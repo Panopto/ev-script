@@ -523,7 +523,7 @@
                         success: _.bind(function(collection, response, options) {
                             if (_.size(response.Data) < collection.pageSize) {
                                 collection.hasMore = false;
-                                this.$scrollLoader.scrollLoader('hideLoader');
+                                this.$scrollLoader.evScrollLoader('hideLoader');
                             } else {
                                 collection.hasMore = true;
                                 collection.pageIndex += 1;
@@ -613,7 +613,7 @@
                 this.$results.prepend('<div class="total">Search returned ' + this.collection.totalResults + ' results.</div>');
                 // Only scroll if we have a full page or our results size is long enough
                 if (this.collection.size() >= pageSize || $table[0].scrollHeight > 600) {
-                    this.$scrollLoader = $table.scrollLoader({
+                    this.$scrollLoader = $table.evScrollLoader({
                         height: 600,
                         callback: this.loadMore
                     });
@@ -659,7 +659,7 @@
                 this.$results.html($table);
                 this.$results.prepend('<div class="total">Search returned ' + this.collection.totalResults + ' results.</div>');
                 if (this.collection.size() >= pageSize || $table[0].scrollHeight > 600) {
-                    this.$scollLoader = $table.scrollLoader({
+                    this.$scollLoader = $table.evScrollLoader({
                         height: 600,
                         callback: this.loadMore
                     });

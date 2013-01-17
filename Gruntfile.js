@@ -8,7 +8,7 @@ module.exports = function(grunt) {
     banner: '/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - ' +
       '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
       '<%= pkg.homepage ? "* " + pkg.homepage + "\\n" : "" %>' +
-      '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;' +
+      '* Copyright (c) <%= grunt.template.today("yyyy") %> Symphony Video, Inc.;' +
       ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */\n',
     // Task configuration.
     concat: {
@@ -17,7 +17,7 @@ module.exports = function(grunt) {
         stripBanners: true
       },
       dist: {
-        src: ['lib/<%= pkg.name %>.js'],
+        src: ['src/<%= pkg.name %>.js'],
         dest: 'dist/<%= pkg.name %>.js'
       }
     },
@@ -29,9 +29,6 @@ module.exports = function(grunt) {
         src: '<%= concat.dist.dest %>',
         dest: 'dist/<%= pkg.name %>.min.js'
       }
-    },
-    connect: {
-      defaults: {}
     },
     jshint: {
       options: {
@@ -55,7 +52,7 @@ module.exports = function(grunt) {
         src: 'Gruntfile.js'
       },
       lib_test: {
-        src: ['lib/**/*.js', 'test/**/*.js']
+        src: ['src/**/*.js', 'test/**/*.js']
       }
     },
     qunit: {
@@ -71,12 +68,23 @@ module.exports = function(grunt) {
         tasks: ['jshint:lib_test', 'qunit']
       }
     },
+    connect: {
+      demo: {
+        options: {
+          port: 8001,
+          base: ''
+        }
+      }
+    },
     proxy: {
       ensemble: {
         options: {
-          port: 8001,
+          port: 8000,
           router: {
-            'localhost/api': 'http:cloud-test.ensemblevideo.com/api'
+            'localhost/ensemble': 'cloud-test.ensemblevideo.com',
+            'localhost/demo': 'localhost:8001/demo',
+            'localhost/src': 'localhost:8001/src',
+            'localhost/assets': 'localhost:8001/assets'
           }
         }
       }
@@ -94,5 +102,6 @@ module.exports = function(grunt) {
 
   // Default task.
   grunt.registerTask('default', ['jshint', 'qunit', 'concat', 'uglify']);
+  grunt.registerTask('demo', ['connect', 'proxy', 'watch']);
 
 };

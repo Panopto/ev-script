@@ -21,8 +21,8 @@
       "url": "https://github.com/jmpease/ev-script/blob/master/LICENSE-MIT"
     },
     {
-      "type": "GPL",
-      "url": "https://github.com/jmpease/ev-script/blob/master/LICENSE-GPL"
+      "type": "GPL-2.0",
+      "url": "https://github.com/jmpease/ev-script/blob/master/LICENSE-GPL-2.0"
     }
   ],
   "engines": {
