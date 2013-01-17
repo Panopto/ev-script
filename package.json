@@ -1,0 +1,45 @@
+{
+  "name": "ev-script",
+  "title": "Ensemble Video Integration Library",
+  "description": "JavaScript library for integration with Ensemble Video.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/jmpease/ev-script",
+  "author": {
+    "name": "Jim Pease",
+    "email": "jmpease@codeserv.us"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jmpease/ev-script.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jmpease/ev-script/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/jmpease/ev-script/blob/master/LICENSE-MIT"
+    },
+    {
+      "type": "GPL",
+      "url": "https://github.com/jmpease/ev-script/blob/master/LICENSE-GPL"
+    }
+  ],
+  "engines": {
+    "node": "*"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt": "https://github.com/gruntjs/grunt/tarball/master",
+    "grunt-proxy": "0.0.1",
+    "grunt-contrib-concat": "https://github.com/gruntjs/grunt-contrib-concat/tarball/master",
+    "grunt-contrib-uglify": "https://github.com/gruntjs/grunt-contrib-uglify/tarball/master",
+    "grunt-contrib-jshint": "https://github.com/gruntjs/grunt-contrib-jshint/tarball/master",
+    "grunt-contrib-watch": "https://github.com/gruntjs/grunt-contrib-watch/tarball/master",
+    "grunt-contrib-qunit": "https://github.com/gruntjs/grunt-contrib-qunit/tarball/master",
+    "grunt-contrib-connect": "https://github.com/gruntjs/grunt-contrib-connect/tarball/master"
+  },
+  "keywords": []
+}
