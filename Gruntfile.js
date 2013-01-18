@@ -67,38 +67,48 @@ module.exports = function(grunt) {
         files: '<%= jshint.lib_test.src %>',
         tasks: ['jshint:lib_test', 'qunit']
       }
-    },
-    connect: {
-      demo: {
-        options: {
-          port: 8001,
-          base: ''
-        }
-      }
-    },
-    proxy: {
-      ensemble: {
-        options: {
-          port: 8000,
-          router: {
-            'localhost/ensemble': 'cloud-test.ensemblevideo.com',
-            'localhost/demo': 'localhost:8001/demo',
-            'localhost/src': 'localhost:8001/src',
-            'localhost/assets': 'localhost:8001/assets'
-          }
-        }
-      }
     }
+  });
+
+  var connect = require('connect'),
+      path = require('path'),
+      https = require('https'),
+      fs = require('fs'),
+      proxy = require('http-proxy'),
+      options = {
+        port: 8000,
+        https: {
+          key: fs.readFileSync('assets/ssl/certs/ev-script-key.pem'),
+          cert: fs.readFileSync('assets/ssl/certs/ev-script-cert.pem')
+        },
+        target: {
+          https: true
+        },
+        router: {
+          'localhost/ensemble': 'cloud-test.ensemblevideo.com',
+          'localhost/demo': 'localhost:8001/demo',
+          'localhost/src': 'localhost:8001/src',
+          'localhost/assets': 'localhost:8001/assets'
+        }
+      };
+  grunt.registerTask('connect', 'Start a static web server.', function() {
+    var port = 8001, base = path.resolve('.');
+    grunt.log.writeln('Starting ssl web server in "' + base + '" on port ' + port + '.');
+    var app = connect()
+      .use(connect['static'](base))
+      .use(connect.directory(base));
+    https.createServer(options.https, app).listen(port);
+  });
+  grunt.registerTask('proxy', 'Start proxy server.', function() {
+    proxy.createServer(options).listen(options.port);
   });
 
   // These plugins provide necessary tasks.
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-qunit');
-  grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-proxy');
 
   // Default task.
   grunt.registerTask('default', ['jshint', 'qunit', 'concat', 'uglify']);
