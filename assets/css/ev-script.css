@@ -1,6 +1,14 @@
+.form-text {
+  padding: 0.2em;
+}
+
 .ev-video-picker,
 .ev-playlist-picker {
   padding: 0;
+}
+
+.ev-video-picker a {
+  text-decoration: none;
 }
 
 div.ev-hider {
@@ -192,6 +200,7 @@ div.ev-auth div.logo {
 div.ev-auth form {
   display: inline-block;
   padding-right: 2em;
+  padding-top: 1em;
 }
 
 div.ev-auth fieldset {
@@ -295,8 +304,21 @@ div.ev-results table {
   font-size: 1em;
 }
 
+div.ev-results .content-list {
+    border: 1px solid #BEBFB9;
+    margin: 0 0 10px;
+    width: 100%;
+}
+
+div.ev-results table.content-list .even {
+    background-color: #F3F4EE;
+}
+
 div.ev-results table.content-list tr td {
   border: none;
+  padding-bottom: 1em;
+  color: #000000;
+  padding: 1em 1.6em;
 }
 
 div.ev-video-picker div.ev-results table.content-list tr td {
@@ -305,6 +327,7 @@ div.ev-video-picker div.ev-results table.content-list tr td {
 
 div.ev-results table.content-list table.content-item {
   border: none;
+  width: 100%;
 }
 
 div.ev-results table.content-list table.content-item td {
@@ -335,6 +358,7 @@ div.scrollWrap .loader {
 
 div.ev-dialog {
   border-radius: 6px 6px 6px 6px;
+  font-size: 1em;
 }
 
 div.ev-dialog div.ui-dialog-titlebar {
@@ -345,6 +369,7 @@ div.ev-dialog div.ui-dialog-titlebar {
   background-image: -webkit-linear-gradient(bottom, #ffffff 0%, #f9d700 100%);
   background-image: linear-gradient(to top, #ffffff 0%, #f9d700 100%);
   border-radius: 6px 6px 0 0;
+  border-width: 0;
 }
 
 .sticky-header {

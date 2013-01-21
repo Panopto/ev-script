@@ -93,7 +93,7 @@
                     modal: true,
                     draggable: false,
                     resizable: false,
-                    width: 450,
+                    width: 540,
                     height: 250,
                     dialogClass: 'ev-dialog',
                     create: _.bind(function(event, ui) {

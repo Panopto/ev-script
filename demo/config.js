@@ -3,6 +3,7 @@
   var evSettings = {
     ensembleUrl: 'https://cloud-test.ensemblevideo.com',
     authId: 'cloud-test',
+    pageSize: 10,
     proxyPath: '/demo/ensemble'
   };
 
