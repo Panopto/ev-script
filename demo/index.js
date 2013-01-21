@@ -1,7 +1,11 @@
 (function($) {
   $(document).ready(function() {
     var app = new EnsembleApp({
-      ensembleUrl: 'https://localhost:8000/ensemble'
+      authId: evSettings.authId,
+      ensembleUrl: evSettings.ensembleUrl,
+      urlCallback: function(url) {
+        return evSettings.proxyPath + '?authId=' + evSettings.authId + '&request=' + encodeURIComponent(url);
+      }
     });
     app.handleField($('#video').parent(), new VideoSettings(), '#video');
   });
