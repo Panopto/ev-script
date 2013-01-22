@@ -1,4 +1,6 @@
-.form-text {
+.form-text,
+.form-select,
+.form-submit {
   padding: 0.2em;
 }
 
