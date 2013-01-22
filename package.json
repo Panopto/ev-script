@@ -32,12 +32,12 @@
     "test": "grunt test"
   },
   "devDependencies": {
-    "grunt": "https://github.com/gruntjs/grunt/tarball/master",
-    "grunt-contrib-concat": "https://github.com/gruntjs/grunt-contrib-concat/tarball/master",
-    "grunt-contrib-uglify": "https://github.com/gruntjs/grunt-contrib-uglify/tarball/master",
-    "grunt-contrib-jshint": "https://github.com/gruntjs/grunt-contrib-jshint/tarball/master",
-    "grunt-contrib-watch": "https://github.com/gruntjs/grunt-contrib-watch/tarball/master",
-    "grunt-contrib-qunit": "https://github.com/gruntjs/grunt-contrib-qunit/tarball/master",
+    "grunt": "~0.4.0rc7",
+    "grunt-contrib-concat": "~0.1.2rc6",
+    "grunt-contrib-uglify": "~0.1.1rc6",
+    "grunt-contrib-jshint": "~0.1.1rc6",
+    "grunt-contrib-watch": "~0.2.0rc5",
+    "grunt-contrib-qunit": "~0.1.1rc6",
     "connect": "~2.7.2",
     "request": "~2.12.0"
   },
