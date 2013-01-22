@@ -1176,7 +1176,8 @@
                     var thumbnail = '';
                     // Validate thumbnailUrl as it could potentially have been modified and we want to protect against XSRF
                     // (a GET shouldn't have side effects...but make sure we actually have a thumbnail url just in case)
-                    if (content.ThumbnailUrl && content.ThumbnailUrl.toLocaleLowerCase().startsWith(ensembleUrl.toLocaleLowerCase() + '/app/assets/')) {
+                    var re = new RegExp('^' + ensembleUrl.toLocaleLowerCase() + '\/app\/assets\/');
+                    if (content.ThumbnailUrl && re.test(content.ThumbnailUrl.toLocaleLowerCase())) {
                         thumbnail =
                             '<div class="thumbnail">' +
                             '  <img alt="Video thumbnail" src="' + content.ThumbnailUrl + '"/>' +
