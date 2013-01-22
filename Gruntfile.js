@@ -76,7 +76,7 @@ module.exports = function(grunt) {
       fs = require('fs'),
       url = require('url'),
       request = require('request'),
-      settings = require('./demo/config.js').evSettings;
+      settings = require('./demo/js/config.js').evSettings;
 
   /*
    * Browsers don't handle cross-domain basic auth and hacks like JSONP don't
