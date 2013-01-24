@@ -20,6 +20,7 @@ module.exports = function(grunt) {
       ' * Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %>\n' +
       ' */\n',
     // Task configuration.
+    clean: ['dist'],
     jshint: {
       all: ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js'],
       gruntfile: {
@@ -46,22 +47,36 @@ module.exports = function(grunt) {
       }
     },
     requirejs: {
-      // TODO - I have a default 'compile' config here for lack of a better term,
-      // but I will probably have separate configs for various custom builds
-      // (e.g. views specific to Drupal vs Moodle)
-      compile: {
+      // FIXME - it doesn't appear that grunt-requirejs supports task-level options?
+      development: {
         options: {
           almond: true,
-          // FIXME - need to figure out best way to organize modules
           baseUrl: 'lib',
           paths: {
             'ev-script': '../src/ev-script',
             'underscore': 'lodash'
           },
           name: 'ev-script',
-          //include: ['ev-script'],
           exclude: ['jquery', 'backbone', 'underscore'],
           out: "dist/ev-script.js",
+          wrap: {
+            start: '<%= banner %>' + grunt.file.read('wrap/wrap.start'),
+            end: grunt.file.read('wrap/wrap.end')
+          },
+          optimize: 'none'
+        }
+      },
+      production: {
+        options: {
+          almond: true,
+          baseUrl: 'lib',
+          paths: {
+            'ev-script': '../src/ev-script',
+            'underscore': 'lodash'
+          },
+          name: 'ev-script',
+          exclude: ['jquery', 'backbone', 'underscore'],
+          out: "dist/ev-script.min.js",
           wrap: {
             start: '<%= banner %>' + grunt.file.read('wrap/wrap.start'),
             end: grunt.file.read('wrap/wrap.end')
@@ -131,13 +146,16 @@ module.exports = function(grunt) {
   });
 
   // These plugins provide necessary tasks.
+  grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-qunit');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-requirejs');
 
   // Default task.
-  grunt.registerTask('default', ['jshint', 'requirejs', 'qunit']);
+  grunt.registerTask('default', ['clean', 'jshint', 'requirejs:development', 'requirejs:production', 'qunit']);
+  grunt.registerTask('dev', ['clean', 'jshint', 'requirejs:development', 'qunit']);
+  grunt.registerTask('prod', ['clean', 'jshint', 'requirejs:production', 'qunit']);
   grunt.registerTask('demo', ['server', 'watch']);
 
 };
