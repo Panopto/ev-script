@@ -1,58 +1,35 @@
-/*global module:false*/
+'use strict';
+
 module.exports = function(grunt) {
+
+  // FIXME
+  // - remove unused tasks
+  // - use volo/jam/bower for lib dependencies
+  // - which dependencies require requirejs 'shim'
 
   // Project configuration.
   grunt.initConfig({
     // Metadata.
     pkg: grunt.file.readJSON('package.json'),
-    banner: '/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - ' +
-      '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
-      '<%= pkg.homepage ? "* " + pkg.homepage + "\\n" : "" %>' +
-      '* Copyright (c) <%= grunt.template.today("yyyy") %> Symphony Video, Inc.;' +
-      ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */\n',
+    banner:
+      '/**\n' +
+      ' * <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>\n' +
+      ' * <%= pkg.title %>\n' +
+      '<%= pkg.homepage ? " * " + pkg.homepage + "\\n" : "" %>' +
+      ' * Copyright (c) <%= grunt.template.today("yyyy") %> Symphony Video, Inc.\n' +
+      ' * Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %>\n' +
+      ' */\n',
     // Task configuration.
-    concat: {
-      options: {
-        banner: '<%= banner %>',
-        stripBanners: true
-      },
-      dist: {
-        src: ['src/<%= pkg.name %>.js'],
-        dest: 'dist/<%= pkg.name %>.js'
-      }
-    },
-    uglify: {
-      options: {
-        banner: '<%= banner %>'
-      },
-      dist: {
-        src: '<%= concat.dist.dest %>',
-        dest: 'dist/<%= pkg.name %>.min.js'
-      }
-    },
     jshint: {
-      options: {
-        curly: true,
-        eqeqeq: true,
-        immed: true,
-        latedef: true,
-        newcap: true,
-        noarg: true,
-        sub: true,
-        undef: true,
-        unused: true,
-        boss: true,
-        eqnull: true,
-        browser: true,
-        globals: {
-          jQuery: true
-        }
-      },
+      all: ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js'],
       gruntfile: {
         src: 'Gruntfile.js'
       },
       lib_test: {
         src: ['src/**/*.js', 'test/**/*.js']
+      },
+      options: {
+        jshintrc: '.jshintrc'
       }
     },
     qunit: {
@@ -66,6 +43,25 @@ module.exports = function(grunt) {
       lib_test: {
         files: '<%= jshint.lib_test.src %>',
         tasks: ['jshint:lib_test', 'qunit']
+      }
+    },
+    requirejs: {
+      compile: {
+        options: {
+          almond: true,
+          baseUrl: 'lib',
+          paths: {
+            'ev-script': '../src/ev-script/ev-script'
+          },
+          name: 'ev-script',
+          //include: ['ev-script'],
+          exclude: ['jquery', 'backbone', 'lodash'],
+          out: "dist/ev-script.js",
+          wrap: {
+            start: '<%= banner %>' + grunt.file.read('wrap/wrap.start'),
+            end: grunt.file.read('wrap/wrap.end')
+          }
+        }
       }
     }
   });
@@ -95,11 +91,13 @@ module.exports = function(grunt) {
    * headers in the event of auth failure so as not to prompt for basic auth).
    */
 
+   // FIXME - move to external file
+
   grunt.registerTask('server', 'Demo server w/ Ensemble Video "proxying".', function() {
     var port = 8000, base = path.resolve('.');
     grunt.log.writeln('Starting ssl web server in "' + base + '" on port ' + port + '.');
     var app = connect()
-      .use(connect.logger())
+      //.use(connect.logger())
       .use(connect.cookieParser())
       .use(connect['static'](base))
       .use(connect.directory(base))
@@ -117,7 +115,7 @@ module.exports = function(grunt) {
             delete response.headers['www-authenticate'];
             res.headers = response.headers;
             res.statusCode = response.statusCode;
-            res.end(response.body);
+            res.end(body);
           });
         }
       });
@@ -128,14 +126,13 @@ module.exports = function(grunt) {
   });
 
   // These plugins provide necessary tasks.
-  grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-qunit');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-requirejs');
 
   // Default task.
-  grunt.registerTask('default', ['jshint', 'qunit', 'concat', 'uglify']);
+  grunt.registerTask('default', ['jshint', 'requirejs', 'qunit']);
   grunt.registerTask('demo', ['server', 'watch']);
 
 };

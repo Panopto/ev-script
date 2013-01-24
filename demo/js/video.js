@@ -1,6 +1,9 @@
+/*global EV,evSettings,jQuery,document*/
 (function($) {
 
-  var app = new EnsembleApp({
+  'use strict';
+
+  var app = new EV.EnsembleApp({
     authId: evSettings.authId,
     ensembleUrl: evSettings.ensembleUrl,
     pageSize: evSettings.pageSize,
@@ -10,7 +13,7 @@
   });
 
   $(document).ready(function() {
-    app.handleField($('#video').parent(), new VideoSettings(), '#video');
+    app.handleField($('#video').parent(), new EV.VideoSettings(), '#video');
   });
 
   /*

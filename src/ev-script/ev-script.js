@@ -1,12 +1,11 @@
-/*jslint unparam: true, nomen: true, vars: true, white: true, browser: true */
-/*global jQuery,Backbone,_*/
-(function($) {
+/*global define*/
+define(['backbone','lodash','jquery'], function(Backbone, _, $) {
 
     'use strict';
 
     var localBB = Backbone.noConflict();
 
-    var VideoSettings = window.VideoSettings = localBB.Model.extend({
+    var VideoSettings = localBB.Model.extend({
         defaults: {
             type: 'video',
             showtitle: false,
@@ -18,13 +17,13 @@
         }
     });
 
-    var PlaylistSettings = window.PlaylistSettings = localBB.Model.extend({
+    var PlaylistSettings = localBB.Model.extend({
         defaults: {
             type: 'playlist'
         }
     });
 
-    window.EnsembleApp = function(appOptions) {
+    var EnsembleApp = function(appOptions) {
 
         appOptions = appOptions || {};
 
@@ -41,8 +40,7 @@
             playlistsCache = [];
 
         var cookieOptions = {
-                path: authPath//,
-                //secure: true
+            path: authPath
         };
 
         var getUser = function() {
@@ -659,7 +657,7 @@
                 this.$results.html($table);
                 this.$results.prepend('<div class="total">Search returned ' + this.collection.totalResults + ' results.</div>');
                 if (this.collection.size() >= pageSize || $table[0].scrollHeight > 600) {
-                    this.$scollLoader = $table.evScrollLoader({
+                    this.$scrollLoader = $table.evScrollLoader({
                         height: 600,
                         callback: this.loadMore
                     });
@@ -1230,4 +1228,10 @@
 
     };
 
-}(jQuery));
+    return {
+        VideoSettings: VideoSettings,
+        PlaylistSettings: PlaylistSettings,
+        EnsembleApp: EnsembleApp
+    };
+
+});
