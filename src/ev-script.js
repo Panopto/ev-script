@@ -1,33 +1,19 @@
 /*global define*/
-define(['backbone','lodash','jquery'], function(Backbone, _, $) {
+define(function(require) {
 
     'use strict';
 
-    var localBB = Backbone.noConflict();
-
-    var VideoSettings = localBB.Model.extend({
-        defaults: {
-            type: 'video',
-            showtitle: false,
-            autoplay: false,
-            showcaptions: false,
-            hidecontrols: false,
-            search: '',
-            sourceId: 'content'
-        }
-    });
-
-    var PlaylistSettings = localBB.Model.extend({
-        defaults: {
-            type: 'playlist'
-        }
-    });
+    var Backbone = require('backbone'),
+        _ = require('underscore'),
+        $ = require('jquery'),
+        VideoSettings = require('ev-script/video-settings'),
+        PlaylistSettings = require('ev-script/playlist-settings');
 
     var EnsembleApp = function(appOptions) {
 
         appOptions = appOptions || {};
 
-        var eventAggr = _.extend({}, localBB.Events),
+        var eventAggr = _.extend({}, Backbone.Events),
             authId = appOptions.authId || 'ensemble',
             ensembleUrl = appOptions.ensembleUrl || '',
             authPath = appOptions.authPath || '',
@@ -64,7 +50,7 @@ define(['backbone','lodash','jquery'], function(Backbone, _, $) {
             return $.cookie(authId + '-user') && $.cookie(authId + '-pass');
         };
 
-        var AuthView = localBB.View.extend({
+        var AuthView = Backbone.View.extend({
             initialize: function(options) {
                 this.submitCallback = options.submitCallback || function() {};
                 var html =
@@ -130,7 +116,7 @@ define(['backbone','lodash','jquery'], function(Backbone, _, $) {
             }
         };
 
-        var VideoEncoding = localBB.Model.extend({
+        var VideoEncoding = Backbone.Model.extend({
             idAttribute: 'videoID',
             url: function() {
                 return ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');
@@ -157,7 +143,7 @@ define(['backbone','lodash','jquery'], function(Backbone, _, $) {
             }
         });
 
-        var VideoEmbedView = localBB.View.extend({
+        var VideoEmbedView = Backbone.View.extend({
             initialize: function(options) {
                 // Width and height really should be set by now...but use a reasonable default if not
                 var width = (this.model.get('width') ? this.model.get('width') : '640');
@@ -178,7 +164,7 @@ define(['backbone','lodash','jquery'], function(Backbone, _, $) {
             }
         });
 
-        var PlaylistEmbedView = localBB.View.extend({
+        var PlaylistEmbedView = Backbone.View.extend({
             initialize: function(options) {
                 var html =
                     '<iframe src="' + ensembleUrl +
@@ -188,7 +174,7 @@ define(['backbone','lodash','jquery'], function(Backbone, _, $) {
             }
         });
 
-        var PreviewView = localBB.View.extend({
+        var PreviewView = Backbone.View.extend({
             initialize: function(options) {
                 var $dialogWrap = $('<div class="dialogWrap"></div>');
                 this.$el.after($dialogWrap);
@@ -248,7 +234,7 @@ define(['backbone','lodash','jquery'], function(Backbone, _, $) {
             embedClass: PlaylistEmbedView
         });
 
-        var SettingsView = localBB.View.extend({
+        var SettingsView = Backbone.View.extend({
             initialize: function(options) {
                 _.bindAll(this, 'show', 'cancelHandler', 'submitHandler');
                 this.field = options.field;
@@ -393,7 +379,7 @@ define(['backbone','lodash','jquery'], function(Backbone, _, $) {
             }
         });
 
-        var HiderView = localBB.View.extend({
+        var HiderView = Backbone.View.extend({
             initialize: function(options) {
                 _.bindAll(this, 'hideHandler', 'logoutHandler', 'render');
                 this.picker = options.picker;
@@ -420,7 +406,7 @@ define(['backbone','lodash','jquery'], function(Backbone, _, $) {
             }
         });
 
-        var SearchView = localBB.View.extend({
+        var SearchView = Backbone.View.extend({
             initialize: function(options) {
                 _.bindAll(this, 'searchHandler', 'doSearch', 'autoSearch');
                 this.picker = options.picker;
@@ -482,7 +468,7 @@ define(['backbone','lodash','jquery'], function(Backbone, _, $) {
         /*
          * Base object for result views since video and playlist results are rendered differently
          */
-        var ResultsView = localBB.View.extend({
+        var ResultsView = Backbone.View.extend({
             initialize: function(options) {
                 _.bindAll(this, 'render', 'loadMore', 'addHandler', 'previewItem');
                 this.picker = options.picker;
@@ -669,7 +655,7 @@ define(['backbone','lodash','jquery'], function(Backbone, _, $) {
         /*
          * Encapsulates views to manage search, display and selection of Ensemble videos and playlists.
          */
-        var PickerView = localBB.View.extend({
+        var PickerView = Backbone.View.extend({
             initialize: function(options) {
                 _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker', 'hideHandler');
                 eventAggr.bind('hidePickers', this.hideHandler);
@@ -713,8 +699,8 @@ define(['backbone','lodash','jquery'], function(Backbone, _, $) {
             }
         });
 
-        var BaseCollection = localBB.Collection.extend({
-            model: localBB.Model.extend({
+        var BaseCollection = Backbone.Collection.extend({
+            model: Backbone.Model.extend({
                 idAttribute: 'ID'
             }),
             parse: function(response) {
@@ -851,7 +837,7 @@ define(['backbone','lodash','jquery'], function(Backbone, _, $) {
             }
         });
 
-        var OrganizationSelectView = localBB.View.extend({
+        var OrganizationSelectView = Backbone.View.extend({
             initialize: function(options) {
                 _.bindAll(this, 'render');
                 this.picker = options.picker;
@@ -873,7 +859,7 @@ define(['backbone','lodash','jquery'], function(Backbone, _, $) {
             }
         });
 
-        var LibrarySelectView = localBB.View.extend({
+        var LibrarySelectView = Backbone.View.extend({
             initialize: function(options) {
                 _.bindAll(this, 'render');
                 this.picker = options.picker;
@@ -890,7 +876,7 @@ define(['backbone','lodash','jquery'], function(Backbone, _, $) {
             }
         });
 
-        var PlaylistSelectView = localBB.View.extend({
+        var PlaylistSelectView = Backbone.View.extend({
             initialize: function(options) {
                 _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization', 'changeLibrary', 'handleSubmit');
                 this.picker = options.picker;
@@ -1059,7 +1045,7 @@ define(['backbone','lodash','jquery'], function(Backbone, _, $) {
         /*
          * View for our field (element that we set with the selected content identifier)
          */
-        var FieldView = localBB.View.extend({
+        var FieldView = Backbone.View.extend({
             initialize: function(options) {
                 _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler');
                 this.$field = options.$field;

@@ -46,16 +46,21 @@ module.exports = function(grunt) {
       }
     },
     requirejs: {
+      // TODO - I have a default 'compile' config here for lack of a better term,
+      // but I will probably have separate configs for various custom builds
+      // (e.g. views specific to Drupal vs Moodle)
       compile: {
         options: {
           almond: true,
+          // FIXME - need to figure out best way to organize modules
           baseUrl: 'lib',
           paths: {
-            'ev-script': '../src/ev-script/ev-script'
+            'ev-script': '../src/ev-script',
+            'underscore': 'lodash'
           },
           name: 'ev-script',
           //include: ['ev-script'],
-          exclude: ['jquery', 'backbone', 'lodash'],
+          exclude: ['jquery', 'backbone', 'underscore'],
           out: "dist/ev-script.js",
           wrap: {
             start: '<%= banner %>' + grunt.file.read('wrap/wrap.start'),

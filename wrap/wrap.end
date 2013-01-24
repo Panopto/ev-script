@@ -3,10 +3,10 @@
     define('jquery', function () {
         return $;
     });
-    define('lodash', function () {
+    define('underscore', function () {
         return _;
     });
-    define('backbone', function () {
+    define('backbone', ['jquery', 'underscore'], function () {
         return Backbone;
     });
 

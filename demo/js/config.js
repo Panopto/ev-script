@@ -1,5 +1,7 @@
 (function() {
 
+  'use strict';
+
   var evSettings = {
     ensembleUrl: 'https://cloud-test.ensemblevideo.com',
     authId: 'cloud-test',
