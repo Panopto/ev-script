@@ -19,11 +19,6 @@ define(function(require) {
               var selected = (this.picker.model.get('organizationId') === org.id ? 'selected="selected"' : '');
               this.$el.append('<option value="' + org.id + '" ' + selected + '>' + org.get('Name') + '</option>');
           }, this);
-          if (this.collection.size() === 1) {
-              this.$el.hide();
-          } else {
-              this.$el.show();
-          }
           this.$el.trigger('change');
       }
   });

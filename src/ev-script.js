@@ -64,6 +64,8 @@ define(function(require) {
                         });
                     } else if (xhr.status === 500) {
                         window.alert('It appears there is an issue with the Ensemble Video installation.');
+                    } else if (xhr.status === 404) {
+                        window.alert('Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.');
                     } else {
                         window.alert('An unexpected error occurred.  Check the server log for more details.');
                     }
