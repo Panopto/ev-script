@@ -131,7 +131,10 @@ module.exports = function(grunt) {
           if (username && password) {
             apiUrl = apiUrl.replace(/http(s)?:\/\//, 'http$1://' +  username + ':' + password + '@');
           }
-          request.get(apiUrl, function(error, response, body) {
+          request.get({ url: apiUrl, timeout: 30000 }, function(error, response, body) {
+            console.log(error);
+            console.log(response);
+            console.log(body);
             delete response.headers['www-authenticate'];
             res.headers = response.headers;
             res.statusCode = response.statusCode;

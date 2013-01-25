@@ -1,15 +1,2045 @@
 /**
- * ev-script 0.1.0 2013-01-23
+ * ev-script 0.1.0 2013-01-24
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
  * Licensed MIT, GPL-2.0
  */
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD.
+        define(['jquery', 'underscore', 'backbone'], factory);
+    } else {
+        // Browser globals
+        root.EV = factory(root.$, root._, root.Backbone);
+    }
+}(this, function ($, _, Backbone) {
 
 /**
  * almond 0.2.3 Copyright (c) 2011-2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/almond for details
  */
+//Going sloppy to avoid 'use strict' string cost, but strict practices should
+//be followed.
+/*jslint sloppy: true */
+/*global setTimeout: false */
 
-(function(e,t){typeof define=="function"&&define.amd?define(["jquery","underscore","backbone"],t):e.EV=t(e.$,e._,e.Backbone)})(this,function(e,t,n){var r,i,s;return function(e){function d(e,t){return h.call(e,t)}function v(e,t){var n,r,i,s,o,u,a,f,c,h,p=t&&t.split("/"),d=l.map,v=d&&d["*"]||{};if(e&&e.charAt(0)===".")if(t){p=p.slice(0,p.length-1),e=p.concat(e.split("/"));for(f=0;f<e.length;f+=1){h=e[f];if(h===".")e.splice(f,1),f-=1;else if(h===".."){if(f===1&&(e[2]===".."||e[0]===".."))break;f>0&&(e.splice(f-1,2),f-=2)}}e=e.join("/")}else e.indexOf("./")===0&&(e=e.substring(2));if((p||v)&&d){n=e.split("/");for(f=n.length;f>0;f-=1){r=n.slice(0,f).join("/");if(p)for(c=p.length;c>0;c-=1){i=d[p.slice(0,c).join("/")];if(i){i=i[r];if(i){s=i,o=f;break}}}if(s)break;!u&&v&&v[r]&&(u=v[r],a=f)}!s&&u&&(s=u,o=a),s&&(n.splice(0,o,s),e=n.join("/"))}return e}function m(t,r){return function(){return n.apply(e,p.call(arguments,0).concat([t,r]))}}function g(e){return function(t){return v(t,e)}}function y(e){return function(t){a[e]=t}}function b(n){if(d(f,n)){var r=f[n];delete f[n],c[n]=!0,t.apply(e,r)}if(!d(a,n)&&!d(c,n))throw new Error("No "+n);return a[n]}function w(e){var t,n=e?e.indexOf("!"):-1;return n>-1&&(t=e.substring(0,n),e=e.substring(n+1,e.length)),[t,e]}function E(e){return function(){return l&&l.config&&l.config[e]||{}}}var t,n,o,u,a={},f={},l={},c={},h=Object.prototype.hasOwnProperty,p=[].slice;o=function(e,t){var n,r=w(e),i=r[0];return e=r[1],i&&(i=v(i,t),n=b(i)),i?n&&n.normalize?e=n.normalize(e,g(t)):e=v(e,t):(e=v(e,t),r=w(e),i=r[0],e=r[1],i&&(n=b(i))),{f:i?i+"!"+e:e,n:e,pr:i,p:n}},u={require:function(e){return m(e)},exports:function(e){var t=a[e];return typeof t!="undefined"?t:a[e]={}},module:function(e){return{id:e,uri:"",exports:a[e],config:E(e)}}},t=function(t,n,r,i){var s,l,h,p,v,g=[],w;i=i||t;if(typeof r=="function"){n=!n.length&&r.length?["require","exports","module"]:n;for(v=0;v<n.length;v+=1){p=o(n[v],i),l=p.f;if(l==="require")g[v]=u.require(t);else if(l==="exports")g[v]=u.exports(t),w=!0;else if(l==="module")s=g[v]=u.module(t);else if(d(a,l)||d(f,l)||d(c,l))g[v]=b(l);else{if(!p.p)throw new Error(t+" missing "+l);p.p.load(p.n,m(i,!0),y(l),{}),g[v]=a[l]}}h=r.apply(a[t],g);if(t)if(s&&s.exports!==e&&s.exports!==a[t])a[t]=s.exports;else if(h!==e||!w)a[t]=h}else t&&(a[t]=r)},r=i=n=function(r,i,s,a,f){return typeof r=="string"?u[r]?u[r](i):b(o(r,i).f):(r.splice||(l=r,i.splice?(r=i,i=s,s=null):r=e),i=i||function(){},typeof s=="function"&&(s=a,a=f),a?t(e,r,i,s):setTimeout(function(){t(e,r,i,s)},15),n)},n.config=function(e){return l=e,n},s=function(e,t,n){t.splice||(n=t,t=[]),!d(a,e)&&!d(f,e)&&(f[e]=[e,t,n])},s.amd={jQuery:!0}}(),s("almond",function(){}),s("ev-script/video-settings",["backbone"],function(e){return e.Model.extend({defaults:{type:"video",showtitle:!1,autoplay:!1,showcaptions:!1,hidecontrols:!1,search:"",sourceId:"content"}})}),s("ev-script/playlist-settings",["backbone"],function(e){return e.Model.extend({defaults:{type:"playlist"}})}),s("ev-script",["require","backbone","underscore","jquery","ev-script/video-settings","ev-script/playlist-settings"],function(e){var t=e("backbone"),n=e("underscore"),r=e("jquery"),i=e("ev-script/video-settings"),s=e("ev-script/playlist-settings"),o=function(e){e=e||{};var o=n.extend({},t.Events),u=e.authId||"ensemble",a=e.ensembleUrl||"",f=e.authPath||"",l=e.authDomain||"",c=e.urlCallback||function(e){return e},h=parseInt(e.pageSize||100,10),p=[],d=[],v=[],m=[],g={path:f},y=function(){return r.cookie(u+"-user")},b=function(e,t){e+=l?"@"+l:"",r.cookie(u+"-user",e,n.extend({},g)),r.cookie(u+"-pass",t,n.extend({},g)),o.trigger("authSet")},w=function(){r.cookie(u+"-user",null,n.extend({},g)),r.cookie(u+"-pass",null,n.extend({},g)),o.trigger("authRemoved")},E=function(){return r.cookie(u+"-user")&&r.cookie(u+"-pass")},S=t.View.extend({initialize:function(e){this.submitCallback=e.submitCallback||function(){};var t='<div class="logo"></div><form>  <fieldset>    <div class="fieldWrap">      <label for="username">Username</label>      <input id="username" name="username" class="form-text"type="text"/>    </div>    <div class="fieldWrap">      <label for="password">Password</label>      <input id="password" name="password" class="form-text"type="password"/>    </div>    <div class="form-actions">      <input type="submit" class="form-submit action-submit" value="Submit"/>    </div>  </fieldset></form>';this.$dialog=r('<div class="ev-auth"></div>'),this.$el.after(this.$dialog),this.$dialog.dialog({title:"Ensemble Video Login - "+a,modal:!0,draggable:!1,resizable:!1,width:540,height:250,dialogClass:"ev-dialog",create:n.bind(function(e,n){this.$dialog.html(t)},this),close:n.bind(function(e,t){this.$dialog.dialog("destroy").remove(),o.trigger("hidePickers")},this)}),r("form",this.$dialog).submit(n.bind(function(e){var t=r(e.target),n=r("#username",t).val(),i=r("#password",t).val();n&&i&&(b(n,i),this.$dialog.dialog("destroy").remove(),this.submitCallback()),e.preventDefault()},this))}}),x=function(e,t){if(e.status===401){w();var n=new S({el:this.el,submitCallback:t})}else e.status===500?window.alert("It appears there is an issue with the Ensemble Video installation."):window.alert("An unexpected error occurred.  Check the server log for more details.")},T=t.Model.extend({idAttribute:"videoID",url:function(){return a+"/app/api/content/show.json/"+this.get("fetchId")},getDims:function(){var e=this.get("dimensions").split("x"),t=[];return t[0]=parseInt(e[0],10),t[1]=parseInt(e[1],10),t},getRatio:function(){var e=this.getDims();return e[0]/e[1]},getWidth:function(){return this.getDims()[0]},getHeight:function(){return this.getDims()[1]},parse:function(e){return e.dataSet.encodings}}),N=t.View.extend({initialize:function(e){var t=this.model.get("width")?this.model.get("width"):"640",n=this.model.get("height")?this.model.get("height"):"360",r='<iframe src="'+a+"/app/plugin/embed.aspx?ID="+this.model.get("id")+"&autoPlay="+this.model.get("autoplay")+"&displayTitle="+this.model.get("showtitle")+"&hideControls="+this.model.get("hidecontrols")+"&showCaptions="+this.model.get("showcaptions")+"&width="+t+"&height="+n+'" frameborder="0" style="width:'+t+"px;height:"+(parseInt(n,10)+56)+'px;" allowfullscreen></iframe>';this.$el.html(r)}}),C=t.View.extend({initialize:function(e){var t='<iframe src="'+a+"/app/plugin/embed.aspx?DestinationID="+this.model.get("id")+'" frameborder="0" style="width:800px;height:850px;" allowfullscreen></iframe>';this.$el.html(t)}}),k=t.View.extend({initialize:function(e){var t=r('<div class="dialogWrap"></div>');this.$el.after(t);var s=this.model.get("content"),o=this.model.get("width");o=o?o:this.model instanceof i?"640":"800";var u=this.model.get("height");u=u?u:this.model instanceof i?"360":"850",t.dialog({title:s.Title||s.Name,modal:!0,width:parseInt(o,10)+50,height:parseInt(u,10)+140,draggable:!1,resizable:!1,dialogClass:"ev-dialog",create:n.bind(function(e,n){var r=new this.embedClass({model:this.model});t.html(r.$el)},this),close:function(e,n){t.dialog("destroy").remove()}})}}),L=k.extend({embedClass:N,initialize:function(e){this.encoding=e.encoding||new T({fetchId:this.model.id});var t=n.bind(function(){(!this.model.get("width")||!this.model.get("height"))&&this.model.set({width:this.encoding.getWidth(),height:this.encoding.getHeight()}),k.prototype.initialize.call(this,e)},this);this.encoding.isNew()?this.encoding.fetch({dataType:"jsonp",success:t}):t()}}),A=k.extend({embedClass:C}),O=t.View.extend({initialize:function(e){n.bindAll(this,"show","cancelHandler","submitHandler"),this.field=e.field},events:{submit:"submitHandler","click input.action-cancel":"cancelHandler"},show:function(){this.render(),this.$el.dialog("open")},cancelHandler:function(e){this.$el.dialog("close"),e.preventDefault()},submitHandler:function(e){this.updateModel(),this.$el.dialog("close"),e.preventDefault()},updateModel:function(){}}),M=O.extend({initialize:function(e){O.prototype.initialize.call(this,e),this.encoding=e.encoding,this.encoding.bind("change:id",n.bind(function(){this.render()},this))},updateModel:function(){var e={showtitle:this.$("#showtitle").is(":checked"),autoplay:this.$("#autoplay").is(":checked"),showcaptions:this.$("#showcaptions").is(":checked"),hidecontrols:this.$("#hidecontrols").is(":checked")},t=this.$("#size").val();if(t==="original")this.encoding&&!this.encoding.isNew()&&n.extend(e,{width:this.encoding.getWidth(),height:this.encoding.getHeight()});else{var r=t.split("x");n.extend(e,{width:parseInt(r[0],10),height:parseInt(r[1],10)})}this.field.model.set(e)},getSizeSelect:function(){var e=this.field.model.get("width"),t=this.field.model.get("height"),r=16/9,i=["1280x720","1024x576","848x480","720x405","640x360","610x344","560x315","480x270","400x225","320x180","240x135","160x90"];e&&t?r=e/t:this.encoding.id&&(e=this.encoding.getWidth(),t=this.encoding.getHeight(),r=this.encoding.getRatio()),Math.ceil(r*10)/10===Math.ceil(4/3*10)/10&&(i=["1280x960","1024x770","848x636","720x540","640x480","610x460","560x420","480x360","400x300","320x240","240x180","160x120"]);var s=e+"x"+t,o='<select class="form-select" id="size" name="size"><option value="original">Original</option>';return n.each(i,function(e){o+='<option value="'+e+'"'+(e===s?' selected="selected"':"")+">"+e+"</option>"}),o+="</select>",o},render:function(){var e='<form>  <fieldset>    <div class="fieldWrap">      <label for="size">Size</label>'+this.getSizeSelect()+"    </div>"+'    <div class="fieldWrap">'+'      <label for="showtitle">Show Title</label>'+'      <input id="showtitle" class="form-checkbox" '+(this.field.model.get("showtitle")?'checked="checked"':"")+' name="showtitle" type="checkbox"/>'+"    </div>"+'    <div class="fieldWrap">'+'      <label for="autoplay">Auto Play</label>'+'      <input id="autoplay" class="form-checkbox" '+(this.field.model.get("autoplay")?'checked="checked"':"")+' name="autoplay" type="checkbox"/>'+"    </div>"+'    <div class="fieldWrap">'+'      <label for="showcaptions">Show Captions</label>'+'      <input id="showcaptions" class="form-checkbox" '+(this.field.model.get("showcaptions")?'checked="checked"':"")+' name="showcaptions" type="checkbox"/>'+"    </div>"+'    <div class="fieldWrap">'+'      <label for="hidecontrols">Hide Controls</label>'+'      <input id="hidecontrols" class="form-checkbox" '+(this.field.model.get("hidecontrols")?'checked="checked"':"")+' name="hidecontrols" type="checkbox"/>'+"    </div>"+'    <div class="form-actions">'+'      <input type="button" class="form-submit action-cancel" value="Cancel"/>'+'      <input type="submit" class="form-submit action-submit" value="Submit"/>'+"    </div>"+"  </fieldset>"+"</form>";this.$el.html(e).dialog({title:this.field.model.get("content").Title,modal:!0,autoOpen:!1,draggable:!1,resizable:!1,dialogClass:"ev-dialog",width:340,height:320})}}),D=O.extend({initialize:function(e){O.prototype.initialize.call(this,e)},render:function(){var e="<h3>TODO</h3>"+JSON.stringify(this.field.model.toJSON());this.$el.html(e),this.$el.dialog({title:"Playlist Embed Settings",modal:!0,autoOpen:!1,dialogClass:"ev-dialog"})}}),P=t.View.extend({initialize:function(e){n.bindAll(this,"hideHandler","logoutHandler","render"),this.picker=e.picker,o.bind("authSet",this.render),o.bind("authRemoved",this.render)},events:{"click a.action-hide":"hideHandler","click a.action-logout":"logoutHandler"},render:function(){var e='<a class="action-hide" href="#" title="Hide Picker">Hide</a>'+(E()?'<a class="action-logout" href="#" title="Logout">Logout</a>':"");this.$el.html(e)},hideHandler:function(e){this.picker.hidePicker(),e.preventDefault()},logoutHandler:function(e){w(),e.preventDefault()}}),H=t.View.extend({initialize:function(e){n.bindAll(this,"searchHandler","doSearch","autoSearch"),this.picker=e.picker},events:{"click input.form-submit":"searchHandler","change select.source":"searchHandler","keyup input.form-text":"autoSearch"},render:function(){var e=this.id+"-input",t='<label for="'+e+'">Search Ensemble:</label>'+'<input id="'+e+'" type="text" class="form-text" value="'+this.picker.model.get("search")+'" />'+'<select class="form-select source">'+'  <option value="content" '+(this.picker.model.get("sourceId")==="content"?'selected="selected"':"")+">Media Library</option>"+'  <option value="shared" '+(this.picker.model.get("sourceId")==="shared"?'selected="selected"':"")+">Shared Library</option>"+"</select>"+'<input type="button" value="Go" class="form-submit" />'+'<div class="loader"></div>'+'<div class="ev-poweredby"><a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a></div>';this.$el.html(t);var r=this.$("div.loader");r.bind("ajaxSend",n.bind(function(e,t,n){this.picker===n.picker&&r.addClass("loading")},this)).bind("ajaxComplete",n.bind(function(e,t,n){this.picker===n.picker&&r.removeClass("loading")},this))},doSearch:function(){this.picker.model.set({search:this.$("input.form-text").val(),sourceId:this.$("select.source").val()}),this.picker.loadVideos()},searchHandler:function(e){this.doSearch(),e.preventDefault()},autoSearch:function(e){var t=e.target.value;t!==this.lastValue&&(this.lastValue=t,this.submitTimeout&&clearTimeout(this.submitTimeout),this.submitTimeout=setTimeout(n.bind(function(){this.doSearch()},this),1e3))}}),B=t.View.extend({initialize:function(e){n.bindAll(this,"render","loadMore","addHandler","previewItem"),this.picker=e.picker,this.$results=r('<div class="results"/>'),this.$el.append(this.$results)},events:{"click a.action-preview":"previewItem"},previewItem:function(e){var t=e.currentTarget,n=r(t).attr("rel"),i=this.collection.get(n),s={id:n,content:i.toJSON()},o=new this.previewClass({el:t,model:new this.modelClass(s)});e.stopPropagation(),e.preventDefault()},loadMore:function(){this.collection.hasMore&&this.collection.fetch({async:!1,add:!0,picker:this.picker,success:n.bind(function(e,t,r){n.size(t.Data)<e.pageSize?(e.hasMore=!1,this.$scrollLoader.evScrollLoader("hideLoader")):(e.hasMore=!0,e.pageIndex+=1)},this),error:n.bind(function(e,t,r){n.bind(x,this)(t,n.bind(function(){this.loadMore()},this))},this)})},addHandler:function(e,t,n){var r=this.getRowHtml(e,n.index);this.$("table.content-list > tbody").append(r)}}),j=B.extend({modelClass:i,previewClass:L,initialize:function(e){B.prototype.initialize.call(this,e)},getRowHtml:function(e,t){var n=r('<tr class="'+(t%2?"odd":"even")+'"/>'),i='<table class="content-item">  <tbody>    <tr class="title">      <td colspan="2">        <a class="action-preview" title="Preview: '+e.get("Title")+'" href="#" rel="'+e.get("ID")+'">'+e.get("Title")+"</a>"+"      </td>"+"    </tr>"+'    <tr class="desc"><td class="label">Description</td><td class="value">'+e.get("Description")+"</td></tr>"+'    <tr><td class="label">Date Added</td><td class="value">'+(new Date(e.get("AddedOn"))).toLocaleString()+"</td></tr>"+'    <tr><td class="label">Keywords</td><td class="value">'+e.get("Keywords")+"</td></tr>"+'    <tr><td class="label">Library</td><td class="value">'+e.get("LibraryName")+"</td></tr>"+"  </tbody>"+"</table>",s='    <td class="content-actions">      <img src="'+e.get("ThumbnailUrl").replace(/width=100/,"width=150")+'" alt="'+e.get("Title")+' thumbnail image"/>'+'      <div class="action-links">'+'        <a class="action-add" href="#" title="Choose '+e.get("Title")+'" rel="'+e.get("ID")+'"><span>Choose</span></a>'+'        <a class="action-preview" href="#" title="Preview: '+e.get("Title")+'" rel="'+e.get("ID")+'"><span>Preview: '+e.get("Title")+"</span></a>"+"      </div>"+"    </td>"+'    <td class="content-meta">'+i+"</td>";return n.html(s),r("tr.desc td.value",n).each(function(e){var t=r(this),n,i,s=100,o=r(this).html();if(o.length>s){t.empty(),n=r("<span>"+o+"</span>"),i=r("<span>"+o.substring(0,s)+"...</span>");var u=r('<a href="#">Less</a>').click(function(e){n.hide(),i.show(),e.preventDefault()}),a=r('<a href="#">More</a>').click(function(e){i.hide(),n.show(),e.preventDefault()});n.hide().append(u),i.append(a),t.append(i).append(n)}}),n},render:function(){var e=r('<table class="content-list"/>'),t=r("<tbody/>").appendTo(e);this.collection.size()>0?this.collection.each(function(e,n){t.append(this.getRowHtml(e,n))},this):t.append('<tr class="odd"><td colspan="2">No results available.</td></tr>'),this.$results.html(e),this.$results.prepend('<div class="total">Search returned '+this.collection.totalResults+" results.</div>");if(this.collection.size()>=h||e[0].scrollHeight>600)this.$scrollLoader=e.evScrollLoader({height:600,callback:this.loadMore});this.collection.bind("add",this.addHandler)}}),F=B.extend({modelClass:s,previewClass:A,initialize:function(e){B.prototype.initialize.call(this,e)},getRowHtml:function(e,t){var n='  <tr class="'+(t%2?"odd":"even")+'">'+'    <td class="content-actions">'+'      <div class="action-links">'+'        <a class="action-add" href="#" title="Choose '+e.get("Name")+'" rel="'+e.get("ID")+'"><span>Choose</span></a>'+'        <a class="action-preview" href="#" title="Preview: '+e.get("Name")+'" rel="'+e.get("ID")+'"><span>Preview: '+e.get("Name")+"</span></a>"+"      </div>"+"    </td>"+'    <td class="content-meta">'+"      <span>"+e.get("Name")+"</span>"+"    </td>"+"  </tr>";return n},render:function(){var e=r('<table class="content-list"/>'),t=r("<tbody/>").appendTo(e),n="";this.collection.size()>0?this.collection.each(function(e,t){n+=this.getRowHtml(e,t)},this):n+='  <tr class="odd"><td colspan="2">No results available.</td></tr>',t.append(n),this.$results.html(e),this.$results.prepend('<div class="total">Search returned '+this.collection.totalResults+" results.</div>");if(this.collection.size()>=h||e[0].scrollHeight>600)this.$scrollLoader=e.evScrollLoader({height:600,callback:this.loadMore});this.collection.bind("add",this.addHandler)}}),I=t.View.extend({initialize:function(e){n.bindAll(this,"chooseItem","hidePicker","showPicker","hideHandler"),o.bind("hidePickers",this.hideHandler),this.$el.hide(),this.field=e.field,this.hider=new P({id:this.id+"-hider",tagName:"div",className:"ev-hider",picker:this}),this.$el.append(this.hider.$el),this.hider.render()},events:{"click a.action-add":"chooseItem"},chooseItem:function(e){var t=r(e.target).attr("rel"),n=this.resultsView.collection.get(t);this.model.set({id:t,content:n.toJSON()}),this.field.model.set(this.model.attributes),this.hidePicker(),e.preventDefault()},hidePicker:function(){this.$el.fadeOut("fast")},showPicker:function(){this.hider.render(),this.$el.fadeIn("fast")},hideHandler:function(e){(!e||this!==e)&&this.hidePicker()}}),q=t.Collection.extend({model:t.Model.extend({idAttribute:"ID"}),parse:function(e){return e.Data}}),R=q.extend({initialize:function(e,t){this.filterOn=t.filterOn,this.filterValue=t.filterValue,this.sourceUrl=t.sourceUrl,this.pageSize=h,this.pageIndex=1,this.hasMore=!0},url:function(){var e=a+this.sourceUrl,t="PageSize="+this.pageSize,n="PageIndex="+this.pageIndex,r="FilterOn="+encodeURIComponent(this.filterOn),i="FilterValue="+encodeURIComponent(this.filterValue),s=e+"?"+t+"&"+n+"&"+r+"&"+i;return c(s)}}),U=I.extend({initialize:function(e){I.prototype.initialize.call(this,e),n.bindAll(this,"loadVideos"),this.searchView=new H({id:this.id+"-search",tagName:"div",className:"ev-search",picker:this}),this.$el.append(this.searchView.$el),this.searchView.render(),this.resultsView=new j({id:this.id+"-results",tagName:"div",className:"ev-results clearfix",picker:this}),this.$el.append(this.resultsView.$el)},showPicker:function(){I.prototype.showPicker.call(this),this.searchView.$('input[type="text"]').focus(),this.loadVideos()},loadVideos:function(){var e=r.trim(this.model.get("search").toLowerCase()),t=this.model.get("sourceId"),i=t==="content"?"/api/Content":"/api/SharedContent",s=p[y()+t+e];s?(this.resultsView.collection=s,this.resultsView.render()):(s=new R({},{sourceUrl:i,filterOn:"",filterValue:e}),s.fetch({picker:this,success:n.bind(function(r,i,s){var o=r.totalResults=parseInt(i.Pager.TotalRecords,10),u=n.size(i.Data);u===o?r.hasMore=!1:(r.hasMore=!0,r.pageIndex+=1),p[y()+t+e]=r,this.resultsView.collection=r,this.resultsView.render()},this),error:n.bind(function(e,t,r){n.bind(x,this)(t,n.bind(function(){this.loadVideos()},this))},this)}))}}),z=q.extend({url:function(){var e=a+"/api/Organizations",t="PageSize=9999",n="PageIndex=1",r=e+"?"+t+"&"+n;return c(r)}}),W=q.extend({initialize:function(e,t){this.filterValue=t.organizationId},url:function(){var e=a+"/api/Libraries",t="PageSize=9999",n="PageIndex=1",r="FilterOn=OrganizationId",i="FilterValue="+encodeURIComponent(this.filterValue),s=e+"?"+t+"&"+n+"&"+r+"&"+i;return c(s)}}),X=q.extend({initialize:function(e,t){this.filterValue=t.filterValue,this.pageSize=h,this.pageIndex=1,this.hasMore=!0},url:function(){var e=a+"/api/Playlists",t="PageSize="+this.pageSize,n="PageIndex="+this.pageIndex,r="FilterOn=LibraryId",i="FilterValue="+encodeURIComponent(this.filterValue),s=e+"?"+t+"&"+n+"&"+r+"&"+i;return c(s)}}),V=t.View.extend({initialize:function(e){n.bindAll(this,"render"),this.picker=e.picker,this.$el.html('<option value="-1">Loading...</option>'),this.collection.bind("reset",this.render)},render:function(){this.$el.html(""),this.collection.each(function(e){var t=this.picker.model.get("organizationId")===e.id?'selected="selected"':"";this.$el.append('<option value="'+e.id+'" '+t+">"+e.get("Name")+"</option>")},this),this.collection.size()===1?this.$el.hide():this.$el.show(),this.$el.trigger("change")}}),J=t.View.extend({initialize:function(e){n.bindAll(this,"render"),this.picker=e.picker,this.$el.html('<option value="-1">Loading...</option>'),this.collection.bind("reset",this.render)},render:function(){this.$el.html(""),this.collection.each(function(e){var t=this.picker.model.get("libraryId")===e.id?'selected="selected"':"";this.$el.append('<option value="'+e.id+'" '+t+">"+e.get("Name")+"</option>")},this),this.$el.trigger("change")}}),K=t.View.extend({initialize:function(e){n.bindAll(this,"loadOrgs","loadLibraries","changeOrganization","changeLibrary","handleSubmit"),this.picker=e.picker,this.id=e.id;var t=this.id+"-org-select";this.$el.append('<label for="'+t+'">Organization:</label>'),this.orgSelect=new V({id:t,tagName:"select",className:"form-select organizations",picker:this.picker,collection:new z({},{})}),this.$el.append(this.orgSelect.$el);var r=this.id+"-lib-select";this.$el.append('<label for="'+r+'">Library:</label>'),this.libSelect=new J({id:r,tagName:"select",className:"form-select libraries",picker:this.picker,collection:new W({},{})}),this.$el.append(this.libSelect.$el);var i='<input type="button" value="Go" class="form-submit" /><div class="loader"></div><div class="ev-poweredby"><a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a></div>';this.$el.append(i);var s=this.$("div.loader");s.bind("ajaxSend",n.bind(function(e,t,n){this.picker===n.picker&&s.addClass("loading")},this)).bind("ajaxComplete",n.bind(function(e,t,n){this.picker===n.picker&&s.removeClass("loading")},this))},events:{"change select.organizations":"changeOrganization","change select.libraries":"changeLibrary","click input.form-submit":"handleSubmit"},changeOrganization:function(e){this.picker.model.set({organizationId:e.target.value}),this.loadLibraries()},changeLibrary:function(e){this.picker.model.set({libraryId:e.target.value}),this.picker.loadPlaylists()},handleSubmit:function(e){this.picker.loadPlaylists(),e.preventDefault()},loadOrgs:function(){var e=d[y()];e?this.orgSelect.collection.reset(e.models):(e=new z({},{}),e.fetch({picker:this.picker,success:n.bind(function(e,t,n){d[y()]=e,this.orgSelect.collection.reset(e.models)},this),error:n.bind(function(e,t,r){n.bind(x,this)(t,n.bind(function(){this.loadOrgs()},this))},this)}))},loadLibraries:function(){var e=this.picker.model.get("organizationId"),t=v[y()+e];t?this.libSelect.collection.reset(t.models):(t=new W({},{organizationId:e}),t.fetch({picker:this.picker,success:n.bind(function(t,n,r){v[y()+e]=t,this.libSelect.collection.reset(t.models)},this),error:n.bind(function(e,t,r){n.bind(x,this)(t,n.bind(function(){this.loadLibraries()},this))},this)}))}}),Q=I.extend({initialize:function(e){I.prototype.initialize.call(this,e),n.bindAll(this,"loadPlaylists"),this.playlistSelect=new K({id:this.id+"-playlist-select",tagName:"div",className:"ev-playlist-select",picker:this}),this.$el.append(this.playlistSelect.$el),this.resultsView=new F({id:this.id+"-results",tagName:"div",className:"ev-results clearfix",picker:this}),this.$el.append(this.resultsView.$el)},showPicker:function(){I.prototype.showPicker.call(this),this.playlistSelect.loadOrgs(),this.playlistSelect.$("select").filter(":visible").first().focus()},loadPlaylists:function(){var e=this.model.get("libraryId"),t=m[y()+e];t?(this.resultsView.collection=t,this.resultsView.render()):(t=new X({},{filterValue:e}),t.fetch({picker:this,success:n.bind(function(t,r,i){var s=t.totalResults=parseInt(r.Pager.TotalRecords,10),o=n.size(r.Data);o===s?t.hasMore=!1:(t.hasMore=!0,t.pageIndex+=1),m[y()+e]=t,this.resultsView.collection=t,this.resultsView.render()},this),error:n.bind(function(e,t,r){n.bind(x,this)(t,n.bind(function(){this.loadPlaylists()},this))},this)}))}}),G=t.View.extend({initialize:function(e){n.bindAll(this,"chooseHandler","optionsHandler","removeHandler","previewHandler"),this.$field=e.$field;var t={id:this.id+"-picker",tagName:"div",className:"ev-"+this.model.get("type")+"-picker",field:this},r={id:this.id+"-settings",tagName:"div",className:"ev-settings",field:this};this.model instanceof i?(this.modelClass=i,this.pickerClass=U,this.settingsClass=M,this.previewClass=L,this.encoding=new T({}),this.model.isNew()||(this.encoding.set({fetchId:this.model.id}),this.encoding.fetch({dataType:"jsonp"})),this.model.bind("change:id",n.bind(function(){this.model.id?(this.encoding.set({fetchId:this.model.id}),this.encoding.fetch({dataType:"jsonp",success:n.bind(function(e){this.model.set({width:this.encoding.getWidth(),height:this.encoding.getHeight()})},this)})):this.encoding.clear()},this)),n.extend(r,{encoding:this.encoding})):this.model instanceof s&&(this.modelClass=s,this.pickerClass=Q,this.settingsClass=D,this.previewClass=A),this.picker=new this.pickerClass(n.extend({},t,{model:new this.modelClass(this.model.toJSON())})),this.settings=new this.settingsClass(r),this.$field.after(this.picker.$el),this.renderActions(),this.model.bind("change",n.bind(function(){this.model.isNew()||(this.$field.val(JSON.stringify(this.model.toJSON())),this.renderActions())},this))},events:{"click .action-choose":"chooseHandler","click .action-preview":"previewHandler","click .action-options":"optionsHandler","click .action-remove":"removeHandler"},chooseHandler:function(e){o.trigger("hidePickers",this),this.picker.$el.is(":hidden")&&this.picker.showPicker(),e.preventDefault()},optionsHandler:function(e){this.settings.show(),e.preventDefault()},removeHandler:function(e){this.model.clear(),this.$field.val(""),this.model.set(this.model.defaults,{silent:!0}),this.renderActions(),e.preventDefault()},previewHandler:function(e){var t=e.currentTarget,n=new this.previewClass({el:t,encoding:this.encoding,model:this.model});e.preventDefault()},renderActions:function(){var e='<div class="logo"><a target="_blank" href="'+a+'"><span>Ensemble Logo</span></a></div>',t=this.model instanceof i?"Video":"Playlist";this.$actions||(this.$actions=r('<div class="ev-field"/>'),this.$field.after(this.$actions));if(this.model.id){var n=this.model.id,s=this.model.get("content");s&&(n=s.Name||s.Title);var o="",u=new RegExp("^"+a.toLocaleLowerCase()+"/app/assets/");s.ThumbnailUrl&&u.test(s.ThumbnailUrl.toLocaleLowerCase())&&(o='<div class="thumbnail">  <img alt="Video thumbnail" src="'+s.ThumbnailUrl+'"/>'+"</div>"),e+=o+'<div class="title">'+n+"</div>"+'<div class="ev-field-actions">'+'  <a href="#" class="action-choose" title="Change '+t+'"><span>Change '+t+"<span></a>"+'  <a href="#" class="action-preview" title="Preview: '+n+'"><span>Preview: '+n+"<span></a>"+(this.model instanceof i?'    <a href="#" class="action-options" title="'+t+' Embed Options"><span>'+t+" Embed Options<span></a>":"")+'  <a href="#" class="action-remove" title="Remove '+t+'"><span>Remove '+t+"<span></a>"+"</div>"}else e+='<div class="title"><em>Add '+(this.model instanceof i?"video":"playlist")+".</em></div>"+'<div class="ev-field-actions">'+'  <a href="#" class="action-choose" title="Choose '+t+'"><span>Choose '+t+"<span></a>"+"</div>";this.$actions.html(e)}});this.handleField=function(e,t,n){var i=r(n,e),s=new G({id:e.id,el:e,model:t,$field:i})},this.handleEmbed=function(e,t){if(t instanceof i)var n=new N({el:e,model:t});else var r=new C({el:e,model:t})}};return{VideoSettings:i,PlaylistSettings:s,EnsembleApp:o}}),s("jquery",function(){return e}),s("underscore",function(){return t}),s("backbone",["jquery","underscore"],function(){return n}),i("ev-script")});
+var requirejs, require, define;
+(function (undef) {
+    var main, req, makeMap, handlers,
+        defined = {},
+        waiting = {},
+        config = {},
+        defining = {},
+        hasOwn = Object.prototype.hasOwnProperty,
+        aps = [].slice;
+
+    function hasProp(obj, prop) {
+        return hasOwn.call(obj, prop);
+    }
+
+    /**
+     * Given a relative module name, like ./something, normalize it to
+     * a real name that can be mapped to a path.
+     * @param {String} name the relative name
+     * @param {String} baseName a real name that the name arg is relative
+     * to.
+     * @returns {String} normalized name
+     */
+    function normalize(name, baseName) {
+        var nameParts, nameSegment, mapValue, foundMap,
+            foundI, foundStarMap, starI, i, j, part,
+            baseParts = baseName && baseName.split("/"),
+            map = config.map,
+            starMap = (map && map['*']) || {};
+
+        //Adjust any relative paths.
+        if (name && name.charAt(0) === ".") {
+            //If have a base name, try to normalize against it,
+            //otherwise, assume it is a top-level require that will
+            //be relative to baseUrl in the end.
+            if (baseName) {
+                //Convert baseName to array, and lop off the last part,
+                //so that . matches that "directory" and not name of the baseName's
+                //module. For instance, baseName of "one/two/three", maps to
+                //"one/two/three.js", but we want the directory, "one/two" for
+                //this normalization.
+                baseParts = baseParts.slice(0, baseParts.length - 1);
+
+                name = baseParts.concat(name.split("/"));
+
+                //start trimDots
+                for (i = 0; i < name.length; i += 1) {
+                    part = name[i];
+                    if (part === ".") {
+                        name.splice(i, 1);
+                        i -= 1;
+                    } else if (part === "..") {
+                        if (i === 1 && (name[2] === '..' || name[0] === '..')) {
+                            //End of the line. Keep at least one non-dot
+                            //path segment at the front so it can be mapped
+                            //correctly to disk. Otherwise, there is likely
+                            //no path mapping for a path starting with '..'.
+                            //This can still fail, but catches the most reasonable
+                            //uses of ..
+                            break;
+                        } else if (i > 0) {
+                            name.splice(i - 1, 2);
+                            i -= 2;
+                        }
+                    }
+                }
+                //end trimDots
+
+                name = name.join("/");
+            } else if (name.indexOf('./') === 0) {
+                // No baseName, so this is ID is resolved relative
+                // to baseUrl, pull off the leading dot.
+                name = name.substring(2);
+            }
+        }
+
+        //Apply map config if available.
+        if ((baseParts || starMap) && map) {
+            nameParts = name.split('/');
+
+            for (i = nameParts.length; i > 0; i -= 1) {
+                nameSegment = nameParts.slice(0, i).join("/");
+
+                if (baseParts) {
+                    //Find the longest baseName segment match in the config.
+                    //So, do joins on the biggest to smallest lengths of baseParts.
+                    for (j = baseParts.length; j > 0; j -= 1) {
+                        mapValue = map[baseParts.slice(0, j).join('/')];
+
+                        //baseName segment has  config, find if it has one for
+                        //this name.
+                        if (mapValue) {
+                            mapValue = mapValue[nameSegment];
+                            if (mapValue) {
+                                //Match, update name to the new value.
+                                foundMap = mapValue;
+                                foundI = i;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (foundMap) {
+                    break;
+                }
+
+                //Check for a star map match, but just hold on to it,
+                //if there is a shorter segment match later in a matching
+                //config, then favor over this star map.
+                if (!foundStarMap && starMap && starMap[nameSegment]) {
+                    foundStarMap = starMap[nameSegment];
+                    starI = i;
+                }
+            }
+
+            if (!foundMap && foundStarMap) {
+                foundMap = foundStarMap;
+                foundI = starI;
+            }
+
+            if (foundMap) {
+                nameParts.splice(0, foundI, foundMap);
+                name = nameParts.join('/');
+            }
+        }
+
+        return name;
+    }
+
+    function makeRequire(relName, forceSync) {
+        return function () {
+            //A version of a require function that passes a moduleName
+            //value for items that may need to
+            //look up paths relative to the moduleName
+            return req.apply(undef, aps.call(arguments, 0).concat([relName, forceSync]));
+        };
+    }
+
+    function makeNormalize(relName) {
+        return function (name) {
+            return normalize(name, relName);
+        };
+    }
+
+    function makeLoad(depName) {
+        return function (value) {
+            defined[depName] = value;
+        };
+    }
+
+    function callDep(name) {
+        if (hasProp(waiting, name)) {
+            var args = waiting[name];
+            delete waiting[name];
+            defining[name] = true;
+            main.apply(undef, args);
+        }
+
+        if (!hasProp(defined, name) && !hasProp(defining, name)) {
+            throw new Error('No ' + name);
+        }
+        return defined[name];
+    }
+
+    //Turns a plugin!resource to [plugin, resource]
+    //with the plugin being undefined if the name
+    //did not have a plugin prefix.
+    function splitPrefix(name) {
+        var prefix,
+            index = name ? name.indexOf('!') : -1;
+        if (index > -1) {
+            prefix = name.substring(0, index);
+            name = name.substring(index + 1, name.length);
+        }
+        return [prefix, name];
+    }
+
+    /**
+     * Makes a name map, normalizing the name, and using a plugin
+     * for normalization if necessary. Grabs a ref to plugin
+     * too, as an optimization.
+     */
+    makeMap = function (name, relName) {
+        var plugin,
+            parts = splitPrefix(name),
+            prefix = parts[0];
+
+        name = parts[1];
+
+        if (prefix) {
+            prefix = normalize(prefix, relName);
+            plugin = callDep(prefix);
+        }
+
+        //Normalize according
+        if (prefix) {
+            if (plugin && plugin.normalize) {
+                name = plugin.normalize(name, makeNormalize(relName));
+            } else {
+                name = normalize(name, relName);
+            }
+        } else {
+            name = normalize(name, relName);
+            parts = splitPrefix(name);
+            prefix = parts[0];
+            name = parts[1];
+            if (prefix) {
+                plugin = callDep(prefix);
+            }
+        }
+
+        //Using ridiculous property names for space reasons
+        return {
+            f: prefix ? prefix + '!' + name : name, //fullName
+            n: name,
+            pr: prefix,
+            p: plugin
+        };
+    };
+
+    function makeConfig(name) {
+        return function () {
+            return (config && config.config && config.config[name]) || {};
+        };
+    }
+
+    handlers = {
+        require: function (name) {
+            return makeRequire(name);
+        },
+        exports: function (name) {
+            var e = defined[name];
+            if (typeof e !== 'undefined') {
+                return e;
+            } else {
+                return (defined[name] = {});
+            }
+        },
+        module: function (name) {
+            return {
+                id: name,
+                uri: '',
+                exports: defined[name],
+                config: makeConfig(name)
+            };
+        }
+    };
+
+    main = function (name, deps, callback, relName) {
+        var cjsModule, depName, ret, map, i,
+            args = [],
+            usingExports;
+
+        //Use name if no relName
+        relName = relName || name;
+
+        //Call the callback to define the module, if necessary.
+        if (typeof callback === 'function') {
+
+            //Pull out the defined dependencies and pass the ordered
+            //values to the callback.
+            //Default to [require, exports, module] if no deps
+            deps = !deps.length && callback.length ? ['require', 'exports', 'module'] : deps;
+            for (i = 0; i < deps.length; i += 1) {
+                map = makeMap(deps[i], relName);
+                depName = map.f;
+
+                //Fast path CommonJS standard dependencies.
+                if (depName === "require") {
+                    args[i] = handlers.require(name);
+                } else if (depName === "exports") {
+                    //CommonJS module spec 1.1
+                    args[i] = handlers.exports(name);
+                    usingExports = true;
+                } else if (depName === "module") {
+                    //CommonJS module spec 1.1
+                    cjsModule = args[i] = handlers.module(name);
+                } else if (hasProp(defined, depName) ||
+                           hasProp(waiting, depName) ||
+                           hasProp(defining, depName)) {
+                    args[i] = callDep(depName);
+                } else if (map.p) {
+                    map.p.load(map.n, makeRequire(relName, true), makeLoad(depName), {});
+                    args[i] = defined[depName];
+                } else {
+                    throw new Error(name + ' missing ' + depName);
+                }
+            }
+
+            ret = callback.apply(defined[name], args);
+
+            if (name) {
+                //If setting exports via "module" is in play,
+                //favor that over return value and exports. After that,
+                //favor a non-undefined return value over exports use.
+                if (cjsModule && cjsModule.exports !== undef &&
+                        cjsModule.exports !== defined[name]) {
+                    defined[name] = cjsModule.exports;
+                } else if (ret !== undef || !usingExports) {
+                    //Use the return value from the function.
+                    defined[name] = ret;
+                }
+            }
+        } else if (name) {
+            //May just be an object definition for the module. Only
+            //worry about defining if have a module name.
+            defined[name] = callback;
+        }
+    };
+
+    requirejs = require = req = function (deps, callback, relName, forceSync, alt) {
+        if (typeof deps === "string") {
+            if (handlers[deps]) {
+                //callback in this case is really relName
+                return handlers[deps](callback);
+            }
+            //Just return the module wanted. In this scenario, the
+            //deps arg is the module name, and second arg (if passed)
+            //is just the relName.
+            //Normalize module name, if it contains . or ..
+            return callDep(makeMap(deps, callback).f);
+        } else if (!deps.splice) {
+            //deps is a config object, not an array.
+            config = deps;
+            if (callback.splice) {
+                //callback is an array, which means it is a dependency list.
+                //Adjust args if there are dependencies
+                deps = callback;
+                callback = relName;
+                relName = null;
+            } else {
+                deps = undef;
+            }
+        }
+
+        //Support require(['a'])
+        callback = callback || function () {};
+
+        //If relName is a function, it is an errback handler,
+        //so remove it.
+        if (typeof relName === 'function') {
+            relName = forceSync;
+            forceSync = alt;
+        }
+
+        //Simulate async callback;
+        if (forceSync) {
+            main(undef, deps, callback, relName);
+        } else {
+            setTimeout(function () {
+                main(undef, deps, callback, relName);
+            }, 15);
+        }
+
+        return req;
+    };
+
+    /**
+     * Just drops the config on the floor, but returns req in case
+     * the config return value is used.
+     */
+    req.config = function (cfg) {
+        config = cfg;
+        return req;
+    };
+
+    define = function (name, deps, callback) {
+
+        //This module may not have dependencies
+        if (!deps.splice) {
+            //deps is not an array, so probably means
+            //an object literal or factory function for
+            //the value. Adjust args.
+            callback = deps;
+            deps = [];
+        }
+
+        if (!hasProp(defined, name) && !hasProp(waiting, name)) {
+            waiting[name] = [name, deps, callback];
+        }
+    };
+
+    define.amd = {
+        jQuery: true
+    };
+}());
+
+define("almond", function(){});
+
+/*global define*/
+define('ev-script/models/video-settings',['backbone'], function(Backbone) {
+
+  
+
+  return Backbone.Model.extend({
+      defaults: {
+          type: 'video',
+          showtitle: false,
+          autoplay: false,
+          showcaptions: false,
+          hidecontrols: false,
+          search: '',
+          sourceId: 'content'
+      }
+  });
+});
+
+/*global define*/
+define('ev-script/models/playlist-settings',['backbone'], function(Backbone) {
+
+  
+
+  return Backbone.Model.extend({
+      defaults: {
+          type: 'playlist'
+      }
+  });
+});
+
+/*global define*/
+define('ev-script/views/hider',['require','underscore','backbone'],function(require) {
+
+    
+
+    var _ = require('underscore'),
+        Backbone = require('backbone');
+
+    return Backbone.View.extend({
+        initialize: function(options) {
+            _.bindAll(this, 'hideHandler', 'logoutHandler', 'render');
+            this.picker = options.picker;
+            this.eventAggr = options.eventAggr;
+            this.auth = options.auth;
+            this.eventAggr.bind('authSet', this.render);
+            this.eventAggr.bind('authRemoved', this.render);
+        },
+        events: {
+            'click a.action-hide': 'hideHandler',
+            'click a.action-logout': 'logoutHandler'
+        },
+        render: function() {
+            var html = '<a class="action-hide" href="#" title="Hide Picker">Hide</a>' + (this.auth.hasAuth() ? '<a class="action-logout" href="#" title="Logout">Logout</a>' : '');
+            this.$el.html(html);
+        },
+        hideHandler: function(e) {
+            this.picker.hidePicker();
+            e.preventDefault();
+        },
+        logoutHandler: function(e) {
+            this.auth.removeAuth();
+            e.preventDefault();
+        }
+    });
+
+});
+
+/*global define*/
+define('ev-script/views/picker',['require','jquery','underscore','backbone','ev-script/views/hider'],function(require) {
+
+    
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        HiderView = require('ev-script/views/hider');
+
+    /*
+     * Encapsulates views to manage search, display and selection of Ensemble videos and playlists.
+     */
+    return Backbone.View.extend({
+        initialize: function(options) {
+            _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker', 'hideHandler');
+            options.eventAggr.bind('hidePickers', this.hideHandler);
+            this.$el.hide();
+            this.auth = options.auth, this.cache = options.cache, this.config = options.config;
+            this.field = options.field;
+            this.hider = new HiderView({
+                id: this.id + '-hider',
+                tagName: 'div',
+                className: 'ev-hider',
+                picker: this,
+                eventAggr: options.eventAggr,
+                auth: options.auth
+            });
+            this.$el.append(this.hider.$el);
+            this.hider.render();
+        },
+        events: {
+            'click a.action-add': 'chooseItem'
+        },
+        chooseItem: function(e) {
+            var id = $(e.target).attr('rel');
+            var content = this.resultsView.collection.get(id);
+            this.model.set({
+                id: id,
+                content: content.toJSON()
+            });
+            this.field.model.set(this.model.attributes);
+            this.hidePicker();
+            e.preventDefault();
+        },
+        hidePicker: function() {
+            this.$el.fadeOut('fast');
+        },
+        showPicker: function() {
+            // In case our authentication status has changed...re-render our hider
+            this.hider.render();
+            this.$el.fadeIn('fast');
+        },
+        hideHandler: function(picker) {
+            if(!picker || (this !== picker)) {
+                this.hidePicker();
+            }
+        }
+    });
+
+});
+
+/*global define*/
+define('ev-script/views/search',['require','underscore','backbone'],function(require) {
+
+  
+
+  var _ = require('underscore'),
+      Backbone = require('backbone');
+
+  return Backbone.View.extend({
+      initialize: function(options) {
+          _.bindAll(this, 'searchHandler', 'doSearch', 'autoSearch');
+          this.picker = options.picker;
+      },
+      events: {
+          'click input.form-submit': 'searchHandler',
+          'change select.source': 'searchHandler',
+          'keyup input.form-text': 'autoSearch'
+      },
+      render: function() {
+          var id = this.id + '-input';
+          var html =
+              '<label for="' + id + '">Search Ensemble:</label>' +
+              '<input id="' + id + '" type="text" class="form-text" value="' + this.picker.model.get('search') + '" />' +
+              '<select class="form-select source">' +
+              '  <option value="content" ' + (this.picker.model.get('sourceId') === 'content' ? 'selected="selected"' : '') + '>Media Library</option>' +
+              '  <option value="shared" ' + (this.picker.model.get('sourceId') === 'shared' ? 'selected="selected"' : '') + '>Shared Library</option>' +
+              '</select>' +
+              '<input type="button" value="Go" class="form-submit" />' +
+              '<div class="loader"></div>' +
+              '<div class="ev-poweredby"><a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a></div>';
+          this.$el.html(html);
+          var $loader = this.$('div.loader');
+          $loader.bind('ajaxSend', _.bind(function(e, xhr, settings) {
+              if (this.picker === settings.picker) {
+                  $loader.addClass('loading');
+              }
+          }, this)).bind('ajaxComplete', _.bind(function(e, xhr, settings) {
+              if (this.picker === settings.picker) {
+                  $loader.removeClass('loading');
+              }
+          }, this));
+      },
+      doSearch: function() {
+          this.picker.model.set({
+              search: this.$('input.form-text').val(),
+              sourceId: this.$('select.source').val()
+          });
+          this.picker.loadVideos();
+      },
+      searchHandler: function(e) {
+          this.doSearch();
+          e.preventDefault();
+      },
+      autoSearch: function(e) {
+          var value = e.target.value;
+          if (value !== this.lastValue) {
+              this.lastValue = value;
+              if (this.submitTimeout) {
+                  clearTimeout(this.submitTimeout);
+              }
+              this.submitTimeout = setTimeout(_.bind(function() {
+                  this.doSearch();
+              }, this), 1000);
+          }
+      }
+  });
+
+});
+
+/*global define*/
+define('ev-script/views/results',['require','jquery','underscore','backbone'],function(require) {
+
+  
+
+  var $ = require('jquery'),
+      _ = require('underscore'),
+      Backbone = require('backbone');
+
+  /*
+   * Base object for result views since video and playlist results are rendered differently
+   */
+  return Backbone.View.extend({
+      initialize: function(options) {
+          _.bindAll(this, 'render', 'loadMore', 'addHandler', 'previewItem');
+          this.picker = options.picker;
+          this.$results = $('<div class="results"/>');
+          this.$el.append(this.$results);
+          this.auth = options.auth;
+          this.config = options.config;
+      },
+      events: {
+          'click a.action-preview': 'previewItem'
+      },
+      previewItem: function(e) {
+          var element = e.currentTarget;
+          var id = $(element).attr('rel');
+          var item = this.collection.get(id);
+          var settings = {
+                  id: id,
+                  content: item.toJSON()
+          };
+          var previewView = new this.previewClass({
+              el: element,
+              model: new this.modelClass(settings),
+              config: this.config
+          });
+          // Stop event propagation so we don't trigger preview of stored field item as well
+          e.stopPropagation();
+          e.preventDefault();
+      },
+      loadMore: function() {
+          if (this.collection.hasMore) {
+              this.collection.fetch({
+                  // This needs to be synchronous so it blocks additional scrolling during load.
+                  // FIXME - add a loading indicator?
+                  // TODO - move to deferred once a more recent version of jQuery is available?  The loading triggered at the bottom
+                  // is choppy.  It'd be nice to trigger a non-blocking load after scrolling down some portion of the results.
+                  async: false,
+                  add: true,
+                  picker: this.picker,
+                  success: _.bind(function(collection, response, options) {
+                      if (_.size(response.Data) < collection.pageSize) {
+                          collection.hasMore = false;
+                          this.$scrollLoader.evScrollLoader('hideLoader');
+                      } else {
+                          collection.hasMore = true;
+                          collection.pageIndex += 1;
+                      }
+                  }, this),
+                  error: _.bind(function(collection, xhr, options) {
+                      this.auth.ajaxError(xhr, _.bind(function() {
+                          this.loadMore();
+                      }, this));
+                  }, this)
+              });
+          }
+      },
+      addHandler: function(item, collection, options) {
+          var row = this.getRowHtml(item, options.index);
+          this.$('table.content-list > tbody').append(row);
+      }
+  });
+
+});
+
+/*global define*/
+define('ev-script/views/preview',['require','jquery','underscore','backbone','ev-script/models/video-settings'],function(require) {
+
+  
+
+  var $ = require('jquery'),
+      _ = require('underscore'),
+      Backbone = require('backbone'),
+      VideoSettings = require('ev-script/models/video-settings');
+
+  return Backbone.View.extend({
+      initialize: function(options) {
+          var $dialogWrap = $('<div class="dialogWrap"></div>');
+          this.$el.after($dialogWrap);
+          var content = this.model.get('content');
+          var width = this.model.get('width');
+          width = (width ? width : (this.model instanceof VideoSettings ? '640' : '800'));
+          var height = this.model.get('height');
+          height = (height ? height : (this.model instanceof VideoSettings ? '360' : '850'));
+          $dialogWrap.dialog({
+              title: content.Title || content.Name,
+              modal: true,
+              width: (parseInt(width, 10) + 50),
+              height: (parseInt(height, 10) + 140),
+              draggable: false,
+              resizable: false,
+              dialogClass: 'ev-dialog',
+              create: _.bind(function(event, ui) {
+                  var embedView = new this.embedClass({
+                      model: this.model,
+                      config: options.config
+                  });
+                  $dialogWrap.html(embedView.$el);
+              },this),
+              close: function(event, ui) {
+                  $dialogWrap.dialog('destroy').remove();
+              }
+          });
+      }
+  });
+
+});
+
+/*global define*/
+define('ev-script/views/video-embed',['require','backbone'],function(require) {
+
+  
+
+  var Backbone = require('backbone');
+
+  return Backbone.View.extend({
+      initialize: function(options) {
+          // Width and height really should be set by now...but use a reasonable default if not
+          var width = (this.model.get('width') ? this.model.get('width') : '640');
+          var height = (this.model.get('height') ? this.model.get('height') : '360');
+          var html =
+              '<iframe src="' +
+              options.config.ensembleUrl +
+              '/app/plugin/embed.aspx?ID=' + this.model.get('id') +
+              '&autoPlay=' + this.model.get('autoplay') + '&displayTitle=' +
+              this.model.get('showtitle') + '&hideControls=' +
+              this.model.get('hidecontrols') + '&showCaptions=' +
+              this.model.get('showcaptions') + '&width=' +
+              width + '&height=' + height +
+              '" frameborder="0" style="width:' +
+              width + 'px;height:' + (parseInt(height, 10) + 56) +
+              'px;" allowfullscreen></iframe>';
+          this.$el.html(html);
+      }
+  });
+
+});
+
+/*global define*/
+define('ev-script/models/video-encoding',['require','backbone'],function(require) {
+
+  
+
+  var Backbone = require('backbone');
+
+  return Backbone.Model.extend({
+      idAttribute: 'videoID',
+      initialize: function(attributes, options) {
+        this.config = options.config;
+      },
+      url: function() {
+          return this.config.ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');
+      },
+      getDims: function() {
+          var dimsStrs = this.get('dimensions').split('x');
+          var dims = [];
+          dims[0] = parseInt(dimsStrs[0], 10);
+          dims[1] = parseInt(dimsStrs[1], 10);
+          return dims;
+      },
+      getRatio: function() {
+          var dims = this.getDims();
+          return dims[0] / dims[1];
+      },
+      getWidth: function() {
+          return this.getDims()[0];
+      },
+      getHeight: function() {
+          return this.getDims()[1];
+      },
+      parse: function(response) {
+          return response.dataSet.encodings;
+      }
+  });
+
+});
+
+/*global define*/
+define('ev-script/views/video-preview',['require','underscore','ev-script/views/preview','ev-script/views/video-embed','ev-script/models/video-encoding'],function(require) {
+
+  
+
+  var _ = require('underscore'),
+      PreviewView = require('ev-script/views/preview'),
+      VideoEmbedView = require('ev-script/views/video-embed'),
+      VideoEncoding = require('ev-script/models/video-encoding');
+
+  return PreviewView.extend({
+      embedClass: VideoEmbedView,
+      initialize: function(options) {
+          this.encoding = options.encoding || new VideoEncoding({
+              fetchId: this.model.id
+          }, {
+              config: options.config
+          });
+          var success = _.bind(function() {
+              if (!this.model.get('width') || !this.model.get('height')) {
+                  this.model.set({
+                      width: this.encoding.getWidth(),
+                      height: this.encoding.getHeight()
+                  });
+              }
+              PreviewView.prototype.initialize.call(this, options);
+          }, this);
+          if (this.encoding.isNew()) {
+              this.encoding.fetch({
+                  dataType: 'jsonp',
+                  success: success
+              });
+          } else {
+              success();
+          }
+      }
+  });
+
+});
+
+/*global define*/
+define('ev-script/views/video-results',['require','jquery','underscore','backbone','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview'],function(require) {
+
+  
+
+  var $ = require('jquery'),
+      _ = require('underscore'),
+      Backbone = require('backbone'),
+      ResultsView = require('ev-script/views/results'),
+      VideoSettings = require('ev-script/models/video-settings'),
+      VideoPreviewView = require('ev-script/views/video-preview');
+
+  return ResultsView.extend({
+      modelClass: VideoSettings,
+      previewClass: VideoPreviewView,
+      initialize: function(options) {
+          ResultsView.prototype.initialize.call(this, options);
+      },
+      getRowHtml: function(item, index) {
+          var $row = $('<tr class="' + (index % 2 ? 'odd' : 'even') + '"/>');
+          var content =
+              '<table class="content-item">' +
+              '  <tbody>' +
+              '    <tr class="title">' +
+              '      <td colspan="2">' +
+              '        <a class="action-preview" title="Preview: ' + item.get('Title') + '" href="#" rel="' + item.get('ID') + '">' + item.get('Title') + '</a>' +
+              '      </td>' +
+              '    </tr>' +
+              '    <tr class="desc"><td class="label">Description</td><td class="value">' + item.get('Description') + '</td></tr>' +
+              '    <tr><td class="label">Date Added</td><td class="value">' + new Date(item.get('AddedOn')).toLocaleString() + '</td></tr>' +
+              '    <tr><td class="label">Keywords</td><td class="value">' + item.get('Keywords') + '</td></tr>' +
+              '    <tr><td class="label">Library</td><td class="value">' + item.get('LibraryName') + '</td></tr>' +
+              '  </tbody>' +
+              '</table>';
+          var rowHtml =
+              '    <td class="content-actions">' +
+              '      <img src="' + item.get('ThumbnailUrl').replace(/width=100/, 'width=150') + '" alt="' + item.get('Title') + ' thumbnail image"/>' +
+              '      <div class="action-links">' +
+              '        <a class="action-add" href="#" title="Choose ' + item.get('Title') + '" rel="' + item.get('ID') + '"><span>Choose</span></a>' +
+              '        <a class="action-preview" href="#" title="Preview: ' + item.get('Title') + '" rel="' + item.get('ID') + '"><span>Preview: ' + item.get('Title') + '</span></a>' +
+              '      </div>' +
+              '    </td>' +
+              '    <td class="content-meta">' + content + '</td>';
+          $row.html(rowHtml);
+          // Handle truncation (more/less) of description text
+          $('tr.desc td.value', $row).each(function(element) {
+              var $this = $(this), $full, $short, truncLen = 100, fullDesc = $(this).html();
+              if (fullDesc.length > truncLen) {
+                  $this.empty();
+                  $full = $('<span>' + fullDesc + '</span>');
+                  $short = $('<span>' + fullDesc.substring(0, truncLen) + '...</span>');
+                  var $shorten = $('<a href="#">Less</a>').click(function(e) {
+                      $full.hide();
+                      $short.show();
+                      e.preventDefault();
+                  });
+                  var $expand = $('<a href="#">More</a>').click(function(e) {
+                      $short.hide();
+                      $full.show();
+                      e.preventDefault();
+                  });
+                  $full.hide().append($shorten);
+                  $short.append($expand);
+                  $this.append($short).append($full);
+              }
+          });
+          return $row;
+      },
+      render: function() {
+          var $table = $('<table class="content-list"/>');
+          var $tbody = $('<tbody/>').appendTo($table);
+          if (this.collection.size() > 0) {
+              this.collection.each(function(item, index) {
+                  $tbody.append(this.getRowHtml(item, index));
+              }, this);
+          } else {
+              $tbody.append('<tr class="odd"><td colspan="2">No results available.</td></tr>');
+          }
+          this.$results.html($table);
+          this.$results.prepend('<div class="total">Search returned ' + this.collection.totalResults + ' results.</div>');
+          // Only scroll if we have a full page or our results size is long enough
+          if (this.collection.size() >= this.config.pageSize || $table[0].scrollHeight > 600) {
+              this.$scrollLoader = $table.evScrollLoader({
+                  height: 600,
+                  callback: this.loadMore
+              });
+          }
+          this.collection.bind('add', this.addHandler);
+      }
+  });
+
+});
+
+/*global define*/
+define('ev-script/collections/base',['require','backbone'],function(require) {
+
+  
+
+  var Backbone = require('backbone');
+
+  return Backbone.Collection.extend({
+      initialize: function(models, options) {
+        this.config = options.config;
+      },
+      model: Backbone.Model.extend({
+          idAttribute: 'ID'
+      }),
+      parse: function(response) {
+          return response.Data;
+      }
+  });
+
+});
+
+/*global define*/
+define('ev-script/collections/videos',['require','ev-script/collections/base'],function(require) {
+
+  
+
+  var BaseCollection = require('ev-script/collections/base');
+
+  return BaseCollection.extend({
+      initialize: function(models, options) {
+          this.filterOn = options.filterOn;
+          this.filterValue = options.filterValue;
+          this.sourceUrl = options.sourceUrl;
+          this.pageIndex = 1;
+          this.hasMore = true;
+          this.config = options.config;
+      },
+      url: function() {
+          var api_url = this.config.ensembleUrl + this.sourceUrl;
+          var sizeParam = 'PageSize=' + this.config.pageSize;
+          var indexParam = 'PageIndex=' + this.pageIndex;
+          var onParam = 'FilterOn=' + encodeURIComponent(this.filterOn);
+          var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
+          var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+          return this.config.urlCallback(url);
+      }
+  });
+
+});
+
+/*global define*/
+define('ev-script/views/video-picker',['require','jquery','underscore','backbone','ev-script/views/picker','ev-script/views/search','ev-script/views/video-results','ev-script/collections/videos'],function(require) {
+
+  
+
+  var $ = require('jquery'),
+      _ = require('underscore'),
+      Backbone = require('backbone'),
+      PickerView = require('ev-script/views/picker'),
+      SearchView = require('ev-script/views/search'),
+      VideoResultsView = require('ev-script/views/video-results'),
+      Videos = require('ev-script/collections/videos');
+
+  return PickerView.extend({
+      initialize: function(options) {
+          PickerView.prototype.initialize.call(this, options);
+          _.bindAll(this, 'loadVideos');
+          this.searchView = new SearchView({
+              id: this.id + '-search',
+              tagName: 'div',
+              className: 'ev-search',
+              picker: this
+          });
+          this.$el.append(this.searchView.$el);
+          this.searchView.render();
+          this.resultsView = new VideoResultsView({
+              id: this.id + '-results',
+              tagName: 'div',
+              className: 'ev-results clearfix',
+              picker: this,
+              auth: this.auth,
+              config: this.config
+          });
+          this.$el.append(this.resultsView.$el);
+      },
+      showPicker: function() {
+          PickerView.prototype.showPicker.call(this);
+          this.searchView.$('input[type="text"]').focus();
+          this.loadVideos();
+      },
+      loadVideos: function() {
+          var searchVal = $.trim(this.model.get('search').toLowerCase());
+          var sourceId = this.model.get('sourceId');
+          var sourceUrl = sourceId === 'content' ? '/api/Content' : '/api/SharedContent';
+          var videos = this.cache.videosCache[this.auth.getUser() + sourceId + searchVal];
+          if (!videos) {
+              videos = new Videos({}, {
+                  sourceUrl: sourceUrl,
+                  filterOn: '',
+                  filterValue: searchVal,
+                  config: this.config
+              });
+              videos.fetch({
+                  picker: this,
+                  success: _.bind(function(collection, response, options) {
+                      var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
+                      var size = _.size(response.Data);
+                      if (size === totalRecords) {
+                          collection.hasMore = false;
+                      } else {
+                          collection.hasMore = true;
+                          collection.pageIndex += 1;
+                      }
+                      this.cache.videosCache[this.auth.getUser() + sourceId + searchVal] = collection;
+                      this.resultsView.collection = collection;
+                      this.resultsView.render();
+                  }, this),
+                  error: _.bind(function(collection, xhr, options) {
+                      this.auth.ajaxError(xhr, _.bind(function() {
+                          this.loadVideos();
+                      }, this));
+                  }, this)
+              });
+          } else {
+              this.resultsView.collection = videos;
+              this.resultsView.render();
+          }
+      }
+  });
+
+});
+
+/*global define*/
+define('ev-script/views/settings',['require','underscore','backbone'],function(require) {
+
+  
+
+  var _ = require('underscore'),
+      Backbone = require('backbone');
+
+  return Backbone.View.extend({
+      initialize: function(options) {
+          _.bindAll(this, 'show', 'cancelHandler', 'submitHandler');
+          this.field = options.field;
+      },
+      events: {
+          'submit': 'submitHandler',
+          'click input.action-cancel': 'cancelHandler'
+      },
+      show: function() {
+          this.render();
+          this.$el.dialog('open');
+      },
+      cancelHandler: function(e) {
+          this.$el.dialog('close');
+          e.preventDefault();
+      },
+      submitHandler: function(e) {
+          this.updateModel();
+          this.$el.dialog('close');
+          e.preventDefault();
+      },
+      // Override me
+      updateModel: function() {}
+  });
+
+});
+
+/*global define*/
+define('ev-script/views/video-settings',['require','underscore','ev-script/views/settings'],function(require) {
+
+  
+
+  var _ = require('underscore'),
+      SettingsView = require('ev-script/views/settings');
+
+  return SettingsView.extend({
+      initialize: function(options) {
+          SettingsView.prototype.initialize.call(this, options);
+          this.encoding = options.encoding;
+          this.encoding.bind('change:id', _.bind(function() {
+              this.render();
+          }, this));
+      },
+      updateModel: function() {
+          var attrs = {
+              'showtitle': this.$('#showtitle').is(':checked'),
+              'autoplay': this.$('#autoplay').is(':checked'),
+              'showcaptions': this.$('#showcaptions').is(':checked'),
+              'hidecontrols': this.$('#hidecontrols').is(':checked')
+          };
+          var sizeVal = this.$('#size').val();
+          if (sizeVal === 'original') {
+              // isNew signifies that the encoding hasn't been fetched yet
+              if (this.encoding && !this.encoding.isNew()) {
+                  _.extend(attrs, {
+                      width: this.encoding.getWidth(),
+                      height: this.encoding.getHeight()
+                  });
+              }
+          } else {
+              var dims = sizeVal.split('x');
+              _.extend(attrs, {
+                  width: parseInt(dims[0], 10),
+                  height: parseInt(dims[1], 10)
+              });
+          }
+          this.field.model.set(attrs);
+      },
+      getSizeSelect: function() {
+          var width = this.field.model.get('width');
+          var height = this.field.model.get('height');
+          var ratio = 16 / 9;
+          var options = ['1280x720', '1024x576', '848x480', '720x405', '640x360', '610x344', '560x315', '480x270', '400x225', '320x180', '240x135', '160x90'];
+          if (width && height) {
+              ratio = width / height;
+          } else if (this.encoding.id) {
+              width = this.encoding.getWidth();
+              height = this.encoding.getHeight();
+              ratio = this.encoding.getRatio();
+          }
+          // Use a fuzz factor to determine ratio equality since our sizes are not always accurate
+          if (Math.ceil(ratio * 10) / 10 === Math.ceil((4 / 3) * 10) / 10) {
+              options = ['1280x960', '1024x770', '848x636', '720x540', '640x480', '610x460', '560x420', '480x360', '400x300', '320x240', '240x180', '160x120'];
+          }
+          var size = width + 'x' + height;
+          var html =
+              '<select class="form-select" id="size" name="size">' +
+              '<option value="original">Original</option>';
+          _.each(options, function(option) {
+              html += '<option value="' + option + '"' + (option === size ? ' selected="selected"' : '') + '>' + option + '</option>';
+          });
+          html += '</select>';
+          return html;
+      },
+      render: function() {
+          var html =
+              '<form>' +
+              '  <fieldset>' +
+              '    <div class="fieldWrap">' +
+              '      <label for="size">Size</label>' + this.getSizeSelect() +
+              '    </div>' +
+              '    <div class="fieldWrap">' +
+              '      <label for="showtitle">Show Title</label>' +
+              '      <input id="showtitle" class="form-checkbox" ' + (this.field.model.get('showtitle') ? 'checked="checked"' : '') + ' name="showtitle" type="checkbox"/>' +
+              '    </div>' +
+              '    <div class="fieldWrap">' +
+              '      <label for="autoplay">Auto Play</label>' +
+              '      <input id="autoplay" class="form-checkbox" ' + (this.field.model.get('autoplay') ? 'checked="checked"' : '') + ' name="autoplay" type="checkbox"/>' +
+              '    </div>' +
+              '    <div class="fieldWrap">' +
+              '      <label for="showcaptions">Show Captions</label>' +
+              '      <input id="showcaptions" class="form-checkbox" ' + (this.field.model.get('showcaptions') ? 'checked="checked"' : '') + ' name="showcaptions" type="checkbox"/>' +
+              '    </div>' +
+              '    <div class="fieldWrap">' +
+              '      <label for="hidecontrols">Hide Controls</label>' +
+              '      <input id="hidecontrols" class="form-checkbox" ' + (this.field.model.get('hidecontrols') ? 'checked="checked"' : '') + ' name="hidecontrols" type="checkbox"/>' +
+              '    </div>' +
+              '    <div class="form-actions">' +
+              '      <input type="button" class="form-submit action-cancel" value="Cancel"/>' +
+              '      <input type="submit" class="form-submit action-submit" value="Submit"/>' +
+              '    </div>' +
+              '  </fieldset>' +
+              '</form>';
+          this.$el.html(html).dialog({
+              title: this.field.model.get('content').Title,
+              modal: true,
+              autoOpen: false,
+              draggable: false,
+              resizable: false,
+              dialogClass: 'ev-dialog',
+              width: 340,
+              height: 320
+          });
+      }
+  });
+
+});
+
+/*global define*/
+define('ev-script/views/organization-select',['require','underscore','backbone'],function(require) {
+
+  
+
+  var _ = require('underscore'),
+      Backbone = require('backbone');
+
+  return Backbone.View.extend({
+      initialize: function(options) {
+          _.bindAll(this, 'render');
+          this.picker = options.picker;
+          this.$el.html('<option value="-1">Loading...</option>');
+          this.collection.bind('reset', this.render);
+      },
+      render: function() {
+          this.$el.html('');
+          this.collection.each(function(org) {
+              var selected = (this.picker.model.get('organizationId') === org.id ? 'selected="selected"' : '');
+              this.$el.append('<option value="' + org.id + '" ' + selected + '>' + org.get('Name') + '</option>');
+          }, this);
+          if (this.collection.size() === 1) {
+              this.$el.hide();
+          } else {
+              this.$el.show();
+          }
+          this.$el.trigger('change');
+      }
+  });
+
+});
+
+/*global define*/
+define('ev-script/collections/organizations',['require','ev-script/collections/base'],function(require) {
+
+  
+
+  var BaseCollection = require('ev-script/collections/base');
+
+  return BaseCollection.extend({
+      initialize: function(models, options) {
+        BaseCollection.prototype.initialize.call(this, models, options);
+      },
+      url: function() {
+          var api_url = this.config.ensembleUrl + '/api/Organizations';
+          // Make this arbitrarily large so we can retrieve ALL orgs in a single request
+          var sizeParam = 'PageSize=9999';
+          var indexParam = 'PageIndex=1';
+          var url = api_url + '?' + sizeParam + '&' + indexParam;
+          return this.config.urlCallback(url);
+      }
+  });
+
+});
+
+/*global define*/
+define('ev-script/views/library-select',['require','underscore','backbone'],function(require) {
+
+  
+
+  var _ = require('underscore'),
+      Backbone = require('backbone');
+
+  return Backbone.View.extend({
+      initialize: function(options) {
+          _.bindAll(this, 'render');
+          this.picker = options.picker;
+          this.$el.html('<option value="-1">Loading...</option>');
+          this.collection.bind('reset', this.render);
+      },
+      render: function() {
+          this.$el.html('');
+          this.collection.each(function(lib) {
+              var selected = (this.picker.model.get('libraryId') === lib.id ? 'selected="selected"' : '');
+              this.$el.append('<option value="' + lib.id + '" ' + selected + '>' + lib.get('Name') + '</option>');
+          }, this);
+          this.$el.trigger('change');
+      }
+  });
+
+});
+
+/*global define*/
+define('ev-script/collections/libraries',['require','ev-script/collections/base'],function(require) {
+
+  
+
+  var BaseCollection = require('ev-script/collections/base');
+
+  return BaseCollection.extend({
+    initialize: function(models, options) {
+      BaseCollection.prototype.initialize.call(this, models, options);
+      this.filterValue = options.organizationId;
+    },
+    url: function() {
+      var api_url = this.config.ensembleUrl + '/api/Libraries';
+      // Make this arbitrarily large so we can retrieve ALL libraries under an org in a single request
+      var sizeParam = 'PageSize=9999';
+      var indexParam = 'PageIndex=1';
+      var onParam = 'FilterOn=OrganizationId';
+      var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
+      var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+      return this.config.urlCallback(url);
+    }
+  });
+
+});
+
+/*global define*/
+define('ev-script/views/playlist-select',['require','jquery','underscore','backbone','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries'],function(require) {
+
+    
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        OrganizationSelectView = require('ev-script/views/organization-select'),
+        Organizations = require('ev-script/collections/organizations'),
+        LibrarySelectView = require('ev-script/views/library-select'),
+        Libraries = require('ev-script/collections/libraries');
+
+    return Backbone.View.extend({
+        initialize: function(options) {
+            _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization', 'changeLibrary', 'handleSubmit');
+            this.picker = options.picker;
+            this.id = options.id;
+            this.cache = options.cache;
+            this.config = options.config;
+            this.auth = options.auth;
+            var orgSelectId = this.id + '-org-select';
+            this.$el.append('<label for="' + orgSelectId + '">Organization:</label>');
+            this.orgSelect = new OrganizationSelectView({
+                id: orgSelectId,
+                tagName: 'select',
+                className: 'form-select organizations',
+                picker: this.picker,
+                collection: new Organizations({}, {
+                    config: this.config
+                })
+            });
+            this.$el.append(this.orgSelect.$el);
+            var libSelectId = this.id + '-lib-select';
+            this.$el.append('<label for="' + libSelectId + '">Library:</label>');
+            this.libSelect = new LibrarySelectView({
+                id: libSelectId,
+                tagName: 'select',
+                className: 'form-select libraries',
+                picker: this.picker,
+                collection: new Libraries({}, {
+                    config: this.config
+                })
+            });
+            this.$el.append(this.libSelect.$el);
+            var html = '<input type="button" value="Go" class="form-submit" />' + '<div class="loader"></div>' + '<div class="ev-poweredby"><a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a></div>';
+            this.$el.append(html);
+            var $loader = this.$('div.loader');
+            $loader.bind('ajaxSend', _.bind(function(e, xhr, settings) {
+                if(this.picker === settings.picker) {
+                    $loader.addClass('loading');
+                }
+            }, this)).bind('ajaxComplete', _.bind(function(e, xhr, settings) {
+                if(this.picker === settings.picker) {
+                    $loader.removeClass('loading');
+                }
+            }, this));
+        },
+        events: {
+            'change select.organizations': 'changeOrganization',
+            'change select.libraries': 'changeLibrary',
+            'click input.form-submit': 'handleSubmit'
+        },
+        changeOrganization: function(e) {
+            this.picker.model.set({
+                organizationId: e.target.value
+            });
+            this.loadLibraries();
+        },
+        changeLibrary: function(e) {
+            this.picker.model.set({
+                libraryId: e.target.value
+            });
+            this.picker.loadPlaylists();
+        },
+        handleSubmit: function(e) {
+            this.picker.loadPlaylists();
+            e.preventDefault();
+        },
+        loadOrgs: function() {
+            var orgs = this.cache.orgsCache[this.auth.getUser()];
+            if(!orgs) {
+                orgs = new Organizations({}, {
+                    config: this.config
+                });
+                orgs.fetch({
+                    picker: this.picker,
+                    success: _.bind(function(collection, response, options) {
+                        this.cache.orgsCache[this.auth.getUser()] = collection;
+                        this.orgSelect.collection.reset(collection.models);
+                    }, this),
+                    error: _.bind(function(collection, xhr, options) {
+                        this.auth.ajaxError(xhr, _.bind(function() {
+                            this.loadOrgs();
+                        }, this));
+                    }, this)
+                });
+            } else {
+                this.orgSelect.collection.reset(orgs.models);
+            }
+        },
+        loadLibraries: function() {
+            var orgId = this.picker.model.get('organizationId');
+            var libs = this.cache.libsCache[this.auth.getUser() + orgId];
+            if(!libs) {
+                libs = new Libraries({}, {
+                    organizationId: orgId,
+                    config: this.config
+                });
+                libs.fetch({
+                    picker: this.picker,
+                    success: _.bind(function(collection, response, options) {
+                        this.cache.libsCache[this.auth.getUser() + orgId] = collection;
+                        this.libSelect.collection.reset(collection.models);
+                    }, this),
+                    error: _.bind(function(collection, xhr, options) {
+                        this.auth.ajaxError(xhr, _.bind(function() {
+                            this.loadLibraries();
+                        }, this));
+                    }, this)
+                });
+            } else {
+                this.libSelect.collection.reset(libs.models);
+            }
+        }
+    });
+
+});
+
+/*global define*/
+define('ev-script/views/playlist-embed',['require','backbone'],function(require) {
+
+    
+
+    var Backbone = require('backbone');
+
+    return Backbone.View.extend({
+        initialize: function(options) {
+            var html =
+                '<iframe src="' + options.config.ensembleUrl +
+                '/app/plugin/embed.aspx?DestinationID=' + this.model.get('id') +
+                '" frameborder="0" style="width:800px;height:850px;" allowfullscreen></iframe>';
+            this.$el.html(html);
+        }
+    });
+
+});
+
+/*global define*/
+define('ev-script/views/playlist-preview',['require','ev-script/views/preview','ev-script/views/playlist-embed'],function(require) {
+
+    
+
+    var PreviewView = require('ev-script/views/preview'),
+        PlaylistEmbedView = require('ev-script/views/playlist-embed');
+
+    return PreviewView.extend({
+        embedClass: PlaylistEmbedView
+    });
+
+});
+
+/*global define*/
+define('ev-script/views/playlist-results',['require','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview'],function(require) {
+
+    
+
+    var $ = require('jquery'),
+        ResultsView = require('ev-script/views/results'),
+        PlaylistSettings = require('ev-script/models/playlist-settings'),
+        PlaylistPreviewView = require('ev-script/views/playlist-preview');
+
+    return ResultsView.extend({
+        modelClass: PlaylistSettings,
+        previewClass: PlaylistPreviewView,
+        initialize: function(options) {
+            ResultsView.prototype.initialize.call(this, options);
+        },
+        getRowHtml: function(item, index) {
+            var html =
+                '  <tr class="' + (index % 2 ? 'odd' : 'even') + '">' +
+                '    <td class="content-actions">' +
+                '      <div class="action-links">' +
+                '        <a class="action-add" href="#" title="Choose ' + item.get('Name') + '" rel="' + item.get('ID') + '"><span>Choose</span></a>' +
+                '        <a class="action-preview" href="#" title="Preview: ' + item.get('Name') + '" rel="' + item.get('ID') + '"><span>Preview: ' + item.get('Name') + '</span></a>' +
+                '      </div>' +
+                '    </td>' +
+                '    <td class="content-meta">' +
+                '      <span>' + item.get('Name') + '</span>' +
+                '    </td>' +
+                '  </tr>';
+            return html;
+        },
+        render: function() {
+            var $table = $('<table class="content-list"/>');
+            var $tbody = $('<tbody/>').appendTo($table);
+            var rows = '';
+            if (this.collection.size() > 0) {
+                this.collection.each(function(item, index) {
+                    rows += this.getRowHtml(item, index);
+                }, this);
+            } else {
+                rows +=
+                    '  <tr class="odd"><td colspan="2">No results available.</td></tr>';
+            }
+            $tbody.append(rows);
+            this.$results.html($table);
+            this.$results.prepend('<div class="total">Search returned ' + this.collection.totalResults + ' results.</div>');
+            if (this.collection.size() >= this.config.pageSize || $table[0].scrollHeight > 600) {
+                this.$scrollLoader = $table.evScrollLoader({
+                    height: 600,
+                    callback: this.loadMore
+                });
+            }
+            this.collection.bind('add', this.addHandler);
+        }
+    });
+
+});
+
+/*global define*/
+define('ev-script/collections/playlists',['require','ev-script/collections/base'],function(require) {
+
+    
+
+    var BaseCollection = require('ev-script/collections/base');
+
+    return BaseCollection.extend({
+        initialize: function(models, options) {
+            BaseCollection.prototype.initialize.call(this, models, options);
+            this.filterValue = options.filterValue;
+            this.pageIndex = 1;
+            this.hasMore = true;
+        },
+        url: function() {
+            var api_url = this.config.ensembleUrl + '/api/Playlists';
+            var sizeParam = 'PageSize=' + this.config.pageSize;
+            var indexParam = 'PageIndex=' + this.pageIndex;
+            var onParam = 'FilterOn=LibraryId';
+            var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
+            var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+            return this.config.urlCallback(url);
+        }
+    });
+
+});
+
+/*global define*/
+define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/playlist-select','ev-script/views/playlist-results','ev-script/collections/playlists'],function(require) {
+
+    
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        PickerView = require('ev-script/views/picker'),
+        PlaylistSelectView = require('ev-script/views/playlist-select'),
+        PlaylistResultsView = require('ev-script/views/playlist-results'),
+        Playlists = require('ev-script/collections/playlists');
+
+    return PickerView.extend({
+        initialize: function(options) {
+            PickerView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'loadPlaylists');
+            this.playlistSelect = new PlaylistSelectView({
+                id: this.id + '-playlist-select',
+                tagName: 'div',
+                className: 'ev-playlist-select',
+                picker: this,
+                cache: this.cache,
+                auth: this.auth,
+                config: this.config
+            });
+            this.$el.append(this.playlistSelect.$el);
+            this.resultsView = new PlaylistResultsView({
+                id: this.id + '-results',
+                tagName: 'div',
+                className: 'ev-results clearfix',
+                picker: this,
+                config: this.config
+            });
+            this.$el.append(this.resultsView.$el);
+        },
+        showPicker: function() {
+            PickerView.prototype.showPicker.call(this);
+            this.playlistSelect.loadOrgs();
+            this.playlistSelect.$('select').filter(':visible').first().focus();
+        },
+        loadPlaylists: function() {
+            var libraryId = this.model.get('libraryId');
+            var playlists = this.cache.playlistsCache[this.auth.getUser() + libraryId];
+            if(!playlists) {
+                playlists = new Playlists({}, {
+                    filterValue: libraryId,
+                    config: this.config
+                });
+                playlists.fetch({
+                    picker: this,
+                    success: _.bind(function(collection, response, options) {
+                        var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
+                        var size = _.size(response.Data);
+                        if(size === totalRecords) {
+                            collection.hasMore = false;
+                        } else {
+                            collection.hasMore = true;
+                            collection.pageIndex += 1;
+                        }
+                        this.cache.playlistsCache[this.auth.getUser() + libraryId] = collection;
+                        this.resultsView.collection = collection;
+                        this.resultsView.render();
+                    }, this),
+                    error: _.bind(function(collection, xhr, options) {
+                        this.auth.ajaxError(xhr, _.bind(function() {
+                            this.loadPlaylists();
+                        }, this));
+                    }, this)
+                });
+            } else {
+                this.resultsView.collection = playlists;
+                this.resultsView.render();
+            }
+        }
+    });
+
+});
+
+/*global define*/
+define('ev-script/views/playlist-settings',['require','ev-script/views/settings'],function(require) {
+
+    
+
+    var SettingsView = require('ev-script/views/settings');
+
+    return SettingsView.extend({
+        initialize: function(options) {
+            SettingsView.prototype.initialize.call(this, options);
+        },
+        render: function() {
+            var html =
+                // TODO
+                '<h3>TODO</h3>' + JSON.stringify(this.field.model.toJSON());
+            this.$el.html(html);
+            this.$el.dialog({
+                title: 'Playlist Embed Settings',
+                modal: true,
+                autoOpen: false,
+                dialogClass: 'ev-dialog'
+            });
+        }
+    });
+
+});
+
+/*global define*/
+define('ev-script/views/field',['require','jquery','underscore','backbone','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview'],function(require) {
+
+    
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        VideoSettings = require('ev-script/models/video-settings'),
+        PlaylistSettings = require('ev-script/models/playlist-settings'),
+        VideoPickerView = require('ev-script/views/video-picker'),
+        VideoSettingsView = require('ev-script/views/video-settings'),
+        VideoPreviewView = require('ev-script/views/video-preview'),
+        VideoEncoding = require('ev-script/models/video-encoding'),
+        PlaylistPickerView = require('ev-script/views/playlist-picker'),
+        PlaylistSettingsView = require('ev-script/views/playlist-settings'),
+        PlaylistPreviewView = require('ev-script/views/playlist-preview');
+
+    /*
+     * View for our field (element that we set with the selected content identifier)
+     */
+    return Backbone.View.extend({
+        initialize: function(options) {
+            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler');
+            this.$field = options.$field;
+            this.eventAggr = options.eventAggr;
+            this.config = options.config;
+            var pickerOptions = {
+                id: this.id + '-picker',
+                tagName: 'div',
+                className: 'ev-' + this.model.get('type') + '-picker',
+                field: this,
+                config: options.config,
+                eventAggr: options.eventAggr,
+                auth: options.auth,
+                cache: options.cache
+            };
+            var settingsOptions = {
+                id: this.id + '-settings',
+                tagName: 'div',
+                className: 'ev-settings',
+                field: this
+            };
+            if(this.model instanceof VideoSettings) {
+                this.modelClass = VideoSettings;
+                this.pickerClass = VideoPickerView;
+                this.settingsClass = VideoSettingsView;
+                this.previewClass = VideoPreviewView;
+                this.encoding = new VideoEncoding({}, {
+                    config: this.config
+                });
+                if(!this.model.isNew()) {
+                    this.encoding.set({
+                        fetchId: this.model.id
+                    });
+                    this.encoding.fetch({
+                        dataType: 'jsonp'
+                    });
+                }
+                this.model.bind('change:id', _.bind(function() {
+                    // Only fetch encoding if identifier is set
+                    if(this.model.id) {
+                        this.encoding.set({
+                            fetchId: this.model.id
+                        });
+                        this.encoding.fetch({
+                            dataType: 'jsonp',
+                            success: _.bind(function(response) {
+                                this.model.set({
+                                    width: this.encoding.getWidth(),
+                                    height: this.encoding.getHeight()
+                                });
+                            }, this)
+                        });
+                    } else {
+                        this.encoding.clear();
+                    }
+                }, this));
+                _.extend(settingsOptions, {
+                    encoding: this.encoding
+                });
+            } else if(this.model instanceof PlaylistSettings) {
+                this.modelClass = PlaylistSettings;
+                this.pickerClass = PlaylistPickerView;
+                this.settingsClass = PlaylistSettingsView;
+                this.previewClass = PlaylistPreviewView;
+            }
+            this.picker = new this.pickerClass(_.extend({}, pickerOptions, {
+                // We don't want to modify field model until we actually pick a new video...so use a copy as our current model
+                model: new this.modelClass(this.model.toJSON()),
+            }));
+            this.settings = new this.settingsClass(settingsOptions);
+            this.$field.after(this.picker.$el);
+            this.renderActions();
+            this.model.bind('change', _.bind(function() {
+                if(!this.model.isNew()) {
+                    this.$field.val(JSON.stringify(this.model.toJSON()));
+                    this.renderActions();
+                }
+            }, this));
+        },
+        events: {
+            'click .action-choose': 'chooseHandler',
+            'click .action-preview': 'previewHandler',
+            'click .action-options': 'optionsHandler',
+            'click .action-remove': 'removeHandler'
+        },
+        chooseHandler: function(e) {
+            // We only want one picker showing at a time so notify all fields to hide them (unless it's ours)
+            this.eventAggr.trigger('hidePickers', this);
+            if(this.picker.$el.is(':hidden')) {
+                this.picker.showPicker();
+            }
+            e.preventDefault();
+        },
+        optionsHandler: function(e) {
+            this.settings.show();
+            e.preventDefault();
+        },
+        removeHandler: function(e) {
+            this.model.clear();
+            this.$field.val('');
+            this.model.set(this.model.defaults, {
+                silent: true
+            });
+            this.renderActions();
+            e.preventDefault();
+        },
+        previewHandler: function(e) {
+            var element = e.currentTarget;
+            var previewView = new this.previewClass({
+                el: element,
+                encoding: this.encoding,
+                model: this.model,
+                config: this.config
+            });
+            e.preventDefault();
+        },
+        renderActions: function() {
+            var html = '<div class="logo"><a target="_blank" href="' + this.config.ensembleUrl + '"><span>Ensemble Logo</span></a></div>';
+            var label = (this.model instanceof VideoSettings) ? 'Video' : 'Playlist';
+            if(!this.$actions) {
+                this.$actions = $('<div class="ev-field"/>');
+                this.$field.after(this.$actions);
+            }
+            if(this.model.id) {
+                var name = this.model.id,
+                    content = this.model.get('content');
+                if(content) {
+                    name = content.Name || content.Title;
+                }
+                var thumbnail = '';
+                // Validate thumbnailUrl as it could potentially have been modified and we want to protect against XSRF
+                // (a GET shouldn't have side effects...but make sure we actually have a thumbnail url just in case)
+                var re = new RegExp('^' + this.config.ensembleUrl.toLocaleLowerCase() + '\/app\/assets\/');
+                if(content.ThumbnailUrl && re.test(content.ThumbnailUrl.toLocaleLowerCase())) {
+                    thumbnail = '<div class="thumbnail">' + '  <img alt="Video thumbnail" src="' + content.ThumbnailUrl + '"/>' + '</div>';
+                }
+                html += thumbnail + '<div class="title">' + name + '</div>' + '<div class="ev-field-actions">' + '  <a href="#" class="action-choose" title="Change ' + label + '"><span>Change ' + label + '<span></a>' + '  <a href="#" class="action-preview" title="Preview: ' + name + '"><span>Preview: ' + name + '<span></a>' +
+                // TODO - temporarily disabled playlist settings until it is implemented
+                (this.model instanceof VideoSettings ? '    <a href="#" class="action-options" title="' + label + ' Embed Options"><span>' + label + ' Embed Options<span></a>' : '') + '  <a href="#" class="action-remove" title="Remove ' + label + '"><span>Remove ' + label + '<span></a>' + '</div>';
+            } else {
+                html += '<div class="title"><em>Add ' + (this.model instanceof VideoSettings ? 'video' : 'playlist') + '.</em></div>' + '<div class="ev-field-actions">' + '  <a href="#" class="action-choose" title="Choose ' + label + '"><span>Choose ' + label + '<span></a>' + '</div>';
+            }
+            this.$actions.html(html);
+        }
+    });
+
+});
+
+/*global define*/
+define('ev-script/views/auth',['require','jquery','underscore','backbone'],function(require) {
+
+    
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone');
+
+    return Backbone.View.extend({
+        initialize: function(options) {
+            this.eventAggr = options.eventAggr;
+            this.config = options.config;
+            this.auth = options.auth;
+            this.submitCallback = options.submitCallback || function() {};
+            var html =
+                '<div class="logo"></div>' +
+                '<form>' +
+                '  <fieldset>' +
+                '    <div class="fieldWrap">' +
+                '      <label for="username">Username</label>' +
+                '      <input id="username" name="username" class="form-text"type="text"/>' +
+                '    </div>' +
+                '    <div class="fieldWrap">' +
+                '      <label for="password">Password</label>' +
+                '      <input id="password" name="password" class="form-text"type="password"/>' +
+                '    </div>' +
+                '    <div class="form-actions">' +
+                '      <input type="submit" class="form-submit action-submit" value="Submit"/>' +
+                '    </div>' +
+                '  </fieldset>' +
+                '</form>';
+            this.$dialog = $('<div class="ev-auth"></div>');
+            this.$el.after(this.$dialog);
+            this.$dialog.dialog({
+                title: 'Ensemble Video Login - ' + this.config.ensembleUrl,
+                modal: true,
+                draggable: false,
+                resizable: false,
+                width: 540,
+                height: 250,
+                dialogClass: 'ev-dialog',
+                create: _.bind(function(event, ui) {
+                    this.$dialog.html(html);
+                }, this),
+                close: _.bind(function(event, ui) {
+                    this.$dialog.dialog('destroy').remove();
+                    this.eventAggr.trigger('hidePickers');
+                }, this)
+            });
+            $('form', this.$dialog).submit(_.bind(function(e) {
+                var $form = $(e.target);
+                var username = $('#username', $form).val();
+                var password = $('#password', $form).val();
+                if (username && password) {
+                    this.auth.setAuth(username, password);
+                    this.$dialog.dialog('destroy').remove();
+                    this.submitCallback();
+                }
+                e.preventDefault();
+            }, this));
+        }
+    });
+
+});
+
+/*global define*/
+define('ev-script',['require','backbone','underscore','jquery','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/auth','ev-script/views/video-embed','ev-script/views/playlist-embed'],function(require) {
+
+    
+
+    var Backbone = require('backbone'),
+        _ = require('underscore'),
+        $ = require('jquery'),
+        VideoSettings = require('ev-script/models/video-settings'),
+        PlaylistSettings = require('ev-script/models/playlist-settings'),
+        FieldView = require('ev-script/views/field'),
+        AuthView = require('ev-script/views/auth'),
+        VideoEmbedView = require('ev-script/views/video-embed'),
+        PlaylistEmbedView = require('ev-script/views/playlist-embed');
+
+    var EnsembleApp = function(appOptions) {
+
+        appOptions = appOptions || {};
+
+        // FIXME - break up the following into proper objects
+        // I *really* need to find a better way to pass this stuff to dependencies
+        // so I don't have to worry whether or not they have them
+        // I'm wondering if it's possible to wrap initializers and pass an 'app'
+        // object (or something) containing all the stuff below that used to be top level
+        // before I started breaking this up.
+        var config = {
+                authId: appOptions.authId || 'ensemble',
+                ensembleUrl: appOptions.ensembleUrl || '',
+                authPath: appOptions.authPath || '',
+                authDomain: appOptions.authDomain || '',
+                urlCallback: appOptions.urlCallback || function(url) { return url; },
+                pageSize: parseInt(appOptions.pageSize || 100, 10)
+            },
+            auth = {
+                cookieOptions: {
+                    path: config.authPath
+                },
+                getUser: function() {
+                    return $.cookie(config.authId + '-user');
+                },
+                setAuth: function(username, password) {
+                    username += (config.authDomain ? '@' + config.authDomain : '');
+                    $.cookie(config.authId + '-user', username, _.extend({}, auth.cookieOptions));
+                    $.cookie(config.authId + '-pass', password, _.extend({}, auth.cookieOptions));
+                    eventAggr.trigger('authSet');
+                },
+                removeAuth: function() {
+                    $.cookie(config.authId + '-user', null, _.extend({}, auth.cookieOptions));
+                    $.cookie(config.authId + '-pass', null, _.extend({}, auth.cookieOptions));
+                    eventAggr.trigger('authRemoved');
+                },
+                hasAuth: function() {
+                    return $.cookie(config.authId + '-user') && $.cookie(config.authId + '-pass');
+                },
+                ajaxError: function(xhr, authCallback) {
+                    if (xhr.status === 401) {
+                        auth.removeAuth();
+                        var authView = new AuthView({
+                            el: this.el,
+                            submitCallback: authCallback,
+                            eventAggr: eventAggr,
+                            config: config,
+                            auth: auth
+                        });
+                    } else if (xhr.status === 500) {
+                        window.alert('It appears there is an issue with the Ensemble Video installation.');
+                    } else {
+                        window.alert('An unexpected error occurred.  Check the server log for more details.');
+                    }
+                }
+            },
+            cache = {
+                videosCache: [],
+                orgsCache: [],
+                libsCache: [],
+                playlistsCache: []
+            },
+            eventAggr = _.extend({}, Backbone.Events);
+
+        this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
+            var $field = $(fieldSelector, fieldWrap);
+            var fieldView = new FieldView({
+                id: fieldWrap.id,
+                el: fieldWrap,
+                model: settingsModel,
+                $field: $field,
+                config: config,
+                auth: auth,
+                cache: cache,
+                eventAggr: eventAggr
+            });
+        };
+
+        this.handleEmbed = function(embedWrap, settingsModel) {
+            if (settingsModel instanceof VideoSettings) {
+                var videoEmbed = new VideoEmbedView({
+                    el: embedWrap,
+                    model: settingsModel,
+                    config: config
+                });
+            } else {
+                var playlistEmbed = new PlaylistEmbedView({
+                    el: embedWrap,
+                    model: settingsModel,
+                    config: config
+                });
+            }
+        };
+
+    };
+
+    return {
+        VideoSettings: VideoSettings,
+        PlaylistSettings: PlaylistSettings,
+        EnsembleApp: EnsembleApp
+    };
+
+});
+    // Register in the values from the outer closure for common dependencies
+    // as local almond modules
+    define('jquery', function () {
+        return $;
+    });
+    define('underscore', function () {
+        return _;
+    });
+    define('backbone', ['jquery', 'underscore'], function () {
+        return Backbone;
+    });
+
+    // Use almond's special top-level, synchronous require to trigger factory
+    // functions, get the final module value, and export it as the public
+    // value.
+    return require('ev-script');
+}));
