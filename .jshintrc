@@ -10,9 +10,5 @@
   "boss": true,
   "eqnull": true,
   "node": true,
-  "es5": true,
-  "globals": {
-    "require": true,
-    "window": true
-  }
+  "es5": true
 }

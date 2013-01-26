@@ -23,23 +23,20 @@ define(function(require) {
         initialize: function(options) {
             _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler');
             this.$field = options.$field;
-            this.eventAggr = options.eventAggr;
-            this.config = options.config;
+            this.app = options.app;
             var pickerOptions = {
                 id: this.id + '-picker',
                 tagName: 'div',
                 className: 'ev-' + this.model.get('type') + '-picker',
                 field: this,
-                config: options.config,
-                eventAggr: options.eventAggr,
-                auth: options.auth,
-                cache: options.cache
+                app: this.app
             };
             var settingsOptions = {
                 id: this.id + '-settings',
                 tagName: 'div',
                 className: 'ev-settings',
-                field: this
+                field: this,
+                app: this.app
             };
             if(this.model instanceof VideoSettings) {
                 this.modelClass = VideoSettings;
@@ -47,7 +44,7 @@ define(function(require) {
                 this.settingsClass = VideoSettingsView;
                 this.previewClass = VideoPreviewView;
                 this.encoding = new VideoEncoding({}, {
-                    config: this.config
+                    app: this.app
                 });
                 if(!this.model.isNew()) {
                     this.encoding.set({
@@ -107,7 +104,7 @@ define(function(require) {
         },
         chooseHandler: function(e) {
             // We only want one picker showing at a time so notify all fields to hide them (unless it's ours)
-            this.eventAggr.trigger('hidePickers', this);
+            this.app.eventAggr.trigger('hidePickers', this);
             if(this.picker.$el.is(':hidden')) {
                 this.picker.showPicker();
             }
@@ -132,12 +129,12 @@ define(function(require) {
                 el: element,
                 encoding: this.encoding,
                 model: this.model,
-                config: this.config
+                app: this.app
             });
             e.preventDefault();
         },
         renderActions: function() {
-            var html = '<div class="logo"><a target="_blank" href="' + this.config.ensembleUrl + '"><span>Ensemble Logo</span></a></div>';
+            var html = '<div class="logo"><a target="_blank" href="' + this.app.config.ensembleUrl + '"><span>Ensemble Logo</span></a></div>';
             var label = (this.model instanceof VideoSettings) ? 'Video' : 'Playlist';
             if(!this.$actions) {
                 this.$actions = $('<div class="ev-field"/>');
@@ -152,7 +149,7 @@ define(function(require) {
                 var thumbnail = '';
                 // Validate thumbnailUrl as it could potentially have been modified and we want to protect against XSRF
                 // (a GET shouldn't have side effects...but make sure we actually have a thumbnail url just in case)
-                var re = new RegExp('^' + this.config.ensembleUrl.toLocaleLowerCase() + '\/app\/assets\/');
+                var re = new RegExp('^' + this.app.config.ensembleUrl.toLocaleLowerCase() + '\/app\/assets\/');
                 if(content.ThumbnailUrl && re.test(content.ThumbnailUrl.toLocaleLowerCase())) {
                     thumbnail = '<div class="thumbnail">' + '  <img alt="Video thumbnail" src="' + content.ThumbnailUrl + '"/>' + '</div>';
                 }

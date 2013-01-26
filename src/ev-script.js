@@ -3,6 +3,8 @@ define(function(require) {
 
     'use strict';
 
+    var root = this;
+
     var Backbone = require('backbone'),
         _ = require('underscore'),
         $ = require('jquery'),
@@ -17,18 +19,15 @@ define(function(require) {
 
         appOptions = appOptions || {};
 
-        // FIXME - break up the following into proper objects
-        // I *really* need to find a better way to pass this stuff to dependencies
-        // so I don't have to worry whether or not they have them
-        // I'm wondering if it's possible to wrap initializers and pass an 'app'
-        // object (or something) containing all the stuff below that used to be top level
-        // before I started breaking this up.
         var config = {
                 authId: appOptions.authId || 'ensemble',
                 ensembleUrl: appOptions.ensembleUrl || '',
                 authPath: appOptions.authPath || '',
                 authDomain: appOptions.authDomain || '',
-                urlCallback: appOptions.urlCallback || function(url) { return url; },
+                urlCallback: appOptions.urlCallback ||
+                function(url) {
+                    return url;
+                },
                 pageSize: parseInt(appOptions.pageSize || 100, 10)
             },
             auth = {
@@ -58,16 +57,15 @@ define(function(require) {
                         var authView = new AuthView({
                             el: this.el,
                             submitCallback: authCallback,
-                            eventAggr: eventAggr,
-                            config: config,
-                            auth: auth
+                            app: app
                         });
                     } else if (xhr.status === 500) {
-                        window.alert('It appears there is an issue with the Ensemble Video installation.');
+                        // Making an assumption that root is window here...
+                        root.alert('It appears there is an issue with the Ensemble Video installation.');
                     } else if (xhr.status === 404) {
-                        window.alert('Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.');
+                        root.alert('Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.');
                     } else {
-                        window.alert('An unexpected error occurred.  Check the server log for more details.');
+                        root.alert('An unexpected error occurred.  Check the server log for more details.');
                     }
                 }
             },
@@ -77,7 +75,13 @@ define(function(require) {
                 libsCache: [],
                 playlistsCache: []
             },
-            eventAggr = _.extend({}, Backbone.Events);
+            eventAggr = _.extend({}, Backbone.Events),
+            app = {
+                config: config,
+                auth: auth,
+                cache: cache,
+                eventAggr: eventAggr
+            };
 
         this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
             var $field = $(fieldSelector, fieldWrap);
@@ -86,10 +90,7 @@ define(function(require) {
                 el: fieldWrap,
                 model: settingsModel,
                 $field: $field,
-                config: config,
-                auth: auth,
-                cache: cache,
-                eventAggr: eventAggr
+                app: app
             });
         };
 
@@ -98,13 +99,13 @@ define(function(require) {
                 var videoEmbed = new VideoEmbedView({
                     el: embedWrap,
                     model: settingsModel,
-                    config: config
+                    app: app
                 });
             } else {
                 var playlistEmbed = new PlaylistEmbedView({
                     el: embedWrap,
                     model: settingsModel,
-                    config: config
+                    app: app
                 });
             }
         };

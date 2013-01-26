@@ -16,9 +16,7 @@ define(function(require) {
             _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization', 'changeLibrary', 'handleSubmit');
             this.picker = options.picker;
             this.id = options.id;
-            this.cache = options.cache;
-            this.config = options.config;
-            this.auth = options.auth;
+            this.app = options.app;
             var orgSelectId = this.id + '-org-select';
             this.$el.append('<label for="' + orgSelectId + '">Organization:</label>');
             this.orgSelect = new OrganizationSelectView({
@@ -26,8 +24,9 @@ define(function(require) {
                 tagName: 'select',
                 className: 'form-select organizations',
                 picker: this.picker,
+                app: this.app,
                 collection: new Organizations({}, {
-                    config: this.config
+                    app: this.app
                 })
             });
             this.$el.append(this.orgSelect.$el);
@@ -38,8 +37,9 @@ define(function(require) {
                 tagName: 'select',
                 className: 'form-select libraries',
                 picker: this.picker,
+                app: this.app,
                 collection: new Libraries({}, {
-                    config: this.config
+                    app: this.app
                 })
             });
             this.$el.append(this.libSelect.$el);
@@ -78,19 +78,19 @@ define(function(require) {
             e.preventDefault();
         },
         loadOrgs: function() {
-            var orgs = this.cache.orgsCache[this.auth.getUser()];
+            var orgs = this.app.cache.orgsCache[this.app.auth.getUser()];
             if(!orgs) {
                 orgs = new Organizations({}, {
-                    config: this.config
+                    app: this.app
                 });
                 orgs.fetch({
                     picker: this.picker,
                     success: _.bind(function(collection, response, options) {
-                        this.cache.orgsCache[this.auth.getUser()] = collection;
+                        this.app.cache.orgsCache[this.app.auth.getUser()] = collection;
                         this.orgSelect.collection.reset(collection.models);
                     }, this),
                     error: _.bind(function(collection, xhr, options) {
-                        this.auth.ajaxError(xhr, _.bind(function() {
+                        this.app.auth.ajaxError(xhr, _.bind(function() {
                             this.loadOrgs();
                         }, this));
                     }, this)
@@ -101,20 +101,20 @@ define(function(require) {
         },
         loadLibraries: function() {
             var orgId = this.picker.model.get('organizationId');
-            var libs = this.cache.libsCache[this.auth.getUser() + orgId];
+            var libs = this.app.cache.libsCache[this.app.auth.getUser() + orgId];
             if(!libs) {
                 libs = new Libraries({}, {
                     organizationId: orgId,
-                    config: this.config
+                    app: this.app
                 });
                 libs.fetch({
                     picker: this.picker,
                     success: _.bind(function(collection, response, options) {
-                        this.cache.libsCache[this.auth.getUser() + orgId] = collection;
+                        this.app.cache.libsCache[this.app.auth.getUser() + orgId] = collection;
                         this.libSelect.collection.reset(collection.models);
                     }, this),
                     error: _.bind(function(collection, xhr, options) {
-                        this.auth.ajaxError(xhr, _.bind(function() {
+                        this.app.auth.ajaxError(xhr, _.bind(function() {
                             this.loadLibraries();
                         }, this));
                     }, this)

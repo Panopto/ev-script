@@ -7,8 +7,9 @@ define(function(require) {
 
     return Backbone.View.extend({
         initialize: function(options) {
+            this.app = options.app;
             var html =
-                '<iframe src="' + options.config.ensembleUrl +
+                '<iframe src="' + this.app.config.ensembleUrl +
                 '/app/plugin/embed.aspx?DestinationID=' + this.model.get('id') +
                 '" frameborder="0" style="width:800px;height:850px;" allowfullscreen></iframe>';
             this.$el.html(html);

@@ -1,11 +1,11 @@
 /*global define*/
 define(['backbone'], function(Backbone) {
 
-  'use strict';
+    'use strict';
 
-  return Backbone.Model.extend({
-      defaults: {
-          type: 'playlist'
-      }
-  });
+    return Backbone.Model.extend({
+        defaults: {
+            type: 'playlist'
+        }
+    });
 });

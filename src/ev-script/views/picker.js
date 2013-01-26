@@ -14,17 +14,16 @@ define(function(require) {
     return Backbone.View.extend({
         initialize: function(options) {
             _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker', 'hideHandler');
-            options.eventAggr.bind('hidePickers', this.hideHandler);
             this.$el.hide();
-            this.auth = options.auth, this.cache = options.cache, this.config = options.config;
+            this.app = options.app;
             this.field = options.field;
+            this.app.eventAggr.bind('hidePickers', this.hideHandler);
             this.hider = new HiderView({
                 id: this.id + '-hider',
                 tagName: 'div',
                 className: 'ev-hider',
                 picker: this,
-                eventAggr: options.eventAggr,
-                auth: options.auth
+                app: this.app
             });
             this.$el.append(this.hider.$el);
             this.hider.render();

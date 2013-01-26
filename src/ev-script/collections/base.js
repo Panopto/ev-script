@@ -1,20 +1,20 @@
 /*global define*/
 define(function(require) {
 
-  'use strict';
+    'use strict';
 
-  var Backbone = require('backbone');
+    var Backbone = require('backbone');
 
-  return Backbone.Collection.extend({
-      initialize: function(models, options) {
-        this.config = options.config;
-      },
-      model: Backbone.Model.extend({
-          idAttribute: 'ID'
-      }),
-      parse: function(response) {
-          return response.Data;
-      }
-  });
+    return Backbone.Collection.extend({
+        initialize: function(models, options) {
+            this.app = options.app;
+        },
+        model: Backbone.Model.extend({
+            idAttribute: 'ID'
+        }),
+        parse: function(response) {
+            return response.Data;
+        }
+    });
 
 });

@@ -10,17 +10,16 @@ define(function(require) {
         initialize: function(options) {
             _.bindAll(this, 'hideHandler', 'logoutHandler', 'render');
             this.picker = options.picker;
-            this.eventAggr = options.eventAggr;
-            this.auth = options.auth;
-            this.eventAggr.bind('authSet', this.render);
-            this.eventAggr.bind('authRemoved', this.render);
+            this.app = options.app;
+            this.app.eventAggr.bind('authSet', this.render);
+            this.app.eventAggr.bind('authRemoved', this.render);
         },
         events: {
             'click a.action-hide': 'hideHandler',
             'click a.action-logout': 'logoutHandler'
         },
         render: function() {
-            var html = '<a class="action-hide" href="#" title="Hide Picker">Hide</a>' + (this.auth.hasAuth() ? '<a class="action-logout" href="#" title="Logout">Logout</a>' : '');
+            var html = '<a class="action-hide" href="#" title="Hide Picker">Hide</a>' + (this.app.auth.hasAuth() ? '<a class="action-logout" href="#" title="Logout">Logout</a>' : '');
             this.$el.html(html);
         },
         hideHandler: function(e) {
@@ -28,7 +27,7 @@ define(function(require) {
             e.preventDefault();
         },
         logoutHandler: function(e) {
-            this.auth.removeAuth();
+            this.app.auth.removeAuth();
             e.preventDefault();
         }
     });

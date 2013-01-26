@@ -9,9 +9,7 @@ define(function(require) {
 
     return Backbone.View.extend({
         initialize: function(options) {
-            this.eventAggr = options.eventAggr;
-            this.config = options.config;
-            this.auth = options.auth;
+            this.app = options.app;
             this.submitCallback = options.submitCallback || function() {};
             var html =
                 '<div class="logo"></div>' +
@@ -33,7 +31,7 @@ define(function(require) {
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
             this.$dialog.dialog({
-                title: 'Ensemble Video Login - ' + this.config.ensembleUrl,
+                title: 'Ensemble Video Login - ' + this.app.config.ensembleUrl,
                 modal: true,
                 draggable: false,
                 resizable: false,
@@ -45,7 +43,7 @@ define(function(require) {
                 }, this),
                 close: _.bind(function(event, ui) {
                     this.$dialog.dialog('destroy').remove();
-                    this.eventAggr.trigger('hidePickers');
+                    this.app.eventAggr.trigger('hidePickers');
                 }, this)
             });
             $('form', this.$dialog).submit(_.bind(function(e) {
@@ -53,7 +51,7 @@ define(function(require) {
                 var username = $('#username', $form).val();
                 var password = $('#password', $form).val();
                 if (username && password) {
-                    this.auth.setAuth(username, password);
+                    this.app.auth.setAuth(username, password);
                     this.$dialog.dialog('destroy').remove();
                     this.submitCallback();
                 }
