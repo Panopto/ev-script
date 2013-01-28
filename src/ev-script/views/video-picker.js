@@ -19,7 +19,7 @@ define(function(require) {
                 tagName: 'div',
                 className: 'ev-search',
                 picker: this,
-                app: this.app,
+                appId: this.appId,
             });
             this.$el.append(this.searchView.$el);
             this.searchView.render();
@@ -28,7 +28,7 @@ define(function(require) {
                 tagName: 'div',
                 className: 'ev-results clearfix',
                 picker: this,
-                app: this.app
+                appId: this.appId
             });
             this.$el.append(this.resultsView.$el);
         },
@@ -41,13 +41,13 @@ define(function(require) {
             var searchVal = $.trim(this.model.get('search').toLowerCase());
             var sourceId = this.model.get('sourceId');
             var sourceUrl = sourceId === 'content' ? '/api/Content' : '/api/SharedContent';
-            var videos = this.app.cache.videosCache[this.app.auth.getUser() + sourceId + searchVal];
+            var videos = this.getCachedVideos(this.getUser(), sourceId + searchVal);
             if (!videos) {
                 videos = new Videos({}, {
                     sourceUrl: sourceUrl,
                     filterOn: '',
                     filterValue: searchVal,
-                    app: this.app
+                    appId: this.appId
                 });
                 videos.fetch({
                     picker: this,
@@ -60,12 +60,12 @@ define(function(require) {
                             collection.hasMore = true;
                             collection.pageIndex += 1;
                         }
-                        this.app.cache.videosCache[this.app.auth.getUser() + sourceId + searchVal] = collection;
+                        this.setCachedVideos(this.getUser(), sourceId + searchVal, collection);
                         this.resultsView.collection = collection;
                         this.resultsView.render();
                     }, this),
                     error: _.bind(function(collection, xhr, options) {
-                        this.app.auth.ajaxError(xhr, _.bind(function() {
+                        this.ajaxError(xhr, _.bind(function() {
                             this.loadVideos();
                         }, this));
                     }, this)

@@ -13,13 +13,13 @@ define(function(require) {
             this.hasMore = true;
         },
         url: function() {
-            var api_url = this.app.config.ensembleUrl + '/api/Playlists';
-            var sizeParam = 'PageSize=' + this.app.config.pageSize;
+            var api_url = this.config.ensembleUrl + '/api/Playlists';
+            var sizeParam = 'PageSize=' + this.config.pageSize;
             var indexParam = 'PageIndex=' + this.pageIndex;
             var onParam = 'FilterOn=LibraryId';
             var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
             var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
-            return this.app.config.urlCallback(url);
+            return this.config.urlCallback(url);
         }
     });
 

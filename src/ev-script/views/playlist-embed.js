@@ -3,13 +3,13 @@ define(function(require) {
 
     'use strict';
 
-    var Backbone = require('backbone');
+    var BaseView = require('ev-script/views/base');
 
-    return Backbone.View.extend({
+    return BaseView.extend({
         initialize: function(options) {
-            this.app = options.app;
+            BaseView.prototype.initialize.call(this, options);
             var html =
-                '<iframe src="' + this.app.config.ensembleUrl +
+                '<iframe src="' + this.config.ensembleUrl +
                 '/app/plugin/embed.aspx?DestinationID=' + this.model.get('id') +
                 '" frameborder="0" style="width:800px;height:850px;" allowfullscreen></iframe>';
             this.$el.html(html);

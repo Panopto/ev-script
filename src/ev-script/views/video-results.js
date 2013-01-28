@@ -78,7 +78,7 @@ define(function(require) {
             this.$results.html($table);
             this.$results.prepend('<div class="total">Search returned ' + this.collection.totalResults + ' results.</div>');
             // Only scroll if we have a full page or our results size is long enough
-            if (this.collection.size() >= this.app.config.pageSize || $table[0].scrollHeight > 600) {
+            if (this.collection.size() >= this.config.pageSize || $table[0].scrollHeight > 600) {
                 this.$scrollLoader = $table.evScrollLoader({
                     height: 600,
                     callback: this.loadMore

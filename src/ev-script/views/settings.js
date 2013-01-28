@@ -4,13 +4,13 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
-        Backbone = require('backbone');
+        BaseView = require('ev-script/views/base');
 
-    return Backbone.View.extend({
+    return BaseView.extend({
         initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'show', 'cancelHandler', 'submitHandler');
             this.field = options.field;
-            this.app = options.app;
         },
         events: {
             'submit': 'submitHandler',

@@ -5,11 +5,16 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Backbone = require('backbone');
+        Backbone = require('backbone'),
+        configUtil = require('ev-script/util/config'),
+        eventsUtil = require('ev-script/util/events'),
+        authUtil = require('ev-script/util/auth');
 
     return Backbone.View.extend({
         initialize: function(options) {
-            this.app = options.app;
+            this.appId = options.appId;
+            this.config = configUtil.getConfig(this.appId);
+            this.appEvents = eventsUtil.getEvents(this.appId);
             this.submitCallback = options.submitCallback || function() {};
             var html =
                 '<div class="logo"></div>' +
@@ -31,7 +36,7 @@ define(function(require) {
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
             this.$dialog.dialog({
-                title: 'Ensemble Video Login - ' + this.app.config.ensembleUrl,
+                title: 'Ensemble Video Login - ' + this.config.ensembleUrl,
                 modal: true,
                 draggable: false,
                 resizable: false,
@@ -43,7 +48,7 @@ define(function(require) {
                 }, this),
                 close: _.bind(function(event, ui) {
                     this.$dialog.dialog('destroy').remove();
-                    this.app.eventAggr.trigger('hidePickers');
+                    this.appEvents.trigger('hidePickers');
                 }, this)
             });
             $('form', this.$dialog).submit(_.bind(function(e) {
@@ -51,7 +56,7 @@ define(function(require) {
                 var username = $('#username', $form).val();
                 var password = $('#password', $form).val();
                 if (username && password) {
-                    this.app.auth.setAuth(username, password);
+                    authUtil.setAuth(this.config.authId, this.config.authDomain, this.config.authPath, username, password);
                     this.$dialog.dialog('destroy').remove();
                     this.submitCallback();
                 }

@@ -3,17 +3,17 @@ define(function(require) {
 
     'use strict';
 
-    var Backbone = require('backbone');
+    var BaseView = require('ev-script/views/base');
 
-    return Backbone.View.extend({
+    return BaseView.extend({
         initialize: function(options) {
-            this.app = options.app;
+            BaseView.prototype.initialize.call(this, options);
             // Width and height really should be set by now...but use a reasonable default if not
             var width = (this.model.get('width') ? this.model.get('width') : '640');
             var height = (this.model.get('height') ? this.model.get('height') : '360');
             var html =
                 '<iframe src="' +
-                this.app.config.ensembleUrl +
+                this.config.ensembleUrl +
                 '/app/plugin/embed.aspx?ID=' + this.model.get('id') +
                 '&autoPlay=' + this.model.get('autoplay') + '&displayTitle=' +
                 this.model.get('showtitle') + '&hideControls=' +

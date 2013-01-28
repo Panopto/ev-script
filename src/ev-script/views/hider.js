@@ -4,22 +4,27 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
-        Backbone = require('backbone');
+        BaseView = require('ev-script/views/base');
 
-    return Backbone.View.extend({
+    return BaseView.extend({
         initialize: function(options) {
-            _.bindAll(this, 'hideHandler', 'logoutHandler', 'render');
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'hideHandler', 'logoutHandler', 'authHandler', 'render');
             this.picker = options.picker;
-            this.app = options.app;
-            this.app.eventAggr.bind('authSet', this.render);
-            this.app.eventAggr.bind('authRemoved', this.render);
+            this.globalEvents.bind('authSet', this.authHandler);
+            this.globalEvents.bind('authRemoved', this.authHandler);
         },
         events: {
             'click a.action-hide': 'hideHandler',
             'click a.action-logout': 'logoutHandler'
         },
+        authHandler: function(authId) {
+            if (authId === this.config.authId) {
+                this.render();
+            }
+        },
         render: function() {
-            var html = '<a class="action-hide" href="#" title="Hide Picker">Hide</a>' + (this.app.auth.hasAuth() ? '<a class="action-logout" href="#" title="Logout">Logout</a>' : '');
+            var html = '<a class="action-hide" href="#" title="Hide Picker">Hide</a>' + (this.hasAuth() ? '<a class="action-logout" href="#" title="Logout">Logout</a>' : '');
             this.$el.html(html);
         },
         hideHandler: function(e) {
@@ -27,7 +32,7 @@ define(function(require) {
             e.preventDefault();
         },
         logoutHandler: function(e) {
-            this.app.auth.removeAuth();
+            this.removeAuth();
             e.preventDefault();
         }
     });

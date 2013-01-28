@@ -11,11 +11,11 @@ define(function(require) {
     return PreviewView.extend({
         embedClass: VideoEmbedView,
         initialize: function(options) {
-            this.app = options.app;
+            PreviewView.prototype.initialize.call(this, options);
             this.encoding = options.encoding || new VideoEncoding({
                 fetchId: this.model.id
             }, {
-                app: this.app
+                appId: this.appId
             });
             var success = _.bind(function() {
                 if (!this.model.get('width') || !this.model.get('height')) {

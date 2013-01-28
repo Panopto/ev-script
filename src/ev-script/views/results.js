@@ -5,18 +5,19 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Backbone = require('backbone');
+        BaseView = require('ev-script/views/base');
 
     /*
      * Base object for result views since video and playlist results are rendered differently
      */
-    return Backbone.View.extend({
+    return BaseView.extend({
         initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render', 'loadMore', 'addHandler', 'previewItem');
             this.picker = options.picker;
             this.$results = $('<div class="results"/>');
             this.$el.append(this.$results);
-            this.app = options.app;
+            this.appId = options.appId;
         },
         events: {
             'click a.action-preview': 'previewItem'
@@ -28,12 +29,12 @@ define(function(require) {
             var settings = {
                 id: id,
                 content: item.toJSON(),
-                app: this.app
+                appId: this.appId
             };
             var previewView = new this.previewClass({
                 el: element,
                 model: new this.modelClass(settings),
-                app: this.app
+                appId: this.appId
             });
             // Stop event propagation so we don't trigger preview of stored field item as well
             e.stopPropagation();
@@ -59,7 +60,7 @@ define(function(require) {
                         }
                     }, this),
                     error: _.bind(function(collection, xhr, options) {
-                        this.app.auth.ajaxError(xhr, _.bind(function() {
+                        this.ajaxError(xhr, _.bind(function() {
                             this.loadMore();
                         }, this));
                     }, this)

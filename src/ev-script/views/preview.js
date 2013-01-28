@@ -5,12 +5,12 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Backbone = require('backbone'),
+        BaseView = require('ev-script/views/base'),
         VideoSettings = require('ev-script/models/video-settings');
 
-    return Backbone.View.extend({
+    return BaseView.extend({
         initialize: function(options) {
-            this.app = options.app;
+            BaseView.prototype.initialize.call(this, options);
             var $dialogWrap = $('<div class="dialogWrap"></div>');
             this.$el.after($dialogWrap);
             var content = this.model.get('content');
@@ -29,7 +29,7 @@ define(function(require) {
                 create: _.bind(function(event, ui) {
                     var embedView = new this.embedClass({
                         model: this.model,
-                        app: this.app
+                        appId: this.appId
                     });
                     $dialogWrap.html(embedView.$el);
                 }, this),

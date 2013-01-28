@@ -3,15 +3,17 @@ define(function(require) {
 
     'use strict';
 
-    var Backbone = require('backbone');
+    var Backbone = require('backbone'),
+        configUtil = require('ev-script/util/config');
 
     return Backbone.Model.extend({
         idAttribute: 'videoID',
         initialize: function(attributes, options) {
-            this.app = options.app;
+            this.appId = options.appId;
+            this.config = configUtil.getConfig(this.appId);
         },
         url: function() {
-            return this.app.config.ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');
+            return this.config.ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');
         },
         getDims: function() {
             var dimsStrs = this.get('dimensions').split('x');

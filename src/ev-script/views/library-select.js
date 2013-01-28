@@ -4,10 +4,11 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
-        Backbone = require('backbone');
+        BaseView = require('ev-script/views/base');
 
-    return Backbone.View.extend({
+    return BaseView.extend({
         initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render');
             this.picker = options.picker;
             this.$el.html('<option value="-1">Loading...</option>');

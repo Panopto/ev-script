@@ -5,18 +5,18 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Backbone = require('backbone'),
+        BaseView = require('ev-script/views/base'),
         OrganizationSelectView = require('ev-script/views/organization-select'),
         Organizations = require('ev-script/collections/organizations'),
         LibrarySelectView = require('ev-script/views/library-select'),
         Libraries = require('ev-script/collections/libraries');
 
-    return Backbone.View.extend({
+    return BaseView.extend({
         initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization', 'changeLibrary', 'handleSubmit');
             this.picker = options.picker;
             this.id = options.id;
-            this.app = options.app;
             var orgSelectId = this.id + '-org-select';
             this.$el.append('<label for="' + orgSelectId + '">Organization:</label>');
             this.orgSelect = new OrganizationSelectView({
@@ -24,9 +24,9 @@ define(function(require) {
                 tagName: 'select',
                 className: 'form-select organizations',
                 picker: this.picker,
-                app: this.app,
+                appId: this.appId,
                 collection: new Organizations({}, {
-                    app: this.app
+                    appId: this.appId
                 })
             });
             this.$el.append(this.orgSelect.$el);
@@ -37,9 +37,9 @@ define(function(require) {
                 tagName: 'select',
                 className: 'form-select libraries',
                 picker: this.picker,
-                app: this.app,
+                appId: this.appId,
                 collection: new Libraries({}, {
-                    app: this.app
+                    appId: this.appId
                 })
             });
             this.$el.append(this.libSelect.$el);
@@ -47,11 +47,11 @@ define(function(require) {
             this.$el.append(html);
             var $loader = this.$('div.loader');
             $loader.bind('ajaxSend', _.bind(function(e, xhr, settings) {
-                if(this.picker === settings.picker) {
+                if (this.picker === settings.picker) {
                     $loader.addClass('loading');
                 }
             }, this)).bind('ajaxComplete', _.bind(function(e, xhr, settings) {
-                if(this.picker === settings.picker) {
+                if (this.picker === settings.picker) {
                     $loader.removeClass('loading');
                 }
             }, this));
@@ -78,19 +78,19 @@ define(function(require) {
             e.preventDefault();
         },
         loadOrgs: function() {
-            var orgs = this.app.cache.orgsCache[this.app.auth.getUser()];
-            if(!orgs) {
+            var orgs = this.getCachedOrgs(this.getUser());
+            if (!orgs) {
                 orgs = new Organizations({}, {
-                    app: this.app
+                    appId: this.appId
                 });
                 orgs.fetch({
                     picker: this.picker,
                     success: _.bind(function(collection, response, options) {
-                        this.app.cache.orgsCache[this.app.auth.getUser()] = collection;
+                        this.setCachedOrgs(this.getUser(), collection);
                         this.orgSelect.collection.reset(collection.models);
                     }, this),
                     error: _.bind(function(collection, xhr, options) {
-                        this.app.auth.ajaxError(xhr, _.bind(function() {
+                        this.ajaxError(xhr, _.bind(function() {
                             this.loadOrgs();
                         }, this));
                     }, this)
@@ -101,20 +101,20 @@ define(function(require) {
         },
         loadLibraries: function() {
             var orgId = this.picker.model.get('organizationId');
-            var libs = this.app.cache.libsCache[this.app.auth.getUser() + orgId];
-            if(!libs) {
+            var libs = this.getCachedLibs(this.getUser(), orgId);
+            if (!libs) {
                 libs = new Libraries({}, {
                     organizationId: orgId,
-                    app: this.app
+                    appId: this.appId
                 });
                 libs.fetch({
                     picker: this.picker,
                     success: _.bind(function(collection, response, options) {
-                        this.app.cache.libsCache[this.app.auth.getUser() + orgId] = collection;
+                        this.setCachedLibs(this.getUser(), orgId, collection);
                         this.libSelect.collection.reset(collection.models);
                     }, this),
                     error: _.bind(function(collection, xhr, options) {
-                        this.app.auth.ajaxError(xhr, _.bind(function() {
+                        this.ajaxError(xhr, _.bind(function() {
                             this.loadLibraries();
                         }, this));
                     }, this)

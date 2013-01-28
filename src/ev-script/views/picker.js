@@ -5,25 +5,25 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Backbone = require('backbone'),
+        BaseView = require('ev-script/views/base'),
         HiderView = require('ev-script/views/hider');
 
     /*
      * Encapsulates views to manage search, display and selection of Ensemble videos and playlists.
      */
-    return Backbone.View.extend({
+    return BaseView.extend({
         initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker', 'hideHandler');
             this.$el.hide();
-            this.app = options.app;
             this.field = options.field;
-            this.app.eventAggr.bind('hidePickers', this.hideHandler);
+            this.appEvents.bind('hidePickers', this.hideHandler);
             this.hider = new HiderView({
                 id: this.id + '-hider',
                 tagName: 'div',
                 className: 'ev-hider',
                 picker: this,
-                app: this.app
+                appId: this.appId
             });
             this.$el.append(this.hider.$el);
             this.hider.render();

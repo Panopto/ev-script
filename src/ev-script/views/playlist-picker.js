@@ -19,7 +19,7 @@ define(function(require) {
                 tagName: 'div',
                 className: 'ev-playlist-select',
                 picker: this,
-                app: this.app
+                appId: this.appId
             });
             this.$el.append(this.playlistSelect.$el);
             this.resultsView = new PlaylistResultsView({
@@ -27,7 +27,7 @@ define(function(require) {
                 tagName: 'div',
                 className: 'ev-results clearfix',
                 picker: this,
-                app: this.app
+                appId: this.appId
             });
             this.$el.append(this.resultsView.$el);
         },
@@ -38,11 +38,11 @@ define(function(require) {
         },
         loadPlaylists: function() {
             var libraryId = this.model.get('libraryId');
-            var playlists = this.app.cache.playlistsCache[this.app.auth.getUser() + libraryId];
+            var playlists = this.getCachedPlaylists(this.getUser(), libraryId);
             if(!playlists) {
                 playlists = new Playlists({}, {
                     filterValue: libraryId,
-                    app: this.app
+                    appId: this.appId
                 });
                 playlists.fetch({
                     picker: this,
@@ -55,12 +55,12 @@ define(function(require) {
                             collection.hasMore = true;
                             collection.pageIndex += 1;
                         }
-                        this.app.cache.playlistsCache[this.app.auth.getUser() + libraryId] = collection;
+                        this.setCachedPlaylists(this.getUser(), libraryId, collection);
                         this.resultsView.collection = collection;
                         this.resultsView.render();
                     }, this),
                     error: _.bind(function(collection, xhr, options) {
-                        this.app.auth.ajaxError(xhr, _.bind(function() {
+                        this.ajaxError(xhr, _.bind(function() {
                             this.loadPlaylists();
                         }, this));
                     }, this)
