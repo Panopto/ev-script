@@ -1,8 +1,12 @@
 body {
-  font-size: 10pt;
-  padding: 1em;
+    font-size: 10pt;
+    padding: 1em;
 }
 
 .ev-field {
-  margin: 1em;
+    margin: 1em;
+}
+
+.video-embed {
+    margin: 1em 0;
 }

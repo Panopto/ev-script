@@ -38,7 +38,7 @@ module.exports = function(grunt) {
             },
             lib_test: {
                 files: '<%= jshint.lib_test.src %>',
-                tasks: ['jshint:lib_test', 'qunit']
+                tasks: ['jshint:lib_test', /*'qunit',*/ 'requirejs:development']
             }
         },
         requirejs: {
@@ -149,9 +149,9 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-requirejs');
 
     // Default task.
-    grunt.registerTask('default', ['clean', 'jshint', 'requirejs:development', 'requirejs:production', 'qunit']);
-    grunt.registerTask('dev', ['clean', 'jshint', 'requirejs:development', 'qunit']);
-    grunt.registerTask('prod', ['clean', 'jshint', 'requirejs:production', 'qunit']);
+    grunt.registerTask('default', ['clean', 'jshint', 'requirejs:development', 'requirejs:production'/*, 'qunit'*/]);
+    grunt.registerTask('dev', ['clean', 'jshint', /*'qunit',*/ 'requirejs:development']);
+    grunt.registerTask('prod', ['clean', 'jshint', /*'qunit',*/ 'requirejs:production']);
     grunt.registerTask('demo', ['server', 'watch']);
 
 };

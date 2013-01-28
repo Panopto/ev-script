@@ -31,12 +31,15 @@ define(function(require) {
             pageSize: parseInt(appOptions.pageSize || 100, 10)
         });
         eventsUtil.initEvents(appId);
+        this.appEvents = eventsUtil.getEvents(appId);
+        this.globalEvents = eventsUtil.getEvents();
+
         cacheUtil.initAppCache(appOptions.ensembleUrl);
 
         this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
             var $field = $(fieldSelector, fieldWrap);
             var fieldView = new FieldView({
-                id: fieldWrap.id,
+                id: fieldWrap.id || appId,
                 el: fieldWrap,
                 model: settingsModel,
                 $field: $field,

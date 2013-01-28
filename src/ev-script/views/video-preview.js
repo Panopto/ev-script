@@ -11,7 +11,6 @@ define(function(require) {
     return PreviewView.extend({
         embedClass: VideoEmbedView,
         initialize: function(options) {
-            PreviewView.prototype.initialize.call(this, options);
             this.encoding = options.encoding || new VideoEncoding({
                 fetchId: this.model.id
             }, {

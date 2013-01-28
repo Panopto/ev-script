@@ -38,7 +38,7 @@ define(function(require) {
                 field: this,
                 appId: this.appId
             };
-            if(this.model instanceof VideoSettings) {
+            if (this.model instanceof VideoSettings) {
                 this.modelClass = VideoSettings;
                 this.pickerClass = VideoPickerView;
                 this.settingsClass = VideoSettingsView;
@@ -46,7 +46,7 @@ define(function(require) {
                 this.encoding = new VideoEncoding({}, {
                     appId: this.appId
                 });
-                if(!this.model.isNew()) {
+                if (!this.model.isNew()) {
                     this.encoding.set({
                         fetchId: this.model.id
                     });
@@ -56,7 +56,7 @@ define(function(require) {
                 }
                 this.model.bind('change:id', _.bind(function() {
                     // Only fetch encoding if identifier is set
-                    if(this.model.id) {
+                    if (this.model.id) {
                         this.encoding.set({
                             fetchId: this.model.id
                         });
@@ -76,7 +76,7 @@ define(function(require) {
                 _.extend(settingsOptions, {
                     encoding: this.encoding
                 });
-            } else if(this.model instanceof PlaylistSettings) {
+            } else if (this.model instanceof PlaylistSettings) {
                 this.modelClass = PlaylistSettings;
                 this.pickerClass = PlaylistPickerView;
                 this.settingsClass = PlaylistSettingsView;
@@ -90,8 +90,10 @@ define(function(require) {
             this.$field.after(this.picker.$el);
             this.renderActions();
             this.model.bind('change', _.bind(function() {
-                if(!this.model.isNew()) {
-                    this.$field.val(JSON.stringify(this.model.toJSON()));
+                if (!this.model.isNew()) {
+                    var json = this.model.toJSON();
+                    this.$field.val(JSON.stringify(json));
+                    this.appEvents.trigger('fieldUpdated', this.$field, json);
                     this.renderActions();
                 }
             }, this));
@@ -105,7 +107,7 @@ define(function(require) {
         chooseHandler: function(e) {
             // We only want one picker showing at a time so notify all fields to hide them (unless it's ours)
             this.appEvents.trigger('hidePickers', this);
-            if(this.picker.$el.is(':hidden')) {
+            if (this.picker.$el.is(':hidden')) {
                 this.picker.showPicker();
             }
             e.preventDefault();
@@ -117,9 +119,12 @@ define(function(require) {
         removeHandler: function(e) {
             this.model.clear();
             this.$field.val('');
+            // Silent here because we don't want to trigger our change handler above
+            // (which would set the field value to our model defaults)
             this.model.set(this.model.defaults, {
                 silent: true
             });
+            this.appEvents.trigger('fieldUpdated', this.$field);
             this.renderActions();
             e.preventDefault();
         },
@@ -136,21 +141,21 @@ define(function(require) {
         renderActions: function() {
             var html = '<div class="logo"><a target="_blank" href="' + this.config.ensembleUrl + '"><span>Ensemble Logo</span></a></div>';
             var label = (this.model instanceof VideoSettings) ? 'Video' : 'Playlist';
-            if(!this.$actions) {
+            if (!this.$actions) {
                 this.$actions = $('<div class="ev-field"/>');
                 this.$field.after(this.$actions);
             }
-            if(this.model.id) {
+            if (this.model.id) {
                 var name = this.model.id,
                     content = this.model.get('content');
-                if(content) {
+                if (content) {
                     name = content.Name || content.Title;
                 }
                 var thumbnail = '';
                 // Validate thumbnailUrl as it could potentially have been modified and we want to protect against XSRF
                 // (a GET shouldn't have side effects...but make sure we actually have a thumbnail url just in case)
                 var re = new RegExp('^' + this.config.ensembleUrl.toLocaleLowerCase() + '\/app\/assets\/');
-                if(content.ThumbnailUrl && re.test(content.ThumbnailUrl.toLocaleLowerCase())) {
+                if (content.ThumbnailUrl && re.test(content.ThumbnailUrl.toLocaleLowerCase())) {
                     thumbnail = '<div class="thumbnail">' + '  <img alt="Video thumbnail" src="' + content.ThumbnailUrl + '"/>' + '</div>';
                 }
                 html += thumbnail + '<div class="title">' + name + '</div>' + '<div class="ev-field-actions">' + '  <a href="#" class="action-choose" title="Change ' + label + '"><span>Change ' + label + '<span></a>' + '  <a href="#" class="action-preview" title="Preview: ' + name + '"><span>Preview: ' + name + '<span></a>' +
