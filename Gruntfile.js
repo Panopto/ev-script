@@ -46,10 +46,12 @@ module.exports = function(grunt) {
             development: {
                 options: {
                     almond: true,
-                    baseUrl: 'lib',
+                    baseUrl: 'lib/bower',
                     paths: {
-                        'ev-script': '../src/ev-script',
-                        'underscore': 'lodash'
+                        'ev-script': '../../src/ev-script',
+                        'jquery':  'jquery/jquery',
+                        'underscore': 'lodash/lodash',
+                        'backbone': 'backbone/backbone'
                     },
                     name: 'ev-script',
                     exclude: ['jquery', 'backbone', 'underscore'],
@@ -64,10 +66,12 @@ module.exports = function(grunt) {
             production: {
                 options: {
                     almond: true,
-                    baseUrl: 'lib',
+                    baseUrl: 'lib/bower',
                     paths: {
-                        'ev-script': '../src/ev-script',
-                        'underscore': 'lodash'
+                        'ev-script': '../../src/ev-script',
+                        'jquery':  'jquery/jquery',
+                        'underscore': 'lodash/lodash',
+                        'backbone': 'backbone/backbone'
                     },
                     name: 'ev-script',
                     exclude: ['jquery', 'backbone', 'underscore'],

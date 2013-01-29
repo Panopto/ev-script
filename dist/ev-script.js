@@ -1,5 +1,5 @@
 /**
- * ev-script 0.1.0 2013-01-28
+ * ev-script 0.1.0 2013-01-29
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -1112,6 +1112,9 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
     return PreviewView.extend({
         embedClass: VideoEmbedView,
         initialize: function(options) {
+            // Although our super sets this...we don't call our super init until
+            // later so we should set appId here
+            this.appId = options.appId;
             this.encoding = options.encoding || new VideoEncoding({
                 fetchId: this.model.id
             }, {
