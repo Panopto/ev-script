@@ -115,7 +115,8 @@ module.exports = function(grunt) {
         //.use(connect.logger())
         .use(connect.cookieParser())
         .use(connect['static'](base))
-        .use(connect.directory(base)).use(function(req, res) {
+        .use(connect.directory(base))
+        .use(function(req, res) {
             var parsed = url.parse(req.url, true);
             if (parsed.pathname === settings.proxyPath) {
                 var authId = parsed.query.authId,
