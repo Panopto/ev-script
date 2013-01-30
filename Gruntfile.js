@@ -37,7 +37,7 @@ module.exports = function(grunt) {
                 tasks: ['jshint:gruntfile']
             },
             lib_test: {
-                files: '<%= jshint.lib_test.src %>',
+                files: ['<%= jshint.lib_test.src %>', 'src/**/*.html'],
                 tasks: ['jshint:lib_test', /*'qunit',*/ 'requirejs:development']
             }
         },
@@ -51,7 +51,8 @@ module.exports = function(grunt) {
                         'ev-script': '../../src/ev-script',
                         'jquery':  'jquery/jquery',
                         'underscore': 'lodash/lodash',
-                        'backbone': 'backbone/backbone'
+                        'backbone': 'backbone/backbone',
+                        'text': 'text/text'
                     },
                     name: 'ev-script',
                     exclude: ['jquery', 'backbone', 'underscore'],
@@ -71,7 +72,8 @@ module.exports = function(grunt) {
                         'ev-script': '../../src/ev-script',
                         'jquery':  'jquery/jquery',
                         'underscore': 'lodash/lodash',
-                        'backbone': 'backbone/backbone'
+                        'backbone': 'backbone/backbone',
+                        'text': 'text/text'
                     },
                     name: 'ev-script',
                     exclude: ['jquery', 'backbone', 'underscore'],

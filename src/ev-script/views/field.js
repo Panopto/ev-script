@@ -20,6 +20,7 @@ define(function(require) {
      * View for our field (element that we set with the selected content identifier)
      */
     return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/field.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler');
@@ -139,32 +140,39 @@ define(function(require) {
             e.preventDefault();
         },
         renderActions: function() {
-            var html = '<div class="logo"><a target="_blank" href="' + this.config.ensembleUrl + '"><span>Ensemble Logo</span></a></div>';
-            var label = (this.model instanceof VideoSettings) ? 'Video' : 'Playlist';
+            var ensembleUrl = this.config.ensembleUrl, name, label, type, thumbnailUrl;
+            if (this.model instanceof VideoSettings) {
+                label = 'Video';
+                type = 'video';
+            } else {
+                label = 'Playlist';
+                type = 'playlist';
+            }
+            if (this.model.id) {
+                name = this.model.id;
+                var content = this.model.get('content');
+                if (content) {
+                    name = content.Name || content.Title;
+                    // Validate thumbnailUrl as it could potentially have been modified and we want to protect against XSRF
+                    // (a GET shouldn't have side effects...but make sure we actually have a thumbnail url just in case)
+                    var re = new RegExp('^' + ensembleUrl.toLocaleLowerCase() + '\/app\/assets\/');
+                    if (content.ThumbnailUrl && re.test(content.ThumbnailUrl.toLocaleLowerCase())) {
+                        thumbnailUrl = content.ThumbnailUrl;
+                    }
+                }
+            }
             if (!this.$actions) {
                 this.$actions = $('<div class="ev-field"/>');
                 this.$field.after(this.$actions);
             }
-            if (this.model.id) {
-                var name = this.model.id,
-                    content = this.model.get('content');
-                if (content) {
-                    name = content.Name || content.Title;
-                }
-                var thumbnail = '';
-                // Validate thumbnailUrl as it could potentially have been modified and we want to protect against XSRF
-                // (a GET shouldn't have side effects...but make sure we actually have a thumbnail url just in case)
-                var re = new RegExp('^' + this.config.ensembleUrl.toLocaleLowerCase() + '\/app\/assets\/');
-                if (content.ThumbnailUrl && re.test(content.ThumbnailUrl.toLocaleLowerCase())) {
-                    thumbnail = '<div class="thumbnail">' + '  <img alt="Video thumbnail" src="' + content.ThumbnailUrl + '"/>' + '</div>';
-                }
-                html += thumbnail + '<div class="title">' + name + '</div>' + '<div class="ev-field-actions">' + '  <a href="#" class="action-choose" title="Change ' + label + '"><span>Change ' + label + '<span></a>' + '  <a href="#" class="action-preview" title="Preview: ' + name + '"><span>Preview: ' + name + '<span></a>' +
-                // TODO - temporarily disabled playlist settings until it is implemented
-                (this.model instanceof VideoSettings ? '    <a href="#" class="action-options" title="' + label + ' Embed Options"><span>' + label + ' Embed Options<span></a>' : '') + '  <a href="#" class="action-remove" title="Remove ' + label + '"><span>Remove ' + label + '<span></a>' + '</div>';
-            } else {
-                html += '<div class="title"><em>Add ' + (this.model instanceof VideoSettings ? 'video' : 'playlist') + '.</em></div>' + '<div class="ev-field-actions">' + '  <a href="#" class="action-choose" title="Choose ' + label + '"><span>Choose ' + label + '<span></a>' + '</div>';
-            }
-            this.$actions.html(html);
+            this.$actions.html(this.template({
+                ensembleUrl: ensembleUrl,
+                modelId: this.model.id,
+                label: label,
+                type: type,
+                name: name,
+                thumbnailUrl: thumbnailUrl
+            }));
         }
     });
 

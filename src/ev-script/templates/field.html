@@ -1,0 +1,25 @@
+<div class="logo">
+    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>
+</div>
+<% if (modelId) { %>
+    <% if (thumbnailUrl) { %>
+        <div class="thumbnail">
+            <img alt="Video thumbnail" src="<%= thumbnailUrl %>"/>
+        </div>
+    <% } %>
+    <div class="title"><%- name %></div>
+    <div class="ev-field-actions">
+        <a href="#" class="action-choose" title="Change <%= label %>"><span>Change <%= label %><span></a>
+        <a href="#" class="action-preview" title="Preview: <%- name %>"><span>Preview: <%- name %><span></a>
+        <!-- TODO - temporarily disabled playlist settings until it is implemented -->
+        <% if (type === 'video') { %>
+            <a href="#" class="action-options" title="<%= label %> Embed Options"><span><%= label %> Embed Options<span></a>
+        <% } %>
+        <a href="#" class="action-remove" title="Remove <%= label %>"><span>Remove <%= label %><span></a>
+    </div>
+<% } else { %>
+    <div class="title"><em>Add <%= type %>.</em></div>
+    <div class="ev-field-actions">
+        <a href="#" class="action-choose" title="Choose <%= label %>"><span>Choose <%= label %><span></a>
+    </div>
+<% } %>

@@ -7,6 +7,7 @@ define(function(require) {
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/hider.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'hideHandler', 'logoutHandler', 'authHandler', 'render');
@@ -24,8 +25,9 @@ define(function(require) {
             }
         },
         render: function() {
-            var html = '<a class="action-hide" href="#" title="Hide Picker">Hide</a>' + (this.hasAuth() ? '<a class="action-logout" href="#" title="Logout">Logout</a>' : '');
-            this.$el.html(html);
+            this.$el.html(this.template({
+                hasAuth: this.hasAuth()
+            }));
         },
         hideHandler: function(e) {
             this.picker.hidePicker();

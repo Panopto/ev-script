@@ -1,5 +1,5 @@
 /*global define*/
-define(function(require) {
+define(function(require, template) {
 
     'use strict';
 
@@ -11,28 +11,13 @@ define(function(require) {
         authUtil = require('ev-script/util/auth');
 
     return Backbone.View.extend({
+        template: _.template(require('text!ev-script/templates/auth.html')),
         initialize: function(options) {
             this.appId = options.appId;
             this.config = configUtil.getConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
             this.submitCallback = options.submitCallback || function() {};
-            var html =
-                '<div class="logo"></div>' +
-                '<form>' +
-                '  <fieldset>' +
-                '    <div class="fieldWrap">' +
-                '      <label for="username">Username</label>' +
-                '      <input id="username" name="username" class="form-text"type="text"/>' +
-                '    </div>' +
-                '    <div class="fieldWrap">' +
-                '      <label for="password">Password</label>' +
-                '      <input id="password" name="password" class="form-text"type="password"/>' +
-                '    </div>' +
-                '    <div class="form-actions">' +
-                '      <input type="submit" class="form-submit action-submit" value="Submit"/>' +
-                '    </div>' +
-                '  </fieldset>' +
-                '</form>';
+            var html = this.template();
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
             this.$dialog.dialog({
