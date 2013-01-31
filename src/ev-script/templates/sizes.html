@@ -1,0 +1,3 @@
+<% _.each(sizes, function(size) { %>
+    <option value="<%= size %>" <% if (size === target) { print('selected="selected"'); } %>><%= size %></option>
+<% }); %>

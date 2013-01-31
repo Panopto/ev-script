@@ -12,39 +12,34 @@ define(function(require) {
         Libraries = require('ev-script/collections/libraries');
 
     return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/playlist-select.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization', 'changeLibrary', 'handleSubmit');
             this.picker = options.picker;
             this.id = options.id;
             var orgSelectId = this.id + '-org-select';
-            this.$el.append('<label for="' + orgSelectId + '">Organization:</label>');
+            var libSelectId = this.id + '-lib-select';
+            this.$el.html(this.template({
+                orgSelectId: orgSelectId,
+                libSelectId: libSelectId
+            }));
             this.orgSelect = new OrganizationSelectView({
-                id: orgSelectId,
-                tagName: 'select',
-                className: 'form-select organizations',
+                el: this.$('.organizations'),
                 picker: this.picker,
                 appId: this.appId,
                 collection: new Organizations({}, {
                     appId: this.appId
                 })
             });
-            this.$el.append(this.orgSelect.$el);
-            var libSelectId = this.id + '-lib-select';
-            this.$el.append('<label for="' + libSelectId + '">Library:</label>');
             this.libSelect = new LibrarySelectView({
-                id: libSelectId,
-                tagName: 'select',
-                className: 'form-select libraries',
+                el: this.$('.libraries'),
                 picker: this.picker,
                 appId: this.appId,
                 collection: new Libraries({}, {
                     appId: this.appId
                 })
             });
-            this.$el.append(this.libSelect.$el);
-            var html = '<input type="button" value="Go" class="form-submit" />' + '<div class="loader"></div>' + '<div class="ev-poweredby"><a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a></div>';
-            this.$el.append(html);
             var $loader = this.$('div.loader');
             $loader.bind('ajaxSend', _.bind(function(e, xhr, settings) {
                 if (this.picker === settings.picker) {
@@ -59,7 +54,7 @@ define(function(require) {
         events: {
             'change select.organizations': 'changeOrganization',
             'change select.libraries': 'changeLibrary',
-            'click input.form-submit': 'handleSubmit'
+            'submit form': 'handleSubmit'
         },
         changeOrganization: function(e) {
             this.picker.model.set({

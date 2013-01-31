@@ -1,5 +1,5 @@
 /**
- * ev-script 0.1.0 2013-01-30
+ * ev-script 0.1.0 2013-01-31
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -902,7 +902,7 @@ define('text',['module'], function (module) {
     return text;
 });
 
-define('text!ev-script/templates/auth.html',[],function () { return '<div class="logo"></div>\n<form>\n  <fieldset>\n    <div class="fieldWrap">\n      <label for="username">Username</label>\n      <input id="username" name="username" class="form-text"type="text"/>\n    </div>\n    <div class="fieldWrap">\n      <label for="password">Password</label>\n      <input id="password" name="password" class="form-text"type="password"/>\n    </div>\n    <div class="form-actions">\n      <input type="submit" class="form-submit action-submit" value="Submit"/>\n    </div>\n  </fieldset>\n</form>\n';});
+define('text!ev-script/templates/auth.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text"type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text"type="password"/>\n        </div>\n        <div class="form-actions">\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
 /*global define*/
 define('ev-script/views/auth',['require','exports','module','jquery','underscore','backbone','ev-script/util/config','ev-script/util/events','ev-script/util/auth','text!ev-script/templates/auth.html'],function(require, template) {
@@ -1151,8 +1151,10 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
 
 });
 
+define('text!ev-script/templates/video-search.html',[],function () { return '<form>\n    <label for="<%= id %>">Search Ensemble:</label>\n    <input id="<%= id %>" type="text" class="form-text search" value="<%- searchVal %>" />\n    <select class="form-select source">\n      <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>>Media Library</option>\n      <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>>Shared Library</option>\n    </select>\n    <input type="submit" value="Go" class="form-submit" />\n    <div class="loader"></div>\n    <div class="ev-poweredby"><a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a></div>\n</form>\n';});
+
 /*global define*/
-define('ev-script/views/search',['require','underscore','ev-script/views/base'],function(require) {
+define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/video-search.html'],function(require) {
 
     
 
@@ -1160,29 +1162,23 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base'],
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/video-search.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'searchHandler', 'doSearch', 'autoSearch');
             this.picker = options.picker;
         },
         events: {
-            'click input.form-submit': 'searchHandler',
-            'change select.source': 'searchHandler',
-            'keyup input.form-text': 'autoSearch'
+            'submit form': 'searchHandler',
+            'change .source': 'searchHandler',
+            'keyup .search': 'autoSearch'
         },
         render: function() {
-            var id = this.id + '-input';
-            var html =
-                '<label for="' + id + '">Search Ensemble:</label>' +
-                '<input id="' + id + '" type="text" class="form-text" value="' + this.picker.model.get('search') + '" />' +
-                '<select class="form-select source">' +
-                '  <option value="content" ' + (this.picker.model.get('sourceId') === 'content' ? 'selected="selected"' : '') + '>Media Library</option>' +
-                '  <option value="shared" ' + (this.picker.model.get('sourceId') === 'shared' ? 'selected="selected"' : '') + '>Shared Library</option>' +
-                '</select>' +
-                '<input type="button" value="Go" class="form-submit" />' +
-                '<div class="loader"></div>' +
-                '<div class="ev-poweredby"><a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a></div>';
-            this.$el.html(html);
+            this.$el.html(this.template({
+                id: this.id + '-input',
+                searchVal: this.picker.model.get('search'),
+                sourceId: this.picker.model.get('sourceId')
+            }));
             var $loader = this.$('div.loader');
             $loader.bind('ajaxSend', _.bind(function(e, xhr, settings) {
                 if (this.picker === settings.picker) {
@@ -1196,8 +1192,8 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base'],
         },
         doSearch: function() {
             this.picker.model.set({
-                search: this.$('input.form-text').val(),
-                sourceId: this.$('select.source').val()
+                search: this.$('.search').val(),
+                sourceId: this.$('.source').val()
             });
             this.picker.loadVideos();
         },
@@ -1221,8 +1217,12 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base'],
 
 });
 
+define('text!ev-script/templates/results.html',[],function () { return '<div class="total">Search returned <%= totalResults %> results.</div>\n<div class="results">\n    <table class="content-list"></table>\n</div>\n';});
+
+define('text!ev-script/templates/no-results.html',[],function () { return '<tr class="odd"><td colspan="2">No results available.</td></tr>\n';});
+
 /*global define*/
-define('ev-script/views/results',['require','jquery','underscore','ev-script/views/base'],function(require) {
+define('ev-script/views/results',['require','jquery','underscore','ev-script/views/base','text!ev-script/templates/results.html','text!ev-script/templates/no-results.html'],function(require) {
 
     
 
@@ -1234,16 +1234,24 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
      * Base object for result views since video and playlist results are rendered differently
      */
     return BaseView.extend({
+        resultsTemplate: _.template(require('text!ev-script/templates/results.html')),
+        emptyTemplate: _.template(require('text!ev-script/templates/no-results.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render', 'loadMore', 'addHandler', 'previewItem');
             this.picker = options.picker;
-            this.$results = $('<div class="results"/>');
-            this.$el.append(this.$results);
             this.appId = options.appId;
         },
         events: {
             'click a.action-preview': 'previewItem'
+        },
+        getItemHtml: function(item, index) {
+            if (this.resultTemplate) {
+                return this.resultTemplate({
+                    item: item,
+                    index: index
+                });
+            }
         },
         previewItem: function(e) {
             var element = e.currentTarget;
@@ -1291,8 +1299,33 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
             }
         },
         addHandler: function(item, collection, options) {
-            var row = this.getRowHtml(item, options.index);
-            this.$('table.content-list > tbody').append(row);
+            var $item = $(this.getItemHtml(item, options.index));
+            this.decorate($item);
+            this.$('.content-list').append($item);
+        },
+        // Override this in extending views to update the DOM when items are added
+        decorate: function($item) {},
+        render: function() {
+            this.$el.html(this.resultsTemplate({
+                totalResults: this.collection.totalResults
+            }));
+            var $contentList = this.$(".content-list");
+            if (!this.collection.isEmpty()) {
+                this.collection.each(function(item, index) {
+                    var $item = $(this.getItemHtml(item, index));
+                    this.decorate($item);
+                    $contentList.append($item);
+                }, this);
+            } else {
+                $contentList.append(this.emptyTemplate());
+            }
+            if (this.collection.size() >= this.config.pageSize || $contentList[0].scrollHeight > 600) {
+                this.$scrollLoader = $contentList.evScrollLoader({
+                    height: 600,
+                    callback: this.loadMore
+                });
+            }
+            this.collection.bind('add', this.addHandler);
         }
     });
 
@@ -1342,32 +1375,29 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
 
 });
 
+define('text!ev-script/templates/video-embed.html',[],function () { return '<iframe src="<%= src %>"\n        frameborder="0"\n        style="width: <%= width %>px;height:<%= (parseInt(height, 10) + 56) %>px;"\n        allowfullscreen>\n</iframe>\n';});
+
 /*global define*/
-define('ev-script/views/video-embed',['require','ev-script/views/base'],function(require) {
+define('ev-script/views/video-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/video-embed.html'],function(require) {
 
     
 
-    var BaseView = require('ev-script/views/base');
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/video-embed.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             // Width and height really should be set by now...but use a reasonable default if not
             var width = (this.model.get('width') ? this.model.get('width') : '640');
             var height = (this.model.get('height') ? this.model.get('height') : '360');
-            var html =
-                '<iframe src="' +
-                this.config.ensembleUrl +
-                '/app/plugin/embed.aspx?ID=' + this.model.get('id') +
-                '&autoPlay=' + this.model.get('autoplay') + '&displayTitle=' +
-                this.model.get('showtitle') + '&hideControls=' +
-                this.model.get('hidecontrols') + '&showCaptions=' +
-                this.model.get('showcaptions') + '&width=' +
-                width + '&height=' + height +
-                '" frameborder="0" style="width:' +
-                width + 'px;height:' + (parseInt(height, 10) + 56) +
-                'px;" allowfullscreen></iframe>';
-            this.$el.html(html);
+            var src = this.config.ensembleUrl + '/app/plugin/embed.aspx?ID=' + this.model.get('id') + '&autoPlay=' + this.model.get('autoplay') + '&displayTitle=' + this.model.get('showtitle') + '&hideControls=' + this.model.get('hidecontrols') + '&showCaptions=' + this.model.get('showcaptions') + '&width=' + width + '&height=' + height;
+            this.$el.html(this.template({
+                src: src,
+                width: width,
+                height: height
+            }));
         }
     });
 
@@ -1457,8 +1487,10 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
 
 });
 
+define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <img src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/, \'width=150\') %>" alt="<%- item.get(\'Title\') %> thumbnail image"/>\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%- item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><span>Choose</span></a>\n            <a class="action-preview" href="#" title="Preview: <%- item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><span>Preview:  item.get(\'Title\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="Preview: <%-item.get(\'Title\') %>" href="#" rel="<%= item.get(\'ID\') %>"><%- item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="desc"><td class="label">Description</td><td class="value"><%- item.get(\'Description\') %></td></tr>\n                <tr><td class="label">Date Added</td><td class="value"><%- new Date(item.get(\'AddedOn\')).toLocaleString() %></td></tr>\n                <tr><td class="label">Keywords</td><td class="value"><%- item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label">Library</td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
+
 /*global define*/
-define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview'],function(require) {
+define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','text!ev-script/templates/video-result.html'],function(require) {
 
     
 
@@ -1471,37 +1503,13 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
     return ResultsView.extend({
         modelClass: VideoSettings,
         previewClass: VideoPreviewView,
+        resultTemplate: _.template(require('text!ev-script/templates/video-result.html')),
         initialize: function(options) {
             ResultsView.prototype.initialize.call(this, options);
         },
-        getRowHtml: function(item, index) {
-            var $row = $('<tr class="' + (index % 2 ? 'odd' : 'even') + '"/>');
-            var content =
-                '<table class="content-item">' +
-                '  <tbody>' +
-                '    <tr class="title">' +
-                '      <td colspan="2">' +
-                '        <a class="action-preview" title="Preview: ' + item.get('Title') + '" href="#" rel="' + item.get('ID') + '">' + item.get('Title') + '</a>' +
-                '      </td>' +
-                '    </tr>' +
-                '    <tr class="desc"><td class="label">Description</td><td class="value">' + item.get('Description') + '</td></tr>' +
-                '    <tr><td class="label">Date Added</td><td class="value">' + new Date(item.get('AddedOn')).toLocaleString() + '</td></tr>' +
-                '    <tr><td class="label">Keywords</td><td class="value">' + item.get('Keywords') + '</td></tr>' +
-                '    <tr><td class="label">Library</td><td class="value">' + item.get('LibraryName') + '</td></tr>' +
-                '  </tbody>' +
-                '</table>';
-            var rowHtml =
-                '    <td class="content-actions">' +
-                '      <img src="' + item.get('ThumbnailUrl').replace(/width=100/, 'width=150') + '" alt="' + item.get('Title') + ' thumbnail image"/>' +
-                '      <div class="action-links">' +
-                '        <a class="action-add" href="#" title="Choose ' + item.get('Title') + '" rel="' + item.get('ID') + '"><span>Choose</span></a>' +
-                '        <a class="action-preview" href="#" title="Preview: ' + item.get('Title') + '" rel="' + item.get('ID') + '"><span>Preview: ' + item.get('Title') + '</span></a>' +
-                '      </div>' +
-                '    </td>' +
-                '    <td class="content-meta">' + content + '</td>';
-            $row.html(rowHtml);
+        decorate: function($item) {
             // Handle truncation (more/less) of description text
-            $('tr.desc td.value', $row).each(function(element) {
+            $('.desc .value', $item).each(function(element) {
                 var $this = $(this), $full, $short, truncLen = 100, fullDesc = $(this).html();
                 if (fullDesc.length > truncLen) {
                     $this.empty();
@@ -1522,28 +1530,6 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
                     $this.append($short).append($full);
                 }
             });
-            return $row;
-        },
-        render: function() {
-            var $table = $('<table class="content-list"/>');
-            var $tbody = $('<tbody/>').appendTo($table);
-            if (this.collection.size() > 0) {
-                this.collection.each(function(item, index) {
-                    $tbody.append(this.getRowHtml(item, index));
-                }, this);
-            } else {
-                $tbody.append('<tr class="odd"><td colspan="2">No results available.</td></tr>');
-            }
-            this.$results.html($table);
-            this.$results.prepend('<div class="total">Search returned ' + this.collection.totalResults + ' results.</div>');
-            // Only scroll if we have a full page or our results size is long enough
-            if (this.collection.size() >= this.config.pageSize || $table[0].scrollHeight > 600) {
-                this.$scrollLoader = $table.evScrollLoader({
-                    height: 600,
-                    callback: this.loadMore
-                });
-            }
-            this.collection.bind('add', this.addHandler);
         }
     });
 
@@ -1720,8 +1706,12 @@ define('ev-script/views/settings',['require','underscore','ev-script/views/base'
 
 });
 
+define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size">Size</label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original">Original</option>\n            </select>\n        </div>\n        <div class="fieldWrap">\n            <label for="showtitle">Show Title</label>\n            <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="autoplay">Auto Play</label>\n            <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="showcaptions">Show Captions</label>\n            <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="hidecontrols">Hide Controls</label>\n            <input id="hidecontrols" class="form-checkbox" <% if (model.get(\'hidecontrols\')) { print(\'checked="checked"\'); } %>  name="hidecontrols" type="checkbox"/>\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="Cancel"/>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
+
+define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(sizes, function(size) { %>\n    <option value="<%= size %>" <% if (size === target) { print(\'selected="selected"\'); } %>><%= size %></option>\n<% }); %>\n';});
+
 /*global define*/
-define('ev-script/views/video-settings',['require','underscore','ev-script/views/settings'],function(require) {
+define('ev-script/views/video-settings',['require','underscore','ev-script/views/settings','text!ev-script/templates/video-settings.html','text!ev-script/templates/sizes.html'],function(require) {
 
     
 
@@ -1729,6 +1719,8 @@ define('ev-script/views/video-settings',['require','underscore','ev-script/views
         SettingsView = require('ev-script/views/settings');
 
     return SettingsView.extend({
+        template: _.template(require('text!ev-script/templates/video-settings.html')),
+        sizesTemplate: _.template(require('text!ev-script/templates/sizes.html')),
         initialize: function(options) {
             SettingsView.prototype.initialize.call(this, options);
             this.encoding = options.encoding;
@@ -1761,7 +1753,7 @@ define('ev-script/views/video-settings',['require','underscore','ev-script/views
             }
             this.field.model.set(attrs);
         },
-        getSizeSelect: function() {
+        renderSize: function() {
             var width = this.field.model.get('width');
             var height = this.field.model.get('height');
             var ratio = 16 / 9;
@@ -1778,45 +1770,17 @@ define('ev-script/views/video-settings',['require','underscore','ev-script/views
                 options = ['1280x960', '1024x770', '848x636', '720x540', '640x480', '610x460', '560x420', '480x360', '400x300', '320x240', '240x180', '160x120'];
             }
             var size = width + 'x' + height;
-            var html =
-                '<select class="form-select" id="size" name="size">' +
-                '<option value="original">Original</option>';
-            _.each(options, function(option) {
-                html += '<option value="' + option + '"' + (option === size ? ' selected="selected"' : '') + '>' + option + '</option>';
-            });
-            html += '</select>';
-            return html;
+            this.$('.size').append(this.sizesTemplate({
+                sizes: options,
+                target: size
+            }));
         },
         render: function() {
-            var html =
-                '<form>' +
-                '  <fieldset>' +
-                '    <div class="fieldWrap">' +
-                '      <label for="size">Size</label>' + this.getSizeSelect() +
-                '    </div>' +
-                '    <div class="fieldWrap">' +
-                '      <label for="showtitle">Show Title</label>' +
-                '      <input id="showtitle" class="form-checkbox" ' + (this.field.model.get('showtitle') ? 'checked="checked"' : '') + ' name="showtitle" type="checkbox"/>' +
-                '    </div>' +
-                '    <div class="fieldWrap">' +
-                '      <label for="autoplay">Auto Play</label>' +
-                '      <input id="autoplay" class="form-checkbox" ' + (this.field.model.get('autoplay') ? 'checked="checked"' : '') + ' name="autoplay" type="checkbox"/>' +
-                '    </div>' +
-                '    <div class="fieldWrap">' +
-                '      <label for="showcaptions">Show Captions</label>' +
-                '      <input id="showcaptions" class="form-checkbox" ' + (this.field.model.get('showcaptions') ? 'checked="checked"' : '') + ' name="showcaptions" type="checkbox"/>' +
-                '    </div>' +
-                '    <div class="fieldWrap">' +
-                '      <label for="hidecontrols">Hide Controls</label>' +
-                '      <input id="hidecontrols" class="form-checkbox" ' + (this.field.model.get('hidecontrols') ? 'checked="checked"' : '') + ' name="hidecontrols" type="checkbox"/>' +
-                '    </div>' +
-                '    <div class="form-actions">' +
-                '      <input type="button" class="form-submit action-cancel" value="Cancel"/>' +
-                '      <input type="submit" class="form-submit action-submit" value="Submit"/>' +
-                '    </div>' +
-                '  </fieldset>' +
-                '</form>';
-            this.$el.html(html).dialog({
+            this.$el.html(this.template({
+                model: this.field.model
+            }));
+            this.renderSize();
+            this.$el.dialog({
                 title: this.field.model.get('content').Title,
                 modal: true,
                 autoOpen: false,
@@ -1831,8 +1795,10 @@ define('ev-script/views/video-settings',['require','underscore','ev-script/views
 
 });
 
+define('text!ev-script/templates/options.html',[],function () { return '<% collection.each(function(item) { %>\n    <option value="<%= item.id %>" <% if (selectedId === item.id) { print(\'selected="selected"\'); } %>><%- item.get(\'Name\') %></option>\n<% }); %>\n';});
+
 /*global define*/
-define('ev-script/views/organization-select',['require','underscore','ev-script/views/base'],function(require) {
+define('ev-script/views/organization-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
 
     
 
@@ -1840,6 +1806,7 @@ define('ev-script/views/organization-select',['require','underscore','ev-script/
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/options.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render');
@@ -1848,11 +1815,10 @@ define('ev-script/views/organization-select',['require','underscore','ev-script/
             this.collection.bind('reset', this.render);
         },
         render: function() {
-            this.$el.html('');
-            this.collection.each(function(org) {
-                var selected = (this.picker.model.get('organizationId') === org.id ? 'selected="selected"' : '');
-                this.$el.append('<option value="' + org.id + '" ' + selected + '>' + org.get('Name') + '</option>');
-            }, this);
+            this.$el.html(this.template({
+                selectedId: this.picker.model.get('organizationId'),
+                collection: this.collection
+            }));
             this.$el.trigger('change');
         }
     });
@@ -1883,7 +1849,7 @@ define('ev-script/collections/organizations',['require','ev-script/collections/b
 });
 
 /*global define*/
-define('ev-script/views/library-select',['require','underscore','ev-script/views/base'],function(require) {
+define('ev-script/views/library-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
 
     
 
@@ -1891,6 +1857,7 @@ define('ev-script/views/library-select',['require','underscore','ev-script/views
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/options.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render');
@@ -1899,11 +1866,10 @@ define('ev-script/views/library-select',['require','underscore','ev-script/views
             this.collection.bind('reset', this.render);
         },
         render: function() {
-            this.$el.html('');
-            this.collection.each(function(lib) {
-                var selected = (this.picker.model.get('libraryId') === lib.id ? 'selected="selected"' : '');
-                this.$el.append('<option value="' + lib.id + '" ' + selected + '>' + lib.get('Name') + '</option>');
-            }, this);
+            this.$el.html(this.template({
+                selectedId: this.picker.model.get('libraryId'),
+                collection: this.collection
+            }));
             this.$el.trigger('change');
         }
     });
@@ -1936,8 +1902,10 @@ define('ev-script/collections/libraries',['require','ev-script/collections/base'
 
 });
 
+define('text!ev-script/templates/playlist-select.html',[],function () { return '<form>\n    <label for="<%= orgSelectId %>">Organization:</label>\n    <select id="<%= orgSelectId %>" class="form-select organizations"></select>\n    <label for="<%= libSelectId %>">Library:</label>\n    <select id="<%= libSelectId %>" class="form-select libraries"></select>\n    <input type="submit" value="Go" class="form-submit" />\n    <div class="loader"></div>\n    <div class="ev-poweredby">\n        <a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a>\n    </div>\n</form>\n';});
+
 /*global define*/
-define('ev-script/views/playlist-select',['require','jquery','underscore','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries'],function(require) {
+define('ev-script/views/playlist-select',['require','jquery','underscore','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','text!ev-script/templates/playlist-select.html'],function(require) {
 
     
 
@@ -1950,39 +1918,34 @@ define('ev-script/views/playlist-select',['require','jquery','underscore','ev-sc
         Libraries = require('ev-script/collections/libraries');
 
     return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/playlist-select.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization', 'changeLibrary', 'handleSubmit');
             this.picker = options.picker;
             this.id = options.id;
             var orgSelectId = this.id + '-org-select';
-            this.$el.append('<label for="' + orgSelectId + '">Organization:</label>');
+            var libSelectId = this.id + '-lib-select';
+            this.$el.html(this.template({
+                orgSelectId: orgSelectId,
+                libSelectId: libSelectId
+            }));
             this.orgSelect = new OrganizationSelectView({
-                id: orgSelectId,
-                tagName: 'select',
-                className: 'form-select organizations',
+                el: this.$('.organizations'),
                 picker: this.picker,
                 appId: this.appId,
                 collection: new Organizations({}, {
                     appId: this.appId
                 })
             });
-            this.$el.append(this.orgSelect.$el);
-            var libSelectId = this.id + '-lib-select';
-            this.$el.append('<label for="' + libSelectId + '">Library:</label>');
             this.libSelect = new LibrarySelectView({
-                id: libSelectId,
-                tagName: 'select',
-                className: 'form-select libraries',
+                el: this.$('.libraries'),
                 picker: this.picker,
                 appId: this.appId,
                 collection: new Libraries({}, {
                     appId: this.appId
                 })
             });
-            this.$el.append(this.libSelect.$el);
-            var html = '<input type="button" value="Go" class="form-submit" />' + '<div class="loader"></div>' + '<div class="ev-poweredby"><a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a></div>';
-            this.$el.append(html);
             var $loader = this.$('div.loader');
             $loader.bind('ajaxSend', _.bind(function(e, xhr, settings) {
                 if (this.picker === settings.picker) {
@@ -1997,7 +1960,7 @@ define('ev-script/views/playlist-select',['require','jquery','underscore','ev-sc
         events: {
             'change select.organizations': 'changeOrganization',
             'change select.libraries': 'changeLibrary',
-            'click input.form-submit': 'handleSubmit'
+            'submit form': 'handleSubmit'
         },
         changeOrganization: function(e) {
             this.picker.model.set({
@@ -2065,21 +2028,24 @@ define('ev-script/views/playlist-select',['require','jquery','underscore','ev-sc
 
 });
 
+define('text!ev-script/templates/playlist-embed.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%= modelId %>"\n        frameborder="0"\n        style="width:800px;height:850px;"\n        allowfullscreen>\n</iframe>\n';});
+
 /*global define*/
-define('ev-script/views/playlist-embed',['require','ev-script/views/base'],function(require) {
+define('ev-script/views/playlist-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/playlist-embed.html'],function(require) {
 
     
 
-    var BaseView = require('ev-script/views/base');
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/playlist-embed.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            var html =
-                '<iframe src="' + this.config.ensembleUrl +
-                '/app/plugin/embed.aspx?DestinationID=' + this.model.get('id') +
-                '" frameborder="0" style="width:800px;height:850px;" allowfullscreen></iframe>';
-            this.$el.html(html);
+            this.$el.html(this.template({
+                modelId: this.model.get('id'),
+                ensembleUrl: this.config.ensembleUrl
+            }));
         }
     });
 
@@ -2102,12 +2068,15 @@ define('ev-script/views/playlist-preview',['require','ev-script/views/preview','
 
 });
 
+define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <span>Choose</span>\n            </a>\n            <a class="action-preview" href="#" title="Preview: <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <span>Preview: <%- item.get(\'Name\') %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
+
 /*global define*/
-define('ev-script/views/playlist-results',['require','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview'],function(require) {
+define('ev-script/views/playlist-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/playlist-result.html'],function(require) {
 
     
 
-    var $ = require('jquery'),
+    var _ = require('underscore'),
+        $ = require('jquery'),
         ResultsView = require('ev-script/views/results'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
         PlaylistPreviewView = require('ev-script/views/playlist-preview');
@@ -2115,46 +2084,9 @@ define('ev-script/views/playlist-results',['require','jquery','ev-script/views/r
     return ResultsView.extend({
         modelClass: PlaylistSettings,
         previewClass: PlaylistPreviewView,
+        resultTemplate: _.template(require('text!ev-script/templates/playlist-result.html')),
         initialize: function(options) {
             ResultsView.prototype.initialize.call(this, options);
-        },
-        getRowHtml: function(item, index) {
-            var html =
-                '  <tr class="' + (index % 2 ? 'odd' : 'even') + '">' +
-                '    <td class="content-actions">' +
-                '      <div class="action-links">' +
-                '        <a class="action-add" href="#" title="Choose ' + item.get('Name') + '" rel="' + item.get('ID') + '"><span>Choose</span></a>' +
-                '        <a class="action-preview" href="#" title="Preview: ' + item.get('Name') + '" rel="' + item.get('ID') + '"><span>Preview: ' + item.get('Name') + '</span></a>' +
-                '      </div>' +
-                '    </td>' +
-                '    <td class="content-meta">' +
-                '      <span>' + item.get('Name') + '</span>' +
-                '    </td>' +
-                '  </tr>';
-            return html;
-        },
-        render: function() {
-            var $table = $('<table class="content-list"/>');
-            var $tbody = $('<tbody/>').appendTo($table);
-            var rows = '';
-            if (this.collection.size() > 0) {
-                this.collection.each(function(item, index) {
-                    rows += this.getRowHtml(item, index);
-                }, this);
-            } else {
-                rows +=
-                    '  <tr class="odd"><td colspan="2">No results available.</td></tr>';
-            }
-            $tbody.append(rows);
-            this.$results.html($table);
-            this.$results.prepend('<div class="total">Search returned ' + this.collection.totalResults + ' results.</div>');
-            if (this.collection.size() >= this.config.pageSize || $table[0].scrollHeight > 600) {
-                this.$scrollLoader = $table.evScrollLoader({
-                    height: 600,
-                    callback: this.loadMore
-                });
-            }
-            this.collection.bind('add', this.addHandler);
         }
     });
 
@@ -2263,22 +2195,26 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
 
 });
 
+define('text!ev-script/templates/playlist-settings.html',[],function () { return '<h3>TODO</h3>\n<p>\n    <%- json %>\n</p>\n';});
+
 /*global define*/
-define('ev-script/views/playlist-settings',['require','ev-script/views/settings'],function(require) {
+define('ev-script/views/playlist-settings',['require','underscore','ev-script/views/settings','text!ev-script/templates/playlist-settings.html'],function(require) {
 
     
 
-    var SettingsView = require('ev-script/views/settings');
+    var _ = require('underscore'),
+        SettingsView = require('ev-script/views/settings');
 
     return SettingsView.extend({
+        template: _.template(require('text!ev-script/templates/playlist-settings.html')),
         initialize: function(options) {
             SettingsView.prototype.initialize.call(this, options);
         },
         render: function() {
-            var html =
-                // TODO
-                '<h3>TODO</h3>' + JSON.stringify(this.field.model.toJSON());
-            this.$el.html(html);
+            // TODO - fix this template when we have playlist settings implemented
+            this.$el.html(this.template({
+                json: JSON.stringify(this.field.model.toJSON())
+            }));
             this.$el.dialog({
                 title: 'Playlist Embed Settings',
                 modal: true,

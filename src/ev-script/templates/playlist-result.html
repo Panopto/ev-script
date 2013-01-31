@@ -1,0 +1,15 @@
+<tr class="<%= (index % 2 ? 'odd' : 'even') %>">
+    <td class="content-actions">
+        <div class="action-links">
+            <a class="action-add" href="#" title="Choose <%- item.get('Name') %>" rel="<%= item.get('ID') %>">
+                <span>Choose</span>
+            </a>
+            <a class="action-preview" href="#" title="Preview: <%- item.get('Name') %>" rel="<%= item.get('ID') %>">
+                <span>Preview: <%- item.get('Name') %></span>
+            </a>
+        </div>
+    </td>
+    <td class="content-meta">
+        <span><%- item.get('Name') %></span>
+    </td>
+</tr>

@@ -1,0 +1,24 @@
+<tr class="<%= (index % 2 ? 'odd' : 'even') %>">
+    <td class="content-actions">
+        <img src="<%= item.get('ThumbnailUrl').replace(/width=100/, 'width=150') %>" alt="<%- item.get('Title') %> thumbnail image"/>
+        <div class="action-links">
+            <a class="action-add" href="#" title="Choose <%- item.get('Title') %>" rel="<%= item.get('ID') %>"><span>Choose</span></a>
+            <a class="action-preview" href="#" title="Preview: <%- item.get('Title') %>" rel="<%= item.get('ID') %>"><span>Preview:  item.get('Title') %></span></a>
+        </div>
+    </td>
+    <td class="content-meta">
+        <table class="content-item">
+            <tbody>
+                <tr class="title">
+                    <td colspan="2">
+                        <a class="action-preview" title="Preview: <%-item.get('Title') %>" href="#" rel="<%= item.get('ID') %>"><%- item.get('Title') %></a>
+                    </td>
+                </tr>
+                <tr class="desc"><td class="label">Description</td><td class="value"><%- item.get('Description') %></td></tr>
+                <tr><td class="label">Date Added</td><td class="value"><%- new Date(item.get('AddedOn')).toLocaleString() %></td></tr>
+                <tr><td class="label">Keywords</td><td class="value"><%- item.get('Keywords') %></td></tr>
+                <tr><td class="label">Library</td><td class="value"><%- item.get('LibraryName') %></td></tr>
+            </tbody>
+        </table>
+    </td>
+</tr>

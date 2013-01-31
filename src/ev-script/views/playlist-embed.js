@@ -3,16 +3,17 @@ define(function(require) {
 
     'use strict';
 
-    var BaseView = require('ev-script/views/base');
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/playlist-embed.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            var html =
-                '<iframe src="' + this.config.ensembleUrl +
-                '/app/plugin/embed.aspx?DestinationID=' + this.model.get('id') +
-                '" frameborder="0" style="width:800px;height:850px;" allowfullscreen></iframe>';
-            this.$el.html(html);
+            this.$el.html(this.template({
+                modelId: this.model.get('id'),
+                ensembleUrl: this.config.ensembleUrl
+            }));
         }
     });
 

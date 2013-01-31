@@ -11,16 +11,24 @@ define(function(require) {
      * Base object for result views since video and playlist results are rendered differently
      */
     return BaseView.extend({
+        resultsTemplate: _.template(require('text!ev-script/templates/results.html')),
+        emptyTemplate: _.template(require('text!ev-script/templates/no-results.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render', 'loadMore', 'addHandler', 'previewItem');
             this.picker = options.picker;
-            this.$results = $('<div class="results"/>');
-            this.$el.append(this.$results);
             this.appId = options.appId;
         },
         events: {
             'click a.action-preview': 'previewItem'
+        },
+        getItemHtml: function(item, index) {
+            if (this.resultTemplate) {
+                return this.resultTemplate({
+                    item: item,
+                    index: index
+                });
+            }
         },
         previewItem: function(e) {
             var element = e.currentTarget;
@@ -68,8 +76,33 @@ define(function(require) {
             }
         },
         addHandler: function(item, collection, options) {
-            var row = this.getRowHtml(item, options.index);
-            this.$('table.content-list > tbody').append(row);
+            var $item = $(this.getItemHtml(item, options.index));
+            this.decorate($item);
+            this.$('.content-list').append($item);
+        },
+        // Override this in extending views to update the DOM when items are added
+        decorate: function($item) {},
+        render: function() {
+            this.$el.html(this.resultsTemplate({
+                totalResults: this.collection.totalResults
+            }));
+            var $contentList = this.$(".content-list");
+            if (!this.collection.isEmpty()) {
+                this.collection.each(function(item, index) {
+                    var $item = $(this.getItemHtml(item, index));
+                    this.decorate($item);
+                    $contentList.append($item);
+                }, this);
+            } else {
+                $contentList.append(this.emptyTemplate());
+            }
+            if (this.collection.size() >= this.config.pageSize || $contentList[0].scrollHeight > 600) {
+                this.$scrollLoader = $contentList.evScrollLoader({
+                    height: 600,
+                    callback: this.loadMore
+                });
+            }
+            this.collection.bind('add', this.addHandler);
         }
     });
 

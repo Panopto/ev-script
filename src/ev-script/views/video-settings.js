@@ -7,6 +7,8 @@ define(function(require) {
         SettingsView = require('ev-script/views/settings');
 
     return SettingsView.extend({
+        template: _.template(require('text!ev-script/templates/video-settings.html')),
+        sizesTemplate: _.template(require('text!ev-script/templates/sizes.html')),
         initialize: function(options) {
             SettingsView.prototype.initialize.call(this, options);
             this.encoding = options.encoding;
@@ -39,7 +41,7 @@ define(function(require) {
             }
             this.field.model.set(attrs);
         },
-        getSizeSelect: function() {
+        renderSize: function() {
             var width = this.field.model.get('width');
             var height = this.field.model.get('height');
             var ratio = 16 / 9;
@@ -56,45 +58,17 @@ define(function(require) {
                 options = ['1280x960', '1024x770', '848x636', '720x540', '640x480', '610x460', '560x420', '480x360', '400x300', '320x240', '240x180', '160x120'];
             }
             var size = width + 'x' + height;
-            var html =
-                '<select class="form-select" id="size" name="size">' +
-                '<option value="original">Original</option>';
-            _.each(options, function(option) {
-                html += '<option value="' + option + '"' + (option === size ? ' selected="selected"' : '') + '>' + option + '</option>';
-            });
-            html += '</select>';
-            return html;
+            this.$('.size').append(this.sizesTemplate({
+                sizes: options,
+                target: size
+            }));
         },
         render: function() {
-            var html =
-                '<form>' +
-                '  <fieldset>' +
-                '    <div class="fieldWrap">' +
-                '      <label for="size">Size</label>' + this.getSizeSelect() +
-                '    </div>' +
-                '    <div class="fieldWrap">' +
-                '      <label for="showtitle">Show Title</label>' +
-                '      <input id="showtitle" class="form-checkbox" ' + (this.field.model.get('showtitle') ? 'checked="checked"' : '') + ' name="showtitle" type="checkbox"/>' +
-                '    </div>' +
-                '    <div class="fieldWrap">' +
-                '      <label for="autoplay">Auto Play</label>' +
-                '      <input id="autoplay" class="form-checkbox" ' + (this.field.model.get('autoplay') ? 'checked="checked"' : '') + ' name="autoplay" type="checkbox"/>' +
-                '    </div>' +
-                '    <div class="fieldWrap">' +
-                '      <label for="showcaptions">Show Captions</label>' +
-                '      <input id="showcaptions" class="form-checkbox" ' + (this.field.model.get('showcaptions') ? 'checked="checked"' : '') + ' name="showcaptions" type="checkbox"/>' +
-                '    </div>' +
-                '    <div class="fieldWrap">' +
-                '      <label for="hidecontrols">Hide Controls</label>' +
-                '      <input id="hidecontrols" class="form-checkbox" ' + (this.field.model.get('hidecontrols') ? 'checked="checked"' : '') + ' name="hidecontrols" type="checkbox"/>' +
-                '    </div>' +
-                '    <div class="form-actions">' +
-                '      <input type="button" class="form-submit action-cancel" value="Cancel"/>' +
-                '      <input type="submit" class="form-submit action-submit" value="Submit"/>' +
-                '    </div>' +
-                '  </fieldset>' +
-                '</form>';
-            this.$el.html(html).dialog({
+            this.$el.html(this.template({
+                model: this.field.model
+            }));
+            this.renderSize();
+            this.$el.dialog({
                 title: this.field.model.get('content').Title,
                 modal: true,
                 autoOpen: false,

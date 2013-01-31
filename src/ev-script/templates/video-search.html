@@ -1,0 +1,11 @@
+<form>
+    <label for="<%= id %>">Search Ensemble:</label>
+    <input id="<%= id %>" type="text" class="form-text search" value="<%- searchVal %>" />
+    <select class="form-select source">
+      <option value="content" <% if (sourceId === 'content') { print('selected="selected"'); } %>>Media Library</option>
+      <option value="shared" <% if (sourceId === 'shared') { print('selected="selected"'); } %>>Shared Library</option>
+    </select>
+    <input type="submit" value="Go" class="form-submit" />
+    <div class="loader"></div>
+    <div class="ev-poweredby"><a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a></div>
+</form>

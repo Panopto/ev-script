@@ -3,6 +3,11 @@ body {
     padding: 1em;
 }
 
+a,
+a:visited {
+    color: #3399ff;
+}
+
 .ev-field {
     margin: 1em;
 }

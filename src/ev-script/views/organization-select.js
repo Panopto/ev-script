@@ -7,6 +7,7 @@ define(function(require) {
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/options.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render');
@@ -15,11 +16,10 @@ define(function(require) {
             this.collection.bind('reset', this.render);
         },
         render: function() {
-            this.$el.html('');
-            this.collection.each(function(org) {
-                var selected = (this.picker.model.get('organizationId') === org.id ? 'selected="selected"' : '');
-                this.$el.append('<option value="' + org.id + '" ' + selected + '>' + org.get('Name') + '</option>');
-            }, this);
+            this.$el.html(this.template({
+                selectedId: this.picker.model.get('organizationId'),
+                collection: this.collection
+            }));
             this.$el.trigger('change');
         }
     });
