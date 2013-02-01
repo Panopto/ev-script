@@ -6,6 +6,8 @@ define(function(require) {
     var _ = require('underscore'),
         BaseView = require('ev-script/views/base');
 
+    require('jquery-ui');
+
     return BaseView.extend({
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);

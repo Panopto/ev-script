@@ -6,6 +6,8 @@ define(function(require) {
     var _ = require('underscore'),
         SettingsView = require('ev-script/views/settings');
 
+    require('jquery-ui');
+
     return SettingsView.extend({
         template: _.template(require('text!ev-script/templates/playlist-settings.html')),
         initialize: function(options) {

@@ -7,6 +7,8 @@ define(function(require) {
         _ = require('underscore'),
         BaseView = require('ev-script/views/base');
 
+    require('ev-scroll-loader');
+
     /*
      * Base object for result views since video and playlist results are rendered differently
      */

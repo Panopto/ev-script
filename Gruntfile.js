@@ -2,6 +2,34 @@
 
 module.exports = function(grunt) {
 
+    var _ = require('lodash'),
+        rjs_dev_opts = {
+            almond: true,
+            baseUrl: 'lib/bower',
+            paths: {
+                'ev-script': '../../src/ev-script',
+                'jquery':  'jquery/jquery',
+                'jquery-ui': 'jquery-ui/jquery-ui',
+                'jquery.cookie': 'jquery.cookie/jquery.cookie',
+                'ev-scroll-loader': '../ev-scroll-loader',
+                'underscore': 'lodash/lodash',
+                'backbone': 'backbone/backbone',
+                'text': 'text/text'
+            },
+            name: 'ev-script',
+            exclude: ['jquery', 'jquery-ui', 'jquery.cookie', 'backbone', 'underscore'],
+            out: "dist/ev-script.js",
+            wrap: {
+                start: '<%= banner %>' + grunt.file.read('wrap/wrap.start'),
+                end: grunt.file.read('wrap/wrap.end')
+            },
+            optimize: 'none'
+        },
+        rjs_prod_opts = _.extend({}, rjs_dev_opts, {
+            out: "dist/ev-script.min.js",
+            optimize: 'uglify'
+        });
+
     // Project configuration.
     grunt.initConfig({
         // Metadata.
@@ -37,52 +65,16 @@ module.exports = function(grunt) {
                 tasks: ['jshint:gruntfile']
             },
             lib_test: {
-                files: ['<%= jshint.lib_test.src %>', 'src/**/*.html'],
+                files: ['<%= jshint.lib_test.src %>', 'src/**/*.html', 'wrap/*'],
                 tasks: ['jshint:lib_test', /*'qunit',*/ 'requirejs:development']
             }
         },
         requirejs: {
-            // FIXME - it doesn't appear that grunt-requirejs supports task-level options?
             development: {
-                options: {
-                    almond: true,
-                    baseUrl: 'lib/bower',
-                    paths: {
-                        'ev-script': '../../src/ev-script',
-                        'jquery':  'jquery/jquery',
-                        'underscore': 'lodash/lodash',
-                        'backbone': 'backbone/backbone',
-                        'text': 'text/text'
-                    },
-                    name: 'ev-script',
-                    exclude: ['jquery', 'backbone', 'underscore'],
-                    out: "dist/ev-script.js",
-                    wrap: {
-                        start: '<%= banner %>' + grunt.file.read('wrap/wrap.start'),
-                        end: grunt.file.read('wrap/wrap.end')
-                    },
-                    optimize: 'none'
-                }
+                options: rjs_dev_opts
             },
             production: {
-                options: {
-                    almond: true,
-                    baseUrl: 'lib/bower',
-                    paths: {
-                        'ev-script': '../../src/ev-script',
-                        'jquery':  'jquery/jquery',
-                        'underscore': 'lodash/lodash',
-                        'backbone': 'backbone/backbone',
-                        'text': 'text/text'
-                    },
-                    name: 'ev-script',
-                    exclude: ['jquery', 'backbone', 'underscore'],
-                    out: "dist/ev-script.min.js",
-                    wrap: {
-                        start: '<%= banner %>' + grunt.file.read('wrap/wrap.start'),
-                        end: grunt.file.read('wrap/wrap.end')
-                    }
-                }
+                options: rjs_prod_opts
             }
         }
     });
@@ -93,7 +85,7 @@ module.exports = function(grunt) {
         fs = require('fs'),
         url = require('url'),
         request = require('request'),
-        settings = require('./demo/js/config.js').evSettings;
+        settings = require('./ev-config.js').evSettings;
 
     /*
      * Browsers don't handle cross-domain basic auth and hacks like JSONP don't

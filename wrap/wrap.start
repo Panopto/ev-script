@@ -1,7 +1,8 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
-        // AMD.
-        define(['jquery', 'underscore', 'backbone'], factory);
+        // AMD.  Put jQuery plugins at the end since they don't return any values
+        // that are passed to our factory.
+        define(['jquery', 'underscore', 'backbone', 'jquery-ui', 'jquery.cookie'], factory);
     } else {
         // Browser globals
         root.EV = factory(root.$, root._, root.Backbone);

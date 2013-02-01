@@ -8,6 +8,8 @@ define(function(require) {
         BaseView = require('ev-script/views/base'),
         VideoSettings = require('ev-script/models/video-settings');
 
+    require('jquery-ui');
+
     return BaseView.extend({
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);

@@ -1,10 +1,11 @@
-/*global EV,evSettings,jQuery,document*/
+/*global EV,evSettings,jQuery,document,window*/
 (function($) {
 
     'use strict';
 
     var app = new EV.EnsembleApp({
         authId: evSettings.authId,
+        authPath: evSettings.authPath,
         ensembleUrl: evSettings.ensembleUrl,
         pageSize: evSettings.pageSize,
         urlCallback: function(url) {
@@ -13,17 +14,25 @@
     });
 
     app.appEvents.bind('fieldUpdated', function($field, value) {
-        var $embed = $('.playlist-embed');
-        if ($field[0].id === 'playlist') {
+        var $videoEmbed = $('.video-embed');
+        var $playlistEmbed = $('.playlist-embed');
+        if ($field[0].id === 'video') {
             if (value) {
-                app.handleEmbed($embed, new EV.PlaylistSettings(value));
+                app.handleEmbed($videoEmbed, new EV.VideoSettings(value));
             } else {
-                $embed.html('');
+                $videoEmbed.html('');
+            }
+        } else if ($field[0].id === 'playlist') {
+            if (value) {
+                app.handleEmbed($playlistEmbed, new EV.PlaylistSettings(value));
+            } else {
+                $playlistEmbed.html('');
             }
         }
     });
 
     $(document).ready(function() {
+        app.handleField($('#video').parent(), new EV.VideoSettings(), '#video');
         app.handleField($('#playlist').parent(), new EV.PlaylistSettings(), '#playlist');
     });
 

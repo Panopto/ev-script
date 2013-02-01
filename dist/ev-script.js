@@ -7,8 +7,9 @@
  */
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
-        // AMD.
-        define(['jquery', 'underscore', 'backbone'], factory);
+        // AMD.  Put jQuery plugins at the end since they don't return any values
+        // that are passed to our factory.
+        define(['jquery', 'underscore', 'backbone', 'jquery-ui', 'jquery.cookie'], factory);
     } else {
         // Browser globals
         root.EV = factory(root.$, root._, root.Backbone);
@@ -905,7 +906,7 @@ define('text',['module'], function (module) {
 define('text!ev-script/templates/auth.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text"type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text"type="password"/>\n        </div>\n        <div class="form-actions">\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
 /*global define*/
-define('ev-script/views/auth',['require','exports','module','jquery','underscore','backbone','ev-script/util/config','ev-script/util/events','ev-script/util/auth','text!ev-script/templates/auth.html'],function(require, template) {
+define('ev-script/views/auth',['require','exports','module','jquery','underscore','backbone','ev-script/util/config','ev-script/util/events','ev-script/util/auth','jquery.cookie','jquery-ui','text!ev-script/templates/auth.html'],function(require, template) {
 
     
 
@@ -915,6 +916,9 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
         configUtil = require('ev-script/util/config'),
         eventsUtil = require('ev-script/util/events'),
         authUtil = require('ev-script/util/auth');
+
+    require('jquery.cookie');
+    require('jquery-ui');
 
     return Backbone.View.extend({
         template: _.template(require('text!ev-script/templates/auth.html')),
@@ -1217,18 +1221,76 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base','
 
 });
 
+/*! Ensemble Video Scroll Loader - v0.1.0 - 2013-01-16
+* https://github.com/jmpease/ev-scroll-loader
+* Copyright (c) 2013 Symphony Video; Licensed MIT, GPL */
+
+(function($) {
+
+  var defaults = {
+    callback: function() {}
+  };
+
+  var methods = {
+    init: function(options) {
+      var settings = $.extend({}, defaults, options);
+      return this.each(function() {
+        var $this = $(this);
+        $this.addClass('scroll-content');
+        var $wrap = $this.wrap('<div class=\"scrollWrap\"/>').closest('.scrollWrap');
+        $wrap.append('<div class="loader"></div>');
+        var scrollHeight = this.scrollHeight;
+        var setHeight = settings.height || scrollHeight;
+        var wrapHeight = Math.min(setHeight, scrollHeight) - 10;
+        $wrap.css({
+          'position': 'relative',
+          'height': wrapHeight + 'px',
+          'overflow-y': 'scroll'
+        }).scroll(function() {
+          if ($wrap.scrollTop() === $wrap[0].scrollHeight - wrapHeight) {
+            settings.callback.apply($this[0]);
+          }
+        });
+      });
+    },
+    showLoader: function() {
+      var $wrap = $(this).closest('.scrollWrap');
+      $('.loader', $wrap).show();
+      return this;
+    },
+    hideLoader: function() {
+      var $wrap = $(this).closest('.scrollWrap');
+      $('.loader', $wrap).hide();
+      return this;
+    }
+  };
+
+  $.fn.evScrollLoader = function(method) {
+    if (methods[method]) {
+      return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+    } else if (typeof method === 'object' || !method) {
+      return methods.init.apply(this, arguments);
+    }
+  };
+
+}(jQuery));
+
+define("ev-scroll-loader", function(){});
+
 define('text!ev-script/templates/results.html',[],function () { return '<div class="total">Search returned <%= totalResults %> results.</div>\n<div class="results">\n    <table class="content-list"></table>\n</div>\n';});
 
 define('text!ev-script/templates/no-results.html',[],function () { return '<tr class="odd"><td colspan="2">No results available.</td></tr>\n';});
 
 /*global define*/
-define('ev-script/views/results',['require','jquery','underscore','ev-script/views/base','text!ev-script/templates/results.html','text!ev-script/templates/no-results.html'],function(require) {
+define('ev-script/views/results',['require','jquery','underscore','ev-script/views/base','ev-scroll-loader','text!ev-script/templates/results.html','text!ev-script/templates/no-results.html'],function(require) {
 
     
 
     var $ = require('jquery'),
         _ = require('underscore'),
         BaseView = require('ev-script/views/base');
+
+    require('ev-scroll-loader');
 
     /*
      * Base object for result views since video and playlist results are rendered differently
@@ -1332,7 +1394,7 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
 });
 
 /*global define*/
-define('ev-script/views/preview',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings'],function(require) {
+define('ev-script/views/preview',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','jquery-ui'],function(require) {
 
     
 
@@ -1340,6 +1402,8 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
         _ = require('underscore'),
         BaseView = require('ev-script/views/base'),
         VideoSettings = require('ev-script/models/video-settings');
+
+    require('jquery-ui');
 
     return BaseView.extend({
         initialize: function(options) {
@@ -1670,12 +1734,14 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
 });
 
 /*global define*/
-define('ev-script/views/settings',['require','underscore','ev-script/views/base'],function(require) {
+define('ev-script/views/settings',['require','underscore','ev-script/views/base','jquery-ui'],function(require) {
 
     
 
     var _ = require('underscore'),
         BaseView = require('ev-script/views/base');
+
+    require('jquery-ui');
 
     return BaseView.extend({
         initialize: function(options) {
@@ -1711,12 +1777,14 @@ define('text!ev-script/templates/video-settings.html',[],function () { return '<
 define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(sizes, function(size) { %>\n    <option value="<%= size %>" <% if (size === target) { print(\'selected="selected"\'); } %>><%= size %></option>\n<% }); %>\n';});
 
 /*global define*/
-define('ev-script/views/video-settings',['require','underscore','ev-script/views/settings','text!ev-script/templates/video-settings.html','text!ev-script/templates/sizes.html'],function(require) {
+define('ev-script/views/video-settings',['require','underscore','ev-script/views/settings','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/sizes.html'],function(require) {
 
     
 
     var _ = require('underscore'),
         SettingsView = require('ev-script/views/settings');
+
+    require('jquery-ui');
 
     return SettingsView.extend({
         template: _.template(require('text!ev-script/templates/video-settings.html')),
@@ -2198,12 +2266,14 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
 define('text!ev-script/templates/playlist-settings.html',[],function () { return '<h3>TODO</h3>\n<p>\n    <%- json %>\n</p>\n';});
 
 /*global define*/
-define('ev-script/views/playlist-settings',['require','underscore','ev-script/views/settings','text!ev-script/templates/playlist-settings.html'],function(require) {
+define('ev-script/views/playlist-settings',['require','underscore','ev-script/views/settings','jquery-ui','text!ev-script/templates/playlist-settings.html'],function(require) {
 
     
 
     var _ = require('underscore'),
         SettingsView = require('ev-script/views/settings');
+
+    require('jquery-ui');
 
     return SettingsView.extend({
         template: _.template(require('text!ev-script/templates/playlist-settings.html')),
@@ -2493,6 +2563,8 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
     define('backbone', ['jquery', 'underscore'], function () {
         return Backbone;
     });
+    define('jquery-ui', ['jquery'], function() {});
+    define('jquery.cookie', ['jquery'], function() {});
 
     // Use almond's special top-level, synchronous require to trigger factory
     // functions, get the final module value, and export it as the public

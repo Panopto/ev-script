@@ -12,6 +12,7 @@ a:visited {
     margin: 1em;
 }
 
-.video-embed {
+.video-embed,
+.playlist-embed {
     margin: 1em 0;
 }
