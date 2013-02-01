@@ -1391,6 +1391,9 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
                     height: 600,
                     callback: this.loadMore
                 });
+                if (!this.collection.hasMore) {
+                    this.$scrollLoader.evScrollLoader('hideLoader');
+                }
             }
             this.collection.bind('add', this.addHandler);
         }

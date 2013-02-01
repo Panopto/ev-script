@@ -102,6 +102,9 @@ define(function(require) {
                     height: 600,
                     callback: this.loadMore
                 });
+                if (!this.collection.hasMore) {
+                    this.$scrollLoader.evScrollLoader('hideLoader');
+                }
             }
             this.collection.bind('add', this.addHandler);
         }
