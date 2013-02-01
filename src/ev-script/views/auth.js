@@ -1,4 +1,3 @@
-/*global define*/
 define(function(require, template) {
 
     'use strict';
