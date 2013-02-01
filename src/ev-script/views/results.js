@@ -20,6 +20,7 @@ define(function(require) {
             _.bindAll(this, 'render', 'loadMore', 'addHandler', 'previewItem');
             this.picker = options.picker;
             this.appId = options.appId;
+            this.loadLock = false;
         },
         events: {
             'click a.action-preview': 'previewItem'
@@ -51,28 +52,26 @@ define(function(require) {
             e.preventDefault();
         },
         loadMore: function() {
-            if (this.collection.hasMore) {
+            if (this.collection.hasMore && !this.loadLock) {
+                this.loadLock = true;
                 this.collection.fetch({
-                    // This needs to be synchronous so it blocks additional scrolling during load.
-                    // FIXME - add a loading indicator?
-                    // TODO - move to deferred once a more recent version of jQuery is available?  The loading triggered at the bottom
-                    // is choppy.  It'd be nice to trigger a non-blocking load after scrolling down some portion of the results.
-                    async: false,
                     add: true,
                     picker: this.picker,
                     success: _.bind(function(collection, response, options) {
-                        if (_.size(response.Data) < collection.pageSize) {
+                        if (_.size(response.Data) < this.config.pageSize) {
                             collection.hasMore = false;
                             this.$scrollLoader.evScrollLoader('hideLoader');
                         } else {
                             collection.hasMore = true;
                             collection.pageIndex += 1;
                         }
+                        this.loadLock = false;
                     }, this),
                     error: _.bind(function(collection, xhr, options) {
                         this.ajaxError(xhr, _.bind(function() {
                             this.loadMore();
                         }, this));
+                        this.loadLock = false;
                     }, this)
                 });
             }
@@ -88,7 +87,7 @@ define(function(require) {
             this.$el.html(this.resultsTemplate({
                 totalResults: this.collection.totalResults
             }));
-            var $contentList = this.$(".content-list");
+            var $contentList = this.$('.content-list');
             if (!this.collection.isEmpty()) {
                 this.collection.each(function(item, index) {
                     var $item = $(this.getItemHtml(item, index));

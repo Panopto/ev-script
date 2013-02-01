@@ -313,41 +313,41 @@ div.ev-results .content-list {
     width: 100%;
 }
 
-div.ev-results table.content-list .even {
+div.ev-results .content-list .even {
     background-color: #F3F4EE;
 }
 
-div.ev-results table.content-list tr td {
+div.ev-results .content-list tr td {
   border: none;
   padding-bottom: 1em;
   color: #000000;
   padding: 1em 1.6em;
 }
 
-div.ev-video-picker div.ev-results table.content-list tr td {
+div.ev-video-picker div.ev-results .content-list tr td {
   vertical-align: top;
 }
 
-div.ev-results table.content-list table.content-item {
+div.ev-results .content-list .content-item {
   border: none;
   width: 100%;
 }
 
-div.ev-results table.content-list table.content-item td {
+div.ev-results .content-list .content-item td {
   border: none;
   padding: 3px 0;
 }
 
-div.ev-results table.content-list table.content-item tr.title td {
+div.ev-results .content-list .content-item tr.title td {
   border-bottom: 1px solid #999999;
   font-weight: bold;
 }
 
-div.ev-results table.content-list table.content-item .desc a {
+div.ev-results .content-list .content-item .desc a {
   margin-left: 5px;
 }
 
-div.ev-results table.content-list table.content-item .label {
+div.ev-results .content-list .content-item .label {
   color: #606060;
   font-weight: bold;
   width: 20%;

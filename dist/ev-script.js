@@ -1221,57 +1221,63 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base','
 
 });
 
-/*! Ensemble Video Scroll Loader - v0.1.0 - 2013-01-16
-* https://github.com/jmpease/ev-scroll-loader
-* Copyright (c) 2013 Symphony Video; Licensed MIT, GPL */
-
+/**
+ * ev-scroll-loader 0.1.0 2013-01-31
+ * Ensemble Video jQuery Scroll Loader Plugin
+ * https://github.com/jmpease/ev-scroll-loader
+ * Copyright (c) 2013 Symphony Video, Inc.
+ * Licensed MIT, GPL-2.0
+ */
+/*global jQuery*/
 (function($) {
 
-  var defaults = {
-    callback: function() {}
-  };
+    
 
-  var methods = {
-    init: function(options) {
-      var settings = $.extend({}, defaults, options);
-      return this.each(function() {
-        var $this = $(this);
-        $this.addClass('scroll-content');
-        var $wrap = $this.wrap('<div class=\"scrollWrap\"/>').closest('.scrollWrap');
-        $wrap.append('<div class="loader"></div>');
-        var scrollHeight = this.scrollHeight;
-        var setHeight = settings.height || scrollHeight;
-        var wrapHeight = Math.min(setHeight, scrollHeight) - 10;
-        $wrap.css({
-          'position': 'relative',
-          'height': wrapHeight + 'px',
-          'overflow-y': 'scroll'
-        }).scroll(function() {
-          if ($wrap.scrollTop() === $wrap[0].scrollHeight - wrapHeight) {
-            settings.callback.apply($this[0]);
-          }
-        });
-      });
-    },
-    showLoader: function() {
-      var $wrap = $(this).closest('.scrollWrap');
-      $('.loader', $wrap).show();
-      return this;
-    },
-    hideLoader: function() {
-      var $wrap = $(this).closest('.scrollWrap');
-      $('.loader', $wrap).hide();
-      return this;
-    }
-  };
+    var defaults = {
+        callback: function() {}
+    };
 
-  $.fn.evScrollLoader = function(method) {
-    if (methods[method]) {
-      return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-    } else if (typeof method === 'object' || !method) {
-      return methods.init.apply(this, arguments);
-    }
-  };
+    var methods = {
+        init: function(options) {
+            var settings = $.extend({}, defaults, options);
+            return this.each(function() {
+                var $this = $(this);
+                $this.addClass('scroll-content');
+                var $wrap = $this.wrap('<div class=\"scrollWrap\"/>').closest('.scrollWrap');
+                $wrap.append('<div class="loader"></div>');
+                var scrollHeight = this.scrollHeight;
+                var setHeight = settings.height || scrollHeight;
+                var wrapHeight = Math.min(setHeight, scrollHeight) - 10;
+                $wrap.css({
+                    'position': 'relative',
+                    'height': wrapHeight + 'px',
+                    'overflow-y': 'scroll'
+                }).scroll(function() {
+                    if ($wrap.scrollTop() === $wrap[0].scrollHeight - wrapHeight) {
+                        settings.callback.apply($this[0]);
+                    }
+                });
+            });
+        },
+        showLoader: function() {
+            var $wrap = $(this).closest('.scrollWrap');
+            $('.loader', $wrap).show();
+            return this;
+        },
+        hideLoader: function() {
+            var $wrap = $(this).closest('.scrollWrap');
+            $('.loader', $wrap).hide();
+            return this;
+        }
+    };
+
+    $.fn.evScrollLoader = function(method) {
+        if (methods[method]) {
+            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+        } else if (typeof method === 'object' || !method) {
+            return methods.init.apply(this, arguments);
+        }
+    };
 
 }(jQuery));
 
@@ -1303,6 +1309,7 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
             _.bindAll(this, 'render', 'loadMore', 'addHandler', 'previewItem');
             this.picker = options.picker;
             this.appId = options.appId;
+            this.loadLock = false;
         },
         events: {
             'click a.action-preview': 'previewItem'
@@ -1334,28 +1341,26 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
             e.preventDefault();
         },
         loadMore: function() {
-            if (this.collection.hasMore) {
+            if (this.collection.hasMore && !this.loadLock) {
+                this.loadLock = true;
                 this.collection.fetch({
-                    // This needs to be synchronous so it blocks additional scrolling during load.
-                    // FIXME - add a loading indicator?
-                    // TODO - move to deferred once a more recent version of jQuery is available?  The loading triggered at the bottom
-                    // is choppy.  It'd be nice to trigger a non-blocking load after scrolling down some portion of the results.
-                    async: false,
                     add: true,
                     picker: this.picker,
                     success: _.bind(function(collection, response, options) {
-                        if (_.size(response.Data) < collection.pageSize) {
+                        if (_.size(response.Data) < this.config.pageSize) {
                             collection.hasMore = false;
                             this.$scrollLoader.evScrollLoader('hideLoader');
                         } else {
                             collection.hasMore = true;
                             collection.pageIndex += 1;
                         }
+                        this.loadLock = false;
                     }, this),
                     error: _.bind(function(collection, xhr, options) {
                         this.ajaxError(xhr, _.bind(function() {
                             this.loadMore();
                         }, this));
+                        this.loadLock = false;
                     }, this)
                 });
             }
@@ -1371,7 +1376,7 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
             this.$el.html(this.resultsTemplate({
                 totalResults: this.collection.totalResults
             }));
-            var $contentList = this.$(".content-list");
+            var $contentList = this.$('.content-list');
             if (!this.collection.isEmpty()) {
                 this.collection.each(function(item, index) {
                     var $item = $(this.getItemHtml(item, index));
