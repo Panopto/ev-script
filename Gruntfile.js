@@ -2,6 +2,11 @@
 
 module.exports = function(grunt) {
 
+    /*
+     * Define grunt-requirejs config here since it doesn't seem to support task-level
+     * configs w/ target-level overrides.  Using underscore to override dev options
+     * for prod and pass these below in the requirejs section of initConfig.
+     */
     var _ = require('lodash'),
         rjs_dev_opts = {
             almond: true,
@@ -100,8 +105,9 @@ module.exports = function(grunt) {
      * via AJAX due to browser restrictions (same origin policy).  So I have a callback
      * that rewrites the url to point to a local "proxy" endpoint passing the original
      * request url as a parameter.  Leveraging cookies from the auth form along w/
-     * the url parameter the proxy handles the API request (and strips basic auth
-     * headers in the event of auth failure so as not to prompt for basic auth).
+     * the url parameter the proxy handles the API request (and strips any basic auth
+     * header from the response in the event of auth failure so as not to prompt
+     * for basic auth).
      */
 
     // FIXME - move to external file
