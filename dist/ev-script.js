@@ -1,5 +1,5 @@
 /**
- * ev-script 0.1.0 2013-01-31
+ * ev-script 0.1.0 2013-02-01
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -415,7 +415,6 @@ var requirejs, require, define;
 
 define("almond", function(){});
 
-/*global define*/
 define('ev-script/models/video-settings',['backbone'], function(Backbone) {
 
   
@@ -433,7 +432,6 @@ define('ev-script/models/video-settings',['backbone'], function(Backbone) {
   });
 });
 
-/*global define*/
 define('ev-script/models/playlist-settings',['backbone'], function(Backbone) {
 
     
@@ -445,7 +443,6 @@ define('ev-script/models/playlist-settings',['backbone'], function(Backbone) {
     });
 });
 
-/*global define*/
 define('ev-script/util/config',['require'],function(require) {
 
     
@@ -463,7 +460,6 @@ define('ev-script/util/config',['require'],function(require) {
 
 });
 
-/*global define*/
 define('ev-script/util/events',['require','underscore','backbone'],function(require) {
 
     
@@ -491,7 +487,6 @@ define('ev-script/util/events',['require','underscore','backbone'],function(requ
 
 });
 
-/*global define*/
 define('ev-script/util/auth',['require','jquery','underscore','ev-script/util/events'],function(require) {
 
     
@@ -524,7 +519,6 @@ define('ev-script/util/auth',['require','jquery','underscore','ev-script/util/ev
 
 });
 
-/*global define*/
 define('ev-script/util/cache',['require','jquery','underscore','backbone'],function(require) {
 
     
@@ -905,7 +899,6 @@ define('text',['module'], function (module) {
 
 define('text!ev-script/templates/auth.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text"type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text"type="password"/>\n        </div>\n        <div class="form-actions">\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
-/*global define*/
 define('ev-script/views/auth',['require','exports','module','jquery','underscore','backbone','ev-script/util/config','ev-script/util/events','ev-script/util/auth','jquery.cookie','jquery-ui','text!ev-script/templates/auth.html'],function(require, template) {
 
     
@@ -962,7 +955,6 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
 
 });
 
-/*global define*/
 define('ev-script/views/base',['require','jquery','underscore','backbone','ev-script/util/config','ev-script/util/auth','ev-script/util/events','ev-script/util/cache','ev-script/views/auth'],function(require) {
 
     
@@ -1051,7 +1043,6 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
 
 define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="Hide Picker">Hide</a>\n<% if (hasAuth) { %>\n    <a class="action-logout" href="#" title="Logout">Logout</a>\n<% } %>\n';});
 
-/*global define*/
 define('ev-script/views/hider',['require','underscore','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
 
     
@@ -1094,7 +1085,6 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
 
 });
 
-/*global define*/
 define('ev-script/views/picker',['require','jquery','underscore','ev-script/views/base','ev-script/views/hider'],function(require) {
 
     
@@ -1157,7 +1147,6 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
 
 define('text!ev-script/templates/video-search.html',[],function () { return '<form>\n    <label for="<%= id %>">Search Ensemble:</label>\n    <input id="<%= id %>" type="text" class="form-text search" value="<%- searchVal %>" />\n    <select class="form-select source">\n      <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>>Media Library</option>\n      <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>>Shared Library</option>\n    </select>\n    <input type="submit" value="Go" class="form-submit" />\n    <div class="loader"></div>\n    <div class="ev-poweredby"><a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a></div>\n</form>\n';});
 
-/*global define*/
 define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/video-search.html'],function(require) {
 
     
@@ -1287,7 +1276,6 @@ define('text!ev-script/templates/results.html',[],function () { return '<div cla
 
 define('text!ev-script/templates/no-results.html',[],function () { return '<tr class="odd"><td colspan="2">No results available.</td></tr>\n';});
 
-/*global define*/
 define('ev-script/views/results',['require','jquery','underscore','ev-script/views/base','ev-scroll-loader','text!ev-script/templates/results.html','text!ev-script/templates/no-results.html'],function(require) {
 
     
@@ -1401,7 +1389,6 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
 
 });
 
-/*global define*/
 define('ev-script/views/preview',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','jquery-ui'],function(require) {
 
     
@@ -1449,7 +1436,6 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
 
 define('text!ev-script/templates/video-embed.html',[],function () { return '<iframe src="<%= src %>"\n        frameborder="0"\n        style="width: <%= width %>px;height:<%= (parseInt(height, 10) + 56) %>px;"\n        allowfullscreen>\n</iframe>\n';});
 
-/*global define*/
 define('ev-script/views/video-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/video-embed.html'],function(require) {
 
     
@@ -1475,7 +1461,6 @@ define('ev-script/views/video-embed',['require','underscore','ev-script/views/ba
 
 });
 
-/*global define*/
 define('ev-script/models/video-encoding',['require','backbone','ev-script/util/config'],function(require) {
 
     
@@ -1516,7 +1501,6 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/util/c
 
 });
 
-/*global define*/
 define('ev-script/views/video-preview',['require','underscore','ev-script/views/preview','ev-script/views/video-embed','ev-script/models/video-encoding'],function(require) {
 
     
@@ -1561,7 +1545,6 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
 
 define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <img src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/, \'width=150\') %>" alt="<%- item.get(\'Title\') %> thumbnail image"/>\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%- item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><span>Choose</span></a>\n            <a class="action-preview" href="#" title="Preview: <%- item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><span>Preview:  item.get(\'Title\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="Preview: <%-item.get(\'Title\') %>" href="#" rel="<%= item.get(\'ID\') %>"><%- item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="desc"><td class="label">Description</td><td class="value"><%- item.get(\'Description\') %></td></tr>\n                <tr><td class="label">Date Added</td><td class="value"><%- new Date(item.get(\'AddedOn\')).toLocaleString() %></td></tr>\n                <tr><td class="label">Keywords</td><td class="value"><%- item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label">Library</td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
 
-/*global define*/
 define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','text!ev-script/templates/video-result.html'],function(require) {
 
     
@@ -1607,7 +1590,6 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
 
 });
 
-/*global define*/
 define('ev-script/collections/base',['require','underscore','backbone','ev-script/util/config'],function(require) {
 
     
@@ -1631,7 +1613,6 @@ define('ev-script/collections/base',['require','underscore','backbone','ev-scrip
 
 });
 
-/*global define*/
 define('ev-script/collections/videos',['require','ev-script/collections/base'],function(require) {
 
     
@@ -1660,7 +1641,6 @@ define('ev-script/collections/videos',['require','ev-script/collections/base'],f
 
 });
 
-/*global define*/
 define('ev-script/views/video-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/search','ev-script/views/video-results','ev-script/collections/videos'],function(require) {
 
     
@@ -1741,7 +1721,6 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
 
 });
 
-/*global define*/
 define('ev-script/views/settings',['require','underscore','ev-script/views/base','jquery-ui'],function(require) {
 
     
@@ -1784,7 +1763,6 @@ define('text!ev-script/templates/video-settings.html',[],function () { return '<
 
 define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(sizes, function(size) { %>\n    <option value="<%= size %>" <% if (size === target) { print(\'selected="selected"\'); } %>><%= size %></option>\n<% }); %>\n';});
 
-/*global define*/
 define('ev-script/views/video-settings',['require','underscore','ev-script/views/settings','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/sizes.html'],function(require) {
 
     
@@ -1873,7 +1851,6 @@ define('ev-script/views/video-settings',['require','underscore','ev-script/views
 
 define('text!ev-script/templates/options.html',[],function () { return '<% collection.each(function(item) { %>\n    <option value="<%= item.id %>" <% if (selectedId === item.id) { print(\'selected="selected"\'); } %>><%- item.get(\'Name\') %></option>\n<% }); %>\n';});
 
-/*global define*/
 define('ev-script/views/organization-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
 
     
@@ -1901,7 +1878,6 @@ define('ev-script/views/organization-select',['require','underscore','ev-script/
 
 });
 
-/*global define*/
 define('ev-script/collections/organizations',['require','ev-script/collections/base'],function(require) {
 
     
@@ -1924,7 +1900,6 @@ define('ev-script/collections/organizations',['require','ev-script/collections/b
 
 });
 
-/*global define*/
 define('ev-script/views/library-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
 
     
@@ -1952,7 +1927,6 @@ define('ev-script/views/library-select',['require','underscore','ev-script/views
 
 });
 
-/*global define*/
 define('ev-script/collections/libraries',['require','ev-script/collections/base'],function(require) {
 
     
@@ -1980,7 +1954,6 @@ define('ev-script/collections/libraries',['require','ev-script/collections/base'
 
 define('text!ev-script/templates/playlist-select.html',[],function () { return '<form>\n    <label for="<%= orgSelectId %>">Organization:</label>\n    <select id="<%= orgSelectId %>" class="form-select organizations"></select>\n    <label for="<%= libSelectId %>">Library:</label>\n    <select id="<%= libSelectId %>" class="form-select libraries"></select>\n    <input type="submit" value="Go" class="form-submit" />\n    <div class="loader"></div>\n    <div class="ev-poweredby">\n        <a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a>\n    </div>\n</form>\n';});
 
-/*global define*/
 define('ev-script/views/playlist-select',['require','jquery','underscore','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','text!ev-script/templates/playlist-select.html'],function(require) {
 
     
@@ -2106,7 +2079,6 @@ define('ev-script/views/playlist-select',['require','jquery','underscore','ev-sc
 
 define('text!ev-script/templates/playlist-embed.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%= modelId %>"\n        frameborder="0"\n        style="width:800px;height:850px;"\n        allowfullscreen>\n</iframe>\n';});
 
-/*global define*/
 define('ev-script/views/playlist-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/playlist-embed.html'],function(require) {
 
     
@@ -2127,7 +2099,6 @@ define('ev-script/views/playlist-embed',['require','underscore','ev-script/views
 
 });
 
-/*global define*/
 define('ev-script/views/playlist-preview',['require','ev-script/views/preview','ev-script/views/playlist-embed'],function(require) {
 
     
@@ -2146,7 +2117,6 @@ define('ev-script/views/playlist-preview',['require','ev-script/views/preview','
 
 define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <span>Choose</span>\n            </a>\n            <a class="action-preview" href="#" title="Preview: <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <span>Preview: <%- item.get(\'Name\') %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
 
-/*global define*/
 define('ev-script/views/playlist-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/playlist-result.html'],function(require) {
 
     
@@ -2168,7 +2138,6 @@ define('ev-script/views/playlist-results',['require','underscore','jquery','ev-s
 
 });
 
-/*global define*/
 define('ev-script/collections/playlists',['require','ev-script/collections/base'],function(require) {
 
     
@@ -2195,7 +2164,6 @@ define('ev-script/collections/playlists',['require','ev-script/collections/base'
 
 });
 
-/*global define*/
 define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/playlist-select','ev-script/views/playlist-results','ev-script/collections/playlists'],function(require) {
 
     
@@ -2273,7 +2241,6 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
 
 define('text!ev-script/templates/playlist-settings.html',[],function () { return '<h3>TODO</h3>\n<p>\n    <%- json %>\n</p>\n';});
 
-/*global define*/
 define('ev-script/views/playlist-settings',['require','underscore','ev-script/views/settings','jquery-ui','text!ev-script/templates/playlist-settings.html'],function(require) {
 
     
@@ -2306,7 +2273,6 @@ define('ev-script/views/playlist-settings',['require','underscore','ev-script/vi
 
 define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="Video thumbnail" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%- name %></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Change <%= label %>"><span>Change <%= label %><span></a>\n        <a href="#" class="action-preview" title="Preview: <%- name %>"><span>Preview: <%- name %><span></a>\n        <!-- TODO - temporarily disabled playlist settings until it is implemented -->\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-options" title="<%= label %> Embed Options"><span><%= label %> Embed Options<span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="Remove <%= label %>"><span>Remove <%= label %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em>Add <%= type %>.</em></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Choose <%= label %>"><span>Choose <%= label %><span></a>\n    </div>\n<% } %>\n';});
 
-/*global define*/
 define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/field.html'],function(require) {
 
     
@@ -2486,7 +2452,6 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
 
 });
 
-/*global define*/
 define('ev-script',['require','backbone','underscore','jquery','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/util/config','ev-script/util/events','ev-script/util/cache'],function(require) {
 
     

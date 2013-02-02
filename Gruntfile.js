@@ -71,7 +71,7 @@ module.exports = function(grunt) {
             },
             lib_test: {
                 files: ['<%= jshint.lib_test.src %>', 'src/**/*.html', 'wrap/*'],
-                tasks: ['jshint:lib_test', /*'qunit',*/ 'requirejs:development']
+                tasks: ['jshint:lib_test', 'qunit', 'requirejs:development']
             }
         },
         requirejs: {
@@ -110,7 +110,7 @@ module.exports = function(grunt) {
      * for basic auth).
      */
 
-    // FIXME - move to external file
+    // TODO - move to external file?
     grunt.registerTask('server', 'Demo server w/ Ensemble Video "proxying".', function() {
         var port = 8000,
             base = path.resolve('.');
@@ -154,9 +154,9 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-requirejs');
 
     // Default task.
-    grunt.registerTask('default', ['clean', 'jshint', 'requirejs:development', 'requirejs:production'/*, 'qunit'*/]);
-    grunt.registerTask('dev', ['clean', 'jshint', /*'qunit',*/ 'requirejs:development']);
-    grunt.registerTask('prod', ['clean', 'jshint', /*'qunit',*/ 'requirejs:production']);
+    grunt.registerTask('default', ['clean', 'jshint', 'qunit', 'requirejs:development', 'requirejs:production']);
+    grunt.registerTask('dev', ['clean', 'jshint', 'qunit', 'requirejs:development']);
+    grunt.registerTask('prod', ['clean', 'jshint', 'qunit', 'requirejs:production']);
     grunt.registerTask('demo', ['server', 'watch']);
 
 };
