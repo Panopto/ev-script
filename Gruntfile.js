@@ -62,7 +62,13 @@ module.exports = function(grunt) {
             }
         },
         qunit: {
-            files: ['test/**/*.html']
+            all: {
+                options: {
+                    urls: ['https://localhost:8000/test'],
+                    '--ignore-ssl-errors': true,
+                    timeout: 30000
+                }
+            }
         },
         watch: {
             gruntfile: {
@@ -127,17 +133,22 @@ module.exports = function(grunt) {
                     apiUrl = parsed.query.request,
                     username = req.cookies[authId + '-user'],
                     password = req.cookies[authId + '-pass'];
-                if (username && password) {
-                    apiUrl = apiUrl.replace(/http(s)?:\/\//, 'http$1://' + username + ':' + password + '@');
-                }
-                request.get({ url: apiUrl }, function(error, response, body) {
-                    if (!error) {
-                        delete response.headers['www-authenticate'];
-                        res.headers = response.headers;
-                        res.statusCode = response.statusCode;
-                        res.end(body);
+                if (apiUrl) {
+                    if (username && password) {
+                        apiUrl = apiUrl.replace(/http(s)?:\/\//, 'http$1://' + username + ':' + password + '@');
                     }
-                });
+                    request.get({ url: apiUrl }, function(error, response, body) {
+                        if (!error) {
+                            delete response.headers['www-authenticate'];
+                            res.headers = response.headers;
+                            res.statusCode = response.statusCode;
+                            res.end(body);
+                        }
+                    });
+                } else {
+                    res.statusCode = 400;
+                    res.end("Missing request parameter.");
+                }
             }
         });
         https.createServer({
@@ -154,9 +165,10 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-requirejs');
 
     // Default task.
-    grunt.registerTask('default', ['clean', 'jshint', 'qunit', 'requirejs:development', 'requirejs:production']);
-    grunt.registerTask('dev', ['clean', 'jshint', 'qunit', 'requirejs:development']);
-    grunt.registerTask('prod', ['clean', 'jshint', 'qunit', 'requirejs:production']);
+    grunt.registerTask('test', ['server', 'qunit']);
+    grunt.registerTask('default', ['clean', 'jshint', 'test', 'requirejs:development', 'requirejs:production']);
+    grunt.registerTask('dev', ['clean', 'jshint', 'test', 'requirejs:development']);
+    grunt.registerTask('prod', ['clean', 'jshint', 'test', 'requirejs:production']);
     grunt.registerTask('demo', ['server', 'watch']);
 
 };

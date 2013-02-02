@@ -8,6 +8,7 @@
         baseUrl: '../lib/bower',
         paths: {
             'ev-script': '../../src/ev-script',
+            'ev-config': '../../ev-config',
             'tests': '../../test/tests',
             'jquery':  'jquery/jquery',
             'jquery-ui': 'jquery-ui/jquery-ui',

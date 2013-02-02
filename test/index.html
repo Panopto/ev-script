@@ -6,6 +6,11 @@
         <link rel="stylesheet" href="../lib/bower/qunit/qunit.css" media="screen">
         <script src="../lib/bower/qunit/qunit.js"></script>
         <script src="../lib/bower/requirejs/require.js"></script>
+        <!--
+          Phantomjs bridge is injected before main test module is loaded when loading
+          it via data-main above.  Loading it inline as below seems to work...
+          I believe this is because injection occurs on DOMContentLoaded.
+        -->
         <script src="main.js"></script>
     </head>
     <body>

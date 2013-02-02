@@ -6,9 +6,9 @@
     var evSettings = {
         ensembleUrl: 'https://cloud.ensemblevideo.com/ensemble',
         authId: 'cloud',
-        authPath: '/demo',
+        authPath: '/',
         pageSize: 10,
-        proxyPath: '/demo/ensemble'
+        proxyPath: '/ensemble'
     };
 
     if (typeof define === 'function' && define.amd) {
