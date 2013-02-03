@@ -7,16 +7,14 @@ define(function(require) {
         Backbone = require('backbone');
 
     var Cache = function() {
-        var cache = [];
-        return {
-            cache: cache,
-            get: function(index) {
-                return cache[index];
-            },
-            set: function(index, value) {
-                return cache[index] = value;
-            }
+        this.cache = [];
+        this.get = function(index) {
+            return this.cache[index];
         };
+        this.set = function(index, value) {
+            return this.cache[index] = value;
+        };
+        return this;
     };
 
     var caches = new Cache();

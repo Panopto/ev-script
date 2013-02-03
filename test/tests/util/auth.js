@@ -11,6 +11,14 @@ define(function(require) {
 
     q.module('Testing ev-script/util/auth');
 
+    q.test('check api', 5, function() {
+        q.ok(_.isFunction(auth.getUser), 'expected getUser');
+        q.ok(_.isFunction(auth.hasAuth), 'expected hasAuth');
+        q.ok(_.isFunction(auth.setAuth), 'expected setAuth');
+        q.ok(_.isFunction(auth.removeAuth), 'expected removeAuth');
+        q.equal(_.size(auth), 4, 'is something exposed but not tested?');
+    });
+
     q.test('set/remove test', 4, function() {
         var authId = Math.random(),
             username = 'foo',
@@ -21,6 +29,36 @@ define(function(require) {
         auth.removeAuth(authId);
         q.ok(!auth.hasAuth(authId));
         q.strictEqual(null, auth.getUser(authId));
+    });
+
+    q.asyncTest('authSet event test', 2, function() {
+        var authId = Math.random(),
+            username = 'foo',
+            password = 'bar';
+        globalEvents.on('authSet', function(id) {
+            if (id === authId) {
+                q.ok(true);
+                q.start();
+            }
+        });
+        auth.setAuth(authId, '', '', username, password);
+        q.ok(auth.hasAuth(authId));
+        auth.removeAuth(authId);
+    });
+
+    q.asyncTest('authRemoved event test', 2, function() {
+        var authId = Math.random(),
+            username = 'foo',
+            password = 'bar';
+        globalEvents.on('authRemoved', function(id) {
+            if (id === authId) {
+                q.ok(true);
+                q.start();
+            }
+        });
+        auth.setAuth(authId, '', '', username, password);
+        q.ok(auth.hasAuth(authId));
+        auth.removeAuth(authId);
     });
 
     q.test('domain test', 2, function() {

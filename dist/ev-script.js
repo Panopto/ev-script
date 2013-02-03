@@ -1,5 +1,5 @@
 /**
- * ev-script 0.1.0 2013-02-02
+ * ev-script 0.1.0 2013-02-03
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -511,16 +511,14 @@ define('ev-script/util/cache',['require','jquery','underscore','backbone'],funct
         Backbone = require('backbone');
 
     var Cache = function() {
-        var cache = [];
-        return {
-            cache: cache,
-            get: function(index) {
-                return cache[index];
-            },
-            set: function(index, value) {
-                return cache[index] = value;
-            }
+        this.cache = [];
+        this.get = function(index) {
+            return this.cache[index];
         };
+        this.set = function(index, value) {
+            return this.cache[index] = value;
+        };
+        return this;
     };
 
     var caches = new Cache();
