@@ -41,7 +41,8 @@
         'backbone',
         // Test modules
         'tests/util/auth',
-        'tests/util/cache'
+        'tests/util/cache',
+        'tests/util/events'
     ];
 
     require(testModules, function() {
