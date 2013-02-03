@@ -6,7 +6,6 @@ define(function(require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         root = this,
-        configUtil = require('ev-script/util/config'),
         authUtil = require('ev-script/util/auth'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache'),
@@ -23,7 +22,7 @@ define(function(require) {
     return Backbone.View.extend({
         initialize: function(options) {
             this.appId = options.appId;
-            this.config = configUtil.getConfig(this.appId);
+            this.config = cacheUtil.getAppConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
             this.globalEvents = eventsUtil.getEvents('global');
         },

@@ -3,13 +3,13 @@ define(function(require) {
     'use strict';
 
     var Backbone = require('backbone'),
-        configUtil = require('ev-script/util/config');
+        cacheUtil = require('ev-script/util/cache');
 
     return Backbone.Model.extend({
         idAttribute: 'videoID',
         initialize: function(attributes, options) {
             this.appId = options.appId;
-            this.config = configUtil.getConfig(this.appId);
+            this.config = cacheUtil.getAppConfig(this.appId);
         },
         url: function() {
             return this.config.ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');

@@ -4,12 +4,12 @@ define(function(require) {
 
     var _ = require('underscore'),
         Backbone = require('backbone'),
-        configUtil = require('ev-script/util/config');
+        cacheUtil = require('ev-script/util/cache');
 
     return Backbone.Collection.extend({
         initialize: function(models, options) {
             this.appId = options.appId;
-            this.config = configUtil.getConfig(this.appId);
+            this.config = cacheUtil.getAppConfig(this.appId);
         },
         model: Backbone.Model.extend({
             idAttribute: 'ID'

@@ -5,7 +5,7 @@ define(function(require, template) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        configUtil = require('ev-script/util/config'),
+        cacheUtil = require('ev-script/util/cache'),
         eventsUtil = require('ev-script/util/events'),
         authUtil = require('ev-script/util/auth');
 
@@ -16,7 +16,7 @@ define(function(require, template) {
         template: _.template(require('text!ev-script/templates/auth.html')),
         initialize: function(options) {
             this.appId = options.appId;
-            this.config = configUtil.getConfig(this.appId);
+            this.config = cacheUtil.getAppConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
             this.submitCallback = options.submitCallback || function() {};
             var html = this.template();

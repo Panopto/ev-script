@@ -40,7 +40,8 @@
         'underscore',
         'backbone',
         // Test modules
-        'tests/util/auth'
+        'tests/util/auth',
+        'tests/util/cache'
     ];
 
     require(testModules, function() {

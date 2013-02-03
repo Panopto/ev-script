@@ -443,23 +443,6 @@ define('ev-script/models/playlist-settings',['backbone'], function(Backbone) {
     });
 });
 
-define('ev-script/util/config',['require'],function(require) {
-
-    
-
-    var configs = [];
-
-    return {
-        setConfig: function(appId, config) {
-            configs[appId] = config;
-        },
-        getConfig: function(appId) {
-            return configs[appId];
-        }
-    };
-
-});
-
 define('ev-script/util/events',['require','underscore','backbone'],function(require) {
 
     
@@ -540,34 +523,44 @@ define('ev-script/util/cache',['require','jquery','underscore','backbone'],funct
         };
     };
 
-    var appCache = new Cache();
+    var caches = new Cache();
 
-    var initAppCache = function(ensembleUrl) {
-        return appCache.set(ensembleUrl, new Cache());
+    // Convenience method to initialize a cache for app-specific configuration
+    var setAppConfig = function(appId, config) {
+        return caches.set(appId, new Cache()).set('config', config);
     };
 
-    var initUserCache = function(ensembleUrl, user) {
+    var getAppConfig = function(appId) {
+        return caches.get(appId).get('config');
+    };
+
+    var initUserCache = function() {
         var userCache = new Cache();
         userCache.set('videos', new Cache());
         userCache.set('playlists', new Cache());
         // There is only one value store for a users orgs
         userCache.set('orgs', null);
         userCache.set('libs', new Cache());
-        return appCache.get(ensembleUrl).set(user, userCache);
+        return userCache;
     };
 
     var getUserCache = function(ensembleUrl, user) {
-        var userCache = appCache.get(ensembleUrl).get(user);
+        var appCache = caches.get(ensembleUrl);
+        if (!appCache) {
+            appCache = caches.set(ensembleUrl, new Cache());
+        }
+        var userCache = appCache.get(user);
         if (!userCache) {
-            userCache = initUserCache(ensembleUrl, user);
+            userCache = appCache.set(user, initUserCache());
         }
         return userCache;
     };
 
     return {
         Cache: Cache,
-        initAppCache: initAppCache,
-        initUserCache: initUserCache,
+        caches: caches,
+        setAppConfig: setAppConfig,
+        getAppConfig: getAppConfig,
         getUserCache: getUserCache
     };
 
@@ -899,14 +892,14 @@ define('text',['module'], function (module) {
 
 define('text!ev-script/templates/auth.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text"type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text"type="password"/>\n        </div>\n        <div class="form-actions">\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
-define('ev-script/views/auth',['require','exports','module','jquery','underscore','backbone','ev-script/util/config','ev-script/util/events','ev-script/util/auth','jquery.cookie','jquery-ui','text!ev-script/templates/auth.html'],function(require, template) {
+define('ev-script/views/auth',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','ev-script/util/auth','jquery.cookie','jquery-ui','text!ev-script/templates/auth.html'],function(require, template) {
 
     
 
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        configUtil = require('ev-script/util/config'),
+        cacheUtil = require('ev-script/util/cache'),
         eventsUtil = require('ev-script/util/events'),
         authUtil = require('ev-script/util/auth');
 
@@ -917,7 +910,7 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
         template: _.template(require('text!ev-script/templates/auth.html')),
         initialize: function(options) {
             this.appId = options.appId;
-            this.config = configUtil.getConfig(this.appId);
+            this.config = cacheUtil.getAppConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
             this.submitCallback = options.submitCallback || function() {};
             var html = this.template();
@@ -955,7 +948,7 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
 
 });
 
-define('ev-script/views/base',['require','jquery','underscore','backbone','ev-script/util/config','ev-script/util/auth','ev-script/util/events','ev-script/util/cache','ev-script/views/auth'],function(require) {
+define('ev-script/views/base',['require','jquery','underscore','backbone','ev-script/util/auth','ev-script/util/events','ev-script/util/cache','ev-script/views/auth'],function(require) {
 
     
 
@@ -963,7 +956,6 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
         _ = require('underscore'),
         Backbone = require('backbone'),
         root = this,
-        configUtil = require('ev-script/util/config'),
         authUtil = require('ev-script/util/auth'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache'),
@@ -980,7 +972,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
     return Backbone.View.extend({
         initialize: function(options) {
             this.appId = options.appId;
-            this.config = configUtil.getConfig(this.appId);
+            this.config = cacheUtil.getAppConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
             this.globalEvents = eventsUtil.getEvents('global');
         },
@@ -1461,18 +1453,18 @@ define('ev-script/views/video-embed',['require','underscore','ev-script/views/ba
 
 });
 
-define('ev-script/models/video-encoding',['require','backbone','ev-script/util/config'],function(require) {
+define('ev-script/models/video-encoding',['require','backbone','ev-script/util/cache'],function(require) {
 
     
 
     var Backbone = require('backbone'),
-        configUtil = require('ev-script/util/config');
+        cacheUtil = require('ev-script/util/cache');
 
     return Backbone.Model.extend({
         idAttribute: 'videoID',
         initialize: function(attributes, options) {
             this.appId = options.appId;
-            this.config = configUtil.getConfig(this.appId);
+            this.config = cacheUtil.getAppConfig(this.appId);
         },
         url: function() {
             return this.config.ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');
@@ -1590,18 +1582,18 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
 
 });
 
-define('ev-script/collections/base',['require','underscore','backbone','ev-script/util/config'],function(require) {
+define('ev-script/collections/base',['require','underscore','backbone','ev-script/util/cache'],function(require) {
 
     
 
     var _ = require('underscore'),
         Backbone = require('backbone'),
-        configUtil = require('ev-script/util/config');
+        cacheUtil = require('ev-script/util/cache');
 
     return Backbone.Collection.extend({
         initialize: function(models, options) {
             this.appId = options.appId;
-            this.config = configUtil.getConfig(this.appId);
+            this.config = cacheUtil.getAppConfig(this.appId);
         },
         model: Backbone.Model.extend({
             idAttribute: 'ID'
@@ -2452,7 +2444,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
 
 });
 
-define('ev-script',['require','backbone','underscore','jquery','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/util/config','ev-script/util/events','ev-script/util/cache'],function(require) {
+define('ev-script',['require','backbone','underscore','jquery','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/util/events','ev-script/util/cache'],function(require) {
 
     
 
@@ -2464,7 +2456,6 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
         FieldView = require('ev-script/views/field'),
         VideoEmbedView = require('ev-script/views/video-embed'),
         PlaylistEmbedView = require('ev-script/views/playlist-embed'),
-        configUtil = require('ev-script/util/config'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
 
@@ -2475,7 +2466,15 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
 
         appOptions = appOptions || {};
 
-        configUtil.setConfig(appId, {
+        // Get or create a new cache to store objects specific to EV installation
+        // but common across 'app' instances (e.g. videos accessible by a given user)
+        var evCache = cacheUtil.caches.get(appOptions.ensembleUrl);
+        if (!evCache) {
+            evCache = cacheUtil.caches.set(appOptions.ensembleUrl, new cacheUtil.Cache());
+        }
+
+        // Add our configuration to the app cache
+        cacheUtil.setAppConfig(appId, {
             authId: appOptions.authId || 'ensemble',
             ensembleUrl: appOptions.ensembleUrl || '',
             authPath: appOptions.authPath || '',
@@ -2483,11 +2482,11 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
             urlCallback: appOptions.urlCallback || function(url) { return url; },
             pageSize: parseInt(appOptions.pageSize || 100, 10)
         });
+
         eventsUtil.initEvents(appId);
         this.appEvents = eventsUtil.getEvents(appId);
         this.globalEvents = eventsUtil.getEvents();
 
-        cacheUtil.initAppCache(appOptions.ensembleUrl);
 
         this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
             var $field = $(fieldSelector, fieldWrap);

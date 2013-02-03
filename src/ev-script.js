@@ -10,7 +10,6 @@ define(function(require) {
         FieldView = require('ev-script/views/field'),
         VideoEmbedView = require('ev-script/views/video-embed'),
         PlaylistEmbedView = require('ev-script/views/playlist-embed'),
-        configUtil = require('ev-script/util/config'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
 
@@ -21,7 +20,15 @@ define(function(require) {
 
         appOptions = appOptions || {};
 
-        configUtil.setConfig(appId, {
+        // Get or create a new cache to store objects specific to EV installation
+        // but common across 'app' instances (e.g. videos accessible by a given user)
+        var evCache = cacheUtil.caches.get(appOptions.ensembleUrl);
+        if (!evCache) {
+            evCache = cacheUtil.caches.set(appOptions.ensembleUrl, new cacheUtil.Cache());
+        }
+
+        // Add our configuration to the app cache
+        cacheUtil.setAppConfig(appId, {
             authId: appOptions.authId || 'ensemble',
             ensembleUrl: appOptions.ensembleUrl || '',
             authPath: appOptions.authPath || '',
@@ -29,11 +36,11 @@ define(function(require) {
             urlCallback: appOptions.urlCallback || function(url) { return url; },
             pageSize: parseInt(appOptions.pageSize || 100, 10)
         });
+
         eventsUtil.initEvents(appId);
         this.appEvents = eventsUtil.getEvents(appId);
         this.globalEvents = eventsUtil.getEvents();
 
-        cacheUtil.initAppCache(appOptions.ensembleUrl);
 
         this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
             var $field = $(fieldSelector, fieldWrap);
