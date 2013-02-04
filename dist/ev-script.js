@@ -1,5 +1,5 @@
 /**
- * ev-script 0.1.0 2013-02-03
+ * ev-script 0.1.0 2013-02-04
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -2525,7 +2525,7 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
     // Register in the values from the outer closure for common dependencies
     // as local almond modules
     define('jquery', function () {
-        return $;
+        return $ || jQuery;
     });
     define('underscore', function () {
         return _;
