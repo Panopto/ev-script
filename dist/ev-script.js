@@ -1,5 +1,5 @@
 /**
- * ev-script 0.1.0 2013-02-04
+ * ev-script 0.1.0 2013-02-06
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -17,7 +17,7 @@
 }(this, function ($, _, Backbone) {
 
 /**
- * almond 0.2.3 Copyright (c) 2011-2012, The Dojo Foundation All Rights Reserved.
+ * almond 0.2.4 Copyright (c) 2011-2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/almond for details
  */
@@ -375,9 +375,15 @@ var requirejs, require, define;
         if (forceSync) {
             main(undef, deps, callback, relName);
         } else {
+            //Using a non-zero value because of concern for what old browsers
+            //do, and latest browsers "upgrade" to 4 if lower value is used:
+            //http://www.whatwg.org/specs/web-apps/current-work/multipage/timers.html#dom-windowtimers-settimeout:
+            //If want a value immediately, use require('id') instead -- something
+            //that works in almond on the global level, but not guaranteed and
+            //unlikely to work in other AMD implementations.
             setTimeout(function () {
                 main(undef, deps, callback, relName);
-            }, 15);
+            }, 4);
         }
 
         return req;
@@ -565,7 +571,7 @@ define('ev-script/util/cache',['require','jquery','underscore','backbone'],funct
 });
 
 /**
- * @license RequireJS text 2.0.4 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ * @license RequireJS text 2.0.5 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/text for details
  */
@@ -589,7 +595,7 @@ define('text',['module'], function (module) {
         masterConfig = (module.config && module.config()) || {};
 
     text = {
-        version: '2.0.4',
+        version: '2.0.5',
 
         strip: function (content) {
             //Strips <?xml ...?> declarations so that external SVG and XML
@@ -817,9 +823,18 @@ define('text',['module'], function (module) {
         };
     } else if (masterConfig.env === 'xhr' || (!masterConfig.env &&
             text.createXhr())) {
-        text.get = function (url, callback, errback) {
-            var xhr = text.createXhr();
+        text.get = function (url, callback, errback, headers) {
+            var xhr = text.createXhr(), header;
             xhr.open('GET', url, true);
+
+            //Allow plugins direct access to xhr headers
+            if (headers) {
+                for (header in headers) {
+                    if (headers.hasOwnProperty(header)) {
+                        xhr.setRequestHeader(header.toLowerCase(), headers[header]);
+                    }
+                }
+            }
 
             //Allow overrides specified in config
             if (masterConfig.onXhr) {
