@@ -1631,7 +1631,6 @@ define('ev-script/collections/videos',['require','ev-script/collections/base'],f
             this.filterValue = options.filterValue || '';
             this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedContent' : '/api/Content';
             this.pageIndex = 1;
-            this.hasMore = true;
         },
         url: function() {
             var api_url = this.config.ensembleUrl + this.sourceUrl;
@@ -2153,7 +2152,6 @@ define('ev-script/collections/playlists',['require','ev-script/collections/base'
             BaseCollection.prototype.initialize.call(this, models, options);
             this.filterValue = options.filterValue || '';
             this.pageIndex = 1;
-            this.hasMore = true;
         },
         url: function() {
             var api_url = this.config.ensembleUrl + '/api/Playlists';

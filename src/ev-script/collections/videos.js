@@ -11,7 +11,6 @@ define(function(require) {
             this.filterValue = options.filterValue || '';
             this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedContent' : '/api/Content';
             this.pageIndex = 1;
-            this.hasMore = true;
         },
         url: function() {
             var api_url = this.config.ensembleUrl + this.sourceUrl;
