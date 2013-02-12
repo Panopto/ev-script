@@ -39,11 +39,10 @@ define(function(require) {
         loadVideos: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase());
             var sourceId = this.model.get('sourceId');
-            var sourceUrl = sourceId === 'content' ? '/api/Content' : '/api/SharedContent';
             var videos = this.getCachedVideos(this.getUser(), sourceId + searchVal);
             if (!videos) {
                 videos = new Videos({}, {
-                    sourceUrl: sourceUrl,
+                    sourceId: sourceId,
                     filterOn: '',
                     filterValue: searchVal,
                     appId: this.appId

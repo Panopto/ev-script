@@ -423,19 +423,19 @@ define("almond", function(){});
 
 define('ev-script/models/video-settings',['backbone'], function(Backbone) {
 
-  
+    
 
-  return Backbone.Model.extend({
-      defaults: {
-          type: 'video',
-          showtitle: false,
-          autoplay: false,
-          showcaptions: false,
-          hidecontrols: false,
-          search: '',
-          sourceId: 'content'
-      }
-  });
+    return Backbone.Model.extend({
+        defaults: {
+            type: 'video',
+            showtitle: false,
+            autoplay: false,
+            showcaptions: false,
+            hidecontrols: false,
+            search: '',
+            sourceId: 'content'
+        }
+    });
 });
 
 define('ev-script/models/playlist-settings',['backbone'], function(Backbone) {
@@ -1629,7 +1629,7 @@ define('ev-script/collections/videos',['require','ev-script/collections/base'],f
             BaseCollection.prototype.initialize.call(this, models, options);
             this.filterOn = options.filterOn || '';
             this.filterValue = options.filterValue || '';
-            this.sourceUrl = options.sourceUrl;
+            this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedContent' : '/api/Content';
             this.pageIndex = 1;
             this.hasMore = true;
         },
@@ -1687,11 +1687,10 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
         loadVideos: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase());
             var sourceId = this.model.get('sourceId');
-            var sourceUrl = sourceId === 'content' ? '/api/Content' : '/api/SharedContent';
             var videos = this.getCachedVideos(this.getUser(), sourceId + searchVal);
             if (!videos) {
                 videos = new Videos({}, {
-                    sourceUrl: sourceUrl,
+                    sourceId: sourceId,
                     filterOn: '',
                     filterValue: searchVal,
                     appId: this.appId

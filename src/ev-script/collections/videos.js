@@ -9,7 +9,7 @@ define(function(require) {
             BaseCollection.prototype.initialize.call(this, models, options);
             this.filterOn = options.filterOn || '';
             this.filterValue = options.filterValue || '';
-            this.sourceUrl = options.sourceUrl;
+            this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedContent' : '/api/Content';
             this.pageIndex = 1;
             this.hasMore = true;
         },
