@@ -7,8 +7,8 @@ define(function(require) {
     return BaseCollection.extend({
         initialize: function(models, options) {
             BaseCollection.prototype.initialize.call(this, models, options);
-            this.filterOn = options.filterOn;
-            this.filterValue = options.filterValue;
+            this.filterOn = options.filterOn || '';
+            this.filterValue = options.filterValue || '';
             this.sourceUrl = options.sourceUrl;
             this.pageIndex = 1;
             this.hasMore = true;
@@ -20,7 +20,7 @@ define(function(require) {
             var onParam = 'FilterOn=' + encodeURIComponent(this.filterOn);
             var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
             var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
-            return this.config.urlCallback(url);
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
         }
     });
 

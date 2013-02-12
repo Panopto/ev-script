@@ -3,12 +3,21 @@
 
     'use strict';
 
+    var authId = 'cloud',
+        proxyPath = '/ensemble';
+
     var evSettings = {
         ensembleUrl: 'https://cloud.ensemblevideo.com/ensemble',
-        authId: 'cloud',
+        authId: authId,
         authPath: '/',
         pageSize: 10,
-        proxyPath: '/ensemble'
+        proxyPath: proxyPath,
+        urlCallback: function(url) {
+            return proxyPath + '?authId=' + authId + '&request=' + encodeURIComponent(url);
+        },
+        // Used during testing
+        testUser: 'hasp',
+        testPass: 'hasp'
     };
 
     if (typeof define === 'function' && define.amd) {

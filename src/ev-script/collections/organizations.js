@@ -14,7 +14,7 @@ define(function(require) {
             var sizeParam = 'PageSize=9999';
             var indexParam = 'PageIndex=1';
             var url = api_url + '?' + sizeParam + '&' + indexParam;
-            return this.config.urlCallback(url);
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
         }
     });
 

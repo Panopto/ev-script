@@ -3,15 +3,7 @@
 
     'use strict';
 
-    var app = new EV.EnsembleApp({
-        authId: evSettings.authId,
-        authPath: evSettings.authPath,
-        ensembleUrl: evSettings.ensembleUrl,
-        pageSize: evSettings.pageSize,
-        urlCallback: function(url) {
-            return evSettings.proxyPath + '?authId=' + evSettings.authId + '&request=' + encodeURIComponent(url);
-        }
-    });
+    var app = new EV.EnsembleApp(evSettings);
 
     app.appEvents.bind('fieldUpdated', function($field, value) {
         var $videoEmbed = $('.video-embed');

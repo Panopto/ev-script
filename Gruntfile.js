@@ -66,7 +66,7 @@ module.exports = function(grunt) {
                 options: {
                     urls: ['https://localhost:8000/test'],
                     '--ignore-ssl-errors': true,
-                    timeout: 30000
+                    timeout: 60000
                 }
             }
         },
@@ -135,7 +135,7 @@ module.exports = function(grunt) {
                     password = req.cookies[authId + '-pass'];
                 if (apiUrl) {
                     if (username && password) {
-                        apiUrl = apiUrl.replace(/http(s)?:\/\//, 'http$1://' + username + ':' + password + '@');
+                        apiUrl = apiUrl.replace(/http(s)?:\/\//, 'http$1://' + encodeURIComponent(username) + ':' + encodeURIComponent(password) + '@');
                     }
                     request.get({ url: apiUrl }, function(error, response, body) {
                         if (!error) {

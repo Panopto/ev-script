@@ -7,7 +7,7 @@ define(function(require) {
     return BaseCollection.extend({
         initialize: function(models, options) {
             BaseCollection.prototype.initialize.call(this, models, options);
-            this.filterValue = options.filterValue;
+            this.filterValue = options.filterValue || '';
             this.pageIndex = 1;
             this.hasMore = true;
         },
@@ -18,7 +18,7 @@ define(function(require) {
             var onParam = 'FilterOn=LibraryId';
             var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
             var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
-            return this.config.urlCallback(url);
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
         }
     });
 

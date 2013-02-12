@@ -42,7 +42,12 @@
         // Test modules
         'tests/util/auth',
         'tests/util/cache',
-        'tests/util/events'
+        'tests/util/events',
+        'tests/collections/base',
+        'tests/collections/organizations',
+        'tests/collections/libraries',
+        'tests/collections/playlists',
+        'tests/collections/videos'
     ];
 
     require(testModules, function() {

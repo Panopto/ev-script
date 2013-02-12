@@ -1,5 +1,5 @@
 /**
- * ev-script 0.1.0 2013-02-06
+ * ev-script 0.1.0 2013-02-12
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -1627,8 +1627,8 @@ define('ev-script/collections/videos',['require','ev-script/collections/base'],f
     return BaseCollection.extend({
         initialize: function(models, options) {
             BaseCollection.prototype.initialize.call(this, models, options);
-            this.filterOn = options.filterOn;
-            this.filterValue = options.filterValue;
+            this.filterOn = options.filterOn || '';
+            this.filterValue = options.filterValue || '';
             this.sourceUrl = options.sourceUrl;
             this.pageIndex = 1;
             this.hasMore = true;
@@ -1640,7 +1640,7 @@ define('ev-script/collections/videos',['require','ev-script/collections/base'],f
             var onParam = 'FilterOn=' + encodeURIComponent(this.filterOn);
             var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
             var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
-            return this.config.urlCallback(url);
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
         }
     });
 
@@ -1899,7 +1899,7 @@ define('ev-script/collections/organizations',['require','ev-script/collections/b
             var sizeParam = 'PageSize=9999';
             var indexParam = 'PageIndex=1';
             var url = api_url + '?' + sizeParam + '&' + indexParam;
-            return this.config.urlCallback(url);
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
         }
     });
 
@@ -1941,7 +1941,7 @@ define('ev-script/collections/libraries',['require','ev-script/collections/base'
     return BaseCollection.extend({
         initialize: function(models, options) {
             BaseCollection.prototype.initialize.call(this, models, options);
-            this.filterValue = options.organizationId;
+            this.filterValue = options.organizationId || '';
         },
         url: function() {
             var api_url = this.config.ensembleUrl + '/api/Libraries';
@@ -1951,7 +1951,7 @@ define('ev-script/collections/libraries',['require','ev-script/collections/base'
             var onParam = 'FilterOn=OrganizationId';
             var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
             var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
-            return this.config.urlCallback(url);
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
         }
     });
 
@@ -2152,7 +2152,7 @@ define('ev-script/collections/playlists',['require','ev-script/collections/base'
     return BaseCollection.extend({
         initialize: function(models, options) {
             BaseCollection.prototype.initialize.call(this, models, options);
-            this.filterValue = options.filterValue;
+            this.filterValue = options.filterValue || '';
             this.pageIndex = 1;
             this.hasMore = true;
         },
@@ -2163,7 +2163,7 @@ define('ev-script/collections/playlists',['require','ev-script/collections/base'
             var onParam = 'FilterOn=LibraryId';
             var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
             var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
-            return this.config.urlCallback(url);
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
         }
     });
 
