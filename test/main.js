@@ -47,7 +47,10 @@
         'tests/collections/organizations',
         'tests/collections/libraries',
         'tests/collections/playlists',
-        'tests/collections/videos'
+        'tests/collections/videos',
+        'tests/models/playlist-settings',
+        'tests/models/video-settings',
+        'tests/models/video-encoding'
     ];
 
     require(testModules, function() {

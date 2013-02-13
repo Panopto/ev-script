@@ -18,6 +18,10 @@ define(function(require) {
         }
     });
 
+    q.test('test extends Backbone.Collection', 1, function() {
+        q.ok(this.collection instanceof Backbone.Collection);
+    });
+
     q.test('test parse', 1, function() {
         q.strictEqual(this.collection.parse({
             Data: 'foo'
