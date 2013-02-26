@@ -1,5 +1,5 @@
 /**
- * ev-script 0.1.0 2013-02-12
+ * ev-script 0.1.0 2013-02-26
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -2483,7 +2483,9 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
             evCache = cacheUtil.caches.set(appOptions.ensembleUrl, new cacheUtil.Cache());
         }
 
-        // Add our configuration to the app cache
+        // Add our configuration to the app cache...this is specific to this 'app'
+        // instance.  There may be multiple instances on a single page w/ unique
+        // settings.
         cacheUtil.setAppConfig(appId, {
             authId: appOptions.authId || 'ensemble',
             ensembleUrl: appOptions.ensembleUrl || '',
@@ -2493,10 +2495,12 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
             pageSize: parseInt(appOptions.pageSize || 100, 10)
         });
 
+        // Create an event aggregator specific to our app
         eventsUtil.initEvents(appId);
         this.appEvents = eventsUtil.getEvents(appId);
+        // eventsUtil also provides us with a global event aggregator for events
+        // that span app instances
         this.globalEvents = eventsUtil.getEvents();
-
 
         this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
             var $field = $(fieldSelector, fieldWrap);

@@ -7,7 +7,7 @@
         proxyPath = '/ensemble';
 
     var evSettings = {
-        ensembleUrl: 'https://cloud.ensemblevideo.com/ensemble',
+        ensembleUrl: 'https://cloud.ensemblevideo.com',
         authId: authId,
         authPath: '/',
         pageSize: 10,

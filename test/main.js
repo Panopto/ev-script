@@ -51,6 +51,7 @@
         'tests/models/playlist-settings',
         'tests/models/video-settings',
         'tests/models/video-encoding'
+        // FIXME - test views
     ];
 
     require(testModules, function() {

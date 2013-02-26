@@ -27,7 +27,9 @@ define(function(require) {
             evCache = cacheUtil.caches.set(appOptions.ensembleUrl, new cacheUtil.Cache());
         }
 
-        // Add our configuration to the app cache
+        // Add our configuration to the app cache...this is specific to this 'app'
+        // instance.  There may be multiple instances on a single page w/ unique
+        // settings.
         cacheUtil.setAppConfig(appId, {
             authId: appOptions.authId || 'ensemble',
             ensembleUrl: appOptions.ensembleUrl || '',
@@ -37,10 +39,12 @@ define(function(require) {
             pageSize: parseInt(appOptions.pageSize || 100, 10)
         });
 
+        // Create an event aggregator specific to our app
         eventsUtil.initEvents(appId);
         this.appEvents = eventsUtil.getEvents(appId);
+        // eventsUtil also provides us with a global event aggregator for events
+        // that span app instances
         this.globalEvents = eventsUtil.getEvents();
-
 
         this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
             var $field = $(fieldSelector, fieldWrap);
