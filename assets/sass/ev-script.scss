@@ -1,8 +1,10 @@
+@import 'compass/css3';
+@import 'compass/css3/box-shadow';
+
 // Colors
 $border-color: #999999;
 $ev-yellow: #f9d700;
 $link-color: #0074bd;
-$shadow-color: #333333;
 
 // Images
 $logo-image: 'images/logo.png';
@@ -14,19 +16,34 @@ $poweredby-image: 'images/poweredby.png';
 $loading-image: 'images/loading.gif';
 $loader-image: 'images/loader.gif';
 
+// Box shadow mixin defaults
+$default-box-shadow-color: #333333;
+
 .form-text,
 .form-select,
 .form-submit {
   padding: 0.2em;
 }
 
-.ev-video-picker,
-.ev-playlist-picker {
+@mixin picker-base {
   padding: 0;
   a {
     color: $link-color;
     text-decoration: none;
   }
+}
+
+.ev-video-picker {
+  @include picker-base;
+  div.ev-results {
+    td.content-actions {
+      min-width: 120px;
+    }
+  }
+}
+
+.ev-playlist-picker {
+  @include picker-base;
 }
 
 div.ev-hider {
@@ -43,7 +60,7 @@ div.ev-hider {
     background: #ffffff;
     background-color: #fbfbfb;
     border-left: 1px solid $border-color;
-    border-radius: 6px 6px 0 0;
+    @include border-top-radius(6px);
     border-right: 1px solid $border-color;
     border-top: 1px solid $border-color;
     bottom: -1px;
@@ -57,9 +74,7 @@ div.ev-hider {
 div.ev-field {
   height: 60px;
   .thumbnail {
-    -moz-box-shadow: 0 0 10px 1px $shadow-color;
-    -webkit-box-shadow: 0 0 10px 1px $shadow-color;
-    box-shadow: 0 0 10px 1px $shadow-color;
+    @include box-shadow(0 0 10px 1px);
     display: inline-block;
     font-size: 0;
     height: 100%;
@@ -144,36 +159,44 @@ div.ev-poweredby {
       display: none;
     }
   }
+  @media screen and (max-width: 620px) {
+    display: none;
+  }
 }
 
-div.ev-search label,
-div.ev-playlist-select label,
-div.ev-search input,
-div.ev-playlist-select input,
-div.ev-search select,
-div.ev-playlist-select select {
-  display: inline;
-  margin-right: 1em;
+@mixin filter-form($max-width) {
+  label,
+  input,
+  select {
+    display: inline;
+    margin-right: 1em;
+  }
+  label {
+    color: #606060;
+    @media screen and (max-width: $max-width) {
+      display: block;
+      margin: 0.4em 0;
+    }
+  }
+  div.loader {
+    display: inline-block;
+  }
+  div.loading {
+    background: url($loading-image) no-repeat scroll center center transparent;
+    display: inline-block;
+    height: 16px;
+    margin-left: 1em;
+    vertical-align: middle;
+    width: 16px;
+  }
 }
 
-div.ev-search label,
-div.ev-playlist-select label {
-  color: #606060;
+div.ev-search {
+  @include filter-form(750px);
 }
 
-div.ev-search div.loader,
-div.ev-playlist-select div.loader {
-  display: inline-block;
-}
-
-div.ev-search div.loading,
-div.ev-playlist-select div.loading {
-  background: url($loading-image) no-repeat scroll center center transparent;
-  display: inline-block;
-  height: 16px;
-  margin-left: 1em;
-  vertical-align: middle;
-  width: 16px;
+div.ev-playlist-select {
+  @include filter-form(850px);
 }
 
 div.ev-auth {
@@ -248,9 +271,7 @@ div.ev-results {
     text-align: right;
     width: 25%;
     img {
-      -moz-box-shadow: 0 0 10px 1px $shadow-color;
-      -webkit-box-shadow: 0 0 10px 1px $shadow-color;
-      box-shadow: 0 0 10px 1px $shadow-color;
+      @include box-shadow(0 0 10px 1px);
       display: block;
       float: right;
       margin: 9px 6px 1em 6px;
@@ -321,6 +342,7 @@ div.ev-results {
         color: #606060;
         font-weight: bold;
         width: 20%;
+        min-width: 100px;
       }
     }
   }
@@ -337,16 +359,11 @@ div.scrollWrap .loader {
 }
 
 div.ev-dialog {
-  border-radius: 6px 6px 6px 6px;
+  @include border-radius(6px);
   font-size: 1em;
   div.ui-dialog-titlebar {
-    background-image: -ms-linear-gradient(bottom, #ffffff 0%, $ev-yellow 100%);
-    background-image: -moz-linear-gradient(bottom, #ffffff 0%, $ev-yellow 100%);
-    background-image: -o-linear-gradient(bottom, #ffffff 0%, $ev-yellow 100%);
-    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #ffffff), color-stop(1, $ev-yellow));
-    background-image: -webkit-linear-gradient(bottom, #ffffff 0%, $ev-yellow 100%);
-    background-image: linear-gradient(to top, #ffffff 0%, $ev-yellow 100%);
-    border-radius: 6px 6px 0 0;
+    @include background(linear-gradient($ev-yellow, #ffffff));
+    @include border-top-radius(6px);
     border-width: 0;
   }
 }
