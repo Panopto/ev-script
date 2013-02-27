@@ -77,7 +77,7 @@ module.exports = function(grunt) {
             },
             lib_test: {
                 files: ['<%= jshint.lib_test.src %>', 'src/**/*.html', 'wrap/*'],
-                tasks: ['jshint:lib_test', 'qunit', 'requirejs:development']
+                tasks: ['jshint:lib_test', /*'qunit',*/ 'requirejs:development']
             }
         },
         requirejs: {
@@ -86,6 +86,14 @@ module.exports = function(grunt) {
             },
             production: {
                 options: rjs_prod_opts
+            }
+        },
+        compass: {
+            default: {
+                options: {
+                    sassDir: 'assets/sass',
+                    cssDir: 'assets/css'
+                }
             }
         }
     });
@@ -162,13 +170,14 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-compass');
     grunt.loadNpmTasks('grunt-requirejs');
 
     // Default task.
     grunt.registerTask('test', ['server', 'qunit']);
-    grunt.registerTask('default', ['clean', 'jshint', 'test', 'requirejs:development', 'requirejs:production']);
-    grunt.registerTask('dev', ['clean', 'jshint', 'test', 'requirejs:development']);
-    grunt.registerTask('prod', ['clean', 'jshint', 'test', 'requirejs:production']);
+    grunt.registerTask('default', ['clean', 'jshint', 'compass', 'test', 'requirejs:development', 'requirejs:production']);
+    grunt.registerTask('dev', ['clean', 'jshint', 'compass', 'test', 'requirejs:development']);
+    grunt.registerTask('prod', ['clean', 'jshint', 'compass', 'test', 'requirejs:production']);
     grunt.registerTask('demo', ['server', 'watch']);
 
 };
