@@ -1,5 +1,5 @@
 /**
- * ev-script 0.1.0 2013-02-26
+ * ev-script 0.1.0 2013-02-28
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -908,6 +908,7 @@ define('text',['module'], function (module) {
 
 define('text!ev-script/templates/auth.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text"type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text"type="password"/>\n        </div>\n        <div class="form-actions">\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
+/*global window*/
 define('ev-script/views/auth',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','ev-script/util/auth','jquery.cookie','jquery-ui','text!ev-script/templates/auth.html'],function(require, template) {
 
     
@@ -937,7 +938,7 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
                 modal: true,
                 draggable: false,
                 resizable: false,
-                width: 540,
+                width: Math.min(540, $(window).width() - 20),
                 height: 250,
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {
@@ -1397,6 +1398,7 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
 
 });
 
+/*global window*/
 define('ev-script/views/preview',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','jquery-ui'],function(require) {
 
     
@@ -1415,20 +1417,33 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
             this.$el.after($dialogWrap);
             var content = this.model.get('content');
             var width = this.model.get('width');
-            width = (width ? width : (this.model instanceof VideoSettings ? '640' : '800'));
+            width = (width ? width : (this.model instanceof VideoSettings ? 640 : 800));
             var height = this.model.get('height');
-            height = (height ? height : (this.model instanceof VideoSettings ? '360' : '850'));
+            height = (height ? height : (this.model instanceof VideoSettings ? 360 : 850));
+            var embedSettings = new this.model.constructor(this.model.toJSON());
+            var dialogWidth = width + 50;
+            var dialogHeight = height + 140;
+            var maxWidth = $(window).width() - 20;
+            // Contain preview within window
+            if (dialogWidth > maxWidth) {
+                var origWidth = dialogWidth;
+                dialogWidth = maxWidth;
+                var ratio = maxWidth / origWidth;
+                embedSettings.set('width', width * ratio);
+                dialogHeight = dialogHeight * ratio;
+                embedSettings.set('height', height * ratio);
+            }
             $dialogWrap.dialog({
                 title: content.Title || content.Name,
                 modal: true,
-                width: (parseInt(width, 10) + 50),
-                height: (parseInt(height, 10) + 140),
+                width: dialogWidth,
+                height: dialogHeight,
                 draggable: false,
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {
                     var embedView = new this.embedClass({
-                        model: this.model,
+                        model: embedSettings,
                         appId: this.appId
                     });
                     $dialogWrap.html(embedView.$el);
@@ -1769,11 +1784,13 @@ define('text!ev-script/templates/video-settings.html',[],function () { return '<
 
 define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(sizes, function(size) { %>\n    <option value="<%= size %>" <% if (size === target) { print(\'selected="selected"\'); } %>><%= size %></option>\n<% }); %>\n';});
 
-define('ev-script/views/video-settings',['require','underscore','ev-script/views/settings','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/sizes.html'],function(require) {
+/*global window*/
+define('ev-script/views/video-settings',['require','jquery','underscore','ev-script/views/settings','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/sizes.html'],function(require) {
 
     
 
-    var _ = require('underscore'),
+    var $ = require('jquery'),
+        _ = require('underscore'),
         SettingsView = require('ev-script/views/settings');
 
     require('jquery-ui');
@@ -1847,7 +1864,7 @@ define('ev-script/views/video-settings',['require','underscore','ev-script/views
                 draggable: false,
                 resizable: false,
                 dialogClass: 'ev-dialog',
-                width: 340,
+                width: Math.min(340, $(window).width() - 20),
                 height: 320
             });
         }

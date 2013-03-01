@@ -322,7 +322,7 @@ div.ev-results {
       border: none;
       padding-bottom: 1em;
       color: #000000;
-      padding: 1em 1.6em;
+      padding: 1em 2%;
     }
     .content-item {
       border: none;
@@ -343,6 +343,9 @@ div.ev-results {
         font-weight: bold;
         width: 20%;
         min-width: 100px;
+        @media screen and (max-width: 600px) {
+          display: none;
+        }
       }
     }
   }

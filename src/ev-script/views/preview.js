@@ -1,3 +1,4 @@
+/*global window*/
 define(function(require) {
 
     'use strict';
@@ -16,20 +17,33 @@ define(function(require) {
             this.$el.after($dialogWrap);
             var content = this.model.get('content');
             var width = this.model.get('width');
-            width = (width ? width : (this.model instanceof VideoSettings ? '640' : '800'));
+            width = (width ? width : (this.model instanceof VideoSettings ? 640 : 800));
             var height = this.model.get('height');
-            height = (height ? height : (this.model instanceof VideoSettings ? '360' : '850'));
+            height = (height ? height : (this.model instanceof VideoSettings ? 360 : 850));
+            var embedSettings = new this.model.constructor(this.model.toJSON());
+            var dialogWidth = width + 50;
+            var dialogHeight = height + 140;
+            var maxWidth = $(window).width() - 20;
+            // Contain preview within window
+            if (dialogWidth > maxWidth) {
+                var origWidth = dialogWidth;
+                dialogWidth = maxWidth;
+                var ratio = maxWidth / origWidth;
+                embedSettings.set('width', width * ratio);
+                dialogHeight = dialogHeight * ratio;
+                embedSettings.set('height', height * ratio);
+            }
             $dialogWrap.dialog({
                 title: content.Title || content.Name,
                 modal: true,
-                width: (parseInt(width, 10) + 50),
-                height: (parseInt(height, 10) + 140),
+                width: dialogWidth,
+                height: dialogHeight,
                 draggable: false,
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {
                     var embedView = new this.embedClass({
-                        model: this.model,
+                        model: embedSettings,
                         appId: this.appId
                     });
                     $dialogWrap.html(embedView.$el);

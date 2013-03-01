@@ -1,3 +1,4 @@
+/*global window*/
 define(function(require, template) {
 
     'use strict';
@@ -27,7 +28,7 @@ define(function(require, template) {
                 modal: true,
                 draggable: false,
                 resizable: false,
-                width: 540,
+                width: Math.min(540, $(window).width() - 20),
                 height: 250,
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {

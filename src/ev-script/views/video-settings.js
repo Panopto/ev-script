@@ -1,8 +1,10 @@
+/*global window*/
 define(function(require) {
 
     'use strict';
 
-    var _ = require('underscore'),
+    var $ = require('jquery'),
+        _ = require('underscore'),
         SettingsView = require('ev-script/views/settings');
 
     require('jquery-ui');
@@ -76,7 +78,7 @@ define(function(require) {
                 draggable: false,
                 resizable: false,
                 dialogClass: 'ev-dialog',
-                width: 340,
+                width: Math.min(340, $(window).width() - 20),
                 height: 320
             });
         }
