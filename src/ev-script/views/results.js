@@ -29,6 +29,7 @@ define(function(require) {
                 return this.resultTemplate({
                     item: item,
                     index: index
+
                 });
             }
         },
@@ -96,9 +97,10 @@ define(function(require) {
             } else {
                 $contentList.append(this.emptyTemplate());
             }
-            if (this.collection.size() >= this.config.pageSize || $contentList[0].scrollHeight > 600) {
+            var scrollHeight = this.config.scrollHeight;
+            if (this.collection.size() >= this.config.pageSize || $contentList[0].scrollHeight > scrollHeight) {
                 this.$scrollLoader = $contentList.evScrollLoader({
-                    height: 600,
+                    height: scrollHeight,
                     callback: this.loadMore
                 });
                 if (!this.collection.hasMore) {

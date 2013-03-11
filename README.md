@@ -24,6 +24,10 @@ Install bower packages (see component.json file for a list of these):
 
     bower install
 
+Install compass-normalize:
+
+    gem install compass-normalize
+
 Verify success by running the default grunt task:
 
     grunt

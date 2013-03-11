@@ -1,5 +1,5 @@
 /**
- * ev-script 0.1.0 2013-02-28
+ * ev-script 0.1.0 2013-03-10
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -1316,6 +1316,7 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
                 return this.resultTemplate({
                     item: item,
                     index: index
+
                 });
             }
         },
@@ -1383,9 +1384,10 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
             } else {
                 $contentList.append(this.emptyTemplate());
             }
-            if (this.collection.size() >= this.config.pageSize || $contentList[0].scrollHeight > 600) {
+            var scrollHeight = this.config.scrollHeight;
+            if (this.collection.size() >= this.config.pageSize || $contentList[0].scrollHeight > scrollHeight) {
                 this.$scrollLoader = $contentList.evScrollLoader({
-                    height: 600,
+                    height: scrollHeight,
                     callback: this.loadMore
                 });
                 if (!this.collection.hasMore) {
@@ -1484,11 +1486,12 @@ define('ev-script/views/video-embed',['require','underscore','ev-script/views/ba
 
 });
 
-define('ev-script/models/video-encoding',['require','backbone','ev-script/util/cache'],function(require) {
+define('ev-script/models/video-encoding',['require','backbone','underscore','ev-script/util/cache'],function(require) {
 
     
 
     var Backbone = require('backbone'),
+        _ = require('underscore'),
         cacheUtil = require('ev-script/util/cache');
 
     return Backbone.Model.extend({
@@ -1518,7 +1521,14 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/util/c
             return this.getDims()[1];
         },
         parse: function(response) {
-            return response.dataSet.encodings;
+            if (_.isArray(response.dataSet.encodings)) {
+                // This is a collection, so return the highest bitrate encoding
+                return _.max(response.dataSet.encodings, function(encoding, index, encodings) {
+                    return parseInt(encoding.bitrate, 10);
+                });
+            } else {
+                return response.dataSet.encodings;
+            }
         }
     });
 
@@ -2512,7 +2522,8 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
             authPath: appOptions.authPath || '',
             authDomain: appOptions.authDomain || '',
             urlCallback: appOptions.urlCallback || function(url) { return url; },
-            pageSize: parseInt(appOptions.pageSize || 100, 10)
+            pageSize: parseInt(appOptions.pageSize || 100, 10),
+            scrollHeight: appOptions.scrollHeight || 600
         });
 
         // Create an event aggregator specific to our app

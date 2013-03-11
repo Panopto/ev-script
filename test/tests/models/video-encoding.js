@@ -36,16 +36,31 @@ define(function(require) {
         q.deepEqual(this.encoding.config, evSettings);
     });
 
-    q.test('test parse', 1, function() {
-        var encodings = {
-            foo: 'bar'
-        };
-        var data = {
+    q.test('test parse', 2, function() {
+        q.deepEqual(this.encoding.parse({
             dataSet: {
-                encodings: encodings
+                encodings: {
+                    encodingId: 'foo'
+                }
             }
-        };
-        q.deepEqual(this.encoding.parse(data), encodings);
+        }), {
+            encodingId: 'foo'
+        });
+        q.deepEqual(this.encoding.parse({
+            dataSet: {
+                encodings: [
+                    {
+                        bitrate: "10"
+                    }, {
+                        bitrate: "30"
+                    }, {
+                        bitrate: "20"
+                    }
+                ]
+            }
+        }), {
+            bitrate: "30"
+        });
     });
 
     q.test('test getDims', 2, function() {

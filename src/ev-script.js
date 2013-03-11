@@ -36,7 +36,8 @@ define(function(require) {
             authPath: appOptions.authPath || '',
             authDomain: appOptions.authDomain || '',
             urlCallback: appOptions.urlCallback || function(url) { return url; },
-            pageSize: parseInt(appOptions.pageSize || 100, 10)
+            pageSize: parseInt(appOptions.pageSize || 100, 10),
+            scrollHeight: appOptions.scrollHeight || 600
         });
 
         // Create an event aggregator specific to our app

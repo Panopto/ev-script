@@ -92,7 +92,8 @@ module.exports = function(grunt) {
             default: {
                 options: {
                     sassDir: 'assets/sass',
-                    cssDir: 'assets/css'
+                    cssDir: 'assets/css',
+                    require: ['compass-normalize']
                 }
             }
         }

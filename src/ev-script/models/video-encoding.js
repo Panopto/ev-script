@@ -3,6 +3,7 @@ define(function(require) {
     'use strict';
 
     var Backbone = require('backbone'),
+        _ = require('underscore'),
         cacheUtil = require('ev-script/util/cache');
 
     return Backbone.Model.extend({
@@ -32,7 +33,14 @@ define(function(require) {
             return this.getDims()[1];
         },
         parse: function(response) {
-            return response.dataSet.encodings;
+            if (_.isArray(response.dataSet.encodings)) {
+                // This is a collection, so return the highest bitrate encoding
+                return _.max(response.dataSet.encodings, function(encoding, index, encodings) {
+                    return parseInt(encoding.bitrate, 10);
+                });
+            } else {
+                return response.dataSet.encodings;
+            }
         }
     });
 
