@@ -97,6 +97,11 @@ define(function(require) {
                     this.renderActions();
                 }
             }, this));
+            this.appEvents.bind('showPicker', function(id) {
+                if (this.id === id) {
+                    this.$('.action-choose').trigger('click');
+                }
+            }, this);
         },
         events: {
             'click .action-choose': 'chooseHandler',

@@ -1,5 +1,5 @@
 /**
- * ev-script 0.1.0 2013-03-10
+ * ev-script 0.1.0 2013-03-13
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -2404,6 +2404,11 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                     this.renderActions();
                 }
             }, this));
+            this.appEvents.bind('showPicker', function(id) {
+                if (this.id === id) {
+                    this.$('.action-choose').trigger('click');
+                }
+            }, this);
         },
         events: {
             'click .action-choose': 'chooseHandler',
