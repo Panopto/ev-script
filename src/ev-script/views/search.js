@@ -24,11 +24,11 @@ define(function(require) {
                 sourceId: this.picker.model.get('sourceId')
             }));
             var $loader = this.$('div.loader');
-            $loader.bind('ajaxSend', _.bind(function(e, xhr, settings) {
+            $loader.on('ajaxSend', _.bind(function(e, xhr, settings) {
                 if (this.picker === settings.picker) {
                     $loader.addClass('loading');
                 }
-            }, this)).bind('ajaxComplete', _.bind(function(e, xhr, settings) {
+            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
                 if (this.picker === settings.picker) {
                     $loader.removeClass('loading');
                 }

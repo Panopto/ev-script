@@ -12,7 +12,7 @@ define(function(require) {
             _.bindAll(this, 'render');
             this.picker = options.picker;
             this.$el.html('<option value="-1">Loading...</option>');
-            this.collection.bind('reset', this.render);
+            this.collection.on('reset', this.render);
         },
         render: function() {
             this.$el.html(this.template({

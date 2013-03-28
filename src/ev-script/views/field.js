@@ -54,7 +54,7 @@ define(function(require) {
                         dataType: 'jsonp'
                     });
                 }
-                this.model.bind('change:id', _.bind(function() {
+                this.model.on('change:id', _.bind(function() {
                     // Only fetch encoding if identifier is set
                     if (this.model.id) {
                         this.encoding.set({
@@ -89,7 +89,7 @@ define(function(require) {
             this.settings = new this.settingsClass(settingsOptions);
             this.$field.after(this.picker.$el);
             this.renderActions();
-            this.model.bind('change', _.bind(function() {
+            this.model.on('change', _.bind(function() {
                 if (!this.model.isNew()) {
                     var json = this.model.toJSON();
                     this.$field.val(JSON.stringify(json));
@@ -97,7 +97,7 @@ define(function(require) {
                     this.renderActions();
                 }
             }, this));
-            this.appEvents.bind('showPicker', function(id) {
+            this.appEvents.on('showPicker', function(id) {
                 if (this.id === id) {
                     this.$('.action-choose').trigger('click');
                 }

@@ -107,7 +107,7 @@ define(function(require) {
                     this.$scrollLoader.evScrollLoader('hideLoader');
                 }
             }
-            this.collection.bind('add', this.addHandler);
+            this.collection.on('add', this.addHandler);
         }
     });
 

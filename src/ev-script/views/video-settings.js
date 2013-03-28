@@ -15,7 +15,7 @@ define(function(require) {
         initialize: function(options) {
             SettingsView.prototype.initialize.call(this, options);
             this.encoding = options.encoding;
-            this.encoding.bind('change:id', _.bind(function() {
+            this.encoding.on('change:id', _.bind(function() {
                 this.render();
             }, this));
         },

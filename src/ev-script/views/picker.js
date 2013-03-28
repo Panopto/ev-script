@@ -16,7 +16,7 @@ define(function(require) {
             _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker', 'hideHandler');
             this.$el.hide();
             this.field = options.field;
-            this.appEvents.bind('hidePickers', this.hideHandler);
+            this.appEvents.on('hidePickers', this.hideHandler);
             this.hider = new HiderView({
                 id: this.id + '-hider',
                 tagName: 'div',

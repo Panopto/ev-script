@@ -11,8 +11,8 @@ define(function(require) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'hideHandler', 'logoutHandler', 'authHandler', 'render');
             this.picker = options.picker;
-            this.globalEvents.bind('authSet', this.authHandler);
-            this.globalEvents.bind('authRemoved', this.authHandler);
+            this.globalEvents.on('authSet', this.authHandler);
+            this.globalEvents.on('authRemoved', this.authHandler);
         },
         events: {
             'click a.action-hide': 'hideHandler',
