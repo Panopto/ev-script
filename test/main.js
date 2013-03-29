@@ -13,6 +13,7 @@
             'jquery':  'jquery/jquery',
             'jquery-ui': 'jquery-ui/jquery-ui',
             'jquery.cookie': 'jquery.cookie/jquery.cookie',
+            'text': 'text/text',
             'underscore': 'lodash/lodash',
             'backbone': 'backbone/backbone'
         },
@@ -50,8 +51,8 @@
         'tests/collections/videos',
         'tests/models/playlist-settings',
         'tests/models/video-settings',
-        'tests/models/video-encoding'
-        // FIXME - test views
+        'tests/models/video-encoding',
+        'tests/views/base'
     ];
 
     require(testModules, function() {

@@ -97,39 +97,37 @@ define(function(require) {
         auth.setAuth(authId, '', evSettings.authPath, username, password);
         var apiUrl = encodeURIComponent(evSettings.ensembleUrl + '/api/Content');
         q.ok(auth.hasAuth(authId));
-        q.stop();
         $.ajax({
+            dataType: "json",
             url: evSettings.proxyPath + '?authId=' + authId + '&request=' + apiUrl,
             success: function(data, status, xhr) {
                 successHandler.call(this, data, status, xhr);
                 auth.removeAuth(authId, evSettings.authPath);
+                q.start();
             },
             error: function(xhr, status, error) {
                 errorHandler.call(this, xhr, status, error);
                 auth.removeAuth(authId, evSettings.authPath);
+                q.start();
             }
         });
     };
 
-    q.test('valid credentials test', 2, function() {
+    q.asyncTest('valid credentials test', 2, function() {
         var success = function(data, status, xhr) {
-                q.start();
                 q.ok(!_.isEmpty(data), 'Expected data to be set');
             },
             error = function(xhr, status, error) {
-                q.start();
-                q.ok(false, 'Expected success.  Recieved status ' + status);
+                q.ok(false, 'Expected success.  Received status ' + status);
             };
         pathTest('hasp', 'hasp', success, error);
     });
 
-    q.test('invalid credentials test', 2, function() {
+    q.asyncTest('invalid credentials test', 2, function() {
         var success = function(data, status, xhr) {
-                q.start();
-                q.ok(false, 'Expected failure.  Recieved data ' + JSON.stringify(data));
+                q.ok(false, 'Expected failure.  Received data ' + JSON.stringify(data));
             },
             error = function(xhr, status, error) {
-                q.start();
                 q.equal(xhr.status, 401, 'Expected failure with 401 status.');
             };
         pathTest('foo', 'bar', success, error);

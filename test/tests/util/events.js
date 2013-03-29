@@ -17,6 +17,11 @@ define(function(require) {
         q.ok(!eventsUtil.getEvents('foo'), 'non-global events object needs to be initialized first');
     });
 
+    q.test('test is Backbone.Events', 2, function() {
+        q.deepEqual(eventsUtil.getEvents(), Backbone.Events);
+        q.deepEqual(eventsUtil.initEvents(''), Backbone.Events);
+    });
+
     q.asyncTest('global events test', 1, function() {
         var appId = Math.random();
         var globalEvents = eventsUtil.getEvents('global');
