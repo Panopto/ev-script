@@ -3,11 +3,11 @@
 
     'use strict';
 
-    var authId = 'cloud',
+    var authId = 'cloud-test',
         proxyPath = '/ensemble';
 
     var evSettings = {
-        ensembleUrl: 'https://cloud.ensemblevideo.com',
+        ensembleUrl: 'https://cloud-test.ensemblevideo.com',
         authId: authId,
         authPath: '/',
         pageSize: 10,
@@ -16,8 +16,8 @@
             return proxyPath + '?authId=' + authId + '&request=' + encodeURIComponent(url);
         },
         // Used during testing
-        testUser: 'hasp',
-        testPass: 'hasp'
+        testUser: 'apiDemo',
+        testPass: 'demo123'
     };
 
     if (typeof define === 'function' && define.amd) {

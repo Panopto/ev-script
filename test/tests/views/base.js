@@ -14,6 +14,7 @@ define(function(require) {
         setup: function() {
             this.appId = Math.random();
             this.config = evSettings;
+            eventsUtil.initEvents(this.appId);
             cacheUtil.setAppConfig(this.appId, this.config);
             this.view = new BaseView({
                 appId: this.appId
@@ -25,13 +26,15 @@ define(function(require) {
         q.ok(this.view instanceof Backbone.View);
     });
 
-    q.test('test initialize', 4, function() {
+    q.test('test initialize', 6, function() {
         // Make sure view has appId and config
         q.strictEqual(this.view.appId, this.appId);
         // Make sure we're grabbing the appropriate app config
         q.deepEqual(this.view.config, this.config);
         // Check view has necessary events objects
+        q.ok(!_.isEmpty(eventsUtil.getEvents()));
         q.deepEqual(this.view.globalEvents, eventsUtil.getEvents());
+        q.ok(!_.isEmpty(eventsUtil.getEvents(this.appId)));
         q.deepEqual(this.view.appEvents, eventsUtil.getEvents(this.appId));
     });
 

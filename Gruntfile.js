@@ -66,7 +66,7 @@ module.exports = function(grunt) {
                 options: {
                     urls: ['https://localhost:8000/test'],
                     '--ignore-ssl-errors': true,
-                    timeout: 60000
+                    timeout: 120000
                 }
             }
         },

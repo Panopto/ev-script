@@ -120,7 +120,7 @@ define(function(require) {
             error = function(xhr, status, error) {
                 q.ok(false, 'Expected success.  Received status ' + status);
             };
-        pathTest('hasp', 'hasp', success, error);
+        pathTest(evSettings.testUser, evSettings.testPass, success, error);
     });
 
     q.asyncTest('invalid credentials test', 2, function() {

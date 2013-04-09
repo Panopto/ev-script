@@ -20,6 +20,8 @@ define(function(require, template) {
             this.config = cacheUtil.getAppConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
             this.submitCallback = options.submitCallback || function() {};
+        },
+        render: function() {
             var html = this.template();
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);

@@ -1,5 +1,5 @@
 /**
- * ev-script 0.2.0 2013-03-29
+ * ev-script 0.2.0 2013-04-09
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -930,6 +930,8 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
             this.config = cacheUtil.getAppConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
             this.submitCallback = options.submitCallback || function() {};
+        },
+        render: function() {
             var html = this.template();
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
@@ -1001,6 +1003,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
                     submitCallback: authCallback,
                     appId: this.appId
                 });
+                authView.render();
             } else if (xhr.status === 500) {
                 // Making an assumption that root is window here...
                 root.alert('It appears there is an issue with the Ensemble Video installation.');

@@ -9,6 +9,7 @@
         paths: {
             'ev-script': '../../src/ev-script',
             'ev-config': '../../ev-config',
+            'ev-scroll-loader': '../ev-scroll-loader',
             'tests': '../../test/tests',
             'jquery':  'jquery/jquery',
             'jquery-ui': 'jquery-ui/jquery-ui',
@@ -52,7 +53,9 @@
         'tests/models/playlist-settings',
         'tests/models/video-settings',
         'tests/models/video-encoding',
-        'tests/views/base'
+        'tests/views/base',
+        'tests/views/auth',
+        'tests/views/field'
     ];
 
     require(testModules, function() {

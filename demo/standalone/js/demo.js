@@ -24,8 +24,8 @@
     });
 
     $(document).ready(function() {
-        app.handleField($('#video').parent(), new EV.VideoSettings(), '#video');
-        app.handleField($('#playlist').parent(), new EV.PlaylistSettings(), '#playlist');
+        app.handleField($('#videoWrap')[0], new EV.VideoSettings(), '#video');
+        app.handleField($('#playlistWrap')[0], new EV.PlaylistSettings(), '#playlist');
     });
 
 }(jQuery));

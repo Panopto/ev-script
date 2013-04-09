@@ -34,6 +34,7 @@ define(function(require) {
                     submitCallback: authCallback,
                     appId: this.appId
                 });
+                authView.render();
             } else if (xhr.status === 500) {
                 // Making an assumption that root is window here...
                 root.alert('It appears there is an issue with the Ensemble Video installation.');
