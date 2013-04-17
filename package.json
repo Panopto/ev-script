@@ -2,7 +2,7 @@
   "name": "ev-script",
   "title": "Ensemble Video Integration Library",
   "description": "JavaScript library for integration with Ensemble Video.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "homepage": "https://github.com/jmpease/ev-script",
   "author": {
     "name": "Jim Pease",

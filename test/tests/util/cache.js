@@ -84,4 +84,13 @@ define(function(require) {
         q.deepEqual(cacheUtil.caches.get(url2).get(user).get('videos').get('foo'), cacheUtil.getUserCache(url2, user).get('videos').get('foo'));
     });
 
+    q.test('test tracks modifications', 1, function() {
+        var obj = {
+            foo: 'foo'
+        };
+        var cache = new cacheUtil.Cache();
+        cache.set('test', obj);
+        obj.bar = 'bar';
+        q.deepEqual(obj, cache.get('test'));
+    });
 });

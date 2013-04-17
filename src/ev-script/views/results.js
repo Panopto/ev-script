@@ -55,7 +55,7 @@ define(function(require) {
             if (this.collection.hasMore && !this.loadLock) {
                 this.loadLock = true;
                 this.collection.fetch({
-                    add: true,
+                    remove: false,
                     picker: this.picker,
                     success: _.bind(function(collection, response, options) {
                         if (_.size(response.Data) < this.config.pageSize) {
@@ -107,7 +107,8 @@ define(function(require) {
                     this.$scrollLoader.evScrollLoader('hideLoader');
                 }
             }
-            this.collection.on('add', this.addHandler);
+            // Prevent multiple bindings if the collection hasn't changed between render calls
+            this.collection.off('add', this.addHandler).on('add', this.addHandler);
         }
     });
 

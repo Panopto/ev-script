@@ -1,5 +1,5 @@
 /**
- * ev-script 0.2.0 2013-04-09
+ * ev-script 0.2.1 2013-04-17
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -1345,7 +1345,7 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
             if (this.collection.hasMore && !this.loadLock) {
                 this.loadLock = true;
                 this.collection.fetch({
-                    add: true,
+                    remove: false,
                     picker: this.picker,
                     success: _.bind(function(collection, response, options) {
                         if (_.size(response.Data) < this.config.pageSize) {
@@ -1397,7 +1397,8 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
                     this.$scrollLoader.evScrollLoader('hideLoader');
                 }
             }
-            this.collection.on('add', this.addHandler);
+            // Prevent multiple bindings if the collection hasn't changed between render calls
+            this.collection.off('add', this.addHandler).on('add', this.addHandler);
         }
     });
 
