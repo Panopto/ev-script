@@ -1,5 +1,5 @@
 /**
- * ev-script 0.2.1 2013-04-17
+ * ev-script 0.2.1 2013-04-18
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -1697,7 +1697,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
                 tagName: 'div',
                 className: 'ev-search',
                 picker: this,
-                appId: this.appId,
+                appId: this.appId
             });
             this.$el.append(this.searchView.$el);
             this.searchView.render();

@@ -18,7 +18,7 @@ define(function(require) {
                 tagName: 'div',
                 className: 'ev-search',
                 picker: this,
-                appId: this.appId,
+                appId: this.appId
             });
             this.$el.append(this.searchView.$el);
             this.searchView.render();
