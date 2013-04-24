@@ -1,5 +1,5 @@
 /**
- * ev-script 0.2.1 2013-04-18
+ * ev-script 0.2.1 2013-04-23
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -574,19 +574,19 @@ define('ev-script/util/cache',['require','jquery','underscore','backbone'],funct
 });
 
 /**
- * @license RequireJS text 2.0.5 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ * @license RequireJS text 2.0.6 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/text for details
  */
 /*jslint regexp: true */
-/*global require: false, XMLHttpRequest: false, ActiveXObject: false,
-  define: false, window: false, process: false, Packages: false,
-  java: false, location: false */
+/*global require, XMLHttpRequest, ActiveXObject,
+  define, window, process, Packages,
+  java, location, Components, FileUtils */
 
 define('text',['module'], function (module) {
     
 
-    var text, fs,
+    var text, fs, Cc, Ci,
         progIds = ['Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'],
         xmlRegExp = /^\s*<\?xml(\s)+version=[\'\"](\d)*.(\d)*[\'\"](\s)*\?>/im,
         bodyRegExp = /<body[^>]*>\s*([\s\S]+)\s*<\/body>/im,
@@ -598,7 +598,7 @@ define('text',['module'], function (module) {
         masterConfig = (module.config && module.config()) || {};
 
     text = {
-        version: '2.0.5',
+        version: '2.0.6',
 
         strip: function (content) {
             //Strips <?xml ...?> declarations so that external SVG and XML
@@ -858,6 +858,10 @@ define('text',['module'], function (module) {
                     } else {
                         callback(xhr.responseText);
                     }
+
+                    if (masterConfig.onXhrComplete) {
+                        masterConfig.onXhrComplete(xhr, url);
+                    }
                 }
             };
             xhr.send(null);
@@ -901,8 +905,39 @@ define('text',['module'], function (module) {
             }
             callback(content);
         };
-    }
+    } else if (masterConfig.env === 'xpconnect' || (!masterConfig.env &&
+            typeof Components !== 'undefined' && Components.classes &&
+            Components.interfaces)) {
+        //Avert your gaze!
+        Cc = Components.classes,
+        Ci = Components.interfaces;
+        Components.utils['import']('resource://gre/modules/FileUtils.jsm');
 
+        text.get = function (url, callback) {
+            var inStream, convertStream,
+                readData = {},
+                fileObj = new FileUtils.File(url);
+
+            //XPCOM, you so crazy
+            try {
+                inStream = Cc['@mozilla.org/network/file-input-stream;1']
+                           .createInstance(Ci.nsIFileInputStream);
+                inStream.init(fileObj, 1, 0, false);
+
+                convertStream = Cc['@mozilla.org/intl/converter-input-stream;1']
+                                .createInstance(Ci.nsIConverterInputStream);
+                convertStream.init(inStream, "utf-8", inStream.available(),
+                Ci.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+
+                convertStream.readString(inStream.available(), readData);
+                convertStream.close();
+                inStream.close();
+                callback(readData.value);
+            } catch (e) {
+                throw new Error((fileObj && fileObj.path || '') + ': ' + e);
+            }
+        };
+    }
     return text;
 });
 
@@ -1067,9 +1102,9 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'hideHandler', 'logoutHandler', 'authHandler', 'render');
-            this.picker = options.picker;
             this.globalEvents.on('authSet', this.authHandler);
             this.globalEvents.on('authRemoved', this.authHandler);
+            this.field = options.field;
         },
         events: {
             'click a.action-hide': 'hideHandler',
@@ -1086,11 +1121,12 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
             }));
         },
         hideHandler: function(e) {
-            this.picker.hidePicker();
+            this.appEvents.trigger('hidePicker', this.field.id);
             e.preventDefault();
         },
         logoutHandler: function(e) {
             this.removeAuth();
+            this.appEvents.trigger('hidePickers');
             e.preventDefault();
         }
     });
@@ -1112,18 +1148,32 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
     return BaseView.extend({
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker', 'hideHandler');
+            _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker');
             this.$el.hide();
             this.field = options.field;
-            this.appEvents.on('hidePickers', this.hideHandler);
             this.hider = new HiderView({
                 id: this.id + '-hider',
                 tagName: 'div',
                 className: 'ev-hider',
-                picker: this,
+                field: this.field,
                 appId: this.appId
             });
             this.$el.append(this.hider.$el);
+            this.appEvents.on('hidePickers', function(fieldId) {
+                if (!fieldId || (this.field.id !== fieldId)) {
+                    this.hidePicker();
+                }
+            }, this);
+            this.appEvents.on('showPicker', function(fieldId) {
+                if (this.field.id === fieldId && this.$el.is(':hidden')) {
+                    this.showPicker();
+                }
+            }, this);
+            this.appEvents.on('hidePicker', function(fieldId) {
+                if (this.field.id === fieldId) {
+                    this.hidePicker();
+                }
+            }, this);
             this.hider.render();
         },
         events: {
@@ -1137,7 +1187,7 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
                 content: content.toJSON()
             });
             this.field.model.set(this.model.attributes);
-            this.hidePicker();
+            this.appEvents.trigger('hidePicker', this.field.id);
             e.preventDefault();
         },
         hidePicker: function() {
@@ -1147,11 +1197,6 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
             // In case our authentication status has changed...re-render our hider
             this.hider.render();
             this.$el.fadeIn('fast');
-        },
-        hideHandler: function(picker) {
-            if(!picker || (this !== picker)) {
-                this.hidePicker();
-            }
         }
     });
 
@@ -2408,9 +2453,24 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                     this.renderActions();
                 }
             }, this));
-            this.appEvents.on('showPicker', function(id) {
-                if (this.id === id) {
-                    this.$('.action-choose').trigger('click');
+            this.appEvents.on('showPicker', function(fieldId) {
+                if (this.id === fieldId) {
+                    this.$('.action-choose').hide();
+                    // We only want one picker showing at a time so notify all fields to hide them (unless it's ours)
+                    if (this.config.hidePickers) {
+                        this.appEvents.trigger('hidePickers', this.id);
+                    }
+                }
+            }, this);
+            this.appEvents.on('hidePicker', function(fieldId) {
+                if (this.id === fieldId) {
+                    this.$('.action-choose').show();
+                }
+            }, this);
+            this.appEvents.on('hidePickers', function(fieldId) {
+                // When the picker for our field is hidden we need need to show our 'Choose' button
+                if (!fieldId || (this.id !== fieldId)) {
+                    this.$('.action-choose').show();
                 }
             }, this);
         },
@@ -2421,11 +2481,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
             'click .action-remove': 'removeHandler'
         },
         chooseHandler: function(e) {
-            // We only want one picker showing at a time so notify all fields to hide them (unless it's ours)
-            this.appEvents.trigger('hidePickers', this);
-            if (this.picker.$el.is(':hidden')) {
-                this.picker.showPicker();
-            }
+            this.appEvents.trigger('showPicker', this.id);
             e.preventDefault();
         },
         optionsHandler: function(e) {
@@ -2488,6 +2544,10 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                 name: name,
                 thumbnailUrl: thumbnailUrl
             }));
+            // If our picker is shown, hide our 'Choose' button
+            if (!this.picker.$el.is(':hidden')) {
+                this.$('.action-choose').hide();
+            }
         }
     });
 
@@ -2513,27 +2573,43 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
         // Lame unique id generator
         var appId = Math.floor(Math.random() * 10000000000000001).toString(16);
 
-        appOptions = appOptions || {};
-
-        // Get or create a new cache to store objects specific to EV installation
-        // but common across 'app' instances (e.g. videos accessible by a given user)
+        // Get or create a new cache to store objects specific to EV
+        // installation but common across 'app' instances (e.g. videos
+        // accessible by a given user).
         var evCache = cacheUtil.caches.get(appOptions.ensembleUrl);
         if (!evCache) {
             evCache = cacheUtil.caches.set(appOptions.ensembleUrl, new cacheUtil.Cache());
         }
 
-        // Add our configuration to the app cache...this is specific to this 'app'
-        // instance.  There may be multiple instances on a single page w/ unique
-        // settings.
-        cacheUtil.setAppConfig(appId, {
-            authId: appOptions.authId || 'ensemble',
-            ensembleUrl: appOptions.ensembleUrl || '',
-            authPath: appOptions.authPath || '',
-            authDomain: appOptions.authDomain || '',
-            urlCallback: appOptions.urlCallback || function(url) { return url; },
-            pageSize: parseInt(appOptions.pageSize || 100, 10),
-            scrollHeight: appOptions.scrollHeight || 600
-        });
+        var defaults = {
+            // Used in cookie keys for auth against an EV install.  If multiple
+            // apps pointing at differing EV installations exist on the same
+            // page, this should be unique between them.
+            authId: 'ensemble',
+            // Application root of the EV installation.
+            ensembleUrl: '',
+            // Cookie path.
+            authPath: '',
+            // Cookie domain.
+            authDomain: '',
+            // Models/collections will typically fetch directly from the API,
+            // but this method is called in case that needs to be overridden
+            // (e.g. in cross-domain scenarios where we're using a proxy).
+            urlCallback: function(url) { return url; },
+            // Number of results to fetch at a time from the server (page size).
+            pageSize: 100,
+            // The height of our scroll loader.
+            scrollHeight: 600,
+            // In scenarios where we have multiple fields on a page we want to
+            // automatically hide inactive pickers to preserve screen real
+            // estate.  Set to false to disable.
+            hidePickers: true
+        };
+
+        // Add our configuration to the app cache...this is specific to this
+        // 'app' instance.  There may be multiple instances on a single page w/
+        // unique settings.
+        var config = cacheUtil.setAppConfig(appId, _.extend({}, defaults, appOptions));
 
         // Create an event aggregator specific to our app
         eventsUtil.initEvents(appId);
@@ -2542,6 +2618,8 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
         // that span app instances
         this.globalEvents = eventsUtil.getEvents();
 
+        // TODO - document and add some flexibility to params (e.g. in addition
+        // to selector allow element or object).
         this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
             var $field = $(fieldSelector, fieldWrap);
             var fieldView = new FieldView({
@@ -2553,6 +2631,7 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
             });
         };
 
+        // TODO - document.  See handleField comment too.
         this.handleEmbed = function(embedWrap, settingsModel) {
             if (settingsModel instanceof VideoSettings) {
                 var videoEmbed = new VideoEmbedView({

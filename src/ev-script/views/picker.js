@@ -13,18 +13,32 @@ define(function(require) {
     return BaseView.extend({
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker', 'hideHandler');
+            _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker');
             this.$el.hide();
             this.field = options.field;
-            this.appEvents.on('hidePickers', this.hideHandler);
             this.hider = new HiderView({
                 id: this.id + '-hider',
                 tagName: 'div',
                 className: 'ev-hider',
-                picker: this,
+                field: this.field,
                 appId: this.appId
             });
             this.$el.append(this.hider.$el);
+            this.appEvents.on('hidePickers', function(fieldId) {
+                if (!fieldId || (this.field.id !== fieldId)) {
+                    this.hidePicker();
+                }
+            }, this);
+            this.appEvents.on('showPicker', function(fieldId) {
+                if (this.field.id === fieldId && this.$el.is(':hidden')) {
+                    this.showPicker();
+                }
+            }, this);
+            this.appEvents.on('hidePicker', function(fieldId) {
+                if (this.field.id === fieldId) {
+                    this.hidePicker();
+                }
+            }, this);
             this.hider.render();
         },
         events: {
@@ -38,7 +52,7 @@ define(function(require) {
                 content: content.toJSON()
             });
             this.field.model.set(this.model.attributes);
-            this.hidePicker();
+            this.appEvents.trigger('hidePicker', this.field.id);
             e.preventDefault();
         },
         hidePicker: function() {
@@ -48,11 +62,6 @@ define(function(require) {
             // In case our authentication status has changed...re-render our hider
             this.hider.render();
             this.$el.fadeIn('fast');
-        },
-        hideHandler: function(picker) {
-            if(!picker || (this !== picker)) {
-                this.hidePicker();
-            }
         }
     });
 

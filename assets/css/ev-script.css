@@ -364,11 +364,7 @@ div.ev-hider a {
   text-decoration: none;
 }
 
-/* line 75, ../sass/ev-script.scss */
-div.ev-field {
-  height: 60px;
-}
-/* line 77, ../sass/ev-script.scss */
+/* line 76, ../sass/ev-script.scss */
 div.ev-field .thumbnail {
   -webkit-box-shadow: 0 0 10px 1px;
   -moz-box-shadow: 0 0 10px 1px;
@@ -379,9 +375,10 @@ div.ev-field .thumbnail {
   margin-right: 20px;
   vertical-align: middle;
 }
-/* line 84, ../sass/ev-script.scss */
+/* line 83, ../sass/ev-script.scss */
 div.ev-field .thumbnail img {
   height: 100%;
+  max-height: 60px;
   vertical-align: middle;
 }
 /* line 89, ../sass/ev-script.scss */

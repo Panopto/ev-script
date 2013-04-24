@@ -97,9 +97,24 @@ define(function(require) {
                     this.renderActions();
                 }
             }, this));
-            this.appEvents.on('showPicker', function(id) {
-                if (this.id === id) {
-                    this.$('.action-choose').trigger('click');
+            this.appEvents.on('showPicker', function(fieldId) {
+                if (this.id === fieldId) {
+                    this.$('.action-choose').hide();
+                    // We only want one picker showing at a time so notify all fields to hide them (unless it's ours)
+                    if (this.config.hidePickers) {
+                        this.appEvents.trigger('hidePickers', this.id);
+                    }
+                }
+            }, this);
+            this.appEvents.on('hidePicker', function(fieldId) {
+                if (this.id === fieldId) {
+                    this.$('.action-choose').show();
+                }
+            }, this);
+            this.appEvents.on('hidePickers', function(fieldId) {
+                // When the picker for our field is hidden we need need to show our 'Choose' button
+                if (!fieldId || (this.id !== fieldId)) {
+                    this.$('.action-choose').show();
                 }
             }, this);
         },
@@ -110,11 +125,7 @@ define(function(require) {
             'click .action-remove': 'removeHandler'
         },
         chooseHandler: function(e) {
-            // We only want one picker showing at a time so notify all fields to hide them (unless it's ours)
-            this.appEvents.trigger('hidePickers', this);
-            if (this.picker.$el.is(':hidden')) {
-                this.picker.showPicker();
-            }
+            this.appEvents.trigger('showPicker', this.id);
             e.preventDefault();
         },
         optionsHandler: function(e) {
@@ -177,6 +188,10 @@ define(function(require) {
                 name: name,
                 thumbnailUrl: thumbnailUrl
             }));
+            // If our picker is shown, hide our 'Choose' button
+            if (!this.picker.$el.is(':hidden')) {
+                this.$('.action-choose').hide();
+            }
         }
     });
 

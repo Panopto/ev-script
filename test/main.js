@@ -15,7 +15,7 @@
             'jquery-ui': 'jquery-ui/jquery-ui',
             'jquery.cookie': 'jquery.cookie/jquery.cookie',
             'text': 'text/text',
-            'underscore': 'lodash/lodash',
+            'underscore': 'lodash/dist/lodash.underscore',
             'backbone': 'backbone/backbone'
         },
         shim: {

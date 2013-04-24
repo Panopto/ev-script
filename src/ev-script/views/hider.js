@@ -10,9 +10,9 @@ define(function(require) {
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'hideHandler', 'logoutHandler', 'authHandler', 'render');
-            this.picker = options.picker;
             this.globalEvents.on('authSet', this.authHandler);
             this.globalEvents.on('authRemoved', this.authHandler);
+            this.field = options.field;
         },
         events: {
             'click a.action-hide': 'hideHandler',
@@ -29,11 +29,12 @@ define(function(require) {
             }));
         },
         hideHandler: function(e) {
-            this.picker.hidePicker();
+            this.appEvents.trigger('hidePicker', this.field.id);
             e.preventDefault();
         },
         logoutHandler: function(e) {
             this.removeAuth();
+            this.appEvents.trigger('hidePickers');
             e.preventDefault();
         }
     });

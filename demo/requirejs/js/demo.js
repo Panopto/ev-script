@@ -10,7 +10,7 @@
             'jquery':  'jquery/jquery',
             'jquery-ui': 'jquery-ui/jquery-ui',
             'jquery.cookie': 'jquery.cookie/jquery.cookie',
-            'underscore': 'lodash/lodash',
+            'underscore': 'lodash/dist/lodash.underscore',
             'backbone': 'backbone/backbone',
             'ev-config': '../../ev-config'
         },

@@ -17,7 +17,7 @@ module.exports = function(grunt) {
                 'jquery-ui': 'jquery-ui/jquery-ui',
                 'jquery.cookie': 'jquery.cookie/jquery.cookie',
                 'ev-scroll-loader': '../ev-scroll-loader',
-                'underscore': 'lodash/lodash',
+                'underscore': 'lodash/dist/lodash.underscore',
                 'backbone': 'backbone/backbone',
                 'text': 'text/text'
             },
@@ -132,11 +132,13 @@ module.exports = function(grunt) {
         grunt.log.writeln('Starting ssl web server in "' + base + '" on port ' + port + '.');
         var app = connect()
         //.use(connect.logger())
+        .use(connect.urlencoded())
         .use(connect.cookieParser())
         .use(connect['static'](base))
         .use(connect.directory(base))
         .use(function(req, res) {
             var parsed = url.parse(req.url, true);
+            // Proxy for EV API requests
             if (parsed.pathname === settings.proxyPath) {
                 var authId = parsed.query.authId,
                     apiUrl = parsed.query.request,
@@ -158,6 +160,16 @@ module.exports = function(grunt) {
                     res.statusCode = 400;
                     res.end("Missing request parameter.");
                 }
+            }
+            // LTI demo launch path
+            else if (parsed.pathname === '/demo/lti/launch' && req.method === 'POST') {
+                // console.log(req);
+                var returnUrl = req.body.launch_presentation_return_url;
+                // We're just doing a simple redirect here
+                res.writeHead(302, {
+                    'Location': 'https://' + req.headers['host'] + '/demo/lti/index.html?return_url=' + encodeURIComponent(returnUrl)
+                });
+                res.end();
             }
         });
         https.createServer({
