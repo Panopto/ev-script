@@ -60,7 +60,7 @@ div.ev-dialog div.ui-dialog-titlebar {
 }
 
 .ui-tabs .ui-tabs-panel {
-    padding: 0;
+    padding: 1em 0;
     background-color: #FBFBFB;
 }
 
