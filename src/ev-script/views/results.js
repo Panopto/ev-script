@@ -45,7 +45,8 @@ define(function(require) {
             var previewView = new this.previewClass({
                 el: element,
                 model: new this.modelClass(settings),
-                appId: this.appId
+                appId: this.appId,
+                picker: this.picker
             });
             // Stop event propagation so we don't trigger preview of stored field item as well
             e.stopPropagation();
