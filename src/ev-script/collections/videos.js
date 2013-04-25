@@ -13,12 +13,12 @@ define(function(require) {
             this.pageIndex = 1;
         },
         url: function() {
-            var api_url = this.config.ensembleUrl + this.sourceUrl;
-            var sizeParam = 'PageSize=' + this.config.pageSize;
-            var indexParam = 'PageIndex=' + this.pageIndex;
-            var onParam = 'FilterOn=' + encodeURIComponent(this.filterOn);
-            var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
-            var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+            var api_url = this.config.ensembleUrl + this.sourceUrl,
+                sizeParam = 'PageSize=' + this.config.pageSize,
+                indexParam = 'PageIndex=' + this.pageIndex,
+                onParam = 'FilterOn=' + encodeURIComponent(this.filterOn),
+                valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue),
+                url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
         }
     });
