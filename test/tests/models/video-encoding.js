@@ -38,8 +38,8 @@ define(function(require) {
 
     q.test('test parse', 2, function() {
         q.deepEqual(this.encoding.parse({
-            dataSet: {
-                encodings: {
+            videos: {
+                videoEncodings: {
                     encodingId: 'foo'
                 }
             }
@@ -47,8 +47,8 @@ define(function(require) {
             encodingId: 'foo'
         });
         q.deepEqual(this.encoding.parse({
-            dataSet: {
-                encodings: [
+            videos: {
+                videoEncodings: [
                     {
                         bitrate: "10"
                     }, {
@@ -89,11 +89,10 @@ define(function(require) {
             success: _.bind(function(collection) {
                 this.encoding.set('fetchId', collection.at(0).id);
                 this.encoding.fetch({
-                    dataType: 'jsonp',
                     success: _.bind(function(model, response) {
                         q.start();
                         console.log(JSON.stringify(model));
-                        q.strictEqual(this.encoding.get('encodingId'), response.dataSet.encodings.encodingId);
+                        q.strictEqual(this.encoding.get('encodingId'), response.videos.videoEncodings.encodingId);
                     }, this)
                 });
             }, this)

@@ -18,6 +18,7 @@ define(function(require) {
             }, {
                 appId: this.appId
             });
+            this.picker = options.picker;
             var success = _.bind(function() {
                 if (!this.model.get('width') || !this.model.get('height')) {
                     this.model.set({
@@ -29,8 +30,10 @@ define(function(require) {
             }, this);
             if (this.encoding.isNew()) {
                 this.encoding.fetch({
-                    dataType: 'jsonp',
-                    success: success
+                    success: success,
+                    // The loader indicator will show if it detects an AJAX
+                    // request on our picker
+                    picker: this.picker
                 });
             } else {
                 success();

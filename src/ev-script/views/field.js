@@ -50,9 +50,7 @@ define(function(require) {
                     this.encoding.set({
                         fetchId: this.model.id
                     });
-                    this.encoding.fetch({
-                        dataType: 'jsonp'
-                    });
+                    this.encoding.fetch();
                 }
                 this.model.on('change:id', _.bind(function() {
                     // Only fetch encoding if identifier is set
@@ -61,7 +59,6 @@ define(function(require) {
                             fetchId: this.model.id
                         });
                         this.encoding.fetch({
-                            dataType: 'jsonp',
                             success: _.bind(function(response) {
                                 this.model.set({
                                     width: this.encoding.getWidth(),

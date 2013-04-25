@@ -13,11 +13,16 @@ define(function(require) {
             this.config = cacheUtil.getAppConfig(this.appId);
         },
         url: function() {
-            return this.config.ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');
+            // Note we're not doing a JSONP request but we're using the JSONP
+            // response because it's the closest to valid JSON the API will
+            // provide.  We'll strip the padding below with our dataFilter.
+            var url = this.config.ensembleUrl + '/app/simpleapi/video/show.jsonp/' + this.get('fetchId');
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
         },
         getDims: function() {
-            var dimsStrs = this.get('dimensions').split('x');
-            var dims = [];
+            var dimsRaw = this.get('dimensions') || "640x360",
+                dimsStrs = dimsRaw.split('x'),
+                dims = [];
             dims[0] = parseInt(dimsStrs[0], 10);
             dims[1] = parseInt(dimsStrs[1], 10);
             return dims;
@@ -33,14 +38,24 @@ define(function(require) {
             return this.getDims()[1];
         },
         parse: function(response) {
-            if (_.isArray(response.dataSet.encodings)) {
+            if (_.isArray(response.videos.videoEncodings)) {
                 // This is a collection, so return the highest bitrate encoding
-                return _.max(response.dataSet.encodings, function(encoding, index, encodings) {
+                return _.max(response.videos.videoEncodings, function(encoding, index, encodings) {
                     return parseInt(encoding.bitrate, 10);
                 });
             } else {
-                return response.dataSet.encodings;
+                return response.videos.videoEncodings;
             }
+        },
+        sync: function(method, model, options) {
+            _.extend(options, {
+                dataFilter: function(data) {
+                    // Strip padding from JSONP response
+                    var match = data.match(/\{.*\}/);
+                    return match[0];
+                }
+            });
+            return Backbone.sync.call(this, method, model, options);
         }
     });
 
