@@ -1,5 +1,5 @@
 /**
- * ev-script 0.2.1 2013-04-23
+ * ev-script 0.2.1 2013-04-25
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -975,8 +975,8 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
                 modal: true,
                 draggable: false,
                 resizable: false,
-                width: Math.min(540, $(window).width() - 20),
-                height: 250,
+                width: Math.min(540, $(window).width() - 40),
+                height: Math.min(250, $(window).height() - 40),
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {
                     this.$dialog.html(html);
@@ -1380,7 +1380,8 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
             var previewView = new this.previewClass({
                 el: element,
                 model: new this.modelClass(settings),
-                appId: this.appId
+                appId: this.appId,
+                picker: this.picker
             });
             // Stop event propagation so we don't trigger preview of stored field item as well
             e.stopPropagation();
@@ -1464,31 +1465,44 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
     return BaseView.extend({
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            var $dialogWrap = $('<div class="dialogWrap"></div>');
+            var $dialogWrap = $('<div class="dialogWrap"></div>'),
+                content = this.model.get('content'),
+                embedSettings = new this.model.constructor(this.model.toJSON()),
+                // Desired media dimensions
+                mediaDims = {
+                    width: this.model.get('width') || (this.model instanceof VideoSettings ? 640 : 800),
+                    height: this.model.get('height') || (this.model instanceof VideoSettings ? 360 : 850)
+                },
+                // Dialog dimensions TBD
+                dialogDims = {},
+                // Desired difference between media width and containing dialog width
+                widthOffset = 50,
+                // Desired difference between media height and containing dialog height
+                heightOffset = 140,
+                // Used for scaling media dimensions to fit within desired dialog size
+                ratio,
+                // Maximum width of media based on desired dialog width
+                maxWidth,
+                // Our dialog
+                $dialog;
             this.$el.after($dialogWrap);
-            var content = this.model.get('content');
-            var width = this.model.get('width');
-            width = (width ? width : (this.model instanceof VideoSettings ? 640 : 800));
-            var height = this.model.get('height');
-            height = (height ? height : (this.model instanceof VideoSettings ? 360 : 850));
-            var embedSettings = new this.model.constructor(this.model.toJSON());
-            var dialogWidth = width + 50;
-            var dialogHeight = height + 140;
-            var maxWidth = $(window).width() - 20;
-            // Contain preview within window
-            if (dialogWidth > maxWidth) {
-                var origWidth = dialogWidth;
-                dialogWidth = maxWidth;
-                var ratio = maxWidth / origWidth;
-                embedSettings.set('width', width * ratio);
-                dialogHeight = dialogHeight * ratio;
-                embedSettings.set('height', height * ratio);
+            dialogDims.width = Math.min(mediaDims.width + widthOffset, $(window).width() - 40);
+            dialogDims.height = Math.min(mediaDims.height + heightOffset, $(window).height() - 40);
+            maxWidth = dialogDims.width - widthOffset;
+            // Only bother scaling if we're dealing with videos and if width is
+            // too big
+            if (this.model instanceof VideoSettings && mediaDims.width > maxWidth) {
+                ratio = maxWidth / mediaDims.width;
+                mediaDims.width = mediaDims.width * ratio;
+                mediaDims.height = mediaDims.height * ratio;
             }
-            $dialogWrap.dialog({
+            embedSettings.set('width', mediaDims.width);
+            embedSettings.set('height', mediaDims.height);
+            $dialog = $dialogWrap.dialog({
                 title: content.Title || content.Name,
                 modal: true,
-                width: dialogWidth,
-                height: dialogHeight,
+                width: dialogDims.width,
+                height: dialogDims.height,
                 draggable: false,
                 resizable: false,
                 dialogClass: 'ev-dialog',
@@ -1550,11 +1564,16 @@ define('ev-script/models/video-encoding',['require','backbone','underscore','ev-
             this.config = cacheUtil.getAppConfig(this.appId);
         },
         url: function() {
-            return this.config.ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');
+            // Note we're not doing a JSONP request but we're using the JSONP
+            // response because it's the closest to valid JSON the API will
+            // provide.  We'll strip the padding below with our dataFilter.
+            var url = this.config.ensembleUrl + '/app/simpleapi/video/show.jsonp/' + this.get('fetchId');
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
         },
         getDims: function() {
-            var dimsStrs = this.get('dimensions').split('x');
-            var dims = [];
+            var dimsRaw = this.get('dimensions') || "640x360",
+                dimsStrs = dimsRaw.split('x'),
+                dims = [];
             dims[0] = parseInt(dimsStrs[0], 10);
             dims[1] = parseInt(dimsStrs[1], 10);
             return dims;
@@ -1570,14 +1589,24 @@ define('ev-script/models/video-encoding',['require','backbone','underscore','ev-
             return this.getDims()[1];
         },
         parse: function(response) {
-            if (_.isArray(response.dataSet.encodings)) {
+            if (_.isArray(response.videos.videoEncodings)) {
                 // This is a collection, so return the highest bitrate encoding
-                return _.max(response.dataSet.encodings, function(encoding, index, encodings) {
+                return _.max(response.videos.videoEncodings, function(encoding, index, encodings) {
                     return parseInt(encoding.bitrate, 10);
                 });
             } else {
-                return response.dataSet.encodings;
+                return response.videos.videoEncodings;
             }
+        },
+        sync: function(method, model, options) {
+            _.extend(options, {
+                dataFilter: function(data) {
+                    // Strip padding from JSONP response
+                    var match = data.match(/\{.*\}/);
+                    return match[0];
+                }
+            });
+            return Backbone.sync.call(this, method, model, options);
         }
     });
 
@@ -1603,6 +1632,7 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
             }, {
                 appId: this.appId
             });
+            this.picker = options.picker;
             var success = _.bind(function() {
                 if (!this.model.get('width') || !this.model.get('height')) {
                     this.model.set({
@@ -1614,8 +1644,10 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
             }, this);
             if (this.encoding.isNew()) {
                 this.encoding.fetch({
-                    dataType: 'jsonp',
-                    success: success
+                    success: success,
+                    // The loader indicator will show if it detects an AJAX
+                    // request on our picker
+                    picker: this.picker
                 });
             } else {
                 success();
@@ -1710,12 +1742,12 @@ define('ev-script/collections/videos',['require','ev-script/collections/base'],f
             this.pageIndex = 1;
         },
         url: function() {
-            var api_url = this.config.ensembleUrl + this.sourceUrl;
-            var sizeParam = 'PageSize=' + this.config.pageSize;
-            var indexParam = 'PageIndex=' + this.pageIndex;
-            var onParam = 'FilterOn=' + encodeURIComponent(this.filterOn);
-            var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
-            var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+            var api_url = this.config.ensembleUrl + this.sourceUrl,
+                sizeParam = 'PageSize=' + this.config.pageSize,
+                indexParam = 'PageIndex=' + this.pageIndex,
+                onParam = 'FilterOn=' + encodeURIComponent(this.filterOn),
+                valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue),
+                url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
         }
     });
@@ -1923,8 +1955,8 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
                 draggable: false,
                 resizable: false,
                 dialogClass: 'ev-dialog',
-                width: Math.min(340, $(window).width() - 20),
-                height: 320
+                width: Math.min(340, $(window).width() - 40),
+                height: Math.min(320, $(window).height() - 40)
             });
         }
     });
@@ -2406,9 +2438,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                     this.encoding.set({
                         fetchId: this.model.id
                     });
-                    this.encoding.fetch({
-                        dataType: 'jsonp'
-                    });
+                    this.encoding.fetch();
                 }
                 this.model.on('change:id', _.bind(function() {
                     // Only fetch encoding if identifier is set
@@ -2417,7 +2447,6 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                             fetchId: this.model.id
                         });
                         this.encoding.fetch({
-                            dataType: 'jsonp',
                             success: _.bind(function(response) {
                                 this.model.set({
                                     width: this.encoding.getWidth(),
