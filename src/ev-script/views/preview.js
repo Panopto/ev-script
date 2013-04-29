@@ -34,8 +34,8 @@ define(function(require) {
                 // Our dialog
                 $dialog;
             this.$el.after($dialogWrap);
-            dialogDims.width = Math.min(mediaDims.width + widthOffset, $(window).width() - 40);
-            dialogDims.height = Math.min(mediaDims.height + heightOffset, $(window).height() - 40);
+            dialogDims.width = Math.min(mediaDims.width + widthOffset, $(window).width() - this.config.dialogMargin);
+            dialogDims.height = Math.min(mediaDims.height + heightOffset, $(window).height() - this.config.dialogMargin);
             maxWidth = dialogDims.width - widthOffset;
             // Only bother scaling if we're dealing with videos and if width is
             // too big

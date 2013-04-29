@@ -78,8 +78,8 @@ define(function(require) {
                 draggable: false,
                 resizable: false,
                 dialogClass: 'ev-dialog',
-                width: Math.min(340, $(window).width() - 40),
-                height: Math.min(320, $(window).height() - 40)
+                width: Math.min(340, $(window).width() - this.config.dialogMargin),
+                height: Math.min(320, $(window).height() - this.config.dialogMargin)
             });
         }
     });

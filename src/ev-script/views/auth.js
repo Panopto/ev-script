@@ -30,8 +30,8 @@ define(function(require, template) {
                 modal: true,
                 draggable: false,
                 resizable: false,
-                width: Math.min(540, $(window).width() - 40),
-                height: Math.min(250, $(window).height() - 40),
+                width: Math.min(540, $(window).width() - this.config.dialogMargin),
+                height: Math.min(250, $(window).height() - this.config.dialogMargin),
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {
                     this.$dialog.html(html);

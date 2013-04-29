@@ -1,5 +1,5 @@
 /**
- * ev-script 0.2.1 2013-04-25
+ * ev-script 0.2.1 2013-04-29
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -975,8 +975,8 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
                 modal: true,
                 draggable: false,
                 resizable: false,
-                width: Math.min(540, $(window).width() - 40),
-                height: Math.min(250, $(window).height() - 40),
+                width: Math.min(540, $(window).width() - this.config.dialogMargin),
+                height: Math.min(250, $(window).height() - this.config.dialogMargin),
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {
                     this.$dialog.html(html);
@@ -1486,8 +1486,8 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
                 // Our dialog
                 $dialog;
             this.$el.after($dialogWrap);
-            dialogDims.width = Math.min(mediaDims.width + widthOffset, $(window).width() - 40);
-            dialogDims.height = Math.min(mediaDims.height + heightOffset, $(window).height() - 40);
+            dialogDims.width = Math.min(mediaDims.width + widthOffset, $(window).width() - this.config.dialogMargin);
+            dialogDims.height = Math.min(mediaDims.height + heightOffset, $(window).height() - this.config.dialogMargin);
             maxWidth = dialogDims.width - widthOffset;
             // Only bother scaling if we're dealing with videos and if width is
             // too big
@@ -1955,8 +1955,8 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
                 draggable: false,
                 resizable: false,
                 dialogClass: 'ev-dialog',
-                width: Math.min(340, $(window).width() - 40),
-                height: Math.min(320, $(window).height() - 40)
+                width: Math.min(340, $(window).width() - this.config.dialogMargin),
+                height: Math.min(320, $(window).height() - this.config.dialogMargin)
             });
         }
     });
@@ -2632,7 +2632,9 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
             // In scenarios where we have multiple fields on a page we want to
             // automatically hide inactive pickers to preserve screen real
             // estate.  Set to false to disable.
-            hidePickers: true
+            hidePickers: true,
+            // The difference between window dimensions and maximum dialog size.
+            dialogMargin: 40
         };
 
         // Add our configuration to the app cache...this is specific to this

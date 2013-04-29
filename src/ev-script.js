@@ -48,7 +48,9 @@ define(function(require) {
             // In scenarios where we have multiple fields on a page we want to
             // automatically hide inactive pickers to preserve screen real
             // estate.  Set to false to disable.
-            hidePickers: true
+            hidePickers: true,
+            // The difference between window dimensions and maximum dialog size.
+            dialogMargin: 40
         };
 
         // Add our configuration to the app cache...this is specific to this
