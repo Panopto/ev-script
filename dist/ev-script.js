@@ -1574,8 +1574,8 @@ define('ev-script/models/video-encoding',['require','backbone','underscore','ev-
             var dimsRaw = this.get('dimensions') || "640x360",
                 dimsStrs = dimsRaw.split('x'),
                 dims = [];
-            dims[0] = parseInt(dimsStrs[0], 10);
-            dims[1] = parseInt(dimsStrs[1], 10);
+            dims[0] = parseInt(dimsStrs[0], 10) || 640;
+            dims[1] = parseInt(dimsStrs[1], 10) || 360;
             return dims;
         },
         getRatio: function() {
@@ -2412,6 +2412,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler');
             this.$field = options.$field;
+            this.showChoose = true;
             var pickerOptions = {
                 id: this.id + '-picker',
                 tagName: 'div',
@@ -2485,6 +2486,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
             this.appEvents.on('showPicker', function(fieldId) {
                 if (this.id === fieldId) {
                     this.$('.action-choose').hide();
+                    this.showChoose = false;
                     // We only want one picker showing at a time so notify all fields to hide them (unless it's ours)
                     if (this.config.hidePickers) {
                         this.appEvents.trigger('hidePickers', this.id);
@@ -2494,12 +2496,14 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
             this.appEvents.on('hidePicker', function(fieldId) {
                 if (this.id === fieldId) {
                     this.$('.action-choose').show();
+                    this.showChoose = true;
                 }
             }, this);
             this.appEvents.on('hidePickers', function(fieldId) {
                 // When the picker for our field is hidden we need need to show our 'Choose' button
                 if (!fieldId || (this.id !== fieldId)) {
                     this.$('.action-choose').show();
+                    this.showChoose = true;
                 }
             }, this);
         },
@@ -2574,7 +2578,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                 thumbnailUrl: thumbnailUrl
             }));
             // If our picker is shown, hide our 'Choose' button
-            if (!this.picker.$el.is(':hidden')) {
+            if (!this.showChoose) {
                 this.$('.action-choose').hide();
             }
         }
