@@ -1,5 +1,5 @@
 /**
- * ev-script 0.2.1 2013-04-29
+ * ev-script 0.2.1 2013-05-01
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -1602,7 +1602,7 @@ define('ev-script/models/video-encoding',['require','backbone','underscore','ev-
             _.extend(options, {
                 dataFilter: function(data) {
                     // Strip padding from JSONP response
-                    var match = data.match(/\{.*\}/);
+                    var match = data.match(/\{[\s\S]*\}/);
                     return match[0];
                 }
             });
