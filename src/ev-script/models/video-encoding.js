@@ -51,7 +51,7 @@ define(function(require) {
             _.extend(options, {
                 dataFilter: function(data) {
                     // Strip padding from JSONP response
-                    var match = data.match(/\{.*\}/);
+                    var match = data.match(/\{[\s\S]*\}/);
                     return match[0];
                 }
             });
