@@ -14,7 +14,9 @@ define(function(require) {
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             var $dialogWrap = $('<div class="dialogWrap"></div>'),
-                content = this.model.get('content'),
+                content = this.model.get('content') || {
+                    Title: this.model.get('id')
+                },
                 embedSettings = new this.model.constructor(this.model.toJSON()),
                 // Desired media dimensions
                 mediaDims = {

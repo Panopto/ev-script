@@ -79,6 +79,12 @@ define(function(require) {
         },
         setCachedOrgs: function(user, value) {
             return cacheUtil.getUserCache(this.config.ensembleUrl, user).set('orgs', value);
+        },
+        getCachedWorkflows: function(user) {
+            return cacheUtil.getUserCache(this.config.ensembleUrl, user).get('workflows');
+        },
+        setCachedWorkflows: function(user, value) {
+            return cacheUtil.getUserCache(this.config.ensembleUrl, user).set('workflows', value);
         }
     });
 

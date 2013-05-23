@@ -71,8 +71,9 @@ define(function(require) {
                 model: this.field.model
             }));
             this.renderSize();
+            var content = this.field.model.get('content');
             this.$el.dialog({
-                title: this.field.model.get('content').Title,
+                title: (content ? content.Title : this.field.model.get('id')),
                 modal: true,
                 autoOpen: false,
                 draggable: false,

@@ -13,7 +13,8 @@ define(function(require) {
         VideoEncoding = require('ev-script/models/video-encoding'),
         PlaylistPickerView = require('ev-script/views/playlist-picker'),
         PlaylistSettingsView = require('ev-script/views/playlist-settings'),
-        PlaylistPreviewView = require('ev-script/views/playlist-preview');
+        PlaylistPreviewView = require('ev-script/views/playlist-preview'),
+        UploadView = require('ev-script/views/upload');
 
     /*
      * View for our field (element that we set with the selected content identifier)
@@ -22,7 +23,7 @@ define(function(require) {
         template: _.template(require('text!ev-script/templates/field.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler');
+            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler', 'uploadHandler');
             this.$field = options.$field;
             this.showChoose = true;
             var pickerOptions = {
@@ -123,7 +124,8 @@ define(function(require) {
             'click .action-choose': 'chooseHandler',
             'click .action-preview': 'previewHandler',
             'click .action-options': 'optionsHandler',
-            'click .action-remove': 'removeHandler'
+            'click .action-remove': 'removeHandler',
+            'click .action-upload': 'uploadHandler'
         },
         chooseHandler: function(e) {
             this.appEvents.trigger('showPicker', this.id);
@@ -152,6 +154,15 @@ define(function(require) {
                 encoding: this.encoding,
                 model: this.model,
                 appId: this.appId
+            });
+            e.preventDefault();
+        },
+        uploadHandler: function(e) {
+            var element = e.currentTarget;
+            var uploadView = new UploadView({
+                el: element,
+                appId: this.appId,
+                field: this
             });
             e.preventDefault();
         },
