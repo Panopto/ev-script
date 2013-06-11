@@ -491,20 +491,20 @@ define('ev-script/util/auth',['require','jquery','underscore','ev-script/util/ev
         getUser: function(ensembleUrl) {
             return $.cookie(ensembleUrl + '-user');
         },
-        setAuth: function(ensembleUrl, authDomain, authPath, username, password) {
+        login: function(ensembleUrl, authDomain, authPath, username, password) {
             username += (authDomain ? '@' + authDomain : '');
             var cookieOptions = { path: authPath };
             $.cookie(ensembleUrl + '-user', username, _.extend({}, cookieOptions));
             $.cookie(ensembleUrl + '-pass', password, _.extend({}, cookieOptions));
-            globalEvents.trigger('authSet', ensembleUrl);
+            globalEvents.trigger('loggedIn', ensembleUrl);
         },
-        removeAuth: function(ensembleUrl, authPath) {
+        logout: function(ensembleUrl, authPath) {
             var cookieOptions = { path: authPath };
             $.cookie(ensembleUrl + '-user', null, _.extend({}, cookieOptions));
             $.cookie(ensembleUrl + '-pass', null, _.extend({}, cookieOptions));
-            globalEvents.trigger('authRemoved', ensembleUrl);
+            globalEvents.trigger('loggedOut', ensembleUrl);
         },
-        hasAuth: function(ensembleUrl) {
+        isAuthenticated: function(ensembleUrl) {
             return $.cookie(ensembleUrl + '-user') && $.cookie(ensembleUrl + '-pass');
         }
     };
@@ -991,7 +991,7 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
                 var username = $('#username', $form).val();
                 var password = $('#password', $form).val();
                 if (username && password) {
-                    authUtil.setAuth(this.config.ensembleUrl, this.config.authDomain, this.config.authPath, username, password);
+                    authUtil.login(this.config.ensembleUrl, this.config.authDomain, this.config.authPath, username, password);
                     this.$dialog.dialog('destroy').remove();
                     this.submitCallback();
                 }
@@ -1032,7 +1032,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
         },
         ajaxError: function(xhr, authCallback) {
             if (xhr.status === 401) {
-                this.removeAuth();
+                this.logout();
                 var authView = new AuthView({
                     el: this.el,
                     submitCallback: authCallback,
@@ -1051,14 +1051,14 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
         getUser: function() {
             return authUtil.getUser(this.config.ensembleUrl);
         },
-        setAuth: function(username, password) {
-            authUtil.setAuth(this.config.ensembleUrl, this.config.authDomain, this.config.authPath, username, password);
+        login: function(username, password) {
+            authUtil.login(this.config.ensembleUrl, this.config.authDomain, this.config.authPath, username, password);
         },
-        removeAuth: function() {
-            authUtil.removeAuth(this.config.ensembleUrl, this.config.authPath);
+        logout: function() {
+            authUtil.logout(this.config.ensembleUrl, this.config.authPath);
         },
-        hasAuth: function() {
-            return authUtil.hasAuth(this.config.ensembleUrl);
+        isAuthenticated: function() {
+            return authUtil.isAuthenticated(this.config.ensembleUrl);
         },
         getCachedVideos: function(user, key) {
             return getCachedValue(this.config.ensembleUrl, user, 'videos', key);
@@ -1088,7 +1088,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
 
 });
 
-define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="Hide Picker">Hide</a>\n<% if (hasAuth) { %>\n    <a class="action-logout" href="#" title="Logout">Logout</a>\n<% } %>\n';});
+define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="Hide Picker">Hide</a>\n<% if (isAuthenticated) { %>\n    <a class="action-logout" href="#" title="Logout">Logout</a>\n<% } %>\n';});
 
 define('ev-script/views/hider',['require','underscore','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
 
@@ -1102,8 +1102,8 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'hideHandler', 'logoutHandler', 'authHandler', 'render');
-            this.globalEvents.on('authSet', this.authHandler);
-            this.globalEvents.on('authRemoved', this.authHandler);
+            this.globalEvents.on('loggedIn', this.authHandler);
+            this.globalEvents.on('loggedOut', this.authHandler);
             this.field = options.field;
         },
         events: {
@@ -1117,7 +1117,7 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
         },
         render: function() {
             this.$el.html(this.template({
-                hasAuth: this.hasAuth()
+                isAuthenticated: this.isAuthenticated()
             }));
         },
         hideHandler: function(e) {
@@ -1125,7 +1125,7 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
             e.preventDefault();
         },
         logoutHandler: function(e) {
-            this.removeAuth();
+            this.logout();
             this.appEvents.trigger('hidePickers');
             e.preventDefault();
         }

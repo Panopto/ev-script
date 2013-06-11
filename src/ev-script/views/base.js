@@ -28,7 +28,7 @@ define(function(require) {
         },
         ajaxError: function(xhr, authCallback) {
             if (xhr.status === 401) {
-                this.removeAuth();
+                this.logout();
                 var authView = new AuthView({
                     el: this.el,
                     submitCallback: authCallback,
@@ -47,14 +47,14 @@ define(function(require) {
         getUser: function() {
             return authUtil.getUser(this.config.ensembleUrl);
         },
-        setAuth: function(username, password) {
-            authUtil.setAuth(this.config.ensembleUrl, this.config.authDomain, this.config.authPath, username, password);
+        login: function(username, password) {
+            authUtil.login(this.config.ensembleUrl, this.config.authDomain, this.config.authPath, username, password);
         },
-        removeAuth: function() {
-            authUtil.removeAuth(this.config.ensembleUrl, this.config.authPath);
+        logout: function() {
+            authUtil.logout(this.config.ensembleUrl, this.config.authPath);
         },
-        hasAuth: function() {
-            return authUtil.hasAuth(this.config.ensembleUrl);
+        isAuthenticated: function() {
+            return authUtil.isAuthenticated(this.config.ensembleUrl);
         },
         getCachedVideos: function(user, key) {
             return getCachedValue(this.config.ensembleUrl, user, 'videos', key);

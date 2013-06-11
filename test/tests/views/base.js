@@ -39,11 +39,11 @@ define(function(require) {
     });
 
     q.test('test auth convenience methods', 3, function() {
-        this.view.setAuth('foo', 'bar');
-        q.ok(this.view.hasAuth());
+        this.view.login('foo', 'bar');
+        q.ok(this.view.isAuthenticated());
         q.strictEqual(this.view.getUser(), 'foo');
-        this.view.removeAuth();
-        q.ok(!this.view.hasAuth());
+        this.view.logout();
+        q.ok(!this.view.isAuthenticated());
     });
 
     q.test('test cache convenience methods', 4, function() {
@@ -65,9 +65,9 @@ define(function(require) {
     q.test('test has functions', 13, function() {
         q.ok(_.isFunction(this.view.ajaxError));
         q.ok(_.isFunction(this.view.getUser));
-        q.ok(_.isFunction(this.view.setAuth));
-        q.ok(_.isFunction(this.view.removeAuth));
-        q.ok(_.isFunction(this.view.hasAuth));
+        q.ok(_.isFunction(this.view.login));
+        q.ok(_.isFunction(this.view.logout));
+        q.ok(_.isFunction(this.view.isAuthenticated));
         q.ok(_.isFunction(this.view.getCachedVideos));
         q.ok(_.isFunction(this.view.setCachedVideos));
         q.ok(_.isFunction(this.view.getCachedPlaylists));

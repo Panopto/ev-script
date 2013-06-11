@@ -10,20 +10,20 @@ define(function(require) {
         getUser: function(ensembleUrl) {
             return $.cookie(ensembleUrl + '-user');
         },
-        setAuth: function(ensembleUrl, authDomain, authPath, username, password) {
+        login: function(ensembleUrl, authDomain, authPath, username, password) {
             username += (authDomain ? '@' + authDomain : '');
             var cookieOptions = { path: authPath };
             $.cookie(ensembleUrl + '-user', username, _.extend({}, cookieOptions));
             $.cookie(ensembleUrl + '-pass', password, _.extend({}, cookieOptions));
-            globalEvents.trigger('authSet', ensembleUrl);
+            globalEvents.trigger('loggedIn', ensembleUrl);
         },
-        removeAuth: function(ensembleUrl, authPath) {
+        logout: function(ensembleUrl, authPath) {
             var cookieOptions = { path: authPath };
             $.cookie(ensembleUrl + '-user', null, _.extend({}, cookieOptions));
             $.cookie(ensembleUrl + '-pass', null, _.extend({}, cookieOptions));
-            globalEvents.trigger('authRemoved', ensembleUrl);
+            globalEvents.trigger('loggedOut', ensembleUrl);
         },
-        hasAuth: function(ensembleUrl) {
+        isAuthenticated: function(ensembleUrl) {
             return $.cookie(ensembleUrl + '-user') && $.cookie(ensembleUrl + '-pass');
         }
     };

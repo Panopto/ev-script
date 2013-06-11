@@ -51,12 +51,12 @@ define(function(require) {
         q.ok($username.length > 0);
         q.ok($password.length > 0);
         // Make sure form works as expected
-        q.ok(!authUtil.hasAuth(config.ensembleUrl));
+        q.ok(!authUtil.isAuthenticated(config.ensembleUrl));
         $username.val(config.testUser);
         $password.val(config.testPass);
         q.stop();
         this.view.submitCallback = function() {
-            q.ok(authUtil.hasAuth(config.ensembleUrl));
+            q.ok(authUtil.isAuthenticated(config.ensembleUrl));
             q.strictEqual(authUtil.getUser(config.ensembleUrl), config.testUser);
             q.strictEqual($('.ev-auth').length, 0);
             q.start();

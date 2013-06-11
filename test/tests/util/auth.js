@@ -13,9 +13,9 @@ define(function(require) {
 
     q.test('check api', 5, function() {
         q.ok(_.isFunction(auth.getUser), 'expected getUser');
-        q.ok(_.isFunction(auth.hasAuth), 'expected hasAuth');
-        q.ok(_.isFunction(auth.setAuth), 'expected setAuth');
-        q.ok(_.isFunction(auth.removeAuth), 'expected removeAuth');
+        q.ok(_.isFunction(auth.isAuthenticated), 'expected isAuthenticated');
+        q.ok(_.isFunction(auth.login), 'expected login');
+        q.ok(_.isFunction(auth.logout), 'expected logout');
         q.equal(_.size(auth), 4, 'is something exposed but not tested?');
     });
 
@@ -23,42 +23,42 @@ define(function(require) {
         var ensembleUrl = Math.random() + '',
             username = 'foo',
             password = 'bar';
-        auth.setAuth(ensembleUrl, '', '', username, password);
-        q.ok(auth.hasAuth(ensembleUrl));
+        auth.login(ensembleUrl, '', '', username, password);
+        q.ok(auth.isAuthenticated(ensembleUrl));
         q.strictEqual(username, auth.getUser(ensembleUrl));
-        auth.removeAuth(ensembleUrl, '');
-        q.ok(!auth.hasAuth(ensembleUrl));
+        auth.logout(ensembleUrl, '');
+        q.ok(!auth.isAuthenticated(ensembleUrl));
         q.strictEqual(null, auth.getUser(ensembleUrl));
     });
 
-    q.asyncTest('authSet event test', 2, function() {
+    q.asyncTest('loggedIn event test', 2, function() {
         var ensembleUrl = Math.random() + '',
             username = 'foo',
             password = 'bar';
-        globalEvents.on('authSet', function(id) {
+        globalEvents.on('loggedIn', function(id) {
             if (id === ensembleUrl) {
                 q.ok(true);
                 q.start();
             }
         });
-        auth.setAuth(ensembleUrl, '', '', username, password);
-        q.ok(auth.hasAuth(ensembleUrl));
-        auth.removeAuth(ensembleUrl, '');
+        auth.login(ensembleUrl, '', '', username, password);
+        q.ok(auth.isAuthenticated(ensembleUrl));
+        auth.logout(ensembleUrl, '');
     });
 
-    q.asyncTest('authRemoved event test', 2, function() {
+    q.asyncTest('loggedOut event test', 2, function() {
         var ensembleUrl = Math.random() + '',
             username = 'foo',
             password = 'bar';
-        globalEvents.on('authRemoved', function(id) {
+        globalEvents.on('loggedOut', function(id) {
             if (id === ensembleUrl) {
                 q.ok(true);
                 q.start();
             }
         });
-        auth.setAuth(ensembleUrl, '', '', username, password);
-        q.ok(auth.hasAuth(ensembleUrl));
-        auth.removeAuth(ensembleUrl, '');
+        auth.login(ensembleUrl, '', '', username, password);
+        q.ok(auth.isAuthenticated(ensembleUrl));
+        auth.logout(ensembleUrl, '');
     });
 
     q.test('domain test', 2, function() {
@@ -66,10 +66,10 @@ define(function(require) {
             username = 'foo',
             password = 'bar',
             authDomain = 'ensemblevideo.com';
-        auth.setAuth(ensembleUrl, authDomain, '', username, password);
-        q.ok(auth.hasAuth(ensembleUrl));
+        auth.login(ensembleUrl, authDomain, '', username, password);
+        q.ok(auth.isAuthenticated(ensembleUrl));
         q.strictEqual(username + '@' + authDomain, auth.getUser(ensembleUrl));
-        auth.removeAuth(ensembleUrl, '');
+        auth.logout(ensembleUrl, '');
     });
 
     q.test('valid path test', 1, function() {
@@ -77,9 +77,9 @@ define(function(require) {
             username = 'foo',
             password = 'bar',
             path = '/test';
-        auth.setAuth(ensembleUrl, '', path, username, password);
-        q.ok(auth.hasAuth(ensembleUrl));
-        auth.removeAuth(ensembleUrl, path);
+        auth.login(ensembleUrl, '', path, username, password);
+        q.ok(auth.isAuthenticated(ensembleUrl));
+        auth.logout(ensembleUrl, path);
     });
 
     q.test('invalid path test', 1, function() {
@@ -87,27 +87,27 @@ define(function(require) {
             username = 'foo',
             password = 'bar',
             path = '/foo';
-        auth.setAuth(ensembleUrl, '', path, username, password);
-        q.ok(!auth.hasAuth(ensembleUrl));
-        auth.removeAuth(ensembleUrl, path);
+        auth.login(ensembleUrl, '', path, username, password);
+        q.ok(!auth.isAuthenticated(ensembleUrl));
+        auth.logout(ensembleUrl, path);
     });
 
     var pathTest = function(username, password, successHandler, errorHandler) {
         var ensembleUrl = evSettings.ensembleUrl;
-        auth.setAuth(ensembleUrl, '', evSettings.authPath, username, password);
+        auth.login(ensembleUrl, '', evSettings.authPath, username, password);
         var apiUrl = encodeURIComponent(ensembleUrl + '/api/Content');
-        q.ok(auth.hasAuth(ensembleUrl));
+        q.ok(auth.isAuthenticated(ensembleUrl));
         $.ajax({
             dataType: "json",
             url: evSettings.proxyPath + '?ensembleUrl=' + encodeURIComponent(ensembleUrl) + '&request=' + apiUrl,
             success: function(data, status, xhr) {
                 successHandler.call(this, data, status, xhr);
-                auth.removeAuth(ensembleUrl, evSettings.authPath);
+                auth.logout(ensembleUrl, evSettings.authPath);
                 q.start();
             },
             error: function(xhr, status, error) {
                 errorHandler.call(this, xhr, status, error);
-                auth.removeAuth(ensembleUrl, evSettings.authPath);
+                auth.logout(ensembleUrl, evSettings.authPath);
                 q.start();
             }
         });

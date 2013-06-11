@@ -10,8 +10,8 @@ define(function(require) {
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'hideHandler', 'logoutHandler', 'authHandler', 'render');
-            this.globalEvents.on('authSet', this.authHandler);
-            this.globalEvents.on('authRemoved', this.authHandler);
+            this.globalEvents.on('loggedIn', this.authHandler);
+            this.globalEvents.on('loggedOut', this.authHandler);
             this.field = options.field;
         },
         events: {
@@ -25,7 +25,7 @@ define(function(require) {
         },
         render: function() {
             this.$el.html(this.template({
-                hasAuth: this.hasAuth()
+                isAuthenticated: this.isAuthenticated()
             }));
         },
         hideHandler: function(e) {
@@ -33,7 +33,7 @@ define(function(require) {
             e.preventDefault();
         },
         logoutHandler: function(e) {
-            this.removeAuth();
+            this.logout();
             this.appEvents.trigger('hidePickers');
             e.preventDefault();
         }
