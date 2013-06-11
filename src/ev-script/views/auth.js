@@ -46,7 +46,7 @@ define(function(require, template) {
                 var username = $('#username', $form).val();
                 var password = $('#password', $form).val();
                 if (username && password) {
-                    authUtil.setAuth(this.config.authId, this.config.authDomain, this.config.authPath, username, password);
+                    authUtil.setAuth(this.config.ensembleUrl, this.config.authDomain, this.config.authPath, username, password);
                     this.$dialog.dialog('destroy').remove();
                     this.submitCallback();
                 }

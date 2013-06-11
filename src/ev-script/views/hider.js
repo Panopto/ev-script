@@ -18,8 +18,8 @@ define(function(require) {
             'click a.action-hide': 'hideHandler',
             'click a.action-logout': 'logoutHandler'
         },
-        authHandler: function(authId) {
-            if (authId === this.config.authId) {
+        authHandler: function(ensembleUrl) {
+            if (ensembleUrl === this.config.ensembleUrl) {
                 this.render();
             }
         },

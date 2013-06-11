@@ -1,5 +1,5 @@
 /**
- * ev-script 0.2.1 2013-05-01
+ * ev-script 0.2.1 2013-06-11
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -488,24 +488,24 @@ define('ev-script/util/auth',['require','jquery','underscore','ev-script/util/ev
         globalEvents = require('ev-script/util/events').getEvents('global');
 
     return {
-        getUser: function(authId) {
-            return $.cookie(authId + '-user');
+        getUser: function(ensembleUrl) {
+            return $.cookie(ensembleUrl + '-user');
         },
-        setAuth: function(authId, authDomain, authPath, username, password) {
+        setAuth: function(ensembleUrl, authDomain, authPath, username, password) {
             username += (authDomain ? '@' + authDomain : '');
             var cookieOptions = { path: authPath };
-            $.cookie(authId + '-user', username, _.extend({}, cookieOptions));
-            $.cookie(authId + '-pass', password, _.extend({}, cookieOptions));
-            globalEvents.trigger('authSet', authId);
+            $.cookie(ensembleUrl + '-user', username, _.extend({}, cookieOptions));
+            $.cookie(ensembleUrl + '-pass', password, _.extend({}, cookieOptions));
+            globalEvents.trigger('authSet', ensembleUrl);
         },
-        removeAuth: function(authId, authPath) {
+        removeAuth: function(ensembleUrl, authPath) {
             var cookieOptions = { path: authPath };
-            $.cookie(authId + '-user', null, _.extend({}, cookieOptions));
-            $.cookie(authId + '-pass', null, _.extend({}, cookieOptions));
-            globalEvents.trigger('authRemoved', authId);
+            $.cookie(ensembleUrl + '-user', null, _.extend({}, cookieOptions));
+            $.cookie(ensembleUrl + '-pass', null, _.extend({}, cookieOptions));
+            globalEvents.trigger('authRemoved', ensembleUrl);
         },
-        hasAuth: function(authId) {
-            return $.cookie(authId + '-user') && $.cookie(authId + '-pass');
+        hasAuth: function(ensembleUrl) {
+            return $.cookie(ensembleUrl + '-user') && $.cookie(ensembleUrl + '-pass');
         }
     };
 
@@ -991,7 +991,7 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
                 var username = $('#username', $form).val();
                 var password = $('#password', $form).val();
                 if (username && password) {
-                    authUtil.setAuth(this.config.authId, this.config.authDomain, this.config.authPath, username, password);
+                    authUtil.setAuth(this.config.ensembleUrl, this.config.authDomain, this.config.authPath, username, password);
                     this.$dialog.dialog('destroy').remove();
                     this.submitCallback();
                 }
@@ -1049,16 +1049,16 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
             }
         },
         getUser: function() {
-            return authUtil.getUser(this.config.authId);
+            return authUtil.getUser(this.config.ensembleUrl);
         },
         setAuth: function(username, password) {
-            authUtil.setAuth(this.config.authId, this.config.authDomain, this.config.authPath, username, password);
+            authUtil.setAuth(this.config.ensembleUrl, this.config.authDomain, this.config.authPath, username, password);
         },
         removeAuth: function() {
-            authUtil.removeAuth(this.config.authId, this.config.authPath);
+            authUtil.removeAuth(this.config.ensembleUrl, this.config.authPath);
         },
         hasAuth: function() {
-            return authUtil.hasAuth(this.config.authId);
+            return authUtil.hasAuth(this.config.ensembleUrl);
         },
         getCachedVideos: function(user, key) {
             return getCachedValue(this.config.ensembleUrl, user, 'videos', key);
@@ -1110,8 +1110,8 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
             'click a.action-hide': 'hideHandler',
             'click a.action-logout': 'logoutHandler'
         },
-        authHandler: function(authId) {
-            if (authId === this.config.authId) {
+        authHandler: function(ensembleUrl) {
+            if (ensembleUrl === this.config.ensembleUrl) {
                 this.render();
             }
         },
@@ -2615,10 +2615,6 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
         }
 
         var defaults = {
-            // Used in cookie keys for auth against an EV install.  If multiple
-            // apps pointing at differing EV installations exist on the same
-            // page, this should be unique between them.
-            authId: 'ensemble',
             // Application root of the EV installation.
             ensembleUrl: '',
             // Cookie path.

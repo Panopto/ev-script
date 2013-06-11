@@ -15,7 +15,7 @@ define(function(require) {
         setup: function() {
             this.appId = Math.random();
             cacheUtil.setAppConfig(this.appId, evSettings);
-            authUtil.setAuth(evSettings.authId, '', evSettings.authPath, evSettings.testUser, evSettings.testPass);
+            authUtil.setAuth(evSettings.ensembleUrl, '', evSettings.authPath, evSettings.testUser, evSettings.testPass);
             this.encoding = new VideoEncoding({
                 dimensions: '640x360'
             }, {
@@ -23,7 +23,7 @@ define(function(require) {
             });
         },
         teardown: function() {
-            authUtil.removeAuth(evSettings.authId, evSettings.authPath);
+            authUtil.removeAuth(evSettings.ensembleUrl, evSettings.authPath);
         }
     });
 

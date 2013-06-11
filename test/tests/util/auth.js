@@ -20,94 +20,94 @@ define(function(require) {
     });
 
     q.test('set/remove test', 4, function() {
-        var authId = Math.random(),
+        var ensembleUrl = Math.random() + '',
             username = 'foo',
             password = 'bar';
-        auth.setAuth(authId, '', '', username, password);
-        q.ok(auth.hasAuth(authId));
-        q.strictEqual(username, auth.getUser(authId));
-        auth.removeAuth(authId, '');
-        q.ok(!auth.hasAuth(authId));
-        q.strictEqual(null, auth.getUser(authId));
+        auth.setAuth(ensembleUrl, '', '', username, password);
+        q.ok(auth.hasAuth(ensembleUrl));
+        q.strictEqual(username, auth.getUser(ensembleUrl));
+        auth.removeAuth(ensembleUrl, '');
+        q.ok(!auth.hasAuth(ensembleUrl));
+        q.strictEqual(null, auth.getUser(ensembleUrl));
     });
 
     q.asyncTest('authSet event test', 2, function() {
-        var authId = Math.random(),
+        var ensembleUrl = Math.random() + '',
             username = 'foo',
             password = 'bar';
         globalEvents.on('authSet', function(id) {
-            if (id === authId) {
+            if (id === ensembleUrl) {
                 q.ok(true);
                 q.start();
             }
         });
-        auth.setAuth(authId, '', '', username, password);
-        q.ok(auth.hasAuth(authId));
-        auth.removeAuth(authId, '');
+        auth.setAuth(ensembleUrl, '', '', username, password);
+        q.ok(auth.hasAuth(ensembleUrl));
+        auth.removeAuth(ensembleUrl, '');
     });
 
     q.asyncTest('authRemoved event test', 2, function() {
-        var authId = Math.random(),
+        var ensembleUrl = Math.random() + '',
             username = 'foo',
             password = 'bar';
         globalEvents.on('authRemoved', function(id) {
-            if (id === authId) {
+            if (id === ensembleUrl) {
                 q.ok(true);
                 q.start();
             }
         });
-        auth.setAuth(authId, '', '', username, password);
-        q.ok(auth.hasAuth(authId));
-        auth.removeAuth(authId, '');
+        auth.setAuth(ensembleUrl, '', '', username, password);
+        q.ok(auth.hasAuth(ensembleUrl));
+        auth.removeAuth(ensembleUrl, '');
     });
 
     q.test('domain test', 2, function() {
-        var authId = Math.random(),
+        var ensembleUrl = Math.random() + '',
             username = 'foo',
             password = 'bar',
             authDomain = 'ensemblevideo.com';
-        auth.setAuth(authId, authDomain, '', username, password);
-        q.ok(auth.hasAuth(authId));
-        q.strictEqual(username + '@' + authDomain, auth.getUser(authId));
-        auth.removeAuth(authId, '');
+        auth.setAuth(ensembleUrl, authDomain, '', username, password);
+        q.ok(auth.hasAuth(ensembleUrl));
+        q.strictEqual(username + '@' + authDomain, auth.getUser(ensembleUrl));
+        auth.removeAuth(ensembleUrl, '');
     });
 
     q.test('valid path test', 1, function() {
-        var authId = Math.random(),
+        var ensembleUrl = Math.random() + '',
             username = 'foo',
             password = 'bar',
             path = '/test';
-        auth.setAuth(authId, '', path, username, password);
-        q.ok(auth.hasAuth(authId));
-        auth.removeAuth(authId, path);
+        auth.setAuth(ensembleUrl, '', path, username, password);
+        q.ok(auth.hasAuth(ensembleUrl));
+        auth.removeAuth(ensembleUrl, path);
     });
 
     q.test('invalid path test', 1, function() {
-        var authId = Math.random(),
+        var ensembleUrl = Math.random() + '',
             username = 'foo',
             password = 'bar',
             path = '/foo';
-        auth.setAuth(authId, '', path, username, password);
-        q.ok(!auth.hasAuth(authId));
-        auth.removeAuth(authId, path);
+        auth.setAuth(ensembleUrl, '', path, username, password);
+        q.ok(!auth.hasAuth(ensembleUrl));
+        auth.removeAuth(ensembleUrl, path);
     });
 
     var pathTest = function(username, password, successHandler, errorHandler) {
-        var authId = Math.random();
-        auth.setAuth(authId, '', evSettings.authPath, username, password);
-        var apiUrl = encodeURIComponent(evSettings.ensembleUrl + '/api/Content');
-        q.ok(auth.hasAuth(authId));
+        var ensembleUrl = evSettings.ensembleUrl;
+        auth.setAuth(ensembleUrl, '', evSettings.authPath, username, password);
+        var apiUrl = encodeURIComponent(ensembleUrl + '/api/Content');
+        q.ok(auth.hasAuth(ensembleUrl));
         $.ajax({
             dataType: "json",
-            url: evSettings.proxyPath + '?authId=' + authId + '&request=' + apiUrl,
+            url: evSettings.proxyPath + '?ensembleUrl=' + encodeURIComponent(ensembleUrl) + '&request=' + apiUrl,
             success: function(data, status, xhr) {
                 successHandler.call(this, data, status, xhr);
-                auth.removeAuth(authId, evSettings.authPath);
+                auth.removeAuth(ensembleUrl, evSettings.authPath);
                 q.start();
             },
             error: function(xhr, status, error) {
                 errorHandler.call(this, xhr, status, error);
-                auth.removeAuth(authId, evSettings.authPath);
+                auth.removeAuth(ensembleUrl, evSettings.authPath);
                 q.start();
             }
         });

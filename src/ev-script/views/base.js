@@ -45,16 +45,16 @@ define(function(require) {
             }
         },
         getUser: function() {
-            return authUtil.getUser(this.config.authId);
+            return authUtil.getUser(this.config.ensembleUrl);
         },
         setAuth: function(username, password) {
-            authUtil.setAuth(this.config.authId, this.config.authDomain, this.config.authPath, username, password);
+            authUtil.setAuth(this.config.ensembleUrl, this.config.authDomain, this.config.authPath, username, password);
         },
         removeAuth: function() {
-            authUtil.removeAuth(this.config.authId, this.config.authPath);
+            authUtil.removeAuth(this.config.ensembleUrl, this.config.authPath);
         },
         hasAuth: function() {
-            return authUtil.hasAuth(this.config.authId);
+            return authUtil.hasAuth(this.config.ensembleUrl);
         },
         getCachedVideos: function(user, key) {
             return getCachedValue(this.config.ensembleUrl, user, 'videos', key);

@@ -7,24 +7,24 @@ define(function(require) {
         globalEvents = require('ev-script/util/events').getEvents('global');
 
     return {
-        getUser: function(authId) {
-            return $.cookie(authId + '-user');
+        getUser: function(ensembleUrl) {
+            return $.cookie(ensembleUrl + '-user');
         },
-        setAuth: function(authId, authDomain, authPath, username, password) {
+        setAuth: function(ensembleUrl, authDomain, authPath, username, password) {
             username += (authDomain ? '@' + authDomain : '');
             var cookieOptions = { path: authPath };
-            $.cookie(authId + '-user', username, _.extend({}, cookieOptions));
-            $.cookie(authId + '-pass', password, _.extend({}, cookieOptions));
-            globalEvents.trigger('authSet', authId);
+            $.cookie(ensembleUrl + '-user', username, _.extend({}, cookieOptions));
+            $.cookie(ensembleUrl + '-pass', password, _.extend({}, cookieOptions));
+            globalEvents.trigger('authSet', ensembleUrl);
         },
-        removeAuth: function(authId, authPath) {
+        removeAuth: function(ensembleUrl, authPath) {
             var cookieOptions = { path: authPath };
-            $.cookie(authId + '-user', null, _.extend({}, cookieOptions));
-            $.cookie(authId + '-pass', null, _.extend({}, cookieOptions));
-            globalEvents.trigger('authRemoved', authId);
+            $.cookie(ensembleUrl + '-user', null, _.extend({}, cookieOptions));
+            $.cookie(ensembleUrl + '-pass', null, _.extend({}, cookieOptions));
+            globalEvents.trigger('authRemoved', ensembleUrl);
         },
-        hasAuth: function(authId) {
-            return $.cookie(authId + '-user') && $.cookie(authId + '-pass');
+        hasAuth: function(ensembleUrl) {
+            return $.cookie(ensembleUrl + '-user') && $.cookie(ensembleUrl + '-pass');
         }
     };
 

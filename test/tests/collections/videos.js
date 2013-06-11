@@ -14,7 +14,7 @@ define(function(require) {
         setup: function() {
             this.appId = Math.random();
             cacheUtil.setAppConfig(this.appId, evSettings);
-            authUtil.setAuth(evSettings.authId, null, evSettings.authPath, evSettings.testUser, evSettings.testPass);
+            authUtil.setAuth(evSettings.ensembleUrl, null, evSettings.authPath, evSettings.testUser, evSettings.testPass);
             this.videos = new Videos([], {
                 appId: this.appId
             });

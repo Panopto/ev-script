@@ -27,10 +27,6 @@ define(function(require) {
         }
 
         var defaults = {
-            // Used in cookie keys for auth against an EV install.  If multiple
-            // apps pointing at differing EV installations exist on the same
-            // page, this should be unique between them.
-            authId: 'ensemble',
             // Application root of the EV installation.
             ensembleUrl: '',
             // Cookie path.
