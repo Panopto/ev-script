@@ -39,7 +39,7 @@ define(function(require) {
         loadVideos: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase());
             var sourceId = this.model.get('sourceId');
-            var videos = this.getCachedVideos(this.getUser(), sourceId + searchVal);
+            var videos = this.getCachedVideos(this.auth.getUser(), sourceId + searchVal);
             if (!videos) {
                 videos = new Videos({}, {
                     sourceId: sourceId,
@@ -58,7 +58,7 @@ define(function(require) {
                             collection.hasMore = true;
                             collection.pageIndex += 1;
                         }
-                        this.setCachedVideos(this.getUser(), sourceId + searchVal, collection);
+                        this.setCachedVideos(this.auth.getUser(), sourceId + searchVal, collection);
                         this.resultsView.collection = collection;
                         this.resultsView.render();
                     }, this),

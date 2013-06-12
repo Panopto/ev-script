@@ -14,10 +14,17 @@ define(function(require) {
         setup: function() {
             this.appId = Math.random();
             cacheUtil.setAppConfig(this.appId, evSettings);
-            authUtil.login(evSettings.ensembleUrl, null, evSettings.authPath, evSettings.testUser, evSettings.testPass);
+            this.auth = authUtil.getAuth(this.appId);
+            this.auth.login({
+                username: evSettings.testUser,
+                password: evSettings.testPass
+            });
             this.organizations = new Organizations([], {
                 appId: this.appId
             });
+        },
+        teardown: function() {
+            this.auth.logout();
         }
     });
 
@@ -36,9 +43,13 @@ define(function(require) {
     q.asyncTest('test fetch', 1, function() {
         this.organizations.fetch({
             success: function(collection, response, options) {
-                q.start();
                 console.log(JSON.stringify(collection));
                 q.ok(collection.size() > 0);
+                q.start();
+            },
+            error: function(collection, response, options) {
+                q.ok(false, response.status);
+                q.start();
             }
         });
     });

@@ -25,7 +25,7 @@ define(function(require) {
         },
         render: function() {
             this.$el.html(this.template({
-                isAuthenticated: this.isAuthenticated()
+                isAuthenticated: this.auth.isAuthenticated()
             }));
         },
         hideHandler: function(e) {
@@ -33,7 +33,7 @@ define(function(require) {
             e.preventDefault();
         },
         logoutHandler: function(e) {
-            this.logout();
+            this.auth.logout();
             this.appEvents.trigger('hidePickers');
             e.preventDefault();
         }

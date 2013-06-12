@@ -15,7 +15,11 @@ define(function(require) {
         setup: function() {
             this.appId = Math.random();
             cacheUtil.setAppConfig(this.appId, evSettings);
-            authUtil.login(evSettings.ensembleUrl, '', evSettings.authPath, evSettings.testUser, evSettings.testPass);
+            this.auth = authUtil.getAuth(this.appId);
+            this.auth.login({
+                username: evSettings.testUser,
+                password: evSettings.testPass
+            });
             this.encoding = new VideoEncoding({
                 dimensions: '640x360'
             }, {
@@ -23,7 +27,7 @@ define(function(require) {
             });
         },
         teardown: function() {
-            authUtil.logout(evSettings.ensembleUrl, evSettings.authPath);
+            this.auth.logout();
         }
     });
 
@@ -90,12 +94,20 @@ define(function(require) {
                 this.encoding.set('fetchId', collection.at(0).id);
                 this.encoding.fetch({
                     success: _.bind(function(model, response) {
-                        q.start();
                         console.log(JSON.stringify(model));
                         q.strictEqual(this.encoding.get('encodingId'), response.videos.videoEncodings.encodingId);
-                    }, this)
+                        q.start();
+                    }, this),
+                    error: function(collection, response, options) {
+                        q.ok(false, response.status);
+                        q.start();
+                    }
                 });
-            }, this)
+            }, this),
+            error: function(collection, response, options) {
+                q.ok(false, response.status);
+                q.start();
+            }
         });
     });
 });

@@ -7,19 +7,19 @@ define(function(require, template) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events'),
-        authUtil = require('ev-script/util/auth');
+        eventsUtil = require('ev-script/util/events');
 
     require('jquery.cookie');
     require('jquery-ui');
 
     return Backbone.View.extend({
-        template: _.template(require('text!ev-script/templates/auth.html')),
+        template: _.template(require('text!ev-script/auth/basic/template.html')),
         initialize: function(options) {
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
             this.submitCallback = options.submitCallback || function() {};
+            this.auth = options.auth;
         },
         render: function() {
             var html = this.template();
@@ -46,7 +46,10 @@ define(function(require, template) {
                 var username = $('#username', $form).val();
                 var password = $('#password', $form).val();
                 if (username && password) {
-                    authUtil.login(this.config.ensembleUrl, this.config.authDomain, this.config.authPath, username, password);
+                    this.auth.login({
+                        username: username,
+                        password: password
+                    });
                     this.$dialog.dialog('destroy').remove();
                     this.submitCallback();
                 }

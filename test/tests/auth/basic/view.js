@@ -7,19 +7,27 @@ define(function(require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         cacheUtil = require('ev-script/util/cache'),
-        authUtil = require('ev-script/util/auth'),
+        BasicAuth = require('ev-script/auth/basic/auth'),
         eventsUtil = require('ev-script/util/events'),
         evSettings = require('ev-config'),
-        AuthView = require('ev-script/views/auth');
+        AuthView = require('ev-script/auth/basic/view');
 
-    q.module('Testing ev-script/views/auth', {
+    q.module('Testing ev-script/auth/basic/view', {
         setup: function() {
             this.appId = Math.random();
+            cacheUtil.setAppConfig(this.appId, evSettings);
             this.config = evSettings;
+            this.auth = new BasicAuth(this.appId);
+            // Make sure we're not already authenticated
+            this.auth.logout();
             cacheUtil.setAppConfig(this.appId, this.config);
             this.view = new AuthView({
+                auth: this.auth,
                 appId: this.appId
             });
+        },
+        teardown: function() {
+            this.auth.logout();
         }
     });
 
@@ -36,7 +44,7 @@ define(function(require) {
         q.ok(_.isFunction(this.view.submitCallback));
     });
 
-    q.test('test render', 8, function() {
+    q.asyncTest('test render', 8, function() {
         this.view.render();
         var config = this.view.config;
         // Make sure the DOM contains our class
@@ -51,13 +59,12 @@ define(function(require) {
         q.ok($username.length > 0);
         q.ok($password.length > 0);
         // Make sure form works as expected
-        q.ok(!authUtil.isAuthenticated(config.ensembleUrl));
+        q.ok(!this.auth.isAuthenticated());
         $username.val(config.testUser);
         $password.val(config.testPass);
-        q.stop();
         this.view.submitCallback = function() {
-            q.ok(authUtil.isAuthenticated(config.ensembleUrl));
-            q.strictEqual(authUtil.getUser(config.ensembleUrl), config.testUser);
+            q.ok(this.auth.isAuthenticated());
+            q.strictEqual(this.auth.getUser(), config.testUser);
             q.strictEqual($('.ev-auth').length, 0);
             q.start();
         };

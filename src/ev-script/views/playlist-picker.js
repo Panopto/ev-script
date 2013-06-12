@@ -37,7 +37,7 @@ define(function(require) {
         },
         loadPlaylists: function() {
             var libraryId = this.model.get('libraryId');
-            var playlists = this.getCachedPlaylists(this.getUser(), libraryId);
+            var playlists = this.getCachedPlaylists(this.auth.getUser(), libraryId);
             if(!playlists) {
                 playlists = new Playlists({}, {
                     filterValue: libraryId,
@@ -54,7 +54,7 @@ define(function(require) {
                             collection.hasMore = true;
                             collection.pageIndex += 1;
                         }
-                        this.setCachedPlaylists(this.getUser(), libraryId, collection);
+                        this.setCachedPlaylists(this.auth.getUser(), libraryId, collection);
                         this.resultsView.collection = collection;
                         this.resultsView.render();
                     }, this),

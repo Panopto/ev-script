@@ -8,8 +8,7 @@ define(function(require) {
         root = this,
         authUtil = require('ev-script/util/auth'),
         eventsUtil = require('ev-script/util/events'),
-        cacheUtil = require('ev-script/util/cache'),
-        AuthView = require('ev-script/views/auth');
+        cacheUtil = require('ev-script/util/cache');
 
     var getCachedValue = function(ensembleUrl, user, cache, key) {
         return cacheUtil.getUserCache(ensembleUrl, user).get(cache).get(key);
@@ -25,16 +24,11 @@ define(function(require) {
             this.config = cacheUtil.getAppConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
             this.globalEvents = eventsUtil.getEvents('global');
+            this.auth = authUtil.getAuth(this.appId);
         },
         ajaxError: function(xhr, authCallback) {
             if (xhr.status === 401) {
-                this.logout();
-                var authView = new AuthView({
-                    el: this.el,
-                    submitCallback: authCallback,
-                    appId: this.appId
-                });
-                authView.render();
+                this.auth.handleUnauthorized(this.el, authCallback);
             } else if (xhr.status === 500) {
                 // Making an assumption that root is window here...
                 root.alert('It appears there is an issue with the Ensemble Video installation.');
@@ -43,18 +37,6 @@ define(function(require) {
             } else if (xhr.status !== 0) {
                 root.alert('An unexpected error occurred.  Check the server log for more details.');
             }
-        },
-        getUser: function() {
-            return authUtil.getUser(this.config.ensembleUrl);
-        },
-        login: function(username, password) {
-            authUtil.login(this.config.ensembleUrl, this.config.authDomain, this.config.authPath, username, password);
-        },
-        logout: function() {
-            authUtil.logout(this.config.ensembleUrl, this.config.authPath);
-        },
-        isAuthenticated: function() {
-            return authUtil.isAuthenticated(this.config.ensembleUrl);
         },
         getCachedVideos: function(user, key) {
             return getCachedValue(this.config.ensembleUrl, user, 'videos', key);

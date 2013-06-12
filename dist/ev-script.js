@@ -1,5 +1,5 @@
 /**
- * ev-script 0.2.1 2013-06-11
+ * ev-script 0.2.1 2013-06-12
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -479,38 +479,6 @@ define('ev-script/util/events',['require','underscore','backbone'],function(requ
 
 });
 
-define('ev-script/util/auth',['require','jquery','underscore','ev-script/util/events'],function(require) {
-
-    
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        globalEvents = require('ev-script/util/events').getEvents('global');
-
-    return {
-        getUser: function(ensembleUrl) {
-            return $.cookie(ensembleUrl + '-user');
-        },
-        login: function(ensembleUrl, authDomain, authPath, username, password) {
-            username += (authDomain ? '@' + authDomain : '');
-            var cookieOptions = { path: authPath };
-            $.cookie(ensembleUrl + '-user', username, _.extend({}, cookieOptions));
-            $.cookie(ensembleUrl + '-pass', password, _.extend({}, cookieOptions));
-            globalEvents.trigger('loggedIn', ensembleUrl);
-        },
-        logout: function(ensembleUrl, authPath) {
-            var cookieOptions = { path: authPath };
-            $.cookie(ensembleUrl + '-user', null, _.extend({}, cookieOptions));
-            $.cookie(ensembleUrl + '-pass', null, _.extend({}, cookieOptions));
-            globalEvents.trigger('loggedOut', ensembleUrl);
-        },
-        isAuthenticated: function(ensembleUrl) {
-            return $.cookie(ensembleUrl + '-user') && $.cookie(ensembleUrl + '-pass');
-        }
-    };
-
-});
-
 define('ev-script/util/cache',['require','jquery','underscore','backbone'],function(require) {
 
     
@@ -941,10 +909,10 @@ define('text',['module'], function (module) {
     return text;
 });
 
-define('text!ev-script/templates/auth.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text"type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text"type="password"/>\n        </div>\n        <div class="form-actions">\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/auth/basic/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text"type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text"type="password"/>\n        </div>\n        <div class="form-actions">\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
 /*global window*/
-define('ev-script/views/auth',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','ev-script/util/auth','jquery.cookie','jquery-ui','text!ev-script/templates/auth.html'],function(require, template) {
+define('ev-script/auth/basic/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/basic/template.html'],function(require, template) {
 
     
 
@@ -952,19 +920,19 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
         _ = require('underscore'),
         Backbone = require('backbone'),
         cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events'),
-        authUtil = require('ev-script/util/auth');
+        eventsUtil = require('ev-script/util/events');
 
     require('jquery.cookie');
     require('jquery-ui');
 
     return Backbone.View.extend({
-        template: _.template(require('text!ev-script/templates/auth.html')),
+        template: _.template(require('text!ev-script/auth/basic/template.html')),
         initialize: function(options) {
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
             this.submitCallback = options.submitCallback || function() {};
+            this.auth = options.auth;
         },
         render: function() {
             var html = this.template();
@@ -991,7 +959,10 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
                 var username = $('#username', $form).val();
                 var password = $('#password', $form).val();
                 if (username && password) {
-                    authUtil.login(this.config.ensembleUrl, this.config.authDomain, this.config.authPath, username, password);
+                    this.auth.login({
+                        username: username,
+                        password: password
+                    });
                     this.$dialog.dialog('destroy').remove();
                     this.submitCallback();
                 }
@@ -1002,7 +973,71 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
 
 });
 
-define('ev-script/views/base',['require','jquery','underscore','backbone','ev-script/util/auth','ev-script/util/events','ev-script/util/cache','ev-script/views/auth'],function(require) {
+define('ev-script/auth/basic/auth',['require','jquery','underscore','ev-script/util/events','ev-script/util/cache','ev-script/auth/basic/view'],function(require) {
+
+    
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        eventsUtil = require('ev-script/util/events'),
+        cacheUtil = require('ev-script/util/cache'),
+        AuthView = require('ev-script/auth/basic/view'),
+        Auth = function(appId) {
+            this.appId = appId;
+            this.config = cacheUtil.getAppConfig(appId);
+            this.globalEvents = eventsUtil.getEvents('global');
+        };
+
+    _.extend(Auth.prototype, {
+        getUser: function() {
+            return $.cookie(this.config.ensembleUrl + '-user');
+        },
+        login: function(loginInfo) {
+            loginInfo.username += (this.config.authDomain ? '@' + this.config.authDomain : '');
+            var cookieOptions = { path: this.config.authPath };
+            $.cookie(this.config.ensembleUrl + '-user', loginInfo.username, _.extend({}, cookieOptions));
+            $.cookie(this.config.ensembleUrl + '-pass', loginInfo.password, _.extend({}, cookieOptions));
+            this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
+        },
+        logout: function() {
+            var cookieOptions = { path: this.config.authPath };
+            $.cookie(this.config.ensembleUrl + '-user', null, _.extend({}, cookieOptions));
+            $.cookie(this.config.ensembleUrl + '-pass', null, _.extend({}, cookieOptions));
+            this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
+        },
+        isAuthenticated: function() {
+            return $.cookie(this.config.ensembleUrl + '-user') && $.cookie(this.config.ensembleUrl + '-pass');
+        },
+        handleUnauthorized: function(element, authCallback) {
+            this.logout();
+            var authView = new AuthView({
+                el: element,
+                submitCallback: authCallback,
+                appId: this.appId,
+                auth: this
+            });
+            authView.render();
+        }
+    });
+
+    return Auth;
+
+});
+
+define('ev-script/util/auth',['require','ev-script/auth/basic/auth'],function(require) {
+
+    
+
+    var BasicAuth = require('ev-script/auth/basic/auth');
+
+    return {
+        getAuth: function(appId) {
+            return new BasicAuth(appId);
+        }
+    };
+});
+
+define('ev-script/views/base',['require','jquery','underscore','backbone','ev-script/util/auth','ev-script/util/events','ev-script/util/cache'],function(require) {
 
     
 
@@ -1012,8 +1047,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
         root = this,
         authUtil = require('ev-script/util/auth'),
         eventsUtil = require('ev-script/util/events'),
-        cacheUtil = require('ev-script/util/cache'),
-        AuthView = require('ev-script/views/auth');
+        cacheUtil = require('ev-script/util/cache');
 
     var getCachedValue = function(ensembleUrl, user, cache, key) {
         return cacheUtil.getUserCache(ensembleUrl, user).get(cache).get(key);
@@ -1029,16 +1063,11 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
             this.config = cacheUtil.getAppConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
             this.globalEvents = eventsUtil.getEvents('global');
+            this.auth = authUtil.getAuth(this.appId);
         },
         ajaxError: function(xhr, authCallback) {
             if (xhr.status === 401) {
-                this.logout();
-                var authView = new AuthView({
-                    el: this.el,
-                    submitCallback: authCallback,
-                    appId: this.appId
-                });
-                authView.render();
+                this.auth.handleUnauthorized(this.el, authCallback);
             } else if (xhr.status === 500) {
                 // Making an assumption that root is window here...
                 root.alert('It appears there is an issue with the Ensemble Video installation.');
@@ -1047,18 +1076,6 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
             } else if (xhr.status !== 0) {
                 root.alert('An unexpected error occurred.  Check the server log for more details.');
             }
-        },
-        getUser: function() {
-            return authUtil.getUser(this.config.ensembleUrl);
-        },
-        login: function(username, password) {
-            authUtil.login(this.config.ensembleUrl, this.config.authDomain, this.config.authPath, username, password);
-        },
-        logout: function() {
-            authUtil.logout(this.config.ensembleUrl, this.config.authPath);
-        },
-        isAuthenticated: function() {
-            return authUtil.isAuthenticated(this.config.ensembleUrl);
         },
         getCachedVideos: function(user, key) {
             return getCachedValue(this.config.ensembleUrl, user, 'videos', key);
@@ -1117,7 +1134,7 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
         },
         render: function() {
             this.$el.html(this.template({
-                isAuthenticated: this.isAuthenticated()
+                isAuthenticated: this.auth.isAuthenticated()
             }));
         },
         hideHandler: function(e) {
@@ -1125,7 +1142,7 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
             e.preventDefault();
         },
         logoutHandler: function(e) {
-            this.logout();
+            this.auth.logout();
             this.appEvents.trigger('hidePickers');
             e.preventDefault();
         }
@@ -1603,7 +1620,7 @@ define('ev-script/models/video-encoding',['require','backbone','underscore','ev-
                 dataFilter: function(data) {
                     // Strip padding from JSONP response
                     var match = data.match(/\{[\s\S]*\}/);
-                    return match[0];
+                    return match ? match[0] : data;
                 }
             });
             return Backbone.sync.call(this, method, model, options);
@@ -1795,7 +1812,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
         loadVideos: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase());
             var sourceId = this.model.get('sourceId');
-            var videos = this.getCachedVideos(this.getUser(), sourceId + searchVal);
+            var videos = this.getCachedVideos(this.auth.getUser(), sourceId + searchVal);
             if (!videos) {
                 videos = new Videos({}, {
                     sourceId: sourceId,
@@ -1814,7 +1831,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
                             collection.hasMore = true;
                             collection.pageIndex += 1;
                         }
-                        this.setCachedVideos(this.getUser(), sourceId + searchVal, collection);
+                        this.setCachedVideos(this.auth.getUser(), sourceId + searchVal, collection);
                         this.resultsView.collection = collection;
                         this.resultsView.render();
                     }, this),
@@ -2142,7 +2159,7 @@ define('ev-script/views/playlist-select',['require','jquery','underscore','ev-sc
             e.preventDefault();
         },
         loadOrgs: function() {
-            var orgs = this.getCachedOrgs(this.getUser());
+            var orgs = this.getCachedOrgs(this.auth.getUser());
             if (!orgs) {
                 orgs = new Organizations({}, {
                     appId: this.appId
@@ -2150,7 +2167,7 @@ define('ev-script/views/playlist-select',['require','jquery','underscore','ev-sc
                 orgs.fetch({
                     picker: this.picker,
                     success: _.bind(function(collection, response, options) {
-                        this.setCachedOrgs(this.getUser(), collection);
+                        this.setCachedOrgs(this.auth.getUser(), collection);
                         this.orgSelect.collection.reset(collection.models);
                     }, this),
                     error: _.bind(function(collection, xhr, options) {
@@ -2165,7 +2182,7 @@ define('ev-script/views/playlist-select',['require','jquery','underscore','ev-sc
         },
         loadLibraries: function() {
             var orgId = this.picker.model.get('organizationId');
-            var libs = this.getCachedLibs(this.getUser(), orgId);
+            var libs = this.getCachedLibs(this.auth.getUser(), orgId);
             if (!libs) {
                 libs = new Libraries({}, {
                     organizationId: orgId,
@@ -2174,7 +2191,7 @@ define('ev-script/views/playlist-select',['require','jquery','underscore','ev-sc
                 libs.fetch({
                     picker: this.picker,
                     success: _.bind(function(collection, response, options) {
-                        this.setCachedLibs(this.getUser(), orgId, collection);
+                        this.setCachedLibs(this.auth.getUser(), orgId, collection);
                         this.libSelect.collection.reset(collection.models);
                     }, this),
                     error: _.bind(function(collection, xhr, options) {
@@ -2316,7 +2333,7 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
         },
         loadPlaylists: function() {
             var libraryId = this.model.get('libraryId');
-            var playlists = this.getCachedPlaylists(this.getUser(), libraryId);
+            var playlists = this.getCachedPlaylists(this.auth.getUser(), libraryId);
             if(!playlists) {
                 playlists = new Playlists({}, {
                     filterValue: libraryId,
@@ -2333,7 +2350,7 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
                             collection.hasMore = true;
                             collection.pageIndex += 1;
                         }
-                        this.setCachedPlaylists(this.getUser(), libraryId, collection);
+                        this.setCachedPlaylists(this.auth.getUser(), libraryId, collection);
                         this.resultsView.collection = collection;
                         this.resultsView.render();
                     }, this),

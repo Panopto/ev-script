@@ -14,11 +14,18 @@ define(function(require) {
         setup: function() {
             this.appId = Math.random();
             cacheUtil.setAppConfig(this.appId, evSettings);
-            authUtil.login(evSettings.ensembleUrl, null, evSettings.authPath, evSettings.testUser, evSettings.testPass);
+            this.auth = authUtil.getAuth(this.appId);
+            this.auth.login({
+                username: evSettings.testUser,
+                password: evSettings.testPass
+            });
             this.videos = new Videos([], {
                 appId: this.appId
             });
         },
+        teardown: function() {
+            this.auth.logout();
+        }
     });
 
     q.test('test extends base', 1, function() {
@@ -37,10 +44,14 @@ define(function(require) {
         this.videos.sourceUrl = '/api/Content';
         this.videos.fetch({
             success: function(collection, response, options) {
-                q.start();
                 console.log(JSON.stringify(collection));
                 q.ok(collection.size() > 0);
                 collection.reset();
+                q.start();
+            },
+            error: function(collection, response, options) {
+                q.ok(false, response.status);
+                q.start();
             }
         });
     });
@@ -49,10 +60,14 @@ define(function(require) {
         this.videos.sourceUrl = '/api/SharedContent';
         this.videos.fetch({
             success: function(collection, response, options) {
-                q.start();
                 console.log(JSON.stringify(collection));
                 q.ok(collection.size() > 0);
                 collection.reset();
+                q.start();
+            },
+            error: function(collection, response, options) {
+                q.ok(false, response.status);
+                q.start();
             }
         });
     });

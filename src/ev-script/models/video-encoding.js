@@ -52,7 +52,7 @@ define(function(require) {
                 dataFilter: function(data) {
                     // Strip padding from JSONP response
                     var match = data.match(/\{[\s\S]*\}/);
-                    return match[0];
+                    return match ? match[0] : data;
                 }
             });
             return Backbone.sync.call(this, method, model, options);

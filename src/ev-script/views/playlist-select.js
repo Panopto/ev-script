@@ -72,7 +72,7 @@ define(function(require) {
             e.preventDefault();
         },
         loadOrgs: function() {
-            var orgs = this.getCachedOrgs(this.getUser());
+            var orgs = this.getCachedOrgs(this.auth.getUser());
             if (!orgs) {
                 orgs = new Organizations({}, {
                     appId: this.appId
@@ -80,7 +80,7 @@ define(function(require) {
                 orgs.fetch({
                     picker: this.picker,
                     success: _.bind(function(collection, response, options) {
-                        this.setCachedOrgs(this.getUser(), collection);
+                        this.setCachedOrgs(this.auth.getUser(), collection);
                         this.orgSelect.collection.reset(collection.models);
                     }, this),
                     error: _.bind(function(collection, xhr, options) {
@@ -95,7 +95,7 @@ define(function(require) {
         },
         loadLibraries: function() {
             var orgId = this.picker.model.get('organizationId');
-            var libs = this.getCachedLibs(this.getUser(), orgId);
+            var libs = this.getCachedLibs(this.auth.getUser(), orgId);
             if (!libs) {
                 libs = new Libraries({}, {
                     organizationId: orgId,
@@ -104,7 +104,7 @@ define(function(require) {
                 libs.fetch({
                     picker: this.picker,
                     success: _.bind(function(collection, response, options) {
-                        this.setCachedLibs(this.getUser(), orgId, collection);
+                        this.setCachedLibs(this.auth.getUser(), orgId, collection);
                         this.libSelect.collection.reset(collection.models);
                     }, this),
                     error: _.bind(function(collection, xhr, options) {
