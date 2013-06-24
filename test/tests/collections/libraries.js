@@ -5,26 +5,43 @@ define(function(require) {
     var q = QUnit,
         _ = require('underscore'),
         cacheUtil = require('ev-script/util/cache'),
-        authUtil = require('ev-script/util/auth'),
+        eventsUtil = require('ev-script/util/events'),
         evSettings = require('ev-config'),
         BaseCollection = require('ev-script/collections/base'),
-        Libraries = require('ev-script/collections/libraries');
+        Libraries = require('ev-script/collections/libraries'),
+        FormsAuth = require('ev-script/auth/forms/auth'),
+        BasicAuth = require('ev-script/auth/basic/auth');
 
     q.module('Testing ev-script/collections/libraries', {
         setup: function() {
-            this.appId = Math.random();
-            cacheUtil.setAppConfig(this.appId, evSettings);
-            this.auth = authUtil.getAuth(this.appId);
-            this.auth.login({
-                username: evSettings.testUser,
-                password: evSettings.testPass
-            });
+            this.appId = 'ev-script/collections/libraries';
+            eventsUtil.initEvents(this.appId);
+            this.config = _.extend({}, evSettings);
+            cacheUtil.setAppConfig(this.appId, this.config);
+            this.auth = (this.config.authType && this.config.authType === 'forms') ? new FormsAuth(this.appId) : new BasicAuth(this.appId);
+            cacheUtil.setAppAuth(this.appId, this.auth);
             this.libs = new Libraries([], {
                 appId: this.appId
             });
+            if (!this.auth.isAuthenticated()) {
+                q.stop();
+                this.auth.login({
+                    username: evSettings.testUser,
+                    password: evSettings.testPass
+                })
+                .then(function() {
+                    q.start();
+                });
+            }
         },
         teardown: function() {
-            this.auth.logout();
+            if (this.auth.isAuthenticated()) {
+                q.stop();
+                this.auth.logout()
+                .always(function() {
+                    q.start();
+                });
+            }
         }
     });
 

@@ -72,50 +72,39 @@ define(function(require) {
             e.preventDefault();
         },
         loadOrgs: function() {
-            var orgs = this.getCachedOrgs(this.auth.getUser());
-            if (!orgs) {
-                orgs = new Organizations({}, {
-                    appId: this.appId
-                });
-                orgs.fetch({
-                    picker: this.picker,
-                    success: _.bind(function(collection, response, options) {
-                        this.setCachedOrgs(this.auth.getUser(), collection);
-                        this.orgSelect.collection.reset(collection.models);
-                    }, this),
-                    error: _.bind(function(collection, xhr, options) {
-                        this.ajaxError(xhr, _.bind(function() {
-                            this.loadOrgs();
-                        }, this));
-                    }, this)
-                });
-            } else {
-                this.orgSelect.collection.reset(orgs.models);
-            }
+            var orgs = new Organizations({}, {
+                appId: this.appId
+            });
+            orgs.fetch({
+                picker: this.picker,
+                success: _.bind(function(collection, response, options) {
+                    this.orgSelect.collection.reset(collection.models);
+                }, this),
+                error: _.bind(function(collection, xhr, options) {
+                    this.ajaxError(xhr, _.bind(function() {
+                        this.loadOrgs();
+                    }, this));
+                }, this)
+            });
         },
         loadLibraries: function() {
             var orgId = this.picker.model.get('organizationId');
-            var libs = this.getCachedLibs(this.auth.getUser(), orgId);
-            if (!libs) {
-                libs = new Libraries({}, {
-                    organizationId: orgId,
-                    appId: this.appId
-                });
-                libs.fetch({
-                    picker: this.picker,
-                    success: _.bind(function(collection, response, options) {
-                        this.setCachedLibs(this.auth.getUser(), orgId, collection);
-                        this.libSelect.collection.reset(collection.models);
-                    }, this),
-                    error: _.bind(function(collection, xhr, options) {
-                        this.ajaxError(xhr, _.bind(function() {
-                            this.loadLibraries();
-                        }, this));
-                    }, this)
-                });
-            } else {
-                this.libSelect.collection.reset(libs.models);
-            }
+            var libs = new Libraries({}, {
+                organizationId: orgId,
+                appId: this.appId
+            });
+            libs.fetch({
+                picker: this.picker,
+                cacheKey: orgId,
+                success: _.bind(function(collection, response, options) {
+                    this.libSelect.collection.reset(collection.models);
+                }, this),
+                error: _.bind(function(collection, xhr, options) {
+                    this.ajaxError(xhr, _.bind(function() {
+                        this.loadLibraries();
+                    }, this));
+                }, this)
+            });
         }
     });
 

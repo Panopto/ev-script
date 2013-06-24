@@ -12,7 +12,7 @@ define(function(require) {
 
     q.module('Testing ev-script/views/base', {
         setup: function() {
-            this.appId = Math.random();
+            this.appId = 'ev-script/views/base';
             this.config = evSettings;
             eventsUtil.initEvents(this.appId);
             cacheUtil.setAppConfig(this.appId, this.config);
@@ -36,34 +36,6 @@ define(function(require) {
         q.deepEqual(this.view.globalEvents, eventsUtil.getEvents());
         q.ok(!_.isEmpty(eventsUtil.getEvents(this.appId)));
         q.deepEqual(this.view.appEvents, eventsUtil.getEvents(this.appId));
-    });
-
-    q.test('test cache convenience methods', 4, function() {
-        var user = 'foo',
-            key = 'test',
-            value = { foo: 'bar' };
-        _.each([ 'Playlists', 'Videos', 'Orgs', 'Libs' ], function(element, index) {
-            // Orgs signature is a little different
-            if (element === 'Orgs') {
-                this.view['setCached' + element].call(this, user, value);
-                q.deepEqual(this.view['getCached' + element].call(this, user), value);
-            } else {
-                this.view['setCached' + element].call(this, user, key, value);
-                q.deepEqual(this.view['getCached' + element].call(this, user, key), value);
-            }
-        }, this);
-    });
-
-    q.test('test has functions', 9, function() {
-        q.ok(_.isFunction(this.view.ajaxError));
-        q.ok(_.isFunction(this.view.getCachedVideos));
-        q.ok(_.isFunction(this.view.setCachedVideos));
-        q.ok(_.isFunction(this.view.getCachedPlaylists));
-        q.ok(_.isFunction(this.view.setCachedPlaylists));
-        q.ok(_.isFunction(this.view.getCachedLibs));
-        q.ok(_.isFunction(this.view.setCachedLibs));
-        q.ok(_.isFunction(this.view.getCachedOrgs));
-        q.ok(_.isFunction(this.view.setCachedOrgs));
     });
 
     // TODO - test ajaxError?

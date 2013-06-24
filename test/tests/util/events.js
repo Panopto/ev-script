@@ -7,7 +7,17 @@ define(function(require) {
         Backbone = require('backbone'),
         eventsUtil = require('ev-script/util/events');
 
-    q.module('Testing ev-script/util/events');
+    q.module('Testing ev-script/util/events', {
+        setup: function() {
+            var appId = 'ev-script/util/events';
+            this.globalEvents = eventsUtil.getEvents('global');
+            this.appEvents = eventsUtil.initEvents(appId);
+        },
+        teardown: function() {
+            this.globalEvents.off();
+            this.appEvents.off();
+        }
+    });
 
     q.test('test api', 5, function() {
         q.ok(_.isFunction(eventsUtil.initEvents));
@@ -23,33 +33,27 @@ define(function(require) {
     });
 
     q.asyncTest('global events test', 1, function() {
-        var appId = Math.random();
-        var globalEvents = eventsUtil.getEvents('global');
-        var appEvents = eventsUtil.initEvents(appId);
-        globalEvents.on('foo', function() {
+        this.globalEvents.on('foo', function() {
             q.start();
             q.ok(true, 'expected global event to be handled');
         });
-        appEvents.on('foo', function() {
+        this.appEvents.on('foo', function() {
             q.start();
             q.ok(false, 'app event should not have been handled');
         });
-        globalEvents.trigger('foo');
+        this.globalEvents.trigger('foo');
     });
 
     q.asyncTest('non-global events test', 1, function() {
-        var appId = Math.random();
-        var globalEvents = eventsUtil.getEvents('global');
-        var appEvents = eventsUtil.initEvents(appId);
-        appEvents.on('foo', function() {
+        this.appEvents.on('foo', function() {
             q.start();
             q.ok(true, 'expected app event to be handled');
         });
-        globalEvents.on('foo', function() {
+        this.globalEvents.on('foo', function() {
             q.start();
             q.ok(false, 'global event should not have been handled');
         });
-        appEvents.trigger('foo');
+        this.appEvents.trigger('foo');
     });
 
 });

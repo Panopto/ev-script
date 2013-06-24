@@ -64,7 +64,7 @@ define(function(require) {
         $password.val(config.testPass);
         this.view.submitCallback = function() {
             q.ok(this.auth.isAuthenticated());
-            q.strictEqual(this.auth.getUserId(), config.testUser);
+            q.strictEqual(this.auth.getUser(), config.testUser);
             q.strictEqual($('.ev-auth').length, 0);
             q.start();
         };

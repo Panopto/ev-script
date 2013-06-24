@@ -8,13 +8,15 @@ define(function(require) {
 
     q.module('Testing ev-script/util/cache');
 
-    q.test('check api', 6, function() {
+    q.test('check api', 8, function() {
         q.ok(_.isObject(cacheUtil.caches), 'expected caches object');
         q.ok(_.isFunction(cacheUtil.Cache), 'expected Cache function');
         q.ok(_.isFunction(cacheUtil.setAppConfig), 'expected setAppConfig function');
         q.ok(_.isFunction(cacheUtil.getAppConfig), 'expected getAppConfig function');
+        q.ok(_.isFunction(cacheUtil.setAppAuth), 'expected setAppAuth function');
+        q.ok(_.isFunction(cacheUtil.getAppAuth), 'expected getAppAuth function');
         q.ok(_.isFunction(cacheUtil.getUserCache), 'expected getUserCache function');
-        q.equal(_.size(cacheUtil), 5, 'is something exposed but not tested?');
+        q.equal(_.size(cacheUtil), 7, 'is something exposed but not tested?');
     });
 
     q.test('check Cache api', 4, function() {
@@ -40,7 +42,7 @@ define(function(require) {
         q.notStrictEqual(cache.get('foo'), cache.get('baz'));
     });
 
-    q.test('test setAppConfig/getAppConfig', 6, function() {
+    var testHelper = function(key, methodName) {
         var app1 = Math.random(),
             app2 = Math.random(),
             config1 = {
@@ -49,13 +51,22 @@ define(function(require) {
             config2 = {
                 bar: 'bar'
             };
-        q.deepEqual(cacheUtil.setAppConfig(app1, config1), config1);
-        q.deepEqual(cacheUtil.getAppConfig(app1), config1);
+        q.deepEqual(cacheUtil['set' + methodName](app1, config1), config1);
+        q.deepEqual(cacheUtil['get' + methodName](app1), config1);
         // Make sure config returned by convenience method is same as that returned by direct access
-        q.deepEqual(cacheUtil.caches.get(app1).get('config'), config1);
-        q.deepEqual(cacheUtil.setAppConfig(app2, config2), config2);
-        q.deepEqual(cacheUtil.getAppConfig(app2), config2);
-        q.notDeepEqual(cacheUtil.getAppConfig(app1), cacheUtil.getAppConfig(app2));
+        q.deepEqual(cacheUtil.caches.get(app1).get(key), config1);
+        q.deepEqual(cacheUtil['set' + methodName](app2, config2), config2);
+        q.deepEqual(cacheUtil['get' + methodName](app2), config2);
+        q.notDeepEqual(cacheUtil['get' + methodName](app1), cacheUtil['get' + methodName](app2));
+    };
+
+    q.test('test setAppConfig/getAppConfig', 6, function() {
+        testHelper('config', 'AppConfig');
+    });
+
+    // Should work the exact same as above
+    q.test('test setAppAuth/getAppAuth', 6, function() {
+        testHelper('auth', 'AppAuth');
     });
 
     q.test('test getUserCache', 7, function() {

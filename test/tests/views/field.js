@@ -18,14 +18,18 @@ define(function(require) {
         PlaylistSettingsView = require('ev-script/views/playlist-settings'),
         PlaylistPreviewView = require('ev-script/views/playlist-preview'),
         BaseView = require('ev-script/views/base'),
-        FieldView = require('ev-script/views/field');
+        FieldView = require('ev-script/views/field'),
+        FormsAuth = require('ev-script/auth/forms/auth'),
+        BasicAuth = require('ev-script/auth/basic/auth');
 
     q.module('Testing ev-script/views/field', {
         setup: function() {
-            this.appId = Math.random();
+            this.appId = 'ev-script/views/field';
             this.config = evSettings;
             eventsUtil.initEvents(this.appId);
             cacheUtil.setAppConfig(this.appId, this.config);
+            this.auth = (this.config.authType && this.config.authType === 'forms') ? new FormsAuth(this.appId) : new BasicAuth(this.appId);
+            cacheUtil.setAppAuth(this.appId, this.auth);
             this.videoField = new FieldView({
                 el: $('#videoWrap')[0],
                 model: new VideoSettings(),

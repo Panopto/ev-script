@@ -9,23 +9,40 @@ define(function(require) {
     var Cache = function() {
         this.cache = [];
         this.get = function(index) {
-            return this.cache[index];
+            return index ? this.cache[index] : null;
         };
         this.set = function(index, value) {
-            return this.cache[index] = value;
+            return index ? this.cache[index] = value : null;
         };
         return this;
     };
 
     var caches = new Cache();
 
+    var _getAppCache = function(appId) {
+        var appCache = caches.get(appId);
+        if (!appCache) {
+            appCache = caches.set(appId, new Cache());
+        }
+        return appCache;
+    };
+
     // Convenience method to initialize a cache for app-specific configuration
     var setAppConfig = function(appId, config) {
-        return caches.set(appId, new Cache()).set('config', config);
+        return _getAppCache(appId).set('config', config);
     };
 
     var getAppConfig = function(appId) {
-        return caches.get(appId).get('config');
+        return _getAppCache(appId).get('config');
+    };
+
+    // Convenience method to initialize a cache for app-specific authentication
+    var setAppAuth = function(appId, auth) {
+        return _getAppCache(appId).set('auth', auth);
+    };
+
+    var getAppAuth = function(appId) {
+        return _getAppCache(appId).get('auth');
     };
 
     var initUserCache = function() {
@@ -55,6 +72,8 @@ define(function(require) {
         caches: caches,
         setAppConfig: setAppConfig,
         getAppConfig: getAppConfig,
+        setAppAuth: setAppAuth,
+        getAppAuth: getAppAuth,
         getUserCache: getUserCache
     };
 

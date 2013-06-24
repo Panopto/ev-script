@@ -39,39 +39,33 @@ define(function(require) {
         loadVideos: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase());
             var sourceId = this.model.get('sourceId');
-            var videos = this.getCachedVideos(this.auth.getUser(), sourceId + searchVal);
-            if (!videos) {
-                videos = new Videos({}, {
-                    sourceId: sourceId,
-                    filterOn: '',
-                    filterValue: searchVal,
-                    appId: this.appId
-                });
-                videos.fetch({
-                    picker: this,
-                    success: _.bind(function(collection, response, options) {
-                        var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
-                        var size = _.size(response.Data);
-                        if (size === totalRecords) {
-                            collection.hasMore = false;
-                        } else {
-                            collection.hasMore = true;
-                            collection.pageIndex += 1;
-                        }
-                        this.setCachedVideos(this.auth.getUser(), sourceId + searchVal, collection);
-                        this.resultsView.collection = collection;
-                        this.resultsView.render();
-                    }, this),
-                    error: _.bind(function(collection, xhr, options) {
-                        this.ajaxError(xhr, _.bind(function() {
-                            this.loadVideos();
-                        }, this));
-                    }, this)
-                });
-            } else {
-                this.resultsView.collection = videos;
-                this.resultsView.render();
-            }
+            var videos = new Videos({}, {
+                sourceId: sourceId,
+                filterOn: '',
+                filterValue: searchVal,
+                appId: this.appId
+            });
+            videos.fetch({
+                picker: this,
+                cacheKey: sourceId + searchVal,
+                success: _.bind(function(collection, response, options) {
+                    var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
+                    var size = _.size(response.Data);
+                    if (size === totalRecords) {
+                        collection.hasMore = false;
+                    } else {
+                        collection.hasMore = true;
+                        collection.pageIndex += 1;
+                    }
+                    this.resultsView.collection = collection;
+                    this.resultsView.render();
+                }, this),
+                error: _.bind(function(collection, xhr, options) {
+                    this.ajaxError(xhr, _.bind(function() {
+                        this.loadVideos();
+                    }, this));
+                }, this)
+            });
         }
     });
 

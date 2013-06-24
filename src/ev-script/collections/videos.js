@@ -2,7 +2,8 @@ define(function(require) {
 
     'use strict';
 
-    var BaseCollection = require('ev-script/collections/base');
+    var BaseCollection = require('ev-script/collections/base'),
+        cacheUtil = require('ev-script/util/cache');
 
     return BaseCollection.extend({
         initialize: function(models, options) {
@@ -11,6 +12,14 @@ define(function(require) {
             this.filterValue = options.filterValue || '';
             this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedContent' : '/api/Content';
             this.pageIndex = 1;
+        },
+        getCached: function(key) {
+            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
+            return cache ? cache.get('videos').get(key) : null;
+        },
+        setCached: function(key, resp) {
+            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
+            return cache ? cache.get('videos').set(key, resp) : null;
         },
         url: function() {
             var api_url = this.config.ensembleUrl + this.sourceUrl,

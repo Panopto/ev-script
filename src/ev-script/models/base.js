@@ -5,23 +5,16 @@ define(function(require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        cacheUtil = require('ev-script/util/cache');
+        cacheUtil = require('ev-script/util/cache'),
+        BaseCollection = require('ev-script/collections/base');
 
-    return Backbone.Collection.extend({
-        initialize: function(collections, options) {
-            this.requiresAuth = true;
+    return Backbone.Model.extend({
+        initialize: function(attributes, options) {
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
-            this.auth = cacheUtil.getAppAuth(this.appId);
         },
-        model: Backbone.Model.extend({
-            idAttribute: 'ID'
-        }),
         getCached: function() {},
         setCached: function() {},
-        parse: function(response) {
-            return response.Data;
-        },
         fetch: function(options) {
             if (options.success) {
                 options.success = _.wrap(options.success, _.bind(function(success) {
@@ -39,7 +32,7 @@ define(function(require) {
                 }, this));
                 // TODO - maybe wrap error to handle 401?
             }
-            return Backbone.Collection.prototype.fetch.call(this, options);
+            return Backbone.Model.prototype.fetch.call(this, options);
         },
         sync: function(method, collection, options) {
             _.defaults(options || (options = {}), {
@@ -60,10 +53,10 @@ define(function(require) {
                         this.setCached(options.cacheKey, arguments[1]);
                         success.apply(this, Array.prototype.slice.call(arguments, 1));
                     }, this));
-                    return Backbone.Collection.prototype.sync.call(this, method, collection, options);
+                    return Backbone.Model.prototype.sync.call(this, method, collection, options);
                 }
             } else {
-                return Backbone.Collection.prototype.sync.call(this, method, collection, options);
+                return Backbone.Model.prototype.sync.call(this, method, collection, options);
             }
         }
     });

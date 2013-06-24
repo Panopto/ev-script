@@ -37,37 +37,32 @@ define(function(require) {
         },
         loadPlaylists: function() {
             var libraryId = this.model.get('libraryId');
-            var playlists = this.getCachedPlaylists(this.auth.getUser(), libraryId);
-            if(!playlists) {
-                playlists = new Playlists({}, {
-                    filterValue: libraryId,
-                    appId: this.appId
-                });
-                playlists.fetch({
-                    picker: this,
-                    success: _.bind(function(collection, response, options) {
-                        var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
-                        var size = _.size(response.Data);
-                        if(size === totalRecords) {
-                            collection.hasMore = false;
-                        } else {
-                            collection.hasMore = true;
-                            collection.pageIndex += 1;
-                        }
-                        this.setCachedPlaylists(this.auth.getUser(), libraryId, collection);
-                        this.resultsView.collection = collection;
-                        this.resultsView.render();
-                    }, this),
-                    error: _.bind(function(collection, xhr, options) {
-                        this.ajaxError(xhr, _.bind(function() {
-                            this.loadPlaylists();
-                        }, this));
-                    }, this)
-                });
-            } else {
-                this.resultsView.collection = playlists;
-                this.resultsView.render();
-            }
+            var user = this.auth.getUserId();
+            var playlists = new Playlists({}, {
+                filterValue: libraryId,
+                appId: this.appId
+            });
+            playlists.fetch({
+                picker: this,
+                cacheKey: libraryId,
+                success: _.bind(function(collection, response, options) {
+                    var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
+                    var size = _.size(response.Data);
+                    if(size === totalRecords) {
+                        collection.hasMore = false;
+                    } else {
+                        collection.hasMore = true;
+                        collection.pageIndex += 1;
+                    }
+                    this.resultsView.collection = collection;
+                    this.resultsView.render();
+                }, this),
+                error: _.bind(function(collection, xhr, options) {
+                    this.ajaxError(xhr, _.bind(function() {
+                        this.loadPlaylists();
+                    }, this));
+                }, this)
+            });
         }
     });
 

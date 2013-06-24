@@ -33,8 +33,7 @@ define(function(require) {
             e.preventDefault();
         },
         logoutHandler: function(e) {
-            this.auth.logout();
-            this.appEvents.trigger('hidePickers');
+            this.auth.logout().always(this.appEvents.trigger('hidePickers'));
             e.preventDefault();
         }
     });
