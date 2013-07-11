@@ -42,7 +42,12 @@
         'underscore',
         'backbone',
         // Test modules
-        'tests/util/auth',
+        'tests/auth/basic/auth',
+        'tests/auth/basic/view',
+        'tests/auth/forms/auth',
+        // TODO - 'tests/auth/forms/view',
+        'tests/auth/forms/authsources',
+        'tests/auth/forms/current-user',
         'tests/util/cache',
         'tests/util/events',
         'tests/collections/base',
@@ -54,7 +59,6 @@
         'tests/models/video-settings',
         'tests/models/video-encoding',
         'tests/views/base',
-        'tests/views/auth',
         'tests/views/field'
     ];
 

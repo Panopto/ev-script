@@ -3,15 +3,19 @@ define(function(require) {
     'use strict';
 
     var Backbone = require('backbone'),
+        BaseModel = require('ev-script/models/base'),
         _ = require('underscore'),
         cacheUtil = require('ev-script/util/cache');
 
-    return Backbone.Model.extend({
+    return BaseModel.extend({
         idAttribute: 'videoID',
         initialize: function(attributes, options) {
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
+            BaseModel.prototype.initialize.call(this, attributes, options);
+            this.requiresAuth = false;
         },
+        // TODO - cache responses
+        getCached: function(key) {},
+        setCached: function(key, resp) {},
         url: function() {
             // Note we're not doing a JSONP request but we're using the JSONP
             // response because it's the closest to valid JSON the API will
@@ -52,7 +56,7 @@ define(function(require) {
                 dataFilter: function(data) {
                     // Strip padding from JSONP response
                     var match = data.match(/\{[\s\S]*\}/);
-                    return match[0];
+                    return match ? match[0] : data;
                 }
             });
             return Backbone.sync.call(this, method, model, options);

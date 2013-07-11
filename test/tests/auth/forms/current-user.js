@@ -4,23 +4,23 @@ define(function(require) {
 
     var q = QUnit,
         _ = require('underscore'),
-        cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events'),
+        Backbone = require('backbone'),
         evSettings = require('ev-config'),
-        BaseCollection = require('ev-script/collections/base'),
-        Organizations = require('ev-script/collections/organizations'),
+        eventsUtil = require('ev-script/util/events'),
+        cacheUtil = require('ev-script/util/cache'),
+        CurrentUser = require('ev-script/auth/forms/current-user'),
         FormsAuth = require('ev-script/auth/forms/auth'),
         BasicAuth = require('ev-script/auth/basic/auth');
 
-    q.module('Testing ev-script/collections/organizations', {
+    q.module('Testing ev-script/auth/forms/current-user', {
         setup: function() {
-            this.appId = 'ev-script/collections/organizations';
+            this.appId = 'ev-script/auth/forms/current-user';
             eventsUtil.initEvents(this.appId);
             this.config = _.extend({}, evSettings);
             cacheUtil.setAppConfig(this.appId, this.config);
             this.auth = (this.config.authType && this.config.authType === 'forms') ? new FormsAuth(this.appId) : new BasicAuth(this.appId);
             cacheUtil.setAppAuth(this.appId, this.auth);
-            this.organizations = new Organizations([], {
+            this.currentUser = new CurrentUser({}, {
                 appId: this.appId
             });
             if (!this.auth.isAuthenticated()) {
@@ -45,25 +45,22 @@ define(function(require) {
         }
     });
 
-    q.test('test extends base', 1, function() {
-        // Make sure we're extending BaseCollection
-        q.ok(this.organizations instanceof BaseCollection);
+    q.test('test extends Backbone.Model', 1, function() {
+        q.ok(this.currentUser instanceof Backbone.Model);
     });
 
     q.test('test initialize', 2, function() {
-        // Make sure we've called BaseCollections initialize which sets
-        // appId and config
-        q.strictEqual(this.organizations.appId, this.appId);
-        q.deepEqual(this.organizations.config, evSettings);
+        q.strictEqual(this.currentUser.appId, this.appId);
+        q.deepEqual(this.currentUser.config, evSettings);
     });
 
     q.asyncTest('test fetch', 1, function() {
-        this.organizations.fetch({
-            success: function(collection, response, options) {
-                console.log(JSON.stringify(collection));
-                q.ok(collection.size() > 0);
+        this.currentUser.fetch({
+            success: _.bind(function(model, response) {
+                console.log(JSON.stringify(model));
+                q.strictEqual(this.currentUser.id, response.Data[0].ID);
                 q.start();
-            },
+            }, this),
             error: function(collection, response, options) {
                 q.ok(false, response.status);
                 q.start();

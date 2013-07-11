@@ -9,7 +9,7 @@ define(function(require) {
 
     q.module('Testing ev-script/collections/base', {
         setup: function() {
-            this.appId = Math.random();
+            this.appId = 'ev-script/collections/base';
             this.config = { foo: 'foo' };
             cacheUtil.setAppConfig(this.appId, this.config);
             this.collection = new BaseCollection([ { ID: 'test' } ], {

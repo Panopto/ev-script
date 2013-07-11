@@ -66,7 +66,7 @@ module.exports = function(grunt) {
                 options: {
                     urls: ['https://localhost:8000/test'],
                     '--ignore-ssl-errors': true,
-                    timeout: 120000
+                    timeout: 240000
                 }
             }
         },
@@ -131,7 +131,7 @@ module.exports = function(grunt) {
             base = path.resolve('.');
         grunt.log.writeln('Starting ssl web server in "' + base + '" on port ' + port + '.');
         var app = connect()
-        //.use(connect.logger())
+        // .use(connect.logger())
         .use(connect.urlencoded())
         .use(connect.cookieParser())
         .use(connect['static'](base))
@@ -140,10 +140,10 @@ module.exports = function(grunt) {
             var parsed = url.parse(req.url, true);
             // Proxy for EV API requests
             if (parsed.pathname === settings.proxyPath) {
-                var authId = parsed.query.authId,
+                var ensembleUrl = parsed.query.ensembleUrl,
                     apiUrl = parsed.query.request,
-                    username = req.cookies[authId + '-user'],
-                    password = req.cookies[authId + '-pass'];
+                    username = req.cookies[encodeURIComponent(ensembleUrl) + '-user'],
+                    password = req.cookies[encodeURIComponent(ensembleUrl) + '-pass'];
                 if (apiUrl) {
                     if (username && password) {
                         apiUrl = apiUrl.replace(/http(s)?:\/\//, 'http$1://' + encodeURIComponent(username) + ':' + encodeURIComponent(password) + '@');

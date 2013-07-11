@@ -10,22 +10,22 @@ define(function(require) {
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'hideHandler', 'logoutHandler', 'authHandler', 'render');
-            this.globalEvents.on('authSet', this.authHandler);
-            this.globalEvents.on('authRemoved', this.authHandler);
+            this.globalEvents.on('loggedIn', this.authHandler);
+            this.globalEvents.on('loggedOut', this.authHandler);
             this.field = options.field;
         },
         events: {
             'click a.action-hide': 'hideHandler',
             'click a.action-logout': 'logoutHandler'
         },
-        authHandler: function(authId) {
-            if (authId === this.config.authId) {
+        authHandler: function(ensembleUrl) {
+            if (ensembleUrl === this.config.ensembleUrl) {
                 this.render();
             }
         },
         render: function() {
             this.$el.html(this.template({
-                hasAuth: this.hasAuth()
+                isAuthenticated: this.auth.isAuthenticated()
             }));
         },
         hideHandler: function(e) {
@@ -33,8 +33,7 @@ define(function(require) {
             e.preventDefault();
         },
         logoutHandler: function(e) {
-            this.removeAuth();
-            this.appEvents.trigger('hidePickers');
+            this.auth.logout().always(this.appEvents.trigger('hidePickers'));
             e.preventDefault();
         }
     });

@@ -3,21 +3,24 @@
 
     'use strict';
 
-    var authId = 'cloud-test',
+    // var ensembleUrl = 'https://cloud.ensemblevideo.com',
+    var ensembleUrl = 'http://71.176.124.143:8081',
         proxyPath = '/ensemble';
 
     var evSettings = {
-        ensembleUrl: 'https://cloud-test.ensemblevideo.com',
-        authId: authId,
+        ensembleUrl: ensembleUrl,
         authPath: '/',
         pageSize: 10,
         proxyPath: proxyPath,
-        urlCallback: function(url) {
-            return proxyPath + '?authId=' + authId + '&request=' + encodeURIComponent(url);
-        },
+        // urlCallback: function(url) {
+        //     return proxyPath + '?ensembleUrl=' + encodeURIComponent(ensembleUrl) + '&request=' + encodeURIComponent(url);
+        // },
         // Used during testing
-        testUser: 'apiDemo',
-        testPass: 'demo123'
+        // testUser: 'hasp',
+        // testPass: 'hasp'
+        testUser: 'admin',
+        testPass: 'admin',
+        authType: 'forms'
     };
 
     if (typeof define === 'function' && define.amd) {

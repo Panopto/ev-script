@@ -10,6 +10,8 @@ define(function(require) {
         FieldView = require('ev-script/views/field'),
         VideoEmbedView = require('ev-script/views/video-embed'),
         PlaylistEmbedView = require('ev-script/views/playlist-embed'),
+        BasicAuth = require('ev-script/auth/basic/auth'),
+        FormsAuth = require('ev-script/auth/forms/auth'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
 
@@ -27,10 +29,6 @@ define(function(require) {
         }
 
         var defaults = {
-            // Used in cookie keys for auth against an EV install.  If multiple
-            // apps pointing at differing EV installations exist on the same
-            // page, this should be unique between them.
-            authId: 'ensemble',
             // Application root of the EV installation.
             ensembleUrl: '',
             // Cookie path.
@@ -50,7 +48,9 @@ define(function(require) {
             // estate.  Set to false to disable.
             hidePickers: true,
             // The difference between window dimensions and maximum dialog size.
-            dialogMargin: 40
+            dialogMargin: 40,
+            // This can be 'forms' or 'basic' (default)
+            // authType: 'forms'
         };
 
         // Add our configuration to the app cache...this is specific to this
@@ -64,6 +64,10 @@ define(function(require) {
         // eventsUtil also provides us with a global event aggregator for events
         // that span app instances
         this.globalEvents = eventsUtil.getEvents();
+
+        // This will initialize and cache an auth object for our app
+        var auth = (config.authType && config.authType === 'forms') ? new FormsAuth(appId) : new BasicAuth(appId);
+        cacheUtil.setAppAuth(appId, auth);
 
         // TODO - document and add some flexibility to params (e.g. in addition
         // to selector allow element or object).
@@ -95,6 +99,7 @@ define(function(require) {
             }
         };
 
+        this.appEvents.trigger('appLoaded');
     };
 
     return {

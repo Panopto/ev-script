@@ -5,20 +5,44 @@ define(function(require) {
     var q = QUnit,
         _ = require('underscore'),
         cacheUtil = require('ev-script/util/cache'),
-        authUtil = require('ev-script/util/auth'),
+        eventsUtil = require('ev-script/util/events'),
         evSettings = require('ev-config'),
         BaseCollection = require('ev-script/collections/base'),
-        Videos = require('ev-script/collections/videos');
+        Videos = require('ev-script/collections/videos'),
+        FormsAuth = require('ev-script/auth/forms/auth'),
+        BasicAuth = require('ev-script/auth/basic/auth');
 
     q.module('Testing ev-script/collections/videos', {
         setup: function() {
-            this.appId = Math.random();
-            cacheUtil.setAppConfig(this.appId, evSettings);
-            authUtil.setAuth(evSettings.authId, null, evSettings.authPath, evSettings.testUser, evSettings.testPass);
+            this.appId = 'ev-script/collections/videos';
+            eventsUtil.initEvents(this.appId);
+            this.config = _.extend({}, evSettings);
+            cacheUtil.setAppConfig(this.appId, this.config);
+            this.auth = (this.config.authType && this.config.authType === 'forms') ? new FormsAuth(this.appId) : new BasicAuth(this.appId);
+            cacheUtil.setAppAuth(this.appId, this.auth);
             this.videos = new Videos([], {
                 appId: this.appId
             });
+            if (!this.auth.isAuthenticated()) {
+                q.stop();
+                this.auth.login({
+                    username: evSettings.testUser,
+                    password: evSettings.testPass
+                })
+                .then(function() {
+                    q.start();
+                });
+            }
         },
+        teardown: function() {
+            if (this.auth.isAuthenticated()) {
+                q.stop();
+                this.auth.logout()
+                .always(function() {
+                    q.start();
+                });
+            }
+        }
     });
 
     q.test('test extends base', 1, function() {
@@ -37,10 +61,14 @@ define(function(require) {
         this.videos.sourceUrl = '/api/Content';
         this.videos.fetch({
             success: function(collection, response, options) {
-                q.start();
                 console.log(JSON.stringify(collection));
                 q.ok(collection.size() > 0);
                 collection.reset();
+                q.start();
+            },
+            error: function(collection, response, options) {
+                q.ok(false, response.status);
+                q.start();
             }
         });
     });
@@ -49,10 +77,14 @@ define(function(require) {
         this.videos.sourceUrl = '/api/SharedContent';
         this.videos.fetch({
             success: function(collection, response, options) {
-                q.start();
                 console.log(JSON.stringify(collection));
                 q.ok(collection.size() > 0);
                 collection.reset();
+                q.start();
+            },
+            error: function(collection, response, options) {
+                q.ok(false, response.status);
+                q.start();
             }
         });
     });

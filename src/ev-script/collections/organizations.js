@@ -2,11 +2,20 @@ define(function(require) {
 
     'use strict';
 
-    var BaseCollection = require('ev-script/collections/base');
+    var BaseCollection = require('ev-script/collections/base'),
+        cacheUtil = require('ev-script/util/cache');
 
     return BaseCollection.extend({
         initialize: function(models, options) {
             BaseCollection.prototype.initialize.call(this, models, options);
+        },
+        getCached: function(key) {
+            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
+            return cache ? cache.get('orgs') : null;
+        },
+        setCached: function(key, resp) {
+            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
+            return cache ? cache.set('orgs', resp) : null;
         },
         url: function() {
             var api_url = this.config.ensembleUrl + '/api/Organizations';
