@@ -11,13 +11,24 @@ define(function(require) {
             this.filterValue = options.filterValue || '';
             this.pageIndex = 1;
         },
+        _cache: function(key, resp) {
+            var cachedValue = null,
+                user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                var playlistsCache = userCache.get('playlists');
+                if (!playlistsCache) {
+                    userCache.set('playlists', playlistsCache = new cacheUtil.Cache());
+                }
+                cachedValue = playlistsCache[resp ? 'set' : 'get'](key, resp);
+            }
+            return cachedValue;
+        },
         getCached: function(key) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.get('playlists').get(key) : null;
+            return this._cache(key);
         },
         setCached: function(key, resp) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.get('playlists').set(key, resp) : null;
+            return this._cache(key, resp);
         },
         url: function() {
             var api_url = this.config.ensembleUrl + '/api/Playlists';

@@ -37,6 +37,16 @@ Install bower packages (see component.json file for a list of these):
 _Windows users_: I had to run this a few times to successfully install required
 packages.  YMMV.
 
+Build plupload library:
+
+    cd lib/bower/plupload
+    ant
+
+You will also need to build the flash runtime as documented in the readme.md in
+the plupload src package.
+
+_Note_: There is also a batch file to build plupload on Windows.
+
 Install compass-normalize:
 
     gem install compass-normalize

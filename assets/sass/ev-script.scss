@@ -13,6 +13,7 @@ $add-image: 'images/add.png';
 $preview-image: 'images/preview.png';
 $settings-image: 'images/settings.png';
 $remove-image: 'images/remove.png';
+$upload-image: 'images/upload.png';
 $poweredby-image: 'images/poweredby.png';
 $loading-image: 'images/loading.gif';
 $loader-image: 'images/loader.gif';
@@ -137,6 +138,9 @@ div.ev-field {
     }
     .action-remove {
       background-image: url($remove-image);
+    }
+    .action-upload {
+      background-image: url($upload-image);
     }
   }
 }
@@ -370,8 +374,24 @@ div.ev-dialog {
     @include border-top-radius(6px);
     border-width: 0;
   }
+  form.upload-form {
+    select {
+      width: 100%;
+      margin-bottom: 1em;
+    }
+    .plupload_header {
+      display: none;
+    }
+    // .plupload_scroll {
+    //   min-height: 33px;
+    // }
+    // .plupload_droptext {
+    //   line-height: 33px;
+    // }
+  }
 }
 
+// FIXME - this doesn't belong here...I think this is specific to Drupal
 .sticky-header {
   z-index: 100;
 }

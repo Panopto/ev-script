@@ -4,7 +4,7 @@
     'use strict';
 
     // var ensembleUrl = 'https://cloud.ensemblevideo.com',
-    var ensembleUrl = 'http://71.176.124.143:8081',
+    var ensembleUrl = 'http://74.106.17.216:8081',
         proxyPath = '/ensemble';
 
     var evSettings = {
@@ -15,6 +15,7 @@
         // urlCallback: function(url) {
         //     return proxyPath + '?ensembleUrl=' + encodeURIComponent(ensembleUrl) + '&request=' + encodeURIComponent(url);
         // },
+        pluploadFlashPath: '/lib/bower/plupload/js/plupload.flash.swf',
         // Used during testing
         // testUser: 'hasp',
         // testPass: 'hasp'

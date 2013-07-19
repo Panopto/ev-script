@@ -45,16 +45,6 @@ define(function(require) {
         return _getAppCache(appId).get('auth');
     };
 
-    var initUserCache = function() {
-        var userCache = new Cache();
-        userCache.set('videos', new Cache());
-        userCache.set('playlists', new Cache());
-        // There is only one value store for a users orgs
-        userCache.set('orgs', null);
-        userCache.set('libs', new Cache());
-        return userCache;
-    };
-
     var getUserCache = function(ensembleUrl, user) {
         var appCache = caches.get(ensembleUrl);
         if (!appCache) {
@@ -62,7 +52,7 @@ define(function(require) {
         }
         var userCache = appCache.get(user);
         if (!userCache) {
-            userCache = appCache.set(user, initUserCache());
+            userCache = appCache.set(user, new Cache());
         }
         return userCache;
     };

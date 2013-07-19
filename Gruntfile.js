@@ -16,13 +16,15 @@ module.exports = function(grunt) {
                 'jquery':  'jquery/jquery',
                 'jquery-ui': 'jquery-ui/jquery-ui',
                 'jquery.cookie': 'jquery.cookie/jquery.cookie',
+                'jquery.plupload.queue': 'plupload/js/jquery.plupload.queue/jquery.plupload.queue',
+                'plupload': 'plupload/js/plupload.full',
                 'ev-scroll-loader': '../ev-scroll-loader',
                 'underscore': 'lodash/dist/lodash.underscore',
                 'backbone': 'backbone/backbone',
                 'text': 'text/text'
             },
             name: 'ev-script',
-            exclude: ['jquery', 'jquery-ui', 'jquery.cookie', 'backbone', 'underscore'],
+            exclude: ['jquery', 'jquery-ui', 'jquery.cookie', 'jquery.plupload.queue', 'plupload', 'backbone', 'underscore'],
             out: "dist/ev-script.js",
             wrap: {
                 start: '<%= banner %>' + grunt.file.read('wrap/wrap.start'),
@@ -145,10 +147,16 @@ module.exports = function(grunt) {
                     username = req.cookies[encodeURIComponent(ensembleUrl) + '-user'],
                     password = req.cookies[encodeURIComponent(ensembleUrl) + '-pass'];
                 if (apiUrl) {
+                    var opts = { url: apiUrl };
                     if (username && password) {
-                        apiUrl = apiUrl.replace(/http(s)?:\/\//, 'http$1://' + encodeURIComponent(username) + ':' + encodeURIComponent(password) + '@');
+                        _.extend(opts, {
+                            auth: {
+                                username: username,
+                                password: password
+                            }
+                        });
                     }
-                    request.get({ url: apiUrl }, function(error, response, body) {
+                    request.get(opts, function(error, response, body) {
                         if (!error) {
                             delete response.headers['www-authenticate'];
                             res.headers = response.headers;
@@ -163,7 +171,7 @@ module.exports = function(grunt) {
             }
             // LTI demo launch path
             else if (parsed.pathname === '/demo/lti/launch' && req.method === 'POST') {
-                // console.log(req);
+                console.log(req);
                 var returnUrl = req.body.launch_presentation_return_url;
                 // We're just doing a simple redirect here
                 res.writeHead(302, {

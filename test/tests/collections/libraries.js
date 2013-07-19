@@ -57,13 +57,17 @@ define(function(require) {
         q.deepEqual(this.libs.config, evSettings);
     });
 
-    q.asyncTest('test fetch', 1, function() {
+    q.asyncTest('test fetch', 2, function() {
+        var cacheKey = 'libs';
         this.libs.fetch({
-            success: function(collection, response, options) {
+            cacheKey: cacheKey,
+            success: _.bind(function(collection, response, options) {
                 console.log(JSON.stringify(collection));
                 q.ok(collection.size() > 0);
+                // Make sure caching is working
+                q.deepEqual(this.libs.getCached(cacheKey), response);
                 q.start();
-            },
+            }, this),
             error: function(collection, response, options) {
                 q.ok(false, response.status);
                 q.start();

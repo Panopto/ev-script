@@ -14,6 +14,8 @@
             'jquery':  'jquery/jquery',
             'jquery-ui': 'jquery-ui/jquery-ui',
             'jquery.cookie': 'jquery.cookie/jquery.cookie',
+            'jquery.ui.plupload': 'plupload/js/jquery.ui.plupload/jquery.ui.plupload',
+            'plupload': 'plupload/js/plupload.full',
             'text': 'text/text',
             'underscore': 'lodash/dist/lodash.underscore',
             'backbone': 'backbone/backbone'
@@ -24,6 +26,8 @@
             },
             'jquery-ui': ['jquery'],
             'jquery.cookie': ['jquery'],
+            'plupload': [],
+            'jquery.ui.plupload': ['jquery', 'plupload'],
             'underscore': {
                 exports: '_'
             },
@@ -46,18 +50,19 @@
         'tests/auth/basic/view',
         'tests/auth/forms/auth',
         // TODO - 'tests/auth/forms/view',
-        'tests/auth/forms/authsources',
-        'tests/auth/forms/current-user',
         'tests/util/cache',
         'tests/util/events',
         'tests/collections/base',
         'tests/collections/organizations',
         'tests/collections/libraries',
+        'tests/collections/media-workflows',
         'tests/collections/playlists',
         'tests/collections/videos',
+        'tests/collections/authsources',
         'tests/models/playlist-settings',
         'tests/models/video-settings',
         'tests/models/video-encoding',
+        'tests/models/current-user',
         'tests/views/base',
         'tests/views/field'
     ];

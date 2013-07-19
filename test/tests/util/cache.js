@@ -69,7 +69,7 @@ define(function(require) {
         testHelper('auth', 'AppAuth');
     });
 
-    q.test('test getUserCache', 7, function() {
+    q.test('test getUserCache', 3, function() {
         var url1 = 'test1',
             url2 = 'test2',
             user = 'user',
@@ -80,19 +80,14 @@ define(function(require) {
                 thing2: 'thing2'
             };
         var url1Cache = cacheUtil.getUserCache(url1, user);
-        // Make sure cache hs expected structure
-        q.ok(url1Cache.get('videos') instanceof cacheUtil.Cache);
-        q.ok(url1Cache.get('playlists') instanceof cacheUtil.Cache);
-        q.strictEqual(url1Cache.get('orgs'), null);
-        q.ok(url1Cache.get('libs') instanceof cacheUtil.Cache);
-        url1Cache.get('videos').set('foo', obj1);
+        url1Cache.set('foo', obj1);
         var url2Cache = cacheUtil.getUserCache(url2, user);
-        url2Cache.get('videos').set('foo', obj2);
+        url2Cache.set('foo', obj2);
         // Make sure user caches are different across EV instances
-        q.notDeepEqual(cacheUtil.getUserCache(url1, user).get('videos').get('foo'), cacheUtil.getUserCache(url2, user).get('videos').get('foo'));
+        q.notDeepEqual(cacheUtil.getUserCache(url1, user).get('foo'), cacheUtil.getUserCache(url2, user).get('foo'));
         // Make sure app caches accessed directly match values returned by convenience method
-        q.deepEqual(cacheUtil.caches.get(url1).get(user).get('videos').get('foo'), cacheUtil.getUserCache(url1, user).get('videos').get('foo'));
-        q.deepEqual(cacheUtil.caches.get(url2).get(user).get('videos').get('foo'), cacheUtil.getUserCache(url2, user).get('videos').get('foo'));
+        q.deepEqual(cacheUtil.caches.get(url1).get(user).get('foo'), cacheUtil.getUserCache(url1, user).get('foo'));
+        q.deepEqual(cacheUtil.caches.get(url2).get(user).get('foo'), cacheUtil.getUserCache(url2, user).get('foo'));
     });
 
     q.test('test tracks modifications', 1, function() {

@@ -37,7 +37,6 @@ define(function(require) {
         },
         loadPlaylists: function() {
             var libraryId = this.model.get('libraryId');
-            var user = this.auth.getUserId();
             var playlists = new Playlists({}, {
                 filterValue: libraryId,
                 appId: this.appId

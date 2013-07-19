@@ -57,15 +57,20 @@ define(function(require) {
         q.deepEqual(this.videos.config, evSettings);
     });
 
-    q.asyncTest('test fetch content', 1, function() {
+    q.asyncTest('test fetch content', 2, function() {
+        var cacheKey = 'content';
         this.videos.sourceUrl = '/api/Content';
         this.videos.fetch({
-            success: function(collection, response, options) {
+            cacheKey: cacheKey,
+            success: _.bind(function(collection, response, options) {
                 console.log(JSON.stringify(collection));
                 q.ok(collection.size() > 0);
+                // Make sure caching is working
+                q.deepEqual(this.videos.getCached(cacheKey), response);
+                this.videos.setCached(cacheKey, null);
                 collection.reset();
                 q.start();
-            },
+            }, this),
             error: function(collection, response, options) {
                 q.ok(false, response.status);
                 q.start();
@@ -73,15 +78,19 @@ define(function(require) {
         });
     });
 
-    q.asyncTest('test fetch shared content', 1, function() {
+    q.asyncTest('test fetch shared content', 2, function() {
+        var cacheKey = 'shared';
         this.videos.sourceUrl = '/api/SharedContent';
         this.videos.fetch({
-            success: function(collection, response, options) {
+            cacheKey: cacheKey,
+            success: _.bind(function(collection, response, options) {
                 console.log(JSON.stringify(collection));
                 q.ok(collection.size() > 0);
+                // Make sure caching is working
+                q.deepEqual(this.videos.getCached(cacheKey), response);
                 collection.reset();
                 q.start();
-            },
+            }, this),
             error: function(collection, response, options) {
                 q.ok(false, response.status);
                 q.start();

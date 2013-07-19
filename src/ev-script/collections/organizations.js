@@ -9,13 +9,17 @@ define(function(require) {
         initialize: function(models, options) {
             BaseCollection.prototype.initialize.call(this, models, options);
         },
+        _cache: function(key, resp) {
+            var cachedValue = null,
+                user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            return userCache ? userCache[resp ? 'set' : 'get'](key, resp) : null;
+        },
         getCached: function(key) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.get('orgs') : null;
+            return this._cache('orgs');
         },
         setCached: function(key, resp) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.set('orgs', resp) : null;
+            return this._cache('orgs', resp);
         },
         url: function() {
             var api_url = this.config.ensembleUrl + '/api/Organizations';

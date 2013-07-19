@@ -1,5 +1,5 @@
 /**
- * ev-script 0.2.1 2013-06-24
+ * ev-script 0.3.0 2013-07-19
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -9,7 +9,7 @@
     if (typeof define === 'function' && define.amd) {
         // AMD.  Put jQuery plugins at the end since they don't return any values
         // that are passed to our factory.
-        define(['jquery', 'underscore', 'backbone', 'jquery-ui', 'jquery.cookie'], factory);
+        define(['jquery', 'underscore', 'backbone', 'jquery-ui', 'jquery.plupload.queue', 'jquery.cookie', 'plupload'], factory);
     } else {
         // Browser globals
         root.EV = factory(root.$, root._, root.Backbone);
@@ -526,16 +526,6 @@ define('ev-script/util/cache',['require','jquery','underscore','backbone'],funct
         return _getAppCache(appId).get('auth');
     };
 
-    var initUserCache = function() {
-        var userCache = new Cache();
-        userCache.set('videos', new Cache());
-        userCache.set('playlists', new Cache());
-        // There is only one value store for a users orgs
-        userCache.set('orgs', null);
-        userCache.set('libs', new Cache());
-        return userCache;
-    };
-
     var getUserCache = function(ensembleUrl, user) {
         var appCache = caches.get(ensembleUrl);
         if (!appCache) {
@@ -543,7 +533,7 @@ define('ev-script/util/cache',['require','jquery','underscore','backbone'],funct
         }
         var userCache = appCache.get(user);
         if (!userCache) {
-            userCache = appCache.set(user, initUserCache());
+            userCache = appCache.set(user, new Cache());
         }
         return userCache;
     };
@@ -1340,7 +1330,9 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             var $dialogWrap = $('<div class="dialogWrap"></div>'),
-                content = this.model.get('content'),
+                content = this.model.get('content') || {
+                    Title: this.model.get('id')
+                },
                 embedSettings = new this.model.constructor(this.model.toJSON()),
                 // Desired media dimensions
                 mediaDims = {
@@ -1442,8 +1434,9 @@ define('ev-script/collections/base',['require','jquery','underscore','backbone',
         model: Backbone.Model.extend({
             idAttribute: 'ID'
         }),
-        getCached: function() {},
-        setCached: function() {},
+        getCached: function(key) {},
+        setCached: function(key, resp) {},
+        clearCache: function(key) {},
         parse: function(response) {
             return response.Data;
         },
@@ -1454,7 +1447,7 @@ define('ev-script/collections/base',['require','jquery','underscore','backbone',
                     // requires authentication but we're in an unauthenticated
                     // state.  Double-check our authentication and proceed.
                     if (this.requiresAuth && !this.auth.isAuthenticated()) {
-                        this.auth.fetchUserId()
+                        this.auth.fetchUser()
                         .always(function() {
                             success.apply(this, Array.prototype.slice.call(arguments, 1));
                         });
@@ -1519,7 +1512,7 @@ define('ev-script/models/base',['require','jquery','underscore','backbone','ev-s
                     // requires authentication but we're in an unauthenticated
                     // state.  Double-check our authentication and proceed.
                     if (this.requiresAuth && !this.auth.isAuthenticated()) {
-                        this.auth.fetchUserId()
+                        this.auth.fetchUser()
                         .always(function() {
                             success.apply(this, Array.prototype.slice.call(arguments, 1));
                         });
@@ -1734,13 +1727,31 @@ define('ev-script/collections/videos',['require','ev-script/collections/base','e
             this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedContent' : '/api/Content';
             this.pageIndex = 1;
         },
+        _cache: function(key, resp) {
+            var cachedValue = null,
+                user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                var videosCache = userCache.get('videos');
+                if (!videosCache) {
+                    userCache.set('videos', videosCache = new cacheUtil.Cache());
+                }
+                cachedValue = videosCache[resp ? 'set' : 'get'](key, resp);
+            }
+            return cachedValue;
+        },
         getCached: function(key) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.get('videos').get(key) : null;
+            return this._cache(key);
         },
         setCached: function(key, resp) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.get('videos').set(key, resp) : null;
+            return this._cache(key, resp);
+        },
+        clearCache: function() {
+            var user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                userCache.set('videos', null);
+            }
         },
         url: function() {
             var api_url = this.config.ensembleUrl + this.sourceUrl,
@@ -1794,17 +1805,22 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
             this.loadVideos();
         },
         loadVideos: function() {
-            var searchVal = $.trim(this.model.get('search').toLowerCase());
-            var sourceId = this.model.get('sourceId');
-            var videos = new Videos({}, {
-                sourceId: sourceId,
-                filterOn: '',
-                filterValue: searchVal,
-                appId: this.appId
-            });
+            var searchVal = $.trim(this.model.get('search').toLowerCase()),
+                sourceId = this.model.get('sourceId'),
+                cacheKey = sourceId + searchVal,
+                videos = new Videos({}, {
+                    sourceId: sourceId,
+                    filterOn: '',
+                    filterValue: searchVal,
+                    appId: this.appId
+                }),
+                clearVideosCache = _.bind(function() {
+                    videos.clearCache();
+                    this.loadVideos();
+                }, this);
             videos.fetch({
                 picker: this,
-                cacheKey: sourceId + searchVal,
+                cacheKey: cacheKey,
                 success: _.bind(function(collection, response, options) {
                     var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
                     var size = _.size(response.Data);
@@ -1823,6 +1839,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
                     }, this));
                 }, this)
             });
+            this.appEvents.off('fileUploaded').on('fileUploaded', clearVideosCache);
         }
     });
 
@@ -1943,8 +1960,9 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
                 model: this.field.model
             }));
             this.renderSize();
+            var content = this.field.model.get('content');
             this.$el.dialog({
-                title: this.field.model.get('content').Title,
+                title: (content ? content.Title : this.field.model.get('id')),
                 modal: true,
                 autoOpen: false,
                 draggable: false,
@@ -1998,13 +2016,17 @@ define('ev-script/collections/organizations',['require','ev-script/collections/b
         initialize: function(models, options) {
             BaseCollection.prototype.initialize.call(this, models, options);
         },
+        _cache: function(key, resp) {
+            var cachedValue = null,
+                user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            return userCache ? userCache[resp ? 'set' : 'get'](key, resp) : null;
+        },
         getCached: function(key) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.get('orgs') : null;
+            return this._cache('orgs');
         },
         setCached: function(key, resp) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.set('orgs', resp) : null;
+            return this._cache('orgs', resp);
         },
         url: function() {
             var api_url = this.config.ensembleUrl + '/api/Organizations';
@@ -2057,13 +2079,24 @@ define('ev-script/collections/libraries',['require','ev-script/collections/base'
             BaseCollection.prototype.initialize.call(this, models, options);
             this.filterValue = options.organizationId || '';
         },
+        _cache: function(key, resp) {
+            var cachedValue = null,
+                user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                var libsCache = userCache.get('libs');
+                if (!libsCache) {
+                    userCache.set('libs', libsCache = new cacheUtil.Cache());
+                }
+                cachedValue = libsCache[resp ? 'set' : 'get'](key, resp);
+            }
+            return cachedValue;
+        },
         getCached: function(key) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.get('libs').get(key) : null;
+            return this._cache(key);
         },
         setCached: function(key, resp) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.get('libs').set(key, resp) : null;
+            return this._cache(key, resp);
         },
         url: function() {
             var api_url = this.config.ensembleUrl + '/api/Libraries';
@@ -2267,13 +2300,24 @@ define('ev-script/collections/playlists',['require','ev-script/collections/base'
             this.filterValue = options.filterValue || '';
             this.pageIndex = 1;
         },
+        _cache: function(key, resp) {
+            var cachedValue = null,
+                user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                var playlistsCache = userCache.get('playlists');
+                if (!playlistsCache) {
+                    userCache.set('playlists', playlistsCache = new cacheUtil.Cache());
+                }
+                cachedValue = playlistsCache[resp ? 'set' : 'get'](key, resp);
+            }
+            return cachedValue;
+        },
         getCached: function(key) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.get('playlists').get(key) : null;
+            return this._cache(key);
         },
         setCached: function(key, resp) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.get('playlists').set(key, resp) : null;
+            return this._cache(key, resp);
         },
         url: function() {
             var api_url = this.config.ensembleUrl + '/api/Playlists';
@@ -2327,7 +2371,6 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
         },
         loadPlaylists: function() {
             var libraryId = this.model.get('libraryId');
-            var user = this.auth.getUserId();
             var playlists = new Playlists({}, {
                 filterValue: libraryId,
                 appId: this.appId
@@ -2390,9 +2433,228 @@ define('ev-script/views/playlist-settings',['require','underscore','ev-script/vi
 
 });
 
-define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="Video thumbnail" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%- name %></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Change <%= label %>"><span>Change <%= label %><span></a>\n        <a href="#" class="action-preview" title="Preview: <%- name %>"><span>Preview: <%- name %><span></a>\n        <!-- TODO - temporarily disabled playlist settings until it is implemented -->\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-options" title="<%= label %> Embed Options"><span><%= label %> Embed Options<span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="Remove <%= label %>"><span>Remove <%= label %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em>Add <%= type %>.</em></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Choose <%= label %>"><span>Choose <%= label %><span></a>\n    </div>\n<% } %>\n';});
+define('ev-script/collections/media-workflows',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
 
-define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/field.html'],function(require) {
+    
+
+    var BaseCollection = require('ev-script/collections/base'),
+        cacheUtil = require('ev-script/util/cache');
+
+    return BaseCollection.extend({
+        initialize: function(models, options) {
+            BaseCollection.prototype.initialize.call(this, models, options);
+            this.filterValue = options.libraryId || '';
+        },
+        _cache: function(key, resp) {
+            var cachedValue = null,
+                user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                var workflowsCache = userCache.get('workflows');
+                if (!workflowsCache) {
+                    userCache.set('workflows', workflowsCache = new cacheUtil.Cache());
+                }
+                cachedValue = workflowsCache[resp ? 'set' : 'get'](key, resp);
+            }
+            return cachedValue;
+        },
+        getCached: function(key) {
+            return this._cache(key);
+        },
+        setCached: function(key, resp) {
+            return this._cache(key, resp);
+        },
+        url: function() {
+            var api_url = this.config.ensembleUrl + '/api/MediaWorkflows';
+            // Make this arbitrarily large so we can retrieve ALL workflows in a single request
+            var sizeParam = 'PageSize=9999';
+            var indexParam = 'PageIndex=1';
+            var onParam = 'FilterOn=LibraryId';
+            var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
+            var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        },
+        // Override base parse in order to grab settings
+        parse: function(response) {
+            this.settings = response.Settings;
+            return response.Data;
+        }
+    });
+
+});
+
+define('ev-script/views/workflow-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
+
+    
+
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/options.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'render');
+            this.$el.html('<option value="-1">Loading...</option>');
+            this.collection.on('reset', this.render);
+        },
+        render: function() {
+            this.$el.html(this.template({
+                selectedId: '',
+                collection: this.collection
+            }));
+        }
+    });
+
+});
+
+define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <select name="MediaWorkflowID"></select>\n    <div class="upload"></div>\n</form>\n';});
+
+/*global window*/
+define('ev-script/views/upload',['require','jquery','underscore','ev-script/views/base','ev-script/collections/media-workflows','ev-script/views/workflow-select','ev-script/models/video-settings','plupload','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
+
+    
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        BaseView = require('ev-script/views/base'),
+        MediaWorkflows = require('ev-script/collections/media-workflows'),
+        WorkflowSelect = require('ev-script/views/workflow-select'),
+        VideoSettings = require('ev-script/models/video-settings');
+
+    // Explicit dependency declaration
+    require('plupload');
+    require('jquery.plupload.queue');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/upload.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'render', 'loadWorkflows', 'decorateUploader', 'closeDialog');
+            this.field = options.field;
+            this.$form = $(this.template());
+            this.$upload = $('.upload', this.$form);
+            this.workflows = new MediaWorkflows({}, {
+                appId: this.appId
+            });
+            this.workflows.on('reset', function() {
+                this.render();
+            }, this);
+            this.workflowSelect = new WorkflowSelect({
+                appId: this.appId,
+                el: $('select', this.$form)[0],
+                collection: this.workflows
+            });
+            this.loadWorkflows();
+            this.appEvents.on('hidePickers', this.closeDialog);
+        },
+        loadWorkflows: function() {
+            // We need to get the current user's home library id before we fetch
+            if (this.auth.isAuthenticated() && this.auth.getUser()) {
+                this.workflows.filterValue = this.auth.getUser().get('LibraryID');
+                this.workflows.fetch({
+                    cacheKey: this.workflows.filterValue,
+                    error: _.bind(function(collection, xhr, options) {
+                        this.ajaxError(xhr, _.bind(function() {
+                            this.loadWorkflows();
+                        }, this));
+                    }, this),
+                    reset: true
+                });
+            } else {
+                this.auth.handleUnauthorized(this.el, this.loadWorkflows);
+            }
+        },
+        getWidth: function() {
+            return Math.min(600, $(window).width() - this.config.dialogMargin);
+        },
+        getHeight: function() {
+            return Math.min(400, $(window).height() - this.config.dialogMargin);
+        },
+        decorateUploader: function() {
+            var extensions = this.workflows.settings.SupportedVideo.replace('*.', '', 'g').replace(';', ',', 'g');
+            // this.$upload.plupload('destroy');
+            this.$upload.pluploadQueue({
+                url: this.workflows.settings.SubmitUrl,
+                runtimes: 'html5,flash',
+                // max_file_count: 1,
+                filters: [
+                    {
+                        title: 'Video files',
+                        extensions: extensions
+                    }
+                ],
+                flash_swf_url: this.config.pluploadFlashPath,
+                preinit: {
+                    Init: _.bind(function(up, info) {
+                        // Remove runtime tooltip
+                        $('.plupload_container', this.$upload).removeAttr('title');
+                    }, this),
+                    UploadFile: _.bind(function(up, file) {
+                        up.settings.multipart_params = {
+                            'MediaWorkflowID': $('select', this.$form).val()
+                        };
+                    }, this)
+                },
+                init: {
+                    FileUploaded: _.bind(function(up, file, info) {
+                        // TODO - do the right thing with this Does it make
+                        // sense to immediately embed...or just flush video
+                        // cache and allow user to do that? In the latter case
+                        // why not just allow multiple video uploads?
+                        // var response = JSON.parse(info.response);
+                        // var contentId = response.ContentID;
+                        this.appEvents.trigger('fileUploaded');
+                    }, this)
+                }
+            });
+            // Hacks to deal with z-index issue in dialog
+            // see https://github.com/moxiecode/plupload/issues/468
+            this.$upload.pluploadQueue().bind('refresh', function() {
+                $('div.upload > div.plupload').css({ 'z-index': '0' });
+                $('.plupload_button').css({ 'z-index': '1' });
+            });
+            this.$upload.pluploadQueue().refresh();
+        },
+        closeDialog: function() {
+            if (this.$dialog) {
+                this.$dialog.dialog('close');
+            }
+        },
+        render: function() {
+            var $dialogWrap = $('<div class="dialogWrap"></div>'),
+                $dialog;
+            this.$el.after($dialogWrap);
+            this.$dialog = $dialogWrap.dialog({
+                title: 'Upload Video to Ensemble',
+                modal: true,
+                width: this.getWidth(),
+                height: this.getHeight(),
+                draggable: false,
+                resizable: false,
+                dialogClass: 'ev-dialog',
+                create: _.bind(function(event, ui) {
+                    $dialogWrap.html(this.$form);
+                }, this),
+                open: _.bind(function(event, ui) {
+                    this.decorateUploader();
+                }, this),
+                close: _.bind(function(event, ui) {
+                    this.workflows.off('reset');
+                    this.$upload.pluploadQueue().destroy();
+                    $dialogWrap.dialog('destroy').remove();
+                    this.appEvents.off('hidePickers', this.closeDialog);
+                    this.$dialog = null;
+                }, this)
+            });
+        }
+    });
+
+});
+
+define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="Video thumbnail" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%- name %></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Change <%= label %>"><span>Change <%= label %><span></a>\n        <a href="#" class="action-preview" title="Preview: <%- name %>"><span>Preview: <%- name %><span></a>\n        <!-- TODO - temporarily disabled playlist settings until it is implemented -->\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-options" title="<%= label %> Embed Options"><span><%= label %> Embed Options<span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="Remove <%= label %>"><span>Remove <%= label %><span></a>\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-upload" title="Upload <%= label %>"><span>Upload <%= label %><span></a>\n        <% } %>\n    </div>\n<% } else { %>\n    <div class="title"><em>Add <%= type %>.</em></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Choose <%= label %>"><span>Choose <%= label %><span></a>\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-upload" title="Upload <%= label %>"><span>Upload <%= label %><span></a>\n        <% } %>\n    </div>\n<% } %>\n';});
+
+define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','ev-script/views/upload','text!ev-script/templates/field.html'],function(require) {
 
     
 
@@ -2407,7 +2669,8 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
         VideoEncoding = require('ev-script/models/video-encoding'),
         PlaylistPickerView = require('ev-script/views/playlist-picker'),
         PlaylistSettingsView = require('ev-script/views/playlist-settings'),
-        PlaylistPreviewView = require('ev-script/views/playlist-preview');
+        PlaylistPreviewView = require('ev-script/views/playlist-preview'),
+        UploadView = require('ev-script/views/upload');
 
     /*
      * View for our field (element that we set with the selected content identifier)
@@ -2416,7 +2679,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
         template: _.template(require('text!ev-script/templates/field.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler');
+            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler', 'uploadHandler');
             this.$field = options.$field;
             this.showChoose = true;
             var pickerOptions = {
@@ -2517,7 +2780,8 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
             'click .action-choose': 'chooseHandler',
             'click .action-preview': 'previewHandler',
             'click .action-options': 'optionsHandler',
-            'click .action-remove': 'removeHandler'
+            'click .action-remove': 'removeHandler',
+            'click .action-upload': 'uploadHandler'
         },
         chooseHandler: function(e) {
             this.appEvents.trigger('showPicker', this.id);
@@ -2546,6 +2810,15 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                 encoding: this.encoding,
                 model: this.model,
                 appId: this.appId
+            });
+            e.preventDefault();
+        },
+        uploadHandler: function(e) {
+            var element = e.currentTarget;
+            var uploadView = new UploadView({
+                el: element,
+                appId: this.appId,
+                field: this
             });
             e.preventDefault();
         },
@@ -2589,6 +2862,88 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
             }
         }
     });
+
+});
+
+define('ev-script/models/current-user',['require','underscore','ev-script/models/base'],function(require) {
+
+    
+
+    var _ = require('underscore'),
+        BaseModel = require('ev-script/models/base');
+
+    return BaseModel.extend({
+        idAttribute: 'ID',
+        initialize: function(attributes, options) {
+            BaseModel.prototype.initialize.call(this, attributes, options);
+            // The API actually does require authentication...but we don't want
+            // special handling
+            this.requiresAuth = false;
+        },
+        url: function() {
+            var url = this.config.ensembleUrl + '/api/CurrentUser';
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        },
+        parse: function(response) {
+            return response.Data[0];
+        }
+    });
+
+});
+
+define('ev-script/auth/base/auth',['require','underscore','backbone','ev-script/util/events','ev-script/util/cache','ev-script/models/current-user'],function(require) {
+
+    
+
+    var _ = require('underscore'),
+        Backbone = require('backbone'),
+        eventsUtil = require('ev-script/util/events'),
+        cacheUtil = require('ev-script/util/cache'),
+        CurrentUser = require('ev-script/models/current-user'),
+        BaseAuth = function(appId) {
+            _.bindAll(this, 'getUser', 'login', 'logout', 'isAuthenticated', 'handleUnauthorized');
+            this.appId = appId;
+            this.config = cacheUtil.getAppConfig(appId);
+            this.globalEvents = eventsUtil.getEvents('global');
+            this.appEvents = eventsUtil.getEvents(appId);
+            this.user = null;
+            this.appEvents.on('appLoaded', function() {
+                this.fetchUser();
+            }, this);
+        };
+
+    // Reusing Backbone's object model for extension
+    BaseAuth.extend = Backbone.Model.extend;
+
+    _.extend(BaseAuth.prototype, {
+        // extend: Backbone.Model.extend,
+        fetchUser: function() {
+            var currentUser = new CurrentUser({}, {
+                appId: this.appId
+            });
+            return currentUser.fetch({
+                success: _.bind(function(model, response, options) {
+                    this.user = model;
+                    this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
+                }, this),
+                error: _.bind(function(model, response, options) {
+                    this.user = null;
+                    this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
+                }, this)
+            }).promise();
+        },
+        getUser: function() {
+            return this.user;
+        },
+        login: function(loginInfo) {},
+        logout: function() {},
+        isAuthenticated: function() {
+            return this.user != null;
+        },
+        handleUnauthorized: function(element, authCallback) {}
+    });
+
+    return BaseAuth;
 
 });
 
@@ -2645,9 +3000,9 @@ define('ev-script/auth/basic/view',['require','exports','module','jquery','under
                     this.auth.login({
                         username: username,
                         password: password
-                    });
+                    })
+                    .always(this.submitCallback);
                     this.$dialog.dialog('destroy').remove();
-                    this.submitCallback();
                 }
                 e.preventDefault();
             }, this));
@@ -2656,92 +3011,51 @@ define('ev-script/auth/basic/view',['require','exports','module','jquery','under
 
 });
 
-define('ev-script/auth/basic/auth',['require','jquery','underscore','ev-script/util/events','ev-script/util/cache','ev-script/auth/basic/view'],function(require) {
+define('ev-script/auth/basic/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/auth/basic/view'],function(require) {
 
     
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        eventsUtil = require('ev-script/util/events'),
-        cacheUtil = require('ev-script/util/cache'),
+        BaseAuth = require('ev-script/auth/base/auth'),
         AuthView = require('ev-script/auth/basic/view'),
-        BasicAuth = function(appId) {
-            this.appId = appId;
-            this.config = cacheUtil.getAppConfig(appId);
-            this.globalEvents = eventsUtil.getEvents('global');
-        };
-
-    _.extend(BasicAuth.prototype, {
-        // Retrieve current user id from API...don't do anything here but return
-        // a resolved deferred
-        fetchUserId: function() {
-            return $.Deferred().resolve().promise();
-        },
-        getUserId: function() {
-            return $.cookie(this.config.ensembleUrl + '-user');
-        },
-        login: function(loginInfo) {
-            var deferred = $.Deferred();
-            loginInfo.username += (this.config.authDomain ? '@' + this.config.authDomain : '');
-            var cookieOptions = { path: this.config.authPath };
-            $.cookie(this.config.ensembleUrl + '-user', loginInfo.username, _.extend({}, cookieOptions));
-            $.cookie(this.config.ensembleUrl + '-pass', loginInfo.password, _.extend({}, cookieOptions));
-            this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
-            deferred.resolve();
-            return deferred.promise();
-        },
-        logout: function() {
-            var deferred = $.Deferred();
-            var cookieOptions = { path: this.config.authPath };
-            $.cookie(this.config.ensembleUrl + '-user', null, _.extend({}, cookieOptions));
-            $.cookie(this.config.ensembleUrl + '-pass', null, _.extend({}, cookieOptions));
-            this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-            deferred.resolve();
-            return deferred.promise();
-        },
-        isAuthenticated: function() {
-            return $.cookie(this.config.ensembleUrl + '-user') && $.cookie(this.config.ensembleUrl + '-pass');
-        },
-        handleUnauthorized: function(element, authCallback) {
-            this.logout();
-            var authView = new AuthView({
-                el: element,
-                submitCallback: authCallback,
-                appId: this.appId,
-                auth: this
-            });
-            authView.render();
-        }
-    });
+        // Note: This isn't really basic authentication at all...we just set cookies containing
+        // credentials to be handled by a proxy.  The proxy uses these to forward our request with
+        // a basic auth header.
+        BasicAuth = BaseAuth.extend({
+            constructor: function(appId) {
+                BasicAuth.__super__.constructor.call(this, appId);
+            },
+            login: function(loginInfo) {
+                loginInfo.username += (this.config.authDomain ? '@' + this.config.authDomain : '');
+                var cookieOptions = { path: this.config.authPath };
+                $.cookie(this.config.ensembleUrl + '-user', loginInfo.username, _.extend({}, cookieOptions));
+                $.cookie(this.config.ensembleUrl + '-pass', loginInfo.password, _.extend({}, cookieOptions));
+                return this.fetchUser();
+            },
+            logout: function() {
+                var deferred = $.Deferred();
+                var cookieOptions = { path: this.config.authPath };
+                $.cookie(this.config.ensembleUrl + '-user', null, _.extend({}, cookieOptions));
+                $.cookie(this.config.ensembleUrl + '-pass', null, _.extend({}, cookieOptions));
+                this.user = null;
+                this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
+                deferred.resolve();
+                return deferred.promise();
+            },
+            handleUnauthorized: function(element, authCallback) {
+                this.logout();
+                var authView = new AuthView({
+                    el: element,
+                    submitCallback: authCallback,
+                    appId: this.appId,
+                    auth: this
+                });
+                authView.render();
+            }
+        });
 
     return BasicAuth;
-
-});
-
-define('ev-script/auth/forms/current-user',['require','underscore','ev-script/models/base'],function(require) {
-
-    
-
-    var _ = require('underscore'),
-        BaseModel = require('ev-script/models/base');
-
-    return BaseModel.extend({
-        idAttribute: 'ID',
-        initialize: function(attributes, options) {
-            BaseModel.prototype.initialize.call(this, attributes, options);
-            // The API actually does require authentication...but we don't want
-            // special handling
-            this.requiresAuth = false;
-        },
-        url: function() {
-            var url = this.config.ensembleUrl + '/api/CurrentUser';
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        },
-        parse: function(response) {
-            return response.Data[0];
-        }
-    });
-
 });
 
 define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text"type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text"type="password"/>\n        </div>\n        <div class="form-actions">\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
@@ -2813,98 +3127,65 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
 
 });
 
-define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/util/events','ev-script/util/cache','ev-script/auth/forms/current-user','ev-script/auth/forms/view'],function(require) {
+define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/models/current-user','ev-script/auth/forms/view'],function(require) {
 
     
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        eventsUtil = require('ev-script/util/events'),
-        cacheUtil = require('ev-script/util/cache'),
-        CurrentUser = require('ev-script/auth/forms/current-user'),
+        BaseAuth = require('ev-script/auth/base/auth'),
+        CurrentUser = require('ev-script/models/current-user'),
         AuthView = require('ev-script/auth/forms/view'),
-        FormsAuth = function(appId) {
-            _.bindAll(this, 'getUserId', 'login', 'logout', 'isAuthenticated', 'handleUnauthorized');
-            this.appId = appId;
-            this.config = cacheUtil.getAppConfig(appId);
-            this.globalEvents = eventsUtil.getEvents('global'),
-            this.appEvents = eventsUtil.getEvents(appId);
-            this.userId = null;
-            this.appEvents.on('appLoaded', function() {
-                this.fetchUserId();
-            }, this);
-        };
-
-    _.extend(FormsAuth.prototype, {
-        fetchUserId: function() {
-            var currentUser = new CurrentUser({}, {
-                appId: this.appId
-            });
-            return currentUser.fetch({
-                success: _.bind(function(model, response, options) {
-                    this.userId = model.id;
-                    this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
-                }, this),
-                error: _.bind(function(model, response, options) {
-                    this.userId = null;
-                    this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                }, this)
-            }).promise();
-        },
-        // Should return a unique identifier
-        getUserId: function() {
-            return this.userId;
-        },
-        login: function(loginInfo) {
-            var url = this.config.ensembleUrl + '/api/Login';
-            return $.ajax({
-                url: this.config.urlCallback ? this.config.urlCallback(url) : url,
-                type: 'POST',
-                dataType: 'json',
-                data: loginInfo,
-                xhrFields: {
-                    withCredentials: true
-                },
-                success: _.bind(function(data, status, xhr) {
-                    var user = new CurrentUser(data.Data[0], {
-                        appId: this.appId
-                    });
-                    this.userId = user.id;
-                    this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
-                }, this)
-            }).promise();
-        },
-        logout: function() {
-            var url = this.config.ensembleUrl + '/api/Logout';
-            return $.ajax({
-                url: this.config.urlCallback ? this.config.urlCallback(url) : url,
-                type: 'POST',
-                xhrFields: {
-                    withCredentials: true
-                },
-                success: _.bind(function(data, status, xhr) {
-                    this.userId = null;
-                    this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                }, this)
-            }).promise();
-        },
-        isAuthenticated: function() {
-            return this.getUserId() != null;
-        },
-        handleUnauthorized: function(element, authCallback) {
-            this.userId = null;
-            this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-            // TODO - update the following for forms auth
-            // likely need to pass auth sources (make sure you check loadingSources deferred)
-            var authView = new AuthView({
-                el: element,
-                submitCallback: authCallback,
-                appId: this.appId,
-                auth: this
-            });
-            authView.render();
-        }
-    });
+        FormsAuth = BaseAuth.extend({
+            constructor: function(appId) {
+                BaseAuth.prototype.constructor.call(this, appId);
+            },
+            login: function(loginInfo) {
+                var url = this.config.ensembleUrl + '/api/Login';
+                return $.ajax({
+                    url: this.config.urlCallback ? this.config.urlCallback(url) : url,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: loginInfo,
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: _.bind(function(data, status, xhr) {
+                        this.user = new CurrentUser(data.Data[0], {
+                            appId: this.appId
+                        });
+                        this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
+                    }, this)
+                }).promise();
+            },
+            logout: function() {
+                var url = this.config.ensembleUrl + '/api/Logout';
+                return $.ajax({
+                    url: this.config.urlCallback ? this.config.urlCallback(url) : url,
+                    type: 'POST',
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: _.bind(function(data, status, xhr) {
+                        this.user = null;
+                        this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
+                    }, this)
+                }).promise();
+            },
+            handleUnauthorized: function(element, authCallback) {
+                this.user = null;
+                this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
+                // TODO - update the following for forms auth
+                // likely need to pass auth sources (make sure you check loadingSources deferred)
+                var authView = new AuthView({
+                    el: element,
+                    submitCallback: authCallback,
+                    appId: this.appId,
+                    auth: this
+                });
+                authView.render();
+            }
+        });
 
     return FormsAuth;
 
@@ -2963,6 +3244,8 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
             dialogMargin: 40,
             // This can be 'forms' or 'basic' (default)
             // authType: 'forms'
+            // Location for plupload flash runtime
+            pluploadFlashPath: ''
         };
 
         // Add our configuration to the app cache...this is specific to this
@@ -3034,6 +3317,8 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
     });
     define('jquery-ui', ['jquery'], function() {});
     define('jquery.cookie', ['jquery'], function() {});
+    define('plupload', function() {});
+    define('jquery.plupload.queue', ['jquery', 'plupload'], function() {});
 
     // Use almond's special top-level, synchronous require to trigger factory
     // functions, get the final module value, and export it as the public

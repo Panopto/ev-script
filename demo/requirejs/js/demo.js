@@ -10,6 +10,8 @@
             'jquery':  'jquery/jquery',
             'jquery-ui': 'jquery-ui/jquery-ui',
             'jquery.cookie': 'jquery.cookie/jquery.cookie',
+            'jquery.plupload.queue': 'plupload/js/jquery.plupload.queue/jquery.plupload.queue',
+            'plupload': 'plupload/js/plupload.full',
             'underscore': 'lodash/dist/lodash.underscore',
             'backbone': 'backbone/backbone',
             'ev-config': '../../ev-config'
@@ -20,6 +22,8 @@
             },
             'jquery-ui': ['jquery'],
             'jquery.cookie': ['jquery'],
+            'plupload': [],
+            'jquery.plupload.queue': ['jquery', 'plupload'],
             'underscore': {
                 exports: '_'
             },

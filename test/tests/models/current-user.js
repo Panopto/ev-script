@@ -8,13 +8,13 @@ define(function(require) {
         evSettings = require('ev-config'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache'),
-        CurrentUser = require('ev-script/auth/forms/current-user'),
+        CurrentUser = require('ev-script/models/current-user'),
         FormsAuth = require('ev-script/auth/forms/auth'),
         BasicAuth = require('ev-script/auth/basic/auth');
 
-    q.module('Testing ev-script/auth/forms/current-user', {
+    q.module('Testing ev-script/models/current-user', {
         setup: function() {
-            this.appId = 'ev-script/auth/forms/current-user';
+            this.appId = 'ev-script/models/current-user';
             eventsUtil.initEvents(this.appId);
             this.config = _.extend({}, evSettings);
             cacheUtil.setAppConfig(this.appId, this.config);

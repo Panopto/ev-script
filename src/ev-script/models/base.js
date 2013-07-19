@@ -22,7 +22,7 @@ define(function(require) {
                     // requires authentication but we're in an unauthenticated
                     // state.  Double-check our authentication and proceed.
                     if (this.requiresAuth && !this.auth.isAuthenticated()) {
-                        this.auth.fetchUserId()
+                        this.auth.fetchUser()
                         .always(function() {
                             success.apply(this, Array.prototype.slice.call(arguments, 1));
                         });

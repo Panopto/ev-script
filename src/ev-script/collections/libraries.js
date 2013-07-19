@@ -10,13 +10,24 @@ define(function(require) {
             BaseCollection.prototype.initialize.call(this, models, options);
             this.filterValue = options.organizationId || '';
         },
+        _cache: function(key, resp) {
+            var cachedValue = null,
+                user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                var libsCache = userCache.get('libs');
+                if (!libsCache) {
+                    userCache.set('libs', libsCache = new cacheUtil.Cache());
+                }
+                cachedValue = libsCache[resp ? 'set' : 'get'](key, resp);
+            }
+            return cachedValue;
+        },
         getCached: function(key) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.get('libs').get(key) : null;
+            return this._cache(key);
         },
         setCached: function(key, resp) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.get('libs').set(key, resp) : null;
+            return this._cache(key, resp);
         },
         url: function() {
             var api_url = this.config.ensembleUrl + '/api/Libraries';

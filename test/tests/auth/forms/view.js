@@ -7,27 +7,35 @@ define(function(require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         cacheUtil = require('ev-script/util/cache'),
-        BasicAuth = require('ev-script/auth/basic/auth'),
+        BasicAuth = require('ev-script/auth/forms/auth'),
         eventsUtil = require('ev-script/util/events'),
         evSettings = require('ev-config'),
-        AuthView = require('ev-script/auth/basic/view');
+        AuthView = require('ev-script/auth/forms/view');
 
-    q.module('Testing ev-script/auth/basic/view', {
+    // TODO - this was copied from basic...make sure this is all valid
+
+    q.module('Testing ev-script/auth/forms/view', {
         setup: function() {
-            this.appId = 'ev-script/auth/basic/view';
-            cacheUtil.setAppConfig(this.appId, evSettings);
-            this.config = evSettings;
-            this.auth = new BasicAuth(this.appId);
-            // Make sure we're not already authenticated
-            this.auth.logout();
+            this.appId = 'ev-script/auth/forms/view';
+            eventsUtil.initEvents(this.appId);
+            this.config = _.extend({}, evSettings);
+            this.config.authType = 'forms';
+            this.config.urlCallback = function() {};
             cacheUtil.setAppConfig(this.appId, this.config);
+            this.auth = new BasicAuth(this.appId);
             this.view = new AuthView({
                 auth: this.auth,
                 appId: this.appId
             });
         },
         teardown: function() {
-            this.auth.logout();
+            if (this.auth.isAuthenticated()) {
+                q.stop();
+                this.auth.logout()
+                .always(function() {
+                    q.start();
+                });
+            }
         }
     });
 

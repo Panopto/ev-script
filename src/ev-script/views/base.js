@@ -28,12 +28,6 @@ define(function(require) {
             } else if (xhr.status !== 0) {
                 root.alert('An unexpected error occurred.  Check the server log for more details.');
             }
-        },
-        getCachedWorkflows: function(user) {
-            return cacheUtil.getUserCache(this.config.ensembleUrl, user).get('workflows');
-        },
-        setCachedWorkflows: function(user, value) {
-            return cacheUtil.getUserCache(this.config.ensembleUrl, user).set('workflows', value);
         }
     });
 

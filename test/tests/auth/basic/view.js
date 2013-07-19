@@ -15,19 +15,27 @@ define(function(require) {
     q.module('Testing ev-script/auth/basic/view', {
         setup: function() {
             this.appId = 'ev-script/auth/basic/view';
-            cacheUtil.setAppConfig(this.appId, evSettings);
-            this.config = evSettings;
-            this.auth = new BasicAuth(this.appId);
-            // Make sure we're not already authenticated
-            this.auth.logout();
+            eventsUtil.initEvents(this.appId);
+            this.config = _.extend({}, evSettings);
             cacheUtil.setAppConfig(this.appId, this.config);
+            this.config.authType = 'basic';
+            if (!this.config.urlCallback) {
+                this.config.urlCallback = _.bind(function(url) {
+                    return this.config.proxyPath + '?ensembleUrl=' + encodeURIComponent(this.config.ensembleUrl) + '&request=' + encodeURIComponent(url);
+                }, this);
+            }
+            this.auth = new BasicAuth(this.appId);
             this.view = new AuthView({
                 auth: this.auth,
                 appId: this.appId
             });
         },
         teardown: function() {
-            this.auth.logout();
+            q.stop();
+            this.auth.logout()
+            .always(function() {
+                q.start();
+            });
         }
     });
 
@@ -62,12 +70,12 @@ define(function(require) {
         q.ok(!this.auth.isAuthenticated());
         $username.val(config.testUser);
         $password.val(config.testPass);
-        this.view.submitCallback = function() {
+        this.view.submitCallback = _.bind(function() {
             q.ok(this.auth.isAuthenticated());
-            q.strictEqual(this.auth.getUserId(), config.testUser);
+            q.ok(this.auth.getUser() !== null);
             q.strictEqual($('.ev-auth').length, 0);
             q.start();
-        };
+        }, this);
         $form.submit();
     });
 

@@ -51,6 +51,8 @@ define(function(require) {
             dialogMargin: 40,
             // This can be 'forms' or 'basic' (default)
             // authType: 'forms'
+            // Location for plupload flash runtime
+            pluploadFlashPath: ''
         };
 
         // Add our configuration to the app cache...this is specific to this

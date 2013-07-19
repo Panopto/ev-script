@@ -13,13 +13,31 @@ define(function(require) {
             this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedContent' : '/api/Content';
             this.pageIndex = 1;
         },
+        _cache: function(key, resp) {
+            var cachedValue = null,
+                user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                var videosCache = userCache.get('videos');
+                if (!videosCache) {
+                    userCache.set('videos', videosCache = new cacheUtil.Cache());
+                }
+                cachedValue = videosCache[resp ? 'set' : 'get'](key, resp);
+            }
+            return cachedValue;
+        },
         getCached: function(key) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.get('videos').get(key) : null;
+            return this._cache(key);
         },
         setCached: function(key, resp) {
-            var cache = cacheUtil.getUserCache(this.config.ensembleUrl, this.auth.getUserId());
-            return cache ? cache.get('videos').set(key, resp) : null;
+            return this._cache(key, resp);
+        },
+        clearCache: function() {
+            var user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                userCache.set('videos', null);
+            }
         },
         url: function() {
             var api_url = this.config.ensembleUrl + this.sourceUrl,

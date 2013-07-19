@@ -37,17 +37,22 @@ define(function(require) {
             this.loadVideos();
         },
         loadVideos: function() {
-            var searchVal = $.trim(this.model.get('search').toLowerCase());
-            var sourceId = this.model.get('sourceId');
-            var videos = new Videos({}, {
-                sourceId: sourceId,
-                filterOn: '',
-                filterValue: searchVal,
-                appId: this.appId
-            });
+            var searchVal = $.trim(this.model.get('search').toLowerCase()),
+                sourceId = this.model.get('sourceId'),
+                cacheKey = sourceId + searchVal,
+                videos = new Videos({}, {
+                    sourceId: sourceId,
+                    filterOn: '',
+                    filterValue: searchVal,
+                    appId: this.appId
+                }),
+                clearVideosCache = _.bind(function() {
+                    videos.clearCache();
+                    this.loadVideos();
+                }, this);
             videos.fetch({
                 picker: this,
-                cacheKey: sourceId + searchVal,
+                cacheKey: cacheKey,
                 success: _.bind(function(collection, response, options) {
                     var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
                     var size = _.size(response.Data);
@@ -66,6 +71,7 @@ define(function(require) {
                     }, this));
                 }, this)
             });
+            this.appEvents.off('fileUploaded').on('fileUploaded', clearVideosCache);
         }
     });
 

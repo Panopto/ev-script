@@ -5,19 +5,43 @@ define(function(require) {
     var q = QUnit,
         _ = require('underscore'),
         cacheUtil = require('ev-script/util/cache'),
-        authUtil = require('ev-script/util/auth'),
+        eventsUtil = require('ev-script/util/events'),
         evSettings = require('ev-config'),
         BaseCollection = require('ev-script/collections/base'),
-        MediaWorkflows = require('ev-script/collections/media-workflows');
+        MediaWorkflows = require('ev-script/collections/media-workflows'),
+        FormsAuth = require('ev-script/auth/forms/auth'),
+        BasicAuth = require('ev-script/auth/basic/auth');
 
     q.module('Testing ev-script/collections/media-workflows', {
         setup: function() {
-            this.appId = Math.random();
-            cacheUtil.setAppConfig(this.appId, evSettings);
-            authUtil.setAuth(evSettings.authId, null, evSettings.authPath, evSettings.testUser, evSettings.testPass);
+            this.appId = 'ev-script/collections/media-workflows';
+            eventsUtil.initEvents(this.appId);
+            this.config = _.extend({}, evSettings);
+            cacheUtil.setAppConfig(this.appId, this.config);
+            this.auth = (this.config.authType && this.config.authType === 'forms') ? new FormsAuth(this.appId) : new BasicAuth(this.appId);
+            cacheUtil.setAppAuth(this.appId, this.auth);
             this.workflows = new MediaWorkflows([], {
                 appId: this.appId
             });
+            if (!this.auth.isAuthenticated()) {
+                q.stop();
+                this.auth.login({
+                    username: evSettings.testUser,
+                    password: evSettings.testPass
+                })
+                .then(function() {
+                    q.start();
+                });
+            }
+        },
+        teardown: function() {
+            if (this.auth.isAuthenticated()) {
+                q.stop();
+                this.auth.logout()
+                .always(function() {
+                    q.start();
+                });
+            }
         }
     });
 
@@ -42,12 +66,20 @@ define(function(require) {
         q.strictEqual(this.workflows.settings, 'bar', 'expected parse to retrieve settings');
     });
 
-    q.asyncTest('test fetch', 1, function() {
+    q.asyncTest('test fetch', 2, function() {
+        var cacheKey = 'test';
         this.workflows.fetch({
-            success: function(collection, response, options) {
-                q.start();
+            cacheKey: cacheKey,
+            success: _.bind(function(collection, response, options) {
                 console.log(JSON.stringify(collection));
                 q.ok(collection.size() > 0);
+                // Make sure caching is working
+                q.deepEqual(this.workflows.getCached(cacheKey), response);
+                q.start();
+            }, this),
+            error: function(collection, response, options) {
+                q.ok(false, response.status);
+                q.start();
             }
         });
     });

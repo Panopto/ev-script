@@ -49,9 +49,9 @@ define(function(require, template) {
                     this.auth.login({
                         username: username,
                         password: password
-                    });
+                    })
+                    .always(this.submitCallback);
                     this.$dialog.dialog('destroy').remove();
-                    this.submitCallback();
                 }
                 e.preventDefault();
             }, this));

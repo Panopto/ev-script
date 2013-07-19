@@ -2,7 +2,7 @@
     if (typeof define === 'function' && define.amd) {
         // AMD.  Put jQuery plugins at the end since they don't return any values
         // that are passed to our factory.
-        define(['jquery', 'underscore', 'backbone', 'jquery-ui', 'jquery.cookie'], factory);
+        define(['jquery', 'underscore', 'backbone', 'jquery-ui', 'jquery.plupload.queue', 'jquery.cookie', 'plupload'], factory);
     } else {
         // Browser globals
         root.EV = factory(root.$, root._, root.Backbone);

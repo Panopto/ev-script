@@ -17,8 +17,9 @@ define(function(require) {
         model: Backbone.Model.extend({
             idAttribute: 'ID'
         }),
-        getCached: function() {},
-        setCached: function() {},
+        getCached: function(key) {},
+        setCached: function(key, resp) {},
+        clearCache: function(key) {},
         parse: function(response) {
             return response.Data;
         },
@@ -29,7 +30,7 @@ define(function(require) {
                     // requires authentication but we're in an unauthenticated
                     // state.  Double-check our authentication and proceed.
                     if (this.requiresAuth && !this.auth.isAuthenticated()) {
-                        this.auth.fetchUserId()
+                        this.auth.fetchUser()
                         .always(function() {
                             success.apply(this, Array.prototype.slice.call(arguments, 1));
                         });
