@@ -1,5 +1,5 @@
 /**
- * ev-script 0.3.0 2013-07-19
+ * ev-script 0.3.0 2013-07-22
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -2510,7 +2510,7 @@ define('ev-script/views/workflow-select',['require','underscore','ev-script/view
 
 define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <select name="MediaWorkflowID"></select>\n    <div class="upload"></div>\n</form>\n';});
 
-/*global window*/
+/*global window,plupload*/
 define('ev-script/views/upload',['require','jquery','underscore','ev-script/views/base','ev-script/collections/media-workflows','ev-script/views/workflow-select','ev-script/models/video-settings','plupload','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
 
     
@@ -2597,13 +2597,39 @@ define('ev-script/views/upload',['require','jquery','underscore','ev-script/view
                     }, this)
                 },
                 init: {
+                    StateChanged: _.bind(function(up) {
+                        switch (up.state) {
+                            case plupload.STARTED:
+                                if (up.state === plupload.STARTED) {
+                                    if ($('.plupload_cancel', this.$upload).length === 0) {
+                                        // Add cancel button
+                                        this.$cancel = $('<a class="plupload_button plupload_cancel" style="margin-left: 1em;" href="#">Cancel upload</a>')
+                                        .insertAfter($('.plupload_filelist_footer .plupload_file_name', this.$upload))
+                                        .click(_.bind(function() {
+                                            up.stop();
+                                            // FIXME - Expensive reset?  Not clear if there's a better way.
+                                            up.destroy();
+                                            this.decorateUploader();
+                                        }, this));
+                                    }
+                                    if (this.$cancel) {
+                                        this.$cancel.show();
+                                    }
+                                }
+                                break;
+                            case plupload.STOPPED:
+                                if (this.$cancel) {
+                                    this.$cancel.hide();
+                                }
+                                break;
+                        }
+                    }, this),
+                    UploadComplete: _.bind(function() {
+                        if (this.$cancel) {
+                            this.$cancel.hide();
+                        }
+                    }, this),
                     FileUploaded: _.bind(function(up, file, info) {
-                        // TODO - do the right thing with this Does it make
-                        // sense to immediately embed...or just flush video
-                        // cache and allow user to do that? In the latter case
-                        // why not just allow multiple video uploads?
-                        // var response = JSON.parse(info.response);
-                        // var contentId = response.ContentID;
                         this.appEvents.trigger('fileUploaded');
                     }, this)
                 }
