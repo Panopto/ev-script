@@ -14,10 +14,17 @@ define(function(require) {
             this.collection.on('reset', this.render);
         },
         render: function() {
+            var selected = this.collection.findWhere({
+                'IsDefault': true
+            }) || this.collection.at(1);
             this.$el.html(this.template({
-                selectedId: '',
+                selectedId: selected.id,
                 collection: this.collection
             }));
+            this.$el.trigger('change');
+        },
+        getSelected: function() {
+            return this.collection.get(this.$('option:selected').val());
         }
     });
 

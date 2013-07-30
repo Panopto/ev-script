@@ -158,9 +158,7 @@ define(function(require) {
             e.preventDefault();
         },
         uploadHandler: function(e) {
-            var element = e.currentTarget;
             var uploadView = new UploadView({
-                el: element,
                 appId: this.appId,
                 field: this
             });

@@ -763,16 +763,43 @@ div.ev-dialog div.ui-dialog-titlebar {
   border-width: 0;
 }
 /* line 378, ../sass/ev-script.scss */
-div.ev-dialog form.upload-form select {
+div.ev-dialog form.upload-form .form-select {
   width: 100%;
   margin-bottom: 1em;
 }
 /* line 382, ../sass/ev-script.scss */
+div.ev-dialog form.upload-form .form-text {
+  width: 72%;
+}
+/* line 385, ../sass/ev-script.scss */
+div.ev-dialog form.upload-form div.fieldWrap {
+  margin-bottom: 1em;
+}
+/* line 388, ../sass/ev-script.scss */
+div.ev-dialog form.upload-form label {
+  color: #606060;
+  display: inline-block;
+  width: 25%;
+}
+/* line 393, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form .plupload_header {
   display: none;
 }
+/* line 396, ../sass/ev-script.scss */
+div.ev-dialog form.upload-form div.plupload_container {
+  padding: 0;
+}
+/* line 399, ../sass/ev-script.scss */
+div.ev-dialog form.upload-form ul.plupload_filelist {
+  overflow-y: auto;
+  height: auto;
+}
+/* line 403, ../sass/ev-script.scss */
+div.ev-dialog form.upload-form li.plupload_droptext {
+  line-height: normal;
+}
 
-/* line 395, ../sass/ev-script.scss */
+/* line 410, ../sass/ev-script.scss */
 .sticky-header {
   z-index: 100;
 }

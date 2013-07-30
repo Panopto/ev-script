@@ -375,19 +375,34 @@ div.ev-dialog {
     border-width: 0;
   }
   form.upload-form {
-    select {
+    .form-select {
       width: 100%;
       margin-bottom: 1em;
+    }
+    .form-text {
+      width: 72%;
+    }
+    div.fieldWrap {
+      margin-bottom: 1em;
+    }
+    label {
+      color: #606060;
+      display: inline-block;
+      width: 25%;
     }
     .plupload_header {
       display: none;
     }
-    // ul.plupload_filelist {
-    //   height: 60px;
-    // }
-    // li.plupload_droptext {
-    //   line-height: 40px;
-    // }
+    div.plupload_container {
+      padding: 0;
+    }
+    ul.plupload_filelist {
+      overflow-y: auto;
+      height: auto;
+    }
+    li.plupload_droptext {
+      line-height: normal;
+    }
   }
 }
 
