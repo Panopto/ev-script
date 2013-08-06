@@ -1,5 +1,5 @@
 /**
- * ev-script 0.3.0 2013-07-30
+ * ev-script 0.3.0 2013-08-06
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -1441,7 +1441,7 @@ define('ev-script/collections/base',['require','jquery','underscore','backbone',
             return response.Data;
         },
         fetch: function(options) {
-            if (options.success) {
+            if (options && options.success) {
                 options.success = _.wrap(options.success, _.bind(function(success) {
                     // We've successfully queried the API for something that
                     // requires authentication but we're in an unauthenticated
@@ -3035,7 +3035,7 @@ define('ev-script/auth/base/auth',['require','underscore','backbone','ev-script/
 
 });
 
-define('text!ev-script/auth/basic/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text"type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text"type="password"/>\n        </div>\n        <div class="form-actions">\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/auth/basic/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text"type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text"type="password"/>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
 /*global window*/
 define('ev-script/auth/basic/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/basic/template.html'],function(require, template) {
@@ -3146,10 +3146,10 @@ define('ev-script/auth/basic/auth',['require','jquery','underscore','ev-script/a
     return BasicAuth;
 });
 
-define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text"type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text"type="password"/>\n        </div>\n        <div class="form-actions">\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="domain">Domain</label>\n            <select id="domain" name="domain" class="form-select"></select>\n        </div>\n        <div class="fieldWrap">\n            <label for="remember">Remember Me</label>\n            <input id="remember" name="remember" type="checkbox"></input>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
 /*global window*/
-define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/forms/template.html'],function(require, template) {
+define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/forms/template.html','text!ev-script/templates/options.html'],function(require, template) {
 
     
 
@@ -3162,10 +3162,9 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
     require('jquery.cookie');
     require('jquery-ui');
 
-    // TODO - Maybe a base class for auth views?
-
     return Backbone.View.extend({
         template: _.template(require('text!ev-script/auth/forms/template.html')),
+        optionsTemplate: _.template(require('text!ev-script/templates/options.html')),
         initialize: function(options) {
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
@@ -3174,7 +3173,12 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
             this.auth = options.auth;
         },
         render: function() {
-            var html = this.template();
+            var $html = $(this.template());
+            var $select = $('#domain', $html).append(this.optionsTemplate({
+                collection: this.collection,
+                // FIXME - need to know the default to select here
+                selectedId: null
+            }));
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
             this.$dialog.dialog({
@@ -3186,7 +3190,7 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
                 height: Math.min(250, $(window).height() - this.config.dialogMargin),
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {
-                    this.$dialog.html(html);
+                    this.$dialog.html($html);
                 }, this),
                 close: _.bind(function(event, ui) {
                     this.$dialog.dialog('destroy').remove();
@@ -3201,8 +3205,8 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
                     this.auth.login({
                         username: username,
                         password: password,
-                        authSourceId: null,
-                        persist: false
+                        authSourceId: $('#domain :selected', $form).val(),
+                        persist: $('#remember', $form).is(':checked')
                     }).then(_.bind(function() {
                         this.$dialog.dialog('destroy').remove();
                         this.submitCallback();
@@ -3215,7 +3219,34 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
 
 });
 
-define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/models/current-user','ev-script/auth/forms/view'],function(require) {
+define('ev-script/collections/authsources',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
+
+    
+
+    var BaseCollection = require('ev-script/collections/base'),
+        cacheUtil = require('ev-script/util/cache'),
+        cached = new cacheUtil.Cache();
+
+    return BaseCollection.extend({
+        initialize: function(models, options) {
+            BaseCollection.prototype.initialize.call(this, models, options);
+            this.requiresAuth = false;
+        },
+        getCached: function(key) {
+            return cached.get(this.config.ensembleUrl);
+        },
+        setCached: function(key, resp) {
+            return cached.set(this.config.ensembleUrl, resp);
+        },
+        url: function() {
+            var api_url = this.config.ensembleUrl + '/api/AuthSources';
+            return this.config.urlCallback ? this.config.urlCallback(api_url) : api_url;
+        }
+    });
+
+});
+
+define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/models/current-user','ev-script/auth/forms/view','ev-script/collections/authsources'],function(require) {
 
     
 
@@ -3224,9 +3255,14 @@ define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/a
         BaseAuth = require('ev-script/auth/base/auth'),
         CurrentUser = require('ev-script/models/current-user'),
         AuthView = require('ev-script/auth/forms/view'),
+        AuthSources = require('ev-script/collections/authsources'),
         FormsAuth = BaseAuth.extend({
             constructor: function(appId) {
                 BaseAuth.prototype.constructor.call(this, appId);
+                this.authSources = new AuthSources({}, {
+                    appId: appId
+                });
+                this.asPromise = this.authSources.fetch();
             },
             login: function(loginInfo) {
                 var url = this.config.ensembleUrl + '/api/Login';
@@ -3263,15 +3299,16 @@ define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/a
             handleUnauthorized: function(element, authCallback) {
                 this.user = null;
                 this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                // TODO - update the following for forms auth
-                // likely need to pass auth sources (make sure you check loadingSources deferred)
-                var authView = new AuthView({
-                    el: element,
-                    submitCallback: authCallback,
-                    appId: this.appId,
-                    auth: this
-                });
-                authView.render();
+                this.asPromise.done(_.bind(function() {
+                    var authView = new AuthView({
+                        el: element,
+                        submitCallback: authCallback,
+                        appId: this.appId,
+                        auth: this,
+                        collection: this.authSources
+                    });
+                    authView.render();
+                }, this));
             }
         });
 

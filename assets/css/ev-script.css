@@ -560,28 +560,28 @@ div.ev-auth div.logo {
 /* line 219, ../sass/ev-script.scss */
 div.ev-auth form {
   display: inline-block;
-  padding-right: 2em;
   padding-top: 1em;
+  width: 80%;
 }
-/* line 224, ../sass/ev-script.scss */
-div.ev-auth fieldset {
+/* line 223, ../sass/ev-script.scss */
+div.ev-auth form fieldset {
   border: none;
   padding: 0;
-  text-align: right;
 }
-/* line 229, ../sass/ev-script.scss */
-div.ev-auth div.fieldWrap {
-  margin-bottom: 1em;
+/* line 227, ../sass/ev-script.scss */
+div.ev-auth form div.fieldWrap {
+  margin-bottom: 0.6em;
 }
-/* line 233, ../sass/ev-script.scss */
-div.ev-auth div.form-actions input {
+/* line 231, ../sass/ev-script.scss */
+div.ev-auth form div.form-actions input {
   margin: 0;
 }
-/* line 237, ../sass/ev-script.scss */
-div.ev-auth label {
+/* line 235, ../sass/ev-script.scss */
+div.ev-auth form label {
   color: #606060;
   display: inline-block;
-  margin-right: 2em;
+  margin-right: 1em;
+  width: 30%;
 }
 
 /* line 245, ../sass/ev-script.scss */

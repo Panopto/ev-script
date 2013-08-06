@@ -7,9 +7,14 @@ define(function(require) {
         BaseAuth = require('ev-script/auth/base/auth'),
         CurrentUser = require('ev-script/models/current-user'),
         AuthView = require('ev-script/auth/forms/view'),
+        AuthSources = require('ev-script/collections/authsources'),
         FormsAuth = BaseAuth.extend({
             constructor: function(appId) {
                 BaseAuth.prototype.constructor.call(this, appId);
+                this.authSources = new AuthSources({}, {
+                    appId: appId
+                });
+                this.asPromise = this.authSources.fetch();
             },
             login: function(loginInfo) {
                 var url = this.config.ensembleUrl + '/api/Login';
@@ -46,15 +51,16 @@ define(function(require) {
             handleUnauthorized: function(element, authCallback) {
                 this.user = null;
                 this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                // TODO - update the following for forms auth
-                // likely need to pass auth sources (make sure you check loadingSources deferred)
-                var authView = new AuthView({
-                    el: element,
-                    submitCallback: authCallback,
-                    appId: this.appId,
-                    auth: this
-                });
-                authView.render();
+                this.asPromise.done(_.bind(function() {
+                    var authView = new AuthView({
+                        el: element,
+                        submitCallback: authCallback,
+                        appId: this.appId,
+                        auth: this,
+                        collection: this.authSources
+                    });
+                    authView.render();
+                }, this));
             }
         });
 

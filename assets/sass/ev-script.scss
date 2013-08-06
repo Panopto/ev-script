@@ -218,26 +218,26 @@ div.ev-auth {
   }
   form {
     display: inline-block;
-    padding-right: 2em;
     padding-top: 1em;
-  }
-  fieldset {
-    border: none;
-    padding: 0;
-    text-align: right;
-  }
-  div.fieldWrap {
-    margin-bottom: 1em;
-  }
-  div.form-actions {
-    input {
-      margin: 0;
+    width: 80%;
+    fieldset {
+      border: none;
+      padding: 0;
     }
-  }
-  label {
-    color: #606060;
-    display: inline-block;
-    margin-right: 2em;
+    div.fieldWrap {
+      margin-bottom: 0.6em;
+    }
+    div.form-actions {
+      input {
+        margin: 0;
+      }
+    }
+    label {
+      color: #606060;
+      display: inline-block;
+      margin-right: 1em;
+      width: 30%;
+    }
   }
 }
 

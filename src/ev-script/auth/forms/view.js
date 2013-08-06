@@ -12,10 +12,9 @@ define(function(require, template) {
     require('jquery.cookie');
     require('jquery-ui');
 
-    // TODO - Maybe a base class for auth views?
-
     return Backbone.View.extend({
         template: _.template(require('text!ev-script/auth/forms/template.html')),
+        optionsTemplate: _.template(require('text!ev-script/templates/options.html')),
         initialize: function(options) {
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
@@ -24,7 +23,12 @@ define(function(require, template) {
             this.auth = options.auth;
         },
         render: function() {
-            var html = this.template();
+            var $html = $(this.template());
+            var $select = $('#domain', $html).append(this.optionsTemplate({
+                collection: this.collection,
+                // FIXME - need to know the default to select here
+                selectedId: null
+            }));
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
             this.$dialog.dialog({
@@ -36,7 +40,7 @@ define(function(require, template) {
                 height: Math.min(250, $(window).height() - this.config.dialogMargin),
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {
-                    this.$dialog.html(html);
+                    this.$dialog.html($html);
                 }, this),
                 close: _.bind(function(event, ui) {
                     this.$dialog.dialog('destroy').remove();
@@ -51,8 +55,8 @@ define(function(require, template) {
                     this.auth.login({
                         username: username,
                         password: password,
-                        authSourceId: null,
-                        persist: false
+                        authSourceId: $('#domain :selected', $form).val(),
+                        persist: $('#remember', $form).is(':checked')
                     }).then(_.bind(function() {
                         this.$dialog.dialog('destroy').remove();
                         this.submitCallback();
