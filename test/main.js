@@ -14,7 +14,7 @@
             'jquery':  'jquery/jquery',
             'jquery-ui': 'jquery-ui/jquery-ui',
             'jquery.cookie': 'jquery.cookie/jquery.cookie',
-            'jquery.ui.plupload': 'plupload/js/jquery.ui.plupload/jquery.ui.plupload',
+            'jquery.plupload.queue': 'plupload/js/jquery.plupload.queue/jquery.plupload.queue',
             'plupload': 'plupload/js/plupload.full',
             'text': 'text/text',
             'underscore': 'lodash/dist/lodash.underscore',

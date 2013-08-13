@@ -35,6 +35,7 @@ define(function(require) {
         var cacheKey = 'authsources';
         this.authsources.fetch({
             cacheKey: cacheKey,
+            requiresAuth: false,
             success: _.bind(function(collection, response, options) {
                 console.log(JSON.stringify(collection));
                 q.ok(collection.size() > 0);
