@@ -798,8 +798,3 @@ div.ev-dialog form.upload-form ul.plupload_filelist {
 div.ev-dialog form.upload-form li.plupload_droptext {
   line-height: normal;
 }
-
-/* line 410, ../sass/ev-script.scss */
-.sticky-header {
-  z-index: 100;
-}
