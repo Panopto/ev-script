@@ -123,8 +123,8 @@ define(function(require) {
                                 if (up.state === plupload.STARTED) {
                                     if ($('.plupload_cancel', this.$upload).length === 0) {
                                         // Add cancel button
-                                        this.$cancel = $('<a class="plupload_button plupload_cancel" style="margin-left: 1em;" href="#">Cancel upload</a>')
-                                        .insertAfter($('.plupload_filelist_footer .plupload_file_name', this.$upload))
+                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">Cancel upload</a>')
+                                        .insertBefore($('.plupload_filelist_footer .plupload_clearer', this.$upload))
                                         .click(_.bind(function() {
                                             up.stop();
                                             this.decorateUploader();

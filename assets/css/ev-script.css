@@ -786,15 +786,21 @@ div.ev-dialog form.upload-form .plupload_header {
   display: none;
 }
 /* line 396, ../sass/ev-script.scss */
+div.ev-dialog form.upload-form .plupload_cancel {
+  margin-right: 3em;
+  display: block;
+  float: right;
+}
+/* line 401, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form div.plupload_container {
   padding: 0;
 }
-/* line 399, ../sass/ev-script.scss */
+/* line 404, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form ul.plupload_filelist {
   overflow-y: auto;
   height: auto;
 }
-/* line 403, ../sass/ev-script.scss */
+/* line 408, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form li.plupload_droptext {
   line-height: normal;
 }

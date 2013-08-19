@@ -1,5 +1,5 @@
 /**
- * ev-script 0.3.0 2013-08-15
+ * ev-script 0.3.0 2013-08-19
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -2661,8 +2661,8 @@ define('ev-script/views/upload',['require','jquery','underscore','ev-script/view
                                 if (up.state === plupload.STARTED) {
                                     if ($('.plupload_cancel', this.$upload).length === 0) {
                                         // Add cancel button
-                                        this.$cancel = $('<a class="plupload_button plupload_cancel" style="margin-left: 1em;" href="#">Cancel upload</a>')
-                                        .insertAfter($('.plupload_filelist_footer .plupload_file_name', this.$upload))
+                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">Cancel upload</a>')
+                                        .insertBefore($('.plupload_filelist_footer .plupload_clearer', this.$upload))
                                         .click(_.bind(function() {
                                             up.stop();
                                             this.decorateUploader();
