@@ -2706,9 +2706,7 @@ define('ev-script/views/upload',['require','jquery','underscore','ev-script/view
                         }
                     }, this),
                     UploadComplete: _.bind(function() {
-                        if (this.$cancel) {
-                            this.$cancel.hide();
-                        }
+                        this.closeDialog();
                     }, this),
                     FileUploaded: _.bind(function(up, file, info) {
                         this.appEvents.trigger('fileUploaded');
