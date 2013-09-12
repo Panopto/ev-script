@@ -68,7 +68,9 @@ module.exports = function(grunt) {
                 options: {
                     urls: ['https://localhost:8000/test'],
                     '--ignore-ssl-errors': true,
-                    timeout: 240000
+                    '--cookies-file': 'cookie-jar.txt',
+                    '--web-security': false,
+                    timeout: 60000
                 }
             }
         },
@@ -147,7 +149,10 @@ module.exports = function(grunt) {
                     username = req.cookies[encodeURIComponent(ensembleUrl) + '-user'],
                     password = req.cookies[encodeURIComponent(ensembleUrl) + '-pass'];
                 if (apiUrl) {
-                    var opts = { url: apiUrl };
+                    var opts = {
+                        url: apiUrl,
+                        strictSSL: false
+                    };
                     if (username && password) {
                         _.extend(opts, {
                             auth: {
@@ -156,14 +161,11 @@ module.exports = function(grunt) {
                             }
                         });
                     }
-                    request.get(opts, function(error, response, body) {
-                        if (!error) {
-                            delete response.headers['www-authenticate'];
-                            res.headers = response.headers;
-                            res.statusCode = response.statusCode;
-                            res.end(body);
-                        }
-                    });
+                    var r = request.get(opts);
+                    r.pipefilter = function(response, dest) {
+                        dest.removeHeader('www-authenticate');
+                    };
+                    r.pipe(res);
                 } else {
                     res.statusCode = 400;
                     res.end("Missing request parameter.");

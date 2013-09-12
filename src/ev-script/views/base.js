@@ -14,6 +14,7 @@ define(function(require) {
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
             this.auth = cacheUtil.getAppAuth(this.appId);
+            this.info = cacheUtil.getAppInfo(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
             this.globalEvents = eventsUtil.getEvents('global');
         },

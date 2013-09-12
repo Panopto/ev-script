@@ -10,6 +10,7 @@ define(function(require) {
         FieldView = require('ev-script/views/field'),
         VideoEmbedView = require('ev-script/views/video-embed'),
         PlaylistEmbedView = require('ev-script/views/playlist-embed'),
+        AppInfo = require('ev-script/models/app-info'),
         BasicAuth = require('ev-script/auth/basic/auth'),
         FormsAuth = require('ev-script/auth/forms/auth'),
         eventsUtil = require('ev-script/util/events'),
@@ -67,41 +68,60 @@ define(function(require) {
         // that span app instances
         this.globalEvents = eventsUtil.getEvents();
 
-        // This will initialize and cache an auth object for our app
-        var auth = (config.authType && config.authType === 'forms') ? new FormsAuth(appId) : new BasicAuth(appId);
-        cacheUtil.setAppAuth(appId, auth);
+        // Features depend on info asynchronously retreived below...so leverage
+        // promises to coordinate loading
+        var loading = $.Deferred();
+        _.extend(this, loading.promise());
 
-        // TODO - document and add some flexibility to params (e.g. in addition
-        // to selector allow element or object).
-        this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
-            var $field = $(fieldSelector, fieldWrap);
-            var fieldView = new FieldView({
-                id: fieldWrap.id || appId,
-                el: fieldWrap,
-                model: settingsModel,
-                $field: $field,
-                appId: appId
-            });
-        };
-
-        // TODO - document.  See handleField comment too.
-        this.handleEmbed = function(embedWrap, settingsModel) {
-            if (settingsModel instanceof VideoSettings) {
-                var videoEmbed = new VideoEmbedView({
-                    el: embedWrap,
-                    model: settingsModel,
-                    appId: appId
-                });
+        var info = new AppInfo({}, {
+            appId: appId
+        });
+        cacheUtil.setAppInfo(appId, info);
+        info.fetch({})
+        .always(_.bind(function() {
+            // This is kinda lazy...but this will only be set in 3.6+ versions
+            // so we don't actually need to check the version number
+            if (!info.get('ApplicationVersion') && config.authType === 'forms') {
+                loading.reject('Configured to use forms authentication against a pre-3.6 API.');
             } else {
-                var playlistEmbed = new PlaylistEmbedView({
-                    el: embedWrap,
-                    model: settingsModel,
-                    appId: appId
-                });
-            }
-        };
+                // This will initialize and cache an auth object for our app
+                var auth = (config.authType && config.authType === 'forms') ? new FormsAuth(appId) : new BasicAuth(appId);
+                cacheUtil.setAppAuth(appId, auth);
 
-        this.appEvents.trigger('appLoaded');
+                // TODO - document and add some flexibility to params (e.g. in addition
+                // to selector allow element or object).
+                this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
+                    var $field = $(fieldSelector, fieldWrap);
+                    var fieldView = new FieldView({
+                        id: fieldWrap.id || appId,
+                        el: fieldWrap,
+                        model: settingsModel,
+                        $field: $field,
+                        appId: appId
+                    });
+                };
+
+                // TODO - document.  See handleField comment too.
+                this.handleEmbed = function(embedWrap, settingsModel) {
+                    if (settingsModel instanceof VideoSettings) {
+                        var videoEmbed = new VideoEmbedView({
+                            el: embedWrap,
+                            model: settingsModel,
+                            appId: appId
+                        });
+                    } else {
+                        var playlistEmbed = new PlaylistEmbedView({
+                            el: embedWrap,
+                            model: settingsModel,
+                            appId: appId
+                        });
+                    }
+                };
+
+                this.appEvents.trigger('appLoaded');
+                loading.resolve();
+            }
+        }, this));
     };
 
     return {

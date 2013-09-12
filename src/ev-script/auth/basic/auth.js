@@ -6,12 +6,42 @@ define(function(require) {
         _ = require('underscore'),
         BaseAuth = require('ev-script/auth/base/auth'),
         AuthView = require('ev-script/auth/basic/view'),
-        // Note: This isn't really basic authentication at all...we just set cookies containing
-        // credentials to be handled by a proxy.  The proxy uses these to forward our request with
-        // a basic auth header.
+        Organizations = require('ev-script/collections/organizations'),
+        // Note: This isn't really basic authentication at all...we just set
+        // cookies containing credentials to be handled by a proxy.  The proxy
+        // uses these to forward our request with a basic auth header.
         BasicAuth = BaseAuth.extend({
             constructor: function(appId) {
                 BasicAuth.__super__.constructor.call(this, appId);
+            },
+            fetchUser: function() {
+                // Hack to handle legacy (pre-3.6) API which doesn't have a
+                // currentUser endpoint.  See if we can successfully query orgs
+                // instead (probably least expensive due to minimal data) to see
+                // if valid credentials are set, then use a randomly generated
+                // user id
+                if (this.info.get('ApplicationVersion')) {
+                    return BasicAuth.__super__.fetchUser.call(this);
+                } else {
+                    var orgs = new Organizations({}, {
+                        appId: this.appId
+                    });
+                    // Don't want special treatment of failure due to
+                    // authentication in this case
+                    orgs.requiresAuth = false;
+                    return orgs.fetch({
+                        success: _.bind(function(collection, response, options) {
+                            this.user = {
+                                id: Math.floor(Math.random() * 10000000000000001).toString(16)
+                            };
+                            this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
+                        }, this),
+                        error: _.bind(function(collection, xhr, options) {
+                            this.user = null;
+                            this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
+                        }, this)
+                    }).promise();
+                }
             },
             login: function(loginInfo) {
                 loginInfo.username += (this.config.authDomain ? '@' + this.config.authDomain : '');

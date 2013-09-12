@@ -11,31 +11,39 @@ define(function(require) {
         Videos = require('ev-script/collections/videos'),
         VideoEncoding = require('ev-script/models/video-encoding'),
         FormsAuth = require('ev-script/auth/forms/auth'),
-        BasicAuth = require('ev-script/auth/basic/auth');
+        BasicAuth = require('ev-script/auth/basic/auth'),
+        AppInfo = require('ev-script/models/app-info');
 
     q.module('Testing ev-script/models/video-encoding', {
         setup: function() {
+            q.stop();
             this.appId = 'ev-script/models/video-encoding';
             eventsUtil.initEvents(this.appId);
             this.config = _.extend({}, evSettings);
             cacheUtil.setAppConfig(this.appId, this.config);
-            this.auth = (this.config.authType && this.config.authType === 'forms') ? new FormsAuth(this.appId) : new BasicAuth(this.appId);
-            cacheUtil.setAppAuth(this.appId, this.auth);
-            this.encoding = new VideoEncoding({
-                dimensions: '640x360'
-            }, {
+            var info = new AppInfo({}, {
                 appId: this.appId
             });
-            if (!this.auth.isAuthenticated()) {
-                q.stop();
-                this.auth.login({
-                    username: evSettings.testUser,
-                    password: evSettings.testPass
-                })
-                .then(function() {
-                    q.start();
+            cacheUtil.setAppInfo(this.appId, info);
+            info.fetch({})
+            .always(_.bind(function() {
+                this.auth = (this.config.authType && this.config.authType === 'forms') ? new FormsAuth(this.appId) : new BasicAuth(this.appId);
+                cacheUtil.setAppAuth(this.appId, this.auth);
+                this.encoding = new VideoEncoding({
+                    dimensions: '640x360'
+                }, {
+                    appId: this.appId
                 });
-            }
+                if (!this.auth.isAuthenticated()) {
+                    this.auth.login({
+                        username: evSettings.testUser,
+                        password: evSettings.testPass
+                    })
+                    .then(function() {
+                        q.start();
+                    });
+                }
+            }, this));
         },
         teardown: function() {
             if (this.auth.isAuthenticated()) {

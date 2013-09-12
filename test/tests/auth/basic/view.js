@@ -8,27 +8,37 @@ define(function(require) {
         Backbone = require('backbone'),
         cacheUtil = require('ev-script/util/cache'),
         BasicAuth = require('ev-script/auth/basic/auth'),
+        AppInfo = require('ev-script/models/app-info'),
         eventsUtil = require('ev-script/util/events'),
         evSettings = require('ev-config'),
         AuthView = require('ev-script/auth/basic/view');
 
     q.module('Testing ev-script/auth/basic/view', {
         setup: function() {
+            q.stop();
             this.appId = 'ev-script/auth/basic/view';
             eventsUtil.initEvents(this.appId);
             this.config = _.extend({}, evSettings);
-            cacheUtil.setAppConfig(this.appId, this.config);
             this.config.authType = 'basic';
             if (!this.config.urlCallback) {
                 this.config.urlCallback = _.bind(function(url) {
                     return this.config.proxyPath + '?ensembleUrl=' + encodeURIComponent(this.config.ensembleUrl) + '&request=' + encodeURIComponent(url);
                 }, this);
             }
-            this.auth = new BasicAuth(this.appId);
-            this.view = new AuthView({
-                auth: this.auth,
+            cacheUtil.setAppConfig(this.appId, this.config);
+            var info = new AppInfo({}, {
                 appId: this.appId
             });
+            cacheUtil.setAppInfo(this.appId, info);
+            info.fetch({})
+            .always(_.bind(function() {
+                this.auth = new BasicAuth(this.appId);
+                this.view = new AuthView({
+                    auth: this.auth,
+                    appId: this.appId
+                });
+                q.start();
+            }, this));
         },
         teardown: function() {
             q.stop();

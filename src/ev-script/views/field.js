@@ -196,7 +196,8 @@ define(function(require) {
                 label: label,
                 type: type,
                 name: name,
-                thumbnailUrl: thumbnailUrl
+                thumbnailUrl: thumbnailUrl,
+                uploadSupported: this.info.get('ApplicationVersion')
             }));
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {

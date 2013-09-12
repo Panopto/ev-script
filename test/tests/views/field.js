@@ -20,28 +20,38 @@ define(function(require) {
         BaseView = require('ev-script/views/base'),
         FieldView = require('ev-script/views/field'),
         FormsAuth = require('ev-script/auth/forms/auth'),
-        BasicAuth = require('ev-script/auth/basic/auth');
+        BasicAuth = require('ev-script/auth/basic/auth'),
+        AppInfo = require('ev-script/models/app-info');
 
     q.module('Testing ev-script/views/field', {
         setup: function() {
+            q.stop();
             this.appId = 'ev-script/views/field';
             this.config = evSettings;
             eventsUtil.initEvents(this.appId);
             cacheUtil.setAppConfig(this.appId, this.config);
-            this.auth = (this.config.authType && this.config.authType === 'forms') ? new FormsAuth(this.appId) : new BasicAuth(this.appId);
-            cacheUtil.setAppAuth(this.appId, this.auth);
-            this.videoField = new FieldView({
-                el: $('#videoWrap')[0],
-                model: new VideoSettings(),
-                $field: $('#video'),
+            this.info = new AppInfo({}, {
                 appId: this.appId
             });
-            this.playlistField = new FieldView({
-                el: $('#playlistWrap')[0],
-                model: new PlaylistSettings(),
-                $field: $('#playlist'),
-                appId: this.appId
-            });
+            cacheUtil.setAppInfo(this.appId, this.info);
+            this.info.fetch({})
+            .always(_.bind(function() {
+                this.auth = (this.config.authType && this.config.authType === 'forms') ? new FormsAuth(this.appId) : new BasicAuth(this.appId);
+                cacheUtil.setAppAuth(this.appId, this.auth);
+                this.videoField = new FieldView({
+                    el: $('#videoWrap')[0],
+                    model: new VideoSettings(),
+                    $field: $('#video'),
+                    appId: this.appId
+                });
+                this.playlistField = new FieldView({
+                    el: $('#playlistWrap')[0],
+                    model: new PlaylistSettings(),
+                    $field: $('#playlist'),
+                    appId: this.appId
+                });
+                q.start();
+            }, this));
         }
     });
 
@@ -50,11 +60,14 @@ define(function(require) {
         q.ok(this.playlistField instanceof BaseView);
     });
 
-    q.test('test properties', 29, function() {
+    q.test('test properties', 31, function() {
         // Test video field
         q.strictEqual(this.videoField.appId, this.appId);
         q.deepEqual(this.videoField.config, this.config);
-        q.deepEqual(this.videoField.appEvents, eventsUtil.getEvents(this.appId));
+        // FIXME - this bombs out in phantomjs
+        // q.deepEqual(this.videoField.appEvents, eventsUtil.getEvents(this.appId));
+        q.ok(_.isEqual(this.videoField.appEvents, eventsUtil.getEvents(this.appId)));
+        q.deepEqual(this.videoField.info, this.info);
         q.ok(this.videoField.modelClass === VideoSettings);
         q.ok(this.videoField.pickerClass === VideoPickerView);
         q.ok(this.videoField.settingsClass === VideoSettingsView);
@@ -70,7 +83,10 @@ define(function(require) {
         // Test playlist field
         q.strictEqual(this.playlistField.appId, this.appId);
         q.deepEqual(this.playlistField.config, this.config);
-        q.deepEqual(this.playlistField.appEvents, eventsUtil.getEvents(this.appId));
+        // FIXME - this bombs out in phantomjs
+        // q.deepEqual(this.playlistField.appEvents, eventsUtil.getEvents(this.appId));
+        q.ok(_.isEqual(this.playlistField.appEvents, eventsUtil.getEvents(this.appId)));
+        q.deepEqual(this.playlistField.info, this.info);
         q.ok(this.playlistField.modelClass === PlaylistSettings);
         q.ok(this.playlistField.pickerClass === PlaylistPickerView);
         q.ok(this.playlistField.settingsClass === PlaylistSettingsView);

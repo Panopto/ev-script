@@ -8,15 +8,17 @@ define(function(require) {
 
     q.module('Testing ev-script/util/cache');
 
-    q.test('check api', 8, function() {
+    q.test('check api', 10, function() {
         q.ok(_.isObject(cacheUtil.caches), 'expected caches object');
         q.ok(_.isFunction(cacheUtil.Cache), 'expected Cache function');
         q.ok(_.isFunction(cacheUtil.setAppConfig), 'expected setAppConfig function');
         q.ok(_.isFunction(cacheUtil.getAppConfig), 'expected getAppConfig function');
         q.ok(_.isFunction(cacheUtil.setAppAuth), 'expected setAppAuth function');
         q.ok(_.isFunction(cacheUtil.getAppAuth), 'expected getAppAuth function');
+        q.ok(_.isFunction(cacheUtil.setAppInfo), 'expected setAppInfo function');
+        q.ok(_.isFunction(cacheUtil.getAppInfo), 'expected getAppInfo function');
         q.ok(_.isFunction(cacheUtil.getUserCache), 'expected getUserCache function');
-        q.equal(_.size(cacheUtil), 7, 'is something exposed but not tested?');
+        q.equal(_.size(cacheUtil), 9, 'is something exposed but not tested?');
     });
 
     q.test('check Cache api', 4, function() {

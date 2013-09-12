@@ -1,3 +1,4 @@
+/*global window*/
 (function() {
 
     'use strict';
@@ -58,8 +59,12 @@
         });
 
         $(document).ready(function() {
-            app.handleField($('#videoWrap')[0], new EV.VideoSettings(), '#video');
-            app.handleField($('#playlistWrap')[0], new EV.PlaylistSettings(), '#playlist');
+            app.done(function() {
+                app.handleField($('#videoWrap')[0], new EV.VideoSettings(), '#video');
+                app.handleField($('#playlistWrap')[0], new EV.PlaylistSettings(), '#playlist');
+            }).fail(function(message) {
+                window.alert(message);
+            });
         });
     });
 

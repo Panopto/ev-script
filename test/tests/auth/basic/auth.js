@@ -7,13 +7,16 @@ define(function(require) {
         $ = require('jquery'),
         cacheUtil = require('ev-script/util/cache'),
         BasicAuth = require('ev-script/auth/basic/auth'),
+        AppInfo = require('ev-script/models/app-info'),
         evSettings = require('ev-config'),
         eventsUtil = require('ev-script/util/events');
 
     q.module('Testing ev-script/auth/basic/auth', {
         setup: function() {
+            q.stop();
             var appId = 'ev-script/auth/basic/auth';
             eventsUtil.initEvents(appId);
+            this.globalEvents = eventsUtil.getEvents('global');
             this.config = _.extend({}, evSettings);
             this.config.authType = 'basic';
             if (!this.config.urlCallback) {
@@ -22,8 +25,15 @@ define(function(require) {
                 }, this);
             }
             cacheUtil.setAppConfig(appId, this.config);
-            this.auth = new BasicAuth(appId);
-            this.globalEvents = eventsUtil.getEvents('global');
+            var info = new AppInfo({}, {
+                appId: appId
+            });
+            cacheUtil.setAppInfo(appId, info);
+            info.fetch({})
+            .always(_.bind(function() {
+                this.auth = new BasicAuth(appId);
+                q.start();
+            }, this));
         },
         teardown: function() {
             q.stop();

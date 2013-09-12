@@ -45,6 +45,15 @@ define(function(require) {
         return _getAppCache(appId).get('auth');
     };
 
+    // Convenience method to initialize a cache for upstream application info
+    var setAppInfo = function(appId, info) {
+        return _getAppCache(appId).set('info', info);
+    };
+
+    var getAppInfo = function(appId) {
+        return _getAppCache(appId).get('info');
+    };
+
     var getUserCache = function(ensembleUrl, user) {
         var appCache = caches.get(ensembleUrl);
         if (!appCache) {
@@ -64,6 +73,8 @@ define(function(require) {
         getAppConfig: getAppConfig,
         setAppAuth: setAppAuth,
         getAppAuth: getAppAuth,
+        setAppInfo: setAppInfo,
+        getAppInfo: getAppInfo,
         getUserCache: getUserCache
     };
 

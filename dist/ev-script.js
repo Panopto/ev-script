@@ -1,5 +1,5 @@
 /**
- * ev-script 0.3.0 2013-08-19
+ * ev-script 0.3.0 2013-09-12
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -526,6 +526,15 @@ define('ev-script/util/cache',['require','jquery','underscore','backbone'],funct
         return _getAppCache(appId).get('auth');
     };
 
+    // Convenience method to initialize a cache for upstream application info
+    var setAppInfo = function(appId, info) {
+        return _getAppCache(appId).set('info', info);
+    };
+
+    var getAppInfo = function(appId) {
+        return _getAppCache(appId).get('info');
+    };
+
     var getUserCache = function(ensembleUrl, user) {
         var appCache = caches.get(ensembleUrl);
         if (!appCache) {
@@ -545,6 +554,8 @@ define('ev-script/util/cache',['require','jquery','underscore','backbone'],funct
         getAppConfig: getAppConfig,
         setAppAuth: setAppAuth,
         getAppAuth: getAppAuth,
+        setAppInfo: setAppInfo,
+        getAppInfo: getAppInfo,
         getUserCache: getUserCache
     };
 
@@ -566,6 +577,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
             this.auth = cacheUtil.getAppAuth(this.appId);
+            this.info = cacheUtil.getAppInfo(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
             this.globalEvents = eventsUtil.getEvents('global');
         },
@@ -2759,7 +2771,7 @@ define('ev-script/views/upload',['require','jquery','underscore','ev-script/view
 
 });
 
-define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="Video thumbnail" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%- name %></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Change <%= label %>"><span>Change <%= label %><span></a>\n        <a href="#" class="action-preview" title="Preview: <%- name %>"><span>Preview: <%- name %><span></a>\n        <!-- TODO - temporarily disabled playlist settings until it is implemented -->\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-options" title="<%= label %> Embed Options"><span><%= label %> Embed Options<span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="Remove <%= label %>"><span>Remove <%= label %><span></a>\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-upload" title="Upload <%= label %>"><span>Upload <%= label %><span></a>\n        <% } %>\n    </div>\n<% } else { %>\n    <div class="title"><em>Add <%= type %>.</em></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Choose <%= label %>"><span>Choose <%= label %><span></a>\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-upload" title="Upload <%= label %>"><span>Upload <%= label %><span></a>\n        <% } %>\n    </div>\n<% } %>\n';});
+define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="Video thumbnail" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%- name %></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Change <%= label %>"><span>Change <%= label %><span></a>\n        <a href="#" class="action-preview" title="Preview: <%- name %>"><span>Preview: <%- name %><span></a>\n        <!-- TODO - temporarily disabled playlist settings until it is implemented -->\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-options" title="<%= label %> Embed Options"><span><%= label %> Embed Options<span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="Remove <%= label %>"><span>Remove <%= label %><span></a>\n        <% if (type === \'video\' && uploadSupported) { %>\n            <a href="#" class="action-upload" title="Upload <%= label %>"><span>Upload <%= label %><span></a>\n        <% } %>\n    </div>\n<% } else { %>\n    <div class="title"><em>Add <%= type %>.</em></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Choose <%= label %>"><span>Choose <%= label %><span></a>\n        <% if (type === \'video\' && uploadSupported) { %>\n            <a href="#" class="action-upload" title="Upload <%= label %>"><span>Upload <%= label %><span></a>\n        <% } %>\n    </div>\n<% } %>\n';});
 
 define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','ev-script/views/upload','text!ev-script/templates/field.html'],function(require) {
 
@@ -2959,12 +2971,36 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                 label: label,
                 type: type,
                 name: name,
-                thumbnailUrl: thumbnailUrl
+                thumbnailUrl: thumbnailUrl,
+                uploadSupported: this.info.get('ApplicationVersion')
             }));
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {
                 this.$('.action-choose').hide();
             }
+        }
+    });
+
+});
+
+define('ev-script/models/app-info',['require','underscore','ev-script/models/base'],function(require) {
+
+    
+
+    var _ = require('underscore'),
+        BaseModel = require('ev-script/models/base');
+
+    return BaseModel.extend({
+        initialize: function(attributes, options) {
+            BaseModel.prototype.initialize.call(this, attributes, options);
+            this.requiresAuth = false;
+        },
+        url: function() {
+            var url = this.config.ensembleUrl + '/api/Info';
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        },
+        parse: function(response) {
+            return response;
         }
     });
 
@@ -3009,6 +3045,7 @@ define('ev-script/auth/base/auth',['require','underscore','backbone','ev-script/
             _.bindAll(this, 'getUser', 'login', 'logout', 'isAuthenticated', 'handleUnauthorized');
             this.appId = appId;
             this.config = cacheUtil.getAppConfig(appId);
+            this.info = cacheUtil.getAppInfo(appId);
             this.globalEvents = eventsUtil.getEvents('global');
             this.appEvents = eventsUtil.getEvents(appId);
             this.user = null;
@@ -3021,7 +3058,6 @@ define('ev-script/auth/base/auth',['require','underscore','backbone','ev-script/
     BaseAuth.extend = Backbone.Model.extend;
 
     _.extend(BaseAuth.prototype, {
-        // extend: Backbone.Model.extend,
         fetchUser: function() {
             var currentUser = new CurrentUser({}, {
                 appId: this.appId
@@ -3116,7 +3152,7 @@ define('ev-script/auth/basic/view',['require','exports','module','jquery','under
 
 });
 
-define('ev-script/auth/basic/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/auth/basic/view'],function(require) {
+define('ev-script/auth/basic/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/auth/basic/view','ev-script/collections/organizations'],function(require) {
 
     
 
@@ -3124,12 +3160,42 @@ define('ev-script/auth/basic/auth',['require','jquery','underscore','ev-script/a
         _ = require('underscore'),
         BaseAuth = require('ev-script/auth/base/auth'),
         AuthView = require('ev-script/auth/basic/view'),
-        // Note: This isn't really basic authentication at all...we just set cookies containing
-        // credentials to be handled by a proxy.  The proxy uses these to forward our request with
-        // a basic auth header.
+        Organizations = require('ev-script/collections/organizations'),
+        // Note: This isn't really basic authentication at all...we just set
+        // cookies containing credentials to be handled by a proxy.  The proxy
+        // uses these to forward our request with a basic auth header.
         BasicAuth = BaseAuth.extend({
             constructor: function(appId) {
                 BasicAuth.__super__.constructor.call(this, appId);
+            },
+            fetchUser: function() {
+                // Hack to handle legacy (pre-3.6) API which doesn't have a
+                // currentUser endpoint.  See if we can successfully query orgs
+                // instead (probably least expensive due to minimal data) to see
+                // if valid credentials are set, then use a randomly generated
+                // user id
+                if (this.info.get('ApplicationVersion')) {
+                    return BasicAuth.__super__.fetchUser.call(this);
+                } else {
+                    var orgs = new Organizations({}, {
+                        appId: this.appId
+                    });
+                    // Don't want special treatment of failure due to
+                    // authentication in this case
+                    orgs.requiresAuth = false;
+                    return orgs.fetch({
+                        success: _.bind(function(collection, response, options) {
+                            this.user = {
+                                id: Math.floor(Math.random() * 10000000000000001).toString(16)
+                            };
+                            this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
+                        }, this),
+                        error: _.bind(function(collection, xhr, options) {
+                            this.user = null;
+                            this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
+                        }, this)
+                    }).promise();
+                }
             },
             login: function(loginInfo) {
                 loginInfo.username += (this.config.authDomain ? '@' + this.config.authDomain : '');
@@ -3333,7 +3399,7 @@ define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/a
 
 });
 
-define('ev-script',['require','backbone','underscore','jquery','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/auth/basic/auth','ev-script/auth/forms/auth','ev-script/util/events','ev-script/util/cache'],function(require) {
+define('ev-script',['require','backbone','underscore','jquery','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/models/app-info','ev-script/auth/basic/auth','ev-script/auth/forms/auth','ev-script/util/events','ev-script/util/cache'],function(require) {
 
     
 
@@ -3345,6 +3411,7 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
         FieldView = require('ev-script/views/field'),
         VideoEmbedView = require('ev-script/views/video-embed'),
         PlaylistEmbedView = require('ev-script/views/playlist-embed'),
+        AppInfo = require('ev-script/models/app-info'),
         BasicAuth = require('ev-script/auth/basic/auth'),
         FormsAuth = require('ev-script/auth/forms/auth'),
         eventsUtil = require('ev-script/util/events'),
@@ -3402,41 +3469,60 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
         // that span app instances
         this.globalEvents = eventsUtil.getEvents();
 
-        // This will initialize and cache an auth object for our app
-        var auth = (config.authType && config.authType === 'forms') ? new FormsAuth(appId) : new BasicAuth(appId);
-        cacheUtil.setAppAuth(appId, auth);
+        // Features depend on info asynchronously retreived below...so leverage
+        // promises to coordinate loading
+        var loading = $.Deferred();
+        _.extend(this, loading.promise());
 
-        // TODO - document and add some flexibility to params (e.g. in addition
-        // to selector allow element or object).
-        this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
-            var $field = $(fieldSelector, fieldWrap);
-            var fieldView = new FieldView({
-                id: fieldWrap.id || appId,
-                el: fieldWrap,
-                model: settingsModel,
-                $field: $field,
-                appId: appId
-            });
-        };
-
-        // TODO - document.  See handleField comment too.
-        this.handleEmbed = function(embedWrap, settingsModel) {
-            if (settingsModel instanceof VideoSettings) {
-                var videoEmbed = new VideoEmbedView({
-                    el: embedWrap,
-                    model: settingsModel,
-                    appId: appId
-                });
+        var info = new AppInfo({}, {
+            appId: appId
+        });
+        cacheUtil.setAppInfo(appId, info);
+        info.fetch({})
+        .always(_.bind(function() {
+            // This is kinda lazy...but this will only be set in 3.6+ versions
+            // so we don't actually need to check the version number
+            if (!info.get('ApplicationVersion') && config.authType === 'forms') {
+                loading.reject('Configured to use forms authentication against a pre-3.6 API.');
             } else {
-                var playlistEmbed = new PlaylistEmbedView({
-                    el: embedWrap,
-                    model: settingsModel,
-                    appId: appId
-                });
-            }
-        };
+                // This will initialize and cache an auth object for our app
+                var auth = (config.authType && config.authType === 'forms') ? new FormsAuth(appId) : new BasicAuth(appId);
+                cacheUtil.setAppAuth(appId, auth);
 
-        this.appEvents.trigger('appLoaded');
+                // TODO - document and add some flexibility to params (e.g. in addition
+                // to selector allow element or object).
+                this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
+                    var $field = $(fieldSelector, fieldWrap);
+                    var fieldView = new FieldView({
+                        id: fieldWrap.id || appId,
+                        el: fieldWrap,
+                        model: settingsModel,
+                        $field: $field,
+                        appId: appId
+                    });
+                };
+
+                // TODO - document.  See handleField comment too.
+                this.handleEmbed = function(embedWrap, settingsModel) {
+                    if (settingsModel instanceof VideoSettings) {
+                        var videoEmbed = new VideoEmbedView({
+                            el: embedWrap,
+                            model: settingsModel,
+                            appId: appId
+                        });
+                    } else {
+                        var playlistEmbed = new PlaylistEmbedView({
+                            el: embedWrap,
+                            model: settingsModel,
+                            appId: appId
+                        });
+                    }
+                };
+
+                this.appEvents.trigger('appLoaded');
+                loading.resolve();
+            }
+        }, this));
     };
 
     return {

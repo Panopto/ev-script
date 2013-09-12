@@ -11,6 +11,7 @@ define(function(require) {
             _.bindAll(this, 'getUser', 'login', 'logout', 'isAuthenticated', 'handleUnauthorized');
             this.appId = appId;
             this.config = cacheUtil.getAppConfig(appId);
+            this.info = cacheUtil.getAppInfo(appId);
             this.globalEvents = eventsUtil.getEvents('global');
             this.appEvents = eventsUtil.getEvents(appId);
             this.user = null;
@@ -23,7 +24,6 @@ define(function(require) {
     BaseAuth.extend = Backbone.Model.extend;
 
     _.extend(BaseAuth.prototype, {
-        // extend: Backbone.Model.extend,
         fetchUser: function() {
             var currentUser = new CurrentUser({}, {
                 appId: this.appId
