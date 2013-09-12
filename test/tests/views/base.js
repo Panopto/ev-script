@@ -3,23 +3,21 @@ define(function(require) {
     'use strict';
 
     var q = QUnit,
-        cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events'),
         _ = require('underscore'),
-        evSettings = require('ev-config'),
         Backbone = require('backbone'),
+        testUtil = require('test/util'),
+        eventsUtil = require('ev-script/util/events'),
         BaseView = require('ev-script/views/base');
 
     q.module('Testing ev-script/views/base', {
-        setup: function() {
-            this.appId = 'ev-script/views/base';
-            this.config = evSettings;
-            eventsUtil.initEvents(this.appId);
-            cacheUtil.setAppConfig(this.appId, this.config);
-            this.view = new BaseView({
-                appId: this.appId
-            });
-        }
+        setup: testUtil.setupHelper('ev-script/views/base', {
+            setupAuth: function() {
+                this.view = new BaseView({
+                    appId: this.appId
+                });
+            },
+            authenticate: false
+        })
     });
 
     q.test('test extends Backbone.View', 1, function() {

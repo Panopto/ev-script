@@ -4,53 +4,20 @@ define(function(require) {
 
     var q = QUnit,
         _ = require('underscore'),
-        cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events'),
+        testUtil = require('test/util'),
         evSettings = require('ev-config'),
         BaseCollection = require('ev-script/collections/base'),
-        MediaWorkflows = require('ev-script/collections/media-workflows'),
-        FormsAuth = require('ev-script/auth/forms/auth'),
-        BasicAuth = require('ev-script/auth/basic/auth'),
-        AppInfo = require('ev-script/models/app-info');
+        MediaWorkflows = require('ev-script/collections/media-workflows');
 
     q.module('Testing ev-script/collections/media-workflows', {
-        setup: function() {
-            q.stop();
-            this.appId = 'ev-script/collections/media-workflows';
-            eventsUtil.initEvents(this.appId);
-            this.config = _.extend({}, evSettings);
-            cacheUtil.setAppConfig(this.appId, this.config);
-            var info = new AppInfo({}, {
-                appId: this.appId
-            });
-            cacheUtil.setAppInfo(this.appId, info);
-            info.fetch({})
-            .always(_.bind(function() {
-                this.auth = (this.config.authType && this.config.authType === 'forms') ? new FormsAuth(this.appId) : new BasicAuth(this.appId);
-                cacheUtil.setAppAuth(this.appId, this.auth);
+        setup: testUtil.setupHelper('ev-script/collections/media-workflows', {
+            setupAuth: function() {
                 this.workflows = new MediaWorkflows([], {
                     appId: this.appId
                 });
-                if (!this.auth.isAuthenticated()) {
-                    this.auth.login({
-                        username: evSettings.testUser,
-                        password: evSettings.testPass
-                    })
-                    .then(function() {
-                        q.start();
-                    });
-                }
-            }, this));
-        },
-        teardown: function() {
-            if (this.auth.isAuthenticated()) {
-                q.stop();
-                this.auth.logout()
-                .always(function() {
-                    q.start();
-                });
             }
-        }
+        }),
+        teardown: testUtil.teardownHelper()
     });
 
     q.test('test extends base', 1, function() {

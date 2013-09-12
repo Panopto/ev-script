@@ -13,6 +13,7 @@ define(function(require) {
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
             this.auth = cacheUtil.getAppAuth(this.appId);
+            this.info = cacheUtil.getAppInfo(this.appId);
         },
         model: Backbone.Model.extend({
             idAttribute: 'ID'

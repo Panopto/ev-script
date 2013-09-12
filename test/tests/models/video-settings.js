@@ -7,7 +7,7 @@ define(function(require) {
         Backbone = require('backbone'),
         VideoSettings = require('ev-script/models/video-settings');
 
-    q.module('Testing ev-script/models/playlist-settings', {
+    q.module('Testing ev-script/models/video-settings', {
         setup: function() {
             this.settings = new VideoSettings();
         }

@@ -5,9 +5,8 @@ define(function(require) {
     var q = QUnit,
         $ = require('jquery'),
         _ = require('underscore'),
-        cacheUtil = require('ev-script/util/cache'),
+        testUtil = require('test/util'),
         eventsUtil = require('ev-script/util/events'),
-        evSettings = require('ev-config'),
         VideoSettings = require('ev-script/models/video-settings'),
         VideoEncoding = require('ev-script/models/video-encoding'),
         VideoPickerView = require('ev-script/views/video-picker'),
@@ -18,26 +17,11 @@ define(function(require) {
         PlaylistSettingsView = require('ev-script/views/playlist-settings'),
         PlaylistPreviewView = require('ev-script/views/playlist-preview'),
         BaseView = require('ev-script/views/base'),
-        FieldView = require('ev-script/views/field'),
-        FormsAuth = require('ev-script/auth/forms/auth'),
-        BasicAuth = require('ev-script/auth/basic/auth'),
-        AppInfo = require('ev-script/models/app-info');
+        FieldView = require('ev-script/views/field');
 
     q.module('Testing ev-script/views/field', {
-        setup: function() {
-            q.stop();
-            this.appId = 'ev-script/views/field';
-            this.config = evSettings;
-            eventsUtil.initEvents(this.appId);
-            cacheUtil.setAppConfig(this.appId, this.config);
-            this.info = new AppInfo({}, {
-                appId: this.appId
-            });
-            cacheUtil.setAppInfo(this.appId, this.info);
-            this.info.fetch({})
-            .always(_.bind(function() {
-                this.auth = (this.config.authType && this.config.authType === 'forms') ? new FormsAuth(this.appId) : new BasicAuth(this.appId);
-                cacheUtil.setAppAuth(this.appId, this.auth);
+        setup: testUtil.setupHelper('ev-script/views/field', {
+            setupAuth: function() {
                 this.videoField = new FieldView({
                     el: $('#videoWrap')[0],
                     model: new VideoSettings(),
@@ -50,9 +34,9 @@ define(function(require) {
                     $field: $('#playlist'),
                     appId: this.appId
                 });
-                q.start();
-            }, this));
-        }
+            },
+            authenticate: false
+        })
     });
 
     q.test('test extends BaseView', 2, function() {

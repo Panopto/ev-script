@@ -5,43 +5,29 @@ define(function(require) {
     var q = QUnit,
         _ = require('underscore'),
         $ = require('jquery'),
-        cacheUtil = require('ev-script/util/cache'),
+        testUtil = require('test/util'),
         BasicAuth = require('ev-script/auth/basic/auth'),
-        AppInfo = require('ev-script/models/app-info'),
         evSettings = require('ev-config'),
         eventsUtil = require('ev-script/util/events');
 
     q.module('Testing ev-script/auth/basic/auth', {
-        setup: function() {
-            q.stop();
-            var appId = 'ev-script/auth/basic/auth';
-            eventsUtil.initEvents(appId);
-            this.globalEvents = eventsUtil.getEvents('global');
-            this.config = _.extend({}, evSettings);
-            this.config.authType = 'basic';
-            if (!this.config.urlCallback) {
-                this.config.urlCallback = _.bind(function(url) {
-                    return this.config.proxyPath + '?ensembleUrl=' + encodeURIComponent(this.config.ensembleUrl) + '&request=' + encodeURIComponent(url);
-                }, this);
-            }
-            cacheUtil.setAppConfig(appId, this.config);
-            var info = new AppInfo({}, {
-                appId: appId
-            });
-            cacheUtil.setAppInfo(appId, info);
-            info.fetch({})
-            .always(_.bind(function() {
-                this.auth = new BasicAuth(appId);
-                q.start();
-            }, this));
-        },
-        teardown: function() {
-            q.stop();
-            this.auth.logout()
-            .always(function() {
-                q.start();
-            });
-        }
+        setup: testUtil.setupHelper('ev-script/auth/basic/auth', {
+            setupConfig: function() {
+                this.config.authType = 'basic';
+                if (!this.config.urlCallback) {
+                    this.config.urlCallback = _.bind(function(url) {
+                        return this.config.proxyPath + '?ensembleUrl=' + encodeURIComponent(this.config.ensembleUrl) + '&request=' + encodeURIComponent(url);
+                    }, this);
+                }
+            },
+            authenticate: false
+        }),
+        teardown: testUtil.teardownHelper()
+    });
+
+    q.test('is basic auth', 1, function() {
+        // Sanity check to make sure our helper is initializing us correctly
+        q.ok(this.auth instanceof BasicAuth);
     });
 
     q.test('check api', 5, function() {
@@ -93,7 +79,8 @@ define(function(require) {
 
     q.asyncTest('loggedIn event test', 2, function() {
         q.stop(1);
-        this.globalEvents.once('loggedIn', function(id) {
+        var globalEvents = eventsUtil.getEvents('global');
+        globalEvents.once('loggedIn', function(id) {
             if (id === evSettings.ensembleUrl) {
                 q.ok(true);
                 q.start(1);
@@ -110,7 +97,8 @@ define(function(require) {
 
     q.asyncTest('loggedOut event test', 3, function() {
         q.stop(1);
-        this.globalEvents.once('loggedOut', function(id) {
+        var globalEvents = eventsUtil.getEvents('global');
+        globalEvents.once('loggedOut', function(id) {
             if (id === evSettings.ensembleUrl) {
                 q.ok(true);
                 q.start(1);

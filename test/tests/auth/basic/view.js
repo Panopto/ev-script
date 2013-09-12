@@ -6,47 +6,36 @@ define(function(require) {
         $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        cacheUtil = require('ev-script/util/cache'),
+        testUtil = require('test/util'),
         BasicAuth = require('ev-script/auth/basic/auth'),
-        AppInfo = require('ev-script/models/app-info'),
         eventsUtil = require('ev-script/util/events'),
         evSettings = require('ev-config'),
         AuthView = require('ev-script/auth/basic/view');
 
     q.module('Testing ev-script/auth/basic/view', {
-        setup: function() {
-            q.stop();
-            this.appId = 'ev-script/auth/basic/view';
-            eventsUtil.initEvents(this.appId);
-            this.config = _.extend({}, evSettings);
-            this.config.authType = 'basic';
-            if (!this.config.urlCallback) {
-                this.config.urlCallback = _.bind(function(url) {
-                    return this.config.proxyPath + '?ensembleUrl=' + encodeURIComponent(this.config.ensembleUrl) + '&request=' + encodeURIComponent(url);
-                }, this);
-            }
-            cacheUtil.setAppConfig(this.appId, this.config);
-            var info = new AppInfo({}, {
-                appId: this.appId
-            });
-            cacheUtil.setAppInfo(this.appId, info);
-            info.fetch({})
-            .always(_.bind(function() {
-                this.auth = new BasicAuth(this.appId);
+        setup: testUtil.setupHelper('ev-script/auth/basic/view', {
+            setupConfig: function() {
+                this.config.authType = 'basic';
+                if (!this.config.urlCallback) {
+                    this.config.urlCallback = _.bind(function(url) {
+                        return this.config.proxyPath + '?ensembleUrl=' + encodeURIComponent(this.config.ensembleUrl) + '&request=' + encodeURIComponent(url);
+                    }, this);
+                }
+            },
+            setupAuth: function() {
                 this.view = new AuthView({
                     auth: this.auth,
                     appId: this.appId
                 });
-                q.start();
-            }, this));
-        },
-        teardown: function() {
-            q.stop();
-            this.auth.logout()
-            .always(function() {
-                q.start();
-            });
-        }
+            },
+            authenticate: false
+        }),
+        teardown: testUtil.teardownHelper()
+    });
+
+    q.test('is basic auth', 1, function() {
+        // Sanity check to make sure our helper is initializing us correctly
+        q.ok(this.auth instanceof BasicAuth);
     });
 
     // Note that AuthView can't extend our Base as that would (currently)

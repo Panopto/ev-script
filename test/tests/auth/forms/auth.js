@@ -5,32 +5,27 @@ define(function(require) {
     var q = QUnit,
         _ = require('underscore'),
         $ = require('jquery'),
-        cacheUtil = require('ev-script/util/cache'),
+        testUtil = require('test/util'),
         FormsAuth = require('ev-script/auth/forms/auth'),
         evSettings = require('ev-config'),
         eventsUtil = require('ev-script/util/events');
 
     q.module('Testing ev-script/auth/forms/auth', {
-        setup: function() {
-            var appId = 'ev-script/auth/forms/auth';
-            eventsUtil.initEvents(appId);
-            this.config = _.extend({}, evSettings);
-            this.config.authType = 'forms';
-            delete(this.config.urlCallback);
-            cacheUtil.setAppConfig(appId, this.config);
-            this.auth = new FormsAuth(appId);
-            cacheUtil.setAppAuth(appId, this.auth);
-            this.globalEvents = eventsUtil.getEvents('global');
-        },
-        teardown: function() {
-            if (this.auth.isAuthenticated()) {
-                q.stop();
-                this.auth.logout()
-                .always(function() {
-                    q.start();
-                });
-            }
-        }
+        setup: testUtil.setupHelper('ev-script/auth/forms/auth', {
+            setupConfig: function() {
+                // Regardless of configured auth...we're testing forms auth here
+                this.config.authType = 'forms';
+                delete(this.config.urlCallback);
+            },
+            // Don't automatically authenticate as we're testing that here
+            authenticate: false
+        }),
+        teardown: testUtil.teardownHelper()
+    });
+
+    q.test('is forms auth', 1, function() {
+        // Sanity check to make sure our helper is initializing us correctly
+        q.ok(this.auth instanceof FormsAuth);
     });
 
     q.test('check api', 5, function() {
@@ -91,13 +86,14 @@ define(function(require) {
     q.asyncTest('event test', 2, function() {
         // We're already running under one stop...add another as we expect two
         q.stop(1);
-        this.globalEvents.once('loggedIn', function(id) {
+        var globalEvents = eventsUtil.getEvents('global');
+        globalEvents.once('loggedIn', function(id) {
             if (id === evSettings.ensembleUrl) {
                 q.ok(true);
                 q.start(1);
             }
         });
-        this.globalEvents.once('loggedOut', function(id) {
+        globalEvents.once('loggedOut', function(id) {
             if (id === evSettings.ensembleUrl) {
                 q.ok(true);
                 q.start(1);

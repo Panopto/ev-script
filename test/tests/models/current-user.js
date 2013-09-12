@@ -5,52 +5,19 @@ define(function(require) {
     var q = QUnit,
         _ = require('underscore'),
         Backbone = require('backbone'),
+        testUtil = require('test/util'),
         evSettings = require('ev-config'),
-        eventsUtil = require('ev-script/util/events'),
-        cacheUtil = require('ev-script/util/cache'),
-        CurrentUser = require('ev-script/models/current-user'),
-        FormsAuth = require('ev-script/auth/forms/auth'),
-        BasicAuth = require('ev-script/auth/basic/auth'),
-        AppInfo = require('ev-script/models/app-info');
+        CurrentUser = require('ev-script/models/current-user');
 
     q.module('Testing ev-script/models/current-user', {
-        setup: function() {
-            q.stop();
-            this.appId = 'ev-script/models/current-user';
-            eventsUtil.initEvents(this.appId);
-            this.config = _.extend({}, evSettings);
-            cacheUtil.setAppConfig(this.appId, this.config);
-            var info = new AppInfo({}, {
-                appId: this.appId
-            });
-            cacheUtil.setAppInfo(this.appId, info);
-            info.fetch({})
-            .always(_.bind(function() {
-                this.auth = (this.config.authType && this.config.authType === 'forms') ? new FormsAuth(this.appId) : new BasicAuth(this.appId);
-                cacheUtil.setAppAuth(this.appId, this.auth);
+        setup: testUtil.setupHelper('ev-script/models/current-user', {
+            setupAuth: function() {
                 this.currentUser = new CurrentUser({}, {
                     appId: this.appId
                 });
-                if (!this.auth.isAuthenticated()) {
-                    this.auth.login({
-                        username: evSettings.testUser,
-                        password: evSettings.testPass
-                    })
-                    .then(function() {
-                        q.start();
-                    });
-                }
-            }, this));
-        },
-        teardown: function() {
-            if (this.auth.isAuthenticated()) {
-                q.stop();
-                this.auth.logout()
-                .always(function() {
-                    q.start();
-                });
             }
-        }
+        }),
+        teardown: testUtil.teardownHelper()
     });
 
     q.test('test extends Backbone.Model', 1, function() {

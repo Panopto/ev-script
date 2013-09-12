@@ -4,19 +4,20 @@ define(function(require) {
 
     var q = QUnit,
         _ = require('underscore'),
-        cacheUtil = require('ev-script/util/cache'),
+        testUtil = require('test/util'),
         evSettings = require('ev-config'),
         BaseCollection = require('ev-script/collections/base'),
         AuthSources = require('ev-script/collections/authsources');
 
     q.module('Testing ev-script/collections/authsources', {
-        setup: function() {
-            this.appId = 'ev-script/collections/authsources';
-            cacheUtil.setAppConfig(this.appId, evSettings);
-            this.authsources = new AuthSources([], {
-                appId: this.appId
-            });
-        }
+        setup: testUtil.setupHelper('ev-script/collections/authsources', {
+            setupAuth: function() {
+                this.authsources = new AuthSources([], {
+                    appId: this.appId
+                });
+            },
+            authenticate: false
+        })
     });
 
     q.test('test extends base', 1, function() {
