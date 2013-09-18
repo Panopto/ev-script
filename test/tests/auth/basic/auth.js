@@ -12,7 +12,7 @@ define(function(require) {
 
     q.module('Testing ev-script/auth/basic/auth', {
         setup: testUtil.setupHelper('ev-script/auth/basic/auth', {
-            setupConfig: function() {
+            configCallback: function() {
                 this.config.authType = 'basic';
                 if (!this.config.urlCallback) {
                     this.config.urlCallback = _.bind(function(url) {

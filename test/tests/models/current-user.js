@@ -11,7 +11,7 @@ define(function(require) {
 
     q.module('Testing ev-script/models/current-user', {
         setup: testUtil.setupHelper('ev-script/models/current-user', {
-            setupAuth: function() {
+            postAuthCallback: function() {
                 this.currentUser = new CurrentUser({}, {
                     appId: this.appId
                 });
@@ -29,17 +29,23 @@ define(function(require) {
         q.deepEqual(this.currentUser.config, evSettings);
     });
 
-    q.asyncTest('test fetch', 1, function() {
-        this.currentUser.fetch({
-            success: _.bind(function(model, response) {
-                console.log(JSON.stringify(model));
-                q.strictEqual(this.currentUser.id, response.Data[0].ID);
-                q.start();
-            }, this),
-            error: function(collection, response, options) {
-                q.ok(false, response.status);
-                q.start();
-            }
-        });
+    q.asyncTest('test fetch', 0, function() {
+        // Don't try to fetch if this isn't support by the API
+        if (this.info.get('ApplicationVersion')) {
+            q.expect(1);
+            this.currentUser.fetch({
+                success: _.bind(function(model, response) {
+                    console.log(JSON.stringify(model));
+                    q.strictEqual(this.currentUser.id, response.Data[0].ID);
+                    q.start();
+                }, this),
+                error: function(collection, response, options) {
+                    q.ok(false, response.status);
+                    q.start();
+                }
+            });
+        } else {
+            q.start();
+        }
     });
 });

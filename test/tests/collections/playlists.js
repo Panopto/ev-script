@@ -11,7 +11,7 @@ define(function(require) {
 
     q.module('Testing ev-script/collections/playlists', {
         setup: testUtil.setupHelper('ev-script/collections/playlists', {
-            setupAuth: function() {
+            postAuthCallback: function() {
                 this.playlists = new Playlists([], {
                     appId: this.appId
                 });

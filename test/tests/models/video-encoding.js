@@ -12,7 +12,7 @@ define(function(require) {
 
     q.module('Testing ev-script/models/video-encoding', {
         setup: testUtil.setupHelper('ev-script/models/video-encoding', {
-            setupAuth: function() {
+            postAuthCallback: function() {
                 this.encoding = new VideoEncoding({
                     dimensions: '640x360'
                 }, {

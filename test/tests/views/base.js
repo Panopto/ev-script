@@ -11,7 +11,7 @@ define(function(require) {
 
     q.module('Testing ev-script/views/base', {
         setup: testUtil.setupHelper('ev-script/views/base', {
-            setupAuth: function() {
+            postAuthCallback: function() {
                 this.view = new BaseView({
                     appId: this.appId
                 });

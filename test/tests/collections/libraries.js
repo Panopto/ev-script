@@ -11,7 +11,7 @@ define(function(require) {
 
     q.module('Testing ev-script/collections/libraries', {
         setup: testUtil.setupHelper('ev-script/collections/libraries', {
-            setupAuth: function() {
+            postAuthCallback: function() {
                 this.libs = new Libraries([], {
                     appId: this.appId
                 });

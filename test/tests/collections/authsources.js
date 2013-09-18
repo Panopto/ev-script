@@ -11,7 +11,7 @@ define(function(require) {
 
     q.module('Testing ev-script/collections/authsources', {
         setup: testUtil.setupHelper('ev-script/collections/authsources', {
-            setupAuth: function() {
+            postAuthCallback: function() {
                 this.authsources = new AuthSources([], {
                     appId: this.appId
                 });
@@ -32,22 +32,27 @@ define(function(require) {
         q.deepEqual(this.authsources.config, evSettings);
     });
 
-    q.asyncTest('test fetch', 2, function() {
-        var cacheKey = 'authsources';
-        this.authsources.fetch({
-            cacheKey: cacheKey,
-            requiresAuth: false,
-            success: _.bind(function(collection, response, options) {
-                console.log(JSON.stringify(collection));
-                q.ok(collection.size() > 0);
-                // Make sure caching is working
-                q.deepEqual(this.authsources.getCached(cacheKey), response);
-                q.start();
-            }, this),
-            error: function(collection, response, options) {
-                q.ok(false, response.status);
-                q.start();
-            }
-        });
+    q.asyncTest('test fetch', 0, function() {
+        if (this.info.get('ApplicationVersion')) {
+            q.expect(2);
+            var cacheKey = 'authsources';
+            this.authsources.fetch({
+                cacheKey: cacheKey,
+                requiresAuth: false,
+                success: _.bind(function(collection, response, options) {
+                    console.log(JSON.stringify(collection));
+                    q.ok(collection.size() > 0);
+                    // Make sure caching is working
+                    q.deepEqual(this.authsources.getCached(cacheKey), response);
+                    q.start();
+                }, this),
+                error: function(collection, response, options) {
+                    q.ok(false, response.status);
+                    q.start();
+                }
+            });
+        } else {
+            q.start();
+        }
     });
 });

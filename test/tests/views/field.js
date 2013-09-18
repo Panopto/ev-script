@@ -21,7 +21,7 @@ define(function(require) {
 
     q.module('Testing ev-script/views/field', {
         setup: testUtil.setupHelper('ev-script/views/field', {
-            setupAuth: function() {
+            postAuthCallback: function() {
                 this.videoField = new FieldView({
                     el: $('#videoWrap')[0],
                     model: new VideoSettings(),

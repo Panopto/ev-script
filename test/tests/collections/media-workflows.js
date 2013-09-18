@@ -11,7 +11,7 @@ define(function(require) {
 
     q.module('Testing ev-script/collections/media-workflows', {
         setup: testUtil.setupHelper('ev-script/collections/media-workflows', {
-            setupAuth: function() {
+            postAuthCallback: function() {
                 this.workflows = new MediaWorkflows([], {
                     appId: this.appId
                 });

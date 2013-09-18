@@ -10,7 +10,7 @@ define(function(require) {
 
     q.module('Testing ev-script/collections/base', {
         setup: testUtil.setupHelper('ev-script/collections/base', {
-            setupAuth: function() {
+            postAuthCallback: function() {
                 this.collection = new BaseCollection([ { ID: 'test' } ], {
                     appId: this.appId
                 });

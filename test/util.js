@@ -12,9 +12,11 @@ define(function(require) {
         AppInfo = require('ev-script/models/app-info'),
         defaults = {
             // Callback called after config is setup
-            setupConfig: function() {},
+            configCallback: function() {},
+            // Callback called before auth is setup
+            preAuthCallback: function() {},
             // Callback called after auth is setup
-            setupAuth: function() {},
+            postAuthCallback: function() {},
             // Set to true to immediately authenticate
             authenticate: true
         };
@@ -28,16 +30,17 @@ define(function(require) {
                 this.config = _.extend({}, evSettings);
                 eventsUtil.initEvents(this.appId);
                 cacheUtil.setAppConfig(this.appId, this.config);
-                settings.setupConfig.call(this);
+                settings.configCallback.call(this);
                 this.info = new AppInfo({}, {
                     appId: this.appId
                 });
                 cacheUtil.setAppInfo(this.appId, this.info);
                 this.info.fetch({})
                 .always(_.bind(function() {
+                    settings.preAuthCallback.call(this);
                     this.auth = (this.config.authType && this.config.authType === 'forms') ? new FormsAuth(this.appId) : new BasicAuth(this.appId);
                     cacheUtil.setAppAuth(this.appId, this.auth);
-                    settings.setupAuth.call(this);
+                    settings.postAuthCallback.call(this);
                     if (settings.authenticate && !this.auth.isAuthenticated()) {
                         this.auth.login({
                             username: evSettings.testUser,

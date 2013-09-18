@@ -11,7 +11,7 @@ define(function(require) {
 
     q.module('Testing ev-script/collections/videos', {
         setup: testUtil.setupHelper('ev-script/collections/videos', {
-            setupAuth: function() {
+            postAuthCallback: function() {
                 this.videos = new Videos([], {
                     appId: this.appId
                 });

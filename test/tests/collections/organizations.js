@@ -11,7 +11,7 @@ define(function(require) {
 
     q.module('Testing ev-script/collections/organizations', {
         setup: testUtil.setupHelper('ev-script/collections/organizations', {
-            setupAuth: function() {
+            postAuthCallback: function() {
                 this.organizations = new Organizations([], {
                     appId: this.appId
                 });
