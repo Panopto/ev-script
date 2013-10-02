@@ -42,6 +42,11 @@ $default-box-shadow-color: #333333;
       min-width: 120px;
     }
   }
+  div.ev-filter-block {
+    div.ev-unit-selects {
+      margin-right: 2em;
+    }
+  }
 }
 
 .ev-playlist-picker {
@@ -145,36 +150,12 @@ div.ev-field {
   }
 }
 
-div.ev-search,
-div.ev-playlist-select {
-  background-color: #fbfbfb;
-  padding: 10px 5px 0 5px;
-  position: relative;
-  z-index: 10;
-}
-
-div.ev-poweredby {
-  float: right;
-  a {
-    background: url($poweredby-image) no-repeat scroll center center transparent;
-    float: right;
-    height: 38px;
-    width: 120px;
-    span {
-      display: none;
-    }
-  }
-  @media screen and (max-width: 620px) {
-    display: none;
-  }
-}
-
 @mixin filter-form($max-width) {
   label,
   input,
   select {
     display: inline;
-    margin-right: 1em;
+    margin-right: 0.4em;
   }
   label {
     color: #606060;
@@ -196,12 +177,32 @@ div.ev-poweredby {
   }
 }
 
-div.ev-search {
+div.ev-filter-block {
+  background-color: #fbfbfb;
+  position: relative;
+  z-index: 10;
+  padding: 10px 5px 0 5px;
+  // FIXME
   @include filter-form(750px);
-}
-
-div.ev-playlist-select {
-  @include filter-form(850px);
+  div.ev-search,
+  div.ev-unit-selects {
+    display: inline-block;
+  }
+  div.ev-poweredby {
+    float: right;
+    a {
+      background: url($poweredby-image) no-repeat scroll center center transparent;
+      float: right;
+      height: 38px;
+      width: 120px;
+      span {
+        display: none;
+      }
+    }
+    @media screen and (max-width: 620px) {
+      display: none;
+    }
+  }
 }
 
 div.ev-auth {

@@ -15,8 +15,9 @@ define(function(require) {
             this.collection.on('reset', this.render);
         },
         render: function() {
+            var selectedId = this.picker.model.get('organizationId') || this.auth.getUser().get('OrganizationID');
             this.$el.html(this.template({
-                selectedId: this.picker.model.get('organizationId'),
+                selectedId: selectedId,
                 collection: this.collection
             }));
             this.$el.trigger('change');

@@ -23,16 +23,6 @@ define(function(require) {
                 searchVal: this.picker.model.get('search'),
                 sourceId: this.picker.model.get('sourceId')
             }));
-            var $loader = this.$('div.loader');
-            $loader.on('ajaxSend', _.bind(function(e, xhr, settings) {
-                if (this.picker === settings.picker) {
-                    $loader.addClass('loading');
-                }
-            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
-                if (this.picker === settings.picker) {
-                    $loader.removeClass('loading');
-                }
-            }, this));
         },
         doSearch: function() {
             this.picker.model.set({

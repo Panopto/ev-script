@@ -320,8 +320,12 @@ table {
 .ev-video-picker div.ev-results td.content-actions {
   min-width: 120px;
 }
+/* line 46, ../sass/ev-script.scss */
+.ev-video-picker div.ev-filter-block div.ev-unit-selects {
+  margin-right: 2em;
+}
 
-/* line 47, ../sass/ev-script.scss */
+/* line 52, ../sass/ev-script.scss */
 .ev-playlist-picker {
   padding: 0;
 }
@@ -331,20 +335,20 @@ table {
   text-decoration: none;
 }
 
-/* line 51, ../sass/ev-script.scss */
+/* line 56, ../sass/ev-script.scss */
 div.ev-hider {
   border-bottom: 1px solid #999999;
   text-align: center;
   width: 100%;
 }
-/* line 55, ../sass/ev-script.scss */
+/* line 60, ../sass/ev-script.scss */
 div.ev-hider .action-logout {
   float: right;
   margin-left: -9.2em;
   margin-right: 3em;
   width: 4em;
 }
-/* line 61, ../sass/ev-script.scss */
+/* line 66, ../sass/ev-script.scss */
 div.ev-hider a {
   background: #ffffff;
   background-color: #fbfbfb;
@@ -364,7 +368,7 @@ div.ev-hider a {
   text-decoration: none;
 }
 
-/* line 77, ../sass/ev-script.scss */
+/* line 82, ../sass/ev-script.scss */
 div.ev-field .thumbnail {
   -webkit-box-shadow: 0 0 10px 1px;
   -moz-box-shadow: 0 0 10px 1px;
@@ -375,13 +379,13 @@ div.ev-field .thumbnail {
   margin-right: 20px;
   vertical-align: middle;
 }
-/* line 84, ../sass/ev-script.scss */
+/* line 89, ../sass/ev-script.scss */
 div.ev-field .thumbnail img {
   height: 100%;
   max-height: 60px;
   vertical-align: middle;
 }
-/* line 90, ../sass/ev-script.scss */
+/* line 95, ../sass/ev-script.scss */
 div.ev-field div.title {
   color: #606060;
   display: inline-block;
@@ -389,14 +393,14 @@ div.ev-field div.title {
   margin-right: 20px;
   max-width: 400px;
 }
-/* line 97, ../sass/ev-script.scss */
+/* line 102, ../sass/ev-script.scss */
 div.ev-field div.logo {
   display: inline-block;
   height: 100%;
   margin-right: 20px;
   vertical-align: middle;
 }
-/* line 102, ../sass/ev-script.scss */
+/* line 107, ../sass/ev-script.scss */
 div.ev-field div.logo a {
   background-image: url("images/logo.png");
   background-repeat: no-repeat;
@@ -406,16 +410,16 @@ div.ev-field div.logo a {
   margin-top: 6px;
   width: 48px;
 }
-/* line 110, ../sass/ev-script.scss */
+/* line 115, ../sass/ev-script.scss */
 div.ev-field div.logo a span {
   display: none;
 }
-/* line 115, ../sass/ev-script.scss */
+/* line 120, ../sass/ev-script.scss */
 div.ev-field div.ev-field-actions {
   display: inline-block;
   padding: 0.4em 0.6em;
 }
-/* line 118, ../sass/ev-script.scss */
+/* line 123, ../sass/ev-script.scss */
 div.ev-field div.ev-field-actions a {
   background-repeat: no-repeat;
   background-size: 18px auto;
@@ -425,127 +429,97 @@ div.ev-field div.ev-field-actions a {
   vertical-align: middle;
   width: 18px;
 }
-/* line 126, ../sass/ev-script.scss */
+/* line 131, ../sass/ev-script.scss */
 div.ev-field div.ev-field-actions a span {
   display: none;
 }
-/* line 130, ../sass/ev-script.scss */
+/* line 135, ../sass/ev-script.scss */
 div.ev-field div.ev-field-actions .action-choose {
   background-image: url("images/add.png");
 }
-/* line 133, ../sass/ev-script.scss */
+/* line 138, ../sass/ev-script.scss */
 div.ev-field div.ev-field-actions .action-preview {
   background-image: url("images/preview.png");
 }
-/* line 136, ../sass/ev-script.scss */
+/* line 141, ../sass/ev-script.scss */
 div.ev-field div.ev-field-actions .action-options {
   background-image: url("images/settings.png");
 }
-/* line 139, ../sass/ev-script.scss */
+/* line 144, ../sass/ev-script.scss */
 div.ev-field div.ev-field-actions .action-remove {
   background-image: url("images/remove.png");
 }
-/* line 142, ../sass/ev-script.scss */
+/* line 147, ../sass/ev-script.scss */
 div.ev-field div.ev-field-actions .action-upload {
   background-image: url("images/upload.png");
 }
 
-/* line 149, ../sass/ev-script.scss */
-div.ev-search,
-div.ev-playlist-select {
+/* line 180, ../sass/ev-script.scss */
+div.ev-filter-block {
   background-color: #fbfbfb;
-  padding: 10px 5px 0 5px;
   position: relative;
   z-index: 10;
+  padding: 10px 5px 0 5px;
 }
-
 /* line 156, ../sass/ev-script.scss */
-div.ev-poweredby {
+div.ev-filter-block label,
+div.ev-filter-block input,
+div.ev-filter-block select {
+  display: inline;
+  margin-right: 0.4em;
+}
+/* line 160, ../sass/ev-script.scss */
+div.ev-filter-block label {
+  color: #606060;
+}
+@media screen and (max-width: 750px) {
+  /* line 160, ../sass/ev-script.scss */
+  div.ev-filter-block label {
+    display: block;
+    margin: 0.4em 0;
+  }
+}
+/* line 167, ../sass/ev-script.scss */
+div.ev-filter-block div.loader {
+  display: inline-block;
+}
+/* line 170, ../sass/ev-script.scss */
+div.ev-filter-block div.loading {
+  background: url("images/loading.gif") no-repeat scroll center center transparent;
+  display: inline-block;
+  height: 16px;
+  margin-left: 1em;
+  vertical-align: middle;
+  width: 16px;
+}
+/* line 188, ../sass/ev-script.scss */
+div.ev-filter-block div.ev-search,
+div.ev-filter-block div.ev-unit-selects {
+  display: inline-block;
+}
+/* line 191, ../sass/ev-script.scss */
+div.ev-filter-block div.ev-poweredby {
   float: right;
 }
-/* line 158, ../sass/ev-script.scss */
-div.ev-poweredby a {
+/* line 193, ../sass/ev-script.scss */
+div.ev-filter-block div.ev-poweredby a {
   background: url("images/poweredby.png") no-repeat scroll center center transparent;
   float: right;
   height: 38px;
   width: 120px;
 }
-/* line 163, ../sass/ev-script.scss */
-div.ev-poweredby a span {
+/* line 198, ../sass/ev-script.scss */
+div.ev-filter-block div.ev-poweredby a span {
   display: none;
 }
 @media screen and (max-width: 620px) {
-  /* line 156, ../sass/ev-script.scss */
-  div.ev-poweredby {
+  /* line 191, ../sass/ev-script.scss */
+  div.ev-filter-block div.ev-poweredby {
     display: none;
   }
 }
 
-/* line 175, ../sass/ev-script.scss */
-div.ev-search label,
-div.ev-search input,
-div.ev-search select {
-  display: inline;
-  margin-right: 1em;
-}
-/* line 179, ../sass/ev-script.scss */
-div.ev-search label {
-  color: #606060;
-}
-@media screen and (max-width: 750px) {
-  /* line 179, ../sass/ev-script.scss */
-  div.ev-search label {
-    display: block;
-    margin: 0.4em 0;
-  }
-}
-/* line 186, ../sass/ev-script.scss */
-div.ev-search div.loader {
-  display: inline-block;
-}
-/* line 189, ../sass/ev-script.scss */
-div.ev-search div.loading {
-  background: url("images/loading.gif") no-repeat scroll center center transparent;
-  display: inline-block;
-  height: 16px;
-  margin-left: 1em;
-  vertical-align: middle;
-  width: 16px;
-}
-
-/* line 175, ../sass/ev-script.scss */
-div.ev-playlist-select label,
-div.ev-playlist-select input,
-div.ev-playlist-select select {
-  display: inline;
-  margin-right: 1em;
-}
-/* line 179, ../sass/ev-script.scss */
-div.ev-playlist-select label {
-  color: #606060;
-}
-@media screen and (max-width: 850px) {
-  /* line 179, ../sass/ev-script.scss */
-  div.ev-playlist-select label {
-    display: block;
-    margin: 0.4em 0;
-  }
-}
-/* line 186, ../sass/ev-script.scss */
-div.ev-playlist-select div.loader {
-  display: inline-block;
-}
-/* line 189, ../sass/ev-script.scss */
-div.ev-playlist-select div.loading {
-  background: url("images/loading.gif") no-repeat scroll center center transparent;
-  display: inline-block;
-  height: 16px;
-  margin-left: 1em;
-  vertical-align: middle;
-  width: 16px;
-}
-
-/* line 208, ../sass/ev-script.scss */
+/* line 209, ../sass/ev-script.scss */
 div.ev-auth div.logo {
   background-image: url("images/logo.png");
   background-repeat: no-repeat;
@@ -557,26 +531,26 @@ div.ev-auth div.logo {
   vertical-align: top;
   width: 65px;
 }
-/* line 219, ../sass/ev-script.scss */
+/* line 220, ../sass/ev-script.scss */
 div.ev-auth form {
   display: inline-block;
   padding-top: 1em;
   width: 80%;
 }
-/* line 223, ../sass/ev-script.scss */
+/* line 224, ../sass/ev-script.scss */
 div.ev-auth form fieldset {
   border: none;
   padding: 0;
 }
-/* line 227, ../sass/ev-script.scss */
+/* line 228, ../sass/ev-script.scss */
 div.ev-auth form div.fieldWrap {
   margin-bottom: 0.6em;
 }
-/* line 231, ../sass/ev-script.scss */
+/* line 232, ../sass/ev-script.scss */
 div.ev-auth form div.form-actions input {
   margin: 0;
 }
-/* line 235, ../sass/ev-script.scss */
+/* line 236, ../sass/ev-script.scss */
 div.ev-auth form label {
   color: #606060;
   display: inline-block;
@@ -584,49 +558,49 @@ div.ev-auth form label {
   width: 30%;
 }
 
-/* line 245, ../sass/ev-script.scss */
+/* line 246, ../sass/ev-script.scss */
 div.ev-settings fieldset {
   border: none;
   padding: 0;
 }
-/* line 249, ../sass/ev-script.scss */
+/* line 250, ../sass/ev-script.scss */
 div.ev-settings div.fieldWrap {
   margin-bottom: 1em;
 }
-/* line 252, ../sass/ev-script.scss */
+/* line 253, ../sass/ev-script.scss */
 div.ev-settings label {
   color: #606060;
   display: inline-block;
   width: 40%;
 }
-/* line 257, ../sass/ev-script.scss */
+/* line 258, ../sass/ev-script.scss */
 div.ev-settings div.form-actions {
   clear: both;
   float: left;
 }
 
-/* line 263, ../sass/ev-script.scss */
+/* line 264, ../sass/ev-script.scss */
 div.ev-results {
   background-color: #fbfbfb;
   border-bottom: 1px solid #cccccc;
   padding: 10px 5px;
 }
-/* line 267, ../sass/ev-script.scss */
+/* line 268, ../sass/ev-script.scss */
 div.ev-results .total {
   margin: 1em 0;
 }
-/* line 270, ../sass/ev-script.scss */
+/* line 271, ../sass/ev-script.scss */
 div.ev-results table thead {
   display: none;
 }
-/* line 273, ../sass/ev-script.scss */
+/* line 274, ../sass/ev-script.scss */
 div.ev-results td.content-actions {
   margin: 10px;
   padding-right: 2em;
   text-align: right;
   width: 25%;
 }
-/* line 278, ../sass/ev-script.scss */
+/* line 279, ../sass/ev-script.scss */
 div.ev-results td.content-actions img {
   -webkit-box-shadow: 0 0 10px 1px;
   -moz-box-shadow: 0 0 10px 1px;
@@ -637,7 +611,7 @@ div.ev-results td.content-actions img {
   max-width: 150px;
   width: 80%;
 }
-/* line 286, ../sass/ev-script.scss */
+/* line 287, ../sass/ev-script.scss */
 div.ev-results td.content-actions div.action-links {
   clear: right;
   float: right;
@@ -647,7 +621,7 @@ div.ev-results td.content-actions div.action-links {
   text-align: center;
   width: 80%;
 }
-/* line 294, ../sass/ev-script.scss */
+/* line 295, ../sass/ev-script.scss */
 div.ev-results td.content-actions div.action-links a {
   background-repeat: no-repeat;
   background-size: 18px auto;
@@ -656,63 +630,63 @@ div.ev-results td.content-actions div.action-links a {
   margin: 0 0.3em;
   width: 18px;
 }
-/* line 301, ../sass/ev-script.scss */
+/* line 302, ../sass/ev-script.scss */
 div.ev-results td.content-actions div.action-links a span {
   display: none;
 }
-/* line 305, ../sass/ev-script.scss */
+/* line 306, ../sass/ev-script.scss */
 div.ev-results td.content-actions div.action-links a.action-add {
   background-image: url("images/add.png");
 }
-/* line 308, ../sass/ev-script.scss */
+/* line 309, ../sass/ev-script.scss */
 div.ev-results td.content-actions div.action-links a.action-preview {
   background-image: url("images/preview.png");
 }
-/* line 313, ../sass/ev-script.scss */
+/* line 314, ../sass/ev-script.scss */
 div.ev-results .content-meta {
   width: 75%;
 }
-/* line 316, ../sass/ev-script.scss */
+/* line 317, ../sass/ev-script.scss */
 div.ev-results table {
   font-size: 1em;
 }
-/* line 319, ../sass/ev-script.scss */
+/* line 320, ../sass/ev-script.scss */
 div.ev-results .content-list {
   border: 1px solid #bebfb9;
   margin: 0 0 10px;
   width: 100%;
 }
-/* line 323, ../sass/ev-script.scss */
+/* line 324, ../sass/ev-script.scss */
 div.ev-results .content-list .even {
   background-color: #f3f4ee;
 }
-/* line 326, ../sass/ev-script.scss */
+/* line 327, ../sass/ev-script.scss */
 div.ev-results .content-list tr td {
   border: none;
   padding-bottom: 1em;
   color: #000000;
   padding: 1em 2%;
 }
-/* line 332, ../sass/ev-script.scss */
+/* line 333, ../sass/ev-script.scss */
 div.ev-results .content-list .content-item {
   border: none;
   width: 100%;
 }
-/* line 335, ../sass/ev-script.scss */
+/* line 336, ../sass/ev-script.scss */
 div.ev-results .content-list .content-item td {
   border: none;
   padding: 3px 0;
 }
-/* line 339, ../sass/ev-script.scss */
+/* line 340, ../sass/ev-script.scss */
 div.ev-results .content-list .content-item tr.title td {
   border-bottom: 1px solid #999999;
   font-weight: bold;
 }
-/* line 343, ../sass/ev-script.scss */
+/* line 344, ../sass/ev-script.scss */
 div.ev-results .content-list .content-item .desc a {
   margin-left: 5px;
 }
-/* line 346, ../sass/ev-script.scss */
+/* line 347, ../sass/ev-script.scss */
 div.ev-results .content-list .content-item .label {
   color: #606060;
   font-weight: bold;
@@ -720,25 +694,25 @@ div.ev-results .content-list .content-item .label {
   min-width: 100px;
 }
 @media screen and (max-width: 600px) {
-  /* line 346, ../sass/ev-script.scss */
+  /* line 347, ../sass/ev-script.scss */
   div.ev-results .content-list .content-item .label {
     display: none;
   }
 }
 
-/* line 359, ../sass/ev-script.scss */
+/* line 360, ../sass/ev-script.scss */
 div.ev-video-picker div.ev-results .content-list tr td {
   vertical-align: top;
 }
 
-/* line 363, ../sass/ev-script.scss */
+/* line 364, ../sass/ev-script.scss */
 div.scrollWrap .loader {
   background: url("images/loader.gif") no-repeat scroll center center transparent;
   height: 60px;
   width: 100%;
 }
 
-/* line 369, ../sass/ev-script.scss */
+/* line 370, ../sass/ev-script.scss */
 div.ev-dialog {
   -webkit-border-radius: 6px;
   -moz-border-radius: 6px;
@@ -747,7 +721,7 @@ div.ev-dialog {
   border-radius: 6px;
   font-size: 1em;
 }
-/* line 372, ../sass/ev-script.scss */
+/* line 373, ../sass/ev-script.scss */
 div.ev-dialog div.ui-dialog-titlebar {
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #f9d700), color-stop(100%, #ffffff));
   background: -webkit-linear-gradient(#f9d700, #ffffff);
@@ -762,45 +736,45 @@ div.ev-dialog div.ui-dialog-titlebar {
   border-top-right-radius: 6px;
   border-width: 0;
 }
-/* line 378, ../sass/ev-script.scss */
+/* line 379, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form .form-select {
   width: 100%;
   margin-bottom: 1em;
 }
-/* line 382, ../sass/ev-script.scss */
+/* line 383, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form .form-text {
   width: 72%;
 }
-/* line 385, ../sass/ev-script.scss */
+/* line 386, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form div.fieldWrap {
   margin-bottom: 1em;
 }
-/* line 388, ../sass/ev-script.scss */
+/* line 389, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form label {
   color: #606060;
   display: inline-block;
   width: 25%;
 }
-/* line 393, ../sass/ev-script.scss */
+/* line 394, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form .plupload_header {
   display: none;
 }
-/* line 396, ../sass/ev-script.scss */
+/* line 397, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form .plupload_cancel {
   margin-right: 3em;
   display: block;
   float: right;
 }
-/* line 401, ../sass/ev-script.scss */
+/* line 402, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form div.plupload_container {
   padding: 0;
 }
-/* line 404, ../sass/ev-script.scss */
+/* line 405, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form ul.plupload_filelist {
   overflow-y: auto;
   height: auto;
 }
-/* line 408, ../sass/ev-script.scss */
+/* line 409, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form li.plupload_droptext {
   line-height: normal;
 }

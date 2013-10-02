@@ -8,6 +8,7 @@ define(function(require) {
     return BaseCollection.extend({
         initialize: function(models, options) {
             BaseCollection.prototype.initialize.call(this, models, options);
+            this.libraryId = options.libraryId || '';
             this.filterOn = options.filterOn || '';
             this.filterValue = options.filterValue || '';
             this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedContent' : '/api/Content';
@@ -45,7 +46,7 @@ define(function(require) {
                 indexParam = 'PageIndex=' + this.pageIndex,
                 onParam = 'FilterOn=' + encodeURIComponent(this.filterOn),
                 valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue),
-                url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+                url = api_url + '/' + this.libraryId + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
         }
     });

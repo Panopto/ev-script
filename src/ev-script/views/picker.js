@@ -11,19 +11,30 @@ define(function(require) {
      * Encapsulates views to manage search, display and selection of Ensemble videos and playlists.
      */
     return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/picker.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker');
             this.$el.hide();
+            this.$el.html(this.template({
+                id: this.id
+            }));
             this.field = options.field;
             this.hider = new HiderView({
-                id: this.id + '-hider',
-                tagName: 'div',
-                className: 'ev-hider',
+                el: this.$('div.ev-hider'),
                 field: this.field,
                 appId: this.appId
             });
-            this.$el.append(this.hider.$el);
+            var $loader = this.$('div.loader');
+            $loader.on('ajaxSend', _.bind(function(e, xhr, settings) {
+                if (this === settings.picker) {
+                    $loader.addClass('loading');
+                }
+            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
+                if (this === settings.picker) {
+                    $loader.removeClass('loading');
+                }
+            }, this));
             this.appEvents.on('hidePickers', function(fieldId) {
                 if (!fieldId || (this.field.id !== fieldId)) {
                     this.hidePicker();
@@ -40,9 +51,6 @@ define(function(require) {
                 }
             }, this);
             this.hider.render();
-        },
-        events: {
-            'click a.action-add': 'chooseItem'
         },
         chooseItem: function(e) {
             var id = $(e.target).attr('rel');

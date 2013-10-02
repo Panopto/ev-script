@@ -5,35 +5,45 @@ define(function(require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         PickerView = require('ev-script/views/picker'),
-        PlaylistSelectView = require('ev-script/views/playlist-select'),
+        UnitSelectsView = require('ev-script/views/unit-selects'),
         PlaylistResultsView = require('ev-script/views/playlist-results'),
         Playlists = require('ev-script/collections/playlists');
 
     return PickerView.extend({
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadPlaylists');
-            this.playlistSelect = new PlaylistSelectView({
-                id: this.id + '-playlist-select',
+            _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit');
+            this.unitSelects = new UnitSelectsView({
+                id: this.id + '-unit-selects',
                 tagName: 'div',
-                className: 'ev-playlist-select',
+                className: 'ev-unit-selects',
                 picker: this,
                 appId: this.appId
             });
-            this.$el.append(this.playlistSelect.$el);
+            this.$('div.ev-filter-block').prepend(this.unitSelects.$el);
             this.resultsView = new PlaylistResultsView({
-                id: this.id + '-results',
-                tagName: 'div',
-                className: 'ev-results clearfix',
+                el: this.$('div.ev-results'),
                 picker: this,
                 appId: this.appId
             });
             this.$el.append(this.resultsView.$el);
         },
+        events: {
+            'click a.action-add': 'chooseItem',
+            'change form.unit-selects select.libraries': 'changeLibrary',
+            'submit form.unit-selects': 'handleSubmit'
+        },
+        changeLibrary: function(e) {
+            this.loadPlaylists();
+        },
+        handleSubmit: function(e) {
+            this.loadPlaylists();
+            e.preventDefault();
+        },
         showPicker: function() {
             PickerView.prototype.showPicker.call(this);
-            this.playlistSelect.loadOrgs();
-            this.playlistSelect.$('select').filter(':visible').first().focus();
+            this.unitSelects.loadOrgs();
+            this.unitSelects.$('select').filter(':visible').first().focus();
         },
         loadPlaylists: function() {
             var libraryId = this.model.get('libraryId');

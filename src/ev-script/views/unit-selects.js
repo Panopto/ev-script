@@ -11,17 +11,16 @@ define(function(require) {
         Libraries = require('ev-script/collections/libraries');
 
     return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/playlist-select.html')),
+        template: _.template(require('text!ev-script/templates/unit-selects.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization', 'changeLibrary', 'handleSubmit');
+            _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization', 'changeLibrary');
             this.picker = options.picker;
             this.id = options.id;
-            var orgSelectId = this.id + '-org-select';
-            var libSelectId = this.id + '-lib-select';
             this.$el.html(this.template({
-                orgSelectId: orgSelectId,
-                libSelectId: libSelectId
+                formId: this.id + '-unit-selects',
+                orgSelectId: this.id + '-org-select',
+                libSelectId: this.id + '-lib-select'
             }));
             this.orgSelect = new OrganizationSelectView({
                 el: this.$('.organizations'),
@@ -39,21 +38,10 @@ define(function(require) {
                     appId: this.appId
                 })
             });
-            var $loader = this.$('div.loader');
-            $loader.on('ajaxSend', _.bind(function(e, xhr, settings) {
-                if (this.picker === settings.picker) {
-                    $loader.addClass('loading');
-                }
-            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
-                if (this.picker === settings.picker) {
-                    $loader.removeClass('loading');
-                }
-            }, this));
         },
         events: {
             'change select.organizations': 'changeOrganization',
-            'change select.libraries': 'changeLibrary',
-            'submit form': 'handleSubmit'
+            'change select.libraries': 'changeLibrary'
         },
         changeOrganization: function(e) {
             this.picker.model.set({
@@ -65,11 +53,6 @@ define(function(require) {
             this.picker.model.set({
                 libraryId: e.target.value
             });
-            this.picker.loadPlaylists();
-        },
-        handleSubmit: function(e) {
-            this.picker.loadPlaylists();
-            e.preventDefault();
         },
         loadOrgs: function() {
             var orgs = new Organizations({}, {

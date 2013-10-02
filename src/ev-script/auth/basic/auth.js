@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        Backbone = require('backbone'),
         BaseAuth = require('ev-script/auth/base/auth'),
         AuthView = require('ev-script/auth/basic/view'),
         Organizations = require('ev-script/collections/organizations'),
@@ -31,9 +32,9 @@ define(function(require) {
                     orgs.requiresAuth = false;
                     return orgs.fetch({
                         success: _.bind(function(collection, response, options) {
-                            this.user = {
+                            this.user = new Backbone.Model({
                                 id: Math.floor(Math.random() * 10000000000000001).toString(16)
-                            };
+                            });
                             this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
                         }, this),
                         error: _.bind(function(collection, xhr, options) {

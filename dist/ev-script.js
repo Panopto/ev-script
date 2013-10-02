@@ -1,5 +1,5 @@
 /**
- * ev-script 0.3.0 2013-09-13
+ * ev-script 0.3.0 2013-10-02
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -1028,7 +1028,9 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
 
 });
 
-define('ev-script/views/picker',['require','jquery','underscore','ev-script/views/base','ev-script/views/hider'],function(require) {
+define('text!ev-script/templates/picker.html',[],function () { return '<div id="<%= id %>-hider" class="ev-hider"></div>\n<div id="<%= id %>-filter-block" class="ev-filter-block">\n    <div class="loader"></div>\n    <div class="ev-poweredby">\n        <a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a>\n    </div>\n</div>\n<div id="<%= id %>-results" class="ev-results clearfix"></div>\n';});
+
+define('ev-script/views/picker',['require','jquery','underscore','ev-script/views/base','ev-script/views/hider','text!ev-script/templates/picker.html'],function(require) {
 
     
 
@@ -1041,19 +1043,30 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
      * Encapsulates views to manage search, display and selection of Ensemble videos and playlists.
      */
     return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/picker.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker');
             this.$el.hide();
+            this.$el.html(this.template({
+                id: this.id
+            }));
             this.field = options.field;
             this.hider = new HiderView({
-                id: this.id + '-hider',
-                tagName: 'div',
-                className: 'ev-hider',
+                el: this.$('div.ev-hider'),
                 field: this.field,
                 appId: this.appId
             });
-            this.$el.append(this.hider.$el);
+            var $loader = this.$('div.loader');
+            $loader.on('ajaxSend', _.bind(function(e, xhr, settings) {
+                if (this === settings.picker) {
+                    $loader.addClass('loading');
+                }
+            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
+                if (this === settings.picker) {
+                    $loader.removeClass('loading');
+                }
+            }, this));
             this.appEvents.on('hidePickers', function(fieldId) {
                 if (!fieldId || (this.field.id !== fieldId)) {
                     this.hidePicker();
@@ -1070,9 +1083,6 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
                 }
             }, this);
             this.hider.render();
-        },
-        events: {
-            'click a.action-add': 'chooseItem'
         },
         chooseItem: function(e) {
             var id = $(e.target).attr('rel');
@@ -1097,7 +1107,7 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
 
 });
 
-define('text!ev-script/templates/video-search.html',[],function () { return '<form>\n    <label for="<%= id %>">Search Ensemble:</label>\n    <input id="<%= id %>" type="text" class="form-text search" value="<%- searchVal %>" />\n    <select class="form-select source">\n      <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>>Media Library</option>\n      <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>>Shared Library</option>\n    </select>\n    <input type="submit" value="Go" class="form-submit" />\n    <div class="loader"></div>\n    <div class="ev-poweredby"><a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a></div>\n</form>\n';});
+define('text!ev-script/templates/video-search.html',[],function () { return '<form>\n    <label for="<%= id %>">Search Ensemble:</label>\n    <select class="form-select source" title="Select Library Type">\n      <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>>Media Library</option>\n      <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>>Shared Library</option>\n    </select>\n    <input id="<%= id %>" type="text" class="form-text search" value="<%- searchVal %>" title="Search Videos" />\n    <input type="submit" value="Go" class="form-submit" />\n</form>\n';});
 
 define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/video-search.html'],function(require) {
 
@@ -1124,16 +1134,6 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base','
                 searchVal: this.picker.model.get('search'),
                 sourceId: this.picker.model.get('sourceId')
             }));
-            var $loader = this.$('div.loader');
-            $loader.on('ajaxSend', _.bind(function(e, xhr, settings) {
-                if (this.picker === settings.picker) {
-                    $loader.addClass('loading');
-                }
-            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
-                if (this.picker === settings.picker) {
-                    $loader.removeClass('loading');
-                }
-            }, this));
         },
         doSearch: function() {
             this.picker.model.set({
@@ -1157,6 +1157,315 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base','
                     this.doSearch();
                 }, this), 1000);
             }
+        }
+    });
+
+});
+
+define('text!ev-script/templates/options.html',[],function () { return '<% collection.each(function(item) { %>\n    <option value="<%= item.id %>" <% if (selectedId === item.id) { print(\'selected="selected"\'); } %>><%- item.get(\'Name\') %></option>\n<% }); %>\n';});
+
+define('ev-script/views/organization-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
+
+    
+
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/options.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'render');
+            this.picker = options.picker;
+            this.$el.html('<option value="-1">Loading...</option>');
+            this.collection.on('reset', this.render);
+        },
+        render: function() {
+            var selectedId = this.picker.model.get('organizationId') || this.auth.getUser().get('OrganizationID');
+            this.$el.html(this.template({
+                selectedId: selectedId,
+                collection: this.collection
+            }));
+            this.$el.trigger('change');
+        }
+    });
+
+});
+
+define('ev-script/collections/base',['require','jquery','underscore','backbone','ev-script/util/cache'],function(require) {
+
+    
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        cacheUtil = require('ev-script/util/cache');
+
+    return Backbone.Collection.extend({
+        initialize: function(collections, options) {
+            this.requiresAuth = true;
+            this.appId = options.appId;
+            this.config = cacheUtil.getAppConfig(this.appId);
+            this.auth = cacheUtil.getAppAuth(this.appId);
+            this.info = cacheUtil.getAppInfo(this.appId);
+        },
+        model: Backbone.Model.extend({
+            idAttribute: 'ID'
+        }),
+        getCached: function(key) {},
+        setCached: function(key, resp) {},
+        clearCache: function(key) {},
+        parse: function(response) {
+            return response.Data;
+        },
+        fetch: function(options) {
+            if (options && options.success) {
+                options.success = _.wrap(options.success, _.bind(function(success) {
+                    // We've successfully queried the API for something that
+                    // requires authentication but we're in an unauthenticated
+                    // state.  Double-check our authentication and proceed.
+                    if (this.requiresAuth && !this.auth.isAuthenticated()) {
+                        this.auth.fetchUser()
+                        .always(function() {
+                            success.apply(this, Array.prototype.slice.call(arguments, 1));
+                        });
+                    } else {
+                        success.apply(this, Array.prototype.slice.call(arguments, 1));
+                    }
+                }, this));
+                // TODO - maybe wrap error to handle 401?
+            }
+            return Backbone.Collection.prototype.fetch.call(this, options);
+        },
+        sync: function(method, collection, options) {
+            _.defaults(options || (options = {}), {
+                xhrFields: { withCredentials: true }
+            });
+            if (method === 'read') {
+                var cached = this.getCached(options.cacheKey);
+                if (cached) {
+                    var deferred = $.Deferred();
+                    if (options.success) {
+                        deferred.done(options.success);
+                    }
+                    return deferred.resolve(cached).promise();
+                } else {
+                    // Grab the response and cache
+                    options.success = options.success || function(collection, response, options) {};
+                    options.success = _.wrap(options.success, _.bind(function(success) {
+                        this.setCached(options.cacheKey, arguments[1]);
+                        success.apply(this, Array.prototype.slice.call(arguments, 1));
+                    }, this));
+                    return Backbone.Collection.prototype.sync.call(this, method, collection, options);
+                }
+            } else {
+                return Backbone.Collection.prototype.sync.call(this, method, collection, options);
+            }
+        }
+    });
+
+});
+
+define('ev-script/collections/organizations',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
+
+    
+
+    var BaseCollection = require('ev-script/collections/base'),
+        cacheUtil = require('ev-script/util/cache');
+
+    return BaseCollection.extend({
+        initialize: function(models, options) {
+            BaseCollection.prototype.initialize.call(this, models, options);
+        },
+        _cache: function(key, resp) {
+            var cachedValue = null,
+                user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            return userCache ? userCache[resp ? 'set' : 'get'](key, resp) : null;
+        },
+        getCached: function(key) {
+            return this._cache('orgs');
+        },
+        setCached: function(key, resp) {
+            return this._cache('orgs', resp);
+        },
+        url: function() {
+            var api_url = this.config.ensembleUrl + '/api/Organizations';
+            // Make this arbitrarily large so we can retrieve ALL orgs in a single request
+            var sizeParam = 'PageSize=9999';
+            var indexParam = 'PageIndex=1';
+            var url = api_url + '?' + sizeParam + '&' + indexParam;
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        }
+    });
+
+});
+
+define('ev-script/views/library-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
+
+    
+
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/options.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'render');
+            this.picker = options.picker;
+            this.$el.html('<option value="-1">Loading...</option>');
+            this.collection.on('reset', this.render);
+        },
+        render: function() {
+            var selectedId = this.picker.model.get('libraryId') || this.auth.getUser().get('LibraryID');
+            this.$el.html(this.template({
+                selectedId: selectedId,
+                collection: this.collection
+            }));
+            this.$el.trigger('change');
+        }
+    });
+
+});
+
+define('ev-script/collections/libraries',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
+
+    
+
+    var BaseCollection = require('ev-script/collections/base'),
+        cacheUtil = require('ev-script/util/cache');
+
+    return BaseCollection.extend({
+        initialize: function(models, options) {
+            BaseCollection.prototype.initialize.call(this, models, options);
+            this.filterValue = options.organizationId || '';
+        },
+        _cache: function(key, resp) {
+            var cachedValue = null,
+                user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                var libsCache = userCache.get('libs');
+                if (!libsCache) {
+                    userCache.set('libs', libsCache = new cacheUtil.Cache());
+                }
+                cachedValue = libsCache[resp ? 'set' : 'get'](key, resp);
+            }
+            return cachedValue;
+        },
+        getCached: function(key) {
+            return this._cache(key);
+        },
+        setCached: function(key, resp) {
+            return this._cache(key, resp);
+        },
+        url: function() {
+            var api_url = this.config.ensembleUrl + '/api/Libraries';
+            // Make this arbitrarily large so we can retrieve ALL libraries under an org in a single request
+            var sizeParam = 'PageSize=9999';
+            var indexParam = 'PageIndex=1';
+            var onParam = 'FilterOn=OrganizationId';
+            var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
+            var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        }
+    });
+
+});
+
+define('text!ev-script/templates/unit-selects.html',[],function () { return '<form id="<%= formId %>" class="unit-selects">\n    <label for="<%= orgSelectId %>">Organization:</label>\n    <select id="<%= orgSelectId %>" class="form-select organizations" title="Select Organization"></select>\n    <label for="<%= libSelectId %>">Library:</label>\n    <select id="<%= libSelectId %>" class="form-select libraries" title="Select Library"></select>\n    <input type="submit" value="Go" class="form-submit" />\n</form>\n';});
+
+define('ev-script/views/unit-selects',['require','jquery','underscore','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','text!ev-script/templates/unit-selects.html'],function(require) {
+
+    
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        BaseView = require('ev-script/views/base'),
+        OrganizationSelectView = require('ev-script/views/organization-select'),
+        Organizations = require('ev-script/collections/organizations'),
+        LibrarySelectView = require('ev-script/views/library-select'),
+        Libraries = require('ev-script/collections/libraries');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/unit-selects.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization', 'changeLibrary');
+            this.picker = options.picker;
+            this.id = options.id;
+            this.$el.html(this.template({
+                formId: this.id + '-unit-selects',
+                orgSelectId: this.id + '-org-select',
+                libSelectId: this.id + '-lib-select'
+            }));
+            this.orgSelect = new OrganizationSelectView({
+                el: this.$('.organizations'),
+                picker: this.picker,
+                appId: this.appId,
+                collection: new Organizations({}, {
+                    appId: this.appId
+                })
+            });
+            this.libSelect = new LibrarySelectView({
+                el: this.$('.libraries'),
+                picker: this.picker,
+                appId: this.appId,
+                collection: new Libraries({}, {
+                    appId: this.appId
+                })
+            });
+        },
+        events: {
+            'change select.organizations': 'changeOrganization',
+            'change select.libraries': 'changeLibrary'
+        },
+        changeOrganization: function(e) {
+            this.picker.model.set({
+                organizationId: e.target.value
+            });
+            this.loadLibraries();
+        },
+        changeLibrary: function(e) {
+            this.picker.model.set({
+                libraryId: e.target.value
+            });
+        },
+        loadOrgs: function() {
+            var orgs = new Organizations({}, {
+                appId: this.appId
+            });
+            orgs.fetch({
+                picker: this.picker,
+                success: _.bind(function(collection, response, options) {
+                    this.orgSelect.collection.reset(collection.models);
+                }, this),
+                error: _.bind(function(collection, xhr, options) {
+                    this.ajaxError(xhr, _.bind(function() {
+                        this.loadOrgs();
+                    }, this));
+                }, this)
+            });
+        },
+        loadLibraries: function() {
+            var orgId = this.picker.model.get('organizationId');
+            var libs = new Libraries({}, {
+                organizationId: orgId,
+                appId: this.appId
+            });
+            libs.fetch({
+                picker: this.picker,
+                cacheKey: orgId,
+                success: _.bind(function(collection, response, options) {
+                    this.libSelect.collection.reset(collection.models);
+                }, this),
+                error: _.bind(function(collection, xhr, options) {
+                    this.ajaxError(xhr, _.bind(function() {
+                        this.loadLibraries();
+                    }, this));
+                }, this)
+            });
         }
     });
 
@@ -1446,80 +1755,6 @@ define('ev-script/views/video-embed',['require','underscore','ev-script/views/ba
 
 });
 
-define('ev-script/collections/base',['require','jquery','underscore','backbone','ev-script/util/cache'],function(require) {
-
-    
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        cacheUtil = require('ev-script/util/cache');
-
-    return Backbone.Collection.extend({
-        initialize: function(collections, options) {
-            this.requiresAuth = true;
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
-            this.auth = cacheUtil.getAppAuth(this.appId);
-            this.info = cacheUtil.getAppInfo(this.appId);
-        },
-        model: Backbone.Model.extend({
-            idAttribute: 'ID'
-        }),
-        getCached: function(key) {},
-        setCached: function(key, resp) {},
-        clearCache: function(key) {},
-        parse: function(response) {
-            return response.Data;
-        },
-        fetch: function(options) {
-            if (options && options.success) {
-                options.success = _.wrap(options.success, _.bind(function(success) {
-                    // We've successfully queried the API for something that
-                    // requires authentication but we're in an unauthenticated
-                    // state.  Double-check our authentication and proceed.
-                    if (this.requiresAuth && !this.auth.isAuthenticated()) {
-                        this.auth.fetchUser()
-                        .always(function() {
-                            success.apply(this, Array.prototype.slice.call(arguments, 1));
-                        });
-                    } else {
-                        success.apply(this, Array.prototype.slice.call(arguments, 1));
-                    }
-                }, this));
-                // TODO - maybe wrap error to handle 401?
-            }
-            return Backbone.Collection.prototype.fetch.call(this, options);
-        },
-        sync: function(method, collection, options) {
-            _.defaults(options || (options = {}), {
-                xhrFields: { withCredentials: true }
-            });
-            if (method === 'read') {
-                var cached = this.getCached(options.cacheKey);
-                if (cached) {
-                    var deferred = $.Deferred();
-                    if (options.success) {
-                        deferred.done(options.success);
-                    }
-                    return deferred.resolve(cached).promise();
-                } else {
-                    // Grab the response and cache
-                    options.success = options.success || function(collection, response, options) {};
-                    options.success = _.wrap(options.success, _.bind(function(success) {
-                        this.setCached(options.cacheKey, arguments[1]);
-                        success.apply(this, Array.prototype.slice.call(arguments, 1));
-                    }, this));
-                    return Backbone.Collection.prototype.sync.call(this, method, collection, options);
-                }
-            } else {
-                return Backbone.Collection.prototype.sync.call(this, method, collection, options);
-            }
-        }
-    });
-
-});
-
 define('ev-script/models/base',['require','jquery','underscore','backbone','ev-script/util/cache','ev-script/collections/base'],function(require) {
 
     
@@ -1754,6 +1989,7 @@ define('ev-script/collections/videos',['require','ev-script/collections/base','e
     return BaseCollection.extend({
         initialize: function(models, options) {
             BaseCollection.prototype.initialize.call(this, models, options);
+            this.libraryId = options.libraryId || '';
             this.filterOn = options.filterOn || '';
             this.filterValue = options.filterValue || '';
             this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedContent' : '/api/Content';
@@ -1791,14 +2027,14 @@ define('ev-script/collections/videos',['require','ev-script/collections/base','e
                 indexParam = 'PageIndex=' + this.pageIndex,
                 onParam = 'FilterOn=' + encodeURIComponent(this.filterOn),
                 valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue),
-                url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+                url = api_url + '/' + this.libraryId + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
         }
     });
 
 });
 
-define('ev-script/views/video-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/search','ev-script/views/video-results','ev-script/collections/videos'],function(require) {
+define('ev-script/views/video-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/search','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos'],function(require) {
 
     
 
@@ -1806,13 +2042,14 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
         _ = require('underscore'),
         PickerView = require('ev-script/views/picker'),
         SearchView = require('ev-script/views/search'),
+        UnitSelectsView = require('ev-script/views/unit-selects'),
         VideoResultsView = require('ev-script/views/video-results'),
         Videos = require('ev-script/collections/videos');
 
     return PickerView.extend({
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadVideos');
+            _.bindAll(this, 'loadVideos', 'changeLibrary', 'handleSubmit');
             this.searchView = new SearchView({
                 id: this.id + '-search',
                 tagName: 'div',
@@ -1820,28 +2057,55 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
                 picker: this,
                 appId: this.appId
             });
-            this.$el.append(this.searchView.$el);
+            this.$('div.ev-filter-block').prepend(this.searchView.$el);
+            if (this.info.get('ApplicationVersion')) {
+                this.unitSelects = new UnitSelectsView({
+                    id: this.id + '-unit-selects',
+                    tagName: 'div',
+                    className: 'ev-unit-selects',
+                    picker: this,
+                    appId: this.appId
+                });
+                this.$('div.ev-filter-block').prepend(this.unitSelects.$el);
+            }
             this.searchView.render();
             this.resultsView = new VideoResultsView({
-                id: this.id + '-results',
-                tagName: 'div',
-                className: 'ev-results clearfix',
+                el: this.$('div.ev-results'),
                 picker: this,
                 appId: this.appId
             });
             this.$el.append(this.resultsView.$el);
         },
+        events: {
+            'click a.action-add': 'chooseItem',
+            'change form.unit-selects select.libraries': 'changeLibrary',
+            'submit form.unit-selects': 'handleSubmit'
+        },
+        changeLibrary: function(e) {
+            this.loadVideos();
+        },
+        handleSubmit: function(e) {
+            this.loadVideos();
+            e.preventDefault();
+        },
         showPicker: function() {
             PickerView.prototype.showPicker.call(this);
-            this.searchView.$('input[type="text"]').focus();
-            this.loadVideos();
+            if (this.info.get('ApplicationVersion')) {
+                this.unitSelects.loadOrgs();
+                this.unitSelects.$('select').filter(':visible').first().focus();
+            } else {
+                this.searchView.$('input[type="text"]').focus();
+                this.loadVideos();
+            }
         },
         loadVideos: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
                 sourceId = this.model.get('sourceId'),
-                cacheKey = sourceId + searchVal,
+                libraryId = this.model.get('libraryId'),
+                cacheKey = sourceId + libraryId + searchVal,
                 videos = new Videos({}, {
                     sourceId: sourceId,
+                    libraryId: libraryId,
                     filterOn: '',
                     filterValue: searchVal,
                     appId: this.appId
@@ -2008,256 +2272,6 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
 
 });
 
-define('text!ev-script/templates/options.html',[],function () { return '<% collection.each(function(item) { %>\n    <option value="<%= item.id %>" <% if (selectedId === item.id) { print(\'selected="selected"\'); } %>><%- item.get(\'Name\') %></option>\n<% }); %>\n';});
-
-define('ev-script/views/organization-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
-
-    
-
-    var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/options.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render');
-            this.picker = options.picker;
-            this.$el.html('<option value="-1">Loading...</option>');
-            this.collection.on('reset', this.render);
-        },
-        render: function() {
-            this.$el.html(this.template({
-                selectedId: this.picker.model.get('organizationId'),
-                collection: this.collection
-            }));
-            this.$el.trigger('change');
-        }
-    });
-
-});
-
-define('ev-script/collections/organizations',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
-
-    
-
-    var BaseCollection = require('ev-script/collections/base'),
-        cacheUtil = require('ev-script/util/cache');
-
-    return BaseCollection.extend({
-        initialize: function(models, options) {
-            BaseCollection.prototype.initialize.call(this, models, options);
-        },
-        _cache: function(key, resp) {
-            var cachedValue = null,
-                user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            return userCache ? userCache[resp ? 'set' : 'get'](key, resp) : null;
-        },
-        getCached: function(key) {
-            return this._cache('orgs');
-        },
-        setCached: function(key, resp) {
-            return this._cache('orgs', resp);
-        },
-        url: function() {
-            var api_url = this.config.ensembleUrl + '/api/Organizations';
-            // Make this arbitrarily large so we can retrieve ALL orgs in a single request
-            var sizeParam = 'PageSize=9999';
-            var indexParam = 'PageIndex=1';
-            var url = api_url + '?' + sizeParam + '&' + indexParam;
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        }
-    });
-
-});
-
-define('ev-script/views/library-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
-
-    
-
-    var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/options.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render');
-            this.picker = options.picker;
-            this.$el.html('<option value="-1">Loading...</option>');
-            this.collection.on('reset', this.render);
-        },
-        render: function() {
-            this.$el.html(this.template({
-                selectedId: this.picker.model.get('libraryId'),
-                collection: this.collection
-            }));
-            this.$el.trigger('change');
-        }
-    });
-
-});
-
-define('ev-script/collections/libraries',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
-
-    
-
-    var BaseCollection = require('ev-script/collections/base'),
-        cacheUtil = require('ev-script/util/cache');
-
-    return BaseCollection.extend({
-        initialize: function(models, options) {
-            BaseCollection.prototype.initialize.call(this, models, options);
-            this.filterValue = options.organizationId || '';
-        },
-        _cache: function(key, resp) {
-            var cachedValue = null,
-                user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                var libsCache = userCache.get('libs');
-                if (!libsCache) {
-                    userCache.set('libs', libsCache = new cacheUtil.Cache());
-                }
-                cachedValue = libsCache[resp ? 'set' : 'get'](key, resp);
-            }
-            return cachedValue;
-        },
-        getCached: function(key) {
-            return this._cache(key);
-        },
-        setCached: function(key, resp) {
-            return this._cache(key, resp);
-        },
-        url: function() {
-            var api_url = this.config.ensembleUrl + '/api/Libraries';
-            // Make this arbitrarily large so we can retrieve ALL libraries under an org in a single request
-            var sizeParam = 'PageSize=9999';
-            var indexParam = 'PageIndex=1';
-            var onParam = 'FilterOn=OrganizationId';
-            var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
-            var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        }
-    });
-
-});
-
-define('text!ev-script/templates/playlist-select.html',[],function () { return '<form>\n    <label for="<%= orgSelectId %>">Organization:</label>\n    <select id="<%= orgSelectId %>" class="form-select organizations"></select>\n    <label for="<%= libSelectId %>">Library:</label>\n    <select id="<%= libSelectId %>" class="form-select libraries"></select>\n    <input type="submit" value="Go" class="form-submit" />\n    <div class="loader"></div>\n    <div class="ev-poweredby">\n        <a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a>\n    </div>\n</form>\n';});
-
-define('ev-script/views/playlist-select',['require','jquery','underscore','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','text!ev-script/templates/playlist-select.html'],function(require) {
-
-    
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        BaseView = require('ev-script/views/base'),
-        OrganizationSelectView = require('ev-script/views/organization-select'),
-        Organizations = require('ev-script/collections/organizations'),
-        LibrarySelectView = require('ev-script/views/library-select'),
-        Libraries = require('ev-script/collections/libraries');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/playlist-select.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization', 'changeLibrary', 'handleSubmit');
-            this.picker = options.picker;
-            this.id = options.id;
-            var orgSelectId = this.id + '-org-select';
-            var libSelectId = this.id + '-lib-select';
-            this.$el.html(this.template({
-                orgSelectId: orgSelectId,
-                libSelectId: libSelectId
-            }));
-            this.orgSelect = new OrganizationSelectView({
-                el: this.$('.organizations'),
-                picker: this.picker,
-                appId: this.appId,
-                collection: new Organizations({}, {
-                    appId: this.appId
-                })
-            });
-            this.libSelect = new LibrarySelectView({
-                el: this.$('.libraries'),
-                picker: this.picker,
-                appId: this.appId,
-                collection: new Libraries({}, {
-                    appId: this.appId
-                })
-            });
-            var $loader = this.$('div.loader');
-            $loader.on('ajaxSend', _.bind(function(e, xhr, settings) {
-                if (this.picker === settings.picker) {
-                    $loader.addClass('loading');
-                }
-            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
-                if (this.picker === settings.picker) {
-                    $loader.removeClass('loading');
-                }
-            }, this));
-        },
-        events: {
-            'change select.organizations': 'changeOrganization',
-            'change select.libraries': 'changeLibrary',
-            'submit form': 'handleSubmit'
-        },
-        changeOrganization: function(e) {
-            this.picker.model.set({
-                organizationId: e.target.value
-            });
-            this.loadLibraries();
-        },
-        changeLibrary: function(e) {
-            this.picker.model.set({
-                libraryId: e.target.value
-            });
-            this.picker.loadPlaylists();
-        },
-        handleSubmit: function(e) {
-            this.picker.loadPlaylists();
-            e.preventDefault();
-        },
-        loadOrgs: function() {
-            var orgs = new Organizations({}, {
-                appId: this.appId
-            });
-            orgs.fetch({
-                picker: this.picker,
-                success: _.bind(function(collection, response, options) {
-                    this.orgSelect.collection.reset(collection.models);
-                }, this),
-                error: _.bind(function(collection, xhr, options) {
-                    this.ajaxError(xhr, _.bind(function() {
-                        this.loadOrgs();
-                    }, this));
-                }, this)
-            });
-        },
-        loadLibraries: function() {
-            var orgId = this.picker.model.get('organizationId');
-            var libs = new Libraries({}, {
-                organizationId: orgId,
-                appId: this.appId
-            });
-            libs.fetch({
-                picker: this.picker,
-                cacheKey: orgId,
-                success: _.bind(function(collection, response, options) {
-                    this.libSelect.collection.reset(collection.models);
-                }, this),
-                error: _.bind(function(collection, xhr, options) {
-                    this.ajaxError(xhr, _.bind(function() {
-                        this.loadLibraries();
-                    }, this));
-                }, this)
-            });
-        }
-    });
-
-});
-
 define('text!ev-script/templates/playlist-embed.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%= modelId %>"\n        frameborder="0"\n        style="width:800px;height:850px;"\n        allowfullscreen>\n</iframe>\n';});
 
 define('ev-script/views/playlist-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/playlist-embed.html'],function(require) {
@@ -2364,42 +2378,52 @@ define('ev-script/collections/playlists',['require','ev-script/collections/base'
 
 });
 
-define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/playlist-select','ev-script/views/playlist-results','ev-script/collections/playlists'],function(require) {
+define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/unit-selects','ev-script/views/playlist-results','ev-script/collections/playlists'],function(require) {
 
     
 
     var $ = require('jquery'),
         _ = require('underscore'),
         PickerView = require('ev-script/views/picker'),
-        PlaylistSelectView = require('ev-script/views/playlist-select'),
+        UnitSelectsView = require('ev-script/views/unit-selects'),
         PlaylistResultsView = require('ev-script/views/playlist-results'),
         Playlists = require('ev-script/collections/playlists');
 
     return PickerView.extend({
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadPlaylists');
-            this.playlistSelect = new PlaylistSelectView({
-                id: this.id + '-playlist-select',
+            _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit');
+            this.unitSelects = new UnitSelectsView({
+                id: this.id + '-unit-selects',
                 tagName: 'div',
-                className: 'ev-playlist-select',
+                className: 'ev-unit-selects',
                 picker: this,
                 appId: this.appId
             });
-            this.$el.append(this.playlistSelect.$el);
+            this.$('div.ev-filter-block').prepend(this.unitSelects.$el);
             this.resultsView = new PlaylistResultsView({
-                id: this.id + '-results',
-                tagName: 'div',
-                className: 'ev-results clearfix',
+                el: this.$('div.ev-results'),
                 picker: this,
                 appId: this.appId
             });
             this.$el.append(this.resultsView.$el);
         },
+        events: {
+            'click a.action-add': 'chooseItem',
+            'change form.unit-selects select.libraries': 'changeLibrary',
+            'submit form.unit-selects': 'handleSubmit'
+        },
+        changeLibrary: function(e) {
+            this.loadPlaylists();
+        },
+        handleSubmit: function(e) {
+            this.loadPlaylists();
+            e.preventDefault();
+        },
         showPicker: function() {
             PickerView.prototype.showPicker.call(this);
-            this.playlistSelect.loadOrgs();
-            this.playlistSelect.$('select').filter(':visible').first().focus();
+            this.unitSelects.loadOrgs();
+            this.unitSelects.$('select').filter(':visible').first().focus();
         },
         loadPlaylists: function() {
             var libraryId = this.model.get('libraryId');
@@ -3153,12 +3177,13 @@ define('ev-script/auth/basic/view',['require','exports','module','jquery','under
 
 });
 
-define('ev-script/auth/basic/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/auth/basic/view','ev-script/collections/organizations'],function(require) {
+define('ev-script/auth/basic/auth',['require','jquery','underscore','backbone','ev-script/auth/base/auth','ev-script/auth/basic/view','ev-script/collections/organizations'],function(require) {
 
     
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        Backbone = require('backbone'),
         BaseAuth = require('ev-script/auth/base/auth'),
         AuthView = require('ev-script/auth/basic/view'),
         Organizations = require('ev-script/collections/organizations'),
@@ -3186,9 +3211,9 @@ define('ev-script/auth/basic/auth',['require','jquery','underscore','ev-script/a
                     orgs.requiresAuth = false;
                     return orgs.fetch({
                         success: _.bind(function(collection, response, options) {
-                            this.user = {
+                            this.user = new Backbone.Model({
                                 id: Math.floor(Math.random() * 10000000000000001).toString(16)
-                            };
+                            });
                             this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
                         }, this),
                         error: _.bind(function(collection, xhr, options) {
