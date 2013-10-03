@@ -1,5 +1,5 @@
 /**
- * ev-script 0.3.0 2013-10-02
+ * ev-script 0.3.0 2013-10-03
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -447,7 +447,8 @@ define('ev-script/models/playlist-settings',['backbone'], function(Backbone) {
 
     return Backbone.Model.extend({
         defaults: {
-            type: 'playlist'
+            type: 'playlist',
+            search: '',
         }
     });
 });
@@ -1107,9 +1108,9 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
 
 });
 
-define('text!ev-script/templates/video-search.html',[],function () { return '<form>\n    <label for="<%= id %>">Search Ensemble:</label>\n    <select class="form-select source" title="Select Library Type">\n      <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>>Media Library</option>\n      <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>>Shared Library</option>\n    </select>\n    <input id="<%= id %>" type="text" class="form-text search" value="<%- searchVal %>" title="Search Videos" />\n    <input type="submit" value="Go" class="form-submit" />\n</form>\n';});
+define('text!ev-script/templates/search.html',[],function () { return '<form>\n    <label for="<%= id %>">Search:</label>\n    <input id="<%= id %>" type="text" class="form-text search" value="<%- searchVal %>" title="Search Videos" />\n    <input type="submit" value="Go" class="form-submit" />\n</form>\n';});
 
-define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/video-search.html'],function(require) {
+define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
 
     
 
@@ -1117,30 +1118,28 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base','
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/video-search.html')),
+        template: _.template(require('text!ev-script/templates/search.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'searchHandler', 'doSearch', 'autoSearch');
             this.picker = options.picker;
+            this.callback = options.callback || function() {};
         },
         events: {
             'submit form': 'searchHandler',
-            'change .source': 'searchHandler',
             'keyup .search': 'autoSearch'
         },
         render: function() {
             this.$el.html(this.template({
                 id: this.id + '-input',
-                searchVal: this.picker.model.get('search'),
-                sourceId: this.picker.model.get('sourceId')
+                searchVal: this.picker.model.get('search')
             }));
         },
         doSearch: function() {
             this.picker.model.set({
-                search: this.$('.search').val(),
-                sourceId: this.$('.source').val()
+                search: this.$('.search').val()
             });
-            this.picker.loadVideos();
+            this.callback();
         },
         searchHandler: function(e) {
             this.doSearch();
@@ -1157,6 +1156,43 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base','
                     this.doSearch();
                 }, this), 1000);
             }
+        }
+    });
+
+});
+
+define('text!ev-script/templates/library-type-select.html',[],function () { return '<form>\n    <label for="<%= id %>">Type:</label>\n    <select id="<%= id %>" class="form-select source" title="Select Library Type">\n      <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>>Media Library</option>\n      <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>>Shared Library</option>\n    </select>\n    <input type="submit" value="Go" class="form-submit" />\n</form>\n';});
+
+define('ev-script/views/library-type-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
+
+    
+
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/library-type-select.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'changeHandler');
+            this.picker = options.picker;
+            this.callback = options.callback || function() {};
+        },
+        events: {
+            'change .source': 'changeHandler'
+        },
+        render: function() {
+            this.$el.html(this.template({
+                id: this.id + '-select',
+                sourceId: this.picker.model.get('sourceId')
+            }));
+        },
+        changeHandler: function(e) {
+            this.picker.model.set({
+                sourceId: this.$('.source').val()
+            });
+            this.callback();
+            e.preventDefault();
         }
     });
 
@@ -2034,7 +2070,7 @@ define('ev-script/collections/videos',['require','ev-script/collections/base','e
 
 });
 
-define('ev-script/views/video-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/search','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos'],function(require) {
+define('ev-script/views/video-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/search','ev-script/views/library-type-select','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos'],function(require) {
 
     
 
@@ -2042,6 +2078,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
         _ = require('underscore'),
         PickerView = require('ev-script/views/picker'),
         SearchView = require('ev-script/views/search'),
+        TypeSelectView = require('ev-script/views/library-type-select'),
         UnitSelectsView = require('ev-script/views/unit-selects'),
         VideoResultsView = require('ev-script/views/video-results'),
         Videos = require('ev-script/collections/videos');
@@ -2050,14 +2087,29 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadVideos', 'changeLibrary', 'handleSubmit');
+            var callback = _.bind(function() {
+                this.loadVideos();
+            }, this);
             this.searchView = new SearchView({
                 id: this.id + '-search',
                 tagName: 'div',
                 className: 'ev-search',
                 picker: this,
-                appId: this.appId
+                appId: this.appId,
+                callback: callback
             });
             this.$('div.ev-filter-block').prepend(this.searchView.$el);
+            this.searchView.render();
+            this.typeSelectView = new TypeSelectView({
+                id: this.id + '-type-select',
+                tagName: 'div',
+                className: 'ev-type-select',
+                picker: this,
+                appId: this.appId,
+                callback: callback
+            });
+            this.$('div.ev-filter-block').prepend(this.typeSelectView.$el);
+            this.typeSelectView.render();
             if (this.info.get('ApplicationVersion')) {
                 this.unitSelects = new UnitSelectsView({
                     id: this.id + '-unit-selects',
@@ -2068,7 +2120,6 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
                 });
                 this.$('div.ev-filter-block').prepend(this.unitSelects.$el);
             }
-            this.searchView.render();
             this.resultsView = new VideoResultsView({
                 el: this.$('div.ev-results'),
                 picker: this,
@@ -2343,6 +2394,7 @@ define('ev-script/collections/playlists',['require','ev-script/collections/base'
     return BaseCollection.extend({
         initialize: function(models, options) {
             BaseCollection.prototype.initialize.call(this, models, options);
+            this.libraryId = options.libraryId || '';
             this.filterValue = options.filterValue || '';
             this.pageIndex = 1;
         },
@@ -2366,19 +2418,26 @@ define('ev-script/collections/playlists',['require','ev-script/collections/base'
             return this._cache(key, resp);
         },
         url: function() {
-            var api_url = this.config.ensembleUrl + '/api/Playlists';
-            var sizeParam = 'PageSize=' + this.config.pageSize;
-            var indexParam = 'PageIndex=' + this.pageIndex;
-            var onParam = 'FilterOn=LibraryId';
-            var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
-            var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+            var api_url = this.config.ensembleUrl + '/api/Playlists',
+                sizeParam = 'PageSize=' + this.config.pageSize,
+                indexParam = 'PageIndex=' + this.pageIndex,
+                url, onParam, valueParam;
+            if (this.info.get('ApplicationVersion')) {
+                onParam = 'FilterOn=Name';
+                valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
+                url = api_url + '/' + encodeURIComponent(this.libraryId) + '?' + sizeParam + '&' + indexParam + (this.filterValue ? '&' + onParam + '&' + valueParam : '');
+            } else {
+                onParam = 'FilterOn=LibraryId';
+                valueParam = 'FilterValue=' + encodeURIComponent(this.libraryId);
+                url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+            }
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
         }
     });
 
 });
 
-define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/unit-selects','ev-script/views/playlist-results','ev-script/collections/playlists'],function(require) {
+define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/unit-selects','ev-script/views/search','ev-script/views/playlist-results','ev-script/collections/playlists'],function(require) {
 
     
 
@@ -2386,6 +2445,7 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
         _ = require('underscore'),
         PickerView = require('ev-script/views/picker'),
         UnitSelectsView = require('ev-script/views/unit-selects'),
+        SearchView = require('ev-script/views/search'),
         PlaylistResultsView = require('ev-script/views/playlist-results'),
         Playlists = require('ev-script/collections/playlists');
 
@@ -2393,6 +2453,20 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit');
+            if (this.info.get('ApplicationVersion')) {
+                this.searchView = new SearchView({
+                    id: this.id + '-search',
+                    tagName: 'div',
+                    className: 'ev-search',
+                    picker: this,
+                    appId: this.appId,
+                    callback: _.bind(function() {
+                        this.loadPlaylists();
+                    }, this)
+                });
+                this.$('div.ev-filter-block').prepend(this.searchView.$el);
+                this.searchView.render();
+            }
             this.unitSelects = new UnitSelectsView({
                 id: this.id + '-unit-selects',
                 tagName: 'div',
@@ -2426,14 +2500,16 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
             this.unitSelects.$('select').filter(':visible').first().focus();
         },
         loadPlaylists: function() {
-            var libraryId = this.model.get('libraryId');
-            var playlists = new Playlists({}, {
-                filterValue: libraryId,
-                appId: this.appId
-            });
+            var searchVal = $.trim(this.model.get('search').toLowerCase()),
+                libraryId = this.model.get('libraryId'),
+                playlists = new Playlists({}, {
+                    libraryId: libraryId,
+                    filterValue: searchVal,
+                    appId: this.appId
+                });
             playlists.fetch({
                 picker: this,
-                cacheKey: libraryId,
+                cacheKey: libraryId + searchVal,
                 success: _.bind(function(collection, response, options) {
                     var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
                     var size = _.size(response.Data);

@@ -1,9 +1,8 @@
 <form>
-    <label for="<%= id %>">Search Ensemble:</label>
-    <select class="form-select source" title="Select Library Type">
+    <label for="<%= id %>">Type:</label>
+    <select id="<%= id %>" class="form-select source" title="Select Library Type">
       <option value="content" <% if (sourceId === 'content') { print('selected="selected"'); } %>>Media Library</option>
       <option value="shared" <% if (sourceId === 'shared') { print('selected="selected"'); } %>>Shared Library</option>
     </select>
-    <input id="<%= id %>" type="text" class="form-text search" value="<%- searchVal %>" title="Search Videos" />
     <input type="submit" value="Go" class="form-submit" />
 </form>

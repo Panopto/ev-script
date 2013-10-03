@@ -16,8 +16,9 @@ define(function(require) {
         q.ok(this.settings instanceof Backbone.Model);
     });
 
-    q.test('test properties', 1, function() {
+    q.test('test properties', 2, function() {
         q.strictEqual(this.settings.get('type'), 'playlist');
+        q.strictEqual(this.settings.get('search'), '');
     });
 
 });

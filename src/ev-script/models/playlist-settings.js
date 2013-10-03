@@ -4,7 +4,8 @@ define(['backbone'], function(Backbone) {
 
     return Backbone.Model.extend({
         defaults: {
-            type: 'playlist'
+            type: 'playlist',
+            search: '',
         }
     });
 });

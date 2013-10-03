@@ -6,30 +6,28 @@ define(function(require) {
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/video-search.html')),
+        template: _.template(require('text!ev-script/templates/search.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'searchHandler', 'doSearch', 'autoSearch');
             this.picker = options.picker;
+            this.callback = options.callback || function() {};
         },
         events: {
             'submit form': 'searchHandler',
-            'change .source': 'searchHandler',
             'keyup .search': 'autoSearch'
         },
         render: function() {
             this.$el.html(this.template({
                 id: this.id + '-input',
-                searchVal: this.picker.model.get('search'),
-                sourceId: this.picker.model.get('sourceId')
+                searchVal: this.picker.model.get('search')
             }));
         },
         doSearch: function() {
             this.picker.model.set({
-                search: this.$('.search').val(),
-                sourceId: this.$('.source').val()
+                search: this.$('.search').val()
             });
-            this.picker.loadVideos();
+            this.callback();
         },
         searchHandler: function(e) {
             this.doSearch();

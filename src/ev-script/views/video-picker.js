@@ -6,6 +6,7 @@ define(function(require) {
         _ = require('underscore'),
         PickerView = require('ev-script/views/picker'),
         SearchView = require('ev-script/views/search'),
+        TypeSelectView = require('ev-script/views/library-type-select'),
         UnitSelectsView = require('ev-script/views/unit-selects'),
         VideoResultsView = require('ev-script/views/video-results'),
         Videos = require('ev-script/collections/videos');
@@ -14,14 +15,29 @@ define(function(require) {
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadVideos', 'changeLibrary', 'handleSubmit');
+            var callback = _.bind(function() {
+                this.loadVideos();
+            }, this);
             this.searchView = new SearchView({
                 id: this.id + '-search',
                 tagName: 'div',
                 className: 'ev-search',
                 picker: this,
-                appId: this.appId
+                appId: this.appId,
+                callback: callback
             });
             this.$('div.ev-filter-block').prepend(this.searchView.$el);
+            this.searchView.render();
+            this.typeSelectView = new TypeSelectView({
+                id: this.id + '-type-select',
+                tagName: 'div',
+                className: 'ev-type-select',
+                picker: this,
+                appId: this.appId,
+                callback: callback
+            });
+            this.$('div.ev-filter-block').prepend(this.typeSelectView.$el);
+            this.typeSelectView.render();
             if (this.info.get('ApplicationVersion')) {
                 this.unitSelects = new UnitSelectsView({
                     id: this.id + '-unit-selects',
@@ -32,7 +48,6 @@ define(function(require) {
                 });
                 this.$('div.ev-filter-block').prepend(this.unitSelects.$el);
             }
-            this.searchView.render();
             this.resultsView = new VideoResultsView({
                 el: this.$('div.ev-results'),
                 picker: this,

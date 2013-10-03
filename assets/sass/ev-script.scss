@@ -35,6 +35,26 @@ $default-box-shadow-color: #333333;
   }
 }
 
+@mixin filter-form($max-width) {
+  label,
+  input,
+  select {
+    display: inline;
+    margin-right: 0.4em;
+  }
+  label {
+    color: #606060;
+    @media screen and (max-width: $max-width) {
+      display: none;
+    }
+  }
+  div.ev-poweredby {
+    @media screen and (max-width: $max-width - 250px) {
+      display: none;
+    }
+  }
+}
+
 .ev-video-picker {
   @include picker-base;
   div.ev-results {
@@ -43,14 +63,15 @@ $default-box-shadow-color: #333333;
     }
   }
   div.ev-filter-block {
-    div.ev-unit-selects {
-      margin-right: 2em;
-    }
+    @include filter-form(1050px);
   }
 }
 
 .ev-playlist-picker {
   @include picker-base;
+  div.ev-filter-block {
+    @include filter-form(1050px);
+  }
 }
 
 div.ev-hider {
@@ -150,43 +171,18 @@ div.ev-field {
   }
 }
 
-@mixin filter-form($max-width) {
-  label,
-  input,
-  select {
-    display: inline;
-    margin-right: 0.4em;
-  }
-  label {
-    color: #606060;
-    @media screen and (max-width: $max-width) {
-      display: block;
-      margin: 0.4em 0;
-    }
-  }
-  div.loader {
-    display: inline-block;
-  }
-  div.loading {
-    background: url($loading-image) no-repeat scroll center center transparent;
-    display: inline-block;
-    height: 16px;
-    margin-left: 1em;
-    vertical-align: middle;
-    width: 16px;
-  }
-}
-
 div.ev-filter-block {
   background-color: #fbfbfb;
   position: relative;
   z-index: 10;
   padding: 10px 5px 0 5px;
-  // FIXME
-  @include filter-form(750px);
   div.ev-search,
+  div.ev-type-select,
   div.ev-unit-selects {
     display: inline-block;
+    input[type="submit"] {
+      display: none;
+    }
   }
   div.ev-poweredby {
     float: right;
@@ -199,9 +195,17 @@ div.ev-filter-block {
         display: none;
       }
     }
-    @media screen and (max-width: 620px) {
-      display: none;
-    }
+  }
+  div.loader {
+    display: inline-block;
+  }
+  div.loading {
+    background: url($loading-image) no-repeat scroll center center transparent;
+    display: inline-block;
+    height: 16px;
+    margin-left: 1em;
+    vertical-align: middle;
+    width: 16px;
   }
 }
 

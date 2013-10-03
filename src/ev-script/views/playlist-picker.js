@@ -6,6 +6,7 @@ define(function(require) {
         _ = require('underscore'),
         PickerView = require('ev-script/views/picker'),
         UnitSelectsView = require('ev-script/views/unit-selects'),
+        SearchView = require('ev-script/views/search'),
         PlaylistResultsView = require('ev-script/views/playlist-results'),
         Playlists = require('ev-script/collections/playlists');
 
@@ -13,6 +14,20 @@ define(function(require) {
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit');
+            if (this.info.get('ApplicationVersion')) {
+                this.searchView = new SearchView({
+                    id: this.id + '-search',
+                    tagName: 'div',
+                    className: 'ev-search',
+                    picker: this,
+                    appId: this.appId,
+                    callback: _.bind(function() {
+                        this.loadPlaylists();
+                    }, this)
+                });
+                this.$('div.ev-filter-block').prepend(this.searchView.$el);
+                this.searchView.render();
+            }
             this.unitSelects = new UnitSelectsView({
                 id: this.id + '-unit-selects',
                 tagName: 'div',
@@ -46,14 +61,16 @@ define(function(require) {
             this.unitSelects.$('select').filter(':visible').first().focus();
         },
         loadPlaylists: function() {
-            var libraryId = this.model.get('libraryId');
-            var playlists = new Playlists({}, {
-                filterValue: libraryId,
-                appId: this.appId
-            });
+            var searchVal = $.trim(this.model.get('search').toLowerCase()),
+                libraryId = this.model.get('libraryId'),
+                playlists = new Playlists({}, {
+                    libraryId: libraryId,
+                    filterValue: searchVal,
+                    appId: this.appId
+                });
             playlists.fetch({
                 picker: this,
-                cacheKey: libraryId,
+                cacheKey: libraryId + searchVal,
                 success: _.bind(function(collection, response, options) {
                     var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
                     var size = _.size(response.Data);

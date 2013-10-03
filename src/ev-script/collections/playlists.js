@@ -8,6 +8,7 @@ define(function(require) {
     return BaseCollection.extend({
         initialize: function(models, options) {
             BaseCollection.prototype.initialize.call(this, models, options);
+            this.libraryId = options.libraryId || '';
             this.filterValue = options.filterValue || '';
             this.pageIndex = 1;
         },
@@ -31,12 +32,19 @@ define(function(require) {
             return this._cache(key, resp);
         },
         url: function() {
-            var api_url = this.config.ensembleUrl + '/api/Playlists';
-            var sizeParam = 'PageSize=' + this.config.pageSize;
-            var indexParam = 'PageIndex=' + this.pageIndex;
-            var onParam = 'FilterOn=LibraryId';
-            var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
-            var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+            var api_url = this.config.ensembleUrl + '/api/Playlists',
+                sizeParam = 'PageSize=' + this.config.pageSize,
+                indexParam = 'PageIndex=' + this.pageIndex,
+                url, onParam, valueParam;
+            if (this.info.get('ApplicationVersion')) {
+                onParam = 'FilterOn=Name';
+                valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
+                url = api_url + '/' + encodeURIComponent(this.libraryId) + '?' + sizeParam + '&' + indexParam + (this.filterValue ? '&' + onParam + '&' + valueParam : '');
+            } else {
+                onParam = 'FilterOn=LibraryId';
+                valueParam = 'FilterValue=' + encodeURIComponent(this.libraryId);
+                url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+            }
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
         }
     });
