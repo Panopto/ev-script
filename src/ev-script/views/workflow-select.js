@@ -1,3 +1,4 @@
+
 define(function(require) {
 
     'use strict';
@@ -11,7 +12,7 @@ define(function(require) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render');
             this.$el.html('<option value="-1">Loading...</option>');
-            this.collection.on('reset', this.render);
+            this.render();
         },
         render: function() {
             var selected = this.collection.findWhere({
@@ -21,7 +22,6 @@ define(function(require) {
                 selectedId: selected.id,
                 collection: this.collection
             }));
-            this.$el.trigger('change');
         },
         getSelected: function() {
             return this.collection.get(this.$('option:selected').val());

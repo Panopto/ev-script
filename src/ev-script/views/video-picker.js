@@ -9,15 +9,21 @@ define(function(require) {
         TypeSelectView = require('ev-script/views/library-type-select'),
         UnitSelectsView = require('ev-script/views/unit-selects'),
         VideoResultsView = require('ev-script/views/video-results'),
-        Videos = require('ev-script/collections/videos');
+        Videos = require('ev-script/collections/videos'),
+        MediaWorkflows = require('ev-script/collections/media-workflows'),
+        UploadView = require('ev-script/views/upload');
 
     return PickerView.extend({
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadVideos', 'changeLibrary', 'handleSubmit');
+            _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary', 'handleSubmit', 'uploadHandler');
             var callback = _.bind(function() {
                 this.loadVideos();
             }, this);
+            if (this.info.get('ApplicationVersion')) {
+                this.$upload = $('<div class="ev-field-actions"><a href="#" class="action-upload" title="Upload Video"><span>Upload Video<span></a></div>').css('display', 'none');
+                this.$('div.ev-filter-block').prepend(this.$upload);
+            }
             this.searchView = new SearchView({
                 id: this.id + '-search',
                 tagName: 'div',
@@ -56,15 +62,25 @@ define(function(require) {
             this.$el.append(this.resultsView.$el);
         },
         events: {
-            'click a.action-add': 'chooseItem',
+            'click .action-add': 'chooseItem',
+            'click .action-upload': 'uploadHandler',
             'change form.unit-selects select.libraries': 'changeLibrary',
             'submit form.unit-selects': 'handleSubmit'
         },
         changeLibrary: function(e) {
             this.loadVideos();
+            this.loadWorkflows();
         },
         handleSubmit: function(e) {
             this.loadVideos();
+            e.preventDefault();
+        },
+        uploadHandler: function(e) {
+            var uploadView = new UploadView({
+                appId: this.appId,
+                field: this.field,
+                workflows: this.workflows
+            });
             e.preventDefault();
         },
         showPicker: function() {
@@ -115,6 +131,29 @@ define(function(require) {
                 }, this)
             });
             this.appEvents.off('fileUploaded').on('fileUploaded', clearVideosCache);
+        },
+        loadWorkflows: function() {
+            this.workflows = new MediaWorkflows({}, {
+                appId: this.appId
+            });
+            // FIXME - add libraryId (as with playlists)
+            this.workflows.filterValue = this.model.get('libraryId');
+            this.workflows.fetch({
+                cacheKey: this.workflows.filterValue,
+                success: _.bind(function(collection, response, options) {
+                    if (!collection.isEmpty()) {
+                        this.$upload.css('display', 'inline-block');
+                    } else {
+                        this.$upload.css('display', 'none');
+                    }
+                }, this),
+                error: _.bind(function(collection, xhr, options) {
+                    this.ajaxError(xhr, _.bind(function() {
+                        this.loadWorkflows();
+                    }, this));
+                }, this),
+                reset: true
+            });
         }
     });
 

@@ -63,14 +63,14 @@ $default-box-shadow-color: #333333;
     }
   }
   div.ev-filter-block {
-    @include filter-form(1050px);
+    @include filter-form(1100px);
   }
 }
 
 .ev-playlist-picker {
   @include picker-base;
   div.ev-filter-block {
-    @include filter-form(1050px);
+    @include filter-form(1000px);
   }
 }
 
@@ -138,36 +138,37 @@ div.ev-field {
       }
     }
   }
-  div.ev-field-actions {
+}
+
+div.ev-field-actions {
+  display: inline-block;
+  padding: 0.4em 0.6em;
+  a {
+    background-repeat: no-repeat;
+    background-size: 18px auto;
     display: inline-block;
-    padding: 0.4em 0.6em;
-    a {
-      background-repeat: no-repeat;
-      background-size: 18px auto;
-      display: inline-block;
-      height: 18px;
-      margin: 0.3em;
-      vertical-align: middle;
-      width: 18px;
-      span {
-        display: none;
-      }
+    height: 18px;
+    margin: 0.3em;
+    vertical-align: middle;
+    width: 18px;
+    span {
+      display: none;
     }
-    .action-choose {
-      background-image: url($add-image);
-    }
-    .action-preview {
-      background-image: url($preview-image);
-    }
-    .action-options {
-      background-image: url($settings-image);
-    }
-    .action-remove {
-      background-image: url($remove-image);
-    }
-    .action-upload {
-      background-image: url($upload-image);
-    }
+  }
+  .action-choose {
+    background-image: url($add-image);
+  }
+  .action-preview {
+    background-image: url($preview-image);
+  }
+  .action-options {
+    background-image: url($settings-image);
+  }
+  .action-remove {
+    background-image: url($remove-image);
+  }
+  .action-upload {
+    background-image: url($upload-image);
   }
 }
 

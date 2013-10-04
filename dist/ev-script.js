@@ -2070,7 +2070,290 @@ define('ev-script/collections/videos',['require','ev-script/collections/base','e
 
 });
 
-define('ev-script/views/video-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/search','ev-script/views/library-type-select','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos'],function(require) {
+define('ev-script/collections/media-workflows',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
+
+    
+
+    var BaseCollection = require('ev-script/collections/base'),
+        cacheUtil = require('ev-script/util/cache');
+
+    return BaseCollection.extend({
+        initialize: function(models, options) {
+            BaseCollection.prototype.initialize.call(this, models, options);
+            this.filterValue = options.libraryId || '';
+        },
+        _cache: function(key, resp) {
+            var cachedValue = null,
+                user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                var workflowsCache = userCache.get('workflows');
+                if (!workflowsCache) {
+                    userCache.set('workflows', workflowsCache = new cacheUtil.Cache());
+                }
+                cachedValue = workflowsCache[resp ? 'set' : 'get'](key, resp);
+            }
+            return cachedValue;
+        },
+        getCached: function(key) {
+            return this._cache(key);
+        },
+        setCached: function(key, resp) {
+            return this._cache(key, resp);
+        },
+        url: function() {
+            var api_url = this.config.ensembleUrl + '/api/MediaWorkflows';
+            // Make this arbitrarily large so we can retrieve ALL workflows in a single request
+            var sizeParam = 'PageSize=9999';
+            var indexParam = 'PageIndex=1';
+            var onParam = 'FilterOn=LibraryId';
+            var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
+            var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        },
+        // Override base parse in order to grab settings
+        parse: function(response) {
+            this.settings = response.Settings;
+            return response.Data;
+        }
+    });
+
+});
+
+
+define('ev-script/views/workflow-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
+
+    
+
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/options.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'render');
+            this.$el.html('<option value="-1">Loading...</option>');
+            this.render();
+        },
+        render: function() {
+            var selected = this.collection.findWhere({
+                'IsDefault': true
+            }) || this.collection.at(1);
+            this.$el.html(this.template({
+                selectedId: selected.id,
+                collection: this.collection
+            }));
+        },
+        getSelected: function() {
+            return this.collection.get(this.$('option:selected').val());
+        }
+    });
+
+});
+
+define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <select class="form-select" name="MediaWorkflowID"></select>\n    <div class="fieldWrap">\n        <label for="Title">Title *</label>\n        <input class="form-text" type="text" name="Title" id="Title" />\n    </div>\n    <div class="fieldWrap">\n        <label for="Description">Description</label>\n        <textarea class="form-text" name="Description" id="Description" />\n    </div>\n    <div class="upload"></div>\n</form>\n';});
+
+/*global window,plupload,navigator*/
+define('ev-script/views/upload',['require','jquery','underscore','ev-script/views/base','backbone','ev-script/views/workflow-select','ev-script/models/video-settings','plupload','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
+
+    
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        BaseView = require('ev-script/views/base'),
+        Backbone = require('backbone'),
+        WorkflowSelect = require('ev-script/views/workflow-select'),
+        VideoSettings = require('ev-script/models/video-settings');
+
+    // Explicit dependency declaration
+    require('plupload');
+    require('jquery.plupload.queue');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/upload.html')),
+        events: {
+            'change select': 'handleSelect'
+        },
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'render', 'decorateUploader', 'closeDialog', 'handleSelect');
+            this.field = options.field;
+            this.$anchor = this.$el;
+            this.setElement(this.template());
+            this.$upload = this.$('.upload');
+            this.workflows = options.workflows;
+            this.workflowSelect = new WorkflowSelect({
+                appId: this.appId,
+                el: this.$('select')[0],
+                collection: this.workflows
+            });
+            this.render();
+            this.decorateUploader();
+            this.appEvents.on('hidePickers', this.closeDialog);
+        },
+        getWidth: function() {
+            return Math.min(600, $(window).width() - this.config.dialogMargin);
+        },
+        getHeight: function() {
+            return Math.min(400, $(window).height() - this.config.dialogMargin);
+        },
+        decorateUploader: function() {
+            var extensions = this.workflows.settings.SupportedVideo.replace(/\*\./g, '').replace(/;/g, ',').replace(/\s/g, ''),
+                selected = this.workflowSelect.getSelected(),
+                maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10); //,
+                // runtimes = 'html5,html4',
+                // iOS = (navigator.userAgent.indexOf('iPad') > -1) || (navigator.userAgent.indexOf('iPhone') > -1),
+                // MSIE = (navigator.userAgent.indexOf('MSIE') > -1),
+                // Android = (navigator.userAgent.indexOf('Android') > -1),
+                // SafariVersion5 = (navigator.userAgent.match(/Version\/5.*Safari/i) != null) && (navigator.userAgent.indexOf('Chrome') === -1) && !iOS && !Android;
+
+            // runtime selection based on browser
+            // if (iOS) {
+            //     runtimes = 'html5,html4';
+            // } else if (MSIE) {
+            //     runtimes = 'silverlight,html4';
+            // } else if (Android) {
+            //     runtimes = 'flash,html5,html4';
+            // }
+
+            if (this.$upload.pluploadQueue()) {
+                this.$upload.pluploadQueue().destroy();
+            }
+
+            this.$upload.pluploadQueue({
+                url: this.workflows.settings.SubmitUrl,
+                runtimes: 'html5,html4,flash', //runtimes,
+                max_file_size: maxUploadSize > 0 ? maxUploadSize + 'gb' : '12gb',
+                max_file_count: 1,
+                chunk_size: '2mb',
+                unique_names: false,
+                multiple_queues: false,
+                multi_selection: false,
+                drag_drop: true,
+                multipart: true,
+                flash_swf_url: this.config.pluploadFlashPath,
+                // FIXME
+                // silverlight_xap_url: 'FIXME',
+                preinit: {
+                    Init: _.bind(function(up, info) {
+                        // Remove runtime tooltip
+                        $('.plupload_container', this.$upload).removeAttr('title');
+                        // Change text since we only allow single file upload
+                        $('.plupload_add', this.$upload).text('Add file');
+                        $('.plupload_droptext', this.$upload).text('Drag file here.');
+                    }, this),
+                    UploadFile: _.bind(function(up, file) {
+                        up.settings.multipart_params = {
+                            'Title': this.$('#Title').val(),
+                            'Description': this.$('#Description').val(),
+                            'MediaWorkflowID': this.$('select').val()
+                        };
+                    }, this)
+                },
+                init: {
+                    StateChanged: _.bind(function(up) {
+                        switch (up.state) {
+                            case plupload.STARTED:
+                                if (up.state === plupload.STARTED) {
+                                    if ($('.plupload_cancel', this.$upload).length === 0) {
+                                        // Add cancel button
+                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">Cancel upload</a>')
+                                        .insertBefore($('.plupload_filelist_footer .plupload_clearer', this.$upload))
+                                        .click(_.bind(function() {
+                                            up.stop();
+                                            this.decorateUploader();
+                                        }, this));
+                                    }
+                                    if (this.$cancel) {
+                                        this.$cancel.show();
+                                    }
+                                }
+                                break;
+                            case plupload.STOPPED:
+                                if (this.$cancel) {
+                                    this.$cancel.hide();
+                                }
+                                break;
+                        }
+                    }, this),
+                    BeforeUpload: _.bind(function(up, file) {
+                        var $title = this.$('#Title'),
+                            title = $title.val();
+                        if (!title || title.trim() === '') {
+                            $title.focus();
+                            up.stop();
+                            $('.plupload_upload_status', this.$upload).hide();
+                            $('.plupload_buttons', this.$upload).show();
+                        }
+                    }, this),
+                    FilesAdded: _.bind(function(up, files) {
+                        var validExtensions = extensions.split(',');
+                        _.each(files, function(file) {
+                            var parts = file.name.split('.'),
+                                extension = parts[parts.length - 1];
+                            if (!_.contains(validExtensions, extension)) {
+                                up.removeFile(file);
+                                // TODO - error message?
+                            }
+                        });
+                        // Keep the last file in the queue
+                        if (up.files.length > 1) {
+                            up.splice(0, up.files.length - 1);
+                        }
+                    }, this),
+                    UploadComplete: _.bind(function() {
+                        this.closeDialog();
+                    }, this),
+                    FileUploaded: _.bind(function(up, file, info) {
+                        this.appEvents.trigger('fileUploaded');
+                    }, this)
+                }
+            });
+            // Hacks to deal with z-index issue in dialog
+            // see https://github.com/moxiecode/plupload/issues/468
+            this.$upload.pluploadQueue().bind('refresh', function() {
+                $('div.upload > div.plupload').css({ 'z-index': '0' });
+                $('.plupload_button').css({ 'z-index': '1' });
+            });
+            this.$upload.pluploadQueue().refresh();
+        },
+        closeDialog: function() {
+            if (this.$dialog) {
+                this.$dialog.dialog('close');
+            }
+        },
+        handleSelect: function(e) {
+            this.decorateUploader();
+        },
+        render: function() {
+            var $dialogWrap = $('<div class="dialogWrap"></div>'),
+                $dialog;
+            this.$anchor.after($dialogWrap);
+            this.$dialog = $dialogWrap.dialog({
+                title: 'Upload Video to Ensemble',
+                modal: true,
+                width: this.getWidth(),
+                height: this.getHeight(),
+                draggable: false,
+                resizable: false,
+                dialogClass: 'ev-dialog',
+                create: _.bind(function(event, ui) {
+                    $dialogWrap.html(this.$el);
+                }, this),
+                close: _.bind(function(event, ui) {
+                    this.$upload.pluploadQueue().destroy();
+                    $dialogWrap.dialog('destroy').remove();
+                    this.appEvents.off('hidePickers', this.closeDialog);
+                    this.$dialog = null;
+                }, this)
+            });
+        }
+    });
+
+});
+
+define('ev-script/views/video-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/search','ev-script/views/library-type-select','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos','ev-script/collections/media-workflows','ev-script/views/upload'],function(require) {
 
     
 
@@ -2081,15 +2364,21 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
         TypeSelectView = require('ev-script/views/library-type-select'),
         UnitSelectsView = require('ev-script/views/unit-selects'),
         VideoResultsView = require('ev-script/views/video-results'),
-        Videos = require('ev-script/collections/videos');
+        Videos = require('ev-script/collections/videos'),
+        MediaWorkflows = require('ev-script/collections/media-workflows'),
+        UploadView = require('ev-script/views/upload');
 
     return PickerView.extend({
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadVideos', 'changeLibrary', 'handleSubmit');
+            _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary', 'handleSubmit', 'uploadHandler');
             var callback = _.bind(function() {
                 this.loadVideos();
             }, this);
+            if (this.info.get('ApplicationVersion')) {
+                this.$upload = $('<div class="ev-field-actions"><a href="#" class="action-upload" title="Upload Video"><span>Upload Video<span></a></div>').css('display', 'none');
+                this.$('div.ev-filter-block').prepend(this.$upload);
+            }
             this.searchView = new SearchView({
                 id: this.id + '-search',
                 tagName: 'div',
@@ -2128,15 +2417,25 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
             this.$el.append(this.resultsView.$el);
         },
         events: {
-            'click a.action-add': 'chooseItem',
+            'click .action-add': 'chooseItem',
+            'click .action-upload': 'uploadHandler',
             'change form.unit-selects select.libraries': 'changeLibrary',
             'submit form.unit-selects': 'handleSubmit'
         },
         changeLibrary: function(e) {
             this.loadVideos();
+            this.loadWorkflows();
         },
         handleSubmit: function(e) {
             this.loadVideos();
+            e.preventDefault();
+        },
+        uploadHandler: function(e) {
+            var uploadView = new UploadView({
+                appId: this.appId,
+                field: this.field,
+                workflows: this.workflows
+            });
             e.preventDefault();
         },
         showPicker: function() {
@@ -2187,6 +2486,29 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
                 }, this)
             });
             this.appEvents.off('fileUploaded').on('fileUploaded', clearVideosCache);
+        },
+        loadWorkflows: function() {
+            this.workflows = new MediaWorkflows({}, {
+                appId: this.appId
+            });
+            // FIXME - add libraryId (as with playlists)
+            this.workflows.filterValue = this.model.get('libraryId');
+            this.workflows.fetch({
+                cacheKey: this.workflows.filterValue,
+                success: _.bind(function(collection, response, options) {
+                    if (!collection.isEmpty()) {
+                        this.$upload.css('display', 'inline-block');
+                    } else {
+                        this.$upload.css('display', 'none');
+                    }
+                }, this),
+                error: _.bind(function(collection, xhr, options) {
+                    this.ajaxError(xhr, _.bind(function() {
+                        this.loadWorkflows();
+                    }, this));
+                }, this),
+                reset: true
+            });
         }
     });
 
@@ -2565,316 +2887,9 @@ define('ev-script/views/playlist-settings',['require','underscore','ev-script/vi
 
 });
 
-define('ev-script/collections/media-workflows',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
+define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="Video thumbnail" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%- name %></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Change <%= label %>"><span>Change <%= label %><span></a>\n        <a href="#" class="action-preview" title="Preview: <%- name %>"><span>Preview: <%- name %><span></a>\n        <!-- TODO - temporarily disabled playlist settings until it is implemented -->\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-options" title="<%= label %> Embed Options"><span><%= label %> Embed Options<span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="Remove <%= label %>"><span>Remove <%= label %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em>Add <%= type %>.</em></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Choose <%= label %>"><span>Choose <%= label %><span></a>\n    </div>\n<% } %>\n';});
 
-    
-
-    var BaseCollection = require('ev-script/collections/base'),
-        cacheUtil = require('ev-script/util/cache');
-
-    return BaseCollection.extend({
-        initialize: function(models, options) {
-            BaseCollection.prototype.initialize.call(this, models, options);
-            this.filterValue = options.libraryId || '';
-        },
-        _cache: function(key, resp) {
-            var cachedValue = null,
-                user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                var workflowsCache = userCache.get('workflows');
-                if (!workflowsCache) {
-                    userCache.set('workflows', workflowsCache = new cacheUtil.Cache());
-                }
-                cachedValue = workflowsCache[resp ? 'set' : 'get'](key, resp);
-            }
-            return cachedValue;
-        },
-        getCached: function(key) {
-            return this._cache(key);
-        },
-        setCached: function(key, resp) {
-            return this._cache(key, resp);
-        },
-        url: function() {
-            var api_url = this.config.ensembleUrl + '/api/MediaWorkflows';
-            // Make this arbitrarily large so we can retrieve ALL workflows in a single request
-            var sizeParam = 'PageSize=9999';
-            var indexParam = 'PageIndex=1';
-            var onParam = 'FilterOn=LibraryId';
-            var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
-            var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        },
-        // Override base parse in order to grab settings
-        parse: function(response) {
-            this.settings = response.Settings;
-            return response.Data;
-        }
-    });
-
-});
-
-define('ev-script/views/workflow-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
-
-    
-
-    var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/options.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render');
-            this.$el.html('<option value="-1">Loading...</option>');
-            this.collection.on('reset', this.render);
-        },
-        render: function() {
-            var selected = this.collection.findWhere({
-                'IsDefault': true
-            }) || this.collection.at(1);
-            this.$el.html(this.template({
-                selectedId: selected.id,
-                collection: this.collection
-            }));
-            this.$el.trigger('change');
-        },
-        getSelected: function() {
-            return this.collection.get(this.$('option:selected').val());
-        }
-    });
-
-});
-
-define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <select class="form-select" name="MediaWorkflowID"></select>\n    <div class="fieldWrap">\n        <label for="Title">Title *</label>\n        <input class="form-text" type="text" name="Title" id="Title" />\n    </div>\n    <div class="fieldWrap">\n        <label for="Description">Description</label>\n        <textarea class="form-text" name="Description" id="Description" />\n    </div>\n    <div class="upload"></div>\n</form>\n';});
-
-/*global window,plupload,navigator*/
-define('ev-script/views/upload',['require','jquery','underscore','ev-script/views/base','ev-script/collections/media-workflows','ev-script/views/workflow-select','ev-script/models/video-settings','plupload','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
-
-    
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        BaseView = require('ev-script/views/base'),
-        MediaWorkflows = require('ev-script/collections/media-workflows'),
-        WorkflowSelect = require('ev-script/views/workflow-select'),
-        VideoSettings = require('ev-script/models/video-settings');
-
-    // Explicit dependency declaration
-    require('plupload');
-    require('jquery.plupload.queue');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/upload.html')),
-        events: {
-            'change select': 'handleSelect'
-        },
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render', 'loadWorkflows', 'decorateUploader', 'closeDialog', 'handleSelect');
-            this.field = options.field;
-            this.$anchor = this.$el;
-            this.setElement(this.template());
-            this.$upload = this.$('.upload');
-            this.workflows = new MediaWorkflows({}, {
-                appId: this.appId
-            });
-            this.workflows.on('reset', function() {
-                this.render();
-            }, this);
-            this.workflowSelect = new WorkflowSelect({
-                appId: this.appId,
-                el: this.$('select')[0],
-                collection: this.workflows
-            });
-            this.loadWorkflows();
-            this.appEvents.on('hidePickers', this.closeDialog);
-        },
-        loadWorkflows: function() {
-            // We need to get the current user's home library id before we fetch
-            if (this.auth.isAuthenticated() && this.auth.getUser()) {
-                this.workflows.filterValue = this.auth.getUser().get('LibraryID');
-                this.workflows.fetch({
-                    cacheKey: this.workflows.filterValue,
-                    error: _.bind(function(collection, xhr, options) {
-                        this.ajaxError(xhr, _.bind(function() {
-                            this.loadWorkflows();
-                        }, this));
-                    }, this),
-                    reset: true
-                });
-            } else {
-                this.auth.handleUnauthorized(this.el, this.loadWorkflows);
-            }
-        },
-        getWidth: function() {
-            return Math.min(600, $(window).width() - this.config.dialogMargin);
-        },
-        getHeight: function() {
-            return Math.min(400, $(window).height() - this.config.dialogMargin);
-        },
-        decorateUploader: function() {
-            var extensions = this.workflows.settings.SupportedVideo.replace(/\*\./g, '').replace(/;/g, ',').replace(/\s/g, ''),
-                selected = this.workflowSelect.getSelected(),
-                maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10); //,
-                // runtimes = 'html5,html4',
-                // iOS = (navigator.userAgent.indexOf('iPad') > -1) || (navigator.userAgent.indexOf('iPhone') > -1),
-                // MSIE = (navigator.userAgent.indexOf('MSIE') > -1),
-                // Android = (navigator.userAgent.indexOf('Android') > -1),
-                // SafariVersion5 = (navigator.userAgent.match(/Version\/5.*Safari/i) != null) && (navigator.userAgent.indexOf('Chrome') === -1) && !iOS && !Android;
-
-            // runtime selection based on browser
-            // if (iOS) {
-            //     runtimes = 'html5,html4';
-            // } else if (MSIE) {
-            //     runtimes = 'silverlight,html4';
-            // } else if (Android) {
-            //     runtimes = 'flash,html5,html4';
-            // }
-
-            if (this.$upload.pluploadQueue()) {
-                this.$upload.pluploadQueue().destroy();
-            }
-
-            this.$upload.pluploadQueue({
-                url: this.workflows.settings.SubmitUrl,
-                runtimes: 'html5,html4,flash', //runtimes,
-                max_file_size: maxUploadSize > 0 ? maxUploadSize + 'gb' : '12gb',
-                max_file_count: 1,
-                chunk_size: '2mb',
-                unique_names: false,
-                multiple_queues: false,
-                multi_selection: false,
-                drag_drop: true,
-                multipart: true,
-                flash_swf_url: this.config.pluploadFlashPath,
-                // FIXME
-                // silverlight_xap_url: 'FIXME',
-                preinit: {
-                    Init: _.bind(function(up, info) {
-                        // Remove runtime tooltip
-                        $('.plupload_container', this.$upload).removeAttr('title');
-                        // Change text since we only allow single file upload
-                        $('.plupload_add', this.$upload).text('Add file');
-                        $('.plupload_droptext', this.$upload).text('Drag file here.');
-                    }, this),
-                    UploadFile: _.bind(function(up, file) {
-                        up.settings.multipart_params = {
-                            'Title': this.$('#Title').val(),
-                            'Description': this.$('#Description').val(),
-                            'MediaWorkflowID': this.$('select').val()
-                        };
-                    }, this)
-                },
-                init: {
-                    StateChanged: _.bind(function(up) {
-                        switch (up.state) {
-                            case plupload.STARTED:
-                                if (up.state === plupload.STARTED) {
-                                    if ($('.plupload_cancel', this.$upload).length === 0) {
-                                        // Add cancel button
-                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">Cancel upload</a>')
-                                        .insertBefore($('.plupload_filelist_footer .plupload_clearer', this.$upload))
-                                        .click(_.bind(function() {
-                                            up.stop();
-                                            this.decorateUploader();
-                                        }, this));
-                                    }
-                                    if (this.$cancel) {
-                                        this.$cancel.show();
-                                    }
-                                }
-                                break;
-                            case plupload.STOPPED:
-                                if (this.$cancel) {
-                                    this.$cancel.hide();
-                                }
-                                break;
-                        }
-                    }, this),
-                    BeforeUpload: _.bind(function(up, file) {
-                        var $title = this.$('#Title'),
-                            title = $title.val();
-                        if (!title || title.trim() === '') {
-                            $title.focus();
-                            up.stop();
-                            $('.plupload_upload_status', this.$upload).hide();
-                            $('.plupload_buttons', this.$upload).show();
-                        }
-                    }, this),
-                    FilesAdded: _.bind(function(up, files) {
-                        var validExtensions = extensions.split(',');
-                        _.each(files, function(file) {
-                            var parts = file.name.split('.'),
-                                extension = parts[parts.length - 1];
-                            if (!_.contains(validExtensions, extension)) {
-                                up.removeFile(file);
-                                // TODO - error message?
-                            }
-                        });
-                        // Keep the last file in the queue
-                        if (up.files.length > 1) {
-                            up.splice(0, up.files.length - 1);
-                        }
-                    }, this),
-                    UploadComplete: _.bind(function() {
-                        this.closeDialog();
-                    }, this),
-                    FileUploaded: _.bind(function(up, file, info) {
-                        this.appEvents.trigger('fileUploaded');
-                    }, this)
-                }
-            });
-            // Hacks to deal with z-index issue in dialog
-            // see https://github.com/moxiecode/plupload/issues/468
-            this.$upload.pluploadQueue().bind('refresh', function() {
-                $('div.upload > div.plupload').css({ 'z-index': '0' });
-                $('.plupload_button').css({ 'z-index': '1' });
-            });
-            this.$upload.pluploadQueue().refresh();
-        },
-        closeDialog: function() {
-            if (this.$dialog) {
-                this.$dialog.dialog('close');
-            }
-        },
-        handleSelect: function(e) {
-            this.$dialog.dialog('open');
-            this.decorateUploader();
-        },
-        render: function() {
-            var $dialogWrap = $('<div class="dialogWrap"></div>'),
-                $dialog;
-            this.$anchor.after($dialogWrap);
-            this.$dialog = $dialogWrap.dialog({
-                title: 'Upload Video to Ensemble',
-                modal: true,
-                width: this.getWidth(),
-                height: this.getHeight(),
-                draggable: false,
-                resizable: false,
-                autoOpen: false,
-                dialogClass: 'ev-dialog',
-                create: _.bind(function(event, ui) {
-                    $dialogWrap.html(this.$el);
-                }, this),
-                close: _.bind(function(event, ui) {
-                    this.workflows.off('reset');
-                    this.$upload.pluploadQueue().destroy();
-                    $dialogWrap.dialog('destroy').remove();
-                    this.appEvents.off('hidePickers', this.closeDialog);
-                    this.$dialog = null;
-                }, this)
-            });
-        }
-    });
-
-});
-
-define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="Video thumbnail" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%- name %></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Change <%= label %>"><span>Change <%= label %><span></a>\n        <a href="#" class="action-preview" title="Preview: <%- name %>"><span>Preview: <%- name %><span></a>\n        <!-- TODO - temporarily disabled playlist settings until it is implemented -->\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-options" title="<%= label %> Embed Options"><span><%= label %> Embed Options<span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="Remove <%= label %>"><span>Remove <%= label %><span></a>\n        <% if (type === \'video\' && uploadSupported) { %>\n            <a href="#" class="action-upload" title="Upload <%= label %>"><span>Upload <%= label %><span></a>\n        <% } %>\n    </div>\n<% } else { %>\n    <div class="title"><em>Add <%= type %>.</em></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Choose <%= label %>"><span>Choose <%= label %><span></a>\n        <% if (type === \'video\' && uploadSupported) { %>\n            <a href="#" class="action-upload" title="Upload <%= label %>"><span>Upload <%= label %><span></a>\n        <% } %>\n    </div>\n<% } %>\n';});
-
-define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','ev-script/views/upload','text!ev-script/templates/field.html'],function(require) {
+define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/field.html'],function(require) {
 
     
 
@@ -2889,8 +2904,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
         VideoEncoding = require('ev-script/models/video-encoding'),
         PlaylistPickerView = require('ev-script/views/playlist-picker'),
         PlaylistSettingsView = require('ev-script/views/playlist-settings'),
-        PlaylistPreviewView = require('ev-script/views/playlist-preview'),
-        UploadView = require('ev-script/views/upload');
+        PlaylistPreviewView = require('ev-script/views/playlist-preview');
 
     /*
      * View for our field (element that we set with the selected content identifier)
@@ -2899,7 +2913,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
         template: _.template(require('text!ev-script/templates/field.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler', 'uploadHandler');
+            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler');
             this.$field = options.$field;
             this.showChoose = true;
             var pickerOptions = {
@@ -3000,8 +3014,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
             'click .action-choose': 'chooseHandler',
             'click .action-preview': 'previewHandler',
             'click .action-options': 'optionsHandler',
-            'click .action-remove': 'removeHandler',
-            'click .action-upload': 'uploadHandler'
+            'click .action-remove': 'removeHandler'
         },
         chooseHandler: function(e) {
             this.appEvents.trigger('showPicker', this.id);
@@ -3030,13 +3043,6 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                 encoding: this.encoding,
                 model: this.model,
                 appId: this.appId
-            });
-            e.preventDefault();
-        },
-        uploadHandler: function(e) {
-            var uploadView = new UploadView({
-                appId: this.appId,
-                field: this
             });
             e.preventDefault();
         },
@@ -3072,8 +3078,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                 label: label,
                 type: type,
                 name: name,
-                thumbnailUrl: thumbnailUrl,
-                uploadSupported: this.info.get('ApplicationVersion')
+                thumbnailUrl: thumbnailUrl
             }));
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {

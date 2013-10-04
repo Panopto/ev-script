@@ -16,16 +16,10 @@
             <a href="#" class="action-options" title="<%= label %> Embed Options"><span><%= label %> Embed Options<span></a>
         <% } %>
         <a href="#" class="action-remove" title="Remove <%= label %>"><span>Remove <%= label %><span></a>
-        <% if (type === 'video' && uploadSupported) { %>
-            <a href="#" class="action-upload" title="Upload <%= label %>"><span>Upload <%= label %><span></a>
-        <% } %>
     </div>
 <% } else { %>
     <div class="title"><em>Add <%= type %>.</em></div>
     <div class="ev-field-actions">
         <a href="#" class="action-choose" title="Choose <%= label %>"><span>Choose <%= label %><span></a>
-        <% if (type === 'video' && uploadSupported) { %>
-            <a href="#" class="action-upload" title="Upload <%= label %>"><span>Upload <%= label %><span></a>
-        <% } %>
     </div>
 <% } %>

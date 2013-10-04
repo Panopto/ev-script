@@ -6,7 +6,7 @@ define(function(require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         BaseView = require('ev-script/views/base'),
-        MediaWorkflows = require('ev-script/collections/media-workflows'),
+        Backbone = require('backbone'),
         WorkflowSelect = require('ev-script/views/workflow-select'),
         VideoSettings = require('ev-script/models/video-settings');
 
@@ -21,41 +21,20 @@ define(function(require) {
         },
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render', 'loadWorkflows', 'decorateUploader', 'closeDialog', 'handleSelect');
+            _.bindAll(this, 'render', 'decorateUploader', 'closeDialog', 'handleSelect');
             this.field = options.field;
             this.$anchor = this.$el;
             this.setElement(this.template());
             this.$upload = this.$('.upload');
-            this.workflows = new MediaWorkflows({}, {
-                appId: this.appId
-            });
-            this.workflows.on('reset', function() {
-                this.render();
-            }, this);
+            this.workflows = options.workflows;
             this.workflowSelect = new WorkflowSelect({
                 appId: this.appId,
                 el: this.$('select')[0],
                 collection: this.workflows
             });
-            this.loadWorkflows();
+            this.render();
+            this.decorateUploader();
             this.appEvents.on('hidePickers', this.closeDialog);
-        },
-        loadWorkflows: function() {
-            // We need to get the current user's home library id before we fetch
-            if (this.auth.isAuthenticated() && this.auth.getUser()) {
-                this.workflows.filterValue = this.auth.getUser().get('LibraryID');
-                this.workflows.fetch({
-                    cacheKey: this.workflows.filterValue,
-                    error: _.bind(function(collection, xhr, options) {
-                        this.ajaxError(xhr, _.bind(function() {
-                            this.loadWorkflows();
-                        }, this));
-                    }, this),
-                    reset: true
-                });
-            } else {
-                this.auth.handleUnauthorized(this.el, this.loadWorkflows);
-            }
         },
         getWidth: function() {
             return Math.min(600, $(window).width() - this.config.dialogMargin);
@@ -189,7 +168,6 @@ define(function(require) {
             }
         },
         handleSelect: function(e) {
-            this.$dialog.dialog('open');
             this.decorateUploader();
         },
         render: function() {
@@ -203,13 +181,11 @@ define(function(require) {
                 height: this.getHeight(),
                 draggable: false,
                 resizable: false,
-                autoOpen: false,
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {
                     $dialogWrap.html(this.$el);
                 }, this),
                 close: _.bind(function(event, ui) {
-                    this.workflows.off('reset');
                     this.$upload.pluploadQueue().destroy();
                     $dialogWrap.dialog('destroy').remove();
                     this.appEvents.off('hidePickers', this.closeDialog);
