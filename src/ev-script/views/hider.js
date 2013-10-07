@@ -24,8 +24,13 @@ define(function(require) {
             }
         },
         render: function() {
+            var username = '';
+            if (this.info.get('ApplicationVersion') && this.auth.isAuthenticated()) {
+                username = this.auth.getUser().get('UserName');
+            }
             this.$el.html(this.template({
-                isAuthenticated: this.auth.isAuthenticated()
+                isAuthenticated: this.auth.isAuthenticated(),
+                username: username
             }));
         },
         hideHandler: function(e) {

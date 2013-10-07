@@ -1,5 +1,5 @@
 /**
- * ev-script 0.3.0 2013-10-03
+ * ev-script 0.3.0 2013-10-07
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -985,7 +985,7 @@ define('text',['module'], function (module) {
     return text;
 });
 
-define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="Hide Picker">Hide</a>\n<% if (isAuthenticated) { %>\n    <a class="action-logout" href="#" title="Logout">Logout</a>\n<% } %>\n';});
+define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="Hide Picker">Hide</a>\n<% if (isAuthenticated) { %>\n    <a class="action-logout" href="#" title="Logout <%= username %>">Logout</a>\n<% } %>\n';});
 
 define('ev-script/views/hider',['require','underscore','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
 
@@ -1013,8 +1013,13 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
             }
         },
         render: function() {
+            var username = '';
+            if (this.info.get('ApplicationVersion') && this.auth.isAuthenticated()) {
+                username = this.auth.getUser().get('UserName');
+            }
             this.$el.html(this.template({
-                isAuthenticated: this.auth.isAuthenticated()
+                isAuthenticated: this.auth.isAuthenticated(),
+                username: username
             }));
         },
         hideHandler: function(e) {
