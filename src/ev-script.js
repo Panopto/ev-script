@@ -34,8 +34,6 @@ define(function(require) {
             ensembleUrl: '',
             // Cookie path.
             authPath: '',
-            // Cookie domain.
-            authDomain: '',
             // Models/collections will typically fetch directly from the API,
             // but this method is called in case that needs to be overridden
             // (e.g. in cross-domain scenarios where we're using a proxy).

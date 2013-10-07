@@ -3310,7 +3310,6 @@ define('ev-script/auth/basic/auth',['require','jquery','underscore','backbone','
                 }
             },
             login: function(loginInfo) {
-                loginInfo.username += (this.config.authDomain ? '@' + this.config.authDomain : '');
                 var cookieOptions = { path: this.config.authPath };
                 $.cookie(this.config.ensembleUrl + '-user', loginInfo.username, _.extend({}, cookieOptions));
                 $.cookie(this.config.ensembleUrl + '-pass', loginInfo.password, _.extend({}, cookieOptions));
@@ -3547,8 +3546,6 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
             ensembleUrl: '',
             // Cookie path.
             authPath: '',
-            // Cookie domain.
-            authDomain: '',
             // Models/collections will typically fetch directly from the API,
             // but this method is called in case that needs to be overridden
             // (e.g. in cross-domain scenarios where we're using a proxy).

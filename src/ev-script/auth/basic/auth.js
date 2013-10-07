@@ -45,7 +45,6 @@ define(function(require) {
                 }
             },
             login: function(loginInfo) {
-                loginInfo.username += (this.config.authDomain ? '@' + this.config.authDomain : '');
                 var cookieOptions = { path: this.config.authPath };
                 $.cookie(this.config.ensembleUrl + '-user', loginInfo.username, _.extend({}, cookieOptions));
                 $.cookie(this.config.ensembleUrl + '-pass', loginInfo.password, _.extend({}, cookieOptions));

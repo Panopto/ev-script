@@ -117,19 +117,6 @@ define(function(require) {
         }, this));
     });
 
-    q.asyncTest('domain test', 1, function() {
-        this.auth.config.authDomain = 'ensemblevideo.com';
-        this.auth.login({
-            username: 'foo',
-            password: 'bar'
-        })
-        // We don't expect success...just that the local auth cookie is set correctly
-        .always(_.bind(function() {
-            q.strictEqual('foo@' + this.auth.config.authDomain, $.cookie(this.config.ensembleUrl + '-user'));
-            q.start();
-        }, this));
-    });
-
     q.asyncTest('valid path test', 1, function() {
         this.auth.config.authPath = this.config.proxyPath;
         this.auth.login({
