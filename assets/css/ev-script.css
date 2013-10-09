@@ -379,15 +379,15 @@ table {
 
 /* line 77, ../sass/ev-script.scss */
 div.ev-hider {
+  position: relative;
   border-bottom: 1px solid #999999;
   text-align: center;
   width: 100%;
 }
-/* line 81, ../sass/ev-script.scss */
+/* line 82, ../sass/ev-script.scss */
 div.ev-hider .action-logout {
-  float: right;
-  margin-left: -9.2em;
-  margin-right: 3em;
+  position: absolute;
+  right: 3em;
   width: 4em;
 }
 /* line 87, ../sass/ev-script.scss */

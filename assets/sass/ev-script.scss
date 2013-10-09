@@ -75,13 +75,13 @@ $default-box-shadow-color: #333333;
 }
 
 div.ev-hider {
+  position: relative;
   border-bottom: 1px solid $border-color;
   text-align: center;
   width: 100%;
   .action-logout {
-    float: right;
-    margin-left: -9.2em;
-    margin-right: 3em;
+    position: absolute;
+    right: 3em;
     width: 4em;
   }
   a {
