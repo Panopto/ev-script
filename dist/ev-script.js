@@ -1265,13 +1265,14 @@ define('ev-script/collections/base',['require','jquery','underscore','backbone',
                     // We've successfully queried the API for something that
                     // requires authentication but we're in an unauthenticated
                     // state.  Double-check our authentication and proceed.
+                    var args = Array.prototype.slice.call(arguments, 1);
                     if (this.requiresAuth && !this.auth.isAuthenticated()) {
                         this.auth.fetchUser()
                         .always(function() {
-                            success.apply(this, Array.prototype.slice.call(arguments, 1));
+                            success.apply(this, args);
                         });
                     } else {
-                        success.apply(this, Array.prototype.slice.call(arguments, 1));
+                        success.apply(this, args);
                     }
                 }, this));
                 // TODO - maybe wrap error to handle 401?
@@ -1819,13 +1820,14 @@ define('ev-script/models/base',['require','jquery','underscore','backbone','ev-s
                     // We've successfully queried the API for something that
                     // requires authentication but we're in an unauthenticated
                     // state.  Double-check our authentication and proceed.
+                    var args = Array.prototype.slice.call(arguments, 1);
                     if (this.requiresAuth && !this.auth.isAuthenticated()) {
                         this.auth.fetchUser()
                         .always(function() {
-                            success.apply(this, Array.prototype.slice.call(arguments, 1));
+                            success.apply(this, args);
                         });
                     } else {
-                        success.apply(this, Array.prototype.slice.call(arguments, 1));
+                        success.apply(this, args);
                     }
                 }, this));
                 // TODO - maybe wrap error to handle 401?
