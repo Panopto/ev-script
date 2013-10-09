@@ -17,10 +17,9 @@ define(function(require) {
         getCached: function(key) {},
         setCached: function(key, resp) {},
         url: function() {
-            // Note we're not doing a JSONP request but we're using the JSONP
-            // response because it's the closest to valid JSON the API will
-            // provide.  We'll strip the padding below with our dataFilter.
-            var url = this.config.ensembleUrl + '/app/simpleapi/video/show.jsonp/' + this.get('fetchId');
+            // Note the response is actually JSONP.  We'll strip the padding
+            // below with our dataFilter.
+            var url = this.config.ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
         },
         getDims: function() {
@@ -42,13 +41,13 @@ define(function(require) {
             return this.getDims()[1];
         },
         parse: function(response) {
-            if (_.isArray(response.videos.videoEncodings)) {
+            if (_.isArray(response.dataSet.encodings)) {
                 // This is a collection, so return the highest bitrate encoding
-                return _.max(response.videos.videoEncodings, function(encoding, index, encodings) {
-                    return parseInt(encoding.bitrate, 10);
+                return _.max(response.dataSet.encodings, function(encoding, index, encodings) {
+                    return parseInt(encoding.bitRate, 10);
                 });
             } else {
-                return response.videos.videoEncodings;
+                return response.dataSet.encodings;
             }
         },
         sync: function(method, model, options) {
