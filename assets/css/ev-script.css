@@ -331,13 +331,13 @@ table {
 .ev-video-picker div.ev-filter-block label {
   color: #606060;
 }
-@media screen and (max-width: 1100px) {
+@media screen and (max-width: 1300px) {
   /* line 45, ../sass/ev-script.scss */
   .ev-video-picker div.ev-filter-block label {
     display: none;
   }
 }
-@media screen and (max-width: 850px) {
+@media screen and (max-width: 1050px) {
   /* line 51, ../sass/ev-script.scss */
   .ev-video-picker div.ev-filter-block div.ev-poweredby {
     display: none;
@@ -494,48 +494,69 @@ div.ev-field-actions .action-remove {
 }
 /* line 170, ../sass/ev-script.scss */
 div.ev-field-actions .action-upload {
+  cursor: pointer;
+}
+/* line 172, ../sass/ev-script.scss */
+div.ev-field-actions .action-upload .upload-icon {
   background-image: url("images/upload.png");
+  background-size: 18px auto;
+  display: inline-block;
+  height: 18px;
+  margin-right: 0.6em;
+  vertical-align: middle;
+  width: 18px;
+}
+/* line 181, ../sass/ev-script.scss */
+div.ev-field-actions .action-upload .upload-link {
+  background: none;
+  height: auto;
+  width: auto;
+  margin: 0;
+}
+/* line 186, ../sass/ev-script.scss */
+div.ev-field-actions .action-upload .upload-link span {
+  display: inline;
 }
 
-/* line 175, ../sass/ev-script.scss */
+/* line 193, ../sass/ev-script.scss */
 div.ev-filter-block {
   background-color: #fbfbfb;
   position: relative;
   z-index: 10;
   padding: 10px 5px 0 5px;
 }
-/* line 182, ../sass/ev-script.scss */
+/* line 200, ../sass/ev-script.scss */
 div.ev-filter-block div.ev-search,
 div.ev-filter-block div.ev-type-select,
 div.ev-filter-block div.ev-unit-selects {
   display: inline-block;
 }
-/* line 184, ../sass/ev-script.scss */
+/* line 202, ../sass/ev-script.scss */
 div.ev-filter-block div.ev-search input[type="submit"],
 div.ev-filter-block div.ev-type-select input[type="submit"],
 div.ev-filter-block div.ev-unit-selects input[type="submit"] {
   display: none;
 }
-/* line 188, ../sass/ev-script.scss */
+/* line 206, ../sass/ev-script.scss */
 div.ev-filter-block div.ev-poweredby {
   float: right;
 }
-/* line 190, ../sass/ev-script.scss */
+/* line 208, ../sass/ev-script.scss */
 div.ev-filter-block div.ev-poweredby a {
   background: url("images/poweredby.png") no-repeat scroll center center transparent;
   float: right;
   height: 38px;
   width: 120px;
 }
-/* line 195, ../sass/ev-script.scss */
+/* line 213, ../sass/ev-script.scss */
 div.ev-filter-block div.ev-poweredby a span {
   display: none;
 }
-/* line 200, ../sass/ev-script.scss */
+/* line 218, ../sass/ev-script.scss */
 div.ev-filter-block div.loader {
   display: inline-block;
 }
-/* line 203, ../sass/ev-script.scss */
+/* line 221, ../sass/ev-script.scss */
 div.ev-filter-block div.loading {
   background: url("images/loading.gif") no-repeat scroll center center transparent;
   display: inline-block;
@@ -545,7 +566,7 @@ div.ev-filter-block div.loading {
   width: 16px;
 }
 
-/* line 214, ../sass/ev-script.scss */
+/* line 232, ../sass/ev-script.scss */
 div.ev-auth div.logo {
   background-image: url("images/logo.png");
   background-repeat: no-repeat;
@@ -557,26 +578,26 @@ div.ev-auth div.logo {
   vertical-align: top;
   width: 65px;
 }
-/* line 225, ../sass/ev-script.scss */
+/* line 243, ../sass/ev-script.scss */
 div.ev-auth form {
   display: inline-block;
   padding-top: 1em;
   width: 80%;
 }
-/* line 229, ../sass/ev-script.scss */
+/* line 247, ../sass/ev-script.scss */
 div.ev-auth form fieldset {
   border: none;
   padding: 0;
 }
-/* line 233, ../sass/ev-script.scss */
+/* line 251, ../sass/ev-script.scss */
 div.ev-auth form div.fieldWrap {
   margin-bottom: 0.6em;
 }
-/* line 237, ../sass/ev-script.scss */
+/* line 255, ../sass/ev-script.scss */
 div.ev-auth form div.form-actions input {
   margin: 0;
 }
-/* line 241, ../sass/ev-script.scss */
+/* line 259, ../sass/ev-script.scss */
 div.ev-auth form label {
   color: #606060;
   display: inline-block;
@@ -584,49 +605,49 @@ div.ev-auth form label {
   width: 30%;
 }
 
-/* line 251, ../sass/ev-script.scss */
+/* line 269, ../sass/ev-script.scss */
 div.ev-settings fieldset {
   border: none;
   padding: 0;
 }
-/* line 255, ../sass/ev-script.scss */
+/* line 273, ../sass/ev-script.scss */
 div.ev-settings div.fieldWrap {
   margin-bottom: 1em;
 }
-/* line 258, ../sass/ev-script.scss */
+/* line 276, ../sass/ev-script.scss */
 div.ev-settings label {
   color: #606060;
   display: inline-block;
   width: 40%;
 }
-/* line 263, ../sass/ev-script.scss */
+/* line 281, ../sass/ev-script.scss */
 div.ev-settings div.form-actions {
   clear: both;
   float: left;
 }
 
-/* line 269, ../sass/ev-script.scss */
+/* line 287, ../sass/ev-script.scss */
 div.ev-results {
   background-color: #fbfbfb;
   border-bottom: 1px solid #cccccc;
   padding: 10px 5px;
 }
-/* line 273, ../sass/ev-script.scss */
+/* line 291, ../sass/ev-script.scss */
 div.ev-results .total {
   margin: 1em 0;
 }
-/* line 276, ../sass/ev-script.scss */
+/* line 294, ../sass/ev-script.scss */
 div.ev-results table thead {
   display: none;
 }
-/* line 279, ../sass/ev-script.scss */
+/* line 297, ../sass/ev-script.scss */
 div.ev-results td.content-actions {
   margin: 10px;
   padding-right: 2em;
   text-align: right;
   width: 25%;
 }
-/* line 284, ../sass/ev-script.scss */
+/* line 302, ../sass/ev-script.scss */
 div.ev-results td.content-actions img {
   -webkit-box-shadow: 0 0 10px 1px;
   -moz-box-shadow: 0 0 10px 1px;
@@ -637,7 +658,7 @@ div.ev-results td.content-actions img {
   max-width: 150px;
   width: 80%;
 }
-/* line 292, ../sass/ev-script.scss */
+/* line 310, ../sass/ev-script.scss */
 div.ev-results td.content-actions div.action-links {
   clear: right;
   float: right;
@@ -647,7 +668,7 @@ div.ev-results td.content-actions div.action-links {
   text-align: center;
   width: 80%;
 }
-/* line 300, ../sass/ev-script.scss */
+/* line 318, ../sass/ev-script.scss */
 div.ev-results td.content-actions div.action-links a {
   background-repeat: no-repeat;
   background-size: 18px auto;
@@ -656,63 +677,63 @@ div.ev-results td.content-actions div.action-links a {
   margin: 0 0.3em;
   width: 18px;
 }
-/* line 307, ../sass/ev-script.scss */
+/* line 325, ../sass/ev-script.scss */
 div.ev-results td.content-actions div.action-links a span {
   display: none;
 }
-/* line 311, ../sass/ev-script.scss */
+/* line 329, ../sass/ev-script.scss */
 div.ev-results td.content-actions div.action-links a.action-add {
   background-image: url("images/add.png");
 }
-/* line 314, ../sass/ev-script.scss */
+/* line 332, ../sass/ev-script.scss */
 div.ev-results td.content-actions div.action-links a.action-preview {
   background-image: url("images/preview.png");
 }
-/* line 319, ../sass/ev-script.scss */
+/* line 337, ../sass/ev-script.scss */
 div.ev-results .content-meta {
   width: 75%;
 }
-/* line 322, ../sass/ev-script.scss */
+/* line 340, ../sass/ev-script.scss */
 div.ev-results table {
   font-size: 1em;
 }
-/* line 325, ../sass/ev-script.scss */
+/* line 343, ../sass/ev-script.scss */
 div.ev-results .content-list {
   border: 1px solid #bebfb9;
   margin: 0 0 10px;
   width: 100%;
 }
-/* line 329, ../sass/ev-script.scss */
+/* line 347, ../sass/ev-script.scss */
 div.ev-results .content-list .even {
   background-color: #f3f4ee;
 }
-/* line 332, ../sass/ev-script.scss */
+/* line 350, ../sass/ev-script.scss */
 div.ev-results .content-list tr td {
   border: none;
   padding-bottom: 1em;
   color: #000000;
   padding: 1em 2%;
 }
-/* line 338, ../sass/ev-script.scss */
+/* line 356, ../sass/ev-script.scss */
 div.ev-results .content-list .content-item {
   border: none;
   width: 100%;
 }
-/* line 341, ../sass/ev-script.scss */
+/* line 359, ../sass/ev-script.scss */
 div.ev-results .content-list .content-item td {
   border: none;
   padding: 3px 0;
 }
-/* line 345, ../sass/ev-script.scss */
+/* line 363, ../sass/ev-script.scss */
 div.ev-results .content-list .content-item tr.title td {
   border-bottom: 1px solid #999999;
   font-weight: bold;
 }
-/* line 349, ../sass/ev-script.scss */
+/* line 367, ../sass/ev-script.scss */
 div.ev-results .content-list .content-item .desc a {
   margin-left: 5px;
 }
-/* line 352, ../sass/ev-script.scss */
+/* line 370, ../sass/ev-script.scss */
 div.ev-results .content-list .content-item .label {
   color: #606060;
   font-weight: bold;
@@ -720,25 +741,25 @@ div.ev-results .content-list .content-item .label {
   min-width: 100px;
 }
 @media screen and (max-width: 600px) {
-  /* line 352, ../sass/ev-script.scss */
+  /* line 370, ../sass/ev-script.scss */
   div.ev-results .content-list .content-item .label {
     display: none;
   }
 }
 
-/* line 365, ../sass/ev-script.scss */
+/* line 383, ../sass/ev-script.scss */
 div.ev-video-picker div.ev-results .content-list tr td {
   vertical-align: top;
 }
 
-/* line 369, ../sass/ev-script.scss */
+/* line 387, ../sass/ev-script.scss */
 div.scrollWrap .loader {
   background: url("images/loader.gif") no-repeat scroll center center transparent;
   height: 60px;
   width: 100%;
 }
 
-/* line 375, ../sass/ev-script.scss */
+/* line 393, ../sass/ev-script.scss */
 div.ev-dialog {
   -webkit-border-radius: 6px;
   -moz-border-radius: 6px;
@@ -747,7 +768,7 @@ div.ev-dialog {
   border-radius: 6px;
   font-size: 1em;
 }
-/* line 378, ../sass/ev-script.scss */
+/* line 396, ../sass/ev-script.scss */
 div.ev-dialog div.ui-dialog-titlebar {
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #f9d700), color-stop(100%, #ffffff));
   background: -webkit-linear-gradient(#f9d700, #ffffff);
@@ -762,45 +783,45 @@ div.ev-dialog div.ui-dialog-titlebar {
   border-top-right-radius: 6px;
   border-width: 0;
 }
-/* line 384, ../sass/ev-script.scss */
+/* line 402, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form .form-select {
   width: 100%;
   margin-bottom: 1em;
 }
-/* line 388, ../sass/ev-script.scss */
+/* line 406, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form .form-text {
   width: 72%;
 }
-/* line 391, ../sass/ev-script.scss */
+/* line 409, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form div.fieldWrap {
   margin-bottom: 1em;
 }
-/* line 394, ../sass/ev-script.scss */
+/* line 412, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form label {
   color: #606060;
   display: inline-block;
   width: 25%;
 }
-/* line 399, ../sass/ev-script.scss */
+/* line 417, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form .plupload_header {
   display: none;
 }
-/* line 402, ../sass/ev-script.scss */
+/* line 420, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form .plupload_cancel {
   margin-right: 3em;
   display: block;
   float: right;
 }
-/* line 407, ../sass/ev-script.scss */
+/* line 425, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form div.plupload_container {
   padding: 0;
 }
-/* line 410, ../sass/ev-script.scss */
+/* line 428, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form ul.plupload_filelist {
   overflow-y: auto;
   height: auto;
 }
-/* line 414, ../sass/ev-script.scss */
+/* line 432, ../sass/ev-script.scss */
 div.ev-dialog form.upload-form li.plupload_droptext {
   line-height: normal;
 }

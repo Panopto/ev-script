@@ -63,7 +63,7 @@ $default-box-shadow-color: #333333;
     }
   }
   div.ev-filter-block {
-    @include filter-form(1100px);
+    @include filter-form(1300px);
   }
 }
 
@@ -168,7 +168,25 @@ div.ev-field-actions {
     background-image: url($remove-image);
   }
   .action-upload {
-    background-image: url($upload-image);
+    cursor: pointer;
+    .upload-icon {
+      background-image: url($upload-image);
+      background-size: 18px auto;
+      display: inline-block;
+      height: 18px;
+      margin-right: 0.6em;
+      vertical-align: middle;
+      width: 18px;
+    }
+    .upload-link {
+      background: none;
+      height: auto;
+      width: auto;
+      margin: 0;
+      span {
+        display: inline;
+      }
+    }
   }
 }
 

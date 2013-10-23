@@ -1,5 +1,5 @@
 /**
- * ev-script 0.3.0 2013-10-09
+ * ev-script 0.3.0 2013-10-23
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -2382,7 +2382,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
                 this.loadVideos();
             }, this);
             if (this.info.get('ApplicationVersion')) {
-                this.$upload = $('<div class="ev-field-actions"><a href="#" class="action-upload" title="Upload Video"><span>Upload Video<span></a></div>').css('display', 'none');
+                this.$upload = $('<div class="ev-field-actions"><div class="action-upload"><div class="upload-icon"></div><a href="#" class="upload-link" title="Upload"><span>Upload<span></a></div></div>').css('display', 'none');
                 this.$('div.ev-filter-block').prepend(this.$upload);
             }
             this.searchView = new SearchView({
