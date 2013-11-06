@@ -6,6 +6,7 @@
 $border-color: #999999;
 $ev-yellow: #f9d700;
 $link-color: #0074bd;
+$label-color: #606060;
 
 // Images
 $logo-image: 'images/logo.png';
@@ -43,7 +44,7 @@ $default-box-shadow-color: #333333;
     margin-right: 0.4em;
   }
   label {
-    color: #606060;
+    color: $label-color;
     @media screen and (max-width: $max-width) {
       display: none;
     }
@@ -88,12 +89,12 @@ div.ev-hider {
     background: #ffffff;
     background-color: #fbfbfb;
     border-left: 1px solid $border-color;
-    @include border-top-radius(6px);
+    @include border-top-radius(4px);
     border-right: 1px solid $border-color;
     border-top: 1px solid $border-color;
     bottom: -1px;
     display: inline-block;
-    padding: 0 1em;
+    padding: 0.2em 1em 0;
     position: relative;
     text-decoration: none;
   }
@@ -114,7 +115,7 @@ div.ev-field {
     }
   }
   div.title {
-    color: #606060;
+    color: $label-color;
     display: inline-block;
     font-weight: bold;
     margin-right: 20px;
@@ -257,7 +258,7 @@ div.ev-auth {
       }
     }
     label {
-      color: #606060;
+      color: $label-color;
       display: inline-block;
       margin-right: 1em;
       width: 30%;
@@ -274,7 +275,7 @@ div.ev-settings {
     margin-bottom: 1em;
   }
   label {
-    color: #606060;
+    color: $label-color;
     display: inline-block;
     width: 40%;
   }
@@ -368,7 +369,7 @@ div.ev-results {
         margin-left: 5px;
       }
       .label {
-        color: #606060;
+        color: $label-color;
         font-weight: bold;
         width: 20%;
         min-width: 100px;
@@ -391,11 +392,11 @@ div.scrollWrap .loader {
 }
 
 div.ev-dialog {
-  @include border-radius(6px);
+  @include border-radius(4px);
   font-size: 1em;
   div.ui-dialog-titlebar {
     @include background(linear-gradient($ev-yellow, #ffffff));
-    @include border-top-radius(6px);
+    @include border-top-radius(4px);
     border-width: 0;
   }
   form.upload-form {
@@ -410,7 +411,7 @@ div.ev-dialog {
       margin-bottom: 1em;
     }
     label {
-      color: #606060;
+      color: $label-color;
       display: inline-block;
       width: 25%;
     }
@@ -431,6 +432,11 @@ div.ev-dialog {
     }
     li.plupload_droptext {
       line-height: normal;
+    }
+    div.info {
+      margin-top: 1em;
+      color: $label-color;
+      font-size: 0.9em;
     }
   }
 }

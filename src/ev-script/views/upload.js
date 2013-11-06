@@ -175,7 +175,7 @@ define(function(require) {
                 $dialog;
             this.$anchor.after($dialogWrap);
             this.$dialog = $dialogWrap.dialog({
-                title: 'Upload Video to Ensemble',
+                title: 'Upload Media to Ensemble',
                 modal: true,
                 width: this.getWidth(),
                 height: this.getHeight(),

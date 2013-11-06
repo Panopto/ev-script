@@ -158,7 +158,7 @@ define(function(require) {
         renderActions: function() {
             var ensembleUrl = this.config.ensembleUrl, name, label, type, thumbnailUrl;
             if (this.model instanceof VideoSettings) {
-                label = 'Video';
+                label = 'Media';
                 type = 'video';
             } else {
                 label = 'Playlist';

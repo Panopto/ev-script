@@ -1,5 +1,5 @@
 /**
- * ev-script 0.3.0 2013-10-23
+ * ev-script 0.3.0 2013-11-05
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -1113,7 +1113,7 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
 
 });
 
-define('text!ev-script/templates/search.html',[],function () { return '<form>\n    <label for="<%= id %>">Search:</label>\n    <input id="<%= id %>" type="text" class="form-text search" value="<%- searchVal %>" title="Search Videos" />\n    <input type="submit" value="Go" class="form-submit" />\n</form>\n';});
+define('text!ev-script/templates/search.html',[],function () { return '<form>\n    <label for="<%= id %>">Search:</label>\n    <input id="<%= id %>" type="text" class="form-text search" value="<%- searchVal %>" title="Search Media" />\n    <input type="submit" value="Go" class="form-submit" />\n</form>\n';});
 
 define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
 
@@ -2158,7 +2158,7 @@ define('ev-script/views/workflow-select',['require','underscore','ev-script/view
 
 });
 
-define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <select class="form-select" name="MediaWorkflowID"></select>\n    <div class="fieldWrap">\n        <label for="Title">Title *</label>\n        <input class="form-text" type="text" name="Title" id="Title" />\n    </div>\n    <div class="fieldWrap">\n        <label for="Description">Description</label>\n        <textarea class="form-text" name="Description" id="Description" />\n    </div>\n    <div class="upload"></div>\n</form>\n';});
+define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <select class="form-select" name="MediaWorkflowID"></select>\n    <div class="fieldWrap">\n        <label for="Title">Title *</label>\n        <input class="form-text" type="text" name="Title" id="Title" />\n    </div>\n    <div class="fieldWrap">\n        <label for="Description">Description</label>\n        <textarea class="form-text" name="Description" id="Description" />\n    </div>\n    <div class="upload"></div>\n    <div class="info">\n        Note: In order for uploaded media to be immediately available for\n        embedding, the current library must have autopublishing configured for\n        the selected workflow.\n    </div>\n</form>\n';});
 
 /*global window,plupload,navigator*/
 define('ev-script/views/upload',['require','jquery','underscore','ev-script/views/base','backbone','ev-script/views/workflow-select','ev-script/models/video-settings','plupload','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
@@ -2337,7 +2337,7 @@ define('ev-script/views/upload',['require','jquery','underscore','ev-script/view
                 $dialog;
             this.$anchor.after($dialogWrap);
             this.$dialog = $dialogWrap.dialog({
-                title: 'Upload Video to Ensemble',
+                title: 'Upload Media to Ensemble',
                 modal: true,
                 width: this.getWidth(),
                 height: this.getHeight(),
@@ -2893,7 +2893,7 @@ define('ev-script/views/playlist-settings',['require','underscore','ev-script/vi
 
 });
 
-define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="Video thumbnail" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%- name %></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Change <%= label %>"><span>Change <%= label %><span></a>\n        <a href="#" class="action-preview" title="Preview: <%- name %>"><span>Preview: <%- name %><span></a>\n        <!-- TODO - temporarily disabled playlist settings until it is implemented -->\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-options" title="<%= label %> Embed Options"><span><%= label %> Embed Options<span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="Remove <%= label %>"><span>Remove <%= label %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em>Add <%= type %>.</em></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Choose <%= label %>"><span>Choose <%= label %><span></a>\n    </div>\n<% } %>\n';});
+define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="Media thumbnail" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%- name %></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Change <%= label %>"><span>Change <%= label %><span></a>\n        <a href="#" class="action-preview" title="Preview: <%- name %>"><span>Preview: <%- name %><span></a>\n        <!-- TODO - temporarily disabled playlist settings until it is implemented -->\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-options" title="<%= label %> Embed Options"><span><%= label %> Embed Options<span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="Remove <%= label %>"><span>Remove <%= label %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em>Add <%= label %></em></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Choose <%= label %>"><span>Choose <%= label %><span></a>\n    </div>\n<% } %>\n';});
 
 define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/field.html'],function(require) {
 
@@ -3055,7 +3055,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
         renderActions: function() {
             var ensembleUrl = this.config.ensembleUrl, name, label, type, thumbnailUrl;
             if (this.model instanceof VideoSettings) {
-                label = 'Video';
+                label = 'Media';
                 type = 'video';
             } else {
                 label = 'Playlist';

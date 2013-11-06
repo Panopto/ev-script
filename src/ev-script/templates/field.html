@@ -4,7 +4,7 @@
 <% if (modelId) { %>
     <% if (thumbnailUrl) { %>
         <div class="thumbnail">
-            <img alt="Video thumbnail" src="<%= thumbnailUrl %>"/>
+            <img alt="Media thumbnail" src="<%= thumbnailUrl %>"/>
         </div>
     <% } %>
     <div class="title"><%- name %></div>
@@ -18,7 +18,7 @@
         <a href="#" class="action-remove" title="Remove <%= label %>"><span>Remove <%= label %><span></a>
     </div>
 <% } else { %>
-    <div class="title"><em>Add <%= type %>.</em></div>
+    <div class="title"><em>Add <%= label %></em></div>
     <div class="ev-field-actions">
         <a href="#" class="action-choose" title="Choose <%= label %>"><span>Choose <%= label %><span></a>
     </div>
