@@ -22,7 +22,12 @@ define(function(require) {
                     url: this.config.urlCallback ? this.config.urlCallback(url) : url,
                     type: 'POST',
                     dataType: 'json',
-                    data: loginInfo,
+                    data: {
+                        user: loginInfo.username,
+                        password: loginInfo.password,
+                        identityProviderId: loginInfo.authSourceId,
+                        persist: loginInfo.persist
+                    },
                     xhrFields: {
                         withCredentials: true
                     },

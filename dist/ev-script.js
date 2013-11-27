@@ -1,5 +1,5 @@
 /**
- * ev-script 0.3.0 2013-11-05
+ * ev-script 0.3.0 2013-11-26
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -3465,7 +3465,12 @@ define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/a
                     url: this.config.urlCallback ? this.config.urlCallback(url) : url,
                     type: 'POST',
                     dataType: 'json',
-                    data: loginInfo,
+                    data: {
+                        user: loginInfo.username,
+                        password: loginInfo.password,
+                        identityProviderId: loginInfo.authSourceId,
+                        persist: loginInfo.persist
+                    },
                     xhrFields: {
                         withCredentials: true
                     },
