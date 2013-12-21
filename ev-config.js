@@ -4,7 +4,7 @@
     'use strict';
 
     // var ensembleUrl = 'https://cloud.ensemblevideo.com',
-    var ensembleUrl = 'https://74.106.19.229:8081',
+    var ensembleUrl = 'https://jmpease-pc:8081',
         proxyPath = '/ensemble';
 
     var evSettings = {

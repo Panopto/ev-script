@@ -7,14 +7,14 @@ define(function(require) {
         BaseAuth = require('ev-script/auth/base/auth'),
         CurrentUser = require('ev-script/models/current-user'),
         AuthView = require('ev-script/auth/forms/view'),
-        AuthSources = require('ev-script/collections/authsources'),
+        IdentityProviders = require('ev-script/collections/identity-providers'),
         FormsAuth = BaseAuth.extend({
             constructor: function(appId) {
                 BaseAuth.prototype.constructor.call(this, appId);
-                this.authSources = new AuthSources({}, {
+                this.identityProviders = new IdentityProviders({}, {
                     appId: appId
                 });
-                this.asPromise = this.authSources.fetch();
+                this.asPromise = this.identityProviders.fetch();
             },
             login: function(loginInfo) {
                 var url = this.config.ensembleUrl + '/api/Login';
@@ -62,7 +62,7 @@ define(function(require) {
                         submitCallback: authCallback,
                         appId: this.appId,
                         auth: this,
-                        collection: this.authSources
+                        collection: this.identityProviders
                     });
                     authView.render();
                 }, this));

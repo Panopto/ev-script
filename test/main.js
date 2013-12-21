@@ -58,7 +58,7 @@
         'test/tests/collections/media-workflows',
         'test/tests/collections/playlists',
         'test/tests/collections/videos',
-        'test/tests/collections/authsources',
+        'test/tests/collections/identity-providers',
         'test/tests/models/playlist-settings',
         'test/tests/models/video-settings',
         'test/tests/models/video-encoding',

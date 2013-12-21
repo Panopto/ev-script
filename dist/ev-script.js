@@ -1,5 +1,5 @@
 /**
- * ev-script 0.3.0 2013-11-26
+ * ev-script 0.3.0 2013-12-20
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2013 Symphony Video, Inc.
@@ -3414,7 +3414,7 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
 
 });
 
-define('ev-script/collections/authsources',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
+define('ev-script/collections/identity-providers',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
 
     
 
@@ -3434,14 +3434,14 @@ define('ev-script/collections/authsources',['require','ev-script/collections/bas
             return cached.set(this.config.ensembleUrl, resp);
         },
         url: function() {
-            var api_url = this.config.ensembleUrl + '/api/AuthSources';
+            var api_url = this.config.ensembleUrl + '/api/IdentityProviders';
             return this.config.urlCallback ? this.config.urlCallback(api_url) : api_url;
         }
     });
 
 });
 
-define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/models/current-user','ev-script/auth/forms/view','ev-script/collections/authsources'],function(require) {
+define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/models/current-user','ev-script/auth/forms/view','ev-script/collections/identity-providers'],function(require) {
 
     
 
@@ -3450,14 +3450,14 @@ define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/a
         BaseAuth = require('ev-script/auth/base/auth'),
         CurrentUser = require('ev-script/models/current-user'),
         AuthView = require('ev-script/auth/forms/view'),
-        AuthSources = require('ev-script/collections/authsources'),
+        IdentityProviders = require('ev-script/collections/identity-providers'),
         FormsAuth = BaseAuth.extend({
             constructor: function(appId) {
                 BaseAuth.prototype.constructor.call(this, appId);
-                this.authSources = new AuthSources({}, {
+                this.identityProviders = new IdentityProviders({}, {
                     appId: appId
                 });
-                this.asPromise = this.authSources.fetch();
+                this.asPromise = this.identityProviders.fetch();
             },
             login: function(loginInfo) {
                 var url = this.config.ensembleUrl + '/api/Login';
@@ -3505,7 +3505,7 @@ define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/a
                         submitCallback: authCallback,
                         appId: this.appId,
                         auth: this,
-                        collection: this.authSources
+                        collection: this.identityProviders
                     });
                     authView.render();
                 }, this));
