@@ -136,9 +136,13 @@ define(function(require) {
                         _.each(files, function(file) {
                             var parts = file.name.split('.'),
                                 extension = parts[parts.length - 1];
-                            if (!_.contains(validExtensions, extension)) {
+                            if (!_.contains(validExtensions, extension.toLowerCase())) {
                                 up.removeFile(file);
-                                // TODO - error message?
+                                up.trigger('Error', {
+                                    code : plupload.FILE_EXTENSION_ERROR,
+                                    message : plupload.translate('File extension error.'),
+                                    file : file
+                                });
                             }
                         });
                         // Keep the last file in the queue

@@ -1,8 +1,8 @@
 /**
- * ev-script 0.3.0 2013-12-20
+ * ev-script 0.3.0 2014-02-18
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
- * Copyright (c) 2013 Symphony Video, Inc.
+ * Copyright (c) 2014 Symphony Video, Inc.
  * Licensed MIT, GPL-2.0
  */
 (function (root, factory) {
@@ -2298,9 +2298,13 @@ define('ev-script/views/upload',['require','jquery','underscore','ev-script/view
                         _.each(files, function(file) {
                             var parts = file.name.split('.'),
                                 extension = parts[parts.length - 1];
-                            if (!_.contains(validExtensions, extension)) {
+                            if (!_.contains(validExtensions, extension.toLowerCase())) {
                                 up.removeFile(file);
-                                // TODO - error message?
+                                up.trigger('Error', {
+                                    code : plupload.FILE_EXTENSION_ERROR,
+                                    message : plupload.translate('File extension error.'),
+                                    file : file
+                                });
                             }
                         });
                         // Keep the last file in the queue
