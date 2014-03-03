@@ -1,5 +1,5 @@
 /**
- * ev-script 0.3.0 2014-02-18
+ * ev-script 0.3.0 2014-03-03
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2014 Symphony Video, Inc.
@@ -2158,7 +2158,7 @@ define('ev-script/views/workflow-select',['require','underscore','ev-script/view
 
 });
 
-define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <select class="form-select" name="MediaWorkflowID"></select>\n    <div class="fieldWrap">\n        <label for="Title">Title *</label>\n        <input class="form-text" type="text" name="Title" id="Title" />\n    </div>\n    <div class="fieldWrap">\n        <label for="Description">Description</label>\n        <textarea class="form-text" name="Description" id="Description" />\n    </div>\n    <div class="upload"></div>\n    <div class="info">\n        Note: In order for uploaded media to be immediately available for\n        embedding, the current library must have autopublishing configured for\n        the selected workflow.\n    </div>\n</form>\n';});
+define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <select class="form-select" name="MediaWorkflowID"></select>\n    <div class="fieldWrap">\n        <label for="Title">Title *</label>\n        <input class="form-text" type="text" name="Title" id="Title" />\n    </div>\n    <div class="fieldWrap">\n        <label for="Description">Description</label>\n        <textarea class="form-text" name="Description" id="Description" />\n    </div>\n    <div class="upload"></div>\n</form>\n';});
 
 /*global window,plupload,navigator*/
 define('ev-script/views/upload',['require','jquery','underscore','ev-script/views/base','backbone','ev-script/views/workflow-select','ev-script/models/video-settings','plupload','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
