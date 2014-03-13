@@ -42,6 +42,7 @@ $default-box-shadow-color: #333333;
   select {
     display: inline;
     margin-right: 0.4em;
+    margin-bottom: 0.4em;
   }
   label {
     color: $label-color;
@@ -288,7 +289,7 @@ div.ev-settings {
 div.ev-results {
   background-color: #fbfbfb;
   border-bottom: 1px solid #cccccc;
-  padding: 10px 5px;
+  padding: 0 5px 10px;
   .total {
     margin: 1em 0;
   }
