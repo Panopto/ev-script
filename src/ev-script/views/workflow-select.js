@@ -17,7 +17,7 @@ define(function(require) {
         render: function() {
             var selected = this.collection.findWhere({
                 'IsDefault': true
-            }) || this.collection.at(1);
+            }) || this.collection.at(0);
             this.$el.html(this.template({
                 selectedId: selected.id,
                 collection: this.collection

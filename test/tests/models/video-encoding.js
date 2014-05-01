@@ -87,7 +87,11 @@ define(function(require) {
                 this.encoding.fetch({
                     success: _.bind(function(model, response) {
                         console.log(JSON.stringify(model));
-                        q.strictEqual(this.encoding.get('encodingId'), response.dataSet.encodings.encodingId);
+                        if (response.dataSet.encodings) {
+                            q.strictEqual(this.encoding.get('encodingId'), response.dataSet.encodings.encodingId);
+                        } else {
+                            q.ok(false, "No encodings returned.");
+                        }
                         q.start();
                     }, this),
                     error: function(collection, response, options) {

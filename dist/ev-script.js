@@ -1,5 +1,5 @@
 /**
- * ev-script 0.3.0 2014-03-03
+ * ev-script 0.3.0 2014-04-30
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2014 Symphony Video, Inc.
@@ -2145,7 +2145,7 @@ define('ev-script/views/workflow-select',['require','underscore','ev-script/view
         render: function() {
             var selected = this.collection.findWhere({
                 'IsDefault': true
-            }) || this.collection.at(1);
+            }) || this.collection.at(0);
             this.$el.html(this.template({
                 selectedId: selected.id,
                 collection: this.collection
