@@ -2,7 +2,8 @@ define(function(require) {
 
     'use strict';
 
-    var _ = require('underscore'),
+    var $ = require('jquery'),
+        _ = require('underscore'),
         Backbone = require('backbone'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache'),
@@ -42,8 +43,14 @@ define(function(require) {
         getUser: function() {
             return this.user;
         },
-        login: function(loginInfo) {},
-        logout: function() {},
+        // Return failed promise...subclasses should override
+        login: function(loginInfo) {
+            return $.Deferred().reject().promise();
+        },
+        // Return failed promise...subclasses should override
+        logout: function() {
+            return $.Deferred().reject().promise();
+        },
         isAuthenticated: function() {
             return this.user != null;
         },

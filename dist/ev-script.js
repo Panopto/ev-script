@@ -1,5 +1,5 @@
 /**
- * ev-script 0.3.0 2014-04-30
+ * ev-script 0.3.0 2014-05-07
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2014 Symphony Video, Inc.
@@ -985,7 +985,7 @@ define('text',['module'], function (module) {
     return text;
 });
 
-define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="Hide Picker">Hide</a>\n<% if (isAuthenticated) { %>\n    <a class="action-logout" href="#" title="Logout <%= username %>">Logout</a>\n<% } %>\n';});
+define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="Hide Picker">Hide</a>\n<% if (showLogout) { %>\n    <a class="action-logout" href="#" title="Logout <%= username %>">Logout</a>\n<% } %>\n';});
 
 define('ev-script/views/hider',['require','underscore','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
 
@@ -1018,7 +1018,7 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
                 username = this.auth.getUser().get('UserName');
             }
             this.$el.html(this.template({
-                isAuthenticated: this.auth.isAuthenticated(),
+                showLogout: this.auth.isAuthenticated() && this.config.authType !== 'none',
                 username: username
             }));
         },
@@ -1786,7 +1786,13 @@ define('ev-script/views/video-embed',['require','underscore','ev-script/views/ba
             // Width and height really should be set by now...but use a reasonable default if not
             var width = (this.model.get('width') ? this.model.get('width') : '640');
             var height = (this.model.get('height') ? this.model.get('height') : '360');
-            var src = this.config.ensembleUrl + '/app/plugin/embed.aspx?ID=' + this.model.get('id') + '&autoPlay=' + this.model.get('autoplay') + '&displayTitle=' + this.model.get('showtitle') + '&hideControls=' + this.model.get('hidecontrols') + '&showCaptions=' + this.model.get('showcaptions') + '&width=' + width + '&height=' + height;
+            var src = this.config.ensembleUrl + '/app/plugin/embed.aspx?ID=' + this.model.get('id') +
+                '&autoPlay=' + this.model.get('autoplay') +
+                '&displayTitle=' + this.model.get('showtitle') +
+                '&hideControls=' + this.model.get('hidecontrols') +
+                '&showCaptions=' + this.model.get('showcaptions') +
+                '&width=' + width +
+                '&height=' + height;
             this.$el.html(this.template({
                 src: src,
                 width: width,
@@ -3148,11 +3154,12 @@ define('ev-script/models/current-user',['require','underscore','ev-script/models
 
 });
 
-define('ev-script/auth/base/auth',['require','underscore','backbone','ev-script/util/events','ev-script/util/cache','ev-script/models/current-user'],function(require) {
+define('ev-script/auth/base/auth',['require','jquery','underscore','backbone','ev-script/util/events','ev-script/util/cache','ev-script/models/current-user'],function(require) {
 
     
 
-    var _ = require('underscore'),
+    var $ = require('jquery'),
+        _ = require('underscore'),
         Backbone = require('backbone'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache'),
@@ -3192,8 +3199,14 @@ define('ev-script/auth/base/auth',['require','underscore','backbone','ev-script/
         getUser: function() {
             return this.user;
         },
-        login: function(loginInfo) {},
-        logout: function() {},
+        // Return failed promise...subclasses should override
+        login: function(loginInfo) {
+            return $.Deferred().reject().promise();
+        },
+        // Return failed promise...subclasses should override
+        logout: function() {
+            return $.Deferred().reject().promise();
+        },
         isAuthenticated: function() {
             return this.user != null;
         },
@@ -3345,7 +3358,7 @@ define('ev-script/auth/basic/auth',['require','jquery','underscore','backbone','
     return BasicAuth;
 });
 
-define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="domain">Domain</label>\n            <select id="domain" name="domain" class="form-select"></select>\n        </div>\n        <div class="fieldWrap">\n            <label for="remember">Remember Me</label>\n            <input id="remember" name="remember" type="checkbox"></input>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="domain">Domain</label>\n            <select id="domain" name="domain" class="form-select"></select>\n        </div>\n        <div class="fieldWrap">\n            <label for="remember">Remember Me</label>\n            <input id="remember" name="remember" type="checkbox"></input>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n            <div class="loader"></div>\n        </div>\n    </fieldset>\n</form>\n';});
 
 /*global window*/
 define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/forms/template.html','text!ev-script/templates/options.html'],function(require, template) {
@@ -3380,6 +3393,15 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
             }));
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
+
+            // Handle loading indicator in form
+            var $loader = $('div.loader', $html);
+            $loader.on('ajaxSend', _.bind(function(e, xhr, settings) {
+                $loader.addClass('loading');
+            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
+                $loader.removeClass('loading');
+            }, this));
+
             this.$dialog.dialog({
                 title: 'Ensemble Video Login - ' + this.config.ensembleUrl,
                 modal: true,
@@ -3392,6 +3414,7 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
                     this.$dialog.html($html);
                 }, this),
                 close: _.bind(function(event, ui) {
+                    $loader.off('ajaxSend').off('ajaxComplete');
                     this.$dialog.dialog('destroy').remove();
                     this.appEvents.trigger('hidePickers');
                 }, this)
@@ -3520,7 +3543,86 @@ define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/a
 
 });
 
-define('ev-script',['require','backbone','underscore','jquery','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/models/app-info','ev-script/auth/basic/auth','ev-script/auth/forms/auth','ev-script/util/events','ev-script/util/cache'],function(require) {
+define('text!ev-script/auth/none/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <h3>You are unauthorized to access this content.</h3>\n</form>\n';});
+
+/*global window*/
+define('ev-script/auth/none/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery-ui','text!ev-script/auth/none/template.html'],function(require, template) {
+
+    
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        cacheUtil = require('ev-script/util/cache'),
+        eventsUtil = require('ev-script/util/events');
+
+    require('jquery-ui');
+
+    return Backbone.View.extend({
+        template: _.template(require('text!ev-script/auth/none/template.html')),
+        initialize: function(options) {
+            this.appId = options.appId;
+            this.config = cacheUtil.getAppConfig(this.appId);
+            this.appEvents = eventsUtil.getEvents(this.appId);
+        },
+        render: function() {
+            var $html = $(this.template());
+            this.$dialog = $('<div class="ev-auth"></div>');
+            this.$el.after(this.$dialog);
+            this.$dialog.dialog({
+                title: 'Ensemble Video Login - ' + this.config.ensembleUrl,
+                modal: true,
+                draggable: false,
+                resizable: false,
+                width: Math.min(540, $(window).width() - this.config.dialogMargin),
+                height: Math.min(250, $(window).height() - this.config.dialogMargin),
+                dialogClass: 'ev-dialog',
+                create: _.bind(function(event, ui) {
+                    this.$dialog.html($html);
+                }, this),
+                close: _.bind(function(event, ui) {
+                    this.$dialog.dialog('destroy').remove();
+                    this.appEvents.trigger('hidePickers');
+                }, this)
+            });
+        }
+    });
+
+});
+
+define('ev-script/auth/none/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/auth/none/view'],function(require) {
+
+    
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        BaseAuth = require('ev-script/auth/base/auth'),
+        AuthView = require('ev-script/auth/none/view'),
+        // This auth type doesn't actually prompt to authenticate.  Rather, it
+        // displays an authentication warning.
+        NoneAuth = BaseAuth.extend({
+            constructor: function(appId) {
+                BaseAuth.prototype.constructor.call(this, appId);
+            },
+            handleUnauthorized: function(element, authCallback) {
+                this.user = null;
+                this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
+                var authView = new AuthView({
+                    el: element,
+                    submitCallback: authCallback,
+                    appId: this.appId,
+                    auth: this,
+                    collection: this.identityProviders
+                });
+                authView.render();
+            }
+        });
+
+    return NoneAuth;
+
+});
+
+define('ev-script',['require','backbone','underscore','jquery','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/models/app-info','ev-script/auth/basic/auth','ev-script/auth/forms/auth','ev-script/auth/none/auth','ev-script/util/events','ev-script/util/cache'],function(require) {
 
     
 
@@ -3535,6 +3637,7 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
         AppInfo = require('ev-script/models/app-info'),
         BasicAuth = require('ev-script/auth/basic/auth'),
         FormsAuth = require('ev-script/auth/forms/auth'),
+        NoneAuth = require('ev-script/auth/none/auth'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
 
@@ -3570,7 +3673,9 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
             hidePickers: true,
             // The difference between window dimensions and maximum dialog size.
             dialogMargin: 40,
-            // This can be 'forms' or 'basic' (default)
+            // This can be 'forms', 'basic' (default) or 'none' (in which case
+            // an access denied message is displayed and user is not prompted
+            // to authenticate).
             // authType: 'forms'
             // Location for plupload flash runtime
             pluploadFlashPath: ''
@@ -3605,7 +3710,18 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
                 loading.reject('Configured to use forms authentication against a pre-3.6 API.');
             } else {
                 // This will initialize and cache an auth object for our app
-                var auth = (config.authType && config.authType === 'forms') ? new FormsAuth(appId) : new BasicAuth(appId);
+                var auth;
+                switch (config.authType) {
+                    case 'forms':
+                        auth = new FormsAuth(appId);
+                        break;
+                    case 'none':
+                        auth = new NoneAuth(appId);
+                        break;
+                    default:
+                        auth = new BasicAuth(appId);
+                        break;
+                }
                 cacheUtil.setAppAuth(appId, auth);
 
                 // TODO - document and add some flexibility to params (e.g. in addition

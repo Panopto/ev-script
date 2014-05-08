@@ -36,6 +36,20 @@ $default-box-shadow-color: #333333;
   }
 }
 
+@mixin loader {
+  div.loader {
+    display: inline-block;
+  }
+  div.loading {
+    background: url($loading-image) no-repeat scroll center center transparent;
+    display: inline-block;
+    height: 16px;
+    margin-left: 1em;
+    vertical-align: middle;
+    width: 16px;
+  }
+}
+
 @mixin filter-form($max-width) {
   label,
   input,
@@ -93,9 +107,9 @@ div.ev-hider {
     @include border-top-radius(4px);
     border-right: 1px solid $border-color;
     border-top: 1px solid $border-color;
-    bottom: -1px;
+    bottom: -2px;
     display: inline-block;
-    padding: 0.2em 1em 0;
+    padding: 0.2em 1em;
     position: relative;
     text-decoration: none;
   }
@@ -217,17 +231,7 @@ div.ev-filter-block {
       }
     }
   }
-  div.loader {
-    display: inline-block;
-  }
-  div.loading {
-    background: url($loading-image) no-repeat scroll center center transparent;
-    display: inline-block;
-    height: 16px;
-    margin-left: 1em;
-    vertical-align: middle;
-    width: 16px;
-  }
+  @include loader;
 }
 
 div.ev-auth {
@@ -264,6 +268,7 @@ div.ev-auth {
       margin-right: 1em;
       width: 30%;
     }
+    @include loader;
   }
 }
 
@@ -289,9 +294,9 @@ div.ev-settings {
 div.ev-results {
   background-color: #fbfbfb;
   border-bottom: 1px solid #cccccc;
-  padding: 0 5px 10px;
+  padding: 10px 5px;
   .total {
-    margin: 1em 0;
+    margin-bottom: 0.4em;
   }
   table thead {
     display: none;

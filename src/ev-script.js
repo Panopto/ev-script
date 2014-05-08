@@ -13,6 +13,7 @@ define(function(require) {
         AppInfo = require('ev-script/models/app-info'),
         BasicAuth = require('ev-script/auth/basic/auth'),
         FormsAuth = require('ev-script/auth/forms/auth'),
+        NoneAuth = require('ev-script/auth/none/auth'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
 
@@ -48,7 +49,9 @@ define(function(require) {
             hidePickers: true,
             // The difference between window dimensions and maximum dialog size.
             dialogMargin: 40,
-            // This can be 'forms' or 'basic' (default)
+            // This can be 'forms', 'basic' (default) or 'none' (in which case
+            // an access denied message is displayed and user is not prompted
+            // to authenticate).
             // authType: 'forms'
             // Location for plupload flash runtime
             pluploadFlashPath: ''
@@ -83,7 +86,18 @@ define(function(require) {
                 loading.reject('Configured to use forms authentication against a pre-3.6 API.');
             } else {
                 // This will initialize and cache an auth object for our app
-                var auth = (config.authType && config.authType === 'forms') ? new FormsAuth(appId) : new BasicAuth(appId);
+                var auth;
+                switch (config.authType) {
+                    case 'forms':
+                        auth = new FormsAuth(appId);
+                        break;
+                    case 'none':
+                        auth = new NoneAuth(appId);
+                        break;
+                    default:
+                        auth = new BasicAuth(appId);
+                        break;
+                }
                 cacheUtil.setAppAuth(appId, auth);
 
                 // TODO - document and add some flexibility to params (e.g. in addition

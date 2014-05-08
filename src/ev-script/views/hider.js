@@ -29,7 +29,7 @@ define(function(require) {
                 username = this.auth.getUser().get('UserName');
             }
             this.$el.html(this.template({
-                isAuthenticated: this.auth.isAuthenticated(),
+                showLogout: this.auth.isAuthenticated() && this.config.authType !== 'none',
                 username: username
             }));
         },

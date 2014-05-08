@@ -50,6 +50,8 @@
         'test/tests/auth/basic/view',
         'test/tests/auth/forms/auth',
         // TODO - 'tests/auth/forms/view',
+        'test/tests/auth/none/auth',
+        'test/tests/auth/none/view',
         'test/tests/util/cache',
         'test/tests/util/events',
         'test/tests/collections/base',

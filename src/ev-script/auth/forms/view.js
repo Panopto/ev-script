@@ -31,6 +31,15 @@ define(function(require, template) {
             }));
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
+
+            // Handle loading indicator in form
+            var $loader = $('div.loader', $html);
+            $loader.on('ajaxSend', _.bind(function(e, xhr, settings) {
+                $loader.addClass('loading');
+            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
+                $loader.removeClass('loading');
+            }, this));
+
             this.$dialog.dialog({
                 title: 'Ensemble Video Login - ' + this.config.ensembleUrl,
                 modal: true,
@@ -43,6 +52,7 @@ define(function(require, template) {
                     this.$dialog.html($html);
                 }, this),
                 close: _.bind(function(event, ui) {
+                    $loader.off('ajaxSend').off('ajaxComplete');
                     this.$dialog.dialog('destroy').remove();
                     this.appEvents.trigger('hidePickers');
                 }, this)

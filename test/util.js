@@ -9,6 +9,7 @@ define(function(require) {
         evSettings = require('ev-config'),
         FormsAuth = require('ev-script/auth/forms/auth'),
         BasicAuth = require('ev-script/auth/basic/auth'),
+        NoneAuth = require('ev-script/auth/none/auth'),
         AppInfo = require('ev-script/models/app-info'),
         defaults = {
             // Callback called after config is setup
@@ -38,7 +39,17 @@ define(function(require) {
                 this.info.fetch({})
                 .always(_.bind(function() {
                     settings.preAuthCallback.call(this);
-                    this.auth = (this.config.authType && this.config.authType === 'forms') ? new FormsAuth(this.appId) : new BasicAuth(this.appId);
+                    switch (this.config.authType) {
+                        case 'forms':
+                            this.auth = new FormsAuth(this.appId);
+                            break;
+                        case 'none':
+                            this.auth = new NoneAuth(this.appId);
+                            break;
+                        default:
+                            this.auth = new BasicAuth(this.appId);
+                            break;
+                    }
                     cacheUtil.setAppAuth(this.appId, this.auth);
                     settings.postAuthCallback.call(this);
                     if (settings.authenticate && !this.auth.isAuthenticated()) {
