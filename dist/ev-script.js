@@ -1,5 +1,5 @@
 /**
- * ev-script 0.3.0 2014-05-07
+ * ev-script 0.3.0 2014-06-06
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
  * Copyright (c) 2014 Symphony Video, Inc.
@@ -1821,7 +1821,7 @@ define('ev-script/models/base',['require','jquery','underscore','backbone','ev-s
         getCached: function() {},
         setCached: function() {},
         fetch: function(options) {
-            if (options.success) {
+            if (options && options.success) {
                 options.success = _.wrap(options.success, _.bind(function(success) {
                     // We've successfully queried the API for something that
                     // requires authentication but we're in an unauthenticated

@@ -16,7 +16,7 @@ define(function(require) {
         getCached: function() {},
         setCached: function() {},
         fetch: function(options) {
-            if (options.success) {
+            if (options && options.success) {
                 options.success = _.wrap(options.success, _.bind(function(success) {
                     // We've successfully queried the API for something that
                     // requires authentication but we're in an unauthenticated
