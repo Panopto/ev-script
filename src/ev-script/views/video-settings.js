@@ -27,7 +27,7 @@ define(function(require) {
                 'hidecontrols': this.$('#hidecontrols').is(':checked')
             };
             var sizeVal = this.$('#size').val();
-            if (sizeVal === 'original') {
+            if (!sizeVal || sizeVal === 'original') {
                 // isNew signifies that the encoding hasn't been fetched yet
                 if (this.encoding && !this.encoding.isNew()) {
                     _.extend(attrs, {
@@ -68,9 +68,12 @@ define(function(require) {
         },
         render: function() {
             this.$el.html(this.template({
-                model: this.field.model
+                model: this.field.model,
+                isAudio: this.encoding && this.encoding.isAudio()
             }));
-            this.renderSize();
+            if (this.encoding && !this.encoding.isAudio()) {
+                this.renderSize();
+            }
             var content = this.field.model.get('content');
             this.$el.dialog({
                 title: (content ? content.Title : this.field.model.get('id')),

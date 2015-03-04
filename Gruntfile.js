@@ -17,14 +17,14 @@ module.exports = function(grunt) {
                 'jquery-ui': 'jquery-ui/jquery-ui',
                 'jquery.cookie': 'jquery.cookie/jquery.cookie',
                 'jquery.plupload.queue': 'plupload/js/jquery.plupload.queue/jquery.plupload.queue',
-                'plupload': 'plupload/js/plupload.full',
+                'plupload': 'plupload/js/plupload.full.min',
                 'ev-scroll-loader': '../ev-scroll-loader',
-                'underscore': 'lodash/dist/lodash.underscore',
+                'underscore': 'lodash/lodash',
                 'backbone': 'backbone/backbone',
                 'text': 'text/text'
             },
             name: 'ev-script',
-            exclude: ['jquery', 'jquery-ui', 'jquery.cookie', 'jquery.plupload.queue', 'plupload', 'backbone', 'underscore'],
+            exclude: ['jquery', 'jquery-ui', 'jquery.cookie', 'jquery.plupload.queue', 'plupload', 'underscore', 'backbone'],
             out: "dist/ev-script.js",
             wrap: {
                 start: '<%= banner %>' + grunt.file.read('wrap/wrap.start'),
@@ -104,6 +104,12 @@ module.exports = function(grunt) {
     });
 
     var connect = require('connect'),
+        bodyParser = require('body-parser'),
+        cookieParser = require('cookie-parser'),
+        serveStatic = require('serve-static'),
+        serveIndex = require('serve-index'),
+        logger = require('morgan'),
+        errorhandler = require('errorhandler'),
         path = require('path'),
         https = require('https'),
         fs = require('fs'),
@@ -135,11 +141,11 @@ module.exports = function(grunt) {
             base = path.resolve('.');
         grunt.log.writeln('Starting ssl web server in "' + base + '" on port ' + port + '.');
         var app = connect()
-        // .use(connect.logger())
-        .use(connect.urlencoded())
-        .use(connect.cookieParser())
-        .use(connect['static'](base))
-        .use(connect.directory(base))
+        // .use(logger('combined'))
+        .use(bodyParser.urlencoded({ extended: true }))
+        .use(cookieParser())
+        .use(serveStatic(base))
+        .use(serveIndex(base))
         .use(function(req, res) {
             var parsed = url.parse(req.url, true);
             // Proxy for EV API requests
@@ -148,6 +154,11 @@ module.exports = function(grunt) {
                     apiUrl = parsed.query.request,
                     username = req.cookies[encodeURIComponent(ensembleUrl) + '-user'],
                     password = req.cookies[encodeURIComponent(ensembleUrl) + '-pass'];
+                // console.log('ensembleUrl: ' + ensembleUrl);
+                // console.log('apiUrl: ' + apiUrl);
+                // console.log('cookies: ' + JSON.stringify(req.cookies));
+                // console.log('username: ' + username);
+                // console.log('password: ' + password);
                 if (apiUrl) {
                     var opts = {
                         url: apiUrl,
@@ -181,7 +192,8 @@ module.exports = function(grunt) {
                 });
                 res.end();
             }
-        });
+        })
+        .use(errorhandler());
         https.createServer({
             key: fs.readFileSync('assets/ssl/certs/ev-script-key.pem'),
             cert: fs.readFileSync('assets/ssl/certs/ev-script-cert.pem')
@@ -199,6 +211,8 @@ module.exports = function(grunt) {
     // Default task.
     grunt.registerTask('test', ['server', 'qunit']);
     grunt.registerTask('default', ['clean', 'jshint', 'compass', 'test', 'requirejs:development', 'requirejs:production']);
+    grunt.registerTask('all', ['clean', 'jshint', 'compass', 'test', 'requirejs:development', 'requirejs:production']);
+    grunt.registerTask('all-skip-tests', ['clean', 'jshint', 'compass', 'requirejs:development', 'requirejs:production']);
     grunt.registerTask('dev', ['clean', 'jshint', 'compass', 'test', 'requirejs:development']);
     grunt.registerTask('prod', ['clean', 'jshint', 'compass', 'test', 'requirejs:production']);
     grunt.registerTask('demo', ['server', 'watch']);

@@ -52,9 +52,12 @@ define(function(require) {
             // This can be 'forms', 'basic' (default) or 'none' (in which case
             // an access denied message is displayed and user is not prompted
             // to authenticate).
-            // authType: 'forms'
+            authType: 'basic',
+            // Set this in order to select the default identity provider in the
+            // forms auth identity provider dropdown.
+            defaultProvider: '',
             // Location for plupload flash runtime
-            pluploadFlashPath: ''
+            pluploadFlashPath: '',
         };
 
         // Add our configuration to the app cache...this is specific to this

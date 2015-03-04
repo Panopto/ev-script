@@ -23,22 +23,23 @@ define(function(require, template) {
             this.auth = options.auth;
         },
         render: function() {
-            var $html = $(this.template());
-            var $select = $('#domain', $html).append(this.optionsTemplate({
-                collection: this.collection,
-                // FIXME - need to know the default to select here
-                selectedId: null
-            }));
+            var $html = $(this.template()),
+                $select = $('#provider', $html).append(this.optionsTemplate({
+                    collection: this.collection,
+                    selectedId: this.config.defaultProvider
+                }));
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
 
             // Handle loading indicator in form
-            var $loader = $('div.loader', $html);
-            $loader.on('ajaxSend', _.bind(function(e, xhr, settings) {
-                $loader.addClass('loading');
-            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
-                $loader.removeClass('loading');
-            }, this));
+            var $loader = $('div.loader', $html),
+                loadingOn = _.bind(function(e, xhr, settings) {
+                    $loader.addClass('loading');
+                }, this),
+                loadingOff = _.bind(function(e, xhr, settings) {
+                    $loader.removeClass('loading');
+                }, this);
+            $(window.document).on('ajaxSend', loadingOn).on('ajaxComplete', loadingOff);
 
             this.$dialog.dialog({
                 title: 'Ensemble Video Login - ' + this.config.ensembleUrl,
@@ -52,7 +53,7 @@ define(function(require, template) {
                     this.$dialog.html($html);
                 }, this),
                 close: _.bind(function(event, ui) {
-                    $loader.off('ajaxSend').off('ajaxComplete');
+                    $(window.document).off('ajaxSend', loadingOn).off('ajaxComplete', loadingOff);
                     this.$dialog.dialog('destroy').remove();
                     this.appEvents.trigger('hidePickers');
                 }, this)
@@ -65,7 +66,7 @@ define(function(require, template) {
                     this.auth.login({
                         username: username,
                         password: password,
-                        authSourceId: $('#domain :selected', $form).val(),
+                        authSourceId: $('#provider :selected', $form).val(),
                         persist: $('#remember', $form).is(':checked')
                     }).then(_.bind(function() {
                         this.$dialog.dialog('destroy').remove();

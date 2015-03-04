@@ -1,8 +1,8 @@
 /**
- * ev-script 0.3.0 2014-06-06
+ * ev-script 0.3.1 2015-03-04
  * Ensemble Video Integration Library
  * https://github.com/jmpease/ev-script
- * Copyright (c) 2014 Symphony Video, Inc.
+ * Copyright (c) 2015 Symphony Video, Inc.
  * Licensed MIT, GPL-2.0
  */
 (function (root, factory) {
@@ -15,9 +15,8 @@
         root.EV = factory(root.$, root._, root.Backbone);
     }
 }(this, function ($, _, Backbone) {
-
 /**
- * almond 0.2.5 Copyright (c) 2011-2012, The Dojo Foundation All Rights Reserved.
+ * @license almond 0.2.9 Copyright (c) 2011-2014, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/almond for details
  */
@@ -34,7 +33,8 @@ var requirejs, require, define;
         config = {},
         defining = {},
         hasOwn = Object.prototype.hasOwnProperty,
-        aps = [].slice;
+        aps = [].slice,
+        jsSuffixRegExp = /\.js$/;
 
     function hasProp(obj, prop) {
         return hasOwn.call(obj, prop);
@@ -49,7 +49,7 @@ var requirejs, require, define;
      * @returns {String} normalized name
      */
     function normalize(name, baseName) {
-        var nameParts, nameSegment, mapValue, foundMap,
+        var nameParts, nameSegment, mapValue, foundMap, lastIndex,
             foundI, foundStarMap, starI, i, j, part,
             baseParts = baseName && baseName.split("/"),
             map = config.map,
@@ -67,8 +67,15 @@ var requirejs, require, define;
                 //"one/two/three.js", but we want the directory, "one/two" for
                 //this normalization.
                 baseParts = baseParts.slice(0, baseParts.length - 1);
+                name = name.split('/');
+                lastIndex = name.length - 1;
 
-                name = baseParts.concat(name.split("/"));
+                // Node .js allowance:
+                if (config.nodeIdCompat && jsSuffixRegExp.test(name[lastIndex])) {
+                    name[lastIndex] = name[lastIndex].replace(jsSuffixRegExp, '');
+                }
+
+                name = baseParts.concat(name);
 
                 //start trimDots
                 for (i = 0; i < name.length; i += 1) {
@@ -277,14 +284,14 @@ var requirejs, require, define;
     main = function (name, deps, callback, relName) {
         var cjsModule, depName, ret, map, i,
             args = [],
+            callbackType = typeof callback,
             usingExports;
 
         //Use name if no relName
         relName = relName || name;
 
         //Call the callback to define the module, if necessary.
-        if (typeof callback === 'function') {
-
+        if (callbackType === 'undefined' || callbackType === 'function') {
             //Pull out the defined dependencies and pass the ordered
             //values to the callback.
             //Default to [require, exports, module] if no deps
@@ -315,7 +322,7 @@ var requirejs, require, define;
                 }
             }
 
-            ret = callback.apply(defined[name], args);
+            ret = callback ? callback.apply(defined[name], args) : undefined;
 
             if (name) {
                 //If setting exports via "module" is in play,
@@ -350,6 +357,13 @@ var requirejs, require, define;
         } else if (!deps.splice) {
             //deps is a config object, not an array.
             config = deps;
+            if (config.deps) {
+                req(config.deps, config.callback);
+            }
+            if (!callback) {
+                return;
+            }
+
             if (callback.splice) {
                 //callback is an array, which means it is a dependency list.
                 //Adjust args if there are dependencies
@@ -394,12 +408,13 @@ var requirejs, require, define;
      * the config return value is used.
      */
     req.config = function (cfg) {
-        config = cfg;
-        if (config.deps) {
-            req(config.deps, config.callback);
-        }
-        return req;
+        return req(cfg);
     };
+
+    /**
+     * Expose module registry for debugging and tooling
+     */
+    requirejs._defined = defined;
 
     define = function (name, deps, callback) {
 
@@ -599,7 +614,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
 });
 
 /**
- * @license RequireJS text 2.0.10 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ * @license RequireJS text 2.0.14 Copyright (c) 2010-2014, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/text for details
  */
@@ -623,7 +638,7 @@ define('text',['module'], function (module) {
         masterConfig = (module.config && module.config()) || {};
 
     text = {
-        version: '2.0.10',
+        version: '2.0.14',
 
         strip: function (content) {
             //Strips <?xml ...?> declarations so that external SVG and XML
@@ -685,13 +700,13 @@ define('text',['module'], function (module) {
         parseName: function (name) {
             var modName, ext, temp,
                 strip = false,
-                index = name.indexOf("."),
+                index = name.lastIndexOf("."),
                 isRelative = name.indexOf('./') === 0 ||
                              name.indexOf('../') === 0;
 
             if (index !== -1 && (!isRelative || index > 1)) {
                 modName = name.substring(0, index);
-                ext = name.substring(index + 1, name.length);
+                ext = name.substring(index + 1);
             } else {
                 modName = name;
             }
@@ -762,12 +777,12 @@ define('text',['module'], function (module) {
 
             // Do not bother with the work if a build and text will
             // not be inlined.
-            if (config.isBuild && !config.inlineText) {
+            if (config && config.isBuild && !config.inlineText) {
                 onLoad();
                 return;
             }
 
-            masterConfig.isBuild = config.isBuild;
+            masterConfig.isBuild = config && config.isBuild;
 
             var parsed = text.parseName(name),
                 nonStripName = parsed.moduleName +
@@ -844,7 +859,8 @@ define('text',['module'], function (module) {
             typeof process !== "undefined" &&
             process.versions &&
             !!process.versions.node &&
-            !process.versions['node-webkit'])) {
+            !process.versions['node-webkit'] &&
+            !process.versions['atom-shell'])) {
         //Using special require.nodeRequire, something added by r.js.
         fs = require.nodeRequire('fs');
 
@@ -852,12 +868,14 @@ define('text',['module'], function (module) {
             try {
                 var file = fs.readFileSync(url, 'utf8');
                 //Remove BOM (Byte Mark Order) from utf8 files if it is there.
-                if (file.indexOf('\uFEFF') === 0) {
+                if (file[0] === '\uFEFF') {
                     file = file.substring(1);
                 }
                 callback(file);
             } catch (e) {
-                errback(e);
+                if (errback) {
+                    errback(e);
+                }
             }
         };
     } else if (masterConfig.env === 'xhr' || (!masterConfig.env &&
@@ -885,12 +903,14 @@ define('text',['module'], function (module) {
                 //Do not explicitly handle errors, those should be
                 //visible via console output in the browser.
                 if (xhr.readyState === 4) {
-                    status = xhr.status;
+                    status = xhr.status || 0;
                     if (status > 399 && status < 600) {
                         //An http 4xx or 5xx error. Signal an error.
                         err = new Error(url + ' HTTP status: ' + status);
                         err.xhr = xhr;
-                        errback(err);
+                        if (errback) {
+                            errback(err);
+                        }
                     } else {
                         callback(xhr.responseText);
                     }
@@ -947,7 +967,7 @@ define('text',['module'], function (module) {
             typeof Components !== 'undefined' && Components.classes &&
             Components.interfaces)) {
         //Avert your gaze!
-        Cc = Components.classes,
+        Cc = Components.classes;
         Ci = Components.interfaces;
         Components.utils['import']('resource://gre/modules/FileUtils.jsm');
         xpcIsWindows = ('@mozilla.org/windows-registry-key;1' in Cc);
@@ -984,6 +1004,7 @@ define('text',['module'], function (module) {
     }
     return text;
 });
+
 
 define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="Hide Picker">Hide</a>\n<% if (showLogout) { %>\n    <a class="action-logout" href="#" title="Logout <%= username %>">Logout</a>\n<% } %>\n';});
 
@@ -1034,8 +1055,10 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
 
 });
 
+
 define('text!ev-script/templates/picker.html',[],function () { return '<div id="<%= id %>-hider" class="ev-hider"></div>\n<div id="<%= id %>-filter-block" class="ev-filter-block">\n    <div class="loader"></div>\n    <div class="ev-poweredby">\n        <a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a>\n    </div>\n</div>\n<div id="<%= id %>-results" class="ev-results clearfix"></div>\n';});
 
+/*global window*/
 define('ev-script/views/picker',['require','jquery','underscore','ev-script/views/base','ev-script/views/hider','text!ev-script/templates/picker.html'],function(require) {
 
     
@@ -1064,7 +1087,7 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
                 appId: this.appId
             });
             var $loader = this.$('div.loader');
-            $loader.on('ajaxSend', _.bind(function(e, xhr, settings) {
+            $(window.document).on('ajaxSend', _.bind(function(e, xhr, settings) {
                 if (this === settings.picker) {
                     $loader.addClass('loading');
                 }
@@ -1112,6 +1135,7 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
     });
 
 });
+
 
 define('text!ev-script/templates/search.html',[],function () { return '<form>\n    <label for="<%= id %>">Search:</label>\n    <input id="<%= id %>" type="text" class="form-text search" value="<%- searchVal %>" title="Search Media" />\n    <input type="submit" value="Go" class="form-submit" />\n</form>\n';});
 
@@ -1166,6 +1190,7 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base','
 
 });
 
+
 define('text!ev-script/templates/library-type-select.html',[],function () { return '<form>\n    <label for="<%= id %>">Type:</label>\n    <select id="<%= id %>" class="form-select source" title="Select Library Type">\n      <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>>Media Library</option>\n      <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>>Shared Library</option>\n    </select>\n    <input type="submit" value="Go" class="form-submit" />\n</form>\n';});
 
 define('ev-script/views/library-type-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
@@ -1202,6 +1227,7 @@ define('ev-script/views/library-type-select',['require','underscore','ev-script/
     });
 
 });
+
 
 define('text!ev-script/templates/options.html',[],function () { return '<% collection.each(function(item) { %>\n    <option value="<%= item.id %>" <% if (selectedId === item.id) { print(\'selected="selected"\'); } %>><%- item.get(\'Name\') %></option>\n<% }); %>\n';});
 
@@ -1416,6 +1442,7 @@ define('ev-script/collections/libraries',['require','ev-script/collections/base'
 
 });
 
+
 define('text!ev-script/templates/unit-selects.html',[],function () { return '<form id="<%= formId %>" class="unit-selects">\n    <label for="<%= orgSelectId %>">Organization:</label>\n    <select id="<%= orgSelectId %>" class="form-select organizations" title="Select Organization"></select>\n    <label for="<%= libSelectId %>">Library:</label>\n    <select id="<%= libSelectId %>" class="form-select libraries" title="Select Library"></select>\n    <input type="submit" value="Go" class="form-submit" />\n</form>\n';});
 
 define('ev-script/views/unit-selects',['require','jquery','underscore','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','text!ev-script/templates/unit-selects.html'],function(require) {
@@ -1575,7 +1602,9 @@ define('ev-script/views/unit-selects',['require','jquery','underscore','ev-scrip
 
 define("ev-scroll-loader", function(){});
 
+
 define('text!ev-script/templates/results.html',[],function () { return '<div class="total">Search returned <%= totalResults %> results.</div>\n<div class="results">\n    <table class="content-list"></table>\n</div>\n';});
+
 
 define('text!ev-script/templates/no-results.html',[],function () { return '<tr class="odd"><td colspan="2">No results available.</td></tr>\n';});
 
@@ -1770,6 +1799,7 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
 
 });
 
+
 define('text!ev-script/templates/video-embed.html',[],function () { return '<iframe src="<%= src %>"\n        frameborder="0"\n        style="width: <%= width %>px;height:<%= (parseInt(height, 10) + 56) %>px;"\n        allowfullscreen>\n</iframe>\n';});
 
 define('ev-script/views/video-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/video-embed.html'],function(require) {
@@ -1784,11 +1814,12 @@ define('ev-script/views/video-embed',['require','underscore','ev-script/views/ba
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             // Width and height really should be set by now...but use a reasonable default if not
-            var width = (this.model.get('width') ? this.model.get('width') : '640');
-            var height = (this.model.get('height') ? this.model.get('height') : '360');
+            var width = (this.model.get('width') ? this.model.get('width') : '640'),
+                height = (this.model.get('height') ? this.model.get('height') : '360'),
+                showTitle = this.model.get('showtitle');
             var src = this.config.ensembleUrl + '/app/plugin/embed.aspx?ID=' + this.model.get('id') +
                 '&autoPlay=' + this.model.get('autoplay') +
-                '&displayTitle=' + this.model.get('showtitle') +
+                '&displayTitle=' + showTitle +
                 '&hideControls=' + this.model.get('hidecontrols') +
                 '&showCaptions=' + this.model.get('showcaptions') +
                 '&width=' + width +
@@ -1796,7 +1827,7 @@ define('ev-script/views/video-embed',['require','underscore','ev-script/views/ba
             this.$el.html(this.template({
                 src: src,
                 width: width,
-                height: height
+                height: (showTitle ? height + 25 : height)
             }));
         }
     });
@@ -1897,8 +1928,8 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/models
             var dimsRaw = this.get('dimensions') || "640x360",
                 dimsStrs = dimsRaw.split('x'),
                 dims = [];
-            dims[0] = parseInt(dimsStrs[0], 10) || 640;
-            dims[1] = parseInt(dimsStrs[1], 10) || 360;
+            dims[0] = this.isAudio() ? 400 : (parseInt(dimsStrs[0], 10) || 640);
+            dims[1] = this.isAudio() ? 26 : (parseInt(dimsStrs[1], 10) || 360);
             return dims;
         },
         getRatio: function() {
@@ -1910,6 +1941,9 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/models
         },
         getHeight: function() {
             return this.getDims()[1];
+        },
+        isAudio: function() {
+            return (/^audio/i).test(this.get('contentType') || '');
         },
         parse: function(response) {
             if (_.isArray(response.dataSet.encodings)) {
@@ -1979,6 +2013,7 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
     });
 
 });
+
 
 define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <img src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/, \'width=150\') %>" alt="<%- item.get(\'Title\') %> thumbnail image"/>\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%- item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><span>Choose</span></a>\n            <a class="action-preview" href="#" title="Preview: <%- item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><span>Preview:  item.get(\'Title\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="Preview: <%-item.get(\'Title\') %>" href="#" rel="<%= item.get(\'ID\') %>"><%- item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="desc"><td class="label">Description</td><td class="value"><%- item.get(\'Description\') %></td></tr>\n                <tr><td class="label">Date Added</td><td class="value"><%- new Date(item.get(\'AddedOn\')).toLocaleString() %></td></tr>\n                <tr><td class="label">Keywords</td><td class="value"><%- item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label">Library</td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
 
@@ -2164,6 +2199,7 @@ define('ev-script/views/workflow-select',['require','underscore','ev-script/view
 
 });
 
+
 define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <select class="form-select" name="MediaWorkflowID"></select>\n    <div class="fieldWrap">\n        <label for="Title">Title *</label>\n        <input class="form-text" type="text" name="Title" id="Title" />\n    </div>\n    <div class="fieldWrap">\n        <label for="Description">Description</label>\n        <textarea class="form-text" name="Description" id="Description" />\n    </div>\n    <div class="upload"></div>\n</form>\n';});
 
 /*global window,plupload,navigator*/
@@ -2211,7 +2247,7 @@ define('ev-script/views/upload',['require','jquery','underscore','ev-script/view
             return Math.min(400, $(window).height() - this.config.dialogMargin);
         },
         decorateUploader: function() {
-            var extensions = this.workflows.settings.SupportedVideo.replace(/\*\./g, '').replace(/;/g, ',').replace(/\s/g, ''),
+            var extensions = "",
                 selected = this.workflowSelect.getSelected(),
                 maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10); //,
                 // runtimes = 'html5,html4',
@@ -2229,6 +2265,14 @@ define('ev-script/views/upload',['require','jquery','underscore','ev-script/view
             //     runtimes = 'flash,html5,html4';
             // }
 
+            if (this.workflows.settings.SupportedVideo) {
+                extensions += this.workflows.settings.SupportedVideo.replace(/\*\./g, '').replace(/;/g, ',').replace(/\s/g, '');
+            }
+
+            if (this.workflows.settings.SupportedAudio) {
+                extensions += this.workflows.settings.SupportedAudio.replace(/\*\./g, '').replace(/;/g, ',').replace(/\s/g, '');
+            }
+
             if (this.$upload.pluploadQueue()) {
                 this.$upload.pluploadQueue().destroy();
             }
@@ -2238,6 +2282,7 @@ define('ev-script/views/upload',['require','jquery','underscore','ev-script/view
                 runtimes: 'html5,html4,flash', //runtimes,
                 max_file_size: maxUploadSize > 0 ? maxUploadSize + 'gb' : '12gb',
                 max_file_count: 1,
+                max_retries: 5,
                 chunk_size: '2mb',
                 unique_names: false,
                 multiple_queues: false,
@@ -2253,6 +2298,9 @@ define('ev-script/views/upload',['require','jquery','underscore','ev-script/view
                         $('.plupload_container', this.$upload).removeAttr('title');
                         // Change text since we only allow single file upload
                         $('.plupload_add', this.$upload).text('Add file');
+                    }, this),
+                    PostInit: _.bind(function(up, info) {
+                        // Change text since we only allow single file upload
                         $('.plupload_droptext', this.$upload).text('Drag file here.');
                     }, this),
                     UploadFile: _.bind(function(up, file) {
@@ -2568,7 +2616,9 @@ define('ev-script/views/settings',['require','underscore','ev-script/views/base'
 
 });
 
-define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size">Size</label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original">Original</option>\n            </select>\n        </div>\n        <div class="fieldWrap">\n            <label for="showtitle">Show Title</label>\n            <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="autoplay">Auto Play</label>\n            <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="showcaptions">Show Captions</label>\n            <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="hidecontrols">Hide Controls</label>\n            <input id="hidecontrols" class="form-checkbox" <% if (model.get(\'hidecontrols\')) { print(\'checked="checked"\'); } %>  name="hidecontrols" type="checkbox"/>\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="Cancel"/>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
+
+define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size">Size</label>\n            <select class="form-select size" id="size" name="size" <% if (isAudio) { print(\'disabled\'); } %> >\n                <option value="original">Original</option>\n            </select>\n        </div>\n        <div class="fieldWrap">\n            <label for="showtitle">Show Title</label>\n            <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="autoplay">Auto Play</label>\n            <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="showcaptions">Show Captions</label>\n            <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="fieldWrap">\n            <label for="hidecontrols">Hide Controls</label>\n            <input id="hidecontrols" class="form-checkbox" <% if (model.get(\'hidecontrols\')) { print(\'checked="checked"\'); } %>  name="hidecontrols" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="Cancel"/>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
+
 
 define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(sizes, function(size) { %>\n    <option value="<%= size %>" <% if (size === target) { print(\'selected="selected"\'); } %>><%= size %></option>\n<% }); %>\n';});
 
@@ -2601,7 +2651,7 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
                 'hidecontrols': this.$('#hidecontrols').is(':checked')
             };
             var sizeVal = this.$('#size').val();
-            if (sizeVal === 'original') {
+            if (!sizeVal || sizeVal === 'original') {
                 // isNew signifies that the encoding hasn't been fetched yet
                 if (this.encoding && !this.encoding.isNew()) {
                     _.extend(attrs, {
@@ -2642,9 +2692,12 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
         },
         render: function() {
             this.$el.html(this.template({
-                model: this.field.model
+                model: this.field.model,
+                isAudio: this.encoding && this.encoding.isAudio()
             }));
-            this.renderSize();
+            if (this.encoding && !this.encoding.isAudio()) {
+                this.renderSize();
+            }
             var content = this.field.model.get('content');
             this.$el.dialog({
                 title: (content ? content.Title : this.field.model.get('id')),
@@ -2660,6 +2713,7 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
     });
 
 });
+
 
 define('text!ev-script/templates/playlist-embed.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%= modelId %>"\n        frameborder="0"\n        style="width:800px;height:850px;"\n        allowfullscreen>\n</iframe>\n';});
 
@@ -2698,6 +2752,7 @@ define('ev-script/views/playlist-preview',['require','ev-script/views/preview','
     });
 
 });
+
 
 define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <span>Choose</span>\n            </a>\n            <a class="action-preview" href="#" title="Preview: <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <span>Preview: <%- item.get(\'Name\') %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
 
@@ -2871,6 +2926,7 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
 
 });
 
+
 define('text!ev-script/templates/playlist-settings.html',[],function () { return '<h3>TODO</h3>\n<p>\n    <%- json %>\n</p>\n';});
 
 define('ev-script/views/playlist-settings',['require','underscore','ev-script/views/settings','jquery-ui','text!ev-script/templates/playlist-settings.html'],function(require) {
@@ -2902,6 +2958,7 @@ define('ev-script/views/playlist-settings',['require','underscore','ev-script/vi
     });
 
 });
+
 
 define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="Media thumbnail" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%- name %></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Change <%= label %>"><span>Change <%= label %><span></a>\n        <a href="#" class="action-preview" title="Preview: <%- name %>"><span>Preview: <%- name %><span></a>\n        <!-- TODO - temporarily disabled playlist settings until it is implemented -->\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-options" title="<%= label %> Embed Options"><span><%= label %> Embed Options<span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="Remove <%= label %>"><span>Remove <%= label %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em>Add <%= label %></em></div>\n    <div class="ev-field-actions">\n        <a href="#" class="action-choose" title="Choose <%= label %>"><span>Choose <%= label %><span></a>\n    </div>\n<% } %>\n';});
 
@@ -3217,6 +3274,7 @@ define('ev-script/auth/base/auth',['require','jquery','underscore','backbone','e
 
 });
 
+
 define('text!ev-script/auth/basic/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text"type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text"type="password"/>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
 /*global window*/
@@ -3336,8 +3394,8 @@ define('ev-script/auth/basic/auth',['require','jquery','underscore','backbone','
             logout: function() {
                 var deferred = $.Deferred();
                 var cookieOptions = { path: this.config.authPath };
-                $.cookie(this.config.ensembleUrl + '-user', null, _.extend({}, cookieOptions));
-                $.cookie(this.config.ensembleUrl + '-pass', null, _.extend({}, cookieOptions));
+                $.removeCookie(this.config.ensembleUrl + '-user', _.extend({}, cookieOptions));
+                $.removeCookie(this.config.ensembleUrl + '-pass', _.extend({}, cookieOptions));
                 this.user = null;
                 this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
                 deferred.resolve();
@@ -3358,7 +3416,8 @@ define('ev-script/auth/basic/auth',['require','jquery','underscore','backbone','
     return BasicAuth;
 });
 
-define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="domain">Domain</label>\n            <select id="domain" name="domain" class="form-select"></select>\n        </div>\n        <div class="fieldWrap">\n            <label for="remember">Remember Me</label>\n            <input id="remember" name="remember" type="checkbox"></input>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n            <div class="loader"></div>\n        </div>\n    </fieldset>\n</form>\n';});
+
+define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="provider">Identity Provider</label>\n            <select id="provider" name="provider" class="form-select"></select>\n        </div>\n        <div class="fieldWrap">\n            <label for="remember">Remember Me</label>\n            <input id="remember" name="remember" type="checkbox"></input>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n            <div class="loader"></div>\n        </div>\n    </fieldset>\n</form>\n';});
 
 /*global window*/
 define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/forms/template.html','text!ev-script/templates/options.html'],function(require, template) {
@@ -3385,22 +3444,23 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
             this.auth = options.auth;
         },
         render: function() {
-            var $html = $(this.template());
-            var $select = $('#domain', $html).append(this.optionsTemplate({
-                collection: this.collection,
-                // FIXME - need to know the default to select here
-                selectedId: null
-            }));
+            var $html = $(this.template()),
+                $select = $('#provider', $html).append(this.optionsTemplate({
+                    collection: this.collection,
+                    selectedId: this.config.defaultProvider
+                }));
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
 
             // Handle loading indicator in form
-            var $loader = $('div.loader', $html);
-            $loader.on('ajaxSend', _.bind(function(e, xhr, settings) {
-                $loader.addClass('loading');
-            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
-                $loader.removeClass('loading');
-            }, this));
+            var $loader = $('div.loader', $html),
+                loadingOn = _.bind(function(e, xhr, settings) {
+                    $loader.addClass('loading');
+                }, this),
+                loadingOff = _.bind(function(e, xhr, settings) {
+                    $loader.removeClass('loading');
+                }, this);
+            $(window.document).on('ajaxSend', loadingOn).on('ajaxComplete', loadingOff);
 
             this.$dialog.dialog({
                 title: 'Ensemble Video Login - ' + this.config.ensembleUrl,
@@ -3414,7 +3474,7 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
                     this.$dialog.html($html);
                 }, this),
                 close: _.bind(function(event, ui) {
-                    $loader.off('ajaxSend').off('ajaxComplete');
+                    $(window.document).off('ajaxSend', loadingOn).off('ajaxComplete', loadingOff);
                     this.$dialog.dialog('destroy').remove();
                     this.appEvents.trigger('hidePickers');
                 }, this)
@@ -3427,7 +3487,7 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
                     this.auth.login({
                         username: username,
                         password: password,
-                        authSourceId: $('#domain :selected', $form).val(),
+                        authSourceId: $('#provider :selected', $form).val(),
                         persist: $('#remember', $form).is(':checked')
                     }).then(_.bind(function() {
                         this.$dialog.dialog('destroy').remove();
@@ -3542,6 +3602,7 @@ define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/a
     return FormsAuth;
 
 });
+
 
 define('text!ev-script/auth/none/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <h3>You are unauthorized to access this content.</h3>\n</form>\n';});
 
@@ -3676,9 +3737,12 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
             // This can be 'forms', 'basic' (default) or 'none' (in which case
             // an access denied message is displayed and user is not prompted
             // to authenticate).
-            // authType: 'forms'
+            authType: 'basic',
+            // Set this in order to select the default identity provider in the
+            // forms auth identity provider dropdown.
+            defaultProvider: '',
             // Location for plupload flash runtime
-            pluploadFlashPath: ''
+            pluploadFlashPath: '',
         };
 
         // Add our configuration to the app cache...this is specific to this
@@ -3767,6 +3831,7 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
     };
 
 });
+
     // Register in the values from the outer closure for common dependencies
     // as local almond modules
     define('jquery', function () {

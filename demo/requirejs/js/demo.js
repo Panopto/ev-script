@@ -3,7 +3,6 @@
 
     'use strict';
 
-    /*global document*/
     require.config({
         baseUrl: '../../lib/bower',
         paths: {
@@ -12,18 +11,15 @@
             'jquery-ui': 'jquery-ui/jquery-ui',
             'jquery.cookie': 'jquery.cookie/jquery.cookie',
             'jquery.plupload.queue': 'plupload/js/jquery.plupload.queue/jquery.plupload.queue',
-            'plupload': 'plupload/js/plupload.full',
-            'underscore': 'lodash/dist/lodash.underscore',
+            'moxie': 'plupload/js/moxie',
+            'plupload': 'plupload/js/plupload.dev',
+            'underscore': 'lodash/lodash',
             'backbone': 'backbone/backbone',
             'ev-config': '../../ev-config'
         },
         shim: {
-            'jquery': {
-                exports: 'jQuery'
-            },
-            'jquery-ui': ['jquery'],
-            'jquery.cookie': ['jquery'],
-            'plupload': [],
+            'moxie': [],
+            'plupload': ['moxie'],
             'jquery.plupload.queue': ['jquery', 'plupload'],
             'underscore': {
                 exports: '_'
@@ -58,7 +54,7 @@
             }
         });
 
-        $(document).ready(function() {
+        $(window.document).ready(function() {
             app.done(function() {
                 app.handleField($('#videoWrap')[0], new EV.VideoSettings(), '#video');
                 app.handleField($('#playlistWrap')[0], new EV.PlaylistSettings(), '#playlist');

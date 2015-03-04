@@ -1,3 +1,4 @@
+/*global window*/
 define(function(require) {
 
     'use strict';
@@ -26,7 +27,7 @@ define(function(require) {
                 appId: this.appId
             });
             var $loader = this.$('div.loader');
-            $loader.on('ajaxSend', _.bind(function(e, xhr, settings) {
+            $(window.document).on('ajaxSend', _.bind(function(e, xhr, settings) {
                 if (this === settings.picker) {
                     $loader.addClass('loading');
                 }

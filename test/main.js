@@ -15,19 +15,16 @@
             'jquery-ui': 'jquery-ui/jquery-ui',
             'jquery.cookie': 'jquery.cookie/jquery.cookie',
             'jquery.plupload.queue': 'plupload/js/jquery.plupload.queue/jquery.plupload.queue',
-            'plupload': 'plupload/js/plupload.full',
+            'moxie': 'plupload/js/moxie',
+            'plupload': 'plupload/js/plupload.dev',
             'text': 'text/text',
-            'underscore': 'lodash/dist/lodash.underscore',
+            'underscore': 'lodash/lodash',
             'backbone': 'backbone/backbone'
         },
         shim: {
-            'jquery': {
-                exports: 'jQuery'
-            },
-            'jquery-ui': ['jquery'],
-            'jquery.cookie': ['jquery'],
-            'plupload': [],
-            'jquery.ui.plupload': ['jquery', 'plupload'],
+            'moxie': [],
+            'plupload': ['moxie'],
+            'jquery.plupload.queue': ['jquery', 'plupload'],
             'underscore': {
                 exports: '_'
             },

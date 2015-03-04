@@ -2,7 +2,7 @@
   "name": "ev-script",
   "title": "Ensemble Video Integration Library",
   "description": "JavaScript library for integration with Ensemble Video.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "homepage": "https://github.com/jmpease/ev-script",
   "author": {
     "name": "Jim Pease",
@@ -32,16 +32,22 @@
     "test": "grunt test"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-contrib-jshint": "~0.6.0",
-    "grunt-contrib-watch": "~0.4.4",
-    "grunt-contrib-qunit": "~0.2.2",
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-compass": "~0.3.0",
-    "grunt-requirejs": "~0.3.5",
-    "connect": "~2.8.4",
-    "request": "~2.22.0",
-    "lodash": "~1.3.1"
+    "grunt": "~0.4.5",
+    "grunt-contrib-jshint": "~0.11.0",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-contrib-qunit": "~0.5.2",
+    "grunt-contrib-clean": "~0.6.0",
+    "grunt-contrib-compass": "~1.0.1",
+    "grunt-requirejs": "~0.4.2",
+    "connect": "~3.3.4",
+    "request": "~2.53.0",
+    "underscore": "~3.3.1",
+    "body-parser": "~1.12.0",
+    "cookie-parser": "~1.3.4",
+    "serve-static": "~1.9.1",
+    "serve-index": "~1.6.2",
+    "morgan": "~1.5.1",
+    "errorhandler": "~1.3.4"
   },
   "keywords": []
 }

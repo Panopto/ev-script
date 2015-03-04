@@ -43,7 +43,7 @@ define(function(require) {
             return Math.min(400, $(window).height() - this.config.dialogMargin);
         },
         decorateUploader: function() {
-            var extensions = this.workflows.settings.SupportedVideo.replace(/\*\./g, '').replace(/;/g, ',').replace(/\s/g, ''),
+            var extensions = "",
                 selected = this.workflowSelect.getSelected(),
                 maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10); //,
                 // runtimes = 'html5,html4',
@@ -61,6 +61,14 @@ define(function(require) {
             //     runtimes = 'flash,html5,html4';
             // }
 
+            if (this.workflows.settings.SupportedVideo) {
+                extensions += this.workflows.settings.SupportedVideo.replace(/\*\./g, '').replace(/;/g, ',').replace(/\s/g, '');
+            }
+
+            if (this.workflows.settings.SupportedAudio) {
+                extensions += this.workflows.settings.SupportedAudio.replace(/\*\./g, '').replace(/;/g, ',').replace(/\s/g, '');
+            }
+
             if (this.$upload.pluploadQueue()) {
                 this.$upload.pluploadQueue().destroy();
             }
@@ -70,6 +78,7 @@ define(function(require) {
                 runtimes: 'html5,html4,flash', //runtimes,
                 max_file_size: maxUploadSize > 0 ? maxUploadSize + 'gb' : '12gb',
                 max_file_count: 1,
+                max_retries: 5,
                 chunk_size: '2mb',
                 unique_names: false,
                 multiple_queues: false,
@@ -85,6 +94,9 @@ define(function(require) {
                         $('.plupload_container', this.$upload).removeAttr('title');
                         // Change text since we only allow single file upload
                         $('.plupload_add', this.$upload).text('Add file');
+                    }, this),
+                    PostInit: _.bind(function(up, info) {
+                        // Change text since we only allow single file upload
                         $('.plupload_droptext', this.$upload).text('Drag file here.');
                     }, this),
                     UploadFile: _.bind(function(up, file) {

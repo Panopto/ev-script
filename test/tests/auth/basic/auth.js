@@ -20,6 +20,7 @@ define(function(require) {
                     }, this);
                 }
             },
+            // Our test util setup will automatically authenticate for other tests...disable that in this case as we're testing auth
             authenticate: false
         }),
         teardown: testUtil.teardownHelper()
@@ -118,7 +119,7 @@ define(function(require) {
     });
 
     q.asyncTest('valid path test', 1, function() {
-        this.auth.config.authPath = this.config.proxyPath;
+        this.auth.config.authPath = this.config.authPath;
         this.auth.login({
             username: evSettings.testUser,
             password: evSettings.testPass

@@ -47,7 +47,7 @@ define(function(require) {
 
     q.asyncTest('invalid credentials test', 0, function() {
         if (this.info.get('ApplicationVersion')) {
-            q.expect(3);
+            q.expect(2);
             q.stop(1);
             var username = 'foo',
                 password = 'bar';
@@ -59,9 +59,6 @@ define(function(require) {
                 q.ok(!this.auth.isAuthenticated());
                 q.strictEqual(this.auth.getUser(), null);
                 this.auth.logout()
-                .fail(function() {
-                    q.ok(true);
-                })
                 .always(function() {
                     q.start(1);
                 });

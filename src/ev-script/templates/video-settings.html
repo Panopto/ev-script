@@ -2,7 +2,7 @@
     <fieldset>
         <div class="fieldWrap">
             <label for="size">Size</label>
-            <select class="form-select size" id="size" name="size">
+            <select class="form-select size" id="size" name="size" <% if (isAudio) { print('disabled'); } %> >
                 <option value="original">Original</option>
             </select>
         </div>
@@ -16,11 +16,11 @@
         </div>
         <div class="fieldWrap">
             <label for="showcaptions">Show Captions</label>
-            <input id="showcaptions" class="form-checkbox" <% if (model.get('showcaptions')) { print('checked="checked"'); } %>  name="showcaptions" type="checkbox"/>
+            <input id="showcaptions" class="form-checkbox" <% if (model.get('showcaptions')) { print('checked="checked"'); } %>  name="showcaptions" type="checkbox" <% if (isAudio) { print('disabled'); } %> />
         </div>
         <div class="fieldWrap">
             <label for="hidecontrols">Hide Controls</label>
-            <input id="hidecontrols" class="form-checkbox" <% if (model.get('hidecontrols')) { print('checked="checked"'); } %>  name="hidecontrols" type="checkbox"/>
+            <input id="hidecontrols" class="form-checkbox" <% if (model.get('hidecontrols')) { print('checked="checked"'); } %>  name="hidecontrols" type="checkbox" <% if (isAudio) { print('disabled'); } %> />
         </div>
         <div class="form-actions">
             <input type="button" class="form-submit action-cancel" value="Cancel"/>

@@ -53,8 +53,8 @@ define(function(require) {
             logout: function() {
                 var deferred = $.Deferred();
                 var cookieOptions = { path: this.config.authPath };
-                $.cookie(this.config.ensembleUrl + '-user', null, _.extend({}, cookieOptions));
-                $.cookie(this.config.ensembleUrl + '-pass', null, _.extend({}, cookieOptions));
+                $.removeCookie(this.config.ensembleUrl + '-user', _.extend({}, cookieOptions));
+                $.removeCookie(this.config.ensembleUrl + '-pass', _.extend({}, cookieOptions));
                 this.user = null;
                 this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
                 deferred.resolve();

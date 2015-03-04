@@ -26,8 +26,8 @@ define(function(require) {
             var dimsRaw = this.get('dimensions') || "640x360",
                 dimsStrs = dimsRaw.split('x'),
                 dims = [];
-            dims[0] = parseInt(dimsStrs[0], 10) || 640;
-            dims[1] = parseInt(dimsStrs[1], 10) || 360;
+            dims[0] = this.isAudio() ? 400 : (parseInt(dimsStrs[0], 10) || 640);
+            dims[1] = this.isAudio() ? 26 : (parseInt(dimsStrs[1], 10) || 360);
             return dims;
         },
         getRatio: function() {
@@ -39,6 +39,9 @@ define(function(require) {
         },
         getHeight: function() {
             return this.getDims()[1];
+        },
+        isAudio: function() {
+            return (/^audio/i).test(this.get('contentType') || '');
         },
         parse: function(response) {
             if (_.isArray(response.dataSet.encodings)) {
