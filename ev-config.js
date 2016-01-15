@@ -15,7 +15,7 @@
         // urlCallback: function(url) {
         //     return proxyPath + '?ensembleUrl=' + encodeURIComponent(ensembleUrl) + '&request=' + encodeURIComponent(url);
         // },
-        pluploadFlashPath: '/lib/bower/plupload/js/plupload.flash.swf',
+        pluploadFlashPath: '/bower_components/plupload/js/plupload.flash.swf',
         // Used during testing
         // testUser: 'hasp',
         // testPass: 'hasp'

@@ -4,10 +4,10 @@
     'use strict';
 
     require.config({
-        baseUrl: '../../lib/bower',
+        baseUrl: '../../bower_components',
         paths: {
             'ev-script': '../../dist/ev-script',
-            'jquery':  'jquery/jquery',
+            'jquery':  'jquery/dist/jquery',
             'jquery-ui': 'jquery-ui/jquery-ui',
             'jquery.cookie': 'jquery.cookie/jquery.cookie',
             'jquery.plupload.queue': 'plupload/js/jquery.plupload.queue/jquery.plupload.queue',

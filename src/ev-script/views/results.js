@@ -29,7 +29,6 @@ define(function(require) {
                 return this.resultTemplate({
                     item: item,
                     index: index
-
                 });
             }
         },

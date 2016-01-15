@@ -5,13 +5,13 @@
     QUnit.config.autostart = false;
 
     require.config({
-        baseUrl: '../lib/bower',
+        baseUrl: '../bower_components',
         paths: {
             'ev-script': '../../src/ev-script',
             'ev-config': '../../ev-config',
-            'ev-scroll-loader': '../ev-scroll-loader',
+            'ev-scroll-loader': 'ev-scroll-loader/dist/jquery.ev-scroll-loader',
             'test': '../../test',
-            'jquery':  'jquery/jquery',
+            'jquery':  'jquery/dist/jquery',
             'jquery-ui': 'jquery-ui/jquery-ui',
             'jquery.cookie': 'jquery.cookie/jquery.cookie',
             'jquery.plupload.queue': 'plupload/js/jquery.plupload.queue/jquery.plupload.queue',

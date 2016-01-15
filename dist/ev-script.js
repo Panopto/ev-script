@@ -1,8 +1,8 @@
 /**
- * ev-script 0.3.1 2015-03-04
+ * ev-script 1.0.0 2016-01-15
  * Ensemble Video Integration Library
- * https://github.com/jmpease/ev-script
- * Copyright (c) 2015 Symphony Video, Inc.
+ * https://github.com/ensembleVideo/ev-script
+ * Copyright (c) 2016 Symphony Video, Inc.
  * Licensed MIT, GPL-2.0
  */
 (function (root, factory) {
@@ -441,7 +441,7 @@ define("almond", function(){});
 
 define('ev-script/models/video-settings',['backbone'], function(Backbone) {
 
-    
+    'use strict';
 
     return Backbone.Model.extend({
         defaults: {
@@ -458,7 +458,7 @@ define('ev-script/models/video-settings',['backbone'], function(Backbone) {
 
 define('ev-script/models/playlist-settings',['backbone'], function(Backbone) {
 
-    
+    'use strict';
 
     return Backbone.Model.extend({
         defaults: {
@@ -470,7 +470,7 @@ define('ev-script/models/playlist-settings',['backbone'], function(Backbone) {
 
 define('ev-script/util/events',['require','underscore','backbone'],function(require) {
 
-    
+    'use strict';
 
     var events = [],
         _ = require('underscore'),
@@ -497,7 +497,7 @@ define('ev-script/util/events',['require','underscore','backbone'],function(requ
 
 define('ev-script/util/cache',['require','jquery','underscore','backbone'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -579,7 +579,7 @@ define('ev-script/util/cache',['require','jquery','underscore','backbone'],funct
 
 define('ev-script/views/base',['require','jquery','underscore','backbone','ev-script/util/events','ev-script/util/cache'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -624,7 +624,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
   java, location, Components, FileUtils */
 
 define('text',['module'], function (module) {
-    
+    'use strict';
 
     var text, fs, Cc, Ci, xpcIsWindows,
         progIds = ['Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'],
@@ -1010,7 +1010,7 @@ define('text!ev-script/templates/hider.html',[],function () { return '<a class="
 
 define('ev-script/views/hider',['require','underscore','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
 
-    
+    'use strict';
 
     var _ = require('underscore'),
         BaseView = require('ev-script/views/base');
@@ -1061,7 +1061,7 @@ define('text!ev-script/templates/picker.html',[],function () { return '<div id="
 /*global window*/
 define('ev-script/views/picker',['require','jquery','underscore','ev-script/views/base','ev-script/views/hider','text!ev-script/templates/picker.html'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -1141,7 +1141,7 @@ define('text!ev-script/templates/search.html',[],function () { return '<form>\n 
 
 define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
 
-    
+    'use strict';
 
     var _ = require('underscore'),
         BaseView = require('ev-script/views/base');
@@ -1195,7 +1195,7 @@ define('text!ev-script/templates/library-type-select.html',[],function () { retu
 
 define('ev-script/views/library-type-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
 
-    
+    'use strict';
 
     var _ = require('underscore'),
         BaseView = require('ev-script/views/base');
@@ -1233,7 +1233,7 @@ define('text!ev-script/templates/options.html',[],function () { return '<% colle
 
 define('ev-script/views/organization-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
 
-    
+    'use strict';
 
     var _ = require('underscore'),
         BaseView = require('ev-script/views/base');
@@ -1261,7 +1261,7 @@ define('ev-script/views/organization-select',['require','underscore','ev-script/
 
 define('ev-script/collections/base',['require','jquery','underscore','backbone','ev-script/util/cache'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -1336,7 +1336,7 @@ define('ev-script/collections/base',['require','jquery','underscore','backbone',
 
 define('ev-script/collections/organizations',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
 
-    
+    'use strict';
 
     var BaseCollection = require('ev-script/collections/base'),
         cacheUtil = require('ev-script/util/cache');
@@ -1371,7 +1371,7 @@ define('ev-script/collections/organizations',['require','ev-script/collections/b
 
 define('ev-script/views/library-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
 
-    
+    'use strict';
 
     var _ = require('underscore'),
         BaseView = require('ev-script/views/base');
@@ -1399,7 +1399,7 @@ define('ev-script/views/library-select',['require','underscore','ev-script/views
 
 define('ev-script/collections/libraries',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
 
-    
+    'use strict';
 
     var BaseCollection = require('ev-script/collections/base'),
         cacheUtil = require('ev-script/util/cache');
@@ -1447,7 +1447,7 @@ define('text!ev-script/templates/unit-selects.html',[],function () { return '<fo
 
 define('ev-script/views/unit-selects',['require','jquery','underscore','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','text!ev-script/templates/unit-selects.html'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -1541,16 +1541,15 @@ define('ev-script/views/unit-selects',['require','jquery','underscore','ev-scrip
 });
 
 /**
- * ev-scroll-loader 0.1.0 2013-01-31
+ * ev-scroll-loader 1.0.0 2016-01-15
  * Ensemble Video jQuery Scroll Loader Plugin
- * https://github.com/jmpease/ev-scroll-loader
- * Copyright (c) 2013 Symphony Video, Inc.
+ * https://github.com/ensembleVideo/ev-scroll-loader
+ * Copyright (c) 2016 Symphony Video, Inc.
  * Licensed MIT, GPL-2.0
  */
-/*global jQuery*/
 (function($) {
 
-    
+    'use strict';
 
     var defaults = {
         callback: function() {}
@@ -1610,7 +1609,7 @@ define('text!ev-script/templates/no-results.html',[],function () { return '<tr c
 
 define('ev-script/views/results',['require','jquery','underscore','ev-script/views/base','ev-scroll-loader','text!ev-script/templates/results.html','text!ev-script/templates/no-results.html'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -1639,7 +1638,6 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
                 return this.resultTemplate({
                     item: item,
                     index: index
-
                 });
             }
         },
@@ -1728,7 +1726,7 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
 /*global window*/
 define('ev-script/views/preview',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','jquery-ui'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -1804,7 +1802,7 @@ define('text!ev-script/templates/video-embed.html',[],function () { return '<ifr
 
 define('ev-script/views/video-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/video-embed.html'],function(require) {
 
-    
+    'use strict';
 
     var _ = require('underscore'),
         BaseView = require('ev-script/views/base');
@@ -1836,7 +1834,7 @@ define('ev-script/views/video-embed',['require','underscore','ev-script/views/ba
 
 define('ev-script/models/base',['require','jquery','underscore','backbone','ev-script/util/cache','ev-script/collections/base'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -1902,7 +1900,7 @@ define('ev-script/models/base',['require','jquery','underscore','backbone','ev-s
 
 define('ev-script/models/video-encoding',['require','backbone','ev-script/models/base','underscore','ev-script/util/cache'],function(require) {
 
-    
+    'use strict';
 
     var Backbone = require('backbone'),
         BaseModel = require('ev-script/models/base'),
@@ -1971,7 +1969,7 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/models
 
 define('ev-script/views/video-preview',['require','underscore','ev-script/views/preview','ev-script/views/video-embed','ev-script/models/video-encoding'],function(require) {
 
-    
+    'use strict';
 
     var _ = require('underscore'),
         PreviewView = require('ev-script/views/preview'),
@@ -2019,7 +2017,7 @@ define('text!ev-script/templates/video-result.html',[],function () { return '<tr
 
 define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','text!ev-script/templates/video-result.html'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -2064,7 +2062,7 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
 
 define('ev-script/collections/videos',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
 
-    
+    'use strict';
 
     var BaseCollection = require('ev-script/collections/base'),
         cacheUtil = require('ev-script/util/cache');
@@ -2119,7 +2117,7 @@ define('ev-script/collections/videos',['require','ev-script/collections/base','e
 
 define('ev-script/collections/media-workflows',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
 
-    
+    'use strict';
 
     var BaseCollection = require('ev-script/collections/base'),
         cacheUtil = require('ev-script/util/cache');
@@ -2170,7 +2168,7 @@ define('ev-script/collections/media-workflows',['require','ev-script/collections
 
 define('ev-script/views/workflow-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
 
-    
+    'use strict';
 
     var _ = require('underscore'),
         BaseView = require('ev-script/views/base');
@@ -2205,7 +2203,7 @@ define('text!ev-script/templates/upload.html',[],function () { return '<form cla
 /*global window,plupload,navigator*/
 define('ev-script/views/upload',['require','jquery','underscore','ev-script/views/base','backbone','ev-script/views/workflow-select','ev-script/models/video-settings','plupload','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -2419,7 +2417,7 @@ define('ev-script/views/upload',['require','jquery','underscore','ev-script/view
 
 define('ev-script/views/video-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/search','ev-script/views/library-type-select','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos','ev-script/collections/media-workflows','ev-script/views/upload'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -2580,7 +2578,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
 
 define('ev-script/views/settings',['require','underscore','ev-script/views/base','jquery-ui'],function(require) {
 
-    
+    'use strict';
 
     var _ = require('underscore'),
         BaseView = require('ev-script/views/base');
@@ -2625,7 +2623,7 @@ define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(
 /*global window*/
 define('ev-script/views/video-settings',['require','jquery','underscore','ev-script/views/settings','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/sizes.html'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -2719,7 +2717,7 @@ define('text!ev-script/templates/playlist-embed.html',[],function () { return '<
 
 define('ev-script/views/playlist-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/playlist-embed.html'],function(require) {
 
-    
+    'use strict';
 
     var _ = require('underscore'),
         BaseView = require('ev-script/views/base');
@@ -2739,7 +2737,7 @@ define('ev-script/views/playlist-embed',['require','underscore','ev-script/views
 
 define('ev-script/views/playlist-preview',['require','ev-script/views/preview','ev-script/views/playlist-embed'],function(require) {
 
-    
+    'use strict';
 
     var PreviewView = require('ev-script/views/preview'),
         PlaylistEmbedView = require('ev-script/views/playlist-embed');
@@ -2758,7 +2756,7 @@ define('text!ev-script/templates/playlist-result.html',[],function () { return '
 
 define('ev-script/views/playlist-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/playlist-result.html'],function(require) {
 
-    
+    'use strict';
 
     var _ = require('underscore'),
         $ = require('jquery'),
@@ -2779,7 +2777,7 @@ define('ev-script/views/playlist-results',['require','underscore','jquery','ev-s
 
 define('ev-script/collections/playlists',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
 
-    
+    'use strict';
 
     var BaseCollection = require('ev-script/collections/base'),
         cacheUtil = require('ev-script/util/cache');
@@ -2832,7 +2830,7 @@ define('ev-script/collections/playlists',['require','ev-script/collections/base'
 
 define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/unit-selects','ev-script/views/search','ev-script/views/playlist-results','ev-script/collections/playlists'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -2931,7 +2929,7 @@ define('text!ev-script/templates/playlist-settings.html',[],function () { return
 
 define('ev-script/views/playlist-settings',['require','underscore','ev-script/views/settings','jquery-ui','text!ev-script/templates/playlist-settings.html'],function(require) {
 
-    
+    'use strict';
 
     var _ = require('underscore'),
         SettingsView = require('ev-script/views/settings');
@@ -2964,7 +2962,7 @@ define('text!ev-script/templates/field.html',[],function () { return '<div class
 
 define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/field.html'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -3164,7 +3162,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
 
 define('ev-script/models/app-info',['require','underscore','ev-script/models/base'],function(require) {
 
-    
+    'use strict';
 
     var _ = require('underscore'),
         BaseModel = require('ev-script/models/base');
@@ -3187,7 +3185,7 @@ define('ev-script/models/app-info',['require','underscore','ev-script/models/bas
 
 define('ev-script/models/current-user',['require','underscore','ev-script/models/base'],function(require) {
 
-    
+    'use strict';
 
     var _ = require('underscore'),
         BaseModel = require('ev-script/models/base');
@@ -3213,7 +3211,7 @@ define('ev-script/models/current-user',['require','underscore','ev-script/models
 
 define('ev-script/auth/base/auth',['require','jquery','underscore','backbone','ev-script/util/events','ev-script/util/cache','ev-script/models/current-user'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -3280,7 +3278,7 @@ define('text!ev-script/auth/basic/template.html',[],function () { return '<div c
 /*global window*/
 define('ev-script/auth/basic/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/basic/template.html'],function(require, template) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -3341,7 +3339,7 @@ define('ev-script/auth/basic/view',['require','exports','module','jquery','under
 
 define('ev-script/auth/basic/auth',['require','jquery','underscore','backbone','ev-script/auth/base/auth','ev-script/auth/basic/view','ev-script/collections/organizations'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -3422,7 +3420,7 @@ define('text!ev-script/auth/forms/template.html',[],function () { return '<div c
 /*global window*/
 define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/forms/template.html','text!ev-script/templates/options.html'],function(require, template) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -3503,7 +3501,7 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
 
 define('ev-script/collections/identity-providers',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
 
-    
+    'use strict';
 
     var BaseCollection = require('ev-script/collections/base'),
         cacheUtil = require('ev-script/util/cache'),
@@ -3530,7 +3528,7 @@ define('ev-script/collections/identity-providers',['require','ev-script/collecti
 
 define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/models/current-user','ev-script/auth/forms/view','ev-script/collections/identity-providers'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -3609,7 +3607,7 @@ define('text!ev-script/auth/none/template.html',[],function () { return '<div cl
 /*global window*/
 define('ev-script/auth/none/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery-ui','text!ev-script/auth/none/template.html'],function(require, template) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -3653,7 +3651,7 @@ define('ev-script/auth/none/view',['require','exports','module','jquery','unders
 
 define('ev-script/auth/none/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/auth/none/view'],function(require) {
 
-    
+    'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
@@ -3685,7 +3683,7 @@ define('ev-script/auth/none/auth',['require','jquery','underscore','ev-script/au
 
 define('ev-script',['require','backbone','underscore','jquery','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/models/app-info','ev-script/auth/basic/auth','ev-script/auth/forms/auth','ev-script/auth/none/auth','ev-script/util/events','ev-script/util/cache'],function(require) {
 
-    
+    'use strict';
 
     var Backbone = require('backbone'),
         _ = require('underscore'),

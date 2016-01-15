@@ -1,4 +1,4 @@
 node_modules
-lib/bower
+bower_components
 .sass-cache
 cookie-jar.txt

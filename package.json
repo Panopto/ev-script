@@ -2,27 +2,27 @@
   "name": "ev-script",
   "title": "Ensemble Video Integration Library",
   "description": "JavaScript library for integration with Ensemble Video.",
-  "version": "0.3.1",
-  "homepage": "https://github.com/jmpease/ev-script",
+  "version": "1.0.0",
+  "homepage": "https://github.com/ensembleVideo/ev-script",
   "author": {
     "name": "Jim Pease",
     "email": "jmpease@codeserv.us"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/jmpease/ev-script.git"
+    "url": "git://github.com/ensembleVideo/ev-script.git"
   },
   "bugs": {
-    "url": "https://github.com/jmpease/ev-script/issues"
+    "url": "https://github.com/ensembleVideo/ev-script/issues"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/jmpease/ev-script/blob/master/LICENSE-MIT"
+      "url": "https://github.com/ensembleVideo/ev-script/blob/master/LICENSE-MIT"
     },
     {
       "type": "GPL-2.0",
-      "url": "https://github.com/jmpease/ev-script/blob/master/LICENSE-GPL-2.0"
+      "url": "https://github.com/ensembleVideo/ev-script/blob/master/LICENSE-GPL-2.0"
     }
   ],
   "engines": {
@@ -32,22 +32,23 @@
     "test": "grunt test"
   },
   "devDependencies": {
-    "grunt": "~0.4.5",
-    "grunt-contrib-jshint": "~0.11.0",
-    "grunt-contrib-watch": "~0.6.1",
-    "grunt-contrib-qunit": "~0.5.2",
-    "grunt-contrib-clean": "~0.6.0",
-    "grunt-contrib-compass": "~1.0.1",
-    "grunt-requirejs": "~0.4.2",
-    "connect": "~3.3.4",
-    "request": "~2.53.0",
-    "lodash": "~3.3.1",
-    "body-parser": "~1.12.0",
-    "cookie-parser": "~1.3.4",
-    "serve-static": "~1.9.1",
-    "serve-index": "~1.6.2",
-    "morgan": "~1.5.1",
-    "errorhandler": "~1.3.4"
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.11.3",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-contrib-qunit": "^0.7.0",
+    "grunt-contrib-clean": "^0.7.0",
+    "grunt-contrib-compass": "^1.0.4",
+    "grunt-requirejs": "^0.4.2",
+    "load-grunt-tasks": "^3.4.0",
+    "connect": "^3.4.0",
+    "request": "^2.67.0",
+    "lodash": "^4.0.0",
+    "body-parser": "^1.14.2",
+    "cookie-parser": "^1.4.1",
+    "serve-static": "^1.10.0",
+    "serve-index": "^1.7.2",
+    "morgan": "^1.6.1",
+    "errorhandler": "^1.4.2"
   },
   "keywords": []
 }

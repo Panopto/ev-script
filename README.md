@@ -14,12 +14,7 @@ JavaScript library supporting Ensemble Video integration.
 
 ### Setup
 
-Due to an issue in a grunt-requirejs dependency, it needs to be installed prior
-to installing the remainder of the dev dependencies:
-
-    npm install grunt-requirejs
-
-Then you can install the remainder of the dependencies:
+Install dev dependencies:
 
     npm install
 
@@ -37,19 +32,9 @@ Install bower packages (see component.json file for a list of these):
 _Windows users_: I had to run this a few times to successfully install required
 packages.  YMMV.
 
-Build plupload library:
+Install compass and compass-normalize:
 
-    cd lib/bower/plupload
-    ant
-
-You will also need to build the flash runtime as documented in the readme.md in
-the plupload src package.
-
-_Note_: There is also a batch file to build plupload on Windows.
-
-Install compass-normalize:
-
-    gem install compass-normalize
+    gem install compass compass-normalize
 
 Verify success by running the default grunt task:
 
