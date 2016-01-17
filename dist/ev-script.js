@@ -1,5 +1,5 @@
 /**
- * ev-script 1.0.0 2016-01-15
+ * ev-script 1.0.0 2016-01-16
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2016 Symphony Video, Inc.
@@ -1056,7 +1056,7 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
 });
 
 
-define('text!ev-script/templates/picker.html',[],function () { return '<div id="<%= id %>-hider" class="ev-hider"></div>\n<div id="<%= id %>-filter-block" class="ev-filter-block">\n    <div class="loader"></div>\n    <div class="ev-poweredby">\n        <a tabindex="-1" target="_blank" href="http://ensemblevideo.com"><span>Powered by Ensemble</span></a>\n    </div>\n</div>\n<div id="<%= id %>-results" class="ev-results clearfix"></div>\n';});
+define('text!ev-script/templates/picker.html',[],function () { return '<div id="<%= id %>-hider" class="ev-hider"></div>\n<div id="<%= id %>-filter-block" class="ev-filter-block">\n    <div class="loader"></div>\n</div>\n<div id="<%= id %>-results" class="ev-results clearfix"></div>\n';});
 
 /*global window*/
 define('ev-script/views/picker',['require','jquery','underscore','ev-script/views/base','ev-script/views/hider','text!ev-script/templates/picker.html'],function(require) {

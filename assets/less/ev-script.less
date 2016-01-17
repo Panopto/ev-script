@@ -1,26 +1,20 @@
-@import 'compass/css3';
-@import 'compass/css3/box-shadow';
-@import 'normalize';
+@import (less) '../../bower_components/normalize-css/normalize.css';
 
 // Colors
-$border-color: #999999;
-$ev-yellow: #f9d700;
-$link-color: #0074bd;
-$label-color: #606060;
+@border-color: #999999;
+@ev-yellow: #f9d700;
+@link-color: #0074bd;
+@label-color: #606060;
 
 // Images
-$logo-image: 'images/logo.png';
-$add-image: 'images/add.png';
-$preview-image: 'images/preview.png';
-$settings-image: 'images/settings.png';
-$remove-image: 'images/remove.png';
-$upload-image: 'images/upload.png';
-$poweredby-image: 'images/poweredby.png';
-$loading-image: 'images/loading.gif';
-$loader-image: 'images/loader.gif';
-
-// Box shadow mixin defaults
-$default-box-shadow-color: #333333;
+@logo-image: 'images/logo.png';
+@add-image: 'images/add.png';
+@preview-image: 'images/preview.png';
+@settings-image: 'images/settings.png';
+@remove-image: 'images/remove.png';
+@upload-image: 'images/upload.png';
+@loading-image: 'images/loading.gif';
+@loader-image: 'images/loader.gif';
 
 .form-text,
 .form-select,
@@ -28,20 +22,20 @@ $default-box-shadow-color: #333333;
   padding: 0.2em;
 }
 
-@mixin picker-base {
+.picker-base() {
   padding: 0;
   a {
-    color: $link-color;
+    color: @link-color;
     text-decoration: none;
   }
 }
 
-@mixin loader {
+.loader() {
   div.loader {
     display: inline-block;
   }
   div.loading {
-    background: url($loading-image) no-repeat scroll center center transparent;
+    background: url(@loading-image) no-repeat scroll center center transparent;
     display: inline-block;
     height: 16px;
     margin-left: 1em;
@@ -50,7 +44,7 @@ $default-box-shadow-color: #333333;
   }
 }
 
-@mixin filter-form($max-width) {
+.filter-form(@max-width) {
   label,
   input,
   select {
@@ -59,40 +53,35 @@ $default-box-shadow-color: #333333;
     margin-bottom: 0.4em;
   }
   label {
-    color: $label-color;
-    @media screen and (max-width: $max-width) {
-      display: none;
-    }
-  }
-  div.ev-poweredby {
-    @media screen and (max-width: $max-width - 250px) {
+    color: @label-color;
+    @media screen and (max-width: @max-width) {
       display: none;
     }
   }
 }
 
 .ev-video-picker {
-  @include picker-base;
+  .picker-base();
   div.ev-results {
     td.content-actions {
       min-width: 120px;
     }
   }
   div.ev-filter-block {
-    @include filter-form(1300px);
+    .filter-form(1300px);
   }
 }
 
 .ev-playlist-picker {
-  @include picker-base;
+  .picker-base();
   div.ev-filter-block {
-    @include filter-form(1000px);
+    .filter-form(1000px);
   }
 }
 
 div.ev-hider {
   position: relative;
-  border-bottom: 1px solid $border-color;
+  border-bottom: 1px solid @border-color;
   text-align: center;
   width: 100%;
   .action-logout {
@@ -103,10 +92,11 @@ div.ev-hider {
   a {
     background: #ffffff;
     background-color: #fbfbfb;
-    border-left: 1px solid $border-color;
-    @include border-top-radius(4px);
-    border-right: 1px solid $border-color;
-    border-top: 1px solid $border-color;
+    border-left: 1px solid @border-color;
+    border-right: 1px solid @border-color;
+    border-top: 1px solid @border-color;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
     bottom: -2px;
     display: inline-block;
     padding: 0.2em 1em;
@@ -117,7 +107,7 @@ div.ev-hider {
 
 div.ev-field {
   .thumbnail {
-    @include box-shadow(0 0 10px 1px);
+    box-shadow: 0 0 10px 1px;
     display: inline-block;
     font-size: 0;
     height: 100%;
@@ -130,7 +120,7 @@ div.ev-field {
     }
   }
   div.title {
-    color: $label-color;
+    color: @label-color;
     display: inline-block;
     font-weight: bold;
     margin-right: 20px;
@@ -142,7 +132,7 @@ div.ev-field {
     margin-right: 20px;
     vertical-align: middle;
     a {
-      background-image: url($logo-image);
+      background-image: url(@logo-image);
       background-repeat: no-repeat;
       background-size: 48px auto;
       display: inline-block;
@@ -172,21 +162,21 @@ div.ev-field-actions {
     }
   }
   .action-choose {
-    background-image: url($add-image);
+    background-image: url(@add-image);
   }
   .action-preview {
-    background-image: url($preview-image);
+    background-image: url(@preview-image);
   }
   .action-options {
-    background-image: url($settings-image);
+    background-image: url(@settings-image);
   }
   .action-remove {
-    background-image: url($remove-image);
+    background-image: url(@remove-image);
   }
   .action-upload {
     cursor: pointer;
     .upload-icon {
-      background-image: url($upload-image);
+      background-image: url(@upload-image);
       background-size: 18px auto;
       display: inline-block;
       height: 18px;
@@ -219,24 +209,12 @@ div.ev-filter-block {
       display: none;
     }
   }
-  div.ev-poweredby {
-    float: right;
-    a {
-      background: url($poweredby-image) no-repeat scroll center center transparent;
-      float: right;
-      height: 38px;
-      width: 120px;
-      span {
-        display: none;
-      }
-    }
-  }
-  @include loader;
+  .loader();
 }
 
 div.ev-auth {
   div.logo {
-    background-image: url($logo-image);
+    background-image: url(@logo-image);
     background-repeat: no-repeat;
     background-size: 65px auto;
     display: inline-block;
@@ -263,12 +241,12 @@ div.ev-auth {
       }
     }
     label {
-      color: $label-color;
+      color: @label-color;
       display: inline-block;
       margin-right: 1em;
       width: 30%;
     }
-    @include loader;
+    .loader();
   }
 }
 
@@ -281,7 +259,7 @@ div.ev-settings {
     margin-bottom: 1em;
   }
   label {
-    color: $label-color;
+    color: @label-color;
     display: inline-block;
     width: 40%;
   }
@@ -307,7 +285,7 @@ div.ev-results {
     text-align: right;
     width: 25%;
     img {
-      @include box-shadow(0 0 10px 1px);
+      box-shadow: 0 0 10px 1px;
       display: block;
       float: right;
       margin: 9px 6px 1em 6px;
@@ -334,10 +312,10 @@ div.ev-results {
         }
       }
       a.action-add {
-        background-image: url($add-image);
+        background-image: url(@add-image);
       }
       a.action-preview {
-        background-image: url($preview-image);
+        background-image: url(@preview-image);
       }
     }
   }
@@ -368,14 +346,14 @@ div.ev-results {
         padding: 3px 0;
       }
       tr.title td {
-        border-bottom: 1px solid $border-color;
+        border-bottom: 1px solid @border-color;
         font-weight: bold;
       }
       .desc a {
         margin-left: 5px;
       }
       .label {
-        color: $label-color;
+        color: @label-color;
         font-weight: bold;
         width: 20%;
         min-width: 100px;
@@ -392,17 +370,19 @@ div.ev-video-picker div.ev-results .content-list tr td {
 }
 
 div.scrollWrap .loader {
-  background: url($loader-image) no-repeat scroll center center transparent;
+  background: url(@loader-image) no-repeat scroll center center transparent;
   height: 60px;
   width: 100%;
 }
 
 div.ev-dialog {
-  @include border-radius(4px);
+  border-radius: 4px;
   font-size: 1em;
   div.ui-dialog-titlebar {
-    @include background(linear-gradient($ev-yellow, #ffffff));
-    @include border-top-radius(4px);
+    // TODO - this is compass
+    //@include background(linear-gradient(@ev-yellow, #ffffff));
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
     border-width: 0;
   }
   form.upload-form {
@@ -417,7 +397,7 @@ div.ev-dialog {
       margin-bottom: 1em;
     }
     label {
-      color: $label-color;
+      color: @label-color;
       display: inline-block;
       width: 25%;
     }
@@ -441,7 +421,7 @@ div.ev-dialog {
     }
     div.info {
       margin-top: 1em;
-      color: $label-color;
+      color: @label-color;
       font-size: 0.9em;
     }
   }

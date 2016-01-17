@@ -94,12 +94,10 @@ module.exports = function(grunt) {
         options: rjs_prod_opts
       }
     },
-    compass: {
+    less: {
       default: {
-        options: {
-          sassDir: 'assets/sass',
-          cssDir: 'assets/css',
-          require: ['compass-normalize']
+        files: {
+          'assets/css/ev-script.css': 'assets/less/ev-script.less'
         }
       }
     }
@@ -206,11 +204,11 @@ module.exports = function(grunt) {
 
   // Default task.
   grunt.registerTask('test', ['server', 'qunit']);
-  grunt.registerTask('default', ['clean', 'jshint', 'compass', 'test', 'requirejs:development', 'requirejs:production']);
-  grunt.registerTask('all', ['clean', 'jshint', 'compass', 'test', 'requirejs:development', 'requirejs:production']);
-  grunt.registerTask('all-skip-tests', ['clean', 'jshint', 'compass', 'requirejs:development', 'requirejs:production']);
-  grunt.registerTask('dev', ['clean', 'jshint', 'compass', 'test', 'requirejs:development']);
-  grunt.registerTask('prod', ['clean', 'jshint', 'compass', 'test', 'requirejs:production']);
+  grunt.registerTask('default', ['clean', 'jshint', 'less', 'test', 'requirejs:development', 'requirejs:production']);
+  grunt.registerTask('all', ['clean', 'jshint', 'less', 'test', 'requirejs:development', 'requirejs:production']);
+  grunt.registerTask('all-skip-tests', ['clean', 'jshint', 'less', 'requirejs:development', 'requirejs:production']);
+  grunt.registerTask('dev', ['clean', 'jshint', 'less', 'test', 'requirejs:development']);
+  grunt.registerTask('prod', ['clean', 'jshint', 'less', 'test', 'requirejs:production']);
   grunt.registerTask('demo', ['server', 'watch']);
 
 };
