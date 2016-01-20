@@ -49,7 +49,7 @@ module.exports = function(grunt) {
       ' * <%= pkg.title %>\n' +
       '<%= pkg.homepage ? " * " + pkg.homepage + "\\n" : "" %>' +
       ' * Copyright (c) <%= grunt.template.today("yyyy") %> Symphony Video, Inc.\n' +
-      ' * Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %>\n' +
+      ' * Licensed <%= pkg.license %>\n' +
       ' */\n',
     // Task configuration.
     clean: ['dist'],
@@ -62,7 +62,8 @@ module.exports = function(grunt) {
         src: ['src/**/*.js', 'test/**/*.js']
       },
       options: {
-        jshintrc: '.jshintrc'
+        jshintrc: '.jshintrc',
+        reporter: require('jshint-stylish')
       }
     },
     qunit: {
