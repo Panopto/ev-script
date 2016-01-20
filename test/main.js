@@ -18,30 +18,23 @@
             'moxie': 'plupload/js/moxie',
             'plupload': 'plupload/js/plupload.dev',
             'text': 'text/text',
-            'underscore': 'lodash/lodash',
+            'underscore': 'underscore/underscore',
             'backbone': 'backbone/backbone'
         },
         shim: {
             'moxie': [],
             'plupload': ['moxie'],
-            'jquery.plupload.queue': ['jquery', 'plupload'],
-            'underscore': {
-                exports: '_'
-            },
-            'backbone': {
-                deps: ['jquery', 'underscore'],
-                exports: 'Backbone'
-            }
+            'jquery.plupload.queue': ['jquery', 'plupload']
         }
     });
 
     var testModules = [
         // Load our shims here
-        'jquery',
-        'jquery-ui',
-        'jquery.cookie',
-        'underscore',
-        'backbone',
+        // 'jquery',
+        // 'jquery-ui',
+        // 'jquery.cookie',
+        // 'underscore',
+        // 'backbone',
         // Test modules
         'test/tests/auth/basic/auth',
         'test/tests/auth/basic/view',

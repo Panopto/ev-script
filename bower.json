@@ -8,12 +8,14 @@
   ],
   "dependencies": {
     "jquery": "~2.1.4",
-    "lodash": "~3.3.1",
     "backbone": "~1.2.3",
     "jquery-ui": "~1.11.3",
     "jquery.cookie": "~1.4.1",
     "plupload": "~2.1.2",
-    "ev-scroll-loader": "git://github.com/ensembleVideo/ev-scroll-loader.git"
+    "ev-scroll-loader": "git://github.com/ensembleVideo/ev-scroll-loader.git",
+    "bootstrap": "~3.3.6",
+    "font-awesome": "fontawesome#~4.5.0",
+    "underscore": "~1.8.3"
   },
   "devDependencies": {
     "text": "~2.0.14",

@@ -1,17 +1,16 @@
     // Register in the values from the outer closure for common dependencies
     // as local almond modules
+
     define('jquery', function () {
         return $ || jQuery;
     });
-    define('underscore', function () {
-        return _;
-    });
-    define('backbone', ['jquery', 'underscore'], function () {
-        return Backbone;
-    });
+
     define('jquery-ui', ['jquery'], function() {});
-    define('jquery.cookie', ['jquery'], function() {});
-    define('plupload', function() {});
+
+    define('plupload', function() {
+        return plupload;
+    });
+
     define('jquery.plupload.queue', ['jquery', 'plupload'], function() {});
 
     // Use almond's special top-level, synchronous require to trigger factory

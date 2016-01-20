@@ -22,12 +22,12 @@ module.exports = function(grunt) {
         'jquery.plupload.queue': 'plupload/js/jquery.plupload.queue/jquery.plupload.queue',
         'plupload': 'plupload/js/plupload.full.min',
         'ev-scroll-loader': 'ev-scroll-loader/dist/jquery.ev-scroll-loader',
-        'underscore': 'lodash/lodash',
+        'underscore': 'underscore/underscore',
         'backbone': 'backbone/backbone',
         'text': 'text/text'
       },
       name: 'ev-script',
-      exclude: ['jquery', 'jquery-ui', 'jquery.cookie', 'jquery.plupload.queue', 'plupload', 'underscore', 'backbone'],
+      exclude: ['jquery', 'jquery-ui', 'jquery.plupload.queue', 'plupload'],
       out: "dist/ev-script.js",
       wrap: {
         start: '<%= banner %>' + grunt.file.read('wrap/wrap.start'),

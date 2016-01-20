@@ -1,4 +1,3 @@
-/*global window*/
 (function() {
 
     'use strict';
@@ -13,21 +12,14 @@
             'jquery.plupload.queue': 'plupload/js/jquery.plupload.queue/jquery.plupload.queue',
             'moxie': 'plupload/js/moxie',
             'plupload': 'plupload/js/plupload.dev',
-            'underscore': 'lodash/lodash',
+            'underscore': 'underscore/underscore',
             'backbone': 'backbone/backbone',
             'ev-config': '../../ev-config'
         },
         shim: {
             'moxie': [],
             'plupload': ['moxie'],
-            'jquery.plupload.queue': ['jquery', 'plupload'],
-            'underscore': {
-                exports: '_'
-            },
-            'backbone': {
-                deps: ['jquery', 'underscore'],
-                exports: 'Backbone'
-            }
+            'jquery.plupload.queue': ['jquery', 'plupload']
         }
     });
 

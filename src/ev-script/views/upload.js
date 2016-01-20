@@ -1,17 +1,16 @@
-/*global window,plupload,navigator*/
 define(function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        plupload = require('plupload'),
         BaseView = require('ev-script/views/base'),
         Backbone = require('backbone'),
         WorkflowSelect = require('ev-script/views/workflow-select'),
         VideoSettings = require('ev-script/models/video-settings');
 
     // Explicit dependency declaration
-    require('plupload');
     require('jquery.plupload.queue');
 
     return BaseView.extend({

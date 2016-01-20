@@ -1,4 +1,3 @@
-/*global window*/
 define(function(require, template) {
 
     'use strict';
