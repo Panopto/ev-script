@@ -13,7 +13,6 @@
     "jquery.cookie": "~1.4.1",
     "plupload": "~2.1.2",
     "ev-scroll-loader": "git://github.com/ensembleVideo/ev-scroll-loader.git",
-    "bootstrap": "~3.3.6",
     "font-awesome": "fontawesome#~4.5.0",
     "underscore": "~1.8.3"
   },

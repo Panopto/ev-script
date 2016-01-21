@@ -8,7 +8,7 @@
         </div>
     <% } %>
     <div class="title"><%- name %></div>
-    <div class="ev-field-actions">
+    <div class="ev-actions">
         <a href="#" class="action-choose" title="Change <%= label %>"><span>Change <%= label %><span></a>
         <a href="#" class="action-preview" title="Preview: <%- name %>"><span>Preview: <%- name %><span></a>
         <!-- TODO - temporarily disabled playlist settings until it is implemented -->
@@ -19,7 +19,7 @@
     </div>
 <% } else { %>
     <div class="title"><em>Add <%= label %></em></div>
-    <div class="ev-field-actions">
+    <div class="ev-actions">
         <a href="#" class="action-choose" title="Choose <%= label %>"><span>Choose <%= label %><span></a>
     </div>
 <% } %>

@@ -58,8 +58,11 @@ module.exports = function(grunt) {
       gruntfile: {
         src: 'Gruntfile.js'
       },
-      lib_test: {
-        src: ['src/**/*.js', 'test/**/*.js']
+      src: {
+        src: ['src/**/*.js']
+      },
+      test: {
+        src: ['test/**/*.js']
       },
       options: {
         jshintrc: '.jshintrc',
@@ -82,10 +85,18 @@ module.exports = function(grunt) {
         files: '<%= jshint.gruntfile.src %>',
         tasks: ['jshint:gruntfile']
       },
-      lib_test: {
-        files: ['<%= jshint.lib_test.src %>', 'src/**/*.html', 'wrap/*'],
-        tasks: ['jshint:lib_test', /*'qunit',*/ 'requirejs:development']
-      }
+      src: {
+        files: ['<%= jshint.src.src %>', 'src/**/*.html', 'wrap/*'],
+        tasks: ['jshint:src', /*'qunit',*/ 'requirejs:development']
+      },
+      test: {
+        files: ['<%= jshint.test.src %>'],
+        tasks: ['jshint:test']
+      },
+      assets: {
+        files: ['assets/less/*.less'],
+        tasks: ['less']
+      },
     },
     requirejs: {
       development: {

@@ -3,7 +3,7 @@
         <img src="<%= item.get('ThumbnailUrl').replace(/width=100/, 'width=150') %>" alt="<%- item.get('Title') %> thumbnail image"/>
         <div class="action-links">
             <a class="action-add" href="#" title="Choose <%- item.get('Title') %>" rel="<%= item.get('ID') %>"><span>Choose</span></a>
-            <a class="action-preview" href="#" title="Preview: <%- item.get('Title') %>" rel="<%= item.get('ID') %>"><span>Preview:  item.get('Title') %></span></a>
+            <a class="action-preview" href="#" title="Preview: <%- item.get('Title') %>" rel="<%= item.get('ID') %>"><span>Preview: <%- item.get('Title') %></span></a>
         </div>
     </td>
     <td class="content-meta">
