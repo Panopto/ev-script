@@ -21,7 +21,7 @@ define(function(require) {
                 this.loadVideos();
             }, this);
             if (this.info.get('ApplicationVersion')) {
-                this.$upload = $('<div class="ev-actions"><div class="action-upload"><div class="upload-icon"></div><a href="#" class="upload-link" title="Upload"><span>Upload<span></a></div></div>').css('display', 'none');
+                this.$upload = $('<div class="ev-actions"><a href="#" class="action-upload" title="Upload"><i class="fa fa-upload fa-fw"></i><span>Upload<span></a></div>').css('display', 'none');
                 this.$('div.ev-filter-block').prepend(this.$upload);
             }
             this.searchView = new SearchView({

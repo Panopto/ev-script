@@ -1,5 +1,5 @@
 /**
- * ev-script 1.0.0 2016-01-21
+ * ev-script 1.0.0 2016-01-22
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2016 Symphony Video, Inc.
@@ -4562,7 +4562,7 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
             this.hider.render();
         },
         chooseItem: function(e) {
-            var id = $(e.target).attr('rel');
+            var id = $(e.currentTarget).attr('rel');
             var content = this.resultsView.collection.get(id);
             this.model.set({
                 id: id,
@@ -5466,7 +5466,7 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
 });
 
 
-define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <img src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/, \'width=150\') %>" alt="<%- item.get(\'Title\') %> thumbnail image"/>\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%- item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><span>Choose</span></a>\n            <a class="action-preview" href="#" title="Preview: <%- item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><span>Preview: <%- item.get(\'Title\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="Preview: <%-item.get(\'Title\') %>" href="#" rel="<%= item.get(\'ID\') %>"><%- item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="desc"><td class="label">Description</td><td class="value"><%- item.get(\'Description\') %></td></tr>\n                <tr><td class="label">Date Added</td><td class="value"><%- new Date(item.get(\'AddedOn\')).toLocaleString() %></td></tr>\n                <tr><td class="label">Keywords</td><td class="value"><%- item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label">Library</td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
+define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <img src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/, \'width=150\') %>" alt="<%- item.get(\'Title\') %> thumbnail image"/>\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%- item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span>Choose</span></a>\n            <a class="action-preview" href="#" title="Preview: <%- item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%- item.get(\'Title\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="Preview: <%-item.get(\'Title\') %>" href="#" rel="<%= item.get(\'ID\') %>"><%- item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="desc"><td class="label">Description</td><td class="value"><%- item.get(\'Description\') %></td></tr>\n                <tr><td class="label">Date Added</td><td class="value"><%- new Date(item.get(\'AddedOn\')).toLocaleString() %></td></tr>\n                <tr><td class="label">Keywords</td><td class="value"><%- item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label">Library</td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
 
 define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','text!ev-script/templates/video-result.html'],function(require) {
 
@@ -5890,7 +5890,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
                 this.loadVideos();
             }, this);
             if (this.info.get('ApplicationVersion')) {
-                this.$upload = $('<div class="ev-actions"><div class="action-upload"><div class="upload-icon"></div><a href="#" class="upload-link" title="Upload"><span>Upload<span></a></div></div>').css('display', 'none');
+                this.$upload = $('<div class="ev-actions"><a href="#" class="action-upload" title="Upload"><i class="fa fa-upload fa-fw"></i><span>Upload<span></a></div>').css('display', 'none');
                 this.$('div.ev-filter-block').prepend(this.$upload);
             }
             this.searchView = new SearchView({
@@ -6203,7 +6203,7 @@ define('ev-script/views/playlist-preview',['require','ev-script/views/preview','
 });
 
 
-define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <span>Choose</span>\n            </a>\n            <a class="action-preview" href="#" title="Preview: <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <span>Preview: <%- item.get(\'Name\') %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
+define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span>Choose</span>\n            </a>\n            <a class="action-preview" href="#" title="Preview: <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span>Preview: <%- item.get(\'Name\') %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
 
 define('ev-script/views/playlist-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/playlist-result.html'],function(require) {
 
@@ -6409,7 +6409,7 @@ define('ev-script/views/playlist-settings',['require','underscore','ev-script/vi
 });
 
 
-define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="Media thumbnail" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%- name %></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="Change <%= label %>"><span>Change <%= label %><span></a>\n        <a href="#" class="action-preview" title="Preview: <%- name %>"><span>Preview: <%- name %><span></a>\n        <!-- TODO - temporarily disabled playlist settings until it is implemented -->\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-options" title="<%= label %> Embed Options"><span><%= label %> Embed Options<span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="Remove <%= label %>"><span>Remove <%= label %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em>Add <%= label %></em></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="Choose <%= label %>"><span>Choose <%= label %><span></a>\n    </div>\n<% } %>\n';});
+define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="Media thumbnail" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%- name %></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="Change <%= label %>"><i class="fa fa-folder-open fa-lg"></i><span>Change <%= label %><span></a>\n        <a href="#" class="action-preview" title="Preview: <%- name %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%- name %><span></a>\n        <!-- TODO - temporarily disabled playlist settings until it is implemented -->\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-options" title="<%= label %> Embed Options"><i class="fa fa-cog fa-lg"></i><span><%= label %> Embed Options<span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="Remove <%= label %>"><i class="fa fa-minus-circle fa-lg"></i><span>Remove <%= label %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em>Add <%= label %></em></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="Choose <%= label %>"><i class="fa fa-folder-open fa-lg"></i><span>Choose <%= label %><span></a>\n    </div>\n<% } %>\n';});
 
 define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/field.html'],function(require) {
 

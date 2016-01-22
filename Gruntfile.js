@@ -216,9 +216,9 @@ module.exports = function(grunt) {
 
   // Default task.
   grunt.registerTask('test', ['server', 'qunit']);
-  grunt.registerTask('default', ['clean', 'jshint', 'less', 'test', 'requirejs:development', 'requirejs:production']);
-  grunt.registerTask('all', ['clean', 'jshint', 'less', 'test', 'requirejs:development', 'requirejs:production']);
-  grunt.registerTask('all-skip-tests', ['clean', 'jshint', 'less', 'requirejs:development', 'requirejs:production']);
+  grunt.registerTask('default', ['clean', 'jshint', 'less', 'test', 'requirejs']);
+  grunt.registerTask('all', ['clean', 'jshint', 'less', 'test', 'requirejs']);
+  grunt.registerTask('all-skip-tests', ['clean', 'jshint', 'less', 'requirejs']);
   grunt.registerTask('dev', ['clean', 'jshint', 'less', 'test', 'requirejs:development']);
   grunt.registerTask('prod', ['clean', 'jshint', 'less', 'test', 'requirejs:production']);
   grunt.registerTask('demo', ['server', 'watch']);

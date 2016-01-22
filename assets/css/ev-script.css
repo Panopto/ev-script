@@ -99,11 +99,11 @@ div.ev-field div.logo {
 div.ev-field div.logo a {
   background-image: url('images/logo.png');
   background-repeat: no-repeat;
-  background-size: 48px auto;
+  background-size: 36px auto;
   display: inline-block;
-  height: 48px;
+  height: 36px;
   margin-top: 6px;
-  width: 48px;
+  width: 36px;
 }
 div.ev-field div.logo a span {
   display: none;
@@ -113,49 +113,31 @@ div.ev-actions {
   padding: 0.4em 0.6em;
 }
 div.ev-actions a {
-  background-repeat: no-repeat;
-  background-size: 18px auto;
   display: inline-block;
-  height: 18px;
   margin: 0.3em;
   vertical-align: middle;
-  width: 18px;
 }
 div.ev-actions a span {
   display: none;
 }
 div.ev-actions .action-choose {
-  background-image: url('images/add.png');
+  color: orange;
 }
 div.ev-actions .action-preview {
-  background-image: url('images/preview.png');
+  color: black;
 }
 div.ev-actions .action-options {
-  background-image: url('images/settings.png');
+  color: grey;
 }
 div.ev-actions .action-remove {
-  background-image: url('images/remove.png');
+  color: red;
 }
 div.ev-actions .action-upload {
-  cursor: pointer;
+  color: black;
 }
-div.ev-actions .action-upload .upload-icon {
-  background-image: url('images/upload.png');
-  background-size: 18px auto;
-  display: inline-block;
-  height: 18px;
-  margin-right: 0.6em;
-  vertical-align: middle;
-  width: 18px;
-}
-div.ev-actions .action-upload .upload-link {
-  background: none;
-  height: auto;
-  width: auto;
-  margin: 0;
-}
-div.ev-actions .action-upload .upload-link span {
+div.ev-actions .action-upload span {
   display: inline;
+  margin-left: 0.3em;
 }
 div.ev-filter-block {
   background-color: #fbfbfb;
@@ -267,6 +249,7 @@ div.ev-results td.content-actions img {
   margin: 9px 6px 1em 6px;
   max-width: 150px;
   width: 80%;
+  min-height: 84px;
 }
 div.ev-results td.content-actions div.action-links {
   clear: right;
@@ -289,10 +272,10 @@ div.ev-results td.content-actions div.action-links a span {
   display: none;
 }
 div.ev-results td.content-actions div.action-links a.action-add {
-  background-image: url('images/add.png');
+  color: green;
 }
 div.ev-results td.content-actions div.action-links a.action-preview {
-  background-image: url('images/preview.png');
+  color: black;
 }
 div.ev-results .content-meta {
   width: 75%;
