@@ -14,7 +14,8 @@
     "plupload": "~2.1.2",
     "ev-scroll-loader": "git://github.com/ensembleVideo/ev-scroll-loader.git",
     "font-awesome": "fontawesome#~4.5.0",
-    "underscore": "~1.8.3"
+    "underscore": "~1.8.3",
+    "semver": "~4.3.4"
   },
   "devDependencies": {
     "text": "~2.0.14",

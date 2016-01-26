@@ -3,6 +3,7 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
+        semver = require('semver'),
         BaseModel = require('ev-script/models/base');
 
     return BaseModel.extend({
@@ -16,6 +17,10 @@ define(function(require) {
         },
         parse: function(response) {
             return response;
+        },
+        checkVersion: function(condition) {
+            var version = this.get('ApplicationVersion');
+            return version && semver.satisfies(version, condition);
         }
     });
 

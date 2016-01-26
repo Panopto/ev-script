@@ -1,6 +1,6 @@
 <tr class="<%= (index % 2 ? 'odd' : 'even') %>">
     <td class="content-actions">
-        <img src="<%= item.get('ThumbnailUrl').replace(/width=100/, 'width=150') %>" alt="<%- item.get('Title') %> thumbnail image"/>
+        <img src="<%= item.get('ThumbnailUrl').replace(/width=100/i, 'width=200') %>" alt="<%- item.get('Title') %> thumbnail image"/>
         <div class="action-links">
             <a class="action-add" href="#" title="Choose <%- item.get('Title') %>" rel="<%= item.get('ID') %>"><i class="fa fa-plus-circle fa-lg"></i><span>Choose</span></a>
             <a class="action-preview" href="#" title="Preview: <%- item.get('Title') %>" rel="<%= item.get('ID') %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%- item.get('Title') %></span></a>

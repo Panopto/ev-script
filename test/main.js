@@ -19,7 +19,8 @@
             'plupload': 'plupload/js/plupload.dev',
             'text': 'text/text',
             'underscore': 'underscore/underscore',
-            'backbone': 'backbone/backbone'
+            'backbone': 'backbone/backbone',
+            'semver': 'semver/semver.browser'
         },
         shim: {
             'moxie': [],

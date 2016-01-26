@@ -24,7 +24,8 @@ module.exports = function(grunt) {
         'ev-scroll-loader': 'ev-scroll-loader/dist/jquery.ev-scroll-loader',
         'underscore': 'underscore/underscore',
         'backbone': 'backbone/backbone',
-        'text': 'text/text'
+        'text': 'text/text',
+        'semver': 'semver/semver.browser'
       },
       name: 'ev-script',
       exclude: ['jquery', 'jquery-ui', 'jquery.plupload.queue', 'plupload'],
@@ -83,11 +84,11 @@ module.exports = function(grunt) {
     watch: {
       gruntfile: {
         files: '<%= jshint.gruntfile.src %>',
-        tasks: ['jshint:gruntfile']
+        tasks: ['jshint:gruntfile', 'requirejs']
       },
       src: {
         files: ['<%= jshint.src.src %>', 'src/**/*.html', 'wrap/*'],
-        tasks: ['jshint:src', /*'qunit',*/ 'requirejs:development']
+        tasks: ['jshint:src', /*'qunit',*/ 'requirejs']
       },
       test: {
         files: ['<%= jshint.test.src %>'],

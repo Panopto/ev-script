@@ -5,9 +5,6 @@
   color: #0074bd;
   text-decoration: none;
 }
-.ev-video-picker div.ev-results td.content-actions {
-  min-width: 120px;
-}
 .ev-video-picker div.ev-filter-block label,
 .ev-video-picker div.ev-filter-block input,
 .ev-video-picker div.ev-filter-block select {
@@ -18,9 +15,17 @@
 .ev-video-picker div.ev-filter-block label {
   color: #606060;
 }
-@media screen and (max-width: 1300px) {
+@media only screen and (max-width: 1100px) {
   .ev-video-picker div.ev-filter-block label {
     display: none;
+  }
+}
+.ev-video-picker div.ev-results td.content-actions {
+  min-width: 200px;
+}
+@media only screen and (max-width: 600px) {
+  .ev-video-picker div.ev-results td.content-actions {
+    min-width: 100px;
   }
 }
 .ev-playlist-picker {
@@ -40,10 +45,13 @@
 .ev-playlist-picker div.ev-filter-block label {
   color: #606060;
 }
-@media screen and (max-width: 1000px) {
+@media only screen and (max-width: 1100px) {
   .ev-playlist-picker div.ev-filter-block label {
     display: none;
   }
+}
+.ev-playlist-picker div.ev-results td.content-actions {
+  min-width: 100px;
 }
 div.ev-hider {
   position: relative;
@@ -247,16 +255,16 @@ div.ev-results td.content-actions img {
   display: block;
   float: right;
   margin: 9px 6px 1em 6px;
-  max-width: 150px;
+  max-width: 200px;
   width: 80%;
-  min-height: 84px;
+  min-height: 112px;
 }
 div.ev-results td.content-actions div.action-links {
   clear: right;
   float: right;
   height: 18px;
   margin: 6px;
-  max-width: 150px;
+  max-width: 200px;
   text-align: center;
   width: 80%;
 }
@@ -276,6 +284,24 @@ div.ev-results td.content-actions div.action-links a.action-add {
 }
 div.ev-results td.content-actions div.action-links a.action-preview {
   color: black;
+}
+@media only screen and (max-width: 1400px) {
+  div.ev-results td.content-actions img {
+    max-width: 150px;
+    min-height: 84px;
+  }
+  div.ev-results td.content-actions div.action-links {
+    max-width: 150px;
+  }
+}
+@media only screen and (max-width: 600px) {
+  div.ev-results td.content-actions img {
+    max-width: 100px;
+    min-height: 56px;
+  }
+  div.ev-results td.content-actions div.action-links {
+    max-width: 100px;
+  }
 }
 div.ev-results .content-meta {
   width: 75%;
@@ -318,7 +344,7 @@ div.ev-results .content-list .content-item .label {
   width: 20%;
   min-width: 100px;
 }
-@media screen and (max-width: 600px) {
+@media only screen and (max-width: 600px) {
   div.ev-results .content-list .content-item .label {
     display: none;
   }

@@ -9,12 +9,26 @@
 @loading-image: 'images/loading.gif';
 @loader-image: 'images/loader.gif';
 
+// Media breaks
+@thumbnail-break: 1400px;
+@large-break: 1100px;
+@medium: 600px;
+
 .picker-base() {
   padding: 0;
   a {
     color: @link-color;
     text-decoration: none;
   }
+  div.ev-filter-block {
+    .filter-form(@large-break);
+  }
+}
+
+.responsive(@maxWidth; @rules) {
+    @media only screen and (max-width: @maxWidth) {
+        @rules();
+    }
 }
 
 .loader() {
@@ -41,9 +55,9 @@
   }
   label {
     color: @label-color;
-    @media screen and (max-width: @max-width) {
+    .responsive(@max-width, {
       display: none;
-    }
+    });
   }
 }
 
@@ -51,18 +65,20 @@
   .picker-base();
   div.ev-results {
     td.content-actions {
-      min-width: 120px;
+      min-width: 200px;
+      .responsive(@medium, {
+        min-width: 100px;
+      });
     }
-  }
-  div.ev-filter-block {
-    .filter-form(1300px);
   }
 }
 
 .ev-playlist-picker {
   .picker-base();
-  div.ev-filter-block {
-    .filter-form(1000px);
+  div.ev-results {
+    td.content-actions {
+      min-width: 100px;
+    }
   }
 }
 
@@ -258,16 +274,16 @@ div.ev-results {
       display: block;
       float: right;
       margin: 9px 6px 1em 6px;
-      max-width: 150px;
+      max-width: 200px;
       width: 80%;
-      min-height: 84px;
+      min-height: 112px;
     }
     div.action-links {
       clear: right;
       float: right;
       height: 18px;
       margin: 6px;
-      max-width: 150px;
+      max-width: 200px;
       text-align: center;
       width: 80%;
       a {
@@ -288,6 +304,24 @@ div.ev-results {
         color: black;
       }
     }
+    .responsive(@thumbnail-break, {
+      img {
+        max-width: 150px;
+        min-height: 84px;
+      }
+      div.action-links {
+        max-width: 150px;
+      }
+    });
+    .responsive(@medium, {
+      img {
+        max-width: 100px;
+        min-height: 56px;
+      }
+      div.action-links {
+        max-width: 100px;
+      }
+    });
   }
   .content-meta {
     width: 75%;
@@ -327,9 +361,9 @@ div.ev-results {
         font-weight: bold;
         width: 20%;
         min-width: 100px;
-        @media screen and (max-width: 600px) {
+        .responsive(@medium, {
           display: none;
-        }
+        });
       }
     }
   }
