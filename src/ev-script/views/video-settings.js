@@ -75,7 +75,7 @@ define(function(require) {
             }
             var content = this.field.model.get('content');
             this.$el.dialog({
-                title: (content ? content.Title : this.field.model.get('id')),
+                title: this.unencode(content ? content.Title : this.field.model.get('id')),
                 modal: true,
                 autoOpen: false,
                 draggable: false,

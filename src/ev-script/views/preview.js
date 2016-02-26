@@ -48,7 +48,7 @@ define(function(require) {
             embedSettings.set('width', mediaDims.width);
             embedSettings.set('height', mediaDims.height);
             $dialog = $dialogWrap.dialog({
-                title: content.Title || content.Name,
+                title: this.unencode(content.Title || content.Name),
                 modal: true,
                 width: dialogDims.width,
                 height: dialogDims.height,

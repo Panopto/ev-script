@@ -29,6 +29,9 @@ define(function(require) {
             } else if (xhr.status !== 0) {
                 root.alert('An unexpected error occurred.  Check the server log for more details.');
             }
+        },
+        unencode: function(encoded) {
+            return $('<span/>').html(encoded).text();
         }
     });
 
