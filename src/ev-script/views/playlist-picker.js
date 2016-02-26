@@ -14,6 +14,7 @@ define(function(require) {
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit');
+            this.$filterBlock = this.$('div.ev-filter-block');
             if (this.info.get('ApplicationVersion')) {
                 this.searchView = new SearchView({
                     id: this.id + '-search',
@@ -25,7 +26,7 @@ define(function(require) {
                         this.loadPlaylists();
                     }, this)
                 });
-                this.$('div.ev-filter-block').prepend(this.searchView.$el);
+                this.$filterBlock.prepend(this.searchView.$el);
                 this.searchView.render();
             }
             this.unitSelects = new UnitSelectsView({
@@ -35,7 +36,7 @@ define(function(require) {
                 picker: this,
                 appId: this.appId
             });
-            this.$('div.ev-filter-block').prepend(this.unitSelects.$el);
+            this.$filterBlock.prepend(this.unitSelects.$el);
             this.resultsView = new PlaylistResultsView({
                 el: this.$('div.ev-results'),
                 picker: this,
@@ -74,7 +75,7 @@ define(function(require) {
                 success: _.bind(function(collection, response, options) {
                     var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
                     var size = _.size(response.Data);
-                    if(size === totalRecords) {
+                    if (size === totalRecords) {
                         collection.hasMore = false;
                     } else {
                         collection.hasMore = true;
@@ -82,6 +83,8 @@ define(function(require) {
                     }
                     this.resultsView.collection = collection;
                     this.resultsView.render();
+                    // TODO - better place for this?
+                    this.resizeResults();
                 }, this),
                 error: _.bind(function(collection, xhr, options) {
                     this.ajaxError(xhr, _.bind(function() {
@@ -89,6 +92,11 @@ define(function(require) {
                     }, this));
                 }, this)
             });
+        },
+        resizeResults: function() {
+            if (this.config.fitToParent) {
+                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true));
+            }
         }
     });
 

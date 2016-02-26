@@ -1,5 +1,5 @@
 /**
- * ev-script 1.0.0 2016-01-26
+ * ev-script 1.0.0 2016-02-26
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2016 Symphony Video, Inc.
@@ -4523,7 +4523,7 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
         template: _.template(require('text!ev-script/templates/picker.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker');
+            _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker', 'setHeight', 'resizeResults');
             this.$el.hide();
             this.$el.html(this.template({
                 id: this.id
@@ -4573,13 +4573,18 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
             e.preventDefault();
         },
         hidePicker: function() {
-            this.$el.fadeOut('fast');
+            this.$el.hide();
         },
         showPicker: function() {
             // In case our authentication status has changed...re-render our hider
             this.hider.render();
-            this.$el.fadeIn('fast');
-        }
+            this.$el.show();
+        },
+        setHeight: function(height) {
+            this.$el.height(height);
+            this.resizeResults();
+        },
+        resizeResults: function() {}
     });
 
 });
@@ -4989,69 +4994,71 @@ define('ev-script/views/unit-selects',['require','jquery','underscore','ev-scrip
 });
 
 /**
- * ev-scroll-loader 1.0.0 2016-01-20
+ * ev-scroll-loader 1.0.0 2016-02-24
  * Ensemble Video jQuery Scroll Loader Plugin
  * https://github.com/ensembleVideo/ev-scroll-loader
  * Copyright (c) 2016 Symphony Video, Inc.
  * Licensed (MIT AND GPL-2.0)
  */
 (function(factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('ev-scroll-loader',['jquery'], factory);
-  } else if (typeof module === 'object' && typeof module.exports === 'object') {
-    factory(require('jquery'));
-  } else {
-    factory(jQuery);
-  }
+    'use strict';
+
+    if (typeof define === 'function' && define.amd) {
+        define('ev-scroll-loader',['jquery'], factory);
+    } else if (typeof module === 'object' && typeof module.exports === 'object') {
+        factory(require('jquery'));
+    } else {
+        factory(jQuery);
+    }
 })(function($) {
 
-  'use strict';
+    'use strict';
 
-  var defaults = {
-    callback: function() {}
-  };
+    var defaults = {
+        onScrolled: function() {}
+    };
 
-  var methods = {
-    init: function(options) {
-      var settings = $.extend({}, defaults, options);
-      return this.each(function() {
-        var $this = $(this);
-        $this.addClass('scroll-content');
-        var $wrap = $this.wrap('<div class=\"scrollWrap\"/>').closest('.scrollWrap');
-        $wrap.append('<div class="loader"></div>');
-        var scrollHeight = this.scrollHeight;
-        var setHeight = settings.height || scrollHeight;
-        var wrapHeight = Math.min(setHeight, scrollHeight) - 10;
-        $wrap.css({
-          'position': 'relative',
-          'height': wrapHeight + 'px',
-          'overflow-y': 'scroll'
-        }).scroll(function() {
-          if ($wrap.scrollTop() === $wrap[0].scrollHeight - wrapHeight) {
-            settings.callback.apply($this[0]);
-          }
-        });
-      });
-    },
-    showLoader: function() {
-      var $wrap = $(this).closest('.scrollWrap');
-      $('.loader', $wrap).show();
-      return this;
-    },
-    hideLoader: function() {
-      var $wrap = $(this).closest('.scrollWrap');
-      $('.loader', $wrap).hide();
-      return this;
-    }
-  };
+    var methods = {
+        init: function(options) {
+            var settings = $.extend({}, defaults, options);
+            return this.each(function() {
+                var $this = $(this),
+                    $wrap = $this.wrap('<div class=\"scrollWrap\"/>').closest('.scrollWrap');
+                $this.addClass('scroll-content');
+                $wrap.append('<div class="loader"></div>');
+                $wrap.css({
+                    'position': 'relative',
+                    'height': settings.height ? (typeof settings.height === 'number' ? settings.height + 'px' : settings.height) : '100%',
+                    'max-height': $this[0].scrollHeight + 'px',
+                    'overflow-y': 'scroll'
+                });
+                $wrap.scroll(function() {
+                    // When we have scrolled to the bottom of our content, call the onScrolled handler.  We subtract a pixel below to account for rounding.
+                    if ($wrap.scrollTop() >= $wrap[0].scrollHeight - $wrap.height() - 1) {
+                        settings.onScrolled.call($this);
+                    }
+                });
+            });
+        },
+        showLoader: function() {
+            var $wrap = $(this).closest('.scrollWrap');
+            $('.loader', $wrap).show();
+            return this;
+        },
+        hideLoader: function() {
+            var $wrap = $(this).closest('.scrollWrap');
+            $('.loader', $wrap).hide();
+            return this;
+        }
+    };
 
-  $.fn.evScrollLoader = function(method) {
-    if (methods[method]) {
-      return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-    } else if (typeof method === 'object' || !method) {
-      return methods.init.apply(this, arguments);
-    }
-  };
+    $.fn.evScrollLoader = function(method) {
+        if (methods[method]) {
+            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+        } else if (typeof method === 'object' || !method) {
+            return methods.init.apply(this, arguments);
+        }
+    };
 
 });
 
@@ -5079,7 +5086,7 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
         emptyTemplate: _.template(require('text!ev-script/templates/no-results.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render', 'loadMore', 'addHandler', 'previewItem');
+            _.bindAll(this, 'render', 'loadMore', 'addHandler', 'previewItem', 'setHeight', 'resizeResults');
             this.picker = options.picker;
             this.appId = options.appId;
             this.loadLock = false;
@@ -5140,8 +5147,8 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
             }
         },
         addHandler: function(item, collection, options) {
-            var $item = $(this.getItemHtml(item, options.index));
-            this.decorate($item);
+            var $item = $(this.getItemHtml(item, collection.indexOf(item)));
+            // this.decorate($item);
             this.$('.content-list').append($item);
         },
         // Override this in extending views to update the DOM when items are added
@@ -5150,28 +5157,38 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
             this.$el.html(this.resultsTemplate({
                 totalResults: this.collection.totalResults
             }));
+            this.$total = this.$('.total');
+            this.$results = this.$('.results');
+            this.resizeResults();
             var $contentList = this.$('.content-list');
             if (!this.collection.isEmpty()) {
                 this.collection.each(function(item, index) {
                     var $item = $(this.getItemHtml(item, index));
-                    this.decorate($item);
+                    // this.decorate($item);
                     $contentList.append($item);
                 }, this);
             } else {
                 $contentList.append(this.emptyTemplate());
             }
             var scrollHeight = this.config.scrollHeight;
-            if (this.collection.size() >= this.config.pageSize || $contentList[0].scrollHeight > scrollHeight) {
-                this.$scrollLoader = $contentList.evScrollLoader({
-                    height: scrollHeight,
-                    callback: this.loadMore
-                });
-                if (!this.collection.hasMore) {
-                    this.$scrollLoader.evScrollLoader('hideLoader');
-                }
+            this.$scrollLoader = $contentList.evScrollLoader({
+                height: scrollHeight,
+                onScrolled: this.loadMore
+            });
+            if (!this.collection.hasMore) {
+                this.$scrollLoader.evScrollLoader('hideLoader');
             }
             // Prevent multiple bindings if the collection hasn't changed between render calls
             this.collection.off('add', this.addHandler).on('add', this.addHandler);
+        },
+        setHeight: function(height) {
+            this.$el.height(height);
+            this.resizeResults();
+        },
+        resizeResults: function() {
+            if (this.config.fitToParent && this.$results) {
+                this.$results.height(this.$el.height() - this.$total.outerHeight(true));
+            }
         }
     });
 
@@ -5466,7 +5483,7 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
 });
 
 
-define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <img src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%- item.get(\'Title\') %> thumbnail image"/>\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%- item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span>Choose</span></a>\n            <a class="action-preview" href="#" title="Preview: <%- item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%- item.get(\'Title\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="Preview: <%-item.get(\'Title\') %>" href="#" rel="<%= item.get(\'ID\') %>"><%- item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="desc"><td class="label">Description</td><td class="value"><%- item.get(\'Description\') %></td></tr>\n                <tr><td class="label">Date Added</td><td class="value"><%- new Date(item.get(\'AddedOn\')).toLocaleString() %></td></tr>\n                <tr><td class="label">Keywords</td><td class="value"><%- item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label">Library</td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
+define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <img src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%= item.get(\'Title\') %> thumbnail image"/>\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%= item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span>Choose</span></a>\n            <a class="action-preview" href="#" title="Preview: <%= item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%= item.get(\'Title\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="Preview: <%= item.get(\'Title\') %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="desc"><td class="label">Description</td><td class="value"><%= item.get(\'Description\') %></td></tr>\n                <tr><td class="label">Date Added</td><td class="value"><%- new Date(item.get(\'AddedOn\')).toLocaleString() %></td></tr>\n                <tr><td class="label">Keywords</td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label">Library</td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
 
 define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','text!ev-script/templates/video-result.html'],function(require) {
 
@@ -5488,7 +5505,11 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
         decorate: function($item) {
             // Handle truncation (more/less) of description text
             $('.desc .value', $item).each(function(element) {
-                var $this = $(this), $full, $short, truncLen = 100, fullDesc = $(this).html();
+                var $this = $(this),
+                    $full,
+                    $short,
+                    truncLen = 100,
+                    fullDesc = $this.html();
                 if (fullDesc.length > truncLen) {
                     $this.empty();
                     $full = $('<span>' + fullDesc + '</span>');
@@ -5513,12 +5534,13 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
 
 });
 
-define('ev-script/collections/videos',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
+define('ev-script/collections/videos',['require','ev-script/collections/base','ev-script/util/cache','underscore'],function(require) {
 
     'use strict';
 
     var BaseCollection = require('ev-script/collections/base'),
-        cacheUtil = require('ev-script/util/cache');
+        cacheUtil = require('ev-script/util/cache'),
+        _ = require('underscore');
 
     return BaseCollection.extend({
         initialize: function(models, options) {
@@ -5567,6 +5589,14 @@ define('ev-script/collections/videos',['require','ev-script/collections/base','e
                 valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue),
                 url = api_url + '/' + this.libraryId + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        },
+        parse: function(response) {
+            var videos = response.Data;
+            _.each(videos, function(video) {
+                video.Description = _.unescape(video.Description);
+                video.Keywords = _.unescape(video.Keywords);
+            });
+            return videos;
         }
     });
 
@@ -5893,9 +5923,10 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
             var callback = _.bind(function() {
                 this.loadVideos();
             }, this);
+            this.$filterBlock = this.$('div.ev-filter-block');
             if (this.info.get('ApplicationVersion')) {
                 this.$upload = $('<div class="ev-actions"><a href="#" class="action-upload" title="Upload"><i class="fa fa-upload fa-fw"></i><span>Upload<span></a></div>').css('display', 'none');
-                this.$('div.ev-filter-block').prepend(this.$upload);
+                this.$filterBlock.prepend(this.$upload);
             }
             this.searchView = new SearchView({
                 id: this.id + '-search',
@@ -5905,7 +5936,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
                 appId: this.appId,
                 callback: callback
             });
-            this.$('div.ev-filter-block').prepend(this.searchView.$el);
+            this.$filterBlock.prepend(this.searchView.$el);
             this.searchView.render();
             this.typeSelectView = new TypeSelectView({
                 id: this.id + '-type-select',
@@ -5915,7 +5946,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
                 appId: this.appId,
                 callback: callback
             });
-            this.$('div.ev-filter-block').prepend(this.typeSelectView.$el);
+            this.$filterBlock.prepend(this.typeSelectView.$el);
             this.typeSelectView.render();
             if (this.info.get('ApplicationVersion')) {
                 this.unitSelects = new UnitSelectsView({
@@ -5925,7 +5956,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
                     picker: this,
                     appId: this.appId
                 });
-                this.$('div.ev-filter-block').prepend(this.unitSelects.$el);
+                this.$filterBlock.prepend(this.unitSelects.$el);
             }
             this.resultsView = new VideoResultsView({
                 el: this.$('div.ev-results'),
@@ -6019,6 +6050,12 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
                     } else {
                         this.$upload.css('display', 'none');
                     }
+                    // This is the last portion of the filter block that loads
+                    // so now it should be fully rendered...resize our results
+                    // to make sure they have the proper height.
+                    // TODO - better place for this? Or better method of
+                    // handling?
+                    this.resizeResults();
                 }, this),
                 error: _.bind(function(collection, xhr, options) {
                     this.ajaxError(xhr, _.bind(function() {
@@ -6027,6 +6064,11 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
                 }, this),
                 reset: true
             });
+        },
+        resizeResults: function() {
+            if (this.config.fitToParent) {
+                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true));
+            }
         }
     });
 
@@ -6299,6 +6341,7 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit');
+            this.$filterBlock = this.$('div.ev-filter-block');
             if (this.info.get('ApplicationVersion')) {
                 this.searchView = new SearchView({
                     id: this.id + '-search',
@@ -6310,7 +6353,7 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
                         this.loadPlaylists();
                     }, this)
                 });
-                this.$('div.ev-filter-block').prepend(this.searchView.$el);
+                this.$filterBlock.prepend(this.searchView.$el);
                 this.searchView.render();
             }
             this.unitSelects = new UnitSelectsView({
@@ -6320,7 +6363,7 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
                 picker: this,
                 appId: this.appId
             });
-            this.$('div.ev-filter-block').prepend(this.unitSelects.$el);
+            this.$filterBlock.prepend(this.unitSelects.$el);
             this.resultsView = new PlaylistResultsView({
                 el: this.$('div.ev-results'),
                 picker: this,
@@ -6359,7 +6402,7 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
                 success: _.bind(function(collection, response, options) {
                     var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
                     var size = _.size(response.Data);
-                    if(size === totalRecords) {
+                    if (size === totalRecords) {
                         collection.hasMore = false;
                     } else {
                         collection.hasMore = true;
@@ -6367,6 +6410,8 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
                     }
                     this.resultsView.collection = collection;
                     this.resultsView.render();
+                    // TODO - better place for this?
+                    this.resizeResults();
                 }, this),
                 error: _.bind(function(collection, xhr, options) {
                     this.ajaxError(xhr, _.bind(function() {
@@ -6374,6 +6419,11 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
                     }, this));
                 }, this)
             });
+        },
+        resizeResults: function() {
+            if (this.config.fitToParent) {
+                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true));
+            }
         }
     });
 
@@ -6439,7 +6489,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
         template: _.template(require('text!ev-script/templates/field.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler');
+            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler', 'resizePicker');
             this.$field = options.$field;
             this.showChoose = true;
             var pickerOptions = {
@@ -6520,6 +6570,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                     if (this.config.hidePickers) {
                         this.appEvents.trigger('hidePickers', this.id);
                     }
+                    this.resizePicker();
                 }
             }, this);
             this.appEvents.on('hidePicker', function(fieldId) {
@@ -6535,6 +6586,9 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                     this.showChoose = true;
                 }
             }, this);
+            this.appEvents.on('resize', _.bind(function() {
+                this.resizePicker();
+            }, this));
         },
         events: {
             'click .action-choose': 'chooseHandler',
@@ -6609,6 +6663,11 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {
                 this.$('.action-choose').hide();
+            }
+        },
+        resizePicker: function() {
+            if (this.config.fitToParent) {
+                this.picker.setHeight(this.$el.height() - this.$actions.outerHeight(true));
             }
         }
     });
@@ -8498,8 +8557,11 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
             urlCallback: function(url) { return url; },
             // Number of results to fetch at a time from the server (page size).
             pageSize: 100,
-            // The height of our scroll loader.
-            scrollHeight: 600,
+            // The height of our scroll loader. This can be an integer (number
+            // of pixels), or css string, e.g. '80%'.
+            scrollHeight: null,
+            // If true, content will try to resize to fit parent container.
+            fitToParent: false,
             // In scenarios where we have multiple fields on a page we want to
             // automatically hide inactive pickers to preserve screen real
             // estate.  Set to false to disable.
@@ -8514,7 +8576,7 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
             // forms auth identity provider dropdown.
             defaultProvider: '',
             // Location for plupload flash runtime
-            pluploadFlashPath: '',
+            pluploadFlashPath: ''
         };
 
         // Add our configuration to the app cache...this is specific to this

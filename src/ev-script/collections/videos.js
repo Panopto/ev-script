@@ -3,7 +3,8 @@ define(function(require) {
     'use strict';
 
     var BaseCollection = require('ev-script/collections/base'),
-        cacheUtil = require('ev-script/util/cache');
+        cacheUtil = require('ev-script/util/cache'),
+        _ = require('underscore');
 
     return BaseCollection.extend({
         initialize: function(models, options) {
@@ -52,6 +53,14 @@ define(function(require) {
                 valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue),
                 url = api_url + '/' + this.libraryId + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        },
+        parse: function(response) {
+            var videos = response.Data;
+            _.each(videos, function(video) {
+                video.Description = _.unescape(video.Description);
+                video.Keywords = _.unescape(video.Keywords);
+            });
+            return videos;
         }
     });
 

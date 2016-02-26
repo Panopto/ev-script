@@ -16,7 +16,7 @@ define(function(require) {
         emptyTemplate: _.template(require('text!ev-script/templates/no-results.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render', 'loadMore', 'addHandler', 'previewItem');
+            _.bindAll(this, 'render', 'loadMore', 'addHandler', 'previewItem', 'setHeight', 'resizeResults');
             this.picker = options.picker;
             this.appId = options.appId;
             this.loadLock = false;
@@ -77,8 +77,8 @@ define(function(require) {
             }
         },
         addHandler: function(item, collection, options) {
-            var $item = $(this.getItemHtml(item, options.index));
-            this.decorate($item);
+            var $item = $(this.getItemHtml(item, collection.indexOf(item)));
+            // this.decorate($item);
             this.$('.content-list').append($item);
         },
         // Override this in extending views to update the DOM when items are added
@@ -87,28 +87,38 @@ define(function(require) {
             this.$el.html(this.resultsTemplate({
                 totalResults: this.collection.totalResults
             }));
+            this.$total = this.$('.total');
+            this.$results = this.$('.results');
+            this.resizeResults();
             var $contentList = this.$('.content-list');
             if (!this.collection.isEmpty()) {
                 this.collection.each(function(item, index) {
                     var $item = $(this.getItemHtml(item, index));
-                    this.decorate($item);
+                    // this.decorate($item);
                     $contentList.append($item);
                 }, this);
             } else {
                 $contentList.append(this.emptyTemplate());
             }
             var scrollHeight = this.config.scrollHeight;
-            if (this.collection.size() >= this.config.pageSize || $contentList[0].scrollHeight > scrollHeight) {
-                this.$scrollLoader = $contentList.evScrollLoader({
-                    height: scrollHeight,
-                    callback: this.loadMore
-                });
-                if (!this.collection.hasMore) {
-                    this.$scrollLoader.evScrollLoader('hideLoader');
-                }
+            this.$scrollLoader = $contentList.evScrollLoader({
+                height: scrollHeight,
+                onScrolled: this.loadMore
+            });
+            if (!this.collection.hasMore) {
+                this.$scrollLoader.evScrollLoader('hideLoader');
             }
             // Prevent multiple bindings if the collection hasn't changed between render calls
             this.collection.off('add', this.addHandler).on('add', this.addHandler);
+        },
+        setHeight: function(height) {
+            this.$el.height(height);
+            this.resizeResults();
+        },
+        resizeResults: function() {
+            if (this.config.fitToParent && this.$results) {
+                this.$results.height(this.$el.height() - this.$total.outerHeight(true));
+            }
         }
     });
 

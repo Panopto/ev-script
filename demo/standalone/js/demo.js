@@ -1,32 +1,59 @@
-/*global EV,evSettings,jQuery,document,window*/
+/*global EV,evSettings,jQuery,document,window,_*/
 (function($) {
 
     'use strict';
 
-    var app = new EV.EnsembleApp(evSettings);
+    var app = new EV.EnsembleApp(_.extend(evSettings, {
+        hidePickers: false,
+        scrollHeight: false,
+        fitToParent: true
+    }));
 
     app.appEvents.bind('fieldUpdated', function($field, value) {
-        var $videoEmbed = $('.video-embed');
-        var $playlistEmbed = $('.playlist-embed');
+        var $embed = $('.embed');
         if ($field[0].id === 'video') {
             if (value) {
-                app.handleEmbed($videoEmbed, new EV.VideoSettings(value));
+                app.handleEmbed($embed, new EV.VideoSettings(value));
             } else {
-                $videoEmbed.html('');
+                $embed.html('');
             }
         } else if ($field[0].id === 'playlist') {
             if (value) {
-                app.handleEmbed($playlistEmbed, new EV.PlaylistSettings(value));
+                app.handleEmbed($embed, new EV.PlaylistSettings(value));
             } else {
-                $playlistEmbed.html('');
+                $embed.html('');
             }
         }
     });
 
     $(document).ready(function() {
+        var $container = $('.chooserContainer'),
+            $tabs = $('#tabs'),
+            playlistSelected = false,
+            resize = function(event) {
+                $container.height($(window).height() * 0.8);
+                $tabs.tabs('refresh');
+                app.appEvents.trigger('resize');
+            };
+        $(window).resize(resize);
         app.done(function() {
             app.handleField($('#videoWrap')[0], new EV.VideoSettings(), '#video');
-            app.handleField($('#playlistWrap')[0], new EV.PlaylistSettings(), '#playlist');
+            $tabs.tabs({
+                heightStyle: 'fill',
+                create: function() {
+                    // Don't show tabs until created to avoid unformatted content flash
+                    $tabs.show();
+                },
+                activate: function(e, ui) {
+                    // Initialize playlist content once (and only once) the playlist tab is selected
+                    if (!playlistSelected && ui.newTab.index() === 1) {
+                        playlistSelected = true;
+                        app.handleField($('#playlistWrap')[0], new EV.PlaylistSettings(), '#playlist');
+                    }
+                    app.appEvents.trigger('resize');
+                }
+            });
+            resize();
         }).fail(function(message) {
             window.alert(message);
         });

@@ -23,10 +23,11 @@
         }
     });
 
-    require(['ev-config', 'ev-script', 'jquery'], function(evSettings, EV, $) {
+    require(['ev-config', 'ev-script', 'jquery', 'underscore'], function(evSettings, EV, $, _) {
 
-
-        var app = new EV.EnsembleApp(evSettings);
+        var app = new EV.EnsembleApp(_.extend(evSettings, {
+            scrollHeight: 600
+        }));
 
         app.appEvents.bind('fieldUpdated', function($field, value) {
             var $videoEmbed = $('.video-embed');

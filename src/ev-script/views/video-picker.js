@@ -20,9 +20,10 @@ define(function(require) {
             var callback = _.bind(function() {
                 this.loadVideos();
             }, this);
+            this.$filterBlock = this.$('div.ev-filter-block');
             if (this.info.get('ApplicationVersion')) {
                 this.$upload = $('<div class="ev-actions"><a href="#" class="action-upload" title="Upload"><i class="fa fa-upload fa-fw"></i><span>Upload<span></a></div>').css('display', 'none');
-                this.$('div.ev-filter-block').prepend(this.$upload);
+                this.$filterBlock.prepend(this.$upload);
             }
             this.searchView = new SearchView({
                 id: this.id + '-search',
@@ -32,7 +33,7 @@ define(function(require) {
                 appId: this.appId,
                 callback: callback
             });
-            this.$('div.ev-filter-block').prepend(this.searchView.$el);
+            this.$filterBlock.prepend(this.searchView.$el);
             this.searchView.render();
             this.typeSelectView = new TypeSelectView({
                 id: this.id + '-type-select',
@@ -42,7 +43,7 @@ define(function(require) {
                 appId: this.appId,
                 callback: callback
             });
-            this.$('div.ev-filter-block').prepend(this.typeSelectView.$el);
+            this.$filterBlock.prepend(this.typeSelectView.$el);
             this.typeSelectView.render();
             if (this.info.get('ApplicationVersion')) {
                 this.unitSelects = new UnitSelectsView({
@@ -52,7 +53,7 @@ define(function(require) {
                     picker: this,
                     appId: this.appId
                 });
-                this.$('div.ev-filter-block').prepend(this.unitSelects.$el);
+                this.$filterBlock.prepend(this.unitSelects.$el);
             }
             this.resultsView = new VideoResultsView({
                 el: this.$('div.ev-results'),
@@ -146,6 +147,12 @@ define(function(require) {
                     } else {
                         this.$upload.css('display', 'none');
                     }
+                    // This is the last portion of the filter block that loads
+                    // so now it should be fully rendered...resize our results
+                    // to make sure they have the proper height.
+                    // TODO - better place for this? Or better method of
+                    // handling?
+                    this.resizeResults();
                 }, this),
                 error: _.bind(function(collection, xhr, options) {
                     this.ajaxError(xhr, _.bind(function() {
@@ -154,6 +161,11 @@ define(function(require) {
                 }, this),
                 reset: true
             });
+        },
+        resizeResults: function() {
+            if (this.config.fitToParent) {
+                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true));
+            }
         }
     });
 

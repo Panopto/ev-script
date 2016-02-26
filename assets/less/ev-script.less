@@ -15,6 +15,7 @@
 @medium: 600px;
 
 .picker-base() {
+  position: relative;
   padding: 0;
   a {
     color: @link-color;
@@ -255,11 +256,14 @@ div.ev-settings {
 }
 
 div.ev-results {
+  position: relative;
   background-color: #fbfbfb;
-  border-bottom: 1px solid #cccccc;
-  padding: 10px 5px;
+  padding: 0 5px;
   .total {
-    margin-bottom: 0.4em;
+    padding: 0.4em 0;
+  }
+  .results {
+    position: relative
   }
   table thead {
     display: none;
@@ -330,8 +334,6 @@ div.ev-results {
     font-size: 1em;
   }
   .content-list {
-    border: 1px solid #bebfb9;
-    margin: 0 0 10px;
     width: 100%;
     .even {
         background-color: #f3f4ee;
@@ -373,10 +375,13 @@ div.ev-video-picker div.ev-results .content-list tr td {
   vertical-align: top;
 }
 
-div.scrollWrap .loader {
-  background: url(@loader-image) no-repeat scroll center center transparent;
-  height: 60px;
-  width: 100%;
+div.scrollWrap {
+  border: 1px solid #bebfb9;
+  .loader {
+    background: url(@loader-image) no-repeat scroll center center transparent;
+    height: 60px;
+    width: 100%;
+  }
 }
 
 div.ev-dialog {

@@ -14,7 +14,7 @@ define(function(require) {
         template: _.template(require('text!ev-script/templates/picker.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker');
+            _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker', 'setHeight', 'resizeResults');
             this.$el.hide();
             this.$el.html(this.template({
                 id: this.id
@@ -64,13 +64,18 @@ define(function(require) {
             e.preventDefault();
         },
         hidePicker: function() {
-            this.$el.fadeOut('fast');
+            this.$el.hide();
         },
         showPicker: function() {
             // In case our authentication status has changed...re-render our hider
             this.hider.render();
-            this.$el.fadeIn('fast');
-        }
+            this.$el.show();
+        },
+        setHeight: function(height) {
+            this.$el.height(height);
+            this.resizeResults();
+        },
+        resizeResults: function() {}
     });
 
 });

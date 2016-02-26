@@ -10,22 +10,33 @@
     <link rel="stylesheet" href="../../bower_components/jquery-ui/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="../../bower_components/plupload/js/jquery.plupload.queue/css/jquery.plupload.queue.css">
     <link rel="stylesheet" href="../../assets/css/ev-script.css">
-    <link rel="stylesheet" href="../css/demo.css">
+    <link rel="stylesheet" href="css/demo.css">
   </head>
   <body>
     <h3>Ensemble Video - Integration Example</h3>
-    <form>
-      <fieldset id="videoWrap">
-        <input id="video" name="video" type="hidden" />
-      </fieldset>
-    </form>
-    <div class="video-embed"></div>
-    <form>
-      <fieldset id="playlistWrap">
-        <input id="playlist" name="playlist" type="hidden" />
-      </fieldset>
-    </form>
-    <div class="playlist-embed"></div>
+    <div class="chooserContainer">
+      <div id="tabs" style="display:none;">
+        <ul>
+          <li><a href="#videosTab">Choose Media</a></li>
+          <li><a href="#playlistsTab">Choose Playlist</a></li>
+        </ul>
+        <div id="videosTab" class="chooserTab">
+          <form>
+            <fieldset id="videoWrap">
+              <input id="video" name="video" type="hidden" />
+            </fieldset>
+          </form>
+        </div>
+        <div id="playlistsTab" class="chooserTab">
+          <form>
+            <fieldset id="playlistWrap">
+              <input id="playlist" name="playlist" type="hidden" />
+            </fieldset>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="embed"></div>
     <script src="../../bower_components/jquery/dist/jquery.js"></script>
     <script src="../../bower_components/jquery-ui/jquery-ui.js"></script>
     <script src="../../bower_components/plupload/js/moxie.js"></script>

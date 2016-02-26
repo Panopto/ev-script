@@ -1,4 +1,5 @@
 .ev-video-picker {
+  position: relative;
   padding: 0;
 }
 .ev-video-picker a {
@@ -29,6 +30,7 @@
   }
 }
 .ev-playlist-picker {
+  position: relative;
   padding: 0;
 }
 .ev-playlist-picker a {
@@ -234,12 +236,15 @@ div.ev-settings div.form-actions {
   float: left;
 }
 div.ev-results {
+  position: relative;
   background-color: #fbfbfb;
-  border-bottom: 1px solid #cccccc;
-  padding: 10px 5px;
+  padding: 0 5px;
 }
 div.ev-results .total {
-  margin-bottom: 0.4em;
+  padding: 0.4em 0;
+}
+div.ev-results .results {
+  position: relative;
 }
 div.ev-results table thead {
   display: none;
@@ -310,8 +315,6 @@ div.ev-results table {
   font-size: 1em;
 }
 div.ev-results .content-list {
-  border: 1px solid #bebfb9;
-  margin: 0 0 10px;
   width: 100%;
 }
 div.ev-results .content-list .even {
@@ -351,6 +354,9 @@ div.ev-results .content-list .content-item .label {
 }
 div.ev-video-picker div.ev-results .content-list tr td {
   vertical-align: top;
+}
+div.scrollWrap {
+  border: 1px solid #bebfb9;
 }
 div.scrollWrap .loader {
   background: url('images/loader.gif') no-repeat scroll center center transparent;

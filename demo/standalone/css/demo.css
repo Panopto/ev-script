@@ -1,0 +1,51 @@
+body {
+    font-size: 10pt;
+    padding: 1em;
+}
+
+a,
+a:visited {
+    color: #3399ff;
+}
+
+.ev-field {
+    margin: 1em 0;
+}
+
+div.ev-field div.logo {
+    display: none;
+}
+
+.chooserTab.ui-tabs-panel {
+    padding: 0.4em;
+}
+
+.chooserTab form {
+    position: relative;
+    height: 100%;
+}
+
+#videoWrap,
+#playlistWrap {
+    border: none;
+    padding: 0;
+    position: relative;
+    height: 100%;
+}
+
+div.ev-results {
+    border: none;
+}
+
+div.ev-results .results {
+    border-bottom: 1px solid #cccccc;
+}
+
+.embed {
+    margin: 1em 0;
+}
+
+.ev-hider .action-hide {
+    display: none;
+}
+

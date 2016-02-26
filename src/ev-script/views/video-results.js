@@ -18,7 +18,11 @@ define(function(require) {
         decorate: function($item) {
             // Handle truncation (more/less) of description text
             $('.desc .value', $item).each(function(element) {
-                var $this = $(this), $full, $short, truncLen = 100, fullDesc = $(this).html();
+                var $this = $(this),
+                    $full,
+                    $short,
+                    truncLen = 100,
+                    fullDesc = $this.html();
                 if (fullDesc.length > truncLen) {
                     $this.empty();
                     $full = $('<span>' + fullDesc + '</span>');
