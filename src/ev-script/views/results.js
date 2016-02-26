@@ -78,7 +78,7 @@ define(function(require) {
         },
         addHandler: function(item, collection, options) {
             var $item = $(this.getItemHtml(item, collection.indexOf(item)));
-            // this.decorate($item);
+            this.decorate($item);
             this.$('.content-list').append($item);
         },
         // Override this in extending views to update the DOM when items are added
@@ -94,7 +94,7 @@ define(function(require) {
             if (!this.collection.isEmpty()) {
                 this.collection.each(function(item, index) {
                     var $item = $(this.getItemHtml(item, index));
-                    // this.decorate($item);
+                    this.decorate($item);
                     $contentList.append($item);
                 }, this);
             } else {

@@ -338,7 +338,7 @@ div.ev-results .content-list .content-item tr.title td {
   border-bottom: 1px solid #999999;
   font-weight: bold;
 }
-div.ev-results .content-list .content-item .desc a {
+div.ev-results .content-list .content-item .trunc a {
   margin-left: 5px;
 }
 div.ev-results .content-list .content-item .label {

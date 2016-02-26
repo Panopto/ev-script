@@ -8,6 +8,8 @@ define(function(require) {
         VideoSettings = require('ev-script/models/video-settings'),
         VideoPreviewView = require('ev-script/views/video-preview');
 
+    require('jquery-truncate-html');
+
     return ResultsView.extend({
         modelClass: VideoSettings,
         previewClass: VideoPreviewView,
@@ -16,17 +18,22 @@ define(function(require) {
             ResultsView.prototype.initialize.call(this, options);
         },
         decorate: function($item) {
-            // Handle truncation (more/less) of description text
-            $('.desc .value', $item).each(function(element) {
+            // Handle truncation (more/less) of truncatable fields
+            $('.trunc .value', $item).each(function(element) {
                 var $this = $(this),
                     $full,
                     $short,
                     truncLen = 100,
-                    fullDesc = $this.html();
-                if (fullDesc.length > truncLen) {
+                    fullText = $this.html(),
+                    truncText = $.truncate(fullText, {
+                        length: truncLen,
+                        stripTags: true,
+                        noBreaks: true
+                    });
+                if (fullText.length > truncLen) {
                     $this.empty();
-                    $full = $('<span>' + fullDesc + '</span>');
-                    $short = $('<span>' + fullDesc.substring(0, truncLen) + '...</span>');
+                    $full = $('<span>' + fullText + '</span>');
+                    $short = $('<span>' + truncText + '</span>');
                     var $shorten = $('<a href="#">Less</a>').click(function(e) {
                         $full.hide();
                         $short.show();

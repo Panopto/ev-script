@@ -15,7 +15,8 @@
     "ev-scroll-loader": "git://github.com/ensembleVideo/ev-scroll-loader.git",
     "font-awesome": "fontawesome#~4.5.0",
     "underscore": "~1.8.3",
-    "semver": "~4.3.4"
+    "semver": "~4.3.4",
+    "jquery-truncate-html": "*"
   },
   "devDependencies": {
     "text": "~2.0.14",

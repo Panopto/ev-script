@@ -20,6 +20,7 @@ module.exports = function(grunt) {
         'jquery-ui': 'jquery-ui/jquery-ui',
         'jquery.cookie': 'jquery.cookie/jquery.cookie',
         'jquery.plupload.queue': 'plupload/js/jquery.plupload.queue/jquery.plupload.queue',
+        'jquery-truncate-html': 'jquery-truncate-html/jquery.truncate',
         'plupload': 'plupload/js/plupload.full.min',
         'ev-scroll-loader': 'ev-scroll-loader/dist/jquery.ev-scroll-loader',
         'underscore': 'underscore/underscore',

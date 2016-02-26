@@ -14,9 +14,9 @@
                         <a class="action-preview" title="Preview: <%= item.get('Title') %>" href="#" rel="<%= item.get('ID') %>"><%= item.get('Title') %></a>
                     </td>
                 </tr>
-                <tr class="desc"><td class="label">Description</td><td class="value"><%= item.get('Description') %></td></tr>
+                <tr class="trunc"><td class="label">Description</td><td class="value"><%= item.get('Description') %></td></tr>
                 <tr><td class="label">Date Added</td><td class="value"><%- new Date(item.get('AddedOn')).toLocaleString() %></td></tr>
-                <tr><td class="label">Keywords</td><td class="value"><%= item.get('Keywords') %></td></tr>
+                <tr class="trunc"><td class="label">Keywords</td><td class="value"><%= item.get('Keywords') %></td></tr>
                 <tr><td class="label">Library</td><td class="value"><%- item.get('LibraryName') %></td></tr>
             </tbody>
         </table>

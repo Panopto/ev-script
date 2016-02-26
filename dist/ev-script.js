@@ -5148,7 +5148,7 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
         },
         addHandler: function(item, collection, options) {
             var $item = $(this.getItemHtml(item, collection.indexOf(item)));
-            // this.decorate($item);
+            this.decorate($item);
             this.$('.content-list').append($item);
         },
         // Override this in extending views to update the DOM when items are added
@@ -5164,7 +5164,7 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
             if (!this.collection.isEmpty()) {
                 this.collection.each(function(item, index) {
                     var $item = $(this.getItemHtml(item, index));
-                    // this.decorate($item);
+                    this.decorate($item);
                     $contentList.append($item);
                 }, this);
             } else {
@@ -5482,10 +5482,95 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
 
 });
 
+(function($) {
 
-define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <img src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%= item.get(\'Title\') %> thumbnail image"/>\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%= item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span>Choose</span></a>\n            <a class="action-preview" href="#" title="Preview: <%= item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%= item.get(\'Title\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="Preview: <%= item.get(\'Title\') %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="desc"><td class="label">Description</td><td class="value"><%= item.get(\'Description\') %></td></tr>\n                <tr><td class="label">Date Added</td><td class="value"><%- new Date(item.get(\'AddedOn\')).toLocaleString() %></td></tr>\n                <tr><td class="label">Keywords</td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label">Library</td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
+  // Matches trailing non-space characters.
+  var chop = /(\s*\S+|\s)$/;
 
-define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','text!ev-script/templates/video-result.html'],function(require) {
+  // Return a truncated html string.  Delegates to $.fn.truncate.
+  $.truncate = function(html, options) {
+    return $('<div></div>').append(html).truncate(options).html();
+  };
+
+  // Truncate the contents of an element in place.
+  $.fn.truncate = function(options) {
+    if ($.isNumeric(options)) options = {length: options};
+    var o = $.extend({}, $.truncate.defaults, options);
+
+    return this.each(function() {
+      var self = $(this);
+
+      if (o.noBreaks) self.find('br').replaceWith(' ');
+
+      var text = self.text();
+      var excess = text.length - o.length;
+
+      if (o.stripTags) self.text(text);
+
+      // Chop off any partial words if appropriate.
+      if (o.words && excess > 0) {
+        excess = text.length - text.slice(0, o.length).replace(chop, '').length - 1;
+      }
+
+      if (excess < 0 || !excess && !o.truncated) return;
+
+      // Iterate over each child node in reverse, removing excess text.
+      $.each(self.contents().get().reverse(), function(i, el) {
+        var $el = $(el);
+        var text = $el.text();
+        var length = text.length;
+
+        // If the text is longer than the excess, remove the node and continue.
+        if (length <= excess) {
+          o.truncated = true;
+          excess -= length;
+          $el.remove();
+          return;
+        }
+
+        // Remove the excess text and append the ellipsis.
+        if (el.nodeType === 3) {
+          $(el.splitText(length - excess - 1)).replaceWith(o.ellipsis);
+          return false;
+        }
+
+        // Recursively truncate child nodes.
+        $el.truncate($.extend(o, {length: length - excess}));
+        return false;
+      });
+    });
+  };
+
+  $.truncate.defaults = {
+
+    // Strip all html elements, leaving only plain text.
+    stripTags: false,
+
+    // Only truncate at word boundaries.
+    words: false,
+
+    // Replace instances of <br> with a single space.
+    noBreaks: false,
+
+    // The maximum length of the truncated html.
+    length: Infinity,
+
+    // The character to use as the ellipsis.  The word joiner (U+2060) can be
+    // used to prevent a hanging ellipsis, but displays incorrectly in Chrome
+    // on Windows 7.
+    // http://code.google.com/p/chromium/issues/detail?id=68323
+    ellipsis: '\u2026' // '\u2060\u2026'
+
+  };
+
+})(jQuery);
+
+define("jquery-truncate-html", function(){});
+
+
+define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <img src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%= item.get(\'Title\') %> thumbnail image"/>\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%= item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span>Choose</span></a>\n            <a class="action-preview" href="#" title="Preview: <%= item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%= item.get(\'Title\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="Preview: <%= item.get(\'Title\') %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label">Description</td><td class="value"><%= item.get(\'Description\') %></td></tr>\n                <tr><td class="label">Date Added</td><td class="value"><%- new Date(item.get(\'AddedOn\')).toLocaleString() %></td></tr>\n                <tr class="trunc"><td class="label">Keywords</td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label">Library</td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
+
+define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-truncate-html','text!ev-script/templates/video-result.html'],function(require) {
 
     'use strict';
 
@@ -5495,6 +5580,8 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
         VideoSettings = require('ev-script/models/video-settings'),
         VideoPreviewView = require('ev-script/views/video-preview');
 
+    require('jquery-truncate-html');
+
     return ResultsView.extend({
         modelClass: VideoSettings,
         previewClass: VideoPreviewView,
@@ -5503,17 +5590,22 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
             ResultsView.prototype.initialize.call(this, options);
         },
         decorate: function($item) {
-            // Handle truncation (more/less) of description text
-            $('.desc .value', $item).each(function(element) {
+            // Handle truncation (more/less) of truncatable fields
+            $('.trunc .value', $item).each(function(element) {
                 var $this = $(this),
                     $full,
                     $short,
                     truncLen = 100,
-                    fullDesc = $this.html();
-                if (fullDesc.length > truncLen) {
+                    fullText = $this.html(),
+                    truncText = $.truncate(fullText, {
+                        length: truncLen,
+                        stripTags: true,
+                        noBreaks: true
+                    });
+                if (fullText.length > truncLen) {
                     $this.empty();
-                    $full = $('<span>' + fullDesc + '</span>');
-                    $short = $('<span>' + fullDesc.substring(0, truncLen) + '...</span>');
+                    $full = $('<span>' + fullText + '</span>');
+                    $short = $('<span>' + truncText + '</span>');
                     var $shorten = $('<a href="#">Less</a>').click(function(e) {
                         $full.hide();
                         $short.show();
