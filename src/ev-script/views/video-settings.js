@@ -10,6 +10,7 @@ define(function(require) {
 
     return SettingsView.extend({
         template: _.template(require('text!ev-script/templates/video-settings.html')),
+        legacyTemplate: _.template(require('text!ev-script/templates/video-settings-legacy.html')),
         sizesTemplate: _.template(require('text!ev-script/templates/sizes.html')),
         initialize: function(options) {
             SettingsView.prototype.initialize.call(this, options);
@@ -25,6 +26,19 @@ define(function(require) {
                 'showcaptions': this.$('#showcaptions').is(':checked'),
                 'hidecontrols': this.$('#hidecontrols').is(':checked')
             };
+            if (this.info.checkVersion('>=3.12.0')) {
+                attrs = _.extend(attrs, {
+                    'socialsharing': this.$('#socialsharing').is(':checked'),
+                    'annotations': this.$('#annotations').is(':checked'),
+                    'captionsearch': this.$('#captionsearch').is(':checked'),
+                    'attachments': this.$('#attachments').is(':checked'),
+                    'links': this.$('#links').is(':checked'),
+                    'metadata': this.$('#metadata').is(':checked'),
+                    'dateproduced': this.$('#dateproduced').is(':checked'),
+                    'embedcode': this.$('#embedcode').is(':checked'),
+                    'download': this.$('#download').is(':checked')
+                });
+            }
             var sizeVal = this.$('#size').val();
             if (!sizeVal || sizeVal === 'original') {
                 // isNew signifies that the encoding hasn't been fetched yet
@@ -66,10 +80,19 @@ define(function(require) {
             }));
         },
         render: function() {
-            this.$el.html(this.template({
-                model: this.field.model,
-                isAudio: this.encoding && this.encoding.isAudio()
-            }));
+            var html = '';
+            if (this.info.checkVersion('>=3.12.0')) {
+                html = this.template({
+                    model: this.field.model,
+                    isAudio: this.encoding && this.encoding.isAudio()
+                });
+            } else {
+                html = this.legacyTemplate({
+                    model: this.field.model,
+                    isAudio: this.encoding && this.encoding.isAudio()
+                });
+            }
+            this.$el.html(html);
             if (this.encoding && !this.encoding.isAudio()) {
                 this.renderSize();
             }
@@ -82,7 +105,7 @@ define(function(require) {
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 width: Math.min(340, $(window).width() - this.config.dialogMargin),
-                height: Math.min(320, $(window).height() - this.config.dialogMargin)
+                height: Math.min(480, $(window).height() - this.config.dialogMargin)
             });
         }
     });

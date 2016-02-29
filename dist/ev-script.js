@@ -3895,10 +3895,19 @@ define('ev-script/models/video-settings',['backbone'], function(Backbone) {
     return Backbone.Model.extend({
         defaults: {
             type: 'video',
-            showtitle: false,
+            showtitle: true,
             autoplay: false,
             showcaptions: false,
             hidecontrols: false,
+            socialsharing: false,
+            annotations: true,
+            captionsearch: true,
+            attachments: true,
+            links: true,
+            metadata: true,
+            dateproduced: true,
+            embedcode: false,
+            download: false,
             search: '',
             sourceId: 'content'
         }
@@ -5275,9 +5284,12 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
 });
 
 
-define('text!ev-script/templates/video-embed.html',[],function () { return '<iframe src="<%= src %>"\n        frameborder="0"\n        style="width: <%= width %>px;height:<%= (parseInt(height, 10) + 56) %>px;"\n        allowfullscreen>\n</iframe>\n';});
+define('text!ev-script/templates/video-embed.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?ID=<%= id %>&autoPlay=<%= autoPlay %>&displayTitle=<%= displayTitle %>&displaySharing=<%= displaySharing %>&displayAnnotations=<%= displayAnnotations %>&displayCaptionSearch=<%= displayCaptionSearch %>&displayAttachments=<%= displayAttachments %>&displayLinks=<%= displayLinks %>&displayMetaData=<%= displayMetaData %>&displayDateProduced=<%= displayDateProduced %>&displayEmbedCode=<%= displayEmbedCode %>&displayDownloadIcon=<%= displayDownloadIcon %>&hideControls=true&showCaptions=<%= showCaptions %>&width=<%= width %>&height=<%= height %>&isNewPluginEmbed=true"\n        frameborder="0"\n        width="<%= width %>"\n        height="<%= (parseInt(height, 10) + 40) %>"\n        allowfullscreen>\n</iframe>\n';});
 
-define('ev-script/views/video-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/video-embed.html'],function(require) {
+
+define('text!ev-script/templates/video-embed-legacy.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?ID=<%= id %>&autoPlay=<%= autoPlay %>&displayTitle=<%= displayTitle %>&hideControls=<%= hideControls %>&showCaptions=<%= showCaptions %>&width=<%= width %>&height=<%= height %>"\n        frameborder="0"\n        style="width: <%= width %>px;height:<%= (parseInt(height, 10) + 56) %>px;"\n        allowfullscreen>\n</iframe>\n';});
+
+define('ev-script/views/video-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/video-embed.html','text!ev-script/templates/video-embed-legacy.html'],function(require) {
 
     'use strict';
 
@@ -5286,24 +5298,46 @@ define('ev-script/views/video-embed',['require','underscore','ev-script/views/ba
 
     return BaseView.extend({
         template: _.template(require('text!ev-script/templates/video-embed.html')),
+        legacyTemplate: _.template(require('text!ev-script/templates/video-embed-legacy.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             // Width and height really should be set by now...but use a reasonable default if not
             var width = (this.model.get('width') ? this.model.get('width') : '640'),
                 height = (this.model.get('height') ? this.model.get('height') : '360'),
-                showTitle = this.model.get('showtitle');
-            var src = this.config.ensembleUrl + '/app/plugin/embed.aspx?ID=' + this.model.get('id') +
-                '&autoPlay=' + this.model.get('autoplay') +
-                '&displayTitle=' + showTitle +
-                '&hideControls=' + this.model.get('hidecontrols') +
-                '&showCaptions=' + this.model.get('showcaptions') +
-                '&width=' + width +
-                '&height=' + height;
-            this.$el.html(this.template({
-                src: src,
-                width: width,
-                height: (showTitle ? height + 25 : height)
-            }));
+                showTitle = this.model.get('showtitle'),
+                embed = '';
+            if (this.info.checkVersion('>=3.12.0')) {
+                embed = this.template({
+                    ensembleUrl: this.config.ensembleUrl,
+                    id: this.model.get('id'),
+                    autoPlay: this.model.get('autoplay'),
+                    displayTitle: showTitle,
+                    displaySharing: this.model.get('socialsharing'),
+                    displayAnnotations: this.model.get('annotations'),
+                    displayCaptionSearch: this.model.get('captionsearch'),
+                    displayAttachments: this.model.get('attachments'),
+                    displayLinks: this.model.get('links'),
+                    displayMetaData: this.model.get('metadata'),
+                    displayDateProduced: this.model.get('dateproduced'),
+                    displayEmbedCode: this.model.get('embedcode'),
+                    displayDownloadIcon: this.model.get('download'),
+                    showCaptions: this.model.get('showcaptions'),
+                    width: width,
+                    height: height
+                });
+            } else {
+                embed = this.legacyTemplate({
+                    ensembleUrl: this.config.ensembleUrl,
+                    id: this.model.get('id'),
+                    autoPlay: this.model.get('autoplay'),
+                    displayTitle: showTitle,
+                    hideControls: this.model.get('hidecontrols'),
+                    showCaptions: this.model.get('showcaptions'),
+                    width: width,
+                    height: (showTitle ? height + 25 : height)
+                });
+            }
+            this.$el.html(embed);
         }
     });
 
@@ -6215,12 +6249,15 @@ define('ev-script/views/settings',['require','underscore','ev-script/views/base'
 });
 
 
-define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size">Size</label>\n            <select class="form-select size" id="size" name="size" <% if (isAudio) { print(\'disabled\'); } %> >\n                <option value="original">Original</option>\n            </select>\n        </div>\n        <div class="fieldWrap">\n            <label for="showtitle">Show Title</label>\n            <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="autoplay">Auto Play</label>\n            <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="showcaptions">Show Captions</label>\n            <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="fieldWrap">\n            <label for="hidecontrols">Hide Controls</label>\n            <input id="hidecontrols" class="form-checkbox" <% if (model.get(\'hidecontrols\')) { print(\'checked="checked"\'); } %>  name="hidecontrols" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="Cancel"/>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size">Size</label>\n            <select class="form-select size" id="size" name="size" <% if (isAudio) { print(\'disabled\'); } %> >\n                <option value="original">Original</option>\n            </select>\n        </div>\n        <div class="fieldWrap">\n            <label for="showtitle">Title</label>\n            <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="socialsharing">Social Tools</label>\n            <input id="socialsharing" class="form-checkbox" <% if (model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="annotations">Annotations</label>\n            <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="captionsearch">Caption Search</label>\n            <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="autoplay">Auto Play (PC Only)</label>\n            <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="attachments">Attachments</label>\n            <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="links">Links</label>\n            <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="metadata">Meta Data</label>\n            <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="dateproduced">Date Produced</label>\n            <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="embedcode">Embed Code</label>\n            <input id="embedcode" class="form-checkbox" <% if (model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="download">Download Link</label>\n            <input id="download" class="form-checkbox" <% if (model.get(\'download\')) { print(\'checked="checked"\'); } %> name="download" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="showcaptions">Captions "On" By Default</label>\n            <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="Cancel"/>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
+
+
+define('text!ev-script/templates/video-settings-legacy.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size">Size</label>\n            <select class="form-select size" id="size" name="size" <% if (isAudio) { print(\'disabled\'); } %> >\n                <option value="original">Original</option>\n            </select>\n        </div>\n        <div class="fieldWrap">\n            <label for="showtitle">Show Title</label>\n            <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="autoplay">Auto Play</label>\n            <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="showcaptions">Show Captions</label>\n            <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="fieldWrap">\n            <label for="hidecontrols">Hide Controls</label>\n            <input id="hidecontrols" class="form-checkbox" <% if (model.get(\'hidecontrols\')) { print(\'checked="checked"\'); } %>  name="hidecontrols" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="Cancel"/>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
 
 define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(sizes, function(size) { %>\n    <option value="<%= size %>" <% if (size === target) { print(\'selected="selected"\'); } %>><%= size %></option>\n<% }); %>\n';});
 
-define('ev-script/views/video-settings',['require','jquery','underscore','ev-script/views/settings','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/sizes.html'],function(require) {
+define('ev-script/views/video-settings',['require','jquery','underscore','ev-script/views/settings','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/video-settings-legacy.html','text!ev-script/templates/sizes.html'],function(require) {
 
     'use strict';
 
@@ -6232,6 +6269,7 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
 
     return SettingsView.extend({
         template: _.template(require('text!ev-script/templates/video-settings.html')),
+        legacyTemplate: _.template(require('text!ev-script/templates/video-settings-legacy.html')),
         sizesTemplate: _.template(require('text!ev-script/templates/sizes.html')),
         initialize: function(options) {
             SettingsView.prototype.initialize.call(this, options);
@@ -6247,6 +6285,19 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
                 'showcaptions': this.$('#showcaptions').is(':checked'),
                 'hidecontrols': this.$('#hidecontrols').is(':checked')
             };
+            if (this.info.checkVersion('>=3.12.0')) {
+                attrs = _.extend(attrs, {
+                    'socialsharing': this.$('#socialsharing').is(':checked'),
+                    'annotations': this.$('#annotations').is(':checked'),
+                    'captionsearch': this.$('#captionsearch').is(':checked'),
+                    'attachments': this.$('#attachments').is(':checked'),
+                    'links': this.$('#links').is(':checked'),
+                    'metadata': this.$('#metadata').is(':checked'),
+                    'dateproduced': this.$('#dateproduced').is(':checked'),
+                    'embedcode': this.$('#embedcode').is(':checked'),
+                    'download': this.$('#download').is(':checked')
+                });
+            }
             var sizeVal = this.$('#size').val();
             if (!sizeVal || sizeVal === 'original') {
                 // isNew signifies that the encoding hasn't been fetched yet
@@ -6288,10 +6339,19 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
             }));
         },
         render: function() {
-            this.$el.html(this.template({
-                model: this.field.model,
-                isAudio: this.encoding && this.encoding.isAudio()
-            }));
+            var html = '';
+            if (this.info.checkVersion('>=3.12.0')) {
+                html = this.template({
+                    model: this.field.model,
+                    isAudio: this.encoding && this.encoding.isAudio()
+                });
+            } else {
+                html = this.legacyTemplate({
+                    model: this.field.model,
+                    isAudio: this.encoding && this.encoding.isAudio()
+                });
+            }
+            this.$el.html(html);
             if (this.encoding && !this.encoding.isAudio()) {
                 this.renderSize();
             }
@@ -6304,7 +6364,7 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 width: Math.min(340, $(window).width() - this.config.dialogMargin),
-                height: Math.min(320, $(window).height() - this.config.dialogMargin)
+                height: Math.min(480, $(window).height() - this.config.dialogMargin)
             });
         }
     });

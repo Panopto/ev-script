@@ -7,20 +7,52 @@
             </select>
         </div>
         <div class="fieldWrap">
-            <label for="showtitle">Show Title</label>
+            <label for="showtitle">Title</label>
             <input id="showtitle" class="form-checkbox" <% if (model.get('showtitle')) { print('checked="checked"'); } %> name="showtitle" type="checkbox"/>
         </div>
         <div class="fieldWrap">
-            <label for="autoplay">Auto Play</label>
+            <label for="socialsharing">Social Tools</label>
+            <input id="socialsharing" class="form-checkbox" <% if (model.get('socialsharing')) { print('checked="checked"'); } %> name="socialsharing" type="checkbox"/>
+        </div>
+        <div class="fieldWrap">
+            <label for="annotations">Annotations</label>
+            <input id="annotations" class="form-checkbox" <% if (model.get('annotations')) { print('checked="checked"'); } %> name="annotations" type="checkbox"/>
+        </div>
+        <div class="fieldWrap">
+            <label for="captionsearch">Caption Search</label>
+            <input id="captionsearch" class="form-checkbox" <% if (model.get('captionsearch')) { print('checked="checked"'); } %> name="captionsearch" type="checkbox"/>
+        </div>
+        <div class="fieldWrap">
+            <label for="autoplay">Auto Play (PC Only)</label>
             <input id="autoplay" class="form-checkbox" <% if (model.get('autoplay')) { print('checked="checked"'); } %>  name="autoplay" type="checkbox"/>
         </div>
         <div class="fieldWrap">
-            <label for="showcaptions">Show Captions</label>
-            <input id="showcaptions" class="form-checkbox" <% if (model.get('showcaptions')) { print('checked="checked"'); } %>  name="showcaptions" type="checkbox" <% if (isAudio) { print('disabled'); } %> />
+            <label for="attachments">Attachments</label>
+            <input id="attachments" class="form-checkbox" <% if (model.get('attachments')) { print('checked="checked"'); } %> name="attachments" type="checkbox"/>
         </div>
         <div class="fieldWrap">
-            <label for="hidecontrols">Hide Controls</label>
-            <input id="hidecontrols" class="form-checkbox" <% if (model.get('hidecontrols')) { print('checked="checked"'); } %>  name="hidecontrols" type="checkbox" <% if (isAudio) { print('disabled'); } %> />
+            <label for="links">Links</label>
+            <input id="links" class="form-checkbox" <% if (model.get('links')) { print('checked="checked"'); } %> name="links" type="checkbox"/>
+        </div>
+        <div class="fieldWrap">
+            <label for="metadata">Meta Data</label>
+            <input id="metadata" class="form-checkbox" <% if (model.get('metadata')) { print('checked="checked"'); } %> name="metadata" type="checkbox"/>
+        </div>
+        <div class="fieldWrap">
+            <label for="dateproduced">Date Produced</label>
+            <input id="dateproduced" class="form-checkbox" <% if (model.get('dateproduced')) { print('checked="checked"'); } %> name="dateproduced" type="checkbox"/>
+        </div>
+        <div class="fieldWrap">
+            <label for="embedcode">Embed Code</label>
+            <input id="embedcode" class="form-checkbox" <% if (model.get('embedcode')) { print('checked="checked"'); } %> name="embedcode" type="checkbox"/>
+        </div>
+        <div class="fieldWrap">
+            <label for="download">Download Link</label>
+            <input id="download" class="form-checkbox" <% if (model.get('download')) { print('checked="checked"'); } %> name="download" type="checkbox"/>
+        </div>
+        <div class="fieldWrap">
+            <label for="showcaptions">Captions "On" By Default</label>
+            <input id="showcaptions" class="form-checkbox" <% if (model.get('showcaptions')) { print('checked="checked"'); } %>  name="showcaptions" type="checkbox"/>
         </div>
         <div class="form-actions">
             <input type="button" class="form-submit action-cancel" value="Cancel"/>

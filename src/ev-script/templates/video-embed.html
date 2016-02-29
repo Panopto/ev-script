@@ -1,5 +1,6 @@
-<iframe src="<%= src %>"
+<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?ID=<%= id %>&autoPlay=<%= autoPlay %>&displayTitle=<%= displayTitle %>&displaySharing=<%= displaySharing %>&displayAnnotations=<%= displayAnnotations %>&displayCaptionSearch=<%= displayCaptionSearch %>&displayAttachments=<%= displayAttachments %>&displayLinks=<%= displayLinks %>&displayMetaData=<%= displayMetaData %>&displayDateProduced=<%= displayDateProduced %>&displayEmbedCode=<%= displayEmbedCode %>&displayDownloadIcon=<%= displayDownloadIcon %>&hideControls=true&showCaptions=<%= showCaptions %>&width=<%= width %>&height=<%= height %>&isNewPluginEmbed=true"
         frameborder="0"
-        style="width: <%= width %>px;height:<%= (parseInt(height, 10) + 56) %>px;"
+        width="<%= width %>"
+        height="<%= (parseInt(height, 10) + 40) %>"
         allowfullscreen>
 </iframe>
