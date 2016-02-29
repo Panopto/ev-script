@@ -24,14 +24,15 @@ define(function(require) {
                     $full,
                     $short,
                     truncLen = 100,
-                    fullText = $this.html(),
+                    fullText = $this.data('fullText') || $this.html(),
                     truncText = $.truncate(fullText, {
                         length: truncLen,
                         stripTags: true,
                         noBreaks: true
                     });
-                if (fullText.length > truncLen) {
-                    $this.empty();
+                $this.empty();
+                if ($(window).width() < 1100 && fullText.length > truncLen) {
+                    $this.data('fullText', fullText);
                     $full = $('<span>' + fullText + '</span>');
                     $short = $('<span>' + truncText + '</span>');
                     var $shorten = $('<a href="#">Less</a>').click(function(e) {
@@ -47,6 +48,8 @@ define(function(require) {
                     $full.hide().append($shorten);
                     $short.append($expand);
                     $this.append($short).append($full);
+                } else {
+                    $this.append(fullText);
                 }
             });
         }

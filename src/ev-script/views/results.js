@@ -118,6 +118,10 @@ define(function(require) {
         resizeResults: function() {
             if (this.config.fitToParent && this.$results) {
                 this.$results.height(this.$el.height() - this.$total.outerHeight(true));
+                // Truncation of metadata depends on window size...so re-decorate
+                this.$('.resultItem').each(_.bind(function(index, element) {
+                    this.decorate($(element));
+                }, this));
             }
         }
     });

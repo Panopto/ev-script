@@ -1,5 +1,5 @@
 /**
- * ev-script 1.0.0 2016-02-26
+ * ev-script 1.1.0 2016-02-29
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2016 Symphony Video, Inc.
@@ -4593,7 +4593,7 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
 });
 
 
-define('text!ev-script/templates/search.html',[],function () { return '<form>\n    <label for="<%= id %>">Search:</label>\n    <input id="<%= id %>" type="text" class="form-text search" value="<%- searchVal %>" title="Search Media" />\n    <input type="submit" value="Go" class="form-submit" />\n</form>\n';});
+define('text!ev-script/templates/search.html',[],function () { return '<form>\n    <label for="<%= id %>">Search:</label>\n    <input id="<%= id %>" type="search" class="form-text search" value="<%- searchVal %>" title="Search Media" />\n    <input type="submit" value="Go" class="form-submit" />\n</form>\n';});
 
 define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
 
@@ -5191,6 +5191,10 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
         resizeResults: function() {
             if (this.config.fitToParent && this.$results) {
                 this.$results.height(this.$el.height() - this.$total.outerHeight(true));
+                // Truncation of metadata depends on window size...so re-decorate
+                this.$('.resultItem').each(_.bind(function(index, element) {
+                    this.decorate($(element));
+                }, this));
             }
         }
     });
@@ -5571,7 +5575,7 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
 define("jquery-truncate-html", function(){});
 
 
-define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <img src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%= item.get(\'Title\') %> thumbnail image"/>\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%= item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span>Choose</span></a>\n            <a class="action-preview" href="#" title="Preview: <%= item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%= item.get(\'Title\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="Preview: <%= item.get(\'Title\') %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label">Description</td><td class="value"><%= item.get(\'Description\') %></td></tr>\n                <tr><td class="label">Date Added</td><td class="value"><%- new Date(item.get(\'AddedOn\')).toLocaleString() %></td></tr>\n                <tr class="trunc"><td class="label">Keywords</td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label">Library</td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
+define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %> resultItem">\n    <td class="content-actions">\n        <img src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%= item.get(\'Title\') %> thumbnail image"/>\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%= item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span>Choose</span></a>\n            <a class="action-preview" href="#" title="Preview: <%= item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%= item.get(\'Title\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="Preview: <%= item.get(\'Title\') %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label">Description</td><td class="value"><%= item.get(\'Description\') %></td></tr>\n                <tr><td class="label">Date Added</td><td class="value"><%- new Date(item.get(\'AddedOn\')).toLocaleString() %></td></tr>\n                <tr class="trunc"><td class="label">Keywords</td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label">Library</td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
 
 define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-truncate-html','text!ev-script/templates/video-result.html'],function(require) {
 
@@ -5599,14 +5603,15 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
                     $full,
                     $short,
                     truncLen = 100,
-                    fullText = $this.html(),
+                    fullText = $this.data('fullText') || $this.html(),
                     truncText = $.truncate(fullText, {
                         length: truncLen,
                         stripTags: true,
                         noBreaks: true
                     });
-                if (fullText.length > truncLen) {
-                    $this.empty();
+                $this.empty();
+                if ($(window).width() < 1100 && fullText.length > truncLen) {
+                    $this.data('fullText', fullText);
                     $full = $('<span>' + fullText + '</span>');
                     $short = $('<span>' + truncText + '</span>');
                     var $shorten = $('<a href="#">Less</a>').click(function(e) {
@@ -5622,6 +5627,8 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
                     $full.hide().append($shorten);
                     $short.append($expand);
                     $this.append($short).append($full);
+                } else {
+                    $this.append(fullText);
                 }
             });
         }
