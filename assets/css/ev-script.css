@@ -224,7 +224,15 @@ div.ev-settings fieldset {
   padding: 0;
 }
 div.ev-settings div.fieldWrap {
-  margin-bottom: 1em;
+  margin-bottom: 0.8em;
+  width: 200px;
+  display: inline-block;
+}
+div.ev-settings div.fieldWrap label {
+  width: auto;
+}
+div.ev-settings div.fieldWrap .size {
+  margin-left: 1em;
 }
 div.ev-settings label {
   color: #606060;
@@ -234,6 +242,7 @@ div.ev-settings label {
 div.ev-settings div.form-actions {
   clear: both;
   float: left;
+  margin-top: 0.8em;
 }
 div.ev-results {
   position: relative;

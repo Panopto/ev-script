@@ -104,8 +104,8 @@ define(function(require) {
                 draggable: false,
                 resizable: false,
                 dialogClass: 'ev-dialog',
-                width: Math.min(340, $(window).width() - this.config.dialogMargin),
-                height: Math.min(480, $(window).height() - this.config.dialogMargin)
+                width: Math.min(680, $(window).width() - this.config.dialogMargin),
+                height: Math.min(220, $(window).height() - this.config.dialogMargin)
             });
         }
     });
