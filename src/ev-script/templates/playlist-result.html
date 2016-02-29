@@ -10,6 +10,7 @@
         </div>
     </td>
     <td class="content-meta">
+        <% if (item.get('IsSecure')) { print('<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>'); } %>
         <span><%- item.get('Name') %></span>
     </td>
 </tr>

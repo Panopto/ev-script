@@ -191,7 +191,8 @@ define(function(require) {
                 label: label,
                 type: type,
                 name: name,
-                thumbnailUrl: thumbnailUrl
+                thumbnailUrl: thumbnailUrl,
+                showPlaylistOptions: this.info.checkVersion('>=3.12.0')
             }));
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {

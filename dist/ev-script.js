@@ -3921,7 +3921,20 @@ define('ev-script/models/playlist-settings',['backbone'], function(Backbone) {
     return Backbone.Model.extend({
         defaults: {
             type: 'playlist',
-            search: '',
+            embedcode: false,
+            statistics: true,
+            duration: true,
+            attachments: true,
+            annotations: true,
+            links: true,
+            credits: true,
+            socialsharing: false,
+            autoplay: false,
+            showcaptions: false,
+            dateproduced: true,
+            audiopreviewimage: false,
+            captionsearch: true,
+            search: ''
         }
     });
 });
@@ -6372,9 +6385,12 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
 });
 
 
-define('text!ev-script/templates/playlist-embed.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%= modelId %>"\n        frameborder="0"\n        style="width:800px;height:850px;"\n        allowfullscreen>\n</iframe>\n';});
+define('text!ev-script/templates/playlist-embed.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%= modelId %>&playlistEmbed=true&isNewPluginEmbed=true&hideControls=true&displayTitle=true&displayEmbedCode=<%= displayEmbedCode %>&displayStatistics=<%= displayStatistics %>&displayVideoDuration=<%= displayDuration %>&displayAttachments=<%= displayAttachments %>&displayAnnotations=<%= displayAnnotations %>&displayLinks=<%= displayLinks %>&displayCredits=<%= displayCredits %>&displaySharing=<%= displaySharing %>&autoPlay=<%= autoPlay %>&showCaptions=<%= showCaptions %>&displayDateProduced=<%= displayDateProduced %>&audioPreviewImage=<%= audioPreviewImage %>&displayCaptionSearch=<%= displayCaptionSearch %>"\n        frameborder="0"\n        style="width:800px;height:1000px;"\n        width="800"\n        height="1000"\n        allowfullscreen>\n</iframe>\n';});
 
-define('ev-script/views/playlist-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/playlist-embed.html'],function(require) {
+
+define('text!ev-script/templates/playlist-embed-legacy.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%= modelId %>"\n        frameborder="0"\n        style="width:800px;height:1000px;"\n        width="800"\n        height="1000"\n        allowfullscreen>\n</iframe>\n';});
+
+define('ev-script/views/playlist-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/playlist-embed.html','text!ev-script/templates/playlist-embed-legacy.html'],function(require) {
 
     'use strict';
 
@@ -6383,12 +6399,35 @@ define('ev-script/views/playlist-embed',['require','underscore','ev-script/views
 
     return BaseView.extend({
         template: _.template(require('text!ev-script/templates/playlist-embed.html')),
+        legacyTemplate: _.template(require('text!ev-script/templates/playlist-embed-legacy.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            this.$el.html(this.template({
-                modelId: this.model.get('id'),
-                ensembleUrl: this.config.ensembleUrl
-            }));
+            var embed = '';
+            if (this.info.checkVersion('>=3.12.0')) {
+                embed = this.template({
+                    modelId: this.model.get('id'),
+                    ensembleUrl: this.config.ensembleUrl,
+                    displayEmbedCode: this.model.get('embedcode'),
+                    displayStatistics: this.model.get('statistics'),
+                    displayDuration: this.model.get('duration'),
+                    displayAttachments: this.model.get('attachments'),
+                    displayAnnotations: this.model.get('annotations'),
+                    displayLinks: this.model.get('links'),
+                    displayCredits: this.model.get('credits'),
+                    displaySharing: this.model.get('socialsharing'),
+                    autoPlay: this.model.get('autoplay'),
+                    showCaptions: this.model.get('showcaptions'),
+                    displayDateProduced: this.model.get('dateproduced'),
+                    audioPreviewImage: this.model.get('audiopreviewimage'),
+                    displayCaptionSearch: this.model.get('captionsearch')
+                });
+            } else {
+                embed = this.legacyTemplate({
+                    modelId: this.model.get('id'),
+                    ensembleUrl: this.config.ensembleUrl
+                });
+            }
+            this.$el.html(embed);
         }
     });
 
@@ -6411,7 +6450,7 @@ define('ev-script/views/playlist-preview',['require','ev-script/views/preview','
 });
 
 
-define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span>Choose</span>\n            </a>\n            <a class="action-preview" href="#" title="Preview: <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span>Preview: <%- item.get(\'Name\') %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
+define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span>Choose</span>\n            </a>\n            <a class="action-preview" href="#" title="Preview: <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span>Preview: <%- item.get(\'Name\') %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <% if (item.get(\'IsSecure\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
 
 define('ev-script/views/playlist-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/playlist-result.html'],function(require) {
 
@@ -6592,13 +6631,14 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
 });
 
 
-define('text!ev-script/templates/playlist-settings.html',[],function () { return '<h3>TODO</h3>\n<p>\n    <%- json %>\n</p>\n';});
+define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <fieldset>\n        <h4>Content Details</h4>\n        <div>\n            <div class="fieldWrap">\n                <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                <label for="embedcode">Embed Code</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="statistics" class="form-checkbox" <% if (model.get(\'statistics\')) { print(\'checked="checked"\'); } %> name="statistics" type="checkbox"/>\n                <label for="statistics">Statistics</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="duration" class="form-checkbox" <% if (model.get(\'duration\')) { print(\'checked="checked"\'); } %> name="duration" type="checkbox"/>\n                <label for="duration">Duration</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments">Attachments</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                <label for="annotations">Annotations</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links">Links</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="credits" class="form-checkbox" <% if (model.get(\'credits\')) { print(\'checked="checked"\'); } %> name="credits" type="checkbox"/>\n                <label for="credits">Credits</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                <label for="socialsharing">Social Tools</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                <label for="autoplay">Auto Play (PC Only)</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions">Captions "On" By Default</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                <label for="dateproduced">Date Produced</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                <label for="audiopreviewimage">Audio Preview Image</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                <label for="captionsearch">Caption Search</label>\n            </div>\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="Cancel"/>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
-define('ev-script/views/playlist-settings',['require','underscore','ev-script/views/settings','jquery-ui','text!ev-script/templates/playlist-settings.html'],function(require) {
+define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-script/views/settings','jquery-ui','text!ev-script/templates/playlist-settings.html'],function(require) {
 
     'use strict';
 
-    var _ = require('underscore'),
+    var $ = require('jquery'),
+        _ = require('underscore'),
         SettingsView = require('ev-script/views/settings');
 
     require('jquery-ui');
@@ -6608,16 +6648,42 @@ define('ev-script/views/playlist-settings',['require','underscore','ev-script/vi
         initialize: function(options) {
             SettingsView.prototype.initialize.call(this, options);
         },
+        updateModel: function() {
+            var content = this.field.model.get('content'),
+                attrs = {
+                    'embedcode': content && content.IsSecure ? false : this.$('#embedcode').is(':checked'),
+                    'statistics': this.$('#statistics').is(':checked'),
+                    'duration': this.$('#duration').is(':checked'),
+                    'attachments': this.$('#attachments').is(':checked'),
+                    'annotations': this.$('#annotations').is(':checked'),
+                    'links': this.$('#links').is(':checked'),
+                    'credits': this.$('#credits').is(':checked'),
+                    'socialsharing': content && content.IsSecure ? false : this.$('#socialsharing').is(':checked'),
+                    'autoplay': this.$('#autoplay').is(':checked'),
+                    'showcaptions': this.$('#showcaptions').is(':checked'),
+                    'dateproduced': this.$('#dateproduced').is(':checked'),
+                    'audiopreviewimage': this.$('#audiopreviewimage').is(':checked'),
+                    'captionsearch': this.$('#captionsearch').is(':checked')
+                };
+            this.field.model.set(attrs);
+        },
         render: function() {
-            // TODO - fix this template when we have playlist settings implemented
-            this.$el.html(this.template({
-                json: JSON.stringify(this.field.model.toJSON())
-            }));
+            var content = this.field.model.get('content'),
+                html = this.template({
+                    model: this.field.model,
+                    isAudio: this.encoding && this.encoding.isAudio(),
+                    isSecure: content && content.IsSecure
+                });
+            this.$el.html(html);
             this.$el.dialog({
-                title: 'Playlist Embed Settings',
+                title: this.unencode(content ? content.Name : this.field.model.get('id')),
                 modal: true,
                 autoOpen: false,
-                dialogClass: 'ev-dialog'
+                draggable: false,
+                resizable: false,
+                dialogClass: 'ev-dialog',
+                width: Math.min(680, $(window).width() - this.config.dialogMargin),
+                height: Math.min(280, $(window).height() - this.config.dialogMargin)
             });
         }
     });
@@ -6625,7 +6691,7 @@ define('ev-script/views/playlist-settings',['require','underscore','ev-script/vi
 });
 
 
-define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="Media thumbnail" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%= name %></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="Change <%= label %>"><i class="fa fa-folder-open fa-lg"></i><span>Change <%= label %><span></a>\n        <a href="#" class="action-preview" title="Preview: <%= name %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%= name %><span></a>\n        <!-- TODO - temporarily disabled playlist settings until it is implemented -->\n        <% if (type === \'video\') { %>\n            <a href="#" class="action-options" title="<%= label %> Embed Options"><i class="fa fa-cog fa-lg"></i><span><%= label %> Embed Options<span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="Remove <%= label %>"><i class="fa fa-minus-circle fa-lg"></i><span>Remove <%= label %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em>Add <%= label %></em></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="Choose <%= label %>"><i class="fa fa-folder-open fa-lg"></i><span>Choose <%= label %><span></a>\n    </div>\n<% } %>\n';});
+define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="Media thumbnail" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%= name %></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="Change <%= label %>"><i class="fa fa-folder-open fa-lg"></i><span>Change <%= label %><span></a>\n        <a href="#" class="action-preview" title="Preview: <%= name %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%= name %><span></a>\n        <% if (type === \'video\' || showPlaylistOptions) { %>\n            <a href="#" class="action-options" title="<%= label %> Embed Options"><i class="fa fa-cog fa-lg"></i><span><%= label %> Embed Options<span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="Remove <%= label %>"><i class="fa fa-minus-circle fa-lg"></i><span>Remove <%= label %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em>Add <%= label %></em></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="Choose <%= label %>"><i class="fa fa-folder-open fa-lg"></i><span>Choose <%= label %><span></a>\n    </div>\n<% } %>\n';});
 
 define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/field.html'],function(require) {
 
@@ -6820,7 +6886,8 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                 label: label,
                 type: type,
                 name: name,
-                thumbnailUrl: thumbnailUrl
+                thumbnailUrl: thumbnailUrl,
+                showPlaylistOptions: this.info.checkVersion('>=3.12.0')
             }));
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {

@@ -11,8 +11,7 @@
     <div class="ev-actions">
         <a href="#" class="action-choose" title="Change <%= label %>"><i class="fa fa-folder-open fa-lg"></i><span>Change <%= label %><span></a>
         <a href="#" class="action-preview" title="Preview: <%= name %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%= name %><span></a>
-        <!-- TODO - temporarily disabled playlist settings until it is implemented -->
-        <% if (type === 'video') { %>
+        <% if (type === 'video' || showPlaylistOptions) { %>
             <a href="#" class="action-options" title="<%= label %> Embed Options"><i class="fa fa-cog fa-lg"></i><span><%= label %> Embed Options<span></a>
         <% } %>
         <a href="#" class="action-remove" title="Remove <%= label %>"><i class="fa fa-minus-circle fa-lg"></i><span>Remove <%= label %><span></a>

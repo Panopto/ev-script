@@ -55,6 +55,10 @@
 .ev-playlist-picker div.ev-results td.content-actions {
   min-width: 100px;
 }
+.ev-playlist-picker div.ev-results td.content-meta .item-security {
+  margin-right: 0.4em;
+  color: goldenrod;
+}
 div.ev-hider {
   position: relative;
   border-bottom: 1px solid #999999;
@@ -233,6 +237,9 @@ div.ev-settings div.fieldWrap label {
 }
 div.ev-settings div.fieldWrap .size {
   margin-left: 1em;
+}
+div.ev-settings div.fieldWrap input[type=checkbox][disabled] {
+  cursor: not-allowed;
 }
 div.ev-settings label {
   color: #606060;

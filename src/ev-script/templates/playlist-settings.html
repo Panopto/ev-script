@@ -1,4 +1,63 @@
-<h3>TODO</h3>
-<p>
-    <%- json %>
-</p>
+<form>
+    <fieldset>
+        <h4>Content Details</h4>
+        <div>
+            <div class="fieldWrap">
+                <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get('embedcode')) { print('checked="checked"'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print('disabled') } %> />
+                <label for="embedcode">Embed Code</label>
+            </div>
+            <div class="fieldWrap">
+                <input id="statistics" class="form-checkbox" <% if (model.get('statistics')) { print('checked="checked"'); } %> name="statistics" type="checkbox"/>
+                <label for="statistics">Statistics</label>
+            </div>
+            <div class="fieldWrap">
+                <input id="duration" class="form-checkbox" <% if (model.get('duration')) { print('checked="checked"'); } %> name="duration" type="checkbox"/>
+                <label for="duration">Duration</label>
+            </div>
+            <div class="fieldWrap">
+                <input id="attachments" class="form-checkbox" <% if (model.get('attachments')) { print('checked="checked"'); } %> name="attachments" type="checkbox"/>
+                <label for="attachments">Attachments</label>
+            </div>
+            <div class="fieldWrap">
+                <input id="annotations" class="form-checkbox" <% if (model.get('annotations')) { print('checked="checked"'); } %> name="annotations" type="checkbox"/>
+                <label for="annotations">Annotations</label>
+            </div>
+            <div class="fieldWrap">
+                <input id="links" class="form-checkbox" <% if (model.get('links')) { print('checked="checked"'); } %> name="links" type="checkbox"/>
+                <label for="links">Links</label>
+            </div>
+            <div class="fieldWrap">
+                <input id="credits" class="form-checkbox" <% if (model.get('credits')) { print('checked="checked"'); } %> name="credits" type="checkbox"/>
+                <label for="credits">Credits</label>
+            </div>
+            <div class="fieldWrap">
+                <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get('socialsharing')) { print('checked="checked"'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print('disabled') } %> />
+                <label for="socialsharing">Social Tools</label>
+            </div>
+            <div class="fieldWrap">
+                <input id="autoplay" class="form-checkbox" <% if (model.get('autoplay')) { print('checked="checked"'); } %>  name="autoplay" type="checkbox"/>
+                <label for="autoplay">Auto Play (PC Only)</label>
+            </div>
+            <div class="fieldWrap">
+                <input id="showcaptions" class="form-checkbox" <% if (model.get('showcaptions')) { print('checked="checked"'); } %>  name="showcaptions" type="checkbox"/>
+                <label for="showcaptions">Captions "On" By Default</label>
+            </div>
+            <div class="fieldWrap">
+                <input id="dateproduced" class="form-checkbox" <% if (model.get('dateproduced')) { print('checked="checked"'); } %> name="dateproduced" type="checkbox"/>
+                <label for="dateproduced">Date Produced</label>
+            </div>
+            <div class="fieldWrap">
+                <input id="audiopreviewimage" class="form-checkbox" <% if (model.get('audiopreviewimage')) { print('checked="checked"'); } %> name="audiopreviewimage" type="checkbox"/>
+                <label for="audiopreviewimage">Audio Preview Image</label>
+            </div>
+            <div class="fieldWrap">
+                <input id="captionsearch" class="form-checkbox" <% if (model.get('captionsearch')) { print('checked="checked"'); } %> name="captionsearch" type="checkbox"/>
+                <label for="captionsearch">Caption Search</label>
+            </div>
+        </div>
+        <div class="form-actions">
+            <input type="button" class="form-submit action-cancel" value="Cancel"/>
+            <input type="submit" class="form-submit action-submit" value="Submit"/>
+        </div>
+    </fieldset>
+</form>
