@@ -1,5 +1,5 @@
 /**
- * ev-script 1.1.0 2016-02-29
+ * ev-script 1.1.0 2016-03-01
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2016 Symphony Video, Inc.
@@ -3921,6 +3921,16 @@ define('ev-script/models/playlist-settings',['backbone'], function(Backbone) {
     return Backbone.Model.extend({
         defaults: {
             type: 'playlist',
+            layout: 'playlist',
+            playlistLayout: {
+                playlistSortBy: 'videoDate',
+                playlistSortDirection: 'desc'
+            },
+            showcaseLayout: {
+                // featuredContent: true,
+                categoryList: true,
+                categoryOrientation: 'horizontal'
+            },
             embedcode: false,
             statistics: true,
             duration: true,
@@ -6385,12 +6395,18 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
 });
 
 
-define('text!ev-script/templates/playlist-embed.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%= modelId %>&playlistEmbed=true&isNewPluginEmbed=true&hideControls=true&displayTitle=true&displayEmbedCode=<%= displayEmbedCode %>&displayStatistics=<%= displayStatistics %>&displayVideoDuration=<%= displayDuration %>&displayAttachments=<%= displayAttachments %>&displayAnnotations=<%= displayAnnotations %>&displayLinks=<%= displayLinks %>&displayCredits=<%= displayCredits %>&displaySharing=<%= displaySharing %>&autoPlay=<%= autoPlay %>&showCaptions=<%= showCaptions %>&displayDateProduced=<%= displayDateProduced %>&audioPreviewImage=<%= audioPreviewImage %>&displayCaptionSearch=<%= displayCaptionSearch %>"\n        frameborder="0"\n        style="width:800px;height:1000px;"\n        width="800"\n        height="1000"\n        allowfullscreen>\n</iframe>\n';});
+define('text!ev-script/templates/playlist-embed.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%= modelId %>&playlistEmbed=true&isNewPluginEmbed=true&hideControls=true&displayTitle=true&displayEmbedCode=<%= displayEmbedCode %>&displayStatistics=<%= displayStatistics %>&displayVideoDuration=<%= displayDuration %>&displayAttachments=<%= displayAttachments %>&displayAnnotations=<%= displayAnnotations %>&displayLinks=<%= displayLinks %>&displayCredits=<%= displayCredits %>&displaySharing=<%= displaySharing %>&autoPlay=<%= autoPlay %>&showCaptions=<%= showCaptions %>&displayDateProduced=<%= displayDateProduced %>&audioPreviewImage=<%= audioPreviewImage %>&displayCaptionSearch=<%= displayCaptionSearch %>&<% if (isShowcase) { print(showcaseParams); } else { print(playlistParams); } %>"\n        frameborder="0"\n        style="width:800px;height:1000px;"\n        width="800"\n        height="1000"\n        allowfullscreen>\n</iframe>\n';});
 
 
 define('text!ev-script/templates/playlist-embed-legacy.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%= modelId %>"\n        frameborder="0"\n        style="width:800px;height:1000px;"\n        width="800"\n        height="1000"\n        allowfullscreen>\n</iframe>\n';});
 
-define('ev-script/views/playlist-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/playlist-embed.html','text!ev-script/templates/playlist-embed-legacy.html'],function(require) {
+
+define('text!ev-script/templates/playlist-embed-playlist-params.html',[],function () { return 'orderBy=<%= playlistSortBy %>&orderByDirection=<%= playlistSortDirection %>\n';});
+
+
+define('text!ev-script/templates/playlist-embed-showcase-params.html',[],function () { return 'displayShowcase=true<% if (categoryList) { print(\'&displayCategoryList=true&categoryOrientation=\' + categoryOrientation); } %>\n';});
+
+define('ev-script/views/playlist-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/playlist-embed.html','text!ev-script/templates/playlist-embed-legacy.html','text!ev-script/templates/playlist-embed-playlist-params.html','text!ev-script/templates/playlist-embed-showcase-params.html'],function(require) {
 
     'use strict';
 
@@ -6400,11 +6416,13 @@ define('ev-script/views/playlist-embed',['require','underscore','ev-script/views
     return BaseView.extend({
         template: _.template(require('text!ev-script/templates/playlist-embed.html')),
         legacyTemplate: _.template(require('text!ev-script/templates/playlist-embed-legacy.html')),
+        playlistParamsTemplate: _.template(require('text!ev-script/templates/playlist-embed-playlist-params.html')),
+        showcaseParamsTemplate: _.template(require('text!ev-script/templates/playlist-embed-showcase-params.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             var embed = '';
             if (this.info.checkVersion('>=3.12.0')) {
-                embed = this.template({
+                var data = {
                     modelId: this.model.get('id'),
                     ensembleUrl: this.config.ensembleUrl,
                     displayEmbedCode: this.model.get('embedcode'),
@@ -6420,7 +6438,28 @@ define('ev-script/views/playlist-embed',['require','underscore','ev-script/views
                     displayDateProduced: this.model.get('dateproduced'),
                     audioPreviewImage: this.model.get('audiopreviewimage'),
                     displayCaptionSearch: this.model.get('captionsearch')
-                });
+                };
+                if (this.model.get('layout') === 'showcase') {
+                    var showcaseLayout = this.model.get('showcaseLayout');
+                    data = _.extend(data, {
+                        isShowcase: true,
+                        showcaseParams: this.showcaseParamsTemplate({
+                            // featuredContent: showcaseLayout.featuredContent,
+                            categoryList: showcaseLayout.categoryList,
+                            categoryOrientation: showcaseLayout.categoryOrientation
+                        })
+                    });
+                } else {
+                    var playlistLayout = this.model.get('playlistLayout');
+                    data = _.extend(data, {
+                        isShowcase: false,
+                        playlistParams: this.playlistParamsTemplate({
+                            playlistSortBy: playlistLayout.playlistSortBy,
+                            playlistSortDirection: playlistLayout.playlistSortDirection
+                        })
+                    });
+                }
+                embed = this.template(data);
             } else {
                 embed = this.legacyTemplate({
                     modelId: this.model.get('id'),
@@ -6631,7 +6670,7 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
 });
 
 
-define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <fieldset>\n        <h4>Content Details</h4>\n        <div>\n            <div class="fieldWrap">\n                <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                <label for="embedcode">Embed Code</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="statistics" class="form-checkbox" <% if (model.get(\'statistics\')) { print(\'checked="checked"\'); } %> name="statistics" type="checkbox"/>\n                <label for="statistics">Statistics</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="duration" class="form-checkbox" <% if (model.get(\'duration\')) { print(\'checked="checked"\'); } %> name="duration" type="checkbox"/>\n                <label for="duration">Duration</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments">Attachments</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                <label for="annotations">Annotations</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links">Links</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="credits" class="form-checkbox" <% if (model.get(\'credits\')) { print(\'checked="checked"\'); } %> name="credits" type="checkbox"/>\n                <label for="credits">Credits</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                <label for="socialsharing">Social Tools</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                <label for="autoplay">Auto Play (PC Only)</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions">Captions "On" By Default</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                <label for="dateproduced">Date Produced</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                <label for="audiopreviewimage">Audio Preview Image</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                <label for="captionsearch">Caption Search</label>\n            </div>\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="Cancel"/>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="accordion">\n            <h4>Choose Layout</h4>\n            <div>\n                <div class="fieldWrap">\n                    <input id="playlist" class="form-radio" <% if (model.get(\'layout\') === \'playlist\') { print(\'checked="checked"\'); } %> name="layout" value="playlist" type="radio"/>\n                    <label for="playlist">Playlist</label>\n                </div>\n                <div class="fieldWrap">\n                    <input id="showcase" class="form-radio" <% if (model.get(\'layout\') === \'showcase\') { print(\'checked="checked"\'); } %> name="layout" value="showcase" type="radio"/>\n                    <label for="showcase">Showcase</label>\n                </div>\n            </div>\n            <h4>Layout Options</h4>\n            <div>\n                <div class="playlistOptions" <% if (model.get(\'layout\') === \'showcase\') { print(\'style="display:none;"\'); } %>>\n                    <div class="fieldWrap">\n                        <label for="playlistSortBy">Sort By</label>\n                        <select id="playlistSortBy" class="form-select">\n                            <option value="videoDate" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDate\') { print(\'selected="selected"\'); } %>>Date Added</option>\n                            <option value="videoDateProduced" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDateProduced\') { print(\'selected="selected"\'); } %>>Date Produced</option>\n                            <option value="videoDescription" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDescription\') { print(\'selected="selected"\'); } %>>Description</option>\n                            <option value="videoTitle" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoTitle\') { print(\'selected="selected"\'); } %>>Title</option>\n                            <option value="videoDuration" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDuration\') { print(\'selected="selected"\'); } %>>Duration</option>\n                            <option value="videoKeywords" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoKeywords\') { print(\'selected="selected"\'); } %>>Keywords</option>\n                            <!-- <option value="videoCustomPosition">Custom Order</option> -->\n                        </select>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'asc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="asc" type="radio"/>\n                            <label for="playlist">Ascending</label>\n                        </div>\n                        <div class="fieldWrap">\n                            <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'desc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="desc" type="radio"/>\n                            <label for="playlist">Descending</label>\n                        </div>\n                    </div>\n                </div>\n                <div class="showcaseOptions" <% if (model.get(\'layout\') === \'playlist\') { print(\'style="display:none;"\'); } %>>\n<!--\n                    <div class="fieldWrap">\n                        <input id="featuredContent" class="form-checkbox" type="checkbox" name="featuredContent" <% if (model.get(\'showcaseLayout\').featuredContent) { print(\'checked="checked"\'); } %>/>\n                        <label for="featuredContent">Featured Content</label>\n                    </div>\n -->\n                    <div class="fieldWrap">\n                        <input id="categoryList" class="form-checkbox" type="checkbox" name="categoryList" <% if (model.get(\'showcaseLayout\').categoryList) { print(\'checked="checked"\'); } %>/>\n                        <label for="categoryList">Category List</label>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationHorizontal" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'horizontal\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="horizontal" type="radio"/>\n                            <label for="playlist">Horizontal</label>\n                        </div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationVertical" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'vertical\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="vertical" type="radio"/>\n                            <label for="playlist">Vertical</label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <h4>Content Details</h4>\n            <div>\n                <div class="fieldWrap">\n                    <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="embedcode">Embed Code</label>\n                </div>\n                <div class="fieldWrap">\n                    <input id="statistics" class="form-checkbox" <% if (model.get(\'statistics\')) { print(\'checked="checked"\'); } %> name="statistics" type="checkbox"/>\n                    <label for="statistics">Statistics</label>\n                </div>\n                <div class="fieldWrap">\n                    <input id="duration" class="form-checkbox" <% if (model.get(\'duration\')) { print(\'checked="checked"\'); } %> name="duration" type="checkbox"/>\n                    <label for="duration">Duration</label>\n                </div>\n                <div class="fieldWrap">\n                    <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                    <label for="attachments">Attachments</label>\n                </div>\n                <div class="fieldWrap">\n                    <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                    <label for="annotations">Annotations</label>\n                </div>\n                <div class="fieldWrap">\n                    <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                    <label for="links">Links</label>\n                </div>\n                <div class="fieldWrap">\n                    <input id="credits" class="form-checkbox" <% if (model.get(\'credits\')) { print(\'checked="checked"\'); } %> name="credits" type="checkbox"/>\n                    <label for="credits">Credits</label>\n                </div>\n                <div class="fieldWrap">\n                    <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="socialsharing">Social Tools</label>\n                </div>\n                <div class="fieldWrap">\n                    <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                    <label for="autoplay">Auto Play (PC Only)</label>\n                </div>\n                <div class="fieldWrap">\n                    <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                    <label for="showcaptions">Captions "On" By Default</label>\n                </div>\n                <div class="fieldWrap">\n                    <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                    <label for="dateproduced">Date Produced</label>\n                </div>\n                <div class="fieldWrap">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage">Audio Preview Image</label>\n                </div>\n                <div class="fieldWrap">\n                    <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                    <label for="captionsearch">Caption Search</label>\n                </div>\n            </div>\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="Cancel"/>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
 define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-script/views/settings','jquery-ui','text!ev-script/templates/playlist-settings.html'],function(require) {
 
@@ -6647,10 +6686,18 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-
         template: _.template(require('text!ev-script/templates/playlist-settings.html')),
         initialize: function(options) {
             SettingsView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'changeLayout', 'changeCategoryList');
+        },
+        events: {
+            'submit': 'submitHandler',
+            'click input.action-cancel': 'cancelHandler',
+            'change input[name="layout"]': 'changeLayout',
+            'change input[name="categoryList"]': 'changeCategoryList'
         },
         updateModel: function() {
             var content = this.field.model.get('content'),
                 attrs = {
+                    'layout': this.$('input[name="layout"]:checked').val(),
                     'embedcode': content && content.IsSecure ? false : this.$('#embedcode').is(':checked'),
                     'statistics': this.$('#statistics').is(':checked'),
                     'duration': this.$('#duration').is(':checked'),
@@ -6665,6 +6712,18 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-
                     'audiopreviewimage': this.$('#audiopreviewimage').is(':checked'),
                     'captionsearch': this.$('#captionsearch').is(':checked')
                 };
+            if (attrs.layout === 'playlist') {
+                attrs.playlistLayout = {
+                    playlistSortBy: this.$('#playlistSortBy option:selected').val(),
+                    playlistSortDirection: this.$('input[name="playlistSortDirection"]:checked').val()
+                };
+            } else {
+                attrs.showcaseLayout = {
+                    // featuredContent: this.$('#featuredContent').is(':checked')
+                    categoryList: this.$('#categoryList').is(':checked'),
+                    categoryOrientation: this.$('input[name="categoryOrientation"]:checked').val()
+                };
+            }
             this.field.model.set(attrs);
         },
         render: function() {
@@ -6675,6 +6734,11 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-
                     isSecure: content && content.IsSecure
                 });
             this.$el.html(html);
+            this.$('.accordion').accordion({
+                active: 2,
+                heightStyle: 'content',
+                collapsible: true
+            });
             this.$el.dialog({
                 title: this.unencode(content ? content.Name : this.field.model.get('id')),
                 modal: true,
@@ -6683,8 +6747,26 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
-                height: Math.min(280, $(window).height() - this.config.dialogMargin)
+                height: Math.min(400, $(window).height() - this.config.dialogMargin)
             });
+        },
+        changeLayout: function(e) {
+            if (e.currentTarget.value === 'playlist') {
+                this.$('.playlistOptions').show();
+                this.$('.showcaseOptions').hide();
+            } else {
+                this.$('.playlistOptions').hide();
+                this.$('.showcaseOptions').show();
+            }
+        },
+        changeCategoryList: function(e) {
+            if ($(e.currentTarget).is(':checked')) {
+                this.$('#categoryOrientationHorizontal').attr('disabled', false);
+                this.$('#categoryOrientationVertical').attr('disabled', false);
+            } else {
+                this.$('#categoryOrientationHorizontal').attr('disabled', true);
+                this.$('#categoryOrientationVertical').attr('disabled', true);
+            }
         }
     });
 

@@ -5,6 +5,16 @@ define(['backbone'], function(Backbone) {
     return Backbone.Model.extend({
         defaults: {
             type: 'playlist',
+            layout: 'playlist',
+            playlistLayout: {
+                playlistSortBy: 'videoDate',
+                playlistSortDirection: 'desc'
+            },
+            showcaseLayout: {
+                // featuredContent: true,
+                categoryList: true,
+                categoryOrientation: 'horizontal'
+            },
             embedcode: false,
             statistics: true,
             duration: true,

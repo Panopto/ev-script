@@ -8,11 +8,13 @@ define(function(require) {
     return BaseView.extend({
         template: _.template(require('text!ev-script/templates/playlist-embed.html')),
         legacyTemplate: _.template(require('text!ev-script/templates/playlist-embed-legacy.html')),
+        playlistParamsTemplate: _.template(require('text!ev-script/templates/playlist-embed-playlist-params.html')),
+        showcaseParamsTemplate: _.template(require('text!ev-script/templates/playlist-embed-showcase-params.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             var embed = '';
             if (this.info.checkVersion('>=3.12.0')) {
-                embed = this.template({
+                var data = {
                     modelId: this.model.get('id'),
                     ensembleUrl: this.config.ensembleUrl,
                     displayEmbedCode: this.model.get('embedcode'),
@@ -28,7 +30,28 @@ define(function(require) {
                     displayDateProduced: this.model.get('dateproduced'),
                     audioPreviewImage: this.model.get('audiopreviewimage'),
                     displayCaptionSearch: this.model.get('captionsearch')
-                });
+                };
+                if (this.model.get('layout') === 'showcase') {
+                    var showcaseLayout = this.model.get('showcaseLayout');
+                    data = _.extend(data, {
+                        isShowcase: true,
+                        showcaseParams: this.showcaseParamsTemplate({
+                            // featuredContent: showcaseLayout.featuredContent,
+                            categoryList: showcaseLayout.categoryList,
+                            categoryOrientation: showcaseLayout.categoryOrientation
+                        })
+                    });
+                } else {
+                    var playlistLayout = this.model.get('playlistLayout');
+                    data = _.extend(data, {
+                        isShowcase: false,
+                        playlistParams: this.playlistParamsTemplate({
+                            playlistSortBy: playlistLayout.playlistSortBy,
+                            playlistSortDirection: playlistLayout.playlistSortDirection
+                        })
+                    });
+                }
+                embed = this.template(data);
             } else {
                 embed = this.legacyTemplate({
                     modelId: this.model.get('id'),
