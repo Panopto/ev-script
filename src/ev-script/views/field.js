@@ -160,7 +160,8 @@ define(function(require) {
             e.preventDefault();
         },
         renderActions: function() {
-            var ensembleUrl = this.config.ensembleUrl, name, label, type, thumbnailUrl;
+            var ensembleUrl = this.config.ensembleUrl,
+                name, label, type, thumbnailUrl;
             if (this.model instanceof VideoSettings) {
                 label = 'Media';
                 type = 'video';
@@ -192,7 +193,7 @@ define(function(require) {
                 type: type,
                 name: name,
                 thumbnailUrl: thumbnailUrl,
-                showPlaylistOptions: this.info.checkVersion('>=3.12.0')
+                showPlaylistOptions: !this.info.useLegacyEmbeds()
             }));
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {

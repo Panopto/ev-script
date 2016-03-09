@@ -5,6 +5,8 @@ define(['backbone'], function(Backbone) {
     return Backbone.Model.extend({
         defaults: {
             type: 'playlist',
+            width: '800',
+            height: '1000',
             layout: 'playlist',
             playlistLayout: {
                 playlistSortBy: 'videoDate',

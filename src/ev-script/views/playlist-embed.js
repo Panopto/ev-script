@@ -13,9 +13,11 @@ define(function(require) {
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             var embed = '';
-            if (this.info.checkVersion('>=3.12.0')) {
+            if (!this.info.useLegacyEmbeds()) {
                 var data = {
                     modelId: this.model.get('id'),
+                    width: this.model.get('width'),
+                    height: this.model.get('height'),
                     ensembleUrl: this.config.ensembleUrl,
                     displayEmbedCode: this.model.get('embedcode'),
                     displayStatistics: this.model.get('statistics'),
@@ -55,6 +57,8 @@ define(function(require) {
             } else {
                 embed = this.legacyTemplate({
                     modelId: this.model.get('id'),
+                    width: this.model.get('width'),
+                    height: this.model.get('height'),
                     ensembleUrl: this.config.ensembleUrl
                 });
             }

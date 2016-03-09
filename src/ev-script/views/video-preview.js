@@ -20,12 +20,10 @@ define(function(require) {
             });
             this.picker = options.picker;
             var success = _.bind(function() {
-                if (!this.model.get('width') || !this.model.get('height')) {
-                    this.model.set({
-                        width: this.encoding.getWidth(),
-                        height: this.encoding.getHeight()
-                    });
-                }
+                this.model.set({
+                    width: this.encoding.getWidth(),
+                    height: this.encoding.getHeight()
+                });
                 PreviewView.prototype.initialize.call(this, options);
             }, this);
             if (this.encoding.isNew()) {

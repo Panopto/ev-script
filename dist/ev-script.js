@@ -1,5 +1,5 @@
 /**
- * ev-script 1.1.0 2016-03-01
+ * ev-script 1.1.0 2016-03-09
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2016 Symphony Video, Inc.
@@ -3895,6 +3895,8 @@ define('ev-script/models/video-settings',['backbone'], function(Backbone) {
     return Backbone.Model.extend({
         defaults: {
             type: 'video',
+            width: '640',
+            height: '360',
             showtitle: true,
             autoplay: false,
             showcaptions: false,
@@ -3921,6 +3923,8 @@ define('ev-script/models/playlist-settings',['backbone'], function(Backbone) {
     return Backbone.Model.extend({
         defaults: {
             type: 'playlist',
+            width: '800',
+            height: '1000',
             layout: 'playlist',
             playlistLayout: {
                 playlistSortBy: 'videoDate',
@@ -5247,38 +5251,44 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
     return BaseView.extend({
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            var $dialogWrap = $('<div class="dialogWrap"></div>'),
+            var $dialogWrap = $('<div class="dialogWrap ev-preview"></div>'),
                 content = this.model.get('content') || {
                     Title: this.model.get('id')
                 },
                 embedSettings = new this.model.constructor(this.model.toJSON()),
                 // Desired media dimensions
                 mediaDims = {
-                    width: this.model.get('width') || (this.model instanceof VideoSettings ? 640 : 800),
-                    height: this.model.get('height') || (this.model instanceof VideoSettings ? 360 : 850)
+                    width: this.model.get('width'),
+                    height: this.model.get('height')
                 },
                 // Dialog dimensions TBD
                 dialogDims = {},
                 // Desired difference between media width and containing dialog width
                 widthOffset = 50,
                 // Desired difference between media height and containing dialog height
-                heightOffset = 140,
+                heightOffset = this.info.useLegacyEmbeds() ? 140 : 100,
                 // Used for scaling media dimensions to fit within desired dialog size
                 ratio,
                 // Maximum width of media based on desired dialog width
                 maxWidth,
+                // Maximum height of media based on desired dialog height
+                maxHeight,
                 // Our dialog
                 $dialog;
             this.$el.after($dialogWrap);
             dialogDims.width = Math.min(mediaDims.width + widthOffset, $(window).width() - this.config.dialogMargin);
             dialogDims.height = Math.min(mediaDims.height + heightOffset, $(window).height() - this.config.dialogMargin);
-            maxWidth = dialogDims.width - widthOffset;
-            // Only bother scaling if we're dealing with videos and if width is
-            // too big
-            if (this.model instanceof VideoSettings && mediaDims.width > maxWidth) {
-                ratio = maxWidth / mediaDims.width;
-                mediaDims.width = mediaDims.width * ratio;
-                mediaDims.height = mediaDims.height * ratio;
+            // Only bother scaling if we're dealing with videos
+            if (this.model instanceof VideoSettings) {
+                maxWidth = dialogDims.width - widthOffset;
+                maxHeight = dialogDims.height - heightOffset;
+                while (mediaDims.width > maxWidth || mediaDims.height > maxHeight) {
+                    ratio = mediaDims.width > maxWidth ? maxWidth / mediaDims.width : maxHeight / mediaDims.height;
+                    mediaDims.width = mediaDims.width * ratio;
+                    mediaDims.height = mediaDims.height * ratio;
+                }
+                mediaDims.width = Math.ceil(mediaDims.width);
+                mediaDims.height = Math.ceil(mediaDims.height);
             }
             embedSettings.set('width', mediaDims.width);
             embedSettings.set('height', mediaDims.height);
@@ -5329,7 +5339,7 @@ define('ev-script/views/video-embed',['require','underscore','ev-script/views/ba
                 height = (this.model.get('height') ? this.model.get('height') : '360'),
                 showTitle = this.model.get('showtitle'),
                 embed = '';
-            if (this.info.checkVersion('>=3.12.0')) {
+            if (!this.info.useLegacyEmbeds()) {
                 embed = this.template({
                     ensembleUrl: this.config.ensembleUrl,
                     id: this.model.get('id'),
@@ -5523,12 +5533,10 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
             });
             this.picker = options.picker;
             var success = _.bind(function() {
-                if (!this.model.get('width') || !this.model.get('height')) {
-                    this.model.set({
-                        width: this.encoding.getWidth(),
-                        height: this.encoding.getHeight()
-                    });
-                }
+                this.model.set({
+                    width: this.encoding.getWidth(),
+                    height: this.encoding.getHeight()
+                });
                 PreviewView.prototype.initialize.call(this, options);
             }, this);
             if (this.encoding.isNew()) {
@@ -6308,7 +6316,7 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
                 'showcaptions': this.$('#showcaptions').is(':checked'),
                 'hidecontrols': this.$('#hidecontrols').is(':checked')
             };
-            if (this.info.checkVersion('>=3.12.0')) {
+            if (!this.info.useLegacyEmbeds()) {
                 attrs = _.extend(attrs, {
                     'socialsharing': this.$('#socialsharing').is(':checked'),
                     'annotations': this.$('#annotations').is(':checked'),
@@ -6363,7 +6371,7 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
         },
         render: function() {
             var html = '';
-            if (this.info.checkVersion('>=3.12.0')) {
+            if (!this.info.useLegacyEmbeds()) {
                 html = this.template({
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio()
@@ -6395,10 +6403,10 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
 });
 
 
-define('text!ev-script/templates/playlist-embed.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%= modelId %>&playlistEmbed=true&isNewPluginEmbed=true&hideControls=true&displayTitle=true&displayEmbedCode=<%= displayEmbedCode %>&displayStatistics=<%= displayStatistics %>&displayVideoDuration=<%= displayDuration %>&displayAttachments=<%= displayAttachments %>&displayAnnotations=<%= displayAnnotations %>&displayLinks=<%= displayLinks %>&displayCredits=<%= displayCredits %>&displaySharing=<%= displaySharing %>&autoPlay=<%= autoPlay %>&showCaptions=<%= showCaptions %>&displayDateProduced=<%= displayDateProduced %>&audioPreviewImage=<%= audioPreviewImage %>&displayCaptionSearch=<%= displayCaptionSearch %>&<% if (isShowcase) { print(showcaseParams); } else { print(playlistParams); } %>"\n        frameborder="0"\n        style="width:800px;height:1000px;"\n        width="800"\n        height="1000"\n        allowfullscreen>\n</iframe>\n';});
+define('text!ev-script/templates/playlist-embed.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%= modelId %>&playlistEmbed=true&isNewPluginEmbed=true&hideControls=true&displayTitle=true&displayEmbedCode=<%= displayEmbedCode %>&displayStatistics=<%= displayStatistics %>&displayVideoDuration=<%= displayDuration %>&displayAttachments=<%= displayAttachments %>&displayAnnotations=<%= displayAnnotations %>&displayLinks=<%= displayLinks %>&displayCredits=<%= displayCredits %>&displaySharing=<%= displaySharing %>&autoPlay=<%= autoPlay %>&showCaptions=<%= showCaptions %>&displayDateProduced=<%= displayDateProduced %>&audioPreviewImage=<%= audioPreviewImage %>&displayCaptionSearch=<%= displayCaptionSearch %>&<% if (isShowcase) { print(showcaseParams); } else { print(playlistParams); } %>"\n        frameborder="0"\n        style="width:<%= width %>px;height:<%= height %>px;"\n        width="<%= width %>"\n        height="<%= height %>"\n        allowfullscreen>\n</iframe>\n';});
 
 
-define('text!ev-script/templates/playlist-embed-legacy.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%= modelId %>"\n        frameborder="0"\n        style="width:800px;height:1000px;"\n        width="800"\n        height="1000"\n        allowfullscreen>\n</iframe>\n';});
+define('text!ev-script/templates/playlist-embed-legacy.html',[],function () { return '<iframe src="<%= ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%= modelId %>"\n        frameborder="0"\n        style="width:<%= width %>px;height:<%= height %>px;"\n        width="<%= width %>"\n        height="<%= height %>"\n        allowfullscreen>\n</iframe>\n';});
 
 
 define('text!ev-script/templates/playlist-embed-playlist-params.html',[],function () { return 'orderBy=<%= playlistSortBy %>&orderByDirection=<%= playlistSortDirection %>\n';});
@@ -6421,9 +6429,11 @@ define('ev-script/views/playlist-embed',['require','underscore','ev-script/views
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             var embed = '';
-            if (this.info.checkVersion('>=3.12.0')) {
+            if (!this.info.useLegacyEmbeds()) {
                 var data = {
                     modelId: this.model.get('id'),
+                    width: this.model.get('width'),
+                    height: this.model.get('height'),
                     ensembleUrl: this.config.ensembleUrl,
                     displayEmbedCode: this.model.get('embedcode'),
                     displayStatistics: this.model.get('statistics'),
@@ -6463,6 +6473,8 @@ define('ev-script/views/playlist-embed',['require','underscore','ev-script/views
             } else {
                 embed = this.legacyTemplate({
                     modelId: this.model.get('id'),
+                    width: this.model.get('width'),
+                    height: this.model.get('height'),
                     ensembleUrl: this.config.ensembleUrl
                 });
             }
@@ -6937,7 +6949,8 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
             e.preventDefault();
         },
         renderActions: function() {
-            var ensembleUrl = this.config.ensembleUrl, name, label, type, thumbnailUrl;
+            var ensembleUrl = this.config.ensembleUrl,
+                name, label, type, thumbnailUrl;
             if (this.model instanceof VideoSettings) {
                 label = 'Media';
                 type = 'video';
@@ -6969,7 +6982,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                 type: type,
                 name: name,
                 thumbnailUrl: thumbnailUrl,
-                showPlaylistOptions: this.info.checkVersion('>=3.12.0')
+                showPlaylistOptions: !this.info.useLegacyEmbeds()
             }));
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {
@@ -8207,6 +8220,9 @@ define('ev-script/models/app-info',['require','underscore','semver','ev-script/m
         checkVersion: function(condition) {
             var version = this.get('ApplicationVersion');
             return version && semver.satisfies(version, condition);
+        },
+        useLegacyEmbeds: function() {
+            return this.checkVersion('<3.12.0');
         }
     });
 

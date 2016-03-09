@@ -21,6 +21,9 @@ define(function(require) {
         checkVersion: function(condition) {
             var version = this.get('ApplicationVersion');
             return version && semver.satisfies(version, condition);
+        },
+        useLegacyEmbeds: function() {
+            return this.checkVersion('<3.12.0');
         }
     });
 

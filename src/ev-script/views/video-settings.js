@@ -26,7 +26,7 @@ define(function(require) {
                 'showcaptions': this.$('#showcaptions').is(':checked'),
                 'hidecontrols': this.$('#hidecontrols').is(':checked')
             };
-            if (this.info.checkVersion('>=3.12.0')) {
+            if (!this.info.useLegacyEmbeds()) {
                 attrs = _.extend(attrs, {
                     'socialsharing': this.$('#socialsharing').is(':checked'),
                     'annotations': this.$('#annotations').is(':checked'),
@@ -81,7 +81,7 @@ define(function(require) {
         },
         render: function() {
             var html = '';
-            if (this.info.checkVersion('>=3.12.0')) {
+            if (!this.info.useLegacyEmbeds()) {
                 html = this.template({
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio()

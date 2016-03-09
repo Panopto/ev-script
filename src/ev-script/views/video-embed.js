@@ -15,7 +15,7 @@ define(function(require) {
                 height = (this.model.get('height') ? this.model.get('height') : '360'),
                 showTitle = this.model.get('showtitle'),
                 embed = '';
-            if (this.info.checkVersion('>=3.12.0')) {
+            if (!this.info.useLegacyEmbeds()) {
                 embed = this.template({
                     ensembleUrl: this.config.ensembleUrl,
                     id: this.model.get('id'),
