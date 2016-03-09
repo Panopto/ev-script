@@ -15,6 +15,7 @@
             'jquery-ui': 'jquery-ui/jquery-ui',
             'jquery.cookie': 'jquery.cookie/jquery.cookie',
             'jquery.plupload.queue': 'plupload/js/jquery.plupload.queue/jquery.plupload.queue',
+            'jquery-truncate-html': 'jquery-truncate-html/jquery.truncate',
             'moxie': 'plupload/js/moxie',
             'plupload': 'plupload/js/plupload.dev',
             'text': 'text/text',

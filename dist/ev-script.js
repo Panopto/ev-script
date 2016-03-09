@@ -8979,6 +8979,16 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
                     }
                 };
 
+                this.getEmbedCode = function(settings) {
+                    var $div = $('<div/>');
+                    if (settings.type === 'video') {
+                        this.handleEmbed($div[0], new VideoSettings(settings));
+                    } else {
+                        this.handleEmbed($div[0], new PlaylistSettings(settings));
+                    }
+                    return $div.html();
+                };
+
                 this.appEvents.trigger('appLoaded');
                 loading.resolve();
             }

@@ -11,18 +11,15 @@
 
     app.appEvents.bind('fieldUpdated', function($field, value) {
         var $embed = $('.embed');
-        if ($field[0].id === 'video') {
-            if (value) {
+        if (value) {
+            if ($field[0].id === 'video') {
                 app.handleEmbed($embed, new EV.VideoSettings(value));
-            } else {
-                $embed.html('');
-            }
-        } else if ($field[0].id === 'playlist') {
-            if (value) {
+            } else if ($field[0].id === 'playlist') {
                 app.handleEmbed($embed, new EV.PlaylistSettings(value));
-            } else {
-                $embed.html('');
             }
+            console.log('Embed code: ' + app.getEmbedCode(value));
+        } else {
+            $embed.html('');
         }
     });
 
