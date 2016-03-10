@@ -155,7 +155,8 @@ define(function(require) {
     return {
         VideoSettings: VideoSettings,
         PlaylistSettings: PlaylistSettings,
-        EnsembleApp: EnsembleApp
+        EnsembleApp: EnsembleApp,
+        _: _
     };
 
 });

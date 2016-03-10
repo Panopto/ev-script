@@ -1,5 +1,5 @@
 /**
- * ev-script 1.1.0 2016-03-09
+ * ev-script 1.1.0 2016-03-10
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2016 Symphony Video, Inc.
@@ -8998,7 +8998,8 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
     return {
         VideoSettings: VideoSettings,
         PlaylistSettings: PlaylistSettings,
-        EnsembleApp: EnsembleApp
+        EnsembleApp: EnsembleApp,
+        _: _
     };
 
 });
