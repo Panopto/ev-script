@@ -59,6 +59,8 @@ define(function(require) {
             // Set this in order to select the default identity provider in the
             // forms auth identity provider dropdown.
             defaultProvider: '',
+            // Set this in order to select the default width in video settings
+            defaultVideoWidth: '',
             // Location for plupload flash runtime
             pluploadFlashPath: ''
         };
@@ -155,8 +157,7 @@ define(function(require) {
     return {
         VideoSettings: VideoSettings,
         PlaylistSettings: PlaylistSettings,
-        EnsembleApp: EnsembleApp,
-        _: _
+        EnsembleApp: EnsembleApp
     };
 
 });

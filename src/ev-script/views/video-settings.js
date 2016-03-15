@@ -58,12 +58,12 @@ define(function(require) {
             this.field.model.set(attrs);
         },
         renderSize: function() {
-            var width = this.field.model.get('width');
-            var height = this.field.model.get('height');
-            var ratio = 16 / 9;
-            var options = ['1280x720', '1024x576', '848x480', '720x405', '640x360', '610x344', '560x315', '480x270', '400x225', '320x180', '240x135', '160x90'];
-            if (width && height) {
-                ratio = width / height;
+            var width = this.field.model.get('width'),
+                height = this.field.model.get('height'),
+                ratio = 16 / 9,
+                options = ['1280x720', '1024x576', '848x480', '720x405', '640x360', '610x344', '560x315', '480x270', '400x225', '320x180', '240x135', '160x90'];
+            if (width && height) { 
+               ratio = width / height;
             } else if (this.encoding.id) {
                 width = this.encoding.getWidth();
                 height = this.encoding.getHeight();
@@ -74,6 +74,11 @@ define(function(require) {
                 options = ['1280x960', '1024x770', '848x636', '720x540', '640x480', '610x460', '560x420', '480x360', '400x300', '320x240', '240x180', '160x120'];
             }
             var size = width + 'x' + height;
+            if (this.config.defaultVideoWidth) {
+                // Find the first available option that matches our desired width
+                var override = _.find(options, _.bind(function(option) { return new RegExp('^' + this.config.defaultVideoWidth).test(option); }, this));
+                size = override || size;
+            }
             this.$('.size').append(this.sizesTemplate({
                 sizes: options,
                 target: size
