@@ -94,7 +94,6 @@ div.ev-field .thumbnail {
 }
 div.ev-field .thumbnail img {
   height: 100%;
-  max-height: 60px;
   vertical-align: middle;
 }
 div.ev-field div.title {
