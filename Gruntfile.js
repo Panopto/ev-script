@@ -13,23 +13,23 @@ module.exports = function(grunt) {
   var _ = require('lodash'),
     rjs_dev_opts = {
       almond: true,
-      baseUrl: 'bower_components',
+      baseUrl: '.',
+      deps: ['ev-script'],
       paths: {
-        'ev-script': '../src/ev-script',
-        'jquery': 'jquery/dist/jquery',
-        'jquery-ui': 'jquery-ui/jquery-ui',
-        'jquery.cookie': 'jquery.cookie/jquery.cookie',
-        'jquery.plupload.queue': 'plupload/js/jquery.plupload.queue/jquery.plupload.queue',
-        'jquery-truncate-html': 'jquery-truncate-html/jquery.truncate',
-        'plupload': 'plupload/js/plupload.full.min',
-        'ev-scroll-loader': 'ev-scroll-loader/dist/jquery.ev-scroll-loader',
-        'underscore': 'underscore/underscore',
-        'backbone': 'backbone/backbone',
-        'text': 'text/text',
-        'semver': 'semver/semver.browser'
+        'ev-script': 'src/ev-script',
+        'jquery': 'empty:',
+        'jquery-ui': 'empty:',
+        'jquery.cookie': 'bower_components/jquery.cookie/jquery.cookie',
+        'jquery.plupload.queue': 'empty:',
+        'jquery-truncate-html': 'bower_components/jquery-truncate-html/jquery.truncate',
+        'plupload': 'empty:',
+        'ev-scroll-loader': 'bower_components/ev-scroll-loader/dist/jquery.ev-scroll-loader',
+        'underscore': 'bower_components/underscore/underscore',
+        'backbone': 'bower_components/backbone/backbone',
+        'text': 'bower_components/text/text',
+        'semver': 'bower_components/semver/semver.browser'
       },
-      name: 'ev-script',
-      exclude: ['jquery', 'jquery-ui', 'jquery.plupload.queue', 'plupload'],
+      name: 'bower_components/almond/almond',
       out: "dist/ev-script.js",
       wrap: {
         start: '<%= banner %>' + grunt.file.read('wrap/wrap.start'),
@@ -39,7 +39,9 @@ module.exports = function(grunt) {
     },
     rjs_prod_opts = _.extend({}, rjs_dev_opts, {
       out: "dist/ev-script.min.js",
-      optimize: 'uglify'
+      optimize: 'uglify2',
+      preserveLicenseComments: false,
+      generateSourceMaps: true
     });
 
   // Project configuration.
