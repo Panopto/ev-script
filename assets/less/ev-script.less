@@ -286,18 +286,27 @@ div.ev-results {
     display: none;
   }
   td.content-actions {
+    position: relative;
     margin: 10px;
     padding-right: 2em;
     text-align: right;
     width: 25%;
-    img {
-      box-shadow: 0 0 10px 1px;
-      display: block;
-      float: right;
-      margin: 9px 6px 1em 6px;
-      max-width: 200px;
-      width: 80%;
-      min-height: 112px;
+    .thumbnail-wrap {
+      position: relative;
+      .thumbnail {
+        box-shadow: 0 0 10px 1px;
+        display: inline-block;
+        margin: 9px 6px 1em 6px;
+        max-width: 200px;
+        width: 80%;
+        min-height: 112px;
+      }
+      .ccbadge {
+        position: absolute;
+        bottom: 23px;
+        right: 15px;
+        background-color: #fff;
+      }
     }
     div.action-links {
       clear: right;
@@ -326,18 +335,27 @@ div.ev-results {
       }
     }
     .responsive(@thumbnail-break, {
-      img {
-        max-width: 150px;
-        min-height: 84px;
+      .thumbnail-wrap {
+        .thumbnail {
+          max-width: 150px;
+          min-height: 84px;
+        }
       }
       div.action-links {
         max-width: 150px;
       }
     });
     .responsive(@medium, {
-      img {
-        max-width: 100px;
-        min-height: 56px;
+      .thumbnail-wrap {
+        .thumbnail {
+          max-width: 100px;
+          min-height: 56px;
+        }
+        .ccbadge {
+          bottom: 20px;
+          right: 11px;
+          font-size: small;
+        }
       }
       div.action-links {
         max-width: 100px;

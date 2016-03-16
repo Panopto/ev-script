@@ -265,19 +265,28 @@ div.ev-results table thead {
   display: none;
 }
 div.ev-results td.content-actions {
+  position: relative;
   margin: 10px;
   padding-right: 2em;
   text-align: right;
   width: 25%;
 }
-div.ev-results td.content-actions img {
+div.ev-results td.content-actions .thumbnail-wrap {
+  position: relative;
+}
+div.ev-results td.content-actions .thumbnail-wrap .thumbnail {
   box-shadow: 0 0 10px 1px;
-  display: block;
-  float: right;
+  display: inline-block;
   margin: 9px 6px 1em 6px;
   max-width: 200px;
   width: 80%;
   min-height: 112px;
+}
+div.ev-results td.content-actions .thumbnail-wrap .ccbadge {
+  position: absolute;
+  bottom: 23px;
+  right: 15px;
+  background-color: #fff;
 }
 div.ev-results td.content-actions div.action-links {
   clear: right;
@@ -306,7 +315,7 @@ div.ev-results td.content-actions div.action-links a.action-preview {
   color: black;
 }
 @media only screen and (max-width: 1400px) {
-  div.ev-results td.content-actions img {
+  div.ev-results td.content-actions .thumbnail-wrap .thumbnail {
     max-width: 150px;
     min-height: 84px;
   }
@@ -315,9 +324,14 @@ div.ev-results td.content-actions div.action-links a.action-preview {
   }
 }
 @media only screen and (max-width: 600px) {
-  div.ev-results td.content-actions img {
+  div.ev-results td.content-actions .thumbnail-wrap .thumbnail {
     max-width: 100px;
     min-height: 56px;
+  }
+  div.ev-results td.content-actions .thumbnail-wrap .ccbadge {
+    bottom: 20px;
+    right: 11px;
+    font-size: small;
   }
   div.ev-results td.content-actions div.action-links {
     max-width: 100px;
