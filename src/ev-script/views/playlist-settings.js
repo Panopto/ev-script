@@ -16,7 +16,7 @@ define(function(require) {
         },
         events: {
             'submit': 'submitHandler',
-            'click input.action-cancel': 'cancelHandler',
+            'click .action-cancel': 'cancelHandler',
             'change input[name="layout"]': 'changeLayout',
             'change input[name="categoryList"]': 'changeCategoryList'
         },

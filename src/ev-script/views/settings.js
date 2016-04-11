@@ -15,7 +15,7 @@ define(function(require) {
         },
         events: {
             'submit': 'submitHandler',
-            'click input.action-cancel': 'cancelHandler'
+            'click .action-cancel': 'cancelHandler'
         },
         show: function() {
             this.render();

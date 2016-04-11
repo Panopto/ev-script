@@ -1,4 +1,5 @@
 // Bootstrap less mixins
+@import (reference) '../../bower_components/bootstrap-less/less/variables.less';
 @import (reference) '../../bower_components/bootstrap-less/less/mixins.less';
 
 // Colors
@@ -6,6 +7,10 @@
 @ev-yellow: #f9d700;
 @link-color: #0074bd;
 @label-color: #606060;
+@alt-gray: #f3f4ee;
+@form-color: #555555;
+@button-green:#44ab00;
+@button-border-green: #3f9d00;
 
 // Images
 @logo-image: 'images/logo.png';
@@ -92,14 +97,32 @@
 }
 
 form {
+  color: @form-color;
   .form-select,
   .form-text {
     .input-size(inherit; 0.2em; 0.2em; inherit; normal; 2px);
-    border: 1px solid darkgray;
+    border: 1px solid @border-color;
     padding: 0.3em;
   }
   .form-select {
-    background-color: #f3f4ee;
+    background-color: @alt-gray;
+  }
+  .form-actions {
+    .form-submit {
+      .button-size(0.3em; 0.3em; inherit; inherit; 2px);
+      border: 1px solid transparent;
+      span {
+        margin-left: 0.4em;
+      }
+    }
+    .action-submit {
+      #gradient > .vertical(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.15), 1%, 100%);
+      .button-variant(#fff; @button-green; @button-border-green);
+    }
+    .action-cancel {
+      #gradient > .vertical(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.1), 1%, 100%);
+      .button-variant(@form-color; @alt-gray; @border-color);
+    }
   }
 }
 
@@ -202,7 +225,7 @@ div.ev-actions {
     }
   }
   .action-upload {
-    .button-variant(#fff; #44ab00; #3f9d00);
+    .button-variant(#fff; @button-green; @button-border-green);
   }
   .action-record {
     .button-variant(#fff; #1e1c1f; #000);
@@ -396,7 +419,7 @@ div.ev-results {
   .content-list {
     width: 100%;
     .even {
-        background-color: #f3f4ee;
+        background-color: @alt-gray;
     }
     tr td {
       border: none;

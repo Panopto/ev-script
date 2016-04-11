@@ -57,6 +57,9 @@
   margin-right: 0.4em;
   color: goldenrod;
 }
+form {
+  color: #555555;
+}
 form .form-select,
 form .form-text {
   height: inherit;
@@ -64,7 +67,7 @@ form .form-text {
   font-size: inherit;
   line-height: normal;
   border-radius: 2px;
-  border: 1px solid darkgray;
+  border: 1px solid #999999;
   padding: 0.3em;
 }
 selectform .form-select,
@@ -80,6 +83,116 @@ select[multiple]form .form-text {
 }
 form .form-select {
   background-color: #f3f4ee;
+}
+form .form-actions .form-submit {
+  padding: 0.3em 0.3em;
+  font-size: inherit;
+  line-height: inherit;
+  border-radius: 2px;
+  border: 1px solid transparent;
+}
+form .form-actions .form-submit span {
+  margin-left: 0.4em;
+}
+form .form-actions .action-submit {
+  background-image: -webkit-linear-gradient(top, rgba(255, 255, 255, 0.3) 1%, rgba(255, 255, 255, 0.15) 100%);
+  background-image: -o-linear-gradient(top, rgba(255, 255, 255, 0.3) 1%, rgba(255, 255, 255, 0.15) 100%);
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 1%, rgba(255, 255, 255, 0.15) 100%);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#4dffffff', endColorstr='#26ffffff', GradientType=0);
+  color: #fff;
+  background-color: #44ab00;
+  border-color: #3f9d00;
+}
+form .form-actions .action-submit:hover,
+form .form-actions .action-submit:focus,
+form .form-actions .action-submit.focus,
+form .form-actions .action-submit:active,
+form .form-actions .action-submit.active,
+.open > .dropdown-toggleform .form-actions .action-submit {
+  color: #fff;
+  background-color: #307800;
+  border-color: #266000;
+}
+form .form-actions .action-submit:active,
+form .form-actions .action-submit.active,
+.open > .dropdown-toggleform .form-actions .action-submit {
+  background-image: none;
+}
+form .form-actions .action-submit.disabled,
+form .form-actions .action-submit[disabled],
+fieldset[disabled] form .form-actions .action-submit,
+form .form-actions .action-submit.disabled:hover,
+form .form-actions .action-submit[disabled]:hover,
+fieldset[disabled] form .form-actions .action-submit:hover,
+form .form-actions .action-submit.disabled:focus,
+form .form-actions .action-submit[disabled]:focus,
+fieldset[disabled] form .form-actions .action-submit:focus,
+form .form-actions .action-submit.disabled.focus,
+form .form-actions .action-submit[disabled].focus,
+fieldset[disabled] form .form-actions .action-submit.focus,
+form .form-actions .action-submit.disabled:active,
+form .form-actions .action-submit[disabled]:active,
+fieldset[disabled] form .form-actions .action-submit:active,
+form .form-actions .action-submit.disabled.active,
+form .form-actions .action-submit[disabled].active,
+fieldset[disabled] form .form-actions .action-submit.active {
+  background-color: #44ab00;
+  border-color: #3f9d00;
+}
+form .form-actions .action-submit .badge {
+  color: #44ab00;
+  background-color: #fff;
+}
+form .form-actions .action-cancel {
+  background-image: -webkit-linear-gradient(top, rgba(255, 255, 255, 0.9) 1%, rgba(255, 255, 255, 0.1) 100%);
+  background-image: -o-linear-gradient(top, rgba(255, 255, 255, 0.9) 1%, rgba(255, 255, 255, 0.1) 100%);
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 1%, rgba(255, 255, 255, 0.1) 100%);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#e6ffffff', endColorstr='#1affffff', GradientType=0);
+  color: #555555;
+  background-color: #f3f4ee;
+  border-color: #999999;
+}
+form .form-actions .action-cancel:hover,
+form .form-actions .action-cancel:focus,
+form .form-actions .action-cancel.focus,
+form .form-actions .action-cancel:active,
+form .form-actions .action-cancel.active,
+.open > .dropdown-toggleform .form-actions .action-cancel {
+  color: #555555;
+  background-color: #dde0cf;
+  border-color: #7a7a7a;
+}
+form .form-actions .action-cancel:active,
+form .form-actions .action-cancel.active,
+.open > .dropdown-toggleform .form-actions .action-cancel {
+  background-image: none;
+}
+form .form-actions .action-cancel.disabled,
+form .form-actions .action-cancel[disabled],
+fieldset[disabled] form .form-actions .action-cancel,
+form .form-actions .action-cancel.disabled:hover,
+form .form-actions .action-cancel[disabled]:hover,
+fieldset[disabled] form .form-actions .action-cancel:hover,
+form .form-actions .action-cancel.disabled:focus,
+form .form-actions .action-cancel[disabled]:focus,
+fieldset[disabled] form .form-actions .action-cancel:focus,
+form .form-actions .action-cancel.disabled.focus,
+form .form-actions .action-cancel[disabled].focus,
+fieldset[disabled] form .form-actions .action-cancel.focus,
+form .form-actions .action-cancel.disabled:active,
+form .form-actions .action-cancel[disabled]:active,
+fieldset[disabled] form .form-actions .action-cancel:active,
+form .form-actions .action-cancel.disabled.active,
+form .form-actions .action-cancel[disabled].active,
+fieldset[disabled] form .form-actions .action-cancel.active {
+  background-color: #f3f4ee;
+  border-color: #999999;
+}
+form .form-actions .action-cancel .badge {
+  color: #f3f4ee;
+  background-color: #555555;
 }
 div.ev-hider {
   position: relative;

@@ -67,6 +67,7 @@ define(function(require) {
         events: {
             'click .action-add': 'chooseItem',
             'click .action-upload': 'uploadHandler',
+            'click .action-record': 'recordHandler',
             'change .unit-selects select.libraries': 'changeLibrary',
             'submit .unit-selects': 'handleSubmit'
         },
@@ -84,6 +85,10 @@ define(function(require) {
                 field: this.field,
                 workflows: this.workflows
             });
+            e.preventDefault();
+        },
+        recordHandler: function(e) {
+            window.alert('record');
             e.preventDefault();
         },
         showPicker: function() {
@@ -145,7 +150,7 @@ define(function(require) {
                 cacheKey: this.workflows.filterValue,
                 success: _.bind(function(collection, response, options) {
                     var currentUser = this.auth.getUser(),
-                        canRecord = currentUser && currentUser.get('CanUseAnthem');
+                        canRecord = this.info.anthemEnabled && currentUser && currentUser.get('CanUseAnthem');
                     if (!collection.isEmpty()) {
                         this.$upload.css('display', 'inline-block');
                         if (canRecord) {
