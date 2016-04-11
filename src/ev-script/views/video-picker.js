@@ -18,11 +18,13 @@ define(function(require) {
             PickerView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary', 'handleSubmit', 'uploadHandler');
             var callback = _.bind(function() {
-                this.loadVideos();
-            }, this);
+                    this.loadVideos();
+                }, this);
             this.$filterBlock = this.$('div.ev-filter-block');
             if (this.info.get('ApplicationVersion')) {
-                this.$upload = $('<div class="ev-actions"><a href="#" class="action-upload" title="Upload"><i class="fa fa-upload fa-fw"></i><span>Upload<span></a></div>').css('display', 'none');
+                this.$record = $('<div class="ev-actions"><button type="button" class="action-record" title="Record"><i class="fa fa-circle fa-fw"></i><span>Record<span></button></div>').css('display', 'none');
+                this.$filterBlock.prepend(this.$record);
+                this.$upload = $('<div class="ev-actions"><button type="button" class="action-upload" title="Upload"><i class="fa fa-upload fa-fw"></i><span>Upload<span></button></div>').css('display', 'none');
                 this.$filterBlock.prepend(this.$upload);
             }
             this.searchView = new SearchView({
@@ -65,8 +67,8 @@ define(function(require) {
         events: {
             'click .action-add': 'chooseItem',
             'click .action-upload': 'uploadHandler',
-            'change form.unit-selects select.libraries': 'changeLibrary',
-            'submit form.unit-selects': 'handleSubmit'
+            'change .unit-selects select.libraries': 'changeLibrary',
+            'submit .unit-selects': 'handleSubmit'
         },
         changeLibrary: function(e) {
             this.loadVideos();
@@ -142,10 +144,16 @@ define(function(require) {
             this.workflows.fetch({
                 cacheKey: this.workflows.filterValue,
                 success: _.bind(function(collection, response, options) {
+                    var currentUser = this.auth.getUser(),
+                        canRecord = currentUser && currentUser.get('CanUseAnthem');
                     if (!collection.isEmpty()) {
                         this.$upload.css('display', 'inline-block');
+                        if (canRecord) {
+                            this.$record.css('display', 'inline-block');
+                        }
                     } else {
                         this.$upload.css('display', 'none');
+                        this.$record.css('display', 'none');
                     }
                     // This is the last portion of the filter block that loads
                     // so now it should be fully rendered...resize our results

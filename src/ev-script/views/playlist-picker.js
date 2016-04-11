@@ -46,8 +46,8 @@ define(function(require) {
         },
         events: {
             'click a.action-add': 'chooseItem',
-            'change form.unit-selects select.libraries': 'changeLibrary',
-            'submit form.unit-selects': 'handleSubmit'
+            'change .unit-selects select.libraries': 'changeLibrary',
+            'submit .unit-selects': 'handleSubmit'
         },
         changeLibrary: function(e) {
             this.loadPlaylists();

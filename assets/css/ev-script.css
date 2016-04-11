@@ -10,13 +10,12 @@
 .ev-video-picker div.ev-filter-block input,
 .ev-video-picker div.ev-filter-block select {
   display: inline;
-  margin-right: 0.4em;
-  margin-bottom: 0.4em;
+  margin: 0.2em 0.4em 0.2em 0;
 }
 .ev-video-picker div.ev-filter-block label {
   color: #606060;
 }
-@media only screen and (max-width: 1100px) {
+@media only screen and (max-width: 1300px) {
   .ev-video-picker div.ev-filter-block label {
     display: none;
   }
@@ -41,13 +40,12 @@
 .ev-playlist-picker div.ev-filter-block input,
 .ev-playlist-picker div.ev-filter-block select {
   display: inline;
-  margin-right: 0.4em;
-  margin-bottom: 0.4em;
+  margin: 0.2em 0.4em 0.2em 0;
 }
 .ev-playlist-picker div.ev-filter-block label {
   color: #606060;
 }
-@media only screen and (max-width: 1100px) {
+@media only screen and (max-width: 1300px) {
   .ev-playlist-picker div.ev-filter-block label {
     display: none;
   }
@@ -58,6 +56,30 @@
 .ev-playlist-picker div.ev-results td.content-meta .item-security {
   margin-right: 0.4em;
   color: goldenrod;
+}
+form .form-select,
+form .form-text {
+  height: inherit;
+  padding: 0.2em 0.2em;
+  font-size: inherit;
+  line-height: normal;
+  border-radius: 2px;
+  border: 1px solid darkgray;
+  padding: 0.3em;
+}
+selectform .form-select,
+selectform .form-text {
+  height: inherit;
+  line-height: inherit;
+}
+textareaform .form-select,
+textareaform .form-text,
+select[multiple]form .form-select,
+select[multiple]form .form-text {
+  height: auto;
+}
+form .form-select {
+  background-color: #f3f4ee;
 }
 div.ev-hider {
   position: relative;
@@ -123,7 +145,7 @@ div.ev-field div.logo a span {
 }
 div.ev-actions {
   display: inline-block;
-  padding: 0.4em 0.6em;
+  padding: 0.3em;
 }
 div.ev-actions a {
   display: inline-block;
@@ -145,12 +167,115 @@ div.ev-actions .action-options {
 div.ev-actions .action-remove {
   color: red;
 }
-div.ev-actions .action-upload {
-  color: black;
+div.ev-actions .action-upload,
+div.ev-actions .action-record {
+  padding: 0.3em 0.3em;
+  font-size: inherit;
+  line-height: inherit;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  background-image: -webkit-linear-gradient(top, rgba(255, 255, 255, 0.3) 1%, rgba(255, 255, 255, 0.15) 100%);
+  background-image: -o-linear-gradient(top, rgba(255, 255, 255, 0.3) 1%, rgba(255, 255, 255, 0.15) 100%);
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 1%, rgba(255, 255, 255, 0.15) 100%);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#4dffffff', endColorstr='#26ffffff', GradientType=0);
 }
-div.ev-actions .action-upload span {
-  display: inline;
-  margin-left: 0.3em;
+div.ev-actions .action-upload span,
+div.ev-actions .action-record span {
+  margin-left: 0.2em;
+}
+div.ev-actions .action-upload {
+  color: #fff;
+  background-color: #44ab00;
+  border-color: #3f9d00;
+}
+div.ev-actions .action-upload:hover,
+div.ev-actions .action-upload:focus,
+div.ev-actions .action-upload.focus,
+div.ev-actions .action-upload:active,
+div.ev-actions .action-upload.active,
+.open > .dropdown-togglediv.ev-actions .action-upload {
+  color: #fff;
+  background-color: #307800;
+  border-color: #266000;
+}
+div.ev-actions .action-upload:active,
+div.ev-actions .action-upload.active,
+.open > .dropdown-togglediv.ev-actions .action-upload {
+  background-image: none;
+}
+div.ev-actions .action-upload.disabled,
+div.ev-actions .action-upload[disabled],
+fieldset[disabled] div.ev-actions .action-upload,
+div.ev-actions .action-upload.disabled:hover,
+div.ev-actions .action-upload[disabled]:hover,
+fieldset[disabled] div.ev-actions .action-upload:hover,
+div.ev-actions .action-upload.disabled:focus,
+div.ev-actions .action-upload[disabled]:focus,
+fieldset[disabled] div.ev-actions .action-upload:focus,
+div.ev-actions .action-upload.disabled.focus,
+div.ev-actions .action-upload[disabled].focus,
+fieldset[disabled] div.ev-actions .action-upload.focus,
+div.ev-actions .action-upload.disabled:active,
+div.ev-actions .action-upload[disabled]:active,
+fieldset[disabled] div.ev-actions .action-upload:active,
+div.ev-actions .action-upload.disabled.active,
+div.ev-actions .action-upload[disabled].active,
+fieldset[disabled] div.ev-actions .action-upload.active {
+  background-color: #44ab00;
+  border-color: #3f9d00;
+}
+div.ev-actions .action-upload .badge {
+  color: #44ab00;
+  background-color: #fff;
+}
+div.ev-actions .action-record {
+  color: #fff;
+  background-color: #1e1c1f;
+  border-color: #000;
+}
+div.ev-actions .action-record:hover,
+div.ev-actions .action-record:focus,
+div.ev-actions .action-record.focus,
+div.ev-actions .action-record:active,
+div.ev-actions .action-record.active,
+.open > .dropdown-togglediv.ev-actions .action-record {
+  color: #fff;
+  background-color: #040404;
+  border-color: #000000;
+}
+div.ev-actions .action-record:active,
+div.ev-actions .action-record.active,
+.open > .dropdown-togglediv.ev-actions .action-record {
+  background-image: none;
+}
+div.ev-actions .action-record.disabled,
+div.ev-actions .action-record[disabled],
+fieldset[disabled] div.ev-actions .action-record,
+div.ev-actions .action-record.disabled:hover,
+div.ev-actions .action-record[disabled]:hover,
+fieldset[disabled] div.ev-actions .action-record:hover,
+div.ev-actions .action-record.disabled:focus,
+div.ev-actions .action-record[disabled]:focus,
+fieldset[disabled] div.ev-actions .action-record:focus,
+div.ev-actions .action-record.disabled.focus,
+div.ev-actions .action-record[disabled].focus,
+fieldset[disabled] div.ev-actions .action-record.focus,
+div.ev-actions .action-record.disabled:active,
+div.ev-actions .action-record[disabled]:active,
+fieldset[disabled] div.ev-actions .action-record:active,
+div.ev-actions .action-record.disabled.active,
+div.ev-actions .action-record[disabled].active,
+fieldset[disabled] div.ev-actions .action-record.active {
+  background-color: #1e1c1f;
+  border-color: #000;
+}
+div.ev-actions .action-record .badge {
+  color: #1e1c1f;
+  background-color: #fff;
+}
+div.ev-actions .action-record i {
+  color: #ff4f3e;
 }
 div.ev-filter-block {
   background-color: #fbfbfb;
@@ -158,14 +283,14 @@ div.ev-filter-block {
   z-index: 10;
   padding: 10px 5px 0 5px;
 }
-div.ev-filter-block div.ev-search,
-div.ev-filter-block div.ev-type-select,
-div.ev-filter-block div.ev-unit-selects {
+div.ev-filter-block .ev-search,
+div.ev-filter-block .ev-type-select,
+div.ev-filter-block .ev-unit-selects {
   display: inline-block;
 }
-div.ev-filter-block div.ev-search input[type="submit"],
-div.ev-filter-block div.ev-type-select input[type="submit"],
-div.ev-filter-block div.ev-unit-selects input[type="submit"] {
+div.ev-filter-block .ev-search input[type="submit"],
+div.ev-filter-block .ev-type-select input[type="submit"],
+div.ev-filter-block .ev-unit-selects input[type="submit"] {
   display: none;
 }
 div.ev-filter-block div.loader {

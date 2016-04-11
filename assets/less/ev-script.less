@@ -1,3 +1,6 @@
+// Bootstrap less mixins
+@import (reference) '../../bower_components/bootstrap-less/less/mixins.less';
+
 // Colors
 @border-color: #999999;
 @ev-yellow: #f9d700;
@@ -11,7 +14,7 @@
 
 // Media breaks
 @thumbnail-break: 1400px;
-@large-break: 1100px;
+@large-break: 1300px;
 @medium: 600px;
 
 .picker-base() {
@@ -51,8 +54,7 @@
   input,
   select {
     display: inline;
-    margin-right: 0.4em;
-    margin-bottom: 0.4em;
+    margin: 0.2em 0.4em 0.2em 0;
   }
   label {
     color: @label-color;
@@ -86,6 +88,18 @@
         color: goldenrod;
       }
     }
+  }
+}
+
+form {
+  .form-select,
+  .form-text {
+    .input-size(inherit; 0.2em; 0.2em; inherit; normal; 2px);
+    border: 1px solid darkgray;
+    padding: 0.3em;
+  }
+  .form-select {
+    background-color: #f3f4ee;
   }
 }
 
@@ -157,7 +171,7 @@ div.ev-field {
 
 div.ev-actions {
   display: inline-block;
-  padding: 0.4em 0.6em;
+  padding: 0.3em;
   a {
     display: inline-block;
     margin: 0.3em;
@@ -178,11 +192,22 @@ div.ev-actions {
   .action-remove {
     color: red;
   }
-  .action-upload {
-    color: black;
+  .action-upload,
+  .action-record {
+    .button-size(0.3em; 0.3em; inherit; inherit; 2px);
+    border: 1px solid transparent;
+    #gradient > .vertical(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.15), 1%, 100%);
     span {
-      display: inline;
-      margin-left: 0.3em;
+      margin-left: 0.2em;
+    }
+  }
+  .action-upload {
+    .button-variant(#fff; #44ab00; #3f9d00);
+  }
+  .action-record {
+    .button-variant(#fff; #1e1c1f; #000);
+    i {
+      color: #ff4f3e;
     }
   }
 }
@@ -192,9 +217,9 @@ div.ev-filter-block {
   position: relative;
   z-index: 10;
   padding: 10px 5px 0 5px;
-  div.ev-search,
-  div.ev-type-select,
-  div.ev-unit-selects {
+  .ev-search,
+  .ev-type-select,
+  .ev-unit-selects {
     display: inline-block;
     input[type="submit"] {
       display: none;

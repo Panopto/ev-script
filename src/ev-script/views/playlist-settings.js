@@ -73,7 +73,7 @@ define(function(require) {
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
-                height: Math.min(400, $(window).height() - this.config.dialogMargin)
+                height: Math.min(420, $(window).height() - this.config.dialogMargin)
             });
         },
         changeLayout: function(e) {

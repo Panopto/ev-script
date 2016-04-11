@@ -1,5 +1,5 @@
 /**
- * ev-script 1.1.0 2016-03-16
+ * ev-script 1.1.0 2016-04-11
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2016 Symphony Video, Inc.
@@ -4638,7 +4638,7 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
 });
 
 
-define('text!ev-script/templates/search.html',[],function () { return '<form>\n    <label for="<%= id %>">Search:</label>\n    <input id="<%= id %>" type="search" class="form-text search" value="<%- searchVal %>" title="Search Media" />\n    <input type="submit" value="Go" class="form-submit" />\n</form>\n';});
+define('text!ev-script/templates/search.html',[],function () { return '<label for="<%= id %>">Search:</label>\n<input id="<%= id %>" type="search" class="form-text search" value="<%- searchVal %>" title="Search Media" />\n<input type="submit" value="Go" class="form-submit" />\n';});
 
 define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
 
@@ -4692,7 +4692,7 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base','
 });
 
 
-define('text!ev-script/templates/library-type-select.html',[],function () { return '<form>\n    <label for="<%= id %>">Type:</label>\n    <select id="<%= id %>" class="form-select source" title="Select Library Type">\n      <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>>Media Library</option>\n      <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>>Shared Library</option>\n    </select>\n    <input type="submit" value="Go" class="form-submit" />\n</form>\n';});
+define('text!ev-script/templates/library-type-select.html',[],function () { return '<div>\n  <label for="<%= id %>">Type:</label>\n  <select id="<%= id %>" class="form-select source" title="Select Library Type">\n    <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>>Media Library</option>\n    <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>>Shared Library</option>\n  </select>\n  <input type="submit" value="Go" class="form-submit" />\n</div>\n';});
 
 define('ev-script/views/library-type-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
 
@@ -4944,7 +4944,7 @@ define('ev-script/collections/libraries',['require','ev-script/collections/base'
 });
 
 
-define('text!ev-script/templates/unit-selects.html',[],function () { return '<form id="<%= formId %>" class="unit-selects">\n    <label for="<%= orgSelectId %>">Organization:</label>\n    <select id="<%= orgSelectId %>" class="form-select organizations" title="Select Organization"></select>\n    <label for="<%= libSelectId %>">Library:</label>\n    <select id="<%= libSelectId %>" class="form-select libraries" title="Select Library"></select>\n    <input type="submit" value="Go" class="form-submit" />\n</form>\n';});
+define('text!ev-script/templates/unit-selects.html',[],function () { return '<div id="<%= formId %>" class="unit-selects">\n    <label for="<%= orgSelectId %>">Organization:</label><select id="<%= orgSelectId %>" class="form-select organizations" title="Select Organization"></select><label for="<%= libSelectId %>">Library:</label><select id="<%= libSelectId %>" class="form-select libraries" title="Select Library"></select><input type="submit" value="Go" class="form-submit" />\n</div>\n';});
 
 define('ev-script/views/unit-selects',['require','jquery','underscore','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','text!ev-script/templates/unit-selects.html'],function(require) {
 
@@ -6097,11 +6097,13 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
             PickerView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary', 'handleSubmit', 'uploadHandler');
             var callback = _.bind(function() {
-                this.loadVideos();
-            }, this);
+                    this.loadVideos();
+                }, this);
             this.$filterBlock = this.$('div.ev-filter-block');
             if (this.info.get('ApplicationVersion')) {
-                this.$upload = $('<div class="ev-actions"><a href="#" class="action-upload" title="Upload"><i class="fa fa-upload fa-fw"></i><span>Upload<span></a></div>').css('display', 'none');
+                this.$record = $('<div class="ev-actions"><button type="button" class="action-record" title="Record"><i class="fa fa-circle fa-fw"></i><span>Record<span></button></div>').css('display', 'none');
+                this.$filterBlock.prepend(this.$record);
+                this.$upload = $('<div class="ev-actions"><button type="button" class="action-upload" title="Upload"><i class="fa fa-upload fa-fw"></i><span>Upload<span></button></div>').css('display', 'none');
                 this.$filterBlock.prepend(this.$upload);
             }
             this.searchView = new SearchView({
@@ -6144,8 +6146,8 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
         events: {
             'click .action-add': 'chooseItem',
             'click .action-upload': 'uploadHandler',
-            'change form.unit-selects select.libraries': 'changeLibrary',
-            'submit form.unit-selects': 'handleSubmit'
+            'change .unit-selects select.libraries': 'changeLibrary',
+            'submit .unit-selects': 'handleSubmit'
         },
         changeLibrary: function(e) {
             this.loadVideos();
@@ -6221,10 +6223,16 @@ define('ev-script/views/video-picker',['require','jquery','underscore','ev-scrip
             this.workflows.fetch({
                 cacheKey: this.workflows.filterValue,
                 success: _.bind(function(collection, response, options) {
+                    var currentUser = this.auth.getUser(),
+                        canRecord = currentUser && currentUser.get('CanUseAnthem');
                     if (!collection.isEmpty()) {
                         this.$upload.css('display', 'inline-block');
+                        if (canRecord) {
+                            this.$record.css('display', 'inline-block');
+                        }
                     } else {
                         this.$upload.css('display', 'none');
+                        this.$record.css('display', 'none');
                     }
                     // This is the last portion of the filter block that loads
                     // so now it should be fully rendered...resize our results
@@ -6361,7 +6369,7 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
                 height = this.field.model.get('height'),
                 ratio = 16 / 9,
                 options = ['1280x720', '1024x576', '848x480', '720x405', '640x360', '610x344', '560x315', '480x270', '400x225', '320x180', '240x135', '160x90'];
-            if (width && height) { 
+            if (width && height) {
                ratio = width / height;
             } else if (this.encoding.id) {
                 width = this.encoding.getWidth();
@@ -6409,7 +6417,7 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
-                height: Math.min(220, $(window).height() - this.config.dialogMargin)
+                height: Math.min(240, $(window).height() - this.config.dialogMargin)
             });
         }
     });
@@ -6639,8 +6647,8 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
         },
         events: {
             'click a.action-add': 'chooseItem',
-            'change form.unit-selects select.libraries': 'changeLibrary',
-            'submit form.unit-selects': 'handleSubmit'
+            'change .unit-selects select.libraries': 'changeLibrary',
+            'submit .unit-selects': 'handleSubmit'
         },
         changeLibrary: function(e) {
             this.loadPlaylists();
@@ -6773,7 +6781,7 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
-                height: Math.min(400, $(window).height() - this.config.dialogMargin)
+                height: Math.min(420, $(window).height() - this.config.dialogMargin)
             });
         },
         changeLayout: function(e) {

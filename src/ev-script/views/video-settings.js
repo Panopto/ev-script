@@ -62,7 +62,7 @@ define(function(require) {
                 height = this.field.model.get('height'),
                 ratio = 16 / 9,
                 options = ['1280x720', '1024x576', '848x480', '720x405', '640x360', '610x344', '560x315', '480x270', '400x225', '320x180', '240x135', '160x90'];
-            if (width && height) { 
+            if (width && height) {
                ratio = width / height;
             } else if (this.encoding.id) {
                 width = this.encoding.getWidth();
@@ -110,7 +110,7 @@ define(function(require) {
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
-                height: Math.min(220, $(window).height() - this.config.dialogMargin)
+                height: Math.min(240, $(window).height() - this.config.dialogMargin)
             });
         }
     });
