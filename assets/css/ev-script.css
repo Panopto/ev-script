@@ -9,7 +9,7 @@
 .ev-video-picker div.ev-filter-block label,
 .ev-video-picker div.ev-filter-block input,
 .ev-video-picker div.ev-filter-block select {
-  display: inline;
+  display: inline-block;
   margin: 0.2em 0.4em 0.2em 0;
 }
 .ev-video-picker div.ev-filter-block label {
@@ -39,7 +39,7 @@
 .ev-playlist-picker div.ev-filter-block label,
 .ev-playlist-picker div.ev-filter-block input,
 .ev-playlist-picker div.ev-filter-block select {
-  display: inline;
+  display: inline-block;
   margin: 0.2em 0.4em 0.2em 0;
 }
 .ev-playlist-picker div.ev-filter-block label {
@@ -65,7 +65,7 @@ form .form-text {
   height: inherit;
   padding: 0.2em 0.2em;
   font-size: inherit;
-  line-height: normal;
+  line-height: inherit;
   border-radius: 2px;
   border: 1px solid #999999;
   padding: 0.3em;
@@ -292,6 +292,9 @@ div.ev-actions .action-record {
   background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 1%, rgba(255, 255, 255, 0.15) 100%);
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#4dffffff', endColorstr='#26ffffff', GradientType=0);
+  margin-right: 0.4em;
+  position: relative;
+  top: 1px;
 }
 div.ev-actions .action-upload span,
 div.ev-actions .action-record span {
@@ -387,8 +390,11 @@ div.ev-actions .action-record .badge {
   color: #1e1c1f;
   background-color: #fff;
 }
-div.ev-actions .action-record i {
+div.ev-actions .action-record i.record-inactive {
   color: #ff4f3e;
+}
+div.ev-actions .action-record i.record-active {
+  color: #fff;
 }
 div.ev-filter-block {
   background-color: #fbfbfb;
@@ -413,7 +419,6 @@ div.ev-filter-block div.loading {
   background: url('images/loading.gif') no-repeat scroll center center transparent;
   display: inline-block;
   height: 16px;
-  margin-left: 1em;
   vertical-align: middle;
   width: 16px;
 }
@@ -456,7 +461,6 @@ div.ev-auth form div.loading {
   background: url('images/loading.gif') no-repeat scroll center center transparent;
   display: inline-block;
   height: 16px;
-  margin-left: 1em;
   vertical-align: middle;
   width: 16px;
 }
@@ -494,7 +498,10 @@ div.ev-results {
   padding: 0 5px;
 }
 div.ev-results .total {
-  padding: 0.4em 0;
+  padding: 0.6em 0;
+}
+div.ev-results .total .action-refresh {
+  color: #555555;
 }
 div.ev-results .results {
   position: relative;

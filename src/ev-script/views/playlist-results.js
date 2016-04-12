@@ -14,6 +14,10 @@ define(function(require) {
         resultTemplate: _.template(require('text!ev-script/templates/playlist-result.html')),
         initialize: function(options) {
             ResultsView.prototype.initialize.call(this, options);
+        },
+        refreshHandler: function(e) {
+            e.preventDefault();
+            this.appEvents.trigger('reloadPlaylists');
         }
     });
 

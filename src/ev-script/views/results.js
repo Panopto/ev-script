@@ -16,13 +16,14 @@ define(function(require) {
         emptyTemplate: _.template(require('text!ev-script/templates/no-results.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render', 'loadMore', 'addHandler', 'previewItem', 'setHeight', 'resizeResults');
+            _.bindAll(this, 'render', 'loadMore', 'addHandler', 'previewItem', 'setHeight', 'resizeResults', 'refreshHandler');
             this.picker = options.picker;
             this.appId = options.appId;
             this.loadLock = false;
         },
         events: {
-            'click a.action-preview': 'previewItem'
+            'click .action-preview': 'previewItem',
+            'click .action-refresh': 'refreshHandler'
         },
         getItemHtml: function(item, index) {
             if (this.resultTemplate) {
@@ -123,7 +124,8 @@ define(function(require) {
                     this.decorate($(element));
                 }, this));
             }
-        }
+        },
+        refreshHandler: function(e) {}
     });
 
 });

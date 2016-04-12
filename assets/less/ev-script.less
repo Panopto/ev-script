@@ -48,7 +48,6 @@
     background: url(@loading-image) no-repeat scroll center center transparent;
     display: inline-block;
     height: 16px;
-    margin-left: 1em;
     vertical-align: middle;
     width: 16px;
   }
@@ -58,7 +57,7 @@
   label,
   input,
   select {
-    display: inline;
+    display: inline-block;
     margin: 0.2em 0.4em 0.2em 0;
   }
   label {
@@ -100,7 +99,7 @@ form {
   color: @form-color;
   .form-select,
   .form-text {
-    .input-size(inherit; 0.2em; 0.2em; inherit; normal; 2px);
+    .input-size(inherit; 0.2em; 0.2em; inherit; inherit; 2px);
     border: 1px solid @border-color;
     padding: 0.3em;
   }
@@ -223,14 +222,20 @@ div.ev-actions {
     span {
       margin-left: 0.2em;
     }
+    margin-right: 0.4em;
+    position: relative;
+    top: 1px;
   }
   .action-upload {
     .button-variant(#fff; @button-green; @button-border-green);
   }
   .action-record {
     .button-variant(#fff; #1e1c1f; #000);
-    i {
+    i.record-inactive {
       color: #ff4f3e;
+    }
+    i.record-active {
+      color: #fff;
     }
   }
 }
@@ -325,7 +330,10 @@ div.ev-results {
   background-color: #fbfbfb;
   padding: 0 5px;
   .total {
-    padding: 0.4em 0;
+    padding: 0.6em 0;
+    .action-refresh {
+      color: @form-color;
+    }
   }
   .results {
     position: relative

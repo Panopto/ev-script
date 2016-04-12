@@ -27,7 +27,9 @@ module.exports = function(grunt) {
         'underscore': 'bower_components/underscore/underscore',
         'backbone': 'bower_components/backbone/backbone',
         'text': 'bower_components/text/text',
-        'semver': 'bower_components/semver/semver.browser'
+        'semver': 'bower_components/semver/semver.browser',
+        'platform': 'bower_components/platform.js/platform',
+        'base64': 'bower_components/base64/base64'
       },
       name: 'bower_components/almond/almond',
       out: "dist/ev-script.js",

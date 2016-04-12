@@ -44,21 +44,7 @@ define(function(require) {
         decorateUploader: function() {
             var extensions = "",
                 selected = this.workflowSelect.getSelected(),
-                maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10); //,
-                // runtimes = 'html5,html4',
-                // iOS = (navigator.userAgent.indexOf('iPad') > -1) || (navigator.userAgent.indexOf('iPhone') > -1),
-                // MSIE = (navigator.userAgent.indexOf('MSIE') > -1),
-                // Android = (navigator.userAgent.indexOf('Android') > -1),
-                // SafariVersion5 = (navigator.userAgent.match(/Version\/5.*Safari/i) != null) && (navigator.userAgent.indexOf('Chrome') === -1) && !iOS && !Android;
-
-            // runtime selection based on browser
-            // if (iOS) {
-            //     runtimes = 'html5,html4';
-            // } else if (MSIE) {
-            //     runtimes = 'silverlight,html4';
-            // } else if (Android) {
-            //     runtimes = 'flash,html5,html4';
-            // }
+                maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10);
 
             if (this.workflows.settings.SupportedVideo) {
                 extensions += this.workflows.settings.SupportedVideo.replace(/\*\./g, '').replace(/;/g, ',').replace(/\s/g, '');
@@ -74,7 +60,7 @@ define(function(require) {
 
             this.$upload.pluploadQueue({
                 url: this.workflows.settings.SubmitUrl,
-                runtimes: 'html5,html4,flash', //runtimes,
+                runtimes: 'html5,html4,flash',
                 max_file_size: maxUploadSize > 0 ? maxUploadSize + 'gb' : '12gb',
                 max_file_count: 1,
                 max_retries: 5,
@@ -85,8 +71,6 @@ define(function(require) {
                 drag_drop: true,
                 multipart: true,
                 flash_swf_url: this.config.pluploadFlashPath,
-                // FIXME
-                // silverlight_xap_url: 'FIXME',
                 preinit: {
                     Init: _.bind(function(up, info) {
                         // Remove runtime tooltip

@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        platform = require('platform'),
         PickerView = require('ev-script/views/picker'),
         SearchView = require('ev-script/views/search'),
         TypeSelectView = require('ev-script/views/library-type-select'),
@@ -13,19 +14,24 @@ define(function(require) {
         MediaWorkflows = require('ev-script/collections/media-workflows'),
         UploadView = require('ev-script/views/upload');
 
+    require('base64');
+
     return PickerView.extend({
+        anthemTemplate: _.template(require('text!ev-script/templates/anthem.html')),
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary', 'handleSubmit', 'uploadHandler');
+            _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary', 'handleSubmit', 'uploadHandler', 'recordHandler');
             var callback = _.bind(function() {
-                    this.loadVideos();
-                }, this);
+                this.loadVideos();
+            }, this);
             this.$filterBlock = this.$('div.ev-filter-block');
             if (this.info.get('ApplicationVersion')) {
-                this.$record = $('<div class="ev-actions"><button type="button" class="action-record" title="Record"><i class="fa fa-circle fa-fw"></i><span>Record<span></button></div>').css('display', 'none');
-                this.$filterBlock.prepend(this.$record);
-                this.$upload = $('<div class="ev-actions"><button type="button" class="action-upload" title="Upload"><i class="fa fa-upload fa-fw"></i><span>Upload<span></button></div>').css('display', 'none');
-                this.$filterBlock.prepend(this.$upload);
+                this.$actions = $('<div class="ev-actions"></div>');
+                this.$upload = $('<button type="button" class="action-upload" title="Upload"><i class="fa fa-upload fa-fw"></i><span>Upload<span></button>').css('display', 'none');
+                this.$actions.append(this.$upload);
+                this.$record = $('<button type="button" class="action-record" title="Record"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>Record<span></button>').css('display', 'none');
+                this.$actions.append(this.$record);
+                this.$filterBlock.prepend(this.$actions);
             }
             this.searchView = new SearchView({
                 id: this.id + '-search',
@@ -88,7 +94,79 @@ define(function(require) {
             e.preventDefault();
         },
         recordHandler: function(e) {
-            window.alert('record');
+            var activeIcon = $('.record-active', this.$record),
+                inactiveIcon = $('.record-inactive', this.$record),
+                pollingId,
+                timeoutId,
+                activate = _.bind(function() {
+                    this.anthemLaunching = true;
+                    inactiveIcon.hide();
+                    activeIcon.show();
+                }, this),
+                deactivate = _.bind(function() {
+                    this.anthemLaunching = false;
+                    inactiveIcon.show();
+                    activeIcon.hide();
+                    if (pollingId) {
+                        clearInterval(pollingId);
+                    }
+                    if (timeoutId) {
+                        clearTimeout(timeoutId);
+                    }
+                }, this);
+
+            if (this.anthemLaunching) {
+                e.preventDefault();
+                return false;
+            }
+
+            activate();
+
+            $.ajax({
+                url: this.config.ensembleUrl + '/api/record/token/CreateToken',
+                data: {
+                    'libraryId': this.model.get('libraryId')
+                },
+                xhrFields: {
+                    withCredentials: true
+                }
+            }).done(_.bind(function(newToken) {
+                if (newToken && newToken !== '00000000-0000-0000-0000-000000000000') {
+                    this.$('#anthemContainer').html(this.anthemTemplate({
+                        tokenDetailsApiUrl: window.btoa(this.config.ensembleUrl + '/api/record/token/GetDetails?token=' + newToken)
+                    }));
+
+                    pollingId = setInterval(_.bind(function() {
+                        $.ajax({
+                            url: this.config.ensembleUrl + '/api/record/token/IsActive',
+                            xhrFields: {
+                                withCredentials: true
+                            },
+                            data: {
+                                'token': newToken
+                            }
+                        }).done(function(activeStatus) {
+                            if (!activeStatus) {
+                                deactivate();
+                            }
+                        }).fail(function() {
+                            deactivate();
+                        });
+                    }, this), 5000);
+
+                    // If launch hasn't deactivated in 30 secs, we probably need to install
+                    timeoutId = setTimeout(_.bind(function() {
+                        deactivate();
+                        if (platform.os.family === 'Windows') {
+                            window.location = this.config.ensembleUrl + '/app/unprotected/EnsembleAnthem/EnsembleAnthem.msi';
+                        } else {
+                            window.location = this.config.ensembleUrl + '/app/unprotected/EnsembleAnthem/EnsembleAnthem.dmg';
+                        }
+                    }, this), 30000);
+                } else {
+                    deactivate();
+                }
+            }, this)).fail(deactivate);
             e.preventDefault();
         },
         showPicker: function() {
@@ -139,6 +217,7 @@ define(function(require) {
                 }, this)
             });
             this.appEvents.off('fileUploaded').on('fileUploaded', clearVideosCache);
+            this.appEvents.off('reloadVideos').on('reloadVideos', clearVideosCache);
         },
         loadWorkflows: function() {
             this.workflows = new MediaWorkflows({}, {
@@ -149,11 +228,9 @@ define(function(require) {
             this.workflows.fetch({
                 cacheKey: this.workflows.filterValue,
                 success: _.bind(function(collection, response, options) {
-                    var currentUser = this.auth.getUser(),
-                        canRecord = this.info.anthemEnabled && currentUser && currentUser.get('CanUseAnthem');
                     if (!collection.isEmpty()) {
                         this.$upload.css('display', 'inline-block');
-                        if (canRecord) {
+                        if (this.canRecord()) {
                             this.$record.css('display', 'inline-block');
                         }
                     } else {
@@ -179,6 +256,14 @@ define(function(require) {
             if (this.config.fitToParent) {
                 this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true));
             }
+        },
+        canRecord: function() {
+            var currentUser = this.auth.getUser();
+            return this.info.anthemEnabled && currentUser && currentUser.get('CanUseAnthem') && !this.isMobile() && platform.os.family !== 'Linux';
+        },
+        isMobile: function() {
+            var family = platform.os.family;
+            return family === 'Android' || family === 'iOS' || family === 'Windows Phone';
         }
     });
 

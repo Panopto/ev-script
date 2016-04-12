@@ -68,7 +68,11 @@ define(function(require) {
                     libraryId: libraryId,
                     filterValue: searchVal,
                     appId: this.appId
-                });
+                }),
+                clearPlaylistsCache = _.bind(function() {
+                    playlists.clearCache();
+                    this.loadPlaylists();
+                }, this);
             playlists.fetch({
                 picker: this,
                 cacheKey: libraryId + searchVal,
@@ -92,6 +96,7 @@ define(function(require) {
                     }, this));
                 }, this)
             });
+            this.appEvents.off('reloadPlaylists').on('reloadPlaylists', clearPlaylistsCache);
         },
         resizeResults: function() {
             if (this.config.fitToParent) {

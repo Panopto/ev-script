@@ -31,6 +31,13 @@ define(function(require) {
         setCached: function(key, resp) {
             return this._cache(key, resp);
         },
+        clearCache: function() {
+            var user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                userCache.set('playlists', null);
+            }
+        },
         url: function() {
             var api_url = this.config.ensembleUrl + '/api/Playlists',
                 sizeParam = 'PageSize=' + this.config.pageSize,

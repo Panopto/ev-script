@@ -52,6 +52,10 @@ define(function(require) {
                     $this.append(fullText);
                 }
             });
+        },
+        refreshHandler: function(e) {
+            e.preventDefault();
+            this.appEvents.trigger('reloadVideos');
         }
     });
 
