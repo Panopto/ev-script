@@ -1,5 +1,5 @@
 /**
- * ev-script 1.1.0 2016-04-12
+ * ev-script 1.1.0 2016-04-13
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2016 Symphony Video, Inc.

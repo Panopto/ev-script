@@ -82,7 +82,7 @@ select[multiple]form .form-text {
   height: auto;
 }
 form .form-select {
-  background-color: #f3f4ee;
+  background-color: #fff;
 }
 form .form-actions .form-submit {
   padding: 0.3em 0.3em;
