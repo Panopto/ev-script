@@ -259,7 +259,7 @@ define(function(require) {
         },
         canRecord: function() {
             var currentUser = this.auth.getUser();
-            return this.info.anthemEnabled && currentUser && currentUser.get('CanUseAnthem') && !this.isMobile() && platform.os.family !== 'Linux';
+            return this.info.anthemEnabled() && currentUser && currentUser.get('CanUseAnthem') && !this.isMobile() && platform.os.family !== 'Linux';
         },
         isMobile: function() {
             var family = platform.os.family;

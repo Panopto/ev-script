@@ -1,5 +1,5 @@
 /**
- * ev-script 1.1.0 2016-04-13
+ * ev-script 1.1.0 2016-04-14
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2016 Symphony Video, Inc.
@@ -7531,7 +7531,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
         },
         canRecord: function() {
             var currentUser = this.auth.getUser();
-            return this.info.anthemEnabled && currentUser && currentUser.get('CanUseAnthem') && !this.isMobile() && platform.os.family !== 'Linux';
+            return this.info.anthemEnabled() && currentUser && currentUser.get('CanUseAnthem') && !this.isMobile() && platform.os.family !== 'Linux';
         },
         isMobile: function() {
             var family = platform.os.family;
