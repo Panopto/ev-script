@@ -53,8 +53,8 @@ define(function(require) {
             this.hider.render();
         },
         chooseItem: function(e) {
-            var id = $(e.currentTarget).attr('rel');
-            var content = this.resultsView.collection.get(id);
+            var id = $(e.currentTarget).attr('rel'),
+                content = this.resultsView.collection.get(id);
             this.model.set({
                 id: id,
                 content: content.toJSON()

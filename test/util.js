@@ -30,8 +30,8 @@ define(function(require) {
                 this.appId = appId;
                 this.config = _.extend({}, evSettings);
                 eventsUtil.initEvents(this.appId);
-                cacheUtil.setAppConfig(this.appId, this.config);
                 settings.configCallback.call(this);
+                cacheUtil.setAppConfig(this.appId, this.config);
                 this.info = new AppInfo({}, {
                     appId: this.appId
                 });

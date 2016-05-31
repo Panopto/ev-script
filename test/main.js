@@ -21,7 +21,9 @@
             'text': 'text/text',
             'underscore': 'underscore/underscore',
             'backbone': 'backbone/backbone',
-            'semver': 'semver/semver.browser'
+            'semver': 'semver/semver.browser',
+            'platform': 'platform.js/platform',
+            'base64': 'base64/base64'
         },
         shim: {
             'moxie': [],
@@ -46,6 +48,7 @@
         'test/tests/auth/none/view',
         'test/tests/util/cache',
         'test/tests/util/events',
+        'test/tests/util/size',
         'test/tests/collections/base',
         'test/tests/collections/organizations',
         'test/tests/collections/libraries',

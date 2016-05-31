@@ -25,9 +25,19 @@ define(function(require) {
         getDims: function() {
             var dimsRaw = this.get('dimensions') || "640x360",
                 dimsStrs = dimsRaw.split('x'),
-                dims = [];
-            dims[0] = this.isAudio() ? 400 : (parseInt(dimsStrs[0], 10) || 640);
-            dims[1] = this.isAudio() ? 26 : (parseInt(dimsStrs[1], 10) || 360);
+                dims = [],
+                originalWidth = parseInt(dimsStrs[0], 10) || 640,
+                originalHeight = parseInt(dimsStrs[1], 10) || 360;
+            if (this.isAudio()) {
+                dims[0] = 400;
+                dims[1] = 26;
+            } else if (this.config.defaultVideoWidth) {
+                dims[0] = parseInt(this.config.defaultVideoWidth, 10) || 640;
+                dims[1] = Math.ceil(dims[0] / (originalWidth / originalHeight));
+            } else {
+                dims[0] = originalWidth;
+                dims[1] = originalHeight;
+            }
             return dims;
         },
         getRatio: function() {

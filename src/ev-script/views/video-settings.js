@@ -4,7 +4,8 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        SettingsView = require('ev-script/views/settings');
+        SettingsView = require('ev-script/views/settings'),
+        sizeUtil = require('ev-script/util/size');
 
     require('jquery-ui');
 
@@ -61,27 +62,19 @@ define(function(require) {
             var width = this.field.model.get('width'),
                 height = this.field.model.get('height'),
                 ratio = 16 / 9,
-                options = ['1280x720', '1024x576', '848x480', '720x405', '640x360', '610x344', '560x315', '480x270', '400x225', '320x180', '240x135', '160x90'];
+                options = [];
             if (width && height) {
-               ratio = width / height;
+                ratio = width / height;
             } else if (this.encoding.id) {
                 width = this.encoding.getWidth();
                 height = this.encoding.getHeight();
                 ratio = this.encoding.getRatio();
             }
-            // Use a fuzz factor to determine ratio equality since our sizes are not always accurate
-            if (Math.ceil(ratio * 10) / 10 === Math.ceil((4 / 3) * 10) / 10) {
-                options = ['1280x960', '1024x770', '848x636', '720x540', '640x480', '610x460', '560x420', '480x360', '400x300', '320x240', '240x180', '160x120'];
-            }
-            var size = width + 'x' + height;
-            if (this.config.defaultVideoWidth) {
-                // Find the first available option that matches our desired width
-                var override = _.find(options, _.bind(function(option) { return new RegExp('^' + this.config.defaultVideoWidth).test(option); }, this));
-                size = override || size;
-            }
+            options = sizeUtil.getAvailableDimensions(ratio);
             this.$('.size').append(this.sizesTemplate({
                 sizes: options,
-                target: size
+                // Select the override or current width
+                target: sizeUtil.findClosestDimension(options, this.config.defaultVideoWidth || width)
             }));
         },
         render: function() {

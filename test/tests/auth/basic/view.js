@@ -9,7 +9,6 @@ define(function(require) {
         testUtil = require('test/util'),
         BasicAuth = require('ev-script/auth/basic/auth'),
         eventsUtil = require('ev-script/util/events'),
-        evSettings = require('ev-config'),
         AuthView = require('ev-script/auth/basic/view');
 
     q.module('Testing ev-script/auth/basic/view', {

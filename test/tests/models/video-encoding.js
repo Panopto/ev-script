@@ -6,7 +6,6 @@ define(function(require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         testUtil = require('test/util'),
-        evSettings = require('ev-config'),
         Videos = require('ev-script/collections/videos'),
         VideoEncoding = require('ev-script/models/video-encoding');
 
@@ -18,6 +17,9 @@ define(function(require) {
                 }, {
                     appId: this.appId
                 });
+            },
+            configCallback: function() {
+                delete this.config.defaultVideoWidth;
             }
         }),
         teardown: testUtil.teardownHelper()
@@ -29,7 +31,7 @@ define(function(require) {
 
     q.test('test initialize', 2, function() {
         q.strictEqual(this.encoding.appId, this.appId);
-        q.deepEqual(this.encoding.config, evSettings);
+        q.deepEqual(this.encoding.config, this.config);
     });
 
     q.test('test parse', 2, function() {

@@ -1,5 +1,5 @@
 /**
- * ev-script 1.1.0 2016-04-14
+ * ev-script 1.1.0 2016-05-31
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2016 Symphony Video, Inc.
@@ -5746,8 +5746,8 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
             this.hider.render();
         },
         chooseItem: function(e) {
-            var id = $(e.currentTarget).attr('rel');
-            var content = this.resultsView.collection.get(id);
+            var id = $(e.currentTarget).attr('rel'),
+                content = this.resultsView.collection.get(id);
             this.model.set({
                 id: id,
                 content: content.toJSON()
@@ -6616,9 +6616,19 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/models
         getDims: function() {
             var dimsRaw = this.get('dimensions') || "640x360",
                 dimsStrs = dimsRaw.split('x'),
-                dims = [];
-            dims[0] = this.isAudio() ? 400 : (parseInt(dimsStrs[0], 10) || 640);
-            dims[1] = this.isAudio() ? 26 : (parseInt(dimsStrs[1], 10) || 360);
+                dims = [],
+                originalWidth = parseInt(dimsStrs[0], 10) || 640,
+                originalHeight = parseInt(dimsStrs[1], 10) || 360;
+            if (this.isAudio()) {
+                dims[0] = 400;
+                dims[1] = 26;
+            } else if (this.config.defaultVideoWidth) {
+                dims[0] = parseInt(this.config.defaultVideoWidth, 10) || 640;
+                dims[1] = Math.ceil(dims[0] / (originalWidth / originalHeight));
+            } else {
+                dims[0] = originalWidth;
+                dims[1] = originalHeight;
+            }
             return dims;
         },
         getRatio: function() {
@@ -7579,6 +7589,46 @@ define('ev-script/views/settings',['require','underscore','ev-script/views/base'
 
 });
 
+define('ev-script/util/size',['require','underscore'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore');
+
+    return {
+        optionsSixteenByNine: ['1280x720', '1024x576', '848x480', '720x405', '640x360', '610x344', '560x315', '480x270', '400x225', '320x180', '240x135', '160x90'],
+        optionsFourByThree: ['1280x960', '1024x770', '848x636', '720x540', '640x480', '610x460', '560x420', '480x360', '400x300', '320x240', '240x180', '160x120'],
+        ratiosAreRoughlyEqual: function(ratioA, ratioB) {
+            // Use a fuzz factor to determine ratio equality since our sizes are not always accurate
+            return Math.ceil(ratioA * 10) / 10 === Math.ceil(ratioB * 10) / 10;
+        },
+        getAvailableDimensions: function(ratio) {
+            ratio = ratio || 16 / 9;
+            var options = this.optionsSixteenByNine;
+            if (this.ratiosAreRoughlyEqual(ratio, 4 / 3)) {
+                options = this.optionsFourByThree;
+            }
+            return options;
+        },
+        findClosestDimension: function(arg, desiredWidth) {
+            var offset = Number.MAX_VALUE,
+                dimensions = _.isNumber(arg) ? this.getAvailableDimensions(arg) : arg,
+                closest;
+            // Find the first available or closest dimension that matches our desired width
+            var match = _.find(dimensions, _.bind(function(dimension) {
+                var width = parseInt(dimension.split('x')[0], 10),
+                    currentOffset = Math.abs(width - desiredWidth);
+                if (currentOffset < offset) {
+                    closest = dimension;
+                }
+                return currentOffset === 0;
+            }, this));
+            return match || closest;
+        }
+    };
+
+});
+
 
 define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size">Size</label>\n            <select class="form-select size" id="size" name="size" <% if (isAudio) { print(\'disabled\'); } %> >\n                <option value="original">Original</option>\n            </select>\n        </div>\n        <div>\n            <div class="fieldWrap">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle">Title</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="socialsharing" class="form-checkbox" <% if (model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox"/>\n                <label for="socialsharing">Social Tools</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                <label for="annotations">Annotations</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                <label for="captionsearch">Caption Search</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                <label for="autoplay">Auto Play (PC Only)</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments">Attachments</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links">Links</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata">Meta Data</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                <label for="dateproduced">Date Produced</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="embedcode" class="form-checkbox" <% if (model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox"/>\n                <label for="embedcode">Embed Code</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="download" class="form-checkbox" <% if (model.get(\'download\')) { print(\'checked="checked"\'); } %> name="download" type="checkbox"/>\n                <label for="download">Download Link</label>\n            </div>\n            <div class="fieldWrap">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions">Captions "On" By Default</label>\n            </div>\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span>Save</span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span>Cancel</span></button>\n        </div>\n    </fieldset>\n</form>\n';});
 
@@ -7588,13 +7638,14 @@ define('text!ev-script/templates/video-settings-legacy.html',[],function () { re
 
 define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(sizes, function(size) { %>\n    <option value="<%= size %>" <% if (size === target) { print(\'selected="selected"\'); } %>><%= size %></option>\n<% }); %>\n';});
 
-define('ev-script/views/video-settings',['require','jquery','underscore','ev-script/views/settings','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/video-settings-legacy.html','text!ev-script/templates/sizes.html'],function(require) {
+define('ev-script/views/video-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/video-settings-legacy.html','text!ev-script/templates/sizes.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        SettingsView = require('ev-script/views/settings');
+        SettingsView = require('ev-script/views/settings'),
+        sizeUtil = require('ev-script/util/size');
 
     require('jquery-ui');
 
@@ -7651,27 +7702,19 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
             var width = this.field.model.get('width'),
                 height = this.field.model.get('height'),
                 ratio = 16 / 9,
-                options = ['1280x720', '1024x576', '848x480', '720x405', '640x360', '610x344', '560x315', '480x270', '400x225', '320x180', '240x135', '160x90'];
+                options = [];
             if (width && height) {
-               ratio = width / height;
+                ratio = width / height;
             } else if (this.encoding.id) {
                 width = this.encoding.getWidth();
                 height = this.encoding.getHeight();
                 ratio = this.encoding.getRatio();
             }
-            // Use a fuzz factor to determine ratio equality since our sizes are not always accurate
-            if (Math.ceil(ratio * 10) / 10 === Math.ceil((4 / 3) * 10) / 10) {
-                options = ['1280x960', '1024x770', '848x636', '720x540', '640x480', '610x460', '560x420', '480x360', '400x300', '320x240', '240x180', '160x120'];
-            }
-            var size = width + 'x' + height;
-            if (this.config.defaultVideoWidth) {
-                // Find the first available option that matches our desired width
-                var override = _.find(options, _.bind(function(option) { return new RegExp('^' + this.config.defaultVideoWidth).test(option); }, this));
-                size = override || size;
-            }
+            options = sizeUtil.getAvailableDimensions(ratio);
             this.$('.size').append(this.sizesTemplate({
                 sizes: options,
-                target: size
+                // Select the override or current width
+                target: sizeUtil.findClosestDimension(options, this.config.defaultVideoWidth || width)
             }));
         },
         render: function() {
