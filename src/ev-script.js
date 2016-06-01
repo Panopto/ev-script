@@ -129,12 +129,14 @@ define(function(require) {
                             model: settingsModel,
                             appId: appId
                         });
+                        videoEmbed.render();
                     } else {
                         var playlistEmbed = new PlaylistEmbedView({
                             el: embedWrap,
                             model: settingsModel,
                             appId: appId
                         });
+                        playlistEmbed.render();
                     }
                 };
 

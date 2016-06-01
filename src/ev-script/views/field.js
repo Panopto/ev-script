@@ -61,10 +61,10 @@ define(function(require) {
                         });
                         this.encoding.fetch({
                             success: _.bind(function(response) {
-                                this.model.set({
-                                    width: this.encoding.getWidth(),
-                                    height: this.encoding.getHeight()
-                                });
+                                // TODO - this is getting messy
+                                this.encoding.updateSettingsModel(this.model);
+                                // Picker model is a copy so need to update that as well
+                                this.encoding.updateSettingsModel(this.picker.model);
                             }, this)
                         });
                     } else {
@@ -155,6 +155,7 @@ define(function(require) {
                 el: element,
                 encoding: this.encoding,
                 model: this.model,
+                picker: this.picker,
                 appId: this.appId
             });
             e.preventDefault();

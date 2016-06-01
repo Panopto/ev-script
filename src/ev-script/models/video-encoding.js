@@ -72,6 +72,28 @@ define(function(require) {
                 }
             });
             return Backbone.sync.call(this, method, model, options);
+        },
+        updateSettingsModel: function(settingsModel) {
+            var attrs = {
+                width: this.getWidth(),
+                height: this.getHeight(),
+                isaudio: this.isAudio()
+            };
+            // TODO - this needs to be handled better
+            // If the settings model hasn't been updated yet with default audio settings
+            // if (this.isAudio() && !settingsModel.get('isaudio')) {
+            //     _.extend(attrs, {
+            //         showtitle: false,
+            //         annotations: false,
+            //         captionsearch: false,
+            //         attachments: false,
+            //         links: false,
+            //         metadata: false,
+            //         dateproduced: false,
+            //         isaudio: true
+            //     });
+            // }
+            settingsModel.set(attrs);
         }
     });
 

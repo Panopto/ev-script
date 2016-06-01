@@ -2,7 +2,7 @@
   "name": "ev-script",
   "title": "Ensemble Video Integration Library",
   "description": "JavaScript library for integration with Ensemble Video.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "./dist/ev-script.js",
   "homepage": "https://github.com/ensembleVideo/ev-script",
   "author": {

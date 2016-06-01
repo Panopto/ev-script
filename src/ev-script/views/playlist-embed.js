@@ -3,21 +3,23 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
+        EmbedView = require('ev-script/views/embed');
 
-    return BaseView.extend({
+    return EmbedView.extend({
         template: _.template(require('text!ev-script/templates/playlist-embed.html')),
         legacyTemplate: _.template(require('text!ev-script/templates/playlist-embed-legacy.html')),
         playlistParamsTemplate: _.template(require('text!ev-script/templates/playlist-embed-playlist-params.html')),
         showcaseParamsTemplate: _.template(require('text!ev-script/templates/playlist-embed-showcase-params.html')),
         initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
+            EmbedView.prototype.initialize.call(this, options);
+        },
+        render: function() {
             var embed = '';
             if (!this.info.useLegacyEmbeds()) {
                 var data = {
                     modelId: this.model.get('id'),
-                    width: this.model.get('width'),
-                    height: this.model.get('height'),
+                    width: this.getFrameWidth(),
+                    height: this.getFrameHeight(),
                     ensembleUrl: this.config.ensembleUrl,
                     displayEmbedCode: this.model.get('embedcode'),
                     displayStatistics: this.model.get('statistics'),
@@ -57,8 +59,8 @@ define(function(require) {
             } else {
                 embed = this.legacyTemplate({
                     modelId: this.model.get('id'),
-                    width: this.model.get('width'),
-                    height: this.model.get('height'),
+                    width: this.getFrameWidth(),
+                    height: this.getFrameHeight(),
                     ensembleUrl: this.config.ensembleUrl
                 });
             }

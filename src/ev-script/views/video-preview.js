@@ -20,10 +20,9 @@ define(function(require) {
             });
             this.picker = options.picker;
             var success = _.bind(function() {
-                this.model.set({
-                    width: this.encoding.getWidth(),
-                    height: this.encoding.getHeight()
-                });
+                this.encoding.updateSettingsModel(this.model);
+                // Picker model is a copy so need to update that as well
+                this.encoding.updateSettingsModel(this.picker.model);
                 PreviewView.prototype.initialize.call(this, options);
             }, this);
             if (this.encoding.isNew()) {

@@ -3,16 +3,18 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
+        EmbedView = require('ev-script/views/embed');
 
-    return BaseView.extend({
+    return EmbedView.extend({
         template: _.template(require('text!ev-script/templates/video-embed.html')),
         legacyTemplate: _.template(require('text!ev-script/templates/video-embed-legacy.html')),
         initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
+            EmbedView.prototype.initialize.call(this, options);
+        },
+        render: function() {
             // Width and height really should be set by now...but use a reasonable default if not
-            var width = (this.model.get('width') ? this.model.get('width') : '640'),
-                height = (this.model.get('height') ? this.model.get('height') : '360'),
+            var width = this.getMediaWidth(),
+                height = this.getMediaHeight(),
                 showTitle = this.model.get('showtitle'),
                 embed = '';
             if (!this.info.useLegacyEmbeds()) {
@@ -32,7 +34,8 @@ define(function(require) {
                     displayDownloadIcon: this.model.get('download'),
                     showCaptions: this.model.get('showcaptions'),
                     width: width,
-                    height: height
+                    height: height,
+                    frameHeight: this.getFrameHeight()
                 });
             } else {
                 embed = this.legacyTemplate({
@@ -47,6 +50,57 @@ define(function(require) {
                 });
             }
             this.$el.html(embed);
+        },
+        getMediaWidth: function() {
+            return parseInt(this.model.get('width'), 10) || 640;
+        },
+        getMediaHeight: function() {
+            return parseInt(this.model.get('height'), 10) || 360;
+        },
+        getFrameWidth: function() {
+            return this.getMediaWidth();
+        },
+        getFrameHeight: function() {
+            var height = this.getMediaHeight();
+            if (this.model.get('isaudio')) {
+                if (this.model.get('showtitle') ||
+                    this.model.get('socialsharing') ||
+                    this.model.get('annotations') ||
+                    this.model.get('captionsearch') ||
+                    this.model.get('attachments') ||
+                    this.model.get('links') ||
+                    this.model.get('metadata') ||
+                    this.model.get('dateproduced') ||
+                    this.model.get('embedcode') ||
+                    this.model.get('download')) {
+                    height = 155;
+                } else {
+                    height = 40;
+                }
+            } else {
+                height += 40;
+            }
+            return height;
+        },
+        scale: function(maxWidth, maxHeight) {
+            var ratio,
+                embedWidth = this.getFrameWidth(),
+                embedHeight = this.getFrameHeight(),
+                mediaWidth = this.getMediaWidth(),
+                mediaHeight = this.getMediaHeight();
+            // We can't scale our audio
+            if (this.model.get('isaudio')) {
+                return;
+            }
+            while (embedWidth > maxWidth || embedHeight > maxHeight) {
+                ratio = embedWidth > maxWidth ? maxWidth / embedWidth : maxHeight / embedHeight;
+                this.model.set('width', Math.ceil(mediaWidth * ratio));
+                this.model.set('height', Math.ceil(mediaHeight * ratio));
+                embedWidth = this.getFrameWidth();
+                embedHeight = this.getFrameHeight();
+                mediaWidth = this.getMediaWidth();
+                mediaHeight = this.getMediaHeight();
+            }
         }
     });
 

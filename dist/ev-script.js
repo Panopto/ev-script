@@ -1,5 +1,5 @@
 /**
- * ev-script 1.1.0 2016-05-31
+ * ev-script 1.2.0 2016-06-01
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2016 Symphony Video, Inc.
@@ -3920,7 +3920,8 @@ define('ev-script/models/video-settings',['backbone'], function(Backbone) {
             embedcode: false,
             download: false,
             search: '',
-            sourceId: 'content'
+            sourceId: 'content',
+            isaudio: false
         }
     });
 });
@@ -6399,77 +6400,54 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             var $dialogWrap = $('<div class="dialogWrap ev-preview"></div>'),
-                content = this.model.get('content') || {
-                    Title: this.model.get('id')
-                },
-                embedSettings = new this.model.constructor(this.model.toJSON()),
-                // Desired media dimensions
-                mediaDims = {
-                    width: this.model.get('width'),
-                    height: this.model.get('height')
-                },
-                // Dialog dimensions TBD
-                dialogDims = {},
+                embedView = new this.embedClass({
+                    model: new this.model.constructor(this.model.toJSON()),
+                    appId: this.appId
+                }),
                 // Desired difference between media width and containing dialog width
                 widthOffset = 50,
                 // Desired difference between media height and containing dialog height
                 heightOffset = this.info.useLegacyEmbeds() ? 140 : 100,
-                // Used for scaling media dimensions to fit within desired dialog size
-                ratio,
-                // Maximum width of media based on desired dialog width
-                maxWidth,
-                // Maximum height of media based on desired dialog height
-                maxHeight,
+                // Actual dialog width taking into account available room
+                dialogWidth = Math.min(embedView.getFrameWidth() + widthOffset, $(window).width() - this.config.dialogMargin),
+                // Actual dialog height taking into account available room
+                dialogHeight = Math.min(embedView.getFrameHeight() + heightOffset, $(window).height() - this.config.dialogMargin),
                 // Our dialog
                 $dialog;
+
             this.$el.after($dialogWrap);
-            dialogDims.width = Math.min(mediaDims.width + widthOffset, $(window).width() - this.config.dialogMargin);
-            dialogDims.height = Math.min(mediaDims.height + heightOffset, $(window).height() - this.config.dialogMargin);
-            // Only bother scaling if we're dealing with videos
-            if (this.model instanceof VideoSettings) {
-                maxWidth = dialogDims.width - widthOffset;
-                maxHeight = dialogDims.height - heightOffset;
-                while (mediaDims.width > maxWidth || mediaDims.height > maxHeight) {
-                    ratio = mediaDims.width > maxWidth ? maxWidth / mediaDims.width : maxHeight / mediaDims.height;
-                    mediaDims.width = mediaDims.width * ratio;
-                    mediaDims.height = mediaDims.height * ratio;
-                }
-                mediaDims.width = Math.ceil(mediaDims.width);
-                mediaDims.height = Math.ceil(mediaDims.height);
-            }
-            embedSettings.set('width', mediaDims.width);
-            embedSettings.set('height', mediaDims.height);
+
+            // Try to scale our content to fit within available dialog dimensions
+            embedView.scale(dialogWidth - widthOffset, dialogHeight - heightOffset);
+
             $dialog = $dialogWrap.dialog({
-                title: this.unencode(content.Title || content.Name),
+                title: this.getTitle(),
                 modal: true,
-                width: dialogDims.width,
-                height: dialogDims.height,
+                width: dialogWidth,
+                height: dialogHeight,
                 draggable: false,
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {
-                    var embedView = new this.embedClass({
-                        model: embedSettings,
-                        appId: this.appId
-                    });
+                    embedView.render();
                     $dialogWrap.html(embedView.$el);
                 }, this),
                 close: function(event, ui) {
                     $dialogWrap.dialog('destroy').remove();
                 }
             });
+        },
+        getTitle: function() {
+            var content = this.model.get('content') || {
+                Title: this.model.get('id')
+            };
+            return this.unencode(content.Title || content.Name);
         }
     });
 
 });
 
-
-define('text!ev-script/templates/video-embed.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?ID=<%- id %>&autoPlay=<%- autoPlay %>&displayTitle=<%- displayTitle %>&displaySharing=<%- displaySharing %>&displayAnnotations=<%- displayAnnotations %>&displayCaptionSearch=<%- displayCaptionSearch %>&displayAttachments=<%- displayAttachments %>&displayLinks=<%- displayLinks %>&displayMetaData=<%- displayMetaData %>&displayDateProduced=<%- displayDateProduced %>&displayEmbedCode=<%- displayEmbedCode %>&displayDownloadIcon=<%- displayDownloadIcon %>&hideControls=true&showCaptions=<%- showCaptions %>&width=<%- width %>&height=<%- height %>&isNewPluginEmbed=true"\n        frameborder="0"\n        width="<%- width %>"\n        height="<%- (parseInt(height, 10) + 40) %>"\n        allowfullscreen>\n</iframe>\n';});
-
-
-define('text!ev-script/templates/video-embed-legacy.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?ID=<%- id %>&autoPlay=<%- autoPlay %>&displayTitle=<%- displayTitle %>&hideControls=<%- hideControls %>&showCaptions=<%- showCaptions %>&width=<%- width %>&height=<%- height %>"\n        frameborder="0"\n        style="width: <%- width %>px;height:<%- (parseInt(height, 10) + 56) %>px;"\n        allowfullscreen>\n</iframe>\n';});
-
-define('ev-script/views/video-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/video-embed.html','text!ev-script/templates/video-embed-legacy.html'],function(require) {
+define('ev-script/views/embed',['require','underscore','ev-script/views/base'],function(require) {
 
     'use strict';
 
@@ -6477,13 +6455,50 @@ define('ev-script/views/video-embed',['require','underscore','ev-script/views/ba
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+        },
+        // Override to render the actual embed
+        render: function() {},
+        // Return width of embed frame
+        getFrameWidth: function() {
+            return this.model.get('width');
+        },
+        // Return height of embed frame
+        getFrameHeight: function() {
+            return this.model.get('height');
+        },
+        // Override if we can scale our embed to fit desired dimensions
+        // Maximum width available
+        // Maximum height available
+        scale: function(maxWidth, maxHeight) {}
+    });
+
+});
+
+
+define('text!ev-script/templates/video-embed.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?ID=<%- id %>&autoPlay=<%- autoPlay %>&displayTitle=<%- displayTitle %>&displaySharing=<%- displaySharing %>&displayAnnotations=<%- displayAnnotations %>&displayCaptionSearch=<%- displayCaptionSearch %>&displayAttachments=<%- displayAttachments %>&displayLinks=<%- displayLinks %>&displayMetaData=<%- displayMetaData %>&displayDateProduced=<%- displayDateProduced %>&displayEmbedCode=<%- displayEmbedCode %>&displayDownloadIcon=<%- displayDownloadIcon %>&hideControls=true&showCaptions=<%- showCaptions %>&width=<%- width %>&height=<%- height %>&isNewPluginEmbed=true"\n        frameborder="0"\n        width="<%- width %>"\n        height="<%- frameHeight %>"\n        allowfullscreen>\n</iframe>\n';});
+
+
+define('text!ev-script/templates/video-embed-legacy.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?ID=<%- id %>&autoPlay=<%- autoPlay %>&displayTitle=<%- displayTitle %>&hideControls=<%- hideControls %>&showCaptions=<%- showCaptions %>&width=<%- width %>&height=<%- height %>"\n        frameborder="0"\n        style="width: <%- width %>px;height:<%- (parseInt(height, 10) + 56) %>px;"\n        allowfullscreen>\n</iframe>\n';});
+
+define('ev-script/views/video-embed',['require','underscore','ev-script/views/embed','text!ev-script/templates/video-embed.html','text!ev-script/templates/video-embed-legacy.html'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        EmbedView = require('ev-script/views/embed');
+
+    return EmbedView.extend({
         template: _.template(require('text!ev-script/templates/video-embed.html')),
         legacyTemplate: _.template(require('text!ev-script/templates/video-embed-legacy.html')),
         initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
+            EmbedView.prototype.initialize.call(this, options);
+        },
+        render: function() {
             // Width and height really should be set by now...but use a reasonable default if not
-            var width = (this.model.get('width') ? this.model.get('width') : '640'),
-                height = (this.model.get('height') ? this.model.get('height') : '360'),
+            var width = this.getMediaWidth(),
+                height = this.getMediaHeight(),
                 showTitle = this.model.get('showtitle'),
                 embed = '';
             if (!this.info.useLegacyEmbeds()) {
@@ -6503,7 +6518,8 @@ define('ev-script/views/video-embed',['require','underscore','ev-script/views/ba
                     displayDownloadIcon: this.model.get('download'),
                     showCaptions: this.model.get('showcaptions'),
                     width: width,
-                    height: height
+                    height: height,
+                    frameHeight: this.getFrameHeight()
                 });
             } else {
                 embed = this.legacyTemplate({
@@ -6518,6 +6534,57 @@ define('ev-script/views/video-embed',['require','underscore','ev-script/views/ba
                 });
             }
             this.$el.html(embed);
+        },
+        getMediaWidth: function() {
+            return parseInt(this.model.get('width'), 10) || 640;
+        },
+        getMediaHeight: function() {
+            return parseInt(this.model.get('height'), 10) || 360;
+        },
+        getFrameWidth: function() {
+            return this.getMediaWidth();
+        },
+        getFrameHeight: function() {
+            var height = this.getMediaHeight();
+            if (this.model.get('isaudio')) {
+                if (this.model.get('showtitle') ||
+                    this.model.get('socialsharing') ||
+                    this.model.get('annotations') ||
+                    this.model.get('captionsearch') ||
+                    this.model.get('attachments') ||
+                    this.model.get('links') ||
+                    this.model.get('metadata') ||
+                    this.model.get('dateproduced') ||
+                    this.model.get('embedcode') ||
+                    this.model.get('download')) {
+                    height = 155;
+                } else {
+                    height = 40;
+                }
+            } else {
+                height += 40;
+            }
+            return height;
+        },
+        scale: function(maxWidth, maxHeight) {
+            var ratio,
+                embedWidth = this.getFrameWidth(),
+                embedHeight = this.getFrameHeight(),
+                mediaWidth = this.getMediaWidth(),
+                mediaHeight = this.getMediaHeight();
+            // We can't scale our audio
+            if (this.model.get('isaudio')) {
+                return;
+            }
+            while (embedWidth > maxWidth || embedHeight > maxHeight) {
+                ratio = embedWidth > maxWidth ? maxWidth / embedWidth : maxHeight / embedHeight;
+                this.model.set('width', Math.ceil(mediaWidth * ratio));
+                this.model.set('height', Math.ceil(mediaHeight * ratio));
+                embedWidth = this.getFrameWidth();
+                embedHeight = this.getFrameHeight();
+                mediaWidth = this.getMediaWidth();
+                mediaHeight = this.getMediaHeight();
+            }
         }
     });
 
@@ -6663,6 +6730,28 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/models
                 }
             });
             return Backbone.sync.call(this, method, model, options);
+        },
+        updateSettingsModel: function(settingsModel) {
+            var attrs = {
+                width: this.getWidth(),
+                height: this.getHeight(),
+                isaudio: this.isAudio()
+            };
+            // TODO - this needs to be handled better
+            // If the settings model hasn't been updated yet with default audio settings
+            // if (this.isAudio() && !settingsModel.get('isaudio')) {
+            //     _.extend(attrs, {
+            //         showtitle: false,
+            //         annotations: false,
+            //         captionsearch: false,
+            //         attachments: false,
+            //         links: false,
+            //         metadata: false,
+            //         dateproduced: false,
+            //         isaudio: true
+            //     });
+            // }
+            settingsModel.set(attrs);
         }
     });
 
@@ -6690,10 +6779,9 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
             });
             this.picker = options.picker;
             var success = _.bind(function() {
-                this.model.set({
-                    width: this.encoding.getWidth(),
-                    height: this.encoding.getHeight()
-                });
+                this.encoding.updateSettingsModel(this.model);
+                // Picker model is a copy so need to update that as well
+                this.encoding.updateSettingsModel(this.picker.model);
                 PreviewView.prototype.initialize.call(this, options);
             }, this);
             if (this.encoding.isNew()) {
@@ -7762,26 +7850,28 @@ define('text!ev-script/templates/playlist-embed-playlist-params.html',[],functio
 
 define('text!ev-script/templates/playlist-embed-showcase-params.html',[],function () { return 'displayShowcase=true<% if (categoryList) { %>&displayCategoryList=true&categoryOrientation=<%- categoryOrientation %><% } %>\n';});
 
-define('ev-script/views/playlist-embed',['require','underscore','ev-script/views/base','text!ev-script/templates/playlist-embed.html','text!ev-script/templates/playlist-embed-legacy.html','text!ev-script/templates/playlist-embed-playlist-params.html','text!ev-script/templates/playlist-embed-showcase-params.html'],function(require) {
+define('ev-script/views/playlist-embed',['require','underscore','ev-script/views/embed','text!ev-script/templates/playlist-embed.html','text!ev-script/templates/playlist-embed-legacy.html','text!ev-script/templates/playlist-embed-playlist-params.html','text!ev-script/templates/playlist-embed-showcase-params.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
+        EmbedView = require('ev-script/views/embed');
 
-    return BaseView.extend({
+    return EmbedView.extend({
         template: _.template(require('text!ev-script/templates/playlist-embed.html')),
         legacyTemplate: _.template(require('text!ev-script/templates/playlist-embed-legacy.html')),
         playlistParamsTemplate: _.template(require('text!ev-script/templates/playlist-embed-playlist-params.html')),
         showcaseParamsTemplate: _.template(require('text!ev-script/templates/playlist-embed-showcase-params.html')),
         initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
+            EmbedView.prototype.initialize.call(this, options);
+        },
+        render: function() {
             var embed = '';
             if (!this.info.useLegacyEmbeds()) {
                 var data = {
                     modelId: this.model.get('id'),
-                    width: this.model.get('width'),
-                    height: this.model.get('height'),
+                    width: this.getFrameWidth(),
+                    height: this.getFrameHeight(),
                     ensembleUrl: this.config.ensembleUrl,
                     displayEmbedCode: this.model.get('embedcode'),
                     displayStatistics: this.model.get('statistics'),
@@ -7821,8 +7911,8 @@ define('ev-script/views/playlist-embed',['require','underscore','ev-script/views
             } else {
                 embed = this.legacyTemplate({
                     modelId: this.model.get('id'),
-                    width: this.model.get('width'),
-                    height: this.model.get('height'),
+                    width: this.getFrameWidth(),
+                    height: this.getFrameHeight(),
                     ensembleUrl: this.config.ensembleUrl
                 });
             }
@@ -8214,10 +8304,10 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                         });
                         this.encoding.fetch({
                             success: _.bind(function(response) {
-                                this.model.set({
-                                    width: this.encoding.getWidth(),
-                                    height: this.encoding.getHeight()
-                                });
+                                // TODO - this is getting messy
+                                this.encoding.updateSettingsModel(this.model);
+                                // Picker model is a copy so need to update that as well
+                                this.encoding.updateSettingsModel(this.picker.model);
                             }, this)
                         });
                     } else {
@@ -8308,6 +8398,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                 el: element,
                 encoding: this.encoding,
                 model: this.model,
+                picker: this.picker,
                 appId: this.appId
             });
             e.preventDefault();
@@ -10339,12 +10430,14 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
                             model: settingsModel,
                             appId: appId
                         });
+                        videoEmbed.render();
                     } else {
                         var playlistEmbed = new PlaylistEmbedView({
                             el: embedWrap,
                             model: settingsModel,
                             appId: appId
                         });
+                        playlistEmbed.render();
                     }
                 };
 

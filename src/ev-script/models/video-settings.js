@@ -21,7 +21,8 @@ define(['backbone'], function(Backbone) {
             embedcode: false,
             download: false,
             search: '',
-            sourceId: 'content'
+            sourceId: 'content',
+            isaudio: false
         }
     });
 });
