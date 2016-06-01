@@ -94,8 +94,8 @@ define(function(require) {
             }
             while (embedWidth > maxWidth || embedHeight > maxHeight) {
                 ratio = embedWidth > maxWidth ? maxWidth / embedWidth : maxHeight / embedHeight;
-                this.model.set('width', Math.ceil(mediaWidth * ratio));
-                this.model.set('height', Math.ceil(mediaHeight * ratio));
+                this.model.set('width', Math.floor(mediaWidth * ratio));
+                this.model.set('height', Math.floor(mediaHeight * ratio));
                 embedWidth = this.getFrameWidth();
                 embedHeight = this.getFrameHeight();
                 mediaWidth = this.getMediaWidth();

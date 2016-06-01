@@ -6407,7 +6407,7 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
                 // Desired difference between media width and containing dialog width
                 widthOffset = 50,
                 // Desired difference between media height and containing dialog height
-                heightOffset = this.info.useLegacyEmbeds() ? 140 : 100,
+                heightOffset = this.info.useLegacyEmbeds() ? 140 : 50,
                 // Actual dialog width taking into account available room
                 dialogWidth = Math.min(embedView.getFrameWidth() + widthOffset, $(window).width() - this.config.dialogMargin),
                 // Actual dialog height taking into account available room
@@ -6578,8 +6578,8 @@ define('ev-script/views/video-embed',['require','underscore','ev-script/views/em
             }
             while (embedWidth > maxWidth || embedHeight > maxHeight) {
                 ratio = embedWidth > maxWidth ? maxWidth / embedWidth : maxHeight / embedHeight;
-                this.model.set('width', Math.ceil(mediaWidth * ratio));
-                this.model.set('height', Math.ceil(mediaHeight * ratio));
+                this.model.set('width', Math.floor(mediaWidth * ratio));
+                this.model.set('height', Math.floor(mediaHeight * ratio));
                 embedWidth = this.getFrameWidth();
                 embedHeight = this.getFrameHeight();
                 mediaWidth = this.getMediaWidth();
