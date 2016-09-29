@@ -157,7 +157,7 @@ define(function(require) {
                     // If launch hasn't deactivated in 30 secs, we probably need to install
                     timeoutId = setTimeout(_.bind(function() {
                         deactivate();
-                        if (platform.os.family === 'Windows') {
+                        if (/windows/i.test(platform.os.family)) {
                             window.location = this.config.ensembleUrl + '/app/unprotected/EnsembleAnthem/EnsembleAnthem.msi';
                         } else {
                             window.location = this.config.ensembleUrl + '/app/unprotected/EnsembleAnthem/EnsembleAnthem.dmg';

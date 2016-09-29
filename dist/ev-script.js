@@ -1,5 +1,5 @@
 /**
- * ev-script 1.2.0 2016-06-01
+ * ev-script 1.2.0 2016-09-29
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2016 Symphony Video, Inc.
@@ -7527,7 +7527,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
                     // If launch hasn't deactivated in 30 secs, we probably need to install
                     timeoutId = setTimeout(_.bind(function() {
                         deactivate();
-                        if (platform.os.family === 'Windows') {
+                        if (/windows/i.test(platform.os.family)) {
                             window.location = this.config.ensembleUrl + '/app/unprotected/EnsembleAnthem/EnsembleAnthem.msi';
                         } else {
                             window.location = this.config.ensembleUrl + '/app/unprotected/EnsembleAnthem/EnsembleAnthem.dmg';
