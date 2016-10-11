@@ -1,5 +1,5 @@
 /**
- * ev-script 1.2.0 2016-09-29
+ * ev-script 1.2.0 2016-10-11
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2016 Symphony Video, Inc.
@@ -7845,10 +7845,10 @@ define('text!ev-script/templates/playlist-embed.html',[],function () { return '<
 define('text!ev-script/templates/playlist-embed-legacy.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%- modelId %>"\n        frameborder="0"\n        style="width:<%- width %>px;height:<%- height %>px;"\n        width="<%- width %>"\n        height="<%- height %>"\n        allowfullscreen>\n</iframe>\n';});
 
 
-define('text!ev-script/templates/playlist-embed-playlist-params.html',[],function () { return 'orderBy=<%- playlistSortBy %>&orderByDirection=<%- playlistSortDirection %>\n';});
+define('text!ev-script/templates/playlist-embed-playlist-params.html',[],function () { return 'orderBy=<%- playlistSortBy %>&orderByDirection=<%- playlistSortDirection %>';});
 
 
-define('text!ev-script/templates/playlist-embed-showcase-params.html',[],function () { return 'displayShowcase=true<% if (categoryList) { %>&displayCategoryList=true&categoryOrientation=<%- categoryOrientation %><% } %>\n';});
+define('text!ev-script/templates/playlist-embed-showcase-params.html',[],function () { return 'displayShowcase=true<% if (categoryList) { %>&displayCategoryList=true&categoryOrientation=<%- categoryOrientation %><% } %>';});
 
 define('ev-script/views/playlist-embed',['require','underscore','ev-script/views/embed','text!ev-script/templates/playlist-embed.html','text!ev-script/templates/playlist-embed-legacy.html','text!ev-script/templates/playlist-embed-playlist-params.html','text!ev-script/templates/playlist-embed-showcase-params.html'],function(require) {
 
