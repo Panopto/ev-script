@@ -14,7 +14,7 @@ define(function(require) {
             this.callback = options.callback || function() {};
         },
         events: {
-            'submit form': 'searchHandler',
+            'keydown .search': 'searchHandler',
             'keyup .search': 'autoSearch'
         },
         render: function() {
@@ -30,8 +30,15 @@ define(function(require) {
             this.callback();
         },
         searchHandler: function(e) {
-            this.doSearch();
-            e.preventDefault();
+            // Looking for enter key in which case we immediately search
+            var code = e.keyCode ? e.keyCode : e.which;
+            if (code === 13) {
+                if (this.submitTimeout) {
+                    clearTimeout(this.submitTimeout);
+                }
+                this.doSearch();
+                e.preventDefault();
+            }
         },
         autoSearch: function(e) {
             var value = e.target.value;

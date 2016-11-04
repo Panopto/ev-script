@@ -1,5 +1,5 @@
 /**
- * ev-script 1.2.0 2016-10-11
+ * ev-script 1.2.0 2016-11-04
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2016 Symphony Video, Inc.
@@ -5793,7 +5793,7 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base','
             this.callback = options.callback || function() {};
         },
         events: {
-            'submit form': 'searchHandler',
+            'keydown .search': 'searchHandler',
             'keyup .search': 'autoSearch'
         },
         render: function() {
@@ -5809,8 +5809,15 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base','
             this.callback();
         },
         searchHandler: function(e) {
-            this.doSearch();
-            e.preventDefault();
+            // Looking for enter key in which case we immediately search
+            var code = e.keyCode ? e.keyCode : e.which;
+            if (code === 13) {
+                if (this.submitTimeout) {
+                    clearTimeout(this.submitTimeout);
+                }
+                this.doSearch();
+                e.preventDefault();
+            }
         },
         autoSearch: function(e) {
             var value = e.target.value;
