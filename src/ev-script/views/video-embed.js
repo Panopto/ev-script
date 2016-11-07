@@ -27,6 +27,7 @@ define(function(require) {
                     displayAnnotations: this.model.get('annotations'),
                     displayCaptionSearch: this.model.get('captionsearch'),
                     displayAttachments: this.model.get('attachments'),
+                    audioPreviewImage: this.model.get('audiopreviewimage'),
                     displayLinks: this.model.get('links'),
                     displayMetaData: this.model.get('metadata'),
                     displayDateProduced: this.model.get('dateproduced'),
@@ -61,26 +62,31 @@ define(function(require) {
             return this.getMediaWidth();
         },
         getFrameHeight: function() {
-            var height = this.getMediaHeight();
-            if (this.model.get('isaudio')) {
-                if (this.model.get('showtitle') ||
-                    this.model.get('socialsharing') ||
-                    this.model.get('annotations') ||
-                    this.model.get('captionsearch') ||
-                    this.model.get('attachments') ||
-                    this.model.get('links') ||
-                    this.model.get('metadata') ||
-                    this.model.get('dateproduced') ||
-                    this.model.get('embedcode') ||
-                    this.model.get('download')) {
-                    height = 155;
+            var height = this.getMediaHeight(),
+                isAudio = this.model.get('isaudio'),
+                audioPreviewImage = this.model.get('audiopreviewimage');
+            if (isAudio) {
+                if (this.isMenuVisible()) {
+                    height = audioPreviewImage ? height + 40 : 155;
                 } else {
-                    height = 40;
+                    height = audioPreviewImage ? height : 40;
                 }
             } else {
                 height += 40;
             }
             return height;
+        },
+        isMenuVisible: function() {
+            return this.model.get('showtitle') ||
+                   this.model.get('socialsharing') ||
+                   this.model.get('annotations') ||
+                   this.model.get('captionsearch') ||
+                   this.model.get('attachments') ||
+                   this.model.get('links') ||
+                   this.model.get('metadata') ||
+                   this.model.get('dateproduced') ||
+                   this.model.get('embedcode') ||
+                   this.model.get('download');
         },
         scale: function(maxWidth, maxHeight) {
             var ratio,

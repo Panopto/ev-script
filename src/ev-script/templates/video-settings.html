@@ -2,7 +2,7 @@
     <fieldset>
         <div class="fieldWrap">
             <label for="size">Size</label>
-            <select class="form-select size" id="size" name="size" <% if (isAudio) { print('disabled'); } %> >
+            <select class="form-select size" id="size" name="size">
                 <option value="original">Original</option>
             </select>
         </div>
@@ -55,7 +55,13 @@
                 <input id="showcaptions" class="form-checkbox" <% if (model.get('showcaptions')) { print('checked="checked"'); } %>  name="showcaptions" type="checkbox"/>
                 <label for="showcaptions">Captions "On" By Default</label>
             </div>
-        </div>
+            <% if (isAudio) { %>
+                <div class="fieldWrap">
+                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get('audiopreviewimage')) { print('checked="checked"'); } %>  name="audiopreviewimage" type="checkbox"/>
+                    <label for="audiopreviewimage">Audio Preview Image</label>
+                </div>
+            <% } %>
+         </div>
         <div class="form-actions">
             <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span>Save</span></button>
             <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span>Cancel</span></button>

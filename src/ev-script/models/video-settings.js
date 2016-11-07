@@ -15,6 +15,7 @@ define(['backbone'], function(Backbone) {
             annotations: true,
             captionsearch: true,
             attachments: true,
+            audiopreviewimage: false,
             links: true,
             metadata: true,
             dateproduced: true,

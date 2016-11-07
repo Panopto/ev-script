@@ -33,6 +33,7 @@ define(function(require) {
                     'annotations': this.$('#annotations').is(':checked'),
                     'captionsearch': this.$('#captionsearch').is(':checked'),
                     'attachments': this.$('#attachments').is(':checked'),
+                    'audiopreviewimage': this.$('#audiopreviewimage').is(':checked'),
                     'links': this.$('#links').is(':checked'),
                     'metadata': this.$('#metadata').is(':checked'),
                     'dateproduced': this.$('#dateproduced').is(':checked'),
@@ -91,7 +92,7 @@ define(function(require) {
                 });
             }
             this.$el.html(html);
-            if (this.encoding && !this.encoding.isAudio()) {
+            if (this.encoding) {
                 this.renderSize();
             }
             var content = this.field.model.get('content');
@@ -103,7 +104,7 @@ define(function(require) {
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
-                height: Math.min(240, $(window).height() - this.config.dialogMargin)
+                height: Math.min(260, $(window).height() - this.config.dialogMargin)
             });
         }
     });
