@@ -4,7 +4,8 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        SettingsView = require('ev-script/views/settings');
+        SettingsView = require('ev-script/views/settings'),
+        Categories = require('ev-script/collections/categories');
 
     require('jquery-ui');
 
@@ -13,6 +14,10 @@ define(function(require) {
         initialize: function(options) {
             SettingsView.prototype.initialize.call(this, options);
             _.bindAll(this, 'changeLayout', 'changeCategoryList');
+            this.categories = options.categories;
+            this.categories.on('reset', _.bind(function() {
+                this.render();
+            }, this));
         },
         events: {
             'submit': 'submitHandler',
@@ -41,7 +46,10 @@ define(function(require) {
             if (attrs.layout === 'playlist') {
                 attrs.playlistLayout = {
                     playlistSortBy: this.$('#playlistSortBy option:selected').val(),
-                    playlistSortDirection: this.$('input[name="playlistSortDirection"]:checked').val()
+                    playlistSortDirection: this.$('input[name="playlistSortDirection"]:checked').val(),
+                    playlistSearchString: this.$('#playlistSearchString').val(),
+                    playlistCategory: this.$('#playlistCategory option:selected').val(),
+                    playlistNumberOfResults: this.$('#playlistNumberOfResults').val()
                 };
             } else {
                 attrs.showcaseLayout = {
@@ -57,7 +65,8 @@ define(function(require) {
                 html = this.template({
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio(),
-                    isSecure: content && content.IsSecure
+                    isSecure: content && content.IsSecure,
+                    categories: this.categories || new Categories([], {})
                 });
             this.$el.html(html);
             this.$('.accordion').accordion({

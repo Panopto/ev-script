@@ -470,8 +470,6 @@ div.ev-settings fieldset {
 }
 div.ev-settings div.fieldWrap {
   margin-bottom: 0.8em;
-  width: 200px;
-  display: inline-block;
 }
 div.ev-settings div.fieldWrap label {
   width: auto;
@@ -481,6 +479,10 @@ div.ev-settings div.fieldWrap .size {
 }
 div.ev-settings div.fieldWrap input[type=checkbox][disabled] {
   cursor: not-allowed;
+}
+div.ev-settings div.inline-option {
+  display: inline-block;
+  width: 200px;
 }
 div.ev-settings label {
   color: #606060;

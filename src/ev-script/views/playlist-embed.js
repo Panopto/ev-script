@@ -51,7 +51,10 @@ define(function(require) {
                         isShowcase: false,
                         playlistParams: this.playlistParamsTemplate({
                             playlistSortBy: playlistLayout.playlistSortBy,
-                            playlistSortDirection: playlistLayout.playlistSortDirection
+                            playlistSortDirection: playlistLayout.playlistSortDirection,
+                            playlistSearchString: playlistLayout.playlistSearchString,
+                            playlistCategory: playlistLayout.playlistCategory,
+                            playlistNumberOfResults: playlistLayout.playlistNumberOfResults
                         })
                     });
                 }

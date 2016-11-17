@@ -3,11 +3,11 @@
         <div class="accordion">
             <h4>Choose Layout</h4>
             <div>
-                <div class="fieldWrap">
+                <div class="fieldWrap inline-option">
                     <input id="playlist" class="form-radio" <% if (model.get('layout') === 'playlist') { print('checked="checked"'); } %> name="layout" value="playlist" type="radio"/>
                     <label for="playlist">Playlist</label>
                 </div>
-                <div class="fieldWrap">
+                <div class="fieldWrap inline-option">
                     <input id="showcase" class="form-radio" <% if (model.get('layout') === 'showcase') { print('checked="checked"'); } %> name="layout" value="showcase" type="radio"/>
                     <label for="showcase">Showcase</label>
                 </div>
@@ -28,13 +28,32 @@
                         </select>
                     </div>
                     <div>
-                        <div class="fieldWrap">
+                        <div class="fieldWrap inline-option">
                             <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get('playlistLayout').playlistSortDirection === 'asc') { print('checked="checked"'); } %> name="playlistSortDirection" value="asc" type="radio"/>
                             <label for="playlist">Ascending</label>
                         </div>
-                        <div class="fieldWrap">
+                        <div class="fieldWrap inline-option">
                             <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get('playlistLayout').playlistSortDirection === 'desc') { print('checked="checked"'); } %> name="playlistSortDirection" value="desc" type="radio"/>
                             <label for="playlist">Descending</label>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="fieldWrap">
+                            <label for="playlistSearchString">Search String</label>
+                            <input id="playlistSearchString" class="form-text" name="playlistSearchString" value="<%- model.get('playlistLayout').playlistSearchString %>" type="text"/>
+                        </div>
+                        <div class="fieldWrap">
+                            <label for="playlistCategory">Category</label>
+                            <select id="playlistCategory" class="form-select" name="playlistCategory">
+                                <option value="" <% if (!model.get('playlistLayout').playlistCategory) { print('selected="selected"'); } %>>--None--</option>
+                                <% categories.each(function(category) { %>
+                                    <option value="<%= category.id %>" <% if (model.get('playlistLayout').playlistCategory === category.id) { print('selected="selected"'); } %>><%- category.get('categoryName') %></option>
+                                <% }); %>
+                            </select>
+                        </div>
+                        <div class="fieldWrap">
+                            <label for="playlistNumberOfResults">Number of Results</label>
+                            <input id="playlistNumberOfResults" class="form-text" name="playlistNumberOfResults" value="<%- model.get('playlistLayout').playlistNumberOfResults %>" type="text"/>
                         </div>
                     </div>
                 </div>
@@ -63,55 +82,55 @@
             </div>
             <h4>Content Details</h4>
             <div>
-                <div class="fieldWrap">
+                <div class="fieldWrap inline-option">
                     <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get('embedcode')) { print('checked="checked"'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print('disabled') } %> />
                     <label for="embedcode">Embed Code</label>
                 </div>
-                <div class="fieldWrap">
+                <div class="fieldWrap inline-option">
                     <input id="statistics" class="form-checkbox" <% if (model.get('statistics')) { print('checked="checked"'); } %> name="statistics" type="checkbox"/>
                     <label for="statistics">Statistics</label>
                 </div>
-                <div class="fieldWrap">
+                <div class="fieldWrap inline-option">
                     <input id="duration" class="form-checkbox" <% if (model.get('duration')) { print('checked="checked"'); } %> name="duration" type="checkbox"/>
                     <label for="duration">Duration</label>
                 </div>
-                <div class="fieldWrap">
+                <div class="fieldWrap inline-option">
                     <input id="attachments" class="form-checkbox" <% if (model.get('attachments')) { print('checked="checked"'); } %> name="attachments" type="checkbox"/>
                     <label for="attachments">Attachments</label>
                 </div>
-                <div class="fieldWrap">
+                <div class="fieldWrap inline-option">
                     <input id="annotations" class="form-checkbox" <% if (model.get('annotations')) { print('checked="checked"'); } %> name="annotations" type="checkbox"/>
                     <label for="annotations">Annotations</label>
                 </div>
-                <div class="fieldWrap">
+                <div class="fieldWrap inline-option">
                     <input id="links" class="form-checkbox" <% if (model.get('links')) { print('checked="checked"'); } %> name="links" type="checkbox"/>
                     <label for="links">Links</label>
                 </div>
-                <div class="fieldWrap">
+                <div class="fieldWrap inline-option">
                     <input id="credits" class="form-checkbox" <% if (model.get('credits')) { print('checked="checked"'); } %> name="credits" type="checkbox"/>
                     <label for="credits">Credits</label>
                 </div>
-                <div class="fieldWrap">
+                <div class="fieldWrap inline-option">
                     <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get('socialsharing')) { print('checked="checked"'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print('disabled') } %> />
                     <label for="socialsharing">Social Tools</label>
                 </div>
-                <div class="fieldWrap">
+                <div class="fieldWrap inline-option">
                     <input id="autoplay" class="form-checkbox" <% if (model.get('autoplay')) { print('checked="checked"'); } %>  name="autoplay" type="checkbox"/>
                     <label for="autoplay">Auto Play (PC Only)</label>
                 </div>
-                <div class="fieldWrap">
+                <div class="fieldWrap inline-option">
                     <input id="showcaptions" class="form-checkbox" <% if (model.get('showcaptions')) { print('checked="checked"'); } %>  name="showcaptions" type="checkbox"/>
                     <label for="showcaptions">Captions "On" By Default</label>
                 </div>
-                <div class="fieldWrap">
+                <div class="fieldWrap inline-option">
                     <input id="dateproduced" class="form-checkbox" <% if (model.get('dateproduced')) { print('checked="checked"'); } %> name="dateproduced" type="checkbox"/>
                     <label for="dateproduced">Date Produced</label>
                 </div>
-                <div class="fieldWrap">
+                <div class="fieldWrap inline-option">
                     <input id="audiopreviewimage" class="form-checkbox" <% if (model.get('audiopreviewimage')) { print('checked="checked"'); } %> name="audiopreviewimage" type="checkbox"/>
                     <label for="audiopreviewimage">Audio Preview Image</label>
                 </div>
-                <div class="fieldWrap">
+                <div class="fieldWrap inline-option">
                     <input id="captionsearch" class="form-checkbox" <% if (model.get('captionsearch')) { print('checked="checked"'); } %> name="captionsearch" type="checkbox"/>
                     <label for="captionsearch">Caption Search</label>
                 </div>

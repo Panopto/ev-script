@@ -10,7 +10,10 @@ define(['backbone'], function(Backbone) {
             layout: 'playlist',
             playlistLayout: {
                 playlistSortBy: 'videoDate',
-                playlistSortDirection: 'desc'
+                playlistSortDirection: 'desc',
+                playlistSearchString: '',
+                playlistCategory: '',
+                playlistNumberOfResults: ''
             },
             showcaseLayout: {
                 // featuredContent: true,

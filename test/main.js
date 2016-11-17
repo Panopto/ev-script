@@ -50,6 +50,7 @@
         'test/tests/util/events',
         'test/tests/util/size',
         'test/tests/collections/base',
+        'test/tests/collections/categories',
         'test/tests/collections/organizations',
         'test/tests/collections/libraries',
         'test/tests/collections/media-workflows',

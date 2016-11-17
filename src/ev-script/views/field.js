@@ -13,7 +13,8 @@ define(function(require) {
         VideoEncoding = require('ev-script/models/video-encoding'),
         PlaylistPickerView = require('ev-script/views/playlist-picker'),
         PlaylistSettingsView = require('ev-script/views/playlist-settings'),
-        PlaylistPreviewView = require('ev-script/views/playlist-preview');
+        PlaylistPreviewView = require('ev-script/views/playlist-preview'),
+        Categories = require('ev-script/collections/categories');
 
     /*
      * View for our field (element that we set with the selected content identifier)
@@ -79,6 +80,26 @@ define(function(require) {
                 this.pickerClass = PlaylistPickerView;
                 this.settingsClass = PlaylistSettingsView;
                 this.previewClass = PlaylistPreviewView;
+                this.categories = new Categories([], {
+                    appId: this.appId
+                });
+                if (!this.model.isNew()) {
+                    this.categories.playlistId = this.model.id;
+                    this.categories.fetch({ reset: true });
+                }
+                this.model.on('change:id', _.bind(function() {
+                    // Only fetch categories if identifier is set
+                    if (this.model.id) {
+                        this.categories.playlistId = this.model.id;
+                        this.categories.fetch({ reset: true });
+                    } else {
+                        this.categories.reset([], { silent: true });
+                        this.categories.playlistId = '';
+                    }
+                }, this));
+                _.extend(settingsOptions, {
+                    categories: this.categories
+                });
             }
             this.picker = new this.pickerClass(_.extend({}, pickerOptions, {
                 // We don't want to modify field model until we actually pick a new video...so use a copy as our current model
