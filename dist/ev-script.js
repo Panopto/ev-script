@@ -1,8 +1,8 @@
 /**
- * ev-script 1.2.0 2016-11-17
+ * ev-script 1.2.0 2017-03-02
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
- * Copyright (c) 2016 Symphony Video, Inc.
+ * Copyright (c) 2017 Symphony Video, Inc.
  * Licensed (MIT AND GPL-2.0)
  */
 (function (root, factory) {
@@ -7724,6 +7724,7 @@ define('ev-script/util/size',['require','underscore'],function(require) {
                 var width = parseInt(dimension.split('x')[0], 10),
                     currentOffset = Math.abs(width - desiredWidth);
                 if (currentOffset < offset) {
+                    offset = currentOffset;
                     closest = dimension;
                 }
                 return currentOffset === 0;

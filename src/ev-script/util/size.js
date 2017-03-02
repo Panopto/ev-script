@@ -28,6 +28,7 @@ define(function(require) {
                 var width = parseInt(dimension.split('x')[0], 10),
                     currentOffset = Math.abs(width - desiredWidth);
                 if (currentOffset < offset) {
+                    offset = currentOffset;
                     closest = dimension;
                 }
                 return currentOffset === 0;
