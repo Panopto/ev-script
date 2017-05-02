@@ -1,5 +1,5 @@
 /**
- * ev-script 1.2.0 2017-03-02
+ * ev-script 1.2.0 2017-05-02
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2017 Symphony Video, Inc.
@@ -8507,7 +8507,8 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                     name = content.Name || content.Title;
                     // Validate thumbnailUrl as it could potentially have been modified and we want to protect against XSRF
                     // (a GET shouldn't have side effects...but make sure we actually have a thumbnail url just in case)
-                    var re = new RegExp('^' + ensembleUrl.toLocaleLowerCase() + '\/app\/assets\/');
+                    var thumbPath = this.info.checkVersion('>=4.5.0') ? '\/api\/data\/image\/' : '\/app\/assets\/';
+                    var re = new RegExp('^' + ensembleUrl.toLocaleLowerCase() + thumbPath);
                     if (content.ThumbnailUrl && re.test(content.ThumbnailUrl.toLocaleLowerCase())) {
                         thumbnailUrl = content.ThumbnailUrl;
                     }
