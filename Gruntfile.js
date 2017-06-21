@@ -29,10 +29,11 @@ module.exports = function(grunt) {
         'text': 'bower_components/text/text',
         'semver': 'bower_components/semver/semver.browser',
         'platform': 'bower_components/platform.js/platform',
-        'base64': 'bower_components/base64/base64'
+        'base64': 'bower_components/base64/base64',
+        'i18n': 'bower_components/i18n/i18n'
       },
       name: 'bower_components/almond/almond',
-      out: "dist/ev-script.js",
+      out: 'dist/ev-script.js',
       wrap: {
         start: '<%= banner %>' + grunt.file.read('wrap/wrap.start'),
         end: grunt.file.read('wrap/wrap.end')
@@ -40,7 +41,7 @@ module.exports = function(grunt) {
       optimize: 'none'
     },
     rjs_prod_opts = _.extend({}, rjs_dev_opts, {
-      out: "dist/ev-script.min.js",
+      out: 'dist/ev-script.min.js',
       optimize: 'uglify2',
       preserveLicenseComments: false,
       generateSourceMaps: true
@@ -199,7 +200,7 @@ module.exports = function(grunt) {
             r.pipe(res);
           } else {
             res.statusCode = 400;
-            res.end("Missing request parameter.");
+            res.end('Missing request parameter.');
           }
         }
         // LTI demo launch path

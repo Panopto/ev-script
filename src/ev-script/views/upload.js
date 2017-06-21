@@ -42,7 +42,7 @@ define(function(require) {
             return Math.min(400, $(window).height() - this.config.dialogMargin);
         },
         decorateUploader: function() {
-            var extensions = "",
+            var extensions = '',
                 selected = this.workflowSelect.getSelected(),
                 maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10);
 

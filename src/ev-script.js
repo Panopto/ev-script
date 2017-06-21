@@ -1,3 +1,4 @@
+/*global requirejs*/
 define(function(require) {
 
     'use strict';
@@ -16,6 +17,9 @@ define(function(require) {
         NoneAuth = require('ev-script/auth/none/auth'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
+
+    // TODO - Workaround to force r.js to bundle language files (will automatically bundle "root")
+    require('i18n!ev-script/nls/es-mx/messages');
 
     var EnsembleApp = function(appOptions) {
 

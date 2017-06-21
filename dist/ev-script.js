@@ -1,5 +1,5 @@
 /**
- * ev-script 1.2.0 2017-05-02
+ * ev-script 1.2.0 2017-06-21
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2017 Symphony Video, Inc.
@@ -21,13 +21,11 @@
     }
 }(this, function ($, plupload) {
 /**
- * @license almond 0.3.1 Copyright (c) 2011-2014, The Dojo Foundation All Rights Reserved.
- * Available via the MIT or new BSD license.
- * see: http://github.com/jrburke/almond for details
+ * @license almond 0.3.3 Copyright jQuery Foundation and other contributors.
+ * Released under MIT license, http://github.com/requirejs/almond/LICENSE
  */
 //Going sloppy to avoid 'use strict' string cost, but strict practices should
 //be followed.
-/*jslint sloppy: true */
 /*global setTimeout: false */
 
 var requirejs, require, define;
@@ -55,60 +53,58 @@ var requirejs, require, define;
      */
     function normalize(name, baseName) {
         var nameParts, nameSegment, mapValue, foundMap, lastIndex,
-            foundI, foundStarMap, starI, i, j, part,
+            foundI, foundStarMap, starI, i, j, part, normalizedBaseParts,
             baseParts = baseName && baseName.split("/"),
             map = config.map,
             starMap = (map && map['*']) || {};
 
         //Adjust any relative paths.
-        if (name && name.charAt(0) === ".") {
-            //If have a base name, try to normalize against it,
-            //otherwise, assume it is a top-level require that will
-            //be relative to baseUrl in the end.
-            if (baseName) {
-                name = name.split('/');
-                lastIndex = name.length - 1;
+        if (name) {
+            name = name.split('/');
+            lastIndex = name.length - 1;
 
-                // Node .js allowance:
-                if (config.nodeIdCompat && jsSuffixRegExp.test(name[lastIndex])) {
-                    name[lastIndex] = name[lastIndex].replace(jsSuffixRegExp, '');
-                }
+            // If wanting node ID compatibility, strip .js from end
+            // of IDs. Have to do this here, and not in nameToUrl
+            // because node allows either .js or non .js to map
+            // to same file.
+            if (config.nodeIdCompat && jsSuffixRegExp.test(name[lastIndex])) {
+                name[lastIndex] = name[lastIndex].replace(jsSuffixRegExp, '');
+            }
 
-                //Lop off the last part of baseParts, so that . matches the
-                //"directory" and not name of the baseName's module. For instance,
-                //baseName of "one/two/three", maps to "one/two/three.js", but we
-                //want the directory, "one/two" for this normalization.
-                name = baseParts.slice(0, baseParts.length - 1).concat(name);
+            // Starts with a '.' so need the baseName
+            if (name[0].charAt(0) === '.' && baseParts) {
+                //Convert baseName to array, and lop off the last part,
+                //so that . matches that 'directory' and not name of the baseName's
+                //module. For instance, baseName of 'one/two/three', maps to
+                //'one/two/three.js', but we want the directory, 'one/two' for
+                //this normalization.
+                normalizedBaseParts = baseParts.slice(0, baseParts.length - 1);
+                name = normalizedBaseParts.concat(name);
+            }
 
-                //start trimDots
-                for (i = 0; i < name.length; i += 1) {
-                    part = name[i];
-                    if (part === ".") {
-                        name.splice(i, 1);
-                        i -= 1;
-                    } else if (part === "..") {
-                        if (i === 1 && (name[2] === '..' || name[0] === '..')) {
-                            //End of the line. Keep at least one non-dot
-                            //path segment at the front so it can be mapped
-                            //correctly to disk. Otherwise, there is likely
-                            //no path mapping for a path starting with '..'.
-                            //This can still fail, but catches the most reasonable
-                            //uses of ..
-                            break;
-                        } else if (i > 0) {
-                            name.splice(i - 1, 2);
-                            i -= 2;
-                        }
+            //start trimDots
+            for (i = 0; i < name.length; i++) {
+                part = name[i];
+                if (part === '.') {
+                    name.splice(i, 1);
+                    i -= 1;
+                } else if (part === '..') {
+                    // If at the start, or previous value is still ..,
+                    // keep them so that when converted to a path it may
+                    // still work when converted to a path, even though
+                    // as an ID it is less than ideal. In larger point
+                    // releases, may be better to just kick out an error.
+                    if (i === 0 || (i === 1 && name[2] === '..') || name[i - 1] === '..') {
+                        continue;
+                    } else if (i > 0) {
+                        name.splice(i - 1, 2);
+                        i -= 2;
                     }
                 }
-                //end trimDots
-
-                name = name.join("/");
-            } else if (name.indexOf('./') === 0) {
-                // No baseName, so this is ID is resolved relative
-                // to baseUrl, pull off the leading dot.
-                name = name.substring(2);
             }
+            //end trimDots
+
+            name = name.join('/');
         }
 
         //Apply map config if available.
@@ -221,32 +217,39 @@ var requirejs, require, define;
         return [prefix, name];
     }
 
+    //Creates a parts array for a relName where first part is plugin ID,
+    //second part is resource ID. Assumes relName has already been normalized.
+    function makeRelParts(relName) {
+        return relName ? splitPrefix(relName) : [];
+    }
+
     /**
      * Makes a name map, normalizing the name, and using a plugin
      * for normalization if necessary. Grabs a ref to plugin
      * too, as an optimization.
      */
-    makeMap = function (name, relName) {
+    makeMap = function (name, relParts) {
         var plugin,
             parts = splitPrefix(name),
-            prefix = parts[0];
+            prefix = parts[0],
+            relResourceName = relParts[1];
 
         name = parts[1];
 
         if (prefix) {
-            prefix = normalize(prefix, relName);
+            prefix = normalize(prefix, relResourceName);
             plugin = callDep(prefix);
         }
 
         //Normalize according
         if (prefix) {
             if (plugin && plugin.normalize) {
-                name = plugin.normalize(name, makeNormalize(relName));
+                name = plugin.normalize(name, makeNormalize(relResourceName));
             } else {
-                name = normalize(name, relName);
+                name = normalize(name, relResourceName);
             }
         } else {
-            name = normalize(name, relName);
+            name = normalize(name, relResourceName);
             parts = splitPrefix(name);
             prefix = parts[0];
             name = parts[1];
@@ -293,13 +296,14 @@ var requirejs, require, define;
     };
 
     main = function (name, deps, callback, relName) {
-        var cjsModule, depName, ret, map, i,
+        var cjsModule, depName, ret, map, i, relParts,
             args = [],
             callbackType = typeof callback,
             usingExports;
 
         //Use name if no relName
         relName = relName || name;
+        relParts = makeRelParts(relName);
 
         //Call the callback to define the module, if necessary.
         if (callbackType === 'undefined' || callbackType === 'function') {
@@ -308,7 +312,7 @@ var requirejs, require, define;
             //Default to [require, exports, module] if no deps
             deps = !deps.length && callback.length ? ['require', 'exports', 'module'] : deps;
             for (i = 0; i < deps.length; i += 1) {
-                map = makeMap(deps[i], relName);
+                map = makeMap(deps[i], relParts);
                 depName = map.f;
 
                 //Fast path CommonJS standard dependencies.
@@ -364,7 +368,7 @@ var requirejs, require, define;
             //deps arg is the module name, and second arg (if passed)
             //is just the relName.
             //Normalize module name, if it contains . or ..
-            return callDep(makeMap(deps, callback).f);
+            return callDep(makeMap(deps, makeRelParts(callback)).f);
         } else if (!deps.splice) {
             //deps is a config object, not an array.
             config = deps;
@@ -4076,16 +4080,219 @@ define('ev-script/util/cache',['require','jquery','underscore','backbone'],funct
 
 });
 
-define('ev-script/views/base',['require','jquery','underscore','backbone','ev-script/util/events','ev-script/util/cache'],function(require) {
+/**
+ * @license RequireJS i18n 2.0.6 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ * Available via the MIT or new BSD license.
+ * see: http://github.com/requirejs/i18n for details
+ */
+/*jslint regexp: true */
+/*global require: false, navigator: false, define: false */
+
+/**
+ * This plugin handles i18n! prefixed modules. It does the following:
+ *
+ * 1) A regular module can have a dependency on an i18n bundle, but the regular
+ * module does not want to specify what locale to load. So it just specifies
+ * the top-level bundle, like 'i18n!nls/colors'.
+ *
+ * This plugin will load the i18n bundle at nls/colors, see that it is a root/master
+ * bundle since it does not have a locale in its name. It will then try to find
+ * the best match locale available in that master bundle, then request all the
+ * locale pieces for that best match locale. For instance, if the locale is 'en-us',
+ * then the plugin will ask for the 'en-us', 'en' and 'root' bundles to be loaded
+ * (but only if they are specified on the master bundle).
+ *
+ * Once all the bundles for the locale pieces load, then it mixes in all those
+ * locale pieces into each other, then finally sets the context.defined value
+ * for the nls/colors bundle to be that mixed in locale.
+ *
+ * 2) A regular module specifies a specific locale to load. For instance,
+ * i18n!nls/fr-fr/colors. In this case, the plugin needs to load the master bundle
+ * first, at nls/colors, then figure out what the best match locale is for fr-fr,
+ * since maybe only fr or just root is defined for that locale. Once that best
+ * fit is found, all of its locale pieces need to have their bundles loaded.
+ *
+ * Once all the bundles for the locale pieces load, then it mixes in all those
+ * locale pieces into each other, then finally sets the context.defined value
+ * for the nls/fr-fr/colors bundle to be that mixed in locale.
+ */
+(function () {
+    'use strict';
+
+    //regexp for reconstructing the master bundle name from parts of the regexp match
+    //nlsRegExp.exec('foo/bar/baz/nls/en-ca/foo') gives:
+    //['foo/bar/baz/nls/en-ca/foo', 'foo/bar/baz/nls/', '/', '/', 'en-ca', 'foo']
+    //nlsRegExp.exec('foo/bar/baz/nls/foo') gives:
+    //['foo/bar/baz/nls/foo', 'foo/bar/baz/nls/', '/', '/', 'foo', '']
+    //so, if match[5] is blank, it means this is the top bundle definition.
+    var nlsRegExp = /(^.*(^|\/)nls(\/|$))([^\/]*)\/?([^\/]*)/;
+
+    //Helper function to avoid repeating code. Lots of arguments in the
+    //desire to stay functional and support RequireJS contexts without having
+    //to know about the RequireJS contexts.
+    function addPart(locale, master, needed, toLoad, prefix, suffix) {
+        if (master[locale]) {
+            needed.push(locale);
+            if (master[locale] === true || master[locale] === 1) {
+                toLoad.push(prefix + locale + '/' + suffix);
+            }
+        }
+    }
+
+    function addIfExists(req, locale, toLoad, prefix, suffix) {
+        var fullName = prefix + locale + '/' + suffix;
+        if (require._fileExists(req.toUrl(fullName + '.js'))) {
+            toLoad.push(fullName);
+        }
+    }
+
+    /**
+     * Simple function to mix in properties from source into target,
+     * but only if target does not already have a property of the same name.
+     * This is not robust in IE for transferring methods that match
+     * Object.prototype names, but the uses of mixin here seem unlikely to
+     * trigger a problem related to that.
+     */
+    function mixin(target, source, force) {
+        var prop;
+        for (prop in source) {
+            if (source.hasOwnProperty(prop) && (!target.hasOwnProperty(prop) || force)) {
+                target[prop] = source[prop];
+            } else if (typeof source[prop] === 'object') {
+                if (!target[prop] && source[prop]) {
+                    target[prop] = {};
+                }
+                mixin(target[prop], source[prop], force);
+            }
+        }
+    }
+
+    define('i18n',['module'], function (module) {
+        var masterConfig = module.config ? module.config() : {};
+
+        return {
+            version: '2.0.6',
+            /**
+             * Called when a dependency needs to be loaded.
+             */
+            load: function (name, req, onLoad, config) {
+                config = config || {};
+
+                if (config.locale) {
+                    masterConfig.locale = config.locale;
+                }
+
+                var masterName,
+                    match = nlsRegExp.exec(name),
+                    prefix = match[1],
+                    locale = match[4],
+                    suffix = match[5],
+                    parts = locale.split('-'),
+                    toLoad = [],
+                    value = {},
+                    i, part, current = '';
+
+                //If match[5] is blank, it means this is the top bundle definition,
+                //so it does not have to be handled. Locale-specific requests
+                //will have a match[4] value but no match[5]
+                if (match[5]) {
+                    //locale-specific bundle
+                    prefix = match[1];
+                    masterName = prefix + suffix;
+                } else {
+                    //Top-level bundle.
+                    masterName = name;
+                    suffix = match[4];
+                    locale = masterConfig.locale;
+                    if (!locale) {
+                        locale = masterConfig.locale =
+                            typeof navigator === 'undefined' ? 'root' :
+                            ((navigator.languages && navigator.languages[0]) ||
+                             navigator.language ||
+                             navigator.userLanguage || 'root').toLowerCase();
+                    }
+                    parts = locale.split('-');
+                }
+
+                if (config.isBuild) {
+                    //Check for existence of all locale possible files and
+                    //require them if exist.
+                    toLoad.push(masterName);
+                    addIfExists(req, 'root', toLoad, prefix, suffix);
+                    for (i = 0; i < parts.length; i++) {
+                        part = parts[i];
+                        current += (current ? '-' : '') + part;
+                        addIfExists(req, current, toLoad, prefix, suffix);
+                    }
+
+                    req(toLoad, function () {
+                        onLoad();
+                    });
+                } else {
+                    //First, fetch the master bundle, it knows what locales are available.
+                    req([masterName], function (master) {
+                        //Figure out the best fit
+                        var needed = [],
+                            part;
+
+                        //Always allow for root, then do the rest of the locale parts.
+                        addPart('root', master, needed, toLoad, prefix, suffix);
+                        for (i = 0; i < parts.length; i++) {
+                            part = parts[i];
+                            current += (current ? '-' : '') + part;
+                            addPart(current, master, needed, toLoad, prefix, suffix);
+                        }
+
+                        //Load all the parts missing.
+                        req(toLoad, function () {
+                            var i, partBundle, part;
+                            for (i = needed.length - 1; i > -1 && needed[i]; i--) {
+                                part = needed[i];
+                                partBundle = master[part];
+                                if (partBundle === true || partBundle === 1) {
+                                    partBundle = req(prefix + part + '/' + suffix);
+                                }
+                                mixin(value, partBundle);
+                            }
+
+                            //All done, notify the loader.
+                            onLoad(value);
+                        });
+                    });
+                }
+            }
+        };
+    });
+}());
+
+define('ev-script/nls/messages',{
+    'root': true,
+    'es-mx': true
+});
+define('ev-script/nls/root/messages',{
+    'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.': 'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.',
+    'It appears there is an issue with the Ensemble Video installation.': 'It appears there is an issue with the Ensemble Video installation.',
+    'An unexpected error occurred.  Check the server log for more details.': 'An unexpected error occurred.  Check the server log for more details.',
+    'Username': 'Username',
+    'Password': 'Password',
+    'Identity Provider': 'Identity Provider',
+    'Remember Me': 'Remember Me',
+    'Submit': 'Submit',
+    'Ensemble Video Login': 'Ensemble Video Login',
+    'You are unauthorized to access this content.': 'You are unauthorized to access this content.'
+});
+
+
+define('ev-script/views/base',['require','jquery','underscore','backbone','ev-script/util/events','ev-script/util/cache','i18n!ev-script/nls/messages'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        root = this,
         eventsUtil = require('ev-script/util/events'),
-        cacheUtil = require('ev-script/util/cache');
+        cacheUtil = require('ev-script/util/cache'),
+        messages = require('i18n!ev-script/nls/messages');
 
     return Backbone.View.extend({
         initialize: function(options) {
@@ -4100,12 +4307,11 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
             if (xhr.status === 401) {
                 this.auth.handleUnauthorized(this.el, authCallback);
             } else if (xhr.status === 500) {
-                // Making an assumption that root is window here...
-                root.alert('It appears there is an issue with the Ensemble Video installation.');
+                window.alert(messages['It appears there is an issue with the Ensemble Video installation.']);
             } else if (xhr.status === 404) {
-                root.alert('Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.');
+                window.alert(messages['Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.']);
             } else if (xhr.status !== 0) {
-                root.alert('An unexpected error occurred.  Check the server log for more details.');
+                window.alert(messages['An unexpected error occurred.  Check the server log for more details.']);
             }
         },
         unencode: function(encoded) {
@@ -4116,33 +4322,33 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
 });
 
 /*!
- * Platform.js v1.3.1 <http://mths.be/platform>
- * Copyright 2014-2016 Benjamin Tan <https://d10.github.io/>
+ * Platform.js <https://mths.be/platform>
+ * Copyright 2014-2016 Benjamin Tan <https://demoneaux.github.io/>
  * Copyright 2011-2013 John-David Dalton <http://allyoucanleet.com/>
- * Available under MIT license <http://mths.be/mit>
+ * Available under MIT license <https://mths.be/mit>
  */
 ;(function() {
   'use strict';
 
-  /** Used to determine if values are of the language type `Object` */
+  /** Used to determine if values are of the language type `Object`. */
   var objectTypes = {
     'function': true,
     'object': true
   };
 
-  /** Used as a reference to the global object */
+  /** Used as a reference to the global object. */
   var root = (objectTypes[typeof window] && window) || this;
 
-  /** Backup possible global object */
+  /** Backup possible global object. */
   var oldRoot = root;
 
-  /** Detect free variable `exports` */
+  /** Detect free variable `exports`. */
   var freeExports = objectTypes[typeof exports] && exports;
 
-  /** Detect free variable `module` */
+  /** Detect free variable `module`. */
   var freeModule = objectTypes[typeof module] && module && !module.nodeType && module;
 
-  /** Detect free variable `global` from Node.js or Browserified code and use it as `root` */
+  /** Detect free variable `global` from Node.js or Browserified code and use it as `root`. */
   var freeGlobal = freeExports && freeModule && typeof global == 'object' && global;
   if (freeGlobal && (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal || freeGlobal.self === freeGlobal)) {
     root = freeGlobal;
@@ -4155,19 +4361,19 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
    */
   var maxSafeInteger = Math.pow(2, 53) - 1;
 
-  /** Opera regexp */
+  /** Regular expression to detect Opera. */
   var reOpera = /\bOpera/;
 
-  /** Possible global object */
+  /** Possible global object. */
   var thisBinding = this;
 
-  /** Used for native method references */
+  /** Used for native method references. */
   var objectProto = Object.prototype;
 
-  /** Used to check for own properties of an object */
+  /** Used to check for own properties of an object. */
   var hasOwnProperty = objectProto.hasOwnProperty;
 
-  /** Used to resolve the internal `[[Class]]` of values */
+  /** Used to resolve the internal `[[Class]]` of values. */
   var toString = objectProto.toString;
 
   /*--------------------------------------------------------------------------*/
@@ -4193,11 +4399,12 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
    * @param {string} [label] A label for the OS.
    */
   function cleanupOS(os, pattern, label) {
-    // platform tokens defined at
+    // Platform tokens are defined at:
     // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
     // http://web.archive.org/web/20081122053950/http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
     var data = {
-      '6.4':  '10',
+      '10.0': '10',
+      '6.4':  '10 Technical Preview',
       '6.3':  '8.1',
       '6.2':  '8',
       '6.1':  'Server 2008 R2 / 7',
@@ -4209,12 +4416,12 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
       '4.0':  'NT',
       '4.90': 'ME'
     };
-    // detect Windows version from platform tokens
-    if (pattern && label && /^Win/i.test(os) &&
-        (data = data[0/*Opera 9.25 fix*/, /[\d.]+$/.exec(os)])) {
+    // Detect Windows version from platform tokens.
+    if (pattern && label && /^Win/i.test(os) && !/^Windows Phone /i.test(os) &&
+        (data = data[/[\d.]+$/.exec(os)])) {
       os = 'Windows ' + data;
     }
-    // correct character case and cleanup
+    // Correct character case and cleanup string.
     os = String(os);
 
     if (pattern && label) {
@@ -4233,6 +4440,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
         .replace(/(?: BePC|[ .]*fc[ \d.]+)$/i, '')
         .replace(/\bx86\.64\b/gi, 'x86_64')
         .replace(/\b(Windows Phone) OS\b/, '$1')
+        .replace(/\b(Chrome OS \w+) [\d.]+\b/, '$1')
         .split(' on ')[0]
     );
 
@@ -4367,93 +4575,94 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
    */
   function parse(ua) {
 
-    /** The environment context object */
+    /** The environment context object. */
     var context = root;
 
-    /** Used to flag when a custom context is provided */
+    /** Used to flag when a custom context is provided. */
     var isCustomContext = ua && typeof ua == 'object' && getClassOf(ua) != 'String';
 
-    // juggle arguments
+    // Juggle arguments.
     if (isCustomContext) {
       context = ua;
       ua = null;
     }
 
-    /** Browser navigator object */
+    /** Browser navigator object. */
     var nav = context.navigator || {};
 
-    /** Browser user agent string */
+    /** Browser user agent string. */
     var userAgent = nav.userAgent || '';
 
     ua || (ua = userAgent);
 
-    /** Used to flag when `thisBinding` is the [ModuleScope] */
+    /** Used to flag when `thisBinding` is the [ModuleScope]. */
     var isModuleScope = isCustomContext || thisBinding == oldRoot;
 
-    /** Used to detect if browser is like Chrome */
+    /** Used to detect if browser is like Chrome. */
     var likeChrome = isCustomContext
       ? !!nav.likeChrome
       : /\bChrome\b/.test(ua) && !/internal|\n/i.test(toString.toString());
 
-    /** Internal `[[Class]]` value shortcuts */
+    /** Internal `[[Class]]` value shortcuts. */
     var objectClass = 'Object',
         airRuntimeClass = isCustomContext ? objectClass : 'ScriptBridgingProxyObject',
         enviroClass = isCustomContext ? objectClass : 'Environment',
         javaClass = (isCustomContext && context.java) ? 'JavaPackage' : getClassOf(context.java),
         phantomClass = isCustomContext ? objectClass : 'RuntimeObject';
 
-    /** Detect Java environment */
+    /** Detect Java environments. */
     var java = /\bJava/.test(javaClass) && context.java;
 
-    /** Detect Rhino */
+    /** Detect Rhino. */
     var rhino = java && getClassOf(context.environment) == enviroClass;
 
-    /** A character to represent alpha */
+    /** A character to represent alpha. */
     var alpha = java ? 'a' : '\u03b1';
 
-    /** A character to represent beta */
+    /** A character to represent beta. */
     var beta = java ? 'b' : '\u03b2';
 
-    /** Browser document object */
+    /** Browser document object. */
     var doc = context.document || {};
 
     /**
-     * Detect Opera browser (Presto-based)
+     * Detect Opera browser (Presto-based).
      * http://www.howtocreate.co.uk/operaStuff/operaObject.html
      * http://dev.opera.com/articles/view/opera-mini-web-content-authoring-guidelines/#operamini
      */
     var opera = context.operamini || context.opera;
 
-    /** Opera `[[Class]]` */
+    /** Opera `[[Class]]`. */
     var operaClass = reOpera.test(operaClass = (isCustomContext && opera) ? opera['[[Class]]'] : getClassOf(opera))
       ? operaClass
       : (opera = null);
 
     /*------------------------------------------------------------------------*/
 
-    /** Temporary variable used over the script's lifetime */
+    /** Temporary variable used over the script's lifetime. */
     var data;
 
-    /** The CPU architecture */
+    /** The CPU architecture. */
     var arch = ua;
 
-    /** Platform description array */
+    /** Platform description array. */
     var description = [];
 
-    /** Platform alpha/beta indicator */
+    /** Platform alpha/beta indicator. */
     var prerelease = null;
 
-    /** A flag to indicate that environment features should be used to resolve the platform */
+    /** A flag to indicate that environment features should be used to resolve the platform. */
     var useFeatures = ua == userAgent;
 
-    /** The browser/environment version */
+    /** The browser/environment version. */
     var version = useFeatures && opera && typeof opera.version == 'function' && opera.version();
 
     /** A flag to indicate if the OS ends with "/ Version" */
     var isSpecialCasedOS;
 
-    /* Detectable layout engines (order is important) */
+    /* Detectable layout engines (order is important). */
     var layout = getLayout([
+      { 'label': 'EdgeHTML', 'pattern': 'Edge' },
       'Trident',
       { 'label': 'WebKit', 'pattern': 'AppleWebKit' },
       'iCab',
@@ -4464,13 +4673,14 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
       'Gecko'
     ]);
 
-    /* Detectable browser names (order is important) */
+    /* Detectable browser names (order is important). */
     var name = getName([
       'Adobe AIR',
       'Arora',
       'Avant Browser',
       'Breach',
       'Camino',
+      'Electron',
       'Epiphany',
       'Fennec',
       'Flock',
@@ -4478,23 +4688,27 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
       'GreenBrowser',
       'iCab',
       'Iceweasel',
-      { 'label': 'SRWare Iron', 'pattern': 'Iron' },
       'K-Meleon',
       'Konqueror',
       'Lunascape',
       'Maxthon',
+      { 'label': 'Microsoft Edge', 'pattern': 'Edge' },
       'Midori',
       'Nook Browser',
+      'PaleMoon',
       'PhantomJS',
       'Raven',
       'Rekonq',
       'RockMelt',
+      { 'label': 'Samsung Internet', 'pattern': 'SamsungBrowser' },
       'SeaMonkey',
       { 'label': 'Silk', 'pattern': '(?:Cloud9|Silk-Accelerated)' },
       'Sleipnir',
       'SlimBrowser',
+      { 'label': 'SRWare Iron', 'pattern': 'Iron' },
       'Sunrise',
       'Swiftfox',
+      'Waterfox',
       'WebPositive',
       'Opera Mini',
       { 'label': 'Opera Mini', 'pattern': 'OPiOS' },
@@ -4503,12 +4717,13 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
       'Chrome',
       { 'label': 'Chrome Mobile', 'pattern': '(?:CriOS|CrMo)' },
       { 'label': 'Firefox', 'pattern': '(?:Firefox|Minefield)' },
+      { 'label': 'Firefox for iOS', 'pattern': 'FxiOS' },
       { 'label': 'IE', 'pattern': 'IEMobile' },
       { 'label': 'IE', 'pattern': 'MSIE' },
       'Safari'
     ]);
 
-    /* Detectable products (order is important) */
+    /* Detectable products (order is important). */
     var product = getProduct([
       { 'label': 'BlackBerry', 'pattern': 'BB10' },
       'BlackBerry',
@@ -4516,6 +4731,11 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
       { 'label': 'Galaxy S2', 'pattern': 'GT-I9100' },
       { 'label': 'Galaxy S3', 'pattern': 'GT-I9300' },
       { 'label': 'Galaxy S4', 'pattern': 'GT-I9500' },
+      { 'label': 'Galaxy S5', 'pattern': 'SM-G900' },
+      { 'label': 'Galaxy S6', 'pattern': 'SM-G920' },
+      { 'label': 'Galaxy S6 Edge', 'pattern': 'SM-G925' },
+      { 'label': 'Galaxy S7', 'pattern': 'SM-G930' },
+      { 'label': 'Galaxy S7 Edge', 'pattern': 'SM-G935' },
       'Google TV',
       'Lumia',
       'iPad',
@@ -4523,11 +4743,11 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
       'iPhone',
       'Kindle',
       { 'label': 'Kindle Fire', 'pattern': '(?:Cloud9|Silk-Accelerated)' },
+      'Nexus',
       'Nook',
       'PlayBook',
-      'PlayStation 4',
-      'PlayStation 3',
       'PlayStation Vita',
+      'PlayStation',
       'TouchPad',
       'Transformer',
       { 'label': 'Wii U', 'pattern': 'WiiU' },
@@ -4537,14 +4757,15 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
       'Xoom'
     ]);
 
-    /* Detectable manufacturers */
+    /* Detectable manufacturers. */
     var manufacturer = getManufacturer({
       'Apple': { 'iPad': 1, 'iPhone': 1, 'iPod': 1 },
+      'Archos': {},
       'Amazon': { 'Kindle': 1, 'Kindle Fire': 1 },
       'Asus': { 'Transformer': 1 },
       'Barnes & Noble': { 'Nook': 1 },
       'BlackBerry': { 'PlayBook': 1 },
-      'Google': { 'Google TV': 1 },
+      'Google': { 'Google TV': 1, 'Nexus': 1 },
       'HP': { 'TouchPad': 1 },
       'HTC': {},
       'LG': {},
@@ -4553,14 +4774,15 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
       'Nintendo': { 'Wii U': 1,  'Wii': 1 },
       'Nokia': { 'Lumia': 1 },
       'Samsung': { 'Galaxy S': 1, 'Galaxy S2': 1, 'Galaxy S3': 1, 'Galaxy S4': 1 },
-      'Sony': { 'PlayStation 4': 1, 'PlayStation 3': 1, 'PlayStation Vita': 1 }
+      'Sony': { 'PlayStation': 1, 'PlayStation Vita': 1 }
     });
 
-    /* Detectable OSes (order is important) */
+    /* Detectable operating systems (order is important). */
     var os = getOS([
-      'Windows Phone ',
+      'Windows Phone',
       'Android',
       'CentOS',
+      { 'label': 'Chrome OS', 'pattern': 'CrOS' },
       'Debian',
       'Fedora',
       'FreeBSD',
@@ -4568,6 +4790,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
       'Haiku',
       'Kubuntu',
       'Linux Mint',
+      'OpenBSD',
       'Red Hat',
       'SuSE',
       'Ubuntu',
@@ -4578,6 +4801,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
       'webOS ',
       'webOS',
       'Tablet OS',
+      'Tizen',
       'Linux',
       'Mac OS X',
       'Macintosh',
@@ -4612,10 +4836,10 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
      */
     function getManufacturer(guesses) {
       return reduce(guesses, function(result, value, key) {
-        // lookup the manufacturer by product or scan the UA for the manufacturer
+        // Lookup the manufacturer by product or scan the UA for the manufacturer.
         return result || (
           value[product] ||
-          value[0/*Opera 9.25 fix*/, /^[a-z]+(?: +[a-z]+\b)*/i.exec(product)] ||
+          value[/^[a-z]+(?: +[a-z]+\b)*/i.exec(product)] ||
           RegExp('\\b' + qualify(key) + '(?:\\b|\\w*\\d)', 'i').exec(ua)
         ) && key;
       });
@@ -4667,13 +4891,14 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
         var pattern = guess.pattern || qualify(guess);
         if (!result && (result =
               RegExp('\\b' + pattern + ' *\\d+[.\\w_]*', 'i').exec(ua) ||
+              RegExp('\\b' + pattern + ' *\\w+-[\\w]*', 'i').exec(ua) ||
               RegExp('\\b' + pattern + '(?:; *(?:[a-z]+[_-])?[a-z]+\\d+|[^ ();-]*)', 'i').exec(ua)
             )) {
-          // split by forward slash and append product version if needed
+          // Split by forward slash and append product version if needed.
           if ((result = String((guess.label && !RegExp(pattern, 'i').test(guess.label)) ? guess.label : result).split('/'))[1] && !/[\d.]+/.test(result[0])) {
             result[0] += ' ' + result[1];
           }
-          // correct character case and cleanup
+          // Correct character case and cleanup string.
           guess = guess.label || guess;
           result = format(result[0]
             .replace(RegExp(pattern, 'i'), guess)
@@ -4711,121 +4936,129 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
 
     /*------------------------------------------------------------------------*/
 
-    // convert layout to an array so we can add extra details
+    // Convert layout to an array so we can add extra details.
     layout && (layout = [layout]);
 
-    // detect product names that contain their manufacturer's name
+    // Detect product names that contain their manufacturer's name.
     if (manufacturer && !product) {
       product = getProduct([manufacturer]);
     }
-    // clean up Google TV
+    // Clean up Google TV.
     if ((data = /\bGoogle TV\b/.exec(product))) {
       product = data[0];
     }
-    // detect simulators
+    // Detect simulators.
     if (/\bSimulator\b/i.test(ua)) {
       product = (product ? product + ' ' : '') + 'Simulator';
     }
-    // detect Opera Mini 8+ running in Turbo/Uncompressed mode on iOS
+    // Detect Opera Mini 8+ running in Turbo/Uncompressed mode on iOS.
     if (name == 'Opera Mini' && /\bOPiOS\b/.test(ua)) {
       description.push('running in Turbo/Uncompressed mode');
     }
-    // detect iOS
-    if (/^iP/.test(product)) {
+    // Detect IE Mobile 11.
+    if (name == 'IE' && /\blike iPhone OS\b/.test(ua)) {
+      data = parse(ua.replace(/like iPhone OS/, ''));
+      manufacturer = data.manufacturer;
+      product = data.product;
+    }
+    // Detect iOS.
+    else if (/^iP/.test(product)) {
       name || (name = 'Safari');
       os = 'iOS' + ((data = / OS ([\d_]+)/i.exec(ua))
         ? ' ' + data[1].replace(/_/g, '.')
         : '');
     }
-    // detect Kubuntu
+    // Detect Kubuntu.
     else if (name == 'Konqueror' && !/buntu/i.test(os)) {
       os = 'Kubuntu';
     }
-    // detect Android browsers
-    else if (manufacturer && manufacturer != 'Google' &&
-        ((/Chrome/.test(name) && !/\bMobile Safari\b/i.test(ua)) || /\bVita\b/.test(product))) {
+    // Detect Android browsers.
+    else if ((manufacturer && manufacturer != 'Google' &&
+        ((/Chrome/.test(name) && !/\bMobile Safari\b/i.test(ua)) || /\bVita\b/.test(product))) ||
+        (/\bAndroid\b/.test(os) && /^Chrome/.test(name) && /\bVersion\//i.test(ua))) {
       name = 'Android Browser';
       os = /\bAndroid\b/.test(os) ? os : 'Android';
     }
-    // detect false positives for Firefox/Safari
-    else if (!name || (data = !/\bMinefield\b|\(Android;/i.test(ua) && /\b(?:Firefox|Safari)\b/.exec(name))) {
-      // escape the `/` for Firefox 1
+    // Detect Silk desktop/accelerated modes.
+    else if (name == 'Silk') {
+      if (!/\bMobi/i.test(ua)) {
+        os = 'Android';
+        description.unshift('desktop mode');
+      }
+      if (/Accelerated *= *true/i.test(ua)) {
+        description.unshift('accelerated');
+      }
+    }
+    // Detect PaleMoon identifying as Firefox.
+    else if (name == 'PaleMoon' && (data = /\bFirefox\/([\d.]+)\b/.exec(ua))) {
+      description.push('identifying as Firefox ' + data[1]);
+    }
+    // Detect Firefox OS and products running Firefox.
+    else if (name == 'Firefox' && (data = /\b(Mobile|Tablet|TV)\b/i.exec(ua))) {
+      os || (os = 'Firefox OS');
+      product || (product = data[1]);
+    }
+    // Detect false positives for Firefox/Safari.
+    else if (!name || (data = !/\bMinefield\b/i.test(ua) && /\b(?:Firefox|Safari)\b/.exec(name))) {
+      // Escape the `/` for Firefox 1.
       if (name && !product && /[\/,]|^[^(]+?\)/.test(ua.slice(ua.indexOf(data + '/') + 8))) {
-        // clear name of false positives
+        // Clear name of false positives.
         name = null;
       }
-      // reassign a generic name
+      // Reassign a generic name.
       if ((data = product || manufacturer || os) &&
           (product || manufacturer || /\b(?:Android|Symbian OS|Tablet OS|webOS)\b/.test(os))) {
         name = /[a-z]+(?: Hat)?/i.exec(/\bAndroid\b/.test(os) ? os : data) + ' Browser';
       }
     }
-    // detect Firefox OS
-    if ((data = /\((Mobile|Tablet).*?Firefox\b/i.exec(ua)) && data[1]) {
-      os = 'Firefox OS';
-      if (!product) {
-        product = data[1];
-      }
+    // Add Chrome version to description for Electron.
+    else if (name == 'Electron' && (data = (/\bChrome\/([\d.]+)\b/.exec(ua) || 0)[1])) {
+      description.push('Chromium ' + data);
     }
-    // detect non-Opera versions (order is important)
+    // Detect non-Opera (Presto-based) versions (order is important).
     if (!version) {
       version = getVersion([
-        '(?:Cloud9|CriOS|CrMo|IEMobile|Iron|Opera ?Mini|OPiOS|OPR|Raven|Silk(?!/[\\d.]+$))',
+        '(?:Cloud9|CriOS|CrMo|Edge|FxiOS|IEMobile|Iron|Opera ?Mini|OPiOS|OPR|Raven|SamsungBrowser|Silk(?!/[\\d.]+$))',
         'Version',
         qualify(name),
         '(?:Firefox|Minefield|NetFront)'
       ]);
     }
-    // detect stubborn layout engines
-    if (layout == 'iCab' && parseFloat(version) > 3) {
-      layout = ['WebKit'];
-    } else if (
-        layout != 'Trident' &&
-        (data =
+    // Detect stubborn layout engines.
+    if ((data =
+          layout == 'iCab' && parseFloat(version) > 3 && 'WebKit' ||
           /\bOpera\b/.test(name) && (/\bOPR\b/.test(ua) ? 'Blink' : 'Presto') ||
-          /\b(?:Midori|Nook|Safari)\b/i.test(ua) && 'WebKit' ||
-          !layout && /\bMSIE\b/i.test(ua) && (os == 'Mac OS' ? 'Tasman' : 'Trident')
-        )
-    ) {
+          /\b(?:Midori|Nook|Safari)\b/i.test(ua) && !/^(?:Trident|EdgeHTML)$/.test(layout) && 'WebKit' ||
+          !layout && /\bMSIE\b/i.test(ua) && (os == 'Mac OS' ? 'Tasman' : 'Trident') ||
+          layout == 'WebKit' && /\bPlayStation\b(?! Vita\b)/i.test(name) && 'NetFront'
+        )) {
       layout = [data];
     }
-    // detect NetFront on PlayStation
-    else if (/\bPlayStation\b(?! Vita\b)/i.test(name) && layout == 'WebKit') {
-      layout = ['NetFront'];
-    }
-    // detect Windows Phone 7 desktop mode
+    // Detect Windows Phone 7 desktop mode.
     if (name == 'IE' && (data = (/; *(?:XBLWP|ZuneWP)(\d+)/i.exec(ua) || 0)[1])) {
       name += ' Mobile';
       os = 'Windows Phone ' + (/\+$/.test(data) ? data : data + '.x');
       description.unshift('desktop mode');
     }
-    // detect Windows Phone 8+ desktop mode
+    // Detect Windows Phone 8.x desktop mode.
     else if (/\bWPDesktop\b/i.test(ua)) {
       name = 'IE Mobile';
-      os = 'Windows Phone 8+';
+      os = 'Windows Phone 8.x';
       description.unshift('desktop mode');
       version || (version = (/\brv:([\d.]+)/.exec(ua) || 0)[1]);
     }
-    // detect IE 11 and above
+    // Detect IE 11 identifying as other browsers.
     else if (name != 'IE' && layout == 'Trident' && (data = /\brv:([\d.]+)/.exec(ua))) {
-      if (!/\bWPDesktop\b/i.test(ua)) {
-        if (name) {
-          description.push('identifying as ' + name + (version ? ' ' + version : ''));
-        }
-        name = 'IE';
+      if (name) {
+        description.push('identifying as ' + name + (version ? ' ' + version : ''));
       }
+      name = 'IE';
       version = data[1];
     }
-    // detect Microsoft Edge
-    else if ((name == 'Chrome' || name != 'IE') && (data = /\bEdge\/([\d.]+)/.exec(ua))) {
-      name = 'Microsoft Edge';
-      version = data[1];
-      layout = ['Trident'];
-    }
-    // leverage environment features
+    // Leverage environment features.
     if (useFeatures) {
-      // detect server-side environments
-      // Rhino has a global function while others have a global object
+      // Detect server-side environments.
+      // Rhino has a global function while others have a global object.
       if (isHostType(context, 'global')) {
         if (java) {
           data = java.lang.System;
@@ -4844,30 +5077,46 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
             }
           }
         }
-        else if (typeof context.process == 'object' && (data = context.process)) {
-          name = 'Node.js';
-          arch = data.arch;
-          os = data.platform;
-          version = /[\d.]+/.exec(data.version)[0];
+        else if (
+          typeof context.process == 'object' && !context.process.browser &&
+          (data = context.process)
+        ) {
+          if (typeof data.versions == 'object') {
+            if (typeof data.versions.electron == 'string') {
+              description.push('Node ' + data.versions.node);
+              name = 'Electron';
+              version = data.versions.electron;
+            } else if (typeof data.versions.nw == 'string') {
+              description.push('Chromium ' + version, 'Node ' + data.versions.node);
+              name = 'NW.js';
+              version = data.versions.nw;
+            }
+          } else {
+            name = 'Node.js';
+            arch = data.arch;
+            os = data.platform;
+            version = /[\d.]+/.exec(data.version)
+            version = version ? version[0] : 'unknown';
+          }
         }
         else if (rhino) {
           name = 'Rhino';
         }
       }
-      // detect Adobe AIR
+      // Detect Adobe AIR.
       else if (getClassOf((data = context.runtime)) == airRuntimeClass) {
         name = 'Adobe AIR';
         os = data.flash.system.Capabilities.os;
       }
-      // detect PhantomJS
+      // Detect PhantomJS.
       else if (getClassOf((data = context.phantom)) == phantomClass) {
         name = 'PhantomJS';
         version = (data = data.version || null) && (data.major + '.' + data.minor + '.' + data.patch);
       }
-      // detect IE compatibility modes
+      // Detect IE compatibility modes.
       else if (typeof doc.documentMode == 'number' && (data = /\bTrident\/(\d+)/i.exec(ua))) {
-        // we're in compatibility mode when the Trident version + 4 doesn't
-        // equal the document mode
+        // We're in compatibility mode when the Trident version + 4 doesn't
+        // equal the document mode.
         version = [version, doc.documentMode];
         if ((data = +data[1] + 4) != version[1]) {
           description.push('IE ' + version[1] + ' mode');
@@ -4876,9 +5125,17 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
         }
         version = name == 'IE' ? String(version[1].toFixed(1)) : version[0];
       }
+      // Detect IE 11 masking as other browsers.
+      else if (typeof doc.documentMode == 'number' && /^(?:Chrome|Firefox)\b/.test(name)) {
+        description.push('masking as ' + name + ' ' + version);
+        name = 'IE';
+        version = '11.0';
+        layout = ['Trident'];
+        os = 'Windows';
+      }
       os = os && format(os);
     }
-    // detect prerelease phases
+    // Detect prerelease phases.
     if (version && (data =
           /(?:[ab]|dp|pre|[ab]\d+pre)(?:\d+\+?)?$/i.exec(version) ||
           /(?:alpha|beta)(?: ?\d)?/i.exec(ua + ';' + (useFeatures && nav.appMinorVersion)) ||
@@ -4888,41 +5145,39 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
       version = version.replace(RegExp(data + '\\+?$'), '') +
         (prerelease == 'beta' ? beta : alpha) + (/\d+\+?/.exec(data) || '');
     }
-    // detect Firefox Mobile
+    // Detect Firefox Mobile.
     if (name == 'Fennec' || name == 'Firefox' && /\b(?:Android|Firefox OS)\b/.test(os)) {
       name = 'Firefox Mobile';
     }
-    // obscure Maxthon's unreliable version
+    // Obscure Maxthon's unreliable version.
     else if (name == 'Maxthon' && version) {
       version = version.replace(/\.[\d.]+/, '.x');
     }
-    // detect Silk desktop/accelerated modes
-    else if (name == 'Silk') {
-      if (!/\bMobi/i.test(ua)) {
-        os = 'Android';
-        description.unshift('desktop mode');
-      }
-      if (/Accelerated *= *true/i.test(ua)) {
-        description.unshift('accelerated');
-      }
-    }
-    // detect Xbox 360 and Xbox One
+    // Detect Xbox 360 and Xbox One.
     else if (/\bXbox\b/i.test(product)) {
-      os = null;
+      if (product == 'Xbox 360') {
+        os = null;
+      }
       if (product == 'Xbox 360' && /\bIEMobile\b/.test(ua)) {
         description.unshift('mobile mode');
       }
     }
-    // add mobile postfix
+    // Add mobile postfix.
     else if ((/^(?:Chrome|IE|Opera)$/.test(name) || name && !product && !/Browser|Mobi/.test(name)) &&
         (os == 'Windows CE' || /Mobi/i.test(ua))) {
       name += ' Mobile';
     }
-    // detect IE platform preview
-    else if (name == 'IE' && useFeatures && context.external === null) {
-      description.unshift('platform preview');
+    // Detect IE platform preview.
+    else if (name == 'IE' && useFeatures) {
+      try {
+        if (context.external === null) {
+          description.unshift('platform preview');
+        }
+      } catch(e) {
+        description.unshift('embedded');
+      }
     }
-    // detect BlackBerry OS version
+    // Detect BlackBerry OS version.
     // http://docs.blackberry.com/en/developers/deliverables/18169/HTTP_headers_sent_by_BB_Browser_1234911_11.jsp
     else if ((/\bBlackBerry\b/.test(product) || /\bBB10\b/.test(ua)) && (data =
           (RegExp(product.replace(/ +/g, ' *') + '/([.\\d]+)', 'i').exec(ua) || 0)[1] ||
@@ -4932,22 +5187,19 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
       os = (data[1] ? (product = null, manufacturer = 'BlackBerry') : 'Device Software') + ' ' + data[0];
       version = null;
     }
-    // detect Opera identifying/masking itself as another browser
+    // Detect Opera identifying/masking itself as another browser.
     // http://www.opera.com/support/kb/view/843/
-    else if (this != forOwn && (
-          product != 'Wii' && (
-            (useFeatures && opera) ||
-            (/Opera/.test(name) && /\b(?:MSIE|Firefox)\b/i.test(ua)) ||
-            (name == 'Firefox' && /\bOS X (?:\d+\.){2,}/.test(os)) ||
-            (name == 'IE' && (
-              (os && !/^Win/.test(os) && version > 5.5) ||
-              /\bWindows XP\b/.test(os) && version > 8 ||
-              version == 8 && !/\bTrident\b/.test(ua)
-            ))
-          )
+    else if (this != forOwn && product != 'Wii' && (
+          (useFeatures && opera) ||
+          (/Opera/.test(name) && /\b(?:MSIE|Firefox)\b/i.test(ua)) ||
+          (name == 'Firefox' && /\bOS X (?:\d+\.){2,}/.test(os)) ||
+          (name == 'IE' && (
+            (os && !/^Win/.test(os) && version > 5.5) ||
+            /\bWindows XP\b/.test(os) && version > 8 ||
+            version == 8 && !/\bTrident\b/.test(ua)
+          ))
         ) && !reOpera.test((data = parse.call(forOwn, ua.replace(reOpera, '') + ';'))) && data.name) {
-
-      // when "indentifying", the UA contains both Opera and the other browser's name
+      // When "identifying", the UA contains both Opera and the other browser's name.
       data = 'ing as ' + data.name + ((data = data.version) ? ' ' + data : '');
       if (reOpera.test(name)) {
         if (/\bIE\b/.test(data) && os == 'Mac OS') {
@@ -4955,7 +5207,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
         }
         data = 'identify' + data;
       }
-      // when "masking", the UA contains only the other browser's name
+      // When "masking", the UA contains only the other browser's name.
       else {
         data = 'mask' + data;
         if (operaClass) {
@@ -4973,29 +5225,29 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
       layout = ['Presto'];
       description.push(data);
     }
-    // detect WebKit Nightly and approximate Chrome/Safari versions
+    // Detect WebKit Nightly and approximate Chrome/Safari versions.
     if ((data = (/\bAppleWebKit\/([\d.]+\+?)/i.exec(ua) || 0)[1])) {
-      // correct build for numeric comparison
+      // Correct build number for numeric comparison.
       // (e.g. "532.5" becomes "532.05")
       data = [parseFloat(data.replace(/\.(\d)$/, '.0$1')), data];
-      // nightly builds are postfixed with a `+`
+      // Nightly builds are postfixed with a "+".
       if (name == 'Safari' && data[1].slice(-1) == '+') {
         name = 'WebKit Nightly';
         prerelease = 'alpha';
         version = data[1].slice(0, -1);
       }
-      // clear incorrect browser versions
+      // Clear incorrect browser versions.
       else if (version == data[1] ||
           version == (data[2] = (/\bSafari\/([\d.]+\+?)/i.exec(ua) || 0)[1])) {
         version = null;
       }
-      // use the full Chrome version when available
+      // Use the full Chrome version when available.
       data[1] = (/\bChrome\/([\d.]+)/i.exec(ua) || 0)[1];
-      // detect Blink layout engine
-      if (data[0] == 537.36 && data[2] == 537.36 && parseFloat(data[1]) >= 28 && name != 'IE' && name != 'Microsoft Edge') {
+      // Detect Blink layout engine.
+      if (data[0] == 537.36 && data[2] == 537.36 && parseFloat(data[1]) >= 28 && layout == 'WebKit') {
         layout = ['Blink'];
       }
-      // detect JavaScriptCore
+      // Detect JavaScriptCore.
       // http://stackoverflow.com/questions/6768474/how-can-i-detect-which-javascript-engine-v8-or-jsc-is-used-at-runtime-in-androi
       if (!useFeatures || (!likeChrome && !data[1])) {
         layout && (layout[1] = 'like Safari');
@@ -5004,14 +5256,14 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
         layout && (layout[1] = 'like Chrome');
         data = data[1] || (data = data[0], data < 530 ? 1 : data < 532 ? 2 : data < 532.05 ? 3 : data < 533 ? 4 : data < 534.03 ? 5 : data < 534.07 ? 6 : data < 534.10 ? 7 : data < 534.13 ? 8 : data < 534.16 ? 9 : data < 534.24 ? 10 : data < 534.30 ? 11 : data < 535.01 ? 12 : data < 535.02 ? '13+' : data < 535.07 ? 15 : data < 535.11 ? 16 : data < 535.19 ? 17 : data < 536.05 ? 18 : data < 536.10 ? 19 : data < 537.01 ? 20 : data < 537.11 ? '21+' : data < 537.13 ? 23 : data < 537.18 ? 24 : data < 537.24 ? 25 : data < 537.36 ? 26 : layout != 'Blink' ? '27' : '28');
       }
-      // add the postfix of ".x" or "+" for approximate versions
+      // Add the postfix of ".x" or "+" for approximate versions.
       layout && (layout[1] += ' ' + (data += typeof data == 'number' ? '.x' : /[.+]/.test(data) ? '' : '+'));
-      // obscure version for some Safari 1-2 releases
+      // Obscure version for some Safari 1-2 releases.
       if (name == 'Safari' && (!version || parseInt(version) > 45)) {
         version = data;
       }
     }
-    // detect Opera desktop modes
+    // Detect Opera desktop modes.
     if (name == 'Opera' &&  (data = /\bzbov|zvav$/.exec(os))) {
       name += ' ';
       description.unshift('desktop mode');
@@ -5023,7 +5275,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
       }
       os = os.replace(RegExp(' *' + data + '$'), '');
     }
-    // detect Chrome desktop mode
+    // Detect Chrome desktop mode.
     else if (name == 'Safari' && /\bChrome\b/.exec(layout && layout[1])) {
       description.unshift('desktop mode');
       name = 'Chrome Mobile';
@@ -5036,31 +5288,32 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
         os = null;
       }
     }
-    // strip incorrect OS versions
+    // Strip incorrect OS versions.
     if (version && version.indexOf((data = /[\d.]+$/.exec(os))) == 0 &&
         ua.indexOf('/' + data + '-') > -1) {
       os = trim(os.replace(data, ''));
     }
-    // add layout engine
+    // Add layout engine.
     if (layout && !/\b(?:Avant|Nook)\b/.test(name) && (
         /Browser|Lunascape|Maxthon/.test(name) ||
-        /^(?:Adobe|Arora|Breach|Midori|Opera|Phantom|Rekonq|Rock|Sleipnir|Web)/.test(name) && layout[1])) {
-      // don't add layout details to description if they are falsey
+        name != 'Safari' && /^iOS/.test(os) && /\bSafari\b/.test(layout[1]) ||
+        /^(?:Adobe|Arora|Breach|Midori|Opera|Phantom|Rekonq|Rock|Samsung Internet|Sleipnir|Web)/.test(name) && layout[1])) {
+      // Don't add layout details to description if they are falsey.
       (data = layout[layout.length - 1]) && description.push(data);
     }
-    // combine contextual information
+    // Combine contextual information.
     if (description.length) {
       description = ['(' + description.join('; ') + ')'];
     }
-    // append manufacturer
+    // Append manufacturer to description.
     if (manufacturer && product && product.indexOf(manufacturer) < 0) {
       description.push('on ' + manufacturer);
     }
-    // append product
+    // Append product to description.
     if (product) {
-      description.push((/^on /.test(description[description.length -1]) ? '' : 'on ') + product);
+      description.push((/^on /.test(description[description.length - 1]) ? '' : 'on ') + product);
     }
-    // parse OS into an object
+    // Parse the OS into an object.
     if (os) {
       data = / ([\d.+]+)$/.exec(os);
       isSpecialCasedOS = data && os.charAt(os.length - data[0].length - 1) == '/';
@@ -5074,7 +5327,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
         }
       };
     }
-    // add browser/OS architecture
+    // Add browser/OS architecture.
     if ((data = /\b(?:AMD|IA|Win|WOW|x86_|x)64\b/i.exec(arch)) && !/\bi686\b/i.test(arch)) {
       if (os) {
         os.architecture = 64;
@@ -5086,6 +5339,13 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
       ) {
         description.unshift('32-bit');
       }
+    }
+    // Chrome 39 and above on OS X is always 64-bit.
+    else if (
+        os && /^OS X/.test(os.family) &&
+        name == 'Chrome' && parseFloat(version) >= 39
+    ) {
+      os.architecture = 64;
     }
 
     ua || (ua = null);
@@ -5111,6 +5371,9 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
     /**
      * The name of the browser's layout engine.
      *
+     * The list of common layout engines include:
+     * "Blink", "EdgeHTML", "Gecko", "Trident" and "WebKit"
+     *
      * @memberOf platform
      * @type string|null
      */
@@ -5119,6 +5382,11 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
     /**
      * The name of the product's manufacturer.
      *
+     * The list of manufacturers include:
+     * "Apple", "Archos", "Amazon", "Asus", "Barnes & Noble", "BlackBerry",
+     * "Google", "HP", "HTC", "LG", "Microsoft", "Motorola", "Nintendo",
+     * "Nokia", "Samsung" and "Sony"
+     *
      * @memberOf platform
      * @type string|null
      */
@@ -5126,6 +5394,14 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
 
     /**
      * The name of the browser/environment.
+     *
+     * The list of common browser names include:
+     * "Chrome", "Electron", "Firefox", "Firefox for iOS", "IE",
+     * "Microsoft Edge", "PhantomJS", "Safari", "SeaMonkey", "Silk",
+     * "Opera Mini" and "Opera"
+     *
+     * Mobile versions of some browsers have "Mobile" appended to their name:
+     * eg. "Chrome Mobile", "Firefox Mobile", "IE Mobile" and "Opera Mobile"
      *
      * @memberOf platform
      * @type string|null
@@ -5142,6 +5418,11 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
 
     /**
      * The name of the product hosting the browser.
+     *
+     * The list of common products include:
+     *
+     * "BlackBerry", "Galaxy S4", "Lumia", "iPad", "iPod", "iPhone", "Kindle",
+     * "Kindle Fire", "Nexus", "Nook", "PlayBook", "TouchPad" and "Transformer"
      *
      * @memberOf platform
      * @type string|null
@@ -5230,31 +5511,37 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
 
   /*--------------------------------------------------------------------------*/
 
-  // export platform
-  // some AMD build optimizers, like r.js, check for condition patterns like the following:
+  // Export platform.
+  var platform = parse();
+
+  // Some AMD build optimizers, like r.js, check for condition patterns like the following:
   if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
-    // define as an anonymous module so, through path mapping, it can be aliased
+    // Expose platform on the global object to prevent errors when platform is
+    // loaded by a script tag in the presence of an AMD loader.
+    // See http://requirejs.org/docs/errors.html#mismatch for more details.
+    root.platform = platform;
+
+    // Define as an anonymous module so platform can be aliased through path mapping.
     define('platform',[],function() {
-      return parse();
+      return platform;
     });
   }
-  // check for `exports` after `define` in case a build optimizer adds an `exports` object
+  // Check for `exports` after `define` in case a build optimizer adds an `exports` object.
   else if (freeExports && freeModule) {
-    // in Narwhal, Node.js, Rhino -require, or RingoJS
-    forOwn(parse(), function(value, key) {
+    // Export for CommonJS support.
+    forOwn(platform, function(value, key) {
       freeExports[key] = value;
     });
   }
-  // in a browser or Rhino
   else {
-    root.platform = parse();
+    // Export to the global object.
+    root.platform = platform;
   }
 }.call(this));
 
 /**
- * @license RequireJS text 2.0.14 Copyright (c) 2010-2014, The Dojo Foundation All Rights Reserved.
- * Available via the MIT or new BSD license.
- * see: http://github.com/requirejs/text for details
+ * @license text 2.0.15 Copyright jQuery Foundation and other contributors.
+ * Released under MIT license, http://github.com/requirejs/text/LICENSE
  */
 /*jslint regexp: true */
 /*global require, XMLHttpRequest, ActiveXObject,
@@ -5275,8 +5562,26 @@ define('text',['module'], function (module) {
         buildMap = {},
         masterConfig = (module.config && module.config()) || {};
 
+    function useDefault(value, defaultValue) {
+        return value === undefined || value === '' ? defaultValue : value;
+    }
+
+    //Allow for default ports for http and https.
+    function isSamePort(protocol1, port1, protocol2, port2) {
+        if (port1 === port2) {
+            return true;
+        } else if (protocol1 === protocol2) {
+            if (protocol1 === 'http') {
+                return useDefault(port1, '80') === useDefault(port2, '80');
+            } else if (protocol1 === 'https') {
+                return useDefault(port1, '443') === useDefault(port2, '443');
+            }
+        }
+        return false;
+    }
+
     text = {
-        version: '2.0.14',
+        version: '2.0.15',
 
         strip: function (content) {
             //Strips <?xml ...?> declarations so that external SVG and XML
@@ -5394,7 +5699,7 @@ define('text',['module'], function (module) {
 
             return (!uProtocol || uProtocol === protocol) &&
                    (!uHostName || uHostName.toLowerCase() === hostname.toLowerCase()) &&
-                   ((!uPort && !uHostName) || uPort === port);
+                   ((!uPort && !uHostName) || isSamePort(uProtocol, uPort, protocol, port));
         },
 
         finishLoad: function (name, strip, content, onLoad) {
@@ -6698,7 +7003,7 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/models
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
         },
         getDims: function() {
-            var dimsRaw = this.get('dimensions') || "640x360",
+            var dimsRaw = this.get('dimensions') || '640x360',
                 dimsStrs = dimsRaw.split('x'),
                 dims = [],
                 originalWidth = parseInt(dimsStrs[0], 10) || 640,
@@ -7164,7 +7469,7 @@ define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-
             return Math.min(400, $(window).height() - this.config.dialogMargin);
         },
         decorateUploader: function() {
-            var extensions = "",
+            var extensions = '',
                 selected = this.workflowSelect.getSelected(),
                 maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10);
 
@@ -9982,9 +10287,9 @@ define('ev-script/auth/base/auth',['require','jquery','underscore','backbone','e
 }));
 
 
-define('text!ev-script/auth/basic/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text"type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text"type="password"/>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/auth/basic/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= messages[\'Username\'] %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= messages[\'Password\'] %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= messages[\'Submit\'] %>"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
-define('ev-script/auth/basic/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/basic/template.html'],function(require, template) {
+define('ev-script/auth/basic/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','i18n!ev-script/nls/messages','jquery.cookie','jquery-ui','text!ev-script/auth/basic/template.html'],function(require, template) {
 
     'use strict';
 
@@ -9992,7 +10297,8 @@ define('ev-script/auth/basic/view',['require','exports','module','jquery','under
         _ = require('underscore'),
         Backbone = require('backbone'),
         cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events');
+        eventsUtil = require('ev-script/util/events'),
+        messages = require('i18n!ev-script/nls/messages');
 
     require('jquery.cookie');
     require('jquery-ui');
@@ -10007,11 +10313,13 @@ define('ev-script/auth/basic/view',['require','exports','module','jquery','under
             this.auth = options.auth;
         },
         render: function() {
-            var html = this.template();
+            var html = this.template({
+                messages: messages
+            });
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
             this.$dialog.dialog({
-                title: 'Ensemble Video Login - ' + this.config.ensembleUrl,
+                title: messages['Ensemble Video Login'] + ' - ' + this.config.ensembleUrl,
                 modal: true,
                 draggable: false,
                 resizable: false,
@@ -10123,9 +10431,9 @@ define('ev-script/auth/basic/auth',['require','jquery','underscore','backbone','
 });
 
 
-define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username">Username</label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password">Password</label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="provider">Identity Provider</label>\n            <select id="provider" name="provider" class="form-select"></select>\n        </div>\n        <div class="fieldWrap">\n            <label for="remember">Remember Me</label>\n            <input id="remember" name="remember" type="checkbox"></input>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n            <div class="loader"></div>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= messages[\'Username\'] %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= messages[\'Password\'] %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="provider"><%= messages[\'Identity Provider\'] %></label>\n            <select id="provider" name="provider" class="form-select"></select>\n        </div>\n        <div class="fieldWrap">\n            <label for="remember"><%= messages[\'Remember Me\'] %></label>\n            <input id="remember" name="remember" type="checkbox"></input>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= messages[\'Submit\'] %>"/>\n            <div class="loader"></div>\n        </div>\n    </fieldset>\n</form>\n';});
 
-define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/forms/template.html','text!ev-script/templates/options.html'],function(require, template) {
+define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','i18n!ev-script/nls/messages','jquery.cookie','jquery-ui','text!ev-script/auth/forms/template.html','text!ev-script/templates/options.html'],function(require, template) {
 
     'use strict';
 
@@ -10133,7 +10441,8 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
         _ = require('underscore'),
         Backbone = require('backbone'),
         cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events');
+        eventsUtil = require('ev-script/util/events'),
+        messages = require('i18n!ev-script/nls/messages');
 
     require('jquery.cookie');
     require('jquery-ui');
@@ -10149,7 +10458,9 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
             this.auth = options.auth;
         },
         render: function() {
-            var $html = $(this.template()),
+            var $html = $(this.template({
+                    messages: messages
+                })),
                 $select = $('#provider', $html).append(this.optionsTemplate({
                     collection: this.collection,
                     selectedId: this.config.defaultProvider
@@ -10168,7 +10479,7 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
             $(window.document).on('ajaxSend', loadingOn).on('ajaxComplete', loadingOff);
 
             this.$dialog.dialog({
-                title: 'Ensemble Video Login - ' + this.config.ensembleUrl,
+                title: messages['Ensemble Video Login'] + ' - ' + this.config.ensembleUrl,
                 modal: true,
                 draggable: false,
                 resizable: false,
@@ -10309,9 +10620,9 @@ define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/a
 });
 
 
-define('text!ev-script/auth/none/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <h3>You are unauthorized to access this content.</h3>\n</form>\n';});
+define('text!ev-script/auth/none/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <h3><%= messages[\'You are unauthorized to access this content.\'] %></h3>\n</form>\n';});
 
-define('ev-script/auth/none/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery-ui','text!ev-script/auth/none/template.html'],function(require, template) {
+define('ev-script/auth/none/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','i18n!ev-script/nls/messages','jquery-ui','text!ev-script/auth/none/template.html'],function(require, template) {
 
     'use strict';
 
@@ -10319,7 +10630,8 @@ define('ev-script/auth/none/view',['require','exports','module','jquery','unders
         _ = require('underscore'),
         Backbone = require('backbone'),
         cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events');
+        eventsUtil = require('ev-script/util/events'),
+        messages = require('i18n!ev-script/nls/messages');
 
     require('jquery-ui');
 
@@ -10331,11 +10643,13 @@ define('ev-script/auth/none/view',['require','exports','module','jquery','unders
             this.appEvents = eventsUtil.getEvents(this.appId);
         },
         render: function() {
-            var $html = $(this.template());
+            var $html = $(this.template({
+                messages: messages
+            }));
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
             this.$dialog.dialog({
-                title: 'Ensemble Video Login - ' + this.config.ensembleUrl,
+                title: messages['Ensemble Video Login'] + ' - ' + this.config.ensembleUrl,
                 modal: true,
                 draggable: false,
                 resizable: false,
@@ -10387,7 +10701,22 @@ define('ev-script/auth/none/auth',['require','jquery','underscore','ev-script/au
 
 });
 
-define('ev-script',['require','backbone','underscore','jquery','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/models/app-info','ev-script/auth/basic/auth','ev-script/auth/forms/auth','ev-script/auth/none/auth','ev-script/util/events','ev-script/util/cache'],function(require) {
+define('ev-script/nls/es-mx/messages',{
+    'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.': 'MX-Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.',
+    'It appears there is an issue with the Ensemble Video installation.': 'MX-It appears there is an issue with the Ensemble Video installation.',
+    'An unexpected error occurred.  Check the server log for more details.': 'MX-An unexpected error occurred.  Check the server log for more details.',
+    'Username': 'MX-Username',
+    'Password': 'MX-Password',
+    'Identity Provider': 'MX-Identity Provider',
+    'Remember Me': 'MX-Remember Me',
+    'Submit': 'MX-Submit',
+    'Ensemble Video Login': 'MX-Ensemble Video Login',
+    'You are unauthorized to access this content.': 'MX-You are unauthorized to access this content.'
+});
+
+
+/*global requirejs*/
+define('ev-script',['require','backbone','underscore','jquery','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/models/app-info','ev-script/auth/basic/auth','ev-script/auth/forms/auth','ev-script/auth/none/auth','ev-script/util/events','ev-script/util/cache','i18n!ev-script/nls/es-mx/messages'],function(require) {
 
     'use strict';
 
@@ -10405,6 +10734,9 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
         NoneAuth = require('ev-script/auth/none/auth'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
+
+    // TODO - Workaround to force r.js to bundle language files (will automatically bundle "root")
+    require('i18n!ev-script/nls/es-mx/messages');
 
     var EnsembleApp = function(appOptions) {
 
@@ -10567,6 +10899,16 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
     });
 
     define('jquery.plupload.queue', ['jquery', 'plupload'], function() {});
+
+    // Set the current locale based on i18n.langtag cookie
+    require('jquery.cookie');
+    require.config({
+        config: {
+            i18n: {
+                locale: ($.cookie('i18n.langtag') || 'en-us').toLowerCase()
+            }
+        }
+    });
 
     // Use almond's special top-level, synchronous require to trigger factory
     // functions, get the final module value, and export it as the public

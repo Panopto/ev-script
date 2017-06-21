@@ -23,7 +23,7 @@ define(function(require) {
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
         },
         getDims: function() {
-            var dimsRaw = this.get('dimensions') || "640x360",
+            var dimsRaw = this.get('dimensions') || '640x360',
                 dimsStrs = dimsRaw.split('x'),
                 dims = [],
                 originalWidth = parseInt(dimsStrs[0], 10) || 640,

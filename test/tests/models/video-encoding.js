@@ -48,16 +48,16 @@ define(function(require) {
             dataSet: {
                 encodings: [
                     {
-                        bitRate: "10"
+                        bitRate: '10'
                     }, {
-                        bitRate: "30"
+                        bitRate: '30'
                     }, {
-                        bitRate: "20"
+                        bitRate: '20'
                     }
                 ]
             }
         }), {
-            bitRate: "30"
+            bitRate: '30'
         });
     });
 
@@ -92,7 +92,7 @@ define(function(require) {
                         if (response.dataSet.encodings) {
                             q.strictEqual(this.encoding.get('encodingId'), response.dataSet.encodings.encodingId);
                         } else {
-                            q.ok(false, "No encodings returned.");
+                            q.ok(false, 'No encodings returned.');
                         }
                         q.start();
                     }, this),

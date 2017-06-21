@@ -11,6 +11,7 @@
   "eqnull": true,
   "node": true,
   "browser": true,
+  "quotmark": "single",
   "predef": [
     "require",
     "define",

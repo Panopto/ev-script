@@ -6,7 +6,8 @@ define(function(require, template) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events');
+        eventsUtil = require('ev-script/util/events'),
+        messages = require('i18n!ev-script/nls/messages');
 
     require('jquery.cookie');
     require('jquery-ui');
@@ -22,7 +23,9 @@ define(function(require, template) {
             this.auth = options.auth;
         },
         render: function() {
-            var $html = $(this.template()),
+            var $html = $(this.template({
+                    messages: messages
+                })),
                 $select = $('#provider', $html).append(this.optionsTemplate({
                     collection: this.collection,
                     selectedId: this.config.defaultProvider
@@ -41,7 +44,7 @@ define(function(require, template) {
             $(window.document).on('ajaxSend', loadingOn).on('ajaxComplete', loadingOff);
 
             this.$dialog.dialog({
-                title: 'Ensemble Video Login - ' + this.config.ensembleUrl,
+                title: messages['Ensemble Video Login'] + ' - ' + this.config.ensembleUrl,
                 modal: true,
                 draggable: false,
                 resizable: false,

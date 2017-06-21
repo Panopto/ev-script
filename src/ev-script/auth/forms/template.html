@@ -2,24 +2,24 @@
 <form>
     <fieldset>
         <div class="fieldWrap">
-            <label for="username">Username</label>
+            <label for="username"><%= messages['Username'] %></label>
             <input id="username" name="username" class="form-text" type="text"/>
         </div>
         <div class="fieldWrap">
-            <label for="password">Password</label>
+            <label for="password"><%= messages['Password'] %></label>
             <input id="password" name="password" class="form-text" type="password"/>
         </div>
         <div class="fieldWrap">
-            <label for="provider">Identity Provider</label>
+            <label for="provider"><%= messages['Identity Provider'] %></label>
             <select id="provider" name="provider" class="form-select"></select>
         </div>
         <div class="fieldWrap">
-            <label for="remember">Remember Me</label>
+            <label for="remember"><%= messages['Remember Me'] %></label>
             <input id="remember" name="remember" type="checkbox"></input>
         </div>
         <div class="form-actions">
             <label></label>
-            <input type="submit" class="form-submit action-submit" value="Submit"/>
+            <input type="submit" class="form-submit action-submit" value="<%= messages['Submit'] %>"/>
             <div class="loader"></div>
         </div>
     </fieldset>
