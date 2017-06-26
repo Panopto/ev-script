@@ -1,14 +1,14 @@
 <tr class="<%= (index % 2 ? 'odd' : 'even') %> resultItem">
     <td class="content-actions">
         <div class="thumbnail-wrap">
-            <img class="thumbnail" src="<%= item.get('ThumbnailUrl').replace(/width=100/i, 'width=200') %>" alt="<%= item.get('Title') %> thumbnail image"/>
+            <img class="thumbnail" src="<%= item.get('ThumbnailUrl').replace(/width=100/i, 'width=200') %>" alt="<%= sprintf(messages['%1$s thumbnail image'], item.get('Title')) %>"/>
             <% if (item.get('IsCaptioned')) { %>
-            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="CC" alt="CC"></i>
+            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= messages['CC'] %>" alt="CC"></i>
             <% } %>
         </div>
         <div class="action-links">
-            <a class="action-add" href="#" title="Choose <%= item.get('Title') %>" rel="<%= item.get('ID') %>"><i class="fa fa-plus-circle fa-lg"></i><span>Choose</span></a>
-            <a class="action-preview" href="#" title="Preview: <%= item.get('Title') %>" rel="<%= item.get('ID') %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%= item.get('Title') %></span></a>
+            <a class="action-add" href="#" title="<%= sprintf(messages['Choose %1$s'], item.get('Title')) %>" rel="<%= item.get('ID') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= messages['Choose'] %></span></a>
+            <a class="action-preview" href="#" title="<%= sprintf(messages['Preview: %1$s'], item.get('Title')) %>" rel="<%= item.get('ID') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= sprintf(messages['Preview: %1$s'], item.get('Title')) %></span></a>
         </div>
     </td>
     <td class="content-meta">
@@ -16,13 +16,13 @@
             <tbody>
                 <tr class="title">
                     <td colspan="2">
-                        <a class="action-preview" title="Preview: <%= item.get('Title') %>" href="#" rel="<%= item.get('ID') %>"><%= item.get('Title') %></a>
+                        <a class="action-preview" title="<%= sprintf(messages['Preview: %1$s'], item.get('Title')) %>" href="#" rel="<%= item.get('ID') %>"><%= item.get('Title') %></a>
                     </td>
                 </tr>
-                <tr class="trunc"><td class="label">Description</td><td class="value"><%= item.get('Description') %></td></tr>
-                <tr><td class="label">Date Added</td><td class="value"><%- new Date(item.get('AddedOn')).toLocaleString() %></td></tr>
-                <tr class="trunc"><td class="label">Keywords</td><td class="value"><%= item.get('Keywords') %></td></tr>
-                <tr><td class="label">Library</td><td class="value"><%- item.get('LibraryName') %></td></tr>
+                <tr class="trunc"><td class="label"><%= messages['Description'] %></td><td class="value"><%= item.get('Description') %></td></tr>
+                <tr><td class="label"><%= messages['Date Added'] %></td><td class="value"><%- new Date(item.get('AddedOn')).toLocaleString() %></td></tr>
+                <tr class="trunc"><td class="label"><%= messages['Keywords'] %></td><td class="value"><%= item.get('Keywords') %></td></tr>
+                <tr><td class="label"><%= messages['Library'] %></td><td class="value"><%- item.get('LibraryName') %></td></tr>
             </tbody>
         </table>
     </td>

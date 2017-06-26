@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         BaseView = require('ev-script/views/base'),
         OrganizationSelectView = require('ev-script/views/organization-select'),
         Organizations = require('ev-script/collections/organizations'),
@@ -18,6 +19,7 @@ define(function(require) {
             this.picker = options.picker;
             this.id = options.id;
             this.$el.html(this.template({
+                messages: messages,
                 formId: this.id + '-unit-selects',
                 orgSelectId: this.id + '-org-select',
                 libSelectId: this.id + '-lib-select'

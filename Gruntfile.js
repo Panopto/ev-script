@@ -30,7 +30,8 @@ module.exports = function(grunt) {
         'semver': 'bower_components/semver/semver.browser',
         'platform': 'bower_components/platform.js/platform',
         'base64': 'bower_components/base64/base64',
-        'i18n': 'bower_components/i18n/i18n'
+        'i18n': 'bower_components/i18n/i18n',
+        'sprintf': 'bower_components/sprintf/src/sprintf'
       },
       name: 'bower_components/almond/almond',
       out: 'dist/ev-script.js',

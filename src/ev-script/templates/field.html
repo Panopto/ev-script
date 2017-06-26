@@ -1,24 +1,24 @@
 <div class="logo">
-    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>
+    <a target="_blank" href="<%= ensembleUrl %>"><span><%= messages['Ensemble Logo'] %></span></a>
 </div>
 <% if (modelId) { %>
     <% if (thumbnailUrl) { %>
         <div class="thumbnail">
-            <img alt="Media thumbnail" src="<%= thumbnailUrl %>"/>
+            <img alt="<%= messages['Media thumbnail'] %>" src="<%= thumbnailUrl %>"/>
         </div>
     <% } %>
     <div class="title"><%= name %></div>
     <div class="ev-actions">
-        <a href="#" class="action-choose" title="Change <%= label %>"><i class="fa fa-folder-open fa-lg"></i><span>Change <%= label %><span></a>
-        <a href="#" class="action-preview" title="Preview: <%= name %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%= name %><span></a>
+        <a href="#" class="action-choose" title="<%= sprintf(messages['Change %1$s'], label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= sprintf(messages['Change %1$s'], label) %><span></a>
+        <a href="#" class="action-preview" title="<%= messages['Preview:'] %> <%= name %>"><i class="fa fa-play-circle fa-lg"></i><span><%= messages['Preview:'] %> <%= name %><span></a>
         <% if (type === 'video' || showPlaylistOptions) { %>
-            <a href="#" class="action-options" title="<%= label %> Embed Options"><i class="fa fa-cog fa-lg"></i><span><%= label %> Embed Options<span></a>
+            <a href="#" class="action-options" title="<%= sprintf(messages['%1$s Embed Options'], label) %>"><i class="fa fa-cog fa-lg"></i><span><%= sprintf(messages['%1$s Embed Options'], label) %><span></a>
         <% } %>
-        <a href="#" class="action-remove" title="Remove <%= label %>"><i class="fa fa-minus-circle fa-lg"></i><span>Remove <%= label %><span></a>
+        <a href="#" class="action-remove" title="<%= sprintf(messages['Remove %1$s'], label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= sprintf(messages['Remove %1$s'], label) %><span></a>
     </div>
 <% } else { %>
-    <div class="title"><em>Add <%= label %></em></div>
+    <div class="title"><em><%= sprintf(messages['Add %1$s'], label) %></em></div>
     <div class="ev-actions">
-        <a href="#" class="action-choose" title="Choose <%= label %>"><i class="fa fa-folder-open fa-lg"></i><span>Choose <%= label %><span></a>
+        <a href="#" class="action-choose" title="<%= sprintf(messages['Choose %1$s'], label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= sprintf(messages['Choose %1$s'], label) %><span></a>
     </div>
 <% } %>

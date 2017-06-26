@@ -1,11 +1,11 @@
 <form class="upload-form" method="POST" action="">
     <select class="form-select" name="MediaWorkflowID"></select>
     <div class="fieldWrap">
-        <label for="Title">Title *</label>
+        <label for="Title"><%= messages['Title'] %> *</label>
         <input class="form-text" type="text" name="Title" id="Title" />
     </div>
     <div class="fieldWrap">
-        <label for="Description">Description</label>
+        <label for="Description"><%= messages['Description'] %></label>
         <textarea class="form-text" name="Description" id="Description" />
     </div>
     <div class="upload"></div>

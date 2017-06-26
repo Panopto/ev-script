@@ -3,6 +3,7 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -19,6 +20,7 @@ define(function(require) {
         },
         render: function() {
             this.$el.html(this.template({
+                messages: messages,
                 id: this.id + '-input',
                 searchVal: this.picker.model.get('search')
             }));

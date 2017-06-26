@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         plupload = require('plupload'),
         BaseView = require('ev-script/views/base'),
         Backbone = require('backbone'),
@@ -23,7 +24,9 @@ define(function(require) {
             _.bindAll(this, 'render', 'decorateUploader', 'closeDialog', 'handleSelect');
             this.field = options.field;
             this.$anchor = this.$el;
-            this.setElement(this.template());
+            this.setElement(this.template({
+                messages: messages
+            }));
             this.$upload = this.$('.upload');
             this.workflows = options.workflows;
             this.workflowSelect = new WorkflowSelect({
@@ -76,11 +79,11 @@ define(function(require) {
                         // Remove runtime tooltip
                         $('.plupload_container', this.$upload).removeAttr('title');
                         // Change text since we only allow single file upload
-                        $('.plupload_add', this.$upload).text('Add file');
+                        $('.plupload_add', this.$upload).text(messages['Add file']);
                     }, this),
                     PostInit: _.bind(function(up, info) {
                         // Change text since we only allow single file upload
-                        $('.plupload_droptext', this.$upload).text('Drag file here.');
+                        $('.plupload_droptext', this.$upload).text(messages['Drag file here.']);
                     }, this),
                     UploadFile: _.bind(function(up, file) {
                         up.settings.multipart_params = {
@@ -97,7 +100,7 @@ define(function(require) {
                                 if (up.state === plupload.STARTED) {
                                     if ($('.plupload_cancel', this.$upload).length === 0) {
                                         // Add cancel button
-                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">Cancel upload</a>')
+                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">' + messages['Cancel upload'] + '</a>')
                                         .insertBefore($('.plupload_filelist_footer .plupload_clearer', this.$upload))
                                         .click(_.bind(function() {
                                             up.stop();
@@ -174,7 +177,7 @@ define(function(require) {
                 $dialog;
             this.$anchor.after($dialogWrap);
             this.$dialog = $dialogWrap.dialog({
-                title: 'Upload Media to Ensemble',
+                title: messages['Upload Media to Ensemble'],
                 modal: true,
                 width: this.getWidth(),
                 height: this.getHeight(),

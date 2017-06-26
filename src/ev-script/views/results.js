@@ -4,6 +4,8 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
+        sprintf = require('sprintf'),
         BaseView = require('ev-script/views/base');
 
     require('ev-scroll-loader');
@@ -28,6 +30,8 @@ define(function(require) {
         getItemHtml: function(item, index) {
             if (this.resultTemplate) {
                 return this.resultTemplate({
+                    messages: messages,
+                    sprintf: sprintf.sprintf,
                     item: item,
                     index: index
                 });
@@ -86,6 +90,8 @@ define(function(require) {
         decorate: function($item) {},
         render: function() {
             this.$el.html(this.resultsTemplate({
+                messages: messages,
+                sprintf: sprintf.sprintf,
                 totalResults: this.collection.totalResults
             }));
             this.$total = this.$('.total');
@@ -99,7 +105,9 @@ define(function(require) {
                     $contentList.append($item);
                 }, this);
             } else {
-                $contentList.append(this.emptyTemplate());
+                $contentList.append(this.emptyTemplate({
+                    messages: messages
+                }));
             }
             var scrollHeight = this.config.scrollHeight;
             this.$scrollLoader = $contentList.evScrollLoader({

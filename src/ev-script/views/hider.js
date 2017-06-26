@@ -3,6 +3,8 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
+        sprintf = require('sprintf'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -29,6 +31,8 @@ define(function(require) {
                 username = this.auth.getUser().get('UserName');
             }
             this.$el.html(this.template({
+                messages: messages,
+                sprintf: sprintf.sprintf,
                 showLogout: this.auth.isAuthenticated() && this.config.authType !== 'none',
                 username: username
             }));

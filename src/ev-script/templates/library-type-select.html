@@ -1,8 +1,8 @@
 <div>
-  <label for="<%= id %>">Type:</label>
-  <select id="<%= id %>" class="form-select source" title="Select Library Type">
-    <option value="content" <% if (sourceId === 'content') { print('selected="selected"'); } %>>Media Library</option>
-    <option value="shared" <% if (sourceId === 'shared') { print('selected="selected"'); } %>>Shared Library</option>
+  <label for="<%= id %>"><%= messages['Type:'] %></label>
+  <select id="<%= id %>" class="form-select source" title="<%= messages['Select Library Type'] %>">
+    <option value="content" <% if (sourceId === 'content') { print('selected="selected"'); } %>><%= messages['Media Library'] %></option>
+    <option value="shared" <% if (sourceId === 'shared') { print('selected="selected"'); } %>><%= messages['Shared Library'] %></option>
   </select>
-  <input type="submit" value="Go" class="form-submit" />
+  <input type="submit" value="<%= messages['Go'] %>" class="form-submit" />
 </div>

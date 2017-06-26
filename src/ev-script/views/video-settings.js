@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         SettingsView = require('ev-script/views/settings'),
         sizeUtil = require('ev-script/util/size');
 
@@ -82,11 +83,13 @@ define(function(require) {
             var html = '';
             if (!this.info.useLegacyEmbeds()) {
                 html = this.template({
+                    messages: messages,
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio()
                 });
             } else {
                 html = this.legacyTemplate({
+                    messages: messages,
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio()
                 });

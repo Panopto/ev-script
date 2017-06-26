@@ -1,5 +1,5 @@
 /**
- * ev-script 1.2.0 2017-06-21
+ * ev-script 1.3.0 2017-06-26
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2017 Symphony Video, Inc.
@@ -3971,115 +3971,6 @@ define('ev-script/models/playlist-settings',['backbone'], function(Backbone) {
     });
 });
 
-define('ev-script/util/events',['require','underscore','backbone'],function(require) {
-
-    'use strict';
-
-    var events = [],
-        _ = require('underscore'),
-        Backbone = require('backbone');
-
-    events['global'] = _.extend({}, Backbone.Events);
-
-    return {
-        initEvents: function(index) {
-            return events[index] = _.extend({}, Backbone.Events);
-        },
-        getEvents: function(index) {
-            var es;
-            if (!index) {
-                es = events['global'];
-            } else {
-                es = events[index];
-            }
-            return es;
-        }
-    };
-
-});
-
-define('ev-script/util/cache',['require','jquery','underscore','backbone'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone');
-
-    var Cache = function() {
-        this.cache = [];
-        this.get = function(index) {
-            return index ? this.cache[index] : null;
-        };
-        this.set = function(index, value) {
-            return index ? this.cache[index] = value : null;
-        };
-        return this;
-    };
-
-    var caches = new Cache();
-
-    var _getAppCache = function(appId) {
-        var appCache = caches.get(appId);
-        if (!appCache) {
-            appCache = caches.set(appId, new Cache());
-        }
-        return appCache;
-    };
-
-    // Convenience method to initialize a cache for app-specific configuration
-    var setAppConfig = function(appId, config) {
-        return _getAppCache(appId).set('config', config);
-    };
-
-    var getAppConfig = function(appId) {
-        return _getAppCache(appId).get('config');
-    };
-
-    // Convenience method to initialize a cache for app-specific authentication
-    var setAppAuth = function(appId, auth) {
-        return _getAppCache(appId).set('auth', auth);
-    };
-
-    var getAppAuth = function(appId) {
-        return _getAppCache(appId).get('auth');
-    };
-
-    // Convenience method to initialize a cache for upstream application info
-    var setAppInfo = function(appId, info) {
-        return _getAppCache(appId).set('info', info);
-    };
-
-    var getAppInfo = function(appId) {
-        return _getAppCache(appId).get('info');
-    };
-
-    var getUserCache = function(ensembleUrl, user) {
-        var appCache = caches.get(ensembleUrl);
-        if (!appCache) {
-            appCache = caches.set(ensembleUrl, new Cache());
-        }
-        var userCache = appCache.get(user);
-        if (!userCache) {
-            userCache = appCache.set(user, new Cache());
-        }
-        return userCache;
-    };
-
-    return {
-        Cache: Cache,
-        caches: caches,
-        setAppConfig: setAppConfig,
-        getAppConfig: getAppConfig,
-        setAppAuth: setAppAuth,
-        getAppAuth: getAppAuth,
-        setAppInfo: setAppInfo,
-        getAppInfo: getAppInfo,
-        getUserCache: getUserCache
-    };
-
-});
-
 /**
  * @license RequireJS i18n 2.0.6 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
@@ -4279,9 +4170,419 @@ define('ev-script/nls/root/messages',{
     'Remember Me': 'Remember Me',
     'Submit': 'Submit',
     'Ensemble Video Login': 'Ensemble Video Login',
-    'You are unauthorized to access this content.': 'You are unauthorized to access this content.'
+    'You are unauthorized to access this content.': 'You are unauthorized to access this content.',
+    'Media': 'Media',
+    'Playlist': 'Playlist',
+    'Ensemble Logo': 'Ensemble Logo',
+    'Media thumbnail': 'Media thumbnail',
+    'Change %1$s': 'Change %1$s',
+    'Preview:': 'Preview:',
+    'Preview: %1$s': 'Preview: %1$s',
+    '%1$s Embed Options': '%1$s Embed Options',
+    'Remove %1$s': 'Remove %1$s',
+    'Add %1$s': 'Add %1$s',
+    'Choose': 'Choose',
+    'Choose %1$s': 'Choose %1$s',
+    'Hide Picker': 'Hide Picker',
+    'Hide': 'Hide',
+    'Logout %1$s': 'Logout %1$s',
+    'Logout': 'Logout',
+    'Loading...': 'Loading...',
+    'Type:': 'Type:',
+    'Select Library Type': 'Select Library Type',
+    'Media Library': 'Media Library',
+    'Shared Library': 'Shared Library',
+    'Go': 'Go',
+    'No results available.': 'No results available.',
+    'Search returned %1$s results.': 'Search returned %1$s results.',
+    'Reload': 'Reload',
+    '%1$s thumbnail image': '%1$s thumbnail image',
+    'CC': 'CC',
+    'Description': 'Description',
+    'Date Added': 'Date Added',
+    'Keywords': 'Keywords',
+    'Library': 'Library',
+    'Search:': 'Search:',
+    'Search Media': 'Search Media',
+    'Choose Layout': 'Choose Layout',
+    'Showcase': 'Showcase',
+    'Layout Options': 'Layout Options',
+    'Sort By': 'Sort By',
+    'Date Produced': 'Date Produced',
+    'Title': 'Title',
+    'Duration': 'Duration',
+    'Ascending': 'Ascending',
+    'Descending': 'Descending',
+    'Search String': 'Search String',
+    'Category': 'Category',
+    'None': 'None',
+    'Number of Results': 'Number of Results',
+    'Category List': 'Category List',
+    'Horizontal': 'Horizontal',
+    'Vertical': 'Vertical',
+    'Content Details': 'Content Details',
+    'Embed Code': 'Embed Code',
+    'Statistics': 'Statistics',
+    'Attachments': 'Attachments',
+    'Annotations': 'Annotations',
+    'Links': 'Links',
+    'Credits': 'Credits',
+    'Social Tools': 'Social Tools',
+    'Auto Play (PC Only)': 'Auto Play (PC Only)',
+    'Captions "On" By Default': 'Captions "On" By Default',
+    'Audio Preview Image': 'Audio Preview Image',
+    'Caption Search': 'Caption Search',
+    'Save': 'Save',
+    'Cancel': 'Cancel',
+    'Size': 'Size',
+    'Original': 'Original',
+    'Meta Data': 'Meta Data',
+    'Download Link': 'Download Link',
+    'Show Title': 'Show Title',
+    'Auto Play': 'Auto Play',
+    'Show Captions': 'Show Captions',
+    'Hide Controls': 'Hide Controls',
+    'Organization:': 'Organization:',
+    'Select Organization': 'Select Organization',
+    'Library:': 'Library:',
+    'Select Library': 'Select Library',
+    'More': 'More',
+    'Less': 'Less',
+    'Upload': 'Upload',
+    'Upload Media to Ensemble': 'Upload Media to Ensemble',
+    'Cancel upload': 'Cancel upload',
+    'Add file': 'Add file',
+    'Drag file here.': 'Drag file here.'
 });
 
+
+/* global window, exports, define */
+
+!function() {
+    'use strict'
+
+    var re = {
+        not_string: /[^s]/,
+        not_bool: /[^t]/,
+        not_type: /[^T]/,
+        not_primitive: /[^v]/,
+        number: /[diefg]/,
+        numeric_arg: /[bcdiefguxX]/,
+        json: /[j]/,
+        not_json: /[^j]/,
+        text: /^[^\x25]+/,
+        modulo: /^\x25{2}/,
+        placeholder: /^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-gijostTuvxX])/,
+        key: /^([a-z_][a-z_\d]*)/i,
+        key_access: /^\.([a-z_][a-z_\d]*)/i,
+        index_access: /^\[(\d+)\]/,
+        sign: /^[\+\-]/
+    }
+
+    function sprintf(key) {
+        // `arguments` is not an array, but should be fine for this call
+        return sprintf_format(sprintf_parse(key), arguments)
+    }
+
+    function vsprintf(fmt, argv) {
+        return sprintf.apply(null, [fmt].concat(argv || []))
+    }
+
+    function sprintf_format(parse_tree, argv) {
+        var cursor = 1, tree_length = parse_tree.length, arg, output = '', i, k, match, pad, pad_character, pad_length, is_positive, sign
+        for (i = 0; i < tree_length; i++) {
+            if (typeof parse_tree[i] === 'string') {
+                output += parse_tree[i]
+            }
+            else if (Array.isArray(parse_tree[i])) {
+                match = parse_tree[i] // convenience purposes only
+                if (match[2]) { // keyword argument
+                    arg = argv[cursor]
+                    for (k = 0; k < match[2].length; k++) {
+                        if (!arg.hasOwnProperty(match[2][k])) {
+                            throw new Error(sprintf('[sprintf] property "%s" does not exist', match[2][k]))
+                        }
+                        arg = arg[match[2][k]]
+                    }
+                }
+                else if (match[1]) { // positional argument (explicit)
+                    arg = argv[match[1]]
+                }
+                else { // positional argument (implicit)
+                    arg = argv[cursor++]
+                }
+
+                if (re.not_type.test(match[8]) && re.not_primitive.test(match[8]) && arg instanceof Function) {
+                    arg = arg()
+                }
+
+                if (re.numeric_arg.test(match[8]) && (typeof arg !== 'number' && isNaN(arg))) {
+                    throw new TypeError(sprintf('[sprintf] expecting number but found %T', arg))
+                }
+
+                if (re.number.test(match[8])) {
+                    is_positive = arg >= 0
+                }
+
+                switch (match[8]) {
+                    case 'b':
+                        arg = parseInt(arg, 10).toString(2)
+                        break
+                    case 'c':
+                        arg = String.fromCharCode(parseInt(arg, 10))
+                        break
+                    case 'd':
+                    case 'i':
+                        arg = parseInt(arg, 10)
+                        break
+                    case 'j':
+                        arg = JSON.stringify(arg, null, match[6] ? parseInt(match[6]) : 0)
+                        break
+                    case 'e':
+                        arg = match[7] ? parseFloat(arg).toExponential(match[7]) : parseFloat(arg).toExponential()
+                        break
+                    case 'f':
+                        arg = match[7] ? parseFloat(arg).toFixed(match[7]) : parseFloat(arg)
+                        break
+                    case 'g':
+                        arg = match[7] ? String(Number(arg.toPrecision(match[7]))) : parseFloat(arg)
+                        break
+                    case 'o':
+                        arg = (parseInt(arg, 10) >>> 0).toString(8)
+                        break
+                    case 's':
+                        arg = String(arg)
+                        arg = (match[7] ? arg.substring(0, match[7]) : arg)
+                        break
+                    case 't':
+                        arg = String(!!arg)
+                        arg = (match[7] ? arg.substring(0, match[7]) : arg)
+                        break
+                    case 'T':
+                        arg = Object.prototype.toString.call(arg).slice(8, -1).toLowerCase()
+                        arg = (match[7] ? arg.substring(0, match[7]) : arg)
+                        break
+                    case 'u':
+                        arg = parseInt(arg, 10) >>> 0
+                        break
+                    case 'v':
+                        arg = arg.valueOf()
+                        arg = (match[7] ? arg.substring(0, match[7]) : arg)
+                        break
+                    case 'x':
+                        arg = (parseInt(arg, 10) >>> 0).toString(16)
+                        break
+                    case 'X':
+                        arg = (parseInt(arg, 10) >>> 0).toString(16).toUpperCase()
+                        break
+                }
+                if (re.json.test(match[8])) {
+                    output += arg
+                }
+                else {
+                    if (re.number.test(match[8]) && (!is_positive || match[3])) {
+                        sign = is_positive ? '+' : '-'
+                        arg = arg.toString().replace(re.sign, '')
+                    }
+                    else {
+                        sign = ''
+                    }
+                    pad_character = match[4] ? match[4] === '0' ? '0' : match[4].charAt(1) : ' '
+                    pad_length = match[6] - (sign + arg).length
+                    pad = match[6] ? (pad_length > 0 ? pad_character.repeat(pad_length) : '') : ''
+                    output += match[5] ? sign + arg + pad : (pad_character === '0' ? sign + pad + arg : pad + sign + arg)
+                }
+            }
+        }
+        return output
+    }
+
+    var sprintf_cache = Object.create(null)
+
+    function sprintf_parse(fmt) {
+        if (sprintf_cache[fmt]) {
+            return sprintf_cache[fmt]
+        }
+
+        var _fmt = fmt, match, parse_tree = [], arg_names = 0
+        while (_fmt) {
+            if ((match = re.text.exec(_fmt)) !== null) {
+                parse_tree.push(match[0])
+            }
+            else if ((match = re.modulo.exec(_fmt)) !== null) {
+                parse_tree.push('%')
+            }
+            else if ((match = re.placeholder.exec(_fmt)) !== null) {
+                if (match[2]) {
+                    arg_names |= 1
+                    var field_list = [], replacement_field = match[2], field_match = []
+                    if ((field_match = re.key.exec(replacement_field)) !== null) {
+                        field_list.push(field_match[1])
+                        while ((replacement_field = replacement_field.substring(field_match[0].length)) !== '') {
+                            if ((field_match = re.key_access.exec(replacement_field)) !== null) {
+                                field_list.push(field_match[1])
+                            }
+                            else if ((field_match = re.index_access.exec(replacement_field)) !== null) {
+                                field_list.push(field_match[1])
+                            }
+                            else {
+                                throw new SyntaxError('[sprintf] failed to parse named argument key')
+                            }
+                        }
+                    }
+                    else {
+                        throw new SyntaxError('[sprintf] failed to parse named argument key')
+                    }
+                    match[2] = field_list
+                }
+                else {
+                    arg_names |= 2
+                }
+                if (arg_names === 3) {
+                    throw new Error('[sprintf] mixing positional and named placeholders is not (yet) supported')
+                }
+                parse_tree.push(match)
+            }
+            else {
+                throw new SyntaxError('[sprintf] unexpected placeholder')
+            }
+            _fmt = _fmt.substring(match[0].length)
+        }
+        return sprintf_cache[fmt] = parse_tree
+    }
+
+    /**
+     * export to either browser or node.js
+     */
+    /* eslint-disable quote-props */
+    if (typeof exports !== 'undefined') {
+        exports['sprintf'] = sprintf
+        exports['vsprintf'] = vsprintf
+    }
+    if (typeof window !== 'undefined') {
+        window['sprintf'] = sprintf
+        window['vsprintf'] = vsprintf
+
+        if (typeof define === 'function' && define['amd']) {
+            define('sprintf',[],function() {
+                return {
+                    'sprintf': sprintf,
+                    'vsprintf': vsprintf
+                }
+            })
+        }
+    }
+    /* eslint-enable quote-props */
+}()
+;
+define('ev-script/util/events',['require','underscore','backbone'],function(require) {
+
+    'use strict';
+
+    var events = [],
+        _ = require('underscore'),
+        Backbone = require('backbone');
+
+    events['global'] = _.extend({}, Backbone.Events);
+
+    return {
+        initEvents: function(index) {
+            return events[index] = _.extend({}, Backbone.Events);
+        },
+        getEvents: function(index) {
+            var es;
+            if (!index) {
+                es = events['global'];
+            } else {
+                es = events[index];
+            }
+            return es;
+        }
+    };
+
+});
+
+define('ev-script/util/cache',['require','jquery','underscore','backbone'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone');
+
+    var Cache = function() {
+        this.cache = [];
+        this.get = function(index) {
+            return index ? this.cache[index] : null;
+        };
+        this.set = function(index, value) {
+            return index ? this.cache[index] = value : null;
+        };
+        return this;
+    };
+
+    var caches = new Cache();
+
+    var _getAppCache = function(appId) {
+        var appCache = caches.get(appId);
+        if (!appCache) {
+            appCache = caches.set(appId, new Cache());
+        }
+        return appCache;
+    };
+
+    // Convenience method to initialize a cache for app-specific configuration
+    var setAppConfig = function(appId, config) {
+        return _getAppCache(appId).set('config', config);
+    };
+
+    var getAppConfig = function(appId) {
+        return _getAppCache(appId).get('config');
+    };
+
+    // Convenience method to initialize a cache for app-specific authentication
+    var setAppAuth = function(appId, auth) {
+        return _getAppCache(appId).set('auth', auth);
+    };
+
+    var getAppAuth = function(appId) {
+        return _getAppCache(appId).get('auth');
+    };
+
+    // Convenience method to initialize a cache for upstream application info
+    var setAppInfo = function(appId, info) {
+        return _getAppCache(appId).set('info', info);
+    };
+
+    var getAppInfo = function(appId) {
+        return _getAppCache(appId).get('info');
+    };
+
+    var getUserCache = function(ensembleUrl, user) {
+        var appCache = caches.get(ensembleUrl);
+        if (!appCache) {
+            appCache = caches.set(ensembleUrl, new Cache());
+        }
+        var userCache = appCache.get(user);
+        if (!userCache) {
+            userCache = appCache.set(user, new Cache());
+        }
+        return userCache;
+    };
+
+    return {
+        Cache: Cache,
+        caches: caches,
+        setAppConfig: setAppConfig,
+        getAppConfig: getAppConfig,
+        setAppAuth: setAppAuth,
+        getAppAuth: getAppAuth,
+        setAppInfo: setAppInfo,
+        getAppInfo: getAppInfo,
+        getUserCache: getUserCache
+    };
+
+});
 
 define('ev-script/views/base',['require','jquery','underscore','backbone','ev-script/util/events','ev-script/util/cache','i18n!ev-script/nls/messages'],function(require) {
 
@@ -5949,13 +6250,15 @@ define('text',['module'], function (module) {
 });
 
 
-define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="Hide Picker">Hide</a>\n<% if (showLogout) { %>\n    <a class="action-logout" href="#" title="Logout <%= username %>">Logout</a>\n<% } %>\n';});
+define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="<%= messages[\'Hide Picker\'] %>"><%= messages[\'Hide\'] %></a>\n<% if (showLogout) { %>\n    <a class="action-logout" href="#" title="<%= sprintf(messages[\'Logout %1$s\'], username) %>"><%= messages[\'Logout\'] %></a>\n<% } %>\n';});
 
-define('ev-script/views/hider',['require','underscore','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
+define('ev-script/views/hider',['require','underscore','i18n!ev-script/nls/messages','sprintf','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
+        sprintf = require('sprintf'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -5982,6 +6285,8 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
                 username = this.auth.getUser().get('UserName');
             }
             this.$el.html(this.template({
+                messages: messages,
+                sprintf: sprintf.sprintf,
                 showLogout: this.auth.isAuthenticated() && this.config.authType !== 'none',
                 username: username
             }));
@@ -6084,13 +6389,14 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
 });
 
 
-define('text!ev-script/templates/search.html',[],function () { return '<label for="<%= id %>">Search:</label>\n<input id="<%= id %>" type="search" class="form-text search" value="<%- searchVal %>" title="Search Media" />\n<input type="submit" value="Go" class="form-submit" />\n';});
+define('text!ev-script/templates/search.html',[],function () { return '<label for="<%= id %>"><%= messages[\'Search:\'] %></label>\n<input id="<%= id %>" type="search" class="form-text search" value="<%- searchVal %>" title="<%= messages[\'Search Media\'] %>" />\n<input type="submit" value="<%= messages[\'Go\'] %>" class="form-submit" />\n';});
 
-define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
+define('ev-script/views/search',['require','underscore','i18n!ev-script/nls/messages','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -6107,6 +6413,7 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base','
         },
         render: function() {
             this.$el.html(this.template({
+                messages: messages,
                 id: this.id + '-input',
                 searchVal: this.picker.model.get('search')
             }));
@@ -6145,13 +6452,14 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base','
 });
 
 
-define('text!ev-script/templates/library-type-select.html',[],function () { return '<div>\n  <label for="<%= id %>">Type:</label>\n  <select id="<%= id %>" class="form-select source" title="Select Library Type">\n    <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>>Media Library</option>\n    <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>>Shared Library</option>\n  </select>\n  <input type="submit" value="Go" class="form-submit" />\n</div>\n';});
+define('text!ev-script/templates/library-type-select.html',[],function () { return '<div>\n  <label for="<%= id %>"><%= messages[\'Type:\'] %></label>\n  <select id="<%= id %>" class="form-select source" title="<%= messages[\'Select Library Type\'] %>">\n    <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>><%= messages[\'Media Library\'] %></option>\n    <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>><%= messages[\'Shared Library\'] %></option>\n  </select>\n  <input type="submit" value="<%= messages[\'Go\'] %>" class="form-submit" />\n</div>\n';});
 
-define('ev-script/views/library-type-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
+define('ev-script/views/library-type-select',['require','underscore','i18n!ev-script/nls/messages','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -6167,6 +6475,7 @@ define('ev-script/views/library-type-select',['require','underscore','ev-script/
         },
         render: function() {
             this.$el.html(this.template({
+                messages: messages,
                 id: this.id + '-select',
                 sourceId: this.picker.model.get('sourceId')
             }));
@@ -6323,11 +6632,12 @@ define('ev-script/collections/organizations',['require','ev-script/collections/b
 
 });
 
-define('ev-script/views/library-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
+define('ev-script/views/library-select',['require','underscore','i18n!ev-script/nls/messages','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -6336,7 +6646,7 @@ define('ev-script/views/library-select',['require','underscore','ev-script/views
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render');
             this.picker = options.picker;
-            this.$el.html('<option value="-1">Loading...</option>');
+            this.$el.html('<option value="-1">' + messages['Loading...'] + '</option>');
             this.collection.on('reset', this.render);
         },
         render: function() {
@@ -6397,14 +6707,15 @@ define('ev-script/collections/libraries',['require','ev-script/collections/base'
 });
 
 
-define('text!ev-script/templates/unit-selects.html',[],function () { return '<div id="<%= formId %>" class="unit-selects">\n    <label for="<%= orgSelectId %>">Organization:</label><select id="<%= orgSelectId %>" class="form-select organizations" title="Select Organization"></select><label for="<%= libSelectId %>">Library:</label><select id="<%= libSelectId %>" class="form-select libraries" title="Select Library"></select><input type="submit" value="Go" class="form-submit" />\n</div>\n';});
+define('text!ev-script/templates/unit-selects.html',[],function () { return '<div id="<%= formId %>" class="unit-selects">\n    <label for="<%= orgSelectId %>"><%= messages[\'Organization:\'] %></label><select id="<%= orgSelectId %>" class="form-select organizations" title="<%= messages[\'Select Organization\'] %>"></select><label for="<%= libSelectId %>"><%= messages[\'Library:\'] %></label><select id="<%= libSelectId %>" class="form-select libraries" title="<%= messages[\'Select Library\'] %>"></select><input type="submit" value="<%= messages[\'Go\'] %>" class="form-submit" />\n</div>\n';});
 
-define('ev-script/views/unit-selects',['require','jquery','underscore','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','text!ev-script/templates/unit-selects.html'],function(require) {
+define('ev-script/views/unit-selects',['require','jquery','underscore','i18n!ev-script/nls/messages','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','text!ev-script/templates/unit-selects.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         BaseView = require('ev-script/views/base'),
         OrganizationSelectView = require('ev-script/views/organization-select'),
         Organizations = require('ev-script/collections/organizations'),
@@ -6419,6 +6730,7 @@ define('ev-script/views/unit-selects',['require','jquery','underscore','ev-scrip
             this.picker = options.picker;
             this.id = options.id;
             this.$el.html(this.template({
+                messages: messages,
                 formId: this.id + '-unit-selects',
                 orgSelectId: this.id + '-org-select',
                 libSelectId: this.id + '-lib-select'
@@ -6564,17 +6876,19 @@ define('ev-script/views/unit-selects',['require','jquery','underscore','ev-scrip
 });
 
 
-define('text!ev-script/templates/results.html',[],function () { return '<div class="total">\n    Search returned <%= totalResults %> results.\n    <a href="#" class="action-refresh" title="Reload"><i class="fa fa-fw fa-lg fa-refresh"></i></a>\n</div>\n<div class="results">\n    <table class="content-list"></table>\n</div>\n';});
+define('text!ev-script/templates/results.html',[],function () { return '<div class="total">\n    <%= sprintf(messages[\'Search returned %1$s results.\'], totalResults) %>\n    <a href="#" class="action-refresh" title="<%= messages[\'Reload\'] %>"><i class="fa fa-fw fa-lg fa-refresh"></i></a>\n</div>\n<div class="results">\n    <table class="content-list"></table>\n</div>\n';});
 
 
-define('text!ev-script/templates/no-results.html',[],function () { return '<tr class="odd"><td colspan="2">No results available.</td></tr>\n';});
+define('text!ev-script/templates/no-results.html',[],function () { return '<tr class="odd"><td colspan="2"><%= messages[\'No results available.\'] %></td></tr>\n';});
 
-define('ev-script/views/results',['require','jquery','underscore','ev-script/views/base','ev-scroll-loader','text!ev-script/templates/results.html','text!ev-script/templates/no-results.html'],function(require) {
+define('ev-script/views/results',['require','jquery','underscore','i18n!ev-script/nls/messages','sprintf','ev-script/views/base','ev-scroll-loader','text!ev-script/templates/results.html','text!ev-script/templates/no-results.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
+        sprintf = require('sprintf'),
         BaseView = require('ev-script/views/base');
 
     require('ev-scroll-loader');
@@ -6599,6 +6913,8 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
         getItemHtml: function(item, index) {
             if (this.resultTemplate) {
                 return this.resultTemplate({
+                    messages: messages,
+                    sprintf: sprintf.sprintf,
                     item: item,
                     index: index
                 });
@@ -6657,6 +6973,8 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
         decorate: function($item) {},
         render: function() {
             this.$el.html(this.resultsTemplate({
+                messages: messages,
+                sprintf: sprintf.sprintf,
                 totalResults: this.collection.totalResults
             }));
             this.$total = this.$('.total');
@@ -6670,7 +6988,9 @@ define('ev-script/views/results',['require','jquery','underscore','ev-script/vie
                     $contentList.append($item);
                 }, this);
             } else {
-                $contentList.append(this.emptyTemplate());
+                $contentList.append(this.emptyTemplate({
+                    messages: messages
+                }));
             }
             var scrollHeight = this.config.scrollHeight;
             this.$scrollLoader = $contentList.evScrollLoader({
@@ -7207,14 +7527,15 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
 define("jquery-truncate-html", function(){});
 
 
-define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %> resultItem">\n    <td class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%= item.get(\'Title\') %> thumbnail image"/>\n            <% if (item.get(\'IsCaptioned\')) { %>\n            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="CC" alt="CC"></i>\n            <% } %>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%= item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span>Choose</span></a>\n            <a class="action-preview" href="#" title="Preview: <%= item.get(\'Title\') %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%= item.get(\'Title\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="Preview: <%= item.get(\'Title\') %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label">Description</td><td class="value"><%= item.get(\'Description\') %></td></tr>\n                <tr><td class="label">Date Added</td><td class="value"><%- new Date(item.get(\'AddedOn\')).toLocaleString() %></td></tr>\n                <tr class="trunc"><td class="label">Keywords</td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label">Library</td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
+define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %> resultItem">\n    <td class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%= sprintf(messages[\'%1$s thumbnail image\'], item.get(\'Title\')) %>"/>\n            <% if (item.get(\'IsCaptioned\')) { %>\n            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= messages[\'CC\'] %>" alt="CC"></i>\n            <% } %>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= sprintf(messages[\'Choose %1$s\'], item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= messages[\'Choose\'] %></span></a>\n            <a class="action-preview" href="#" title="<%= sprintf(messages[\'Preview: %1$s\'], item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= sprintf(messages[\'Preview: %1$s\'], item.get(\'Title\')) %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="<%= sprintf(messages[\'Preview: %1$s\'], item.get(\'Title\')) %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label"><%= messages[\'Description\'] %></td><td class="value"><%= item.get(\'Description\') %></td></tr>\n                <tr><td class="label"><%= messages[\'Date Added\'] %></td><td class="value"><%- new Date(item.get(\'AddedOn\')).toLocaleString() %></td></tr>\n                <tr class="trunc"><td class="label"><%= messages[\'Keywords\'] %></td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label"><%= messages[\'Library\'] %></td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
 
-define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-truncate-html','text!ev-script/templates/video-result.html'],function(require) {
+define('ev-script/views/video-results',['require','jquery','underscore','i18n!ev-script/nls/messages','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-truncate-html','text!ev-script/templates/video-result.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         ResultsView = require('ev-script/views/results'),
         VideoSettings = require('ev-script/models/video-settings'),
         VideoPreviewView = require('ev-script/views/video-preview');
@@ -7246,12 +7567,12 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
                     $this.data('fullText', fullText);
                     $full = $('<span>' + fullText + '</span>');
                     $short = $('<span>' + truncText + '</span>');
-                    var $shorten = $('<a href="#">Less</a>').click(function(e) {
+                    var $shorten = $('<a href="#">' + messages['Less'] + '</a>').click(function(e) {
                         $full.hide();
                         $short.show();
                         e.preventDefault();
                     });
-                    var $expand = $('<a href="#">More</a>').click(function(e) {
+                    var $expand = $('<a href="#">' + messages['More'] + '</a>').click(function(e) {
                         $short.hide();
                         $full.show();
                         e.preventDefault();
@@ -7391,11 +7712,12 @@ define('ev-script/collections/media-workflows',['require','ev-script/collections
 });
 
 
-define('ev-script/views/workflow-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
+define('ev-script/views/workflow-select',['require','underscore','i18n!ev-script/nls/messages','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -7403,7 +7725,7 @@ define('ev-script/views/workflow-select',['require','underscore','ev-script/view
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render');
-            this.$el.html('<option value="-1">Loading...</option>');
+            this.$el.html('<option value="-1">' + messages['Loading...'] + '</option>');
             this.render();
         },
         render: function() {
@@ -7423,14 +7745,15 @@ define('ev-script/views/workflow-select',['require','underscore','ev-script/view
 });
 
 
-define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <select class="form-select" name="MediaWorkflowID"></select>\n    <div class="fieldWrap">\n        <label for="Title">Title *</label>\n        <input class="form-text" type="text" name="Title" id="Title" />\n    </div>\n    <div class="fieldWrap">\n        <label for="Description">Description</label>\n        <textarea class="form-text" name="Description" id="Description" />\n    </div>\n    <div class="upload"></div>\n</form>\n';});
+define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <select class="form-select" name="MediaWorkflowID"></select>\n    <div class="fieldWrap">\n        <label for="Title"><%= messages[\'Title\'] %> *</label>\n        <input class="form-text" type="text" name="Title" id="Title" />\n    </div>\n    <div class="fieldWrap">\n        <label for="Description"><%= messages[\'Description\'] %></label>\n        <textarea class="form-text" name="Description" id="Description" />\n    </div>\n    <div class="upload"></div>\n</form>\n';});
 
-define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-script/views/base','backbone','ev-script/views/workflow-select','ev-script/models/video-settings','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
+define('ev-script/views/upload',['require','jquery','underscore','i18n!ev-script/nls/messages','plupload','ev-script/views/base','backbone','ev-script/views/workflow-select','ev-script/models/video-settings','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         plupload = require('plupload'),
         BaseView = require('ev-script/views/base'),
         Backbone = require('backbone'),
@@ -7450,7 +7773,9 @@ define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-
             _.bindAll(this, 'render', 'decorateUploader', 'closeDialog', 'handleSelect');
             this.field = options.field;
             this.$anchor = this.$el;
-            this.setElement(this.template());
+            this.setElement(this.template({
+                messages: messages
+            }));
             this.$upload = this.$('.upload');
             this.workflows = options.workflows;
             this.workflowSelect = new WorkflowSelect({
@@ -7503,11 +7828,11 @@ define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-
                         // Remove runtime tooltip
                         $('.plupload_container', this.$upload).removeAttr('title');
                         // Change text since we only allow single file upload
-                        $('.plupload_add', this.$upload).text('Add file');
+                        $('.plupload_add', this.$upload).text(messages['Add file']);
                     }, this),
                     PostInit: _.bind(function(up, info) {
                         // Change text since we only allow single file upload
-                        $('.plupload_droptext', this.$upload).text('Drag file here.');
+                        $('.plupload_droptext', this.$upload).text(messages['Drag file here.']);
                     }, this),
                     UploadFile: _.bind(function(up, file) {
                         up.settings.multipart_params = {
@@ -7524,7 +7849,7 @@ define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-
                                 if (up.state === plupload.STARTED) {
                                     if ($('.plupload_cancel', this.$upload).length === 0) {
                                         // Add cancel button
-                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">Cancel upload</a>')
+                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">' + messages['Cancel upload'] + '</a>')
                                         .insertBefore($('.plupload_filelist_footer .plupload_clearer', this.$upload))
                                         .click(_.bind(function() {
                                             up.stop();
@@ -7601,7 +7926,7 @@ define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-
                 $dialog;
             this.$anchor.after($dialogWrap);
             this.$dialog = $dialogWrap.dialog({
-                title: 'Upload Media to Ensemble',
+                title: messages['Upload Media to Ensemble'],
                 modal: true,
                 width: this.getWidth(),
                 height: this.getHeight(),
@@ -7690,12 +8015,13 @@ define("base64", function(){});
 
 define('text!ev-script/templates/anthem.html',[],function () { return '<iframe src="ensemble://<%= tokenDetailsApiUrl %>" style="display:none;"></iframe>\n';});
 
-define('ev-script/views/video-picker',['require','jquery','underscore','platform','ev-script/views/picker','ev-script/views/search','ev-script/views/library-type-select','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos','ev-script/collections/media-workflows','ev-script/views/upload','base64','text!ev-script/templates/anthem.html'],function(require) {
+define('ev-script/views/video-picker',['require','jquery','underscore','i18n!ev-script/nls/messages','platform','ev-script/views/picker','ev-script/views/search','ev-script/views/library-type-select','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos','ev-script/collections/media-workflows','ev-script/views/upload','base64','text!ev-script/templates/anthem.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         platform = require('platform'),
         PickerView = require('ev-script/views/picker'),
         SearchView = require('ev-script/views/search'),
@@ -7719,9 +8045,9 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
             this.$filterBlock = this.$('div.ev-filter-block');
             if (this.info.get('ApplicationVersion')) {
                 this.$actions = $('<div class="ev-actions"></div>');
-                this.$upload = $('<button type="button" class="action-upload" title="Upload"><i class="fa fa-upload fa-fw"></i><span>Upload<span></button>').css('display', 'none');
+                this.$upload = $('<button type="button" class="action-upload" title="' + messages['Upload'] + '"><i class="fa fa-upload fa-fw"></i><span>' + messages['Upload'] + '<span></button>').css('display', 'none');
                 this.$actions.append(this.$upload);
-                this.$record = $('<button type="button" class="action-record" title="Record"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>Record<span></button>').css('display', 'none');
+                this.$record = $('<button type="button" class="action-record" title="' + messages['Record'] + '"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>' + messages['Record'] + '<span></button>').css('display', 'none');
                 this.$actions.append(this.$record);
                 this.$filterBlock.prepend(this.$actions);
             }
@@ -8041,20 +8367,21 @@ define('ev-script/util/size',['require','underscore'],function(require) {
 });
 
 
-define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size">Size</label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original">Original</option>\n            </select>\n        </div>\n        <div>\n            <div class="fieldWrap inline-option">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle">Title</label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="socialsharing" class="form-checkbox" <% if (model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox"/>\n                <label for="socialsharing">Social Tools</label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                <label for="annotations">Annotations</label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                <label for="captionsearch">Caption Search</label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                <label for="autoplay">Auto Play (PC Only)</label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments">Attachments</label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links">Links</label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata">Meta Data</label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                <label for="dateproduced">Date Produced</label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="embedcode" class="form-checkbox" <% if (model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox"/>\n                <label for="embedcode">Embed Code</label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="download" class="form-checkbox" <% if (model.get(\'download\')) { print(\'checked="checked"\'); } %> name="download" type="checkbox"/>\n                <label for="download">Download Link</label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions">Captions "On" By Default</label>\n            </div>\n            <% if (isAudio) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %>  name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage">Audio Preview Image</label>\n                </div>\n            <% } %>\n         </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span>Save</span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span>Cancel</span></button>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size"><%= messages[\'Size\'] %></label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original"><%= messages[\'Original\'] %></option>\n            </select>\n        </div>\n        <div>\n            <div class="fieldWrap inline-option">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle"><%= messages[\'Title\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="socialsharing" class="form-checkbox" <% if (model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox"/>\n                <label for="socialsharing"><%= messages[\'Social Tools\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                <label for="annotations"><%= messages[\'Annotations\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                <label for="captionsearch"><%= messages[\'Caption Search\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                <label for="autoplay"><%= messages[\'Auto Play (PC Only)\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments"><%= messages[\'Attachments\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links"><%= messages[\'Links\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata"><%= messages[\'Meta Data\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                <label for="dateproduced"><%= messages[\'Date Produced\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="embedcode" class="form-checkbox" <% if (model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox"/>\n                <label for="embedcode"><%= messages[\'Embed Code\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="download" class="form-checkbox" <% if (model.get(\'download\')) { print(\'checked="checked"\'); } %> name="download" type="checkbox"/>\n                <label for="download"><%= messages[\'Download Link\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions"><%= messages[\'Captions "On" By Default\'] %></label>\n            </div>\n            <% if (isAudio) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %>  name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= messages[\'Audio Preview Image\'] %></label>\n                </div>\n            <% } %>\n         </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= messages[\'Save\'] %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= messages[\'Cancel\'] %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
 
 
-define('text!ev-script/templates/video-settings-legacy.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size">Size</label>\n            <select class="form-select size" id="size" name="size" <% if (isAudio) { print(\'disabled\'); } %> >\n                <option value="original">Original</option>\n            </select>\n        </div>\n        <div class="fieldWrap">\n            <label for="showtitle">Show Title</label>\n            <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="autoplay">Auto Play</label>\n            <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="showcaptions">Show Captions</label>\n            <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="fieldWrap">\n            <label for="hidecontrols">Hide Controls</label>\n            <input id="hidecontrols" class="form-checkbox" <% if (model.get(\'hidecontrols\')) { print(\'checked="checked"\'); } %>  name="hidecontrols" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="Cancel"/>\n            <input type="submit" class="form-submit action-submit" value="Submit"/>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/templates/video-settings-legacy.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size"><%= messages[\'Size\'] %></label>\n            <select class="form-select size" id="size" name="size" <% if (isAudio) { print(\'disabled\'); } %> >\n                <option value="original"><%= messages[\'Original\'] %></option>\n            </select>\n        </div>\n        <div class="fieldWrap">\n            <label for="showtitle"><%= messages[\'Show Title\'] %></label>\n            <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="autoplay"><%= messages[\'Auto Play\'] %></label>\n            <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="showcaptions"><%= messages[\'Show Captions\'] %></label>\n            <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="fieldWrap">\n            <label for="hidecontrols"><%= messages[\'Hide Controls\'] %></label>\n            <input id="hidecontrols" class="form-checkbox" <% if (model.get(\'hidecontrols\')) { print(\'checked="checked"\'); } %>  name="hidecontrols" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="<%= messages[\'Cancel\'] %>"/>\n            <input type="submit" class="form-submit action-submit" value="<%= messages[\'Submit\'] %>"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
 
 define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(sizes, function(size) { %>\n    <option value="<%= size %>" <% if (size === target) { print(\'selected="selected"\'); } %>><%= size %></option>\n<% }); %>\n';});
 
-define('ev-script/views/video-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/video-settings-legacy.html','text!ev-script/templates/sizes.html'],function(require) {
+define('ev-script/views/video-settings',['require','jquery','underscore','i18n!ev-script/nls/messages','ev-script/views/settings','ev-script/util/size','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/video-settings-legacy.html','text!ev-script/templates/sizes.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         SettingsView = require('ev-script/views/settings'),
         sizeUtil = require('ev-script/util/size');
 
@@ -8133,11 +8460,13 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
             var html = '';
             if (!this.info.useLegacyEmbeds()) {
                 html = this.template({
+                    messages: messages,
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio()
                 });
             } else {
                 html = this.legacyTemplate({
+                    messages: messages,
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio()
                 });
@@ -8266,7 +8595,7 @@ define('ev-script/views/playlist-preview',['require','ev-script/views/preview','
 });
 
 
-define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="Choose <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span>Choose</span>\n            </a>\n            <a class="action-preview" href="#" title="Preview: <%- item.get(\'Name\') %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span>Preview: <%- item.get(\'Name\') %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <% if (item.get(\'IsSecure\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
+define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= sprintf(messages[\'Choose %1$s\'], item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= messages[\'Choose\'] %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= sprintf(messages[\'Preview: %1$s\'], item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= sprintf(messages[\'Preview: %1$s\'], item.get(\'Name\')) %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <% if (item.get(\'IsSecure\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
 
 define('ev-script/views/playlist-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/playlist-result.html'],function(require) {
 
@@ -8498,14 +8827,15 @@ define('ev-script/collections/categories',['require','backbone','ev-script/colle
 });
 
 
-define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="accordion">\n            <h4>Choose Layout</h4>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="playlist" class="form-radio" <% if (model.get(\'layout\') === \'playlist\') { print(\'checked="checked"\'); } %> name="layout" value="playlist" type="radio"/>\n                    <label for="playlist">Playlist</label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcase" class="form-radio" <% if (model.get(\'layout\') === \'showcase\') { print(\'checked="checked"\'); } %> name="layout" value="showcase" type="radio"/>\n                    <label for="showcase">Showcase</label>\n                </div>\n            </div>\n            <h4>Layout Options</h4>\n            <div>\n                <div class="playlistOptions" <% if (model.get(\'layout\') === \'showcase\') { print(\'style="display:none;"\'); } %>>\n                    <div class="fieldWrap">\n                        <label for="playlistSortBy">Sort By</label>\n                        <select id="playlistSortBy" class="form-select">\n                            <option value="videoDate" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDate\') { print(\'selected="selected"\'); } %>>Date Added</option>\n                            <option value="videoDateProduced" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDateProduced\') { print(\'selected="selected"\'); } %>>Date Produced</option>\n                            <option value="videoDescription" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDescription\') { print(\'selected="selected"\'); } %>>Description</option>\n                            <option value="videoTitle" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoTitle\') { print(\'selected="selected"\'); } %>>Title</option>\n                            <option value="videoDuration" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDuration\') { print(\'selected="selected"\'); } %>>Duration</option>\n                            <option value="videoKeywords" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoKeywords\') { print(\'selected="selected"\'); } %>>Keywords</option>\n                            <!-- <option value="videoCustomPosition">Custom Order</option> -->\n                        </select>\n                    </div>\n                    <div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'asc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="asc" type="radio"/>\n                            <label for="playlist">Ascending</label>\n                        </div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'desc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="desc" type="radio"/>\n                            <label for="playlist">Descending</label>\n                        </div>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <label for="playlistSearchString">Search String</label>\n                            <input id="playlistSearchString" class="form-text" name="playlistSearchString" value="<%- model.get(\'playlistLayout\').playlistSearchString %>" type="text"/>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistCategory">Category</label>\n                            <select id="playlistCategory" class="form-select" name="playlistCategory">\n                                <option value="" <% if (!model.get(\'playlistLayout\').playlistCategory) { print(\'selected="selected"\'); } %>>--None--</option>\n                                <% categories.each(function(category) { %>\n                                    <option value="<%= category.id %>" <% if (model.get(\'playlistLayout\').playlistCategory === category.id) { print(\'selected="selected"\'); } %>><%- category.get(\'categoryName\') %></option>\n                                <% }); %>\n                            </select>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistNumberOfResults">Number of Results</label>\n                            <input id="playlistNumberOfResults" class="form-text" name="playlistNumberOfResults" value="<%- model.get(\'playlistLayout\').playlistNumberOfResults %>" type="text"/>\n                        </div>\n                    </div>\n                </div>\n                <div class="showcaseOptions" <% if (model.get(\'layout\') === \'playlist\') { print(\'style="display:none;"\'); } %>>\n<!--\n                    <div class="fieldWrap">\n                        <input id="featuredContent" class="form-checkbox" type="checkbox" name="featuredContent" <% if (model.get(\'showcaseLayout\').featuredContent) { print(\'checked="checked"\'); } %>/>\n                        <label for="featuredContent">Featured Content</label>\n                    </div>\n -->\n                    <div class="fieldWrap">\n                        <input id="categoryList" class="form-checkbox" type="checkbox" name="categoryList" <% if (model.get(\'showcaseLayout\').categoryList) { print(\'checked="checked"\'); } %>/>\n                        <label for="categoryList">Category List</label>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationHorizontal" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'horizontal\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="horizontal" type="radio"/>\n                            <label for="playlist">Horizontal</label>\n                        </div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationVertical" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'vertical\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="vertical" type="radio"/>\n                            <label for="playlist">Vertical</label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <h4>Content Details</h4>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="embedcode">Embed Code</label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="statistics" class="form-checkbox" <% if (model.get(\'statistics\')) { print(\'checked="checked"\'); } %> name="statistics" type="checkbox"/>\n                    <label for="statistics">Statistics</label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="duration" class="form-checkbox" <% if (model.get(\'duration\')) { print(\'checked="checked"\'); } %> name="duration" type="checkbox"/>\n                    <label for="duration">Duration</label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                    <label for="attachments">Attachments</label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                    <label for="annotations">Annotations</label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                    <label for="links">Links</label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="credits" class="form-checkbox" <% if (model.get(\'credits\')) { print(\'checked="checked"\'); } %> name="credits" type="checkbox"/>\n                    <label for="credits">Credits</label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="socialsharing">Social Tools</label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                    <label for="autoplay">Auto Play (PC Only)</label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                    <label for="showcaptions">Captions "On" By Default</label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                    <label for="dateproduced">Date Produced</label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage">Audio Preview Image</label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                    <label for="captionsearch">Caption Search</label>\n                </div>\n            </div>\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span>Save</span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span>Cancel</span></button>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="accordion">\n            <h4><%= messages[\'Choose Layout\'] %></h4>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="playlist" class="form-radio" <% if (model.get(\'layout\') === \'playlist\') { print(\'checked="checked"\'); } %> name="layout" value="playlist" type="radio"/>\n                    <label for="playlist"><%= messages[\'Playlist\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcase" class="form-radio" <% if (model.get(\'layout\') === \'showcase\') { print(\'checked="checked"\'); } %> name="layout" value="showcase" type="radio"/>\n                    <label for="showcase"><%= messages[\'Showcase\'] %></label>\n                </div>\n            </div>\n            <h4><%= messages[\'Layout Options\'] %></h4>\n            <div>\n                <div class="playlistOptions" <% if (model.get(\'layout\') === \'showcase\') { print(\'style="display:none;"\'); } %>>\n                    <div class="fieldWrap">\n                        <label for="playlistSortBy"><%= messages[\'Sort By\'] %></label>\n                        <select id="playlistSortBy" class="form-select">\n                            <option value="videoDate" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDate\') { print(\'selected="selected"\'); } %>><%= messages[\'Date Added\'] %></option>\n                            <option value="videoDateProduced" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDateProduced\') { print(\'selected="selected"\'); } %>><%= messages[\'Date Produced\'] %></option>\n                            <option value="videoDescription" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDescription\') { print(\'selected="selected"\'); } %>><%= messages[\'Description\'] %></option>\n                            <option value="videoTitle" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoTitle\') { print(\'selected="selected"\'); } %>><%= messages[\'Title\'] %></option>\n                            <option value="videoDuration" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDuration\') { print(\'selected="selected"\'); } %>><%= messages[\'Duration\'] %></option>\n                            <option value="videoKeywords" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoKeywords\') { print(\'selected="selected"\'); } %>><%= messages[\'Keywords\'] %></option>\n                            <!-- <option value="videoCustomPosition">Custom Order</option> -->\n                        </select>\n                    </div>\n                    <div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'asc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="asc" type="radio"/>\n                            <label for="playlist"><%= messages[\'Ascending\'] %></label>\n                        </div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'desc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="desc" type="radio"/>\n                            <label for="playlist"><%= messages[\'Descending\'] %></label>\n                        </div>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <label for="playlistSearchString"><%= messages[\'Search String\'] %></label>\n                            <input id="playlistSearchString" class="form-text" name="playlistSearchString" value="<%- model.get(\'playlistLayout\').playlistSearchString %>" type="text"/>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistCategory"><%= messages[\'Category\'] %></label>\n                            <select id="playlistCategory" class="form-select" name="playlistCategory">\n                                <option value="" <% if (!model.get(\'playlistLayout\').playlistCategory) { print(\'selected="selected"\'); } %>>-- <%= messages[\'None\'] %> --</option>\n                                <% categories.each(function(category) { %>\n                                    <option value="<%= category.id %>" <% if (model.get(\'playlistLayout\').playlistCategory === category.id) { print(\'selected="selected"\'); } %>><%- category.get(\'categoryName\') %></option>\n                                <% }); %>\n                            </select>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistNumberOfResults"><%= messages[\'Number of Results\'] %></label>\n                            <input id="playlistNumberOfResults" class="form-text" name="playlistNumberOfResults" value="<%- model.get(\'playlistLayout\').playlistNumberOfResults %>" type="text"/>\n                        </div>\n                    </div>\n                </div>\n                <div class="showcaseOptions" <% if (model.get(\'layout\') === \'playlist\') { print(\'style="display:none;"\'); } %>>\n<!--\n                    <div class="fieldWrap">\n                        <input id="featuredContent" class="form-checkbox" type="checkbox" name="featuredContent" <% if (model.get(\'showcaseLayout\').featuredContent) { print(\'checked="checked"\'); } %>/>\n                        <label for="featuredContent">Featured Content</label>\n                    </div>\n -->\n                    <div class="fieldWrap">\n                        <input id="categoryList" class="form-checkbox" type="checkbox" name="categoryList" <% if (model.get(\'showcaseLayout\').categoryList) { print(\'checked="checked"\'); } %>/>\n                        <label for="categoryList"><%= messages[\'Category List\'] %></label>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationHorizontal" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'horizontal\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="horizontal" type="radio"/>\n                            <label for="playlist"><%= messages[\'Horizontal\'] %></label>\n                        </div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationVertical" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'vertical\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="vertical" type="radio"/>\n                            <label for="playlist"><%= messages[\'Vertical\'] %></label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <h4><%= messages[\'Content Details\'] %></h4>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="embedcode"><%= messages[\'Embed Code\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="statistics" class="form-checkbox" <% if (model.get(\'statistics\')) { print(\'checked="checked"\'); } %> name="statistics" type="checkbox"/>\n                    <label for="statistics"><%= messages[\'Statistics\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="duration" class="form-checkbox" <% if (model.get(\'duration\')) { print(\'checked="checked"\'); } %> name="duration" type="checkbox"/>\n                    <label for="duration"><%= messages[\'Duration\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                    <label for="attachments"><%= messages[\'Attachments\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                    <label for="annotations"><%= messages[\'Annotations\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                    <label for="links"><%= messages[\'Links\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="credits" class="form-checkbox" <% if (model.get(\'credits\')) { print(\'checked="checked"\'); } %> name="credits" type="checkbox"/>\n                    <label for="credits"><%= messages[\'Credits\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="socialsharing"><%= messages[\'Social Tools\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                    <label for="autoplay"><%= messages[\'Auto Play (PC Only)\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                    <label for="showcaptions"><%= messages[\'Captions "On" By Default\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                    <label for="dateproduced"><%= messages[\'Date Produced\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= messages[\'Audio Preview Image\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                    <label for="captionsearch"><%= messages[\'Caption Search\'] %></label>\n                </div>\n            </div>\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= messages[\'Save\'] %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= messages[\'Cancel\'] %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
 
-define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/collections/categories','jquery-ui','text!ev-script/templates/playlist-settings.html'],function(require) {
+define('ev-script/views/playlist-settings',['require','jquery','underscore','i18n!ev-script/nls/messages','ev-script/views/settings','ev-script/collections/categories','jquery-ui','text!ev-script/templates/playlist-settings.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         SettingsView = require('ev-script/views/settings'),
         Categories = require('ev-script/collections/categories');
 
@@ -8565,6 +8895,7 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-
         render: function() {
             var content = this.field.model.get('content'),
                 html = this.template({
+                    messages: messages,
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio(),
                     isSecure: content && content.IsSecure,
@@ -8610,14 +8941,16 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-
 });
 
 
-define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span>Ensemble Logo</span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="Media thumbnail" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%= name %></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="Change <%= label %>"><i class="fa fa-folder-open fa-lg"></i><span>Change <%= label %><span></a>\n        <a href="#" class="action-preview" title="Preview: <%= name %>"><i class="fa fa-play-circle fa-lg"></i><span>Preview: <%= name %><span></a>\n        <% if (type === \'video\' || showPlaylistOptions) { %>\n            <a href="#" class="action-options" title="<%= label %> Embed Options"><i class="fa fa-cog fa-lg"></i><span><%= label %> Embed Options<span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="Remove <%= label %>"><i class="fa fa-minus-circle fa-lg"></i><span>Remove <%= label %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em>Add <%= label %></em></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="Choose <%= label %>"><i class="fa fa-folder-open fa-lg"></i><span>Choose <%= label %><span></a>\n    </div>\n<% } %>\n';});
+define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span><%= messages[\'Ensemble Logo\'] %></span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="<%= messages[\'Media thumbnail\'] %>" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%= name %></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= sprintf(messages[\'Change %1$s\'], label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= sprintf(messages[\'Change %1$s\'], label) %><span></a>\n        <a href="#" class="action-preview" title="<%= messages[\'Preview:\'] %> <%= name %>"><i class="fa fa-play-circle fa-lg"></i><span><%= messages[\'Preview:\'] %> <%= name %><span></a>\n        <% if (type === \'video\' || showPlaylistOptions) { %>\n            <a href="#" class="action-options" title="<%= sprintf(messages[\'%1$s Embed Options\'], label) %>"><i class="fa fa-cog fa-lg"></i><span><%= sprintf(messages[\'%1$s Embed Options\'], label) %><span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="<%= sprintf(messages[\'Remove %1$s\'], label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= sprintf(messages[\'Remove %1$s\'], label) %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em><%= sprintf(messages[\'Add %1$s\'], label) %></em></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= sprintf(messages[\'Choose %1$s\'], label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= sprintf(messages[\'Choose %1$s\'], label) %><span></a>\n    </div>\n<% } %>\n';});
 
-define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','ev-script/collections/categories','text!ev-script/templates/field.html'],function(require) {
+define('ev-script/views/field',['require','jquery','underscore','i18n!ev-script/nls/messages','sprintf','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','ev-script/collections/categories','text!ev-script/templates/field.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
+        sprintf = require('sprintf'),
         BaseView = require('ev-script/views/base'),
         VideoSettings = require('ev-script/models/video-settings'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
@@ -8799,10 +9132,10 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
             var ensembleUrl = this.config.ensembleUrl,
                 name, label, type, thumbnailUrl;
             if (this.model instanceof VideoSettings) {
-                label = 'Media';
+                label = messages['Media'];
                 type = 'video';
             } else {
-                label = 'Playlist';
+                label = messages['Playlist'];
                 type = 'playlist';
             }
             if (this.model.id) {
@@ -8824,6 +9157,8 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                 this.$field.after(this.$actions);
             }
             this.$actions.html(this.template({
+                messages: messages,
+                sprintf: sprintf.sprintf,
                 ensembleUrl: ensembleUrl,
                 modelId: this.model.id,
                 label: label,
@@ -10711,7 +11046,89 @@ define('ev-script/nls/es-mx/messages',{
     'Remember Me': 'MX-Remember Me',
     'Submit': 'MX-Submit',
     'Ensemble Video Login': 'MX-Ensemble Video Login',
-    'You are unauthorized to access this content.': 'MX-You are unauthorized to access this content.'
+    'You are unauthorized to access this content.': 'MX-You are unauthorized to access this content.',
+    'Media': 'MX-Media',
+    'Playlist': 'MX-Playlist',
+    'Ensemble Logo': 'MX-Ensemble Logo',
+    'Media thumbnail': 'MX-Media thumbnail',
+    'Change %1$s': 'MX-Change %1$s',
+    'Preview:': 'MX-Preview:',
+    'Preview: %1$s': 'MX-Preview: %1$s',
+    '%1$s Embed Options': 'MX-%1$s Embed Options',
+    'Remove %1$s': 'MX-Remove %1$s',
+    'Add %1$s': 'MX-Add %1$s',
+    'Choose': 'MX-Choose',
+    'Choose %1$s': 'MX-Choose %1$s',
+    'Hide Picker': 'MX-Hide Picker',
+    'Hide': 'MX-Hide',
+    'Logout %1$s': 'MX-Logout %1$s',
+    'Logout': 'MX-Logout',
+    'Loading...': 'MX-Loading...',
+    'Type:': 'MX-Type:',
+    'Select Library Type': 'MX-Select Library Type',
+    'Media Library': 'MX-Media Library',
+    'Shared Library': 'MX-Shared Library',
+    'Go': 'MX-Go',
+    'No results available.': 'MX-No results available.',
+    'Search returned %1$s results.': 'MX-Search returned %1$s results.',
+    'Reload': 'MX-Reload',
+    '%1$s thumbnail image': 'MX-%1$s thumbnail image',
+    'CC': 'MX-CC',
+    'Description': 'MX-Description',
+    'Date Added': 'MX-Date Added',
+    'Keywords': 'MX-Keywords',
+    'Library': 'MX-Library',
+    'Search:': 'MX-Search:',
+    'Search Media': 'MX-Search Media',
+    'Choose Layout': 'MX-Choose Layout',
+    'Showcase': 'MX-Showcase',
+    'Layout Options': 'MX-Layout Options',
+    'Sort By': 'MX-Sort By',
+    'Date Produced': 'MX-Date Produced',
+    'Title': 'MX-Title',
+    'Duration': 'MX-Duration',
+    'Ascending': 'MX-Ascending',
+    'Descending': 'MX-Descending',
+    'Search String': 'MX-Search String',
+    'Category': 'MX-Category',
+    'None': 'MX-None',
+    'Number of Results': 'MX-Number of Results',
+    'Category List': 'MX-Category List',
+    'Horizontal': 'MX-Horizontal',
+    'Vertical': 'MX-Vertical',
+    'Content Details': 'MX-Content Details',
+    'Embed Code': 'MX-Embed Code',
+    'Statistics': 'MX-Statistics',
+    'Attachments': 'MX-Attachments',
+    'Annotations': 'MX-Annotations',
+    'Links': 'MX-Links',
+    'Credits': 'MX-Credits',
+    'Social Tools': 'MX-Social Tools',
+    'Auto Play (PC Only)': 'MX-Auto Play (PC Only)',
+    'Captions "On" By Default': 'MX-Captions "On" By Default',
+    'Audio Preview Image': 'MX-Audio Preview Image',
+    'Caption Search': 'MX-Caption Search',
+    'Save': 'MX-Save',
+    'Cancel': 'MX-Cancel',
+    'Size': 'MX-Size',
+    'Original': 'MX-Original',
+    'Meta Data': 'MX-Meta Data',
+    'Download Link': 'MX-Download Link',
+    'Show Title': 'MX-Show Title',
+    'Auto Play': 'MX-Auto Play',
+    'Show Captions': 'MX-Show Captions',
+    'Hide Controls': 'MX-Hide Controls',
+    'Organization:': 'MX-Organization:',
+    'Select Organization': 'MX-Select Organization',
+    'Library:': 'MX-Library:',
+    'Select Library': 'MX-Select Library',
+    'More': 'MX-More',
+    'Less': 'MX-Less',
+    'Upload': 'MX-Upload',
+    'Upload Media to Ensemble': 'MX-Upload Media to Ensemble',
+    'Cancel upload': 'MX-Cancel upload',
+    'Add file': 'MX-Add file',
+    'Drag file here.': 'MX-Drag file here.'
 });
 
 

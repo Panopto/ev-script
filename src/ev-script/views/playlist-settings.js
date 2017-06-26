@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         SettingsView = require('ev-script/views/settings'),
         Categories = require('ev-script/collections/categories');
 
@@ -63,6 +64,7 @@ define(function(require) {
         render: function() {
             var content = this.field.model.get('content'),
                 html = this.template({
+                    messages: messages,
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio(),
                     isSecure: content && content.IsSecure,
