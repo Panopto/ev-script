@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         BaseView = require('ev-script/views/base'),
         VideoSettings = require('ev-script/models/video-settings');
 
@@ -45,6 +46,7 @@ define(function(require) {
                     embedView.render();
                     $dialogWrap.html(embedView.$el);
                 }, this),
+                closeText: messages['Close'],
                 close: function(event, ui) {
                     $dialogWrap.dialog('destroy').remove();
                 }

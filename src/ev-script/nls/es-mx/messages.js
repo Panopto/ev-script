@@ -21,6 +21,7 @@ define({
     'Choose %1$s': 'Seleccione %1$s',
     'Choose Layout': 'Seleccione Diseño',
     'Choose': 'Seleccione',
+    'Close': 'Cerrar',
     'Content Details': 'Detalles del Contenido',
     'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.': 'MX-Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.',
     'Credits': 'Créditos',

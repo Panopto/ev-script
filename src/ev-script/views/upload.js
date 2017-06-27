@@ -187,6 +187,7 @@ define(function(require) {
                 create: _.bind(function(event, ui) {
                     $dialogWrap.html(this.$el);
                 }, this),
+                closeText: messages['Close'],
                 close: _.bind(function(event, ui) {
                     this.$upload.pluploadQueue().destroy();
                     $dialogWrap.dialog('destroy').remove();

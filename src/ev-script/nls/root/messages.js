@@ -21,6 +21,7 @@ define({
     'Choose %1$s': 'Choose %1$s',
     'Choose': 'Choose',
     'Choose Layout': 'Choose Layout',
+    'Close': 'Close',
     'Content Details': 'Content Details',
     'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.': 'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.',
     'Credits': 'Credits',

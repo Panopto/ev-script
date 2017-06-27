@@ -54,6 +54,7 @@ define(function(require, template) {
                 create: _.bind(function(event, ui) {
                     this.$dialog.html($html);
                 }, this),
+                closeText: messages['Close'],
                 close: _.bind(function(event, ui) {
                     $(window.document).off('ajaxSend', loadingOn).off('ajaxComplete', loadingOff);
                     this.$dialog.dialog('destroy').remove();

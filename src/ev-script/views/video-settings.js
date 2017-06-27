@@ -107,7 +107,8 @@ define(function(require) {
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
-                height: Math.min(260, $(window).height() - this.config.dialogMargin)
+                height: Math.min(260, $(window).height() - this.config.dialogMargin),
+                closeText: messages['Close']
             });
         }
     });

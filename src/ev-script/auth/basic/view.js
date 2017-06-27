@@ -38,6 +38,7 @@ define(function(require, template) {
                 create: _.bind(function(event, ui) {
                     this.$dialog.html(html);
                 }, this),
+                closeText: messages['Close'],
                 close: _.bind(function(event, ui) {
                     this.$dialog.dialog('destroy').remove();
                     this.appEvents.trigger('hidePickers');

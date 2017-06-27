@@ -1,5 +1,5 @@
 /**
- * ev-script 1.3.0 2017-06-26
+ * ev-script 1.3.0 2017-06-27
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2017 Symphony Video, Inc.
@@ -4183,6 +4183,7 @@ define('ev-script/nls/root/messages',{
     'Choose %1$s': 'Choose %1$s',
     'Choose': 'Choose',
     'Choose Layout': 'Choose Layout',
+    'Close': 'Close',
     'Content Details': 'Content Details',
     'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.': 'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.',
     'Credits': 'Credits',
@@ -7021,12 +7022,13 @@ define('ev-script/views/results',['require','jquery','underscore','i18n!ev-scrip
 
 });
 
-define('ev-script/views/preview',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','jquery-ui'],function(require) {
+define('ev-script/views/preview',['require','jquery','underscore','i18n!ev-script/nls/messages','ev-script/views/base','ev-script/models/video-settings','jquery-ui'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        messages = require('i18n!ev-script/nls/messages'),
         BaseView = require('ev-script/views/base'),
         VideoSettings = require('ev-script/models/video-settings');
 
@@ -7068,6 +7070,7 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
                     embedView.render();
                     $dialogWrap.html(embedView.$el);
                 }, this),
+                closeText: messages['Close'],
                 close: function(event, ui) {
                     $dialogWrap.dialog('destroy').remove();
                 }
@@ -7936,6 +7939,7 @@ define('ev-script/views/upload',['require','jquery','underscore','i18n!ev-script
                 create: _.bind(function(event, ui) {
                     $dialogWrap.html(this.$el);
                 }, this),
+                closeText: messages['Close'],
                 close: _.bind(function(event, ui) {
                     this.$upload.pluploadQueue().destroy();
                     $dialogWrap.dialog('destroy').remove();
@@ -8484,7 +8488,8 @@ define('ev-script/views/video-settings',['require','jquery','underscore','i18n!e
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
-                height: Math.min(260, $(window).height() - this.config.dialogMargin)
+                height: Math.min(260, $(window).height() - this.config.dialogMargin),
+                closeText: messages['Close']
             });
         }
     });
@@ -8915,7 +8920,8 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','i18
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
-                height: Math.min(420, $(window).height() - this.config.dialogMargin)
+                height: Math.min(420, $(window).height() - this.config.dialogMargin),
+                closeText: messages['Close']
             });
         },
         changeLayout: function(e) {
@@ -10664,6 +10670,7 @@ define('ev-script/auth/basic/view',['require','exports','module','jquery','under
                 create: _.bind(function(event, ui) {
                     this.$dialog.html(html);
                 }, this),
+                closeText: messages['Close'],
                 close: _.bind(function(event, ui) {
                     this.$dialog.dialog('destroy').remove();
                     this.appEvents.trigger('hidePickers');
@@ -10824,6 +10831,7 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
                 create: _.bind(function(event, ui) {
                     this.$dialog.html($html);
                 }, this),
+                closeText: messages['Close'],
                 close: _.bind(function(event, ui) {
                     $(window.document).off('ajaxSend', loadingOn).off('ajaxComplete', loadingOff);
                     this.$dialog.dialog('destroy').remove();
@@ -10994,6 +11002,7 @@ define('ev-script/auth/none/view',['require','exports','module','jquery','unders
                 create: _.bind(function(event, ui) {
                     this.$dialog.html($html);
                 }, this),
+                closeText: messages['Close'],
                 close: _.bind(function(event, ui) {
                     this.$dialog.dialog('destroy').remove();
                     this.appEvents.trigger('hidePickers');
@@ -11059,6 +11068,7 @@ define('ev-script/nls/es-mx/messages',{
     'Choose %1$s': 'Seleccione %1$s',
     'Choose Layout': 'Seleccione Diseño',
     'Choose': 'Seleccione',
+    'Close': 'Cerrar',
     'Content Details': 'Detalles del Contenido',
     'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.': 'MX-Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.',
     'Credits': 'Créditos',
