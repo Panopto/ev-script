@@ -1,11 +1,11 @@
 <tr class="<%= (index % 2 ? 'odd' : 'even') %>">
     <td class="content-actions">
         <div class="action-links">
-            <a class="action-add" href="#" title="<%= sprintf(messages['Choose %1$s'], item.get('Name')) %>" rel="<%= item.get('ID') %>">
-                <i class="fa fa-plus-circle fa-lg"></i><span><%= messages['Choose'] %></span>
+            <a class="action-add" href="#" title="<%= Globalize.formatMessage('Choose {0}', item.get('Name')) %>" rel="<%= item.get('ID') %>">
+                <i class="fa fa-plus-circle fa-lg"></i><span><%= Globalize.formatMessage('Choose') %></span>
             </a>
-            <a class="action-preview" href="#" title="<%= sprintf(messages['Preview: %1$s'], item.get('Name')) %>" rel="<%= item.get('ID') %>">
-                <i class="fa fa-play-circle fa-lg"></i><span><%= sprintf(messages['Preview: %1$s'], item.get('Name')) %></span>
+            <a class="action-preview" href="#" title="<%= Globalize.formatMessage('Preview: {0}', item.get('Name')) %>" rel="<%= item.get('ID') %>">
+                <i class="fa fa-play-circle fa-lg"></i><span><%= Globalize.formatMessage('Preview: {0}', item.get('Name')) %></span>
             </a>
         </div>
     </td>

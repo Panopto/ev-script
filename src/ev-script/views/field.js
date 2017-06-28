@@ -4,8 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
-        sprintf = require('sprintf'),
+        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base'),
         VideoSettings = require('ev-script/models/video-settings'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
@@ -187,10 +186,10 @@ define(function(require) {
             var ensembleUrl = this.config.ensembleUrl,
                 name, label, type, thumbnailUrl;
             if (this.model instanceof VideoSettings) {
-                label = messages['Media'];
+                label = Globalize.formatMessage('Media');
                 type = 'video';
             } else {
-                label = messages['Playlist'];
+                label = Globalize.formatMessage('Playlist');
                 type = 'playlist';
             }
             if (this.model.id) {
@@ -212,8 +211,7 @@ define(function(require) {
                 this.$field.after(this.$actions);
             }
             this.$actions.html(this.template({
-                messages: messages,
-                sprintf: sprintf.sprintf,
+                Globalize: Globalize,
                 ensembleUrl: ensembleUrl,
                 modelId: this.model.id,
                 label: label,

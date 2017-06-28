@@ -1,4 +1,4 @@
-<a class="action-hide" href="#" title="<%= messages['Hide Picker'] %>"><%= messages['Hide'] %></a>
+<a class="action-hide" href="#" title="<%= Globalize.formatMessage('Hide Picker') %>"><%= Globalize.formatMessage('Hide') %></a>
 <% if (showLogout) { %>
-    <a class="action-logout" href="#" title="<%= sprintf(messages['Logout %1$s'], username) %>"><%= messages['Logout'] %></a>
+    <a class="action-logout" href="#" title="<%= Globalize.formatMessage('Logout {0}', username) %>"><%= Globalize.formatMessage('Logout') %></a>
 <% } %>

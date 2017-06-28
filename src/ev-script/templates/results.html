@@ -1,6 +1,6 @@
 <div class="total">
-    <%= sprintf(messages['Search returned %1$s results.'], totalResults) %>
-    <a href="#" class="action-refresh" title="<%= messages['Reload'] %>"><i class="fa fa-fw fa-lg fa-refresh"></i></a>
+    <%= Globalize.formatMessage('Search returned {0} results.', totalResults) %>
+    <a href="#" class="action-refresh" title="<%= Globalize.formatMessage('Reload') %>"><i class="fa fa-fw fa-lg fa-refresh"></i></a>
 </div>
 <div class="results">
     <table class="content-list"></table>

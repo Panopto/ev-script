@@ -25,17 +25,19 @@
   },
   "devDependencies": {
     "body-parser": "^1.14.2",
+    "bower": "^1.8.0",
     "connect": "^3.4.0",
-    "cookie-parser": "^1.4.1",
+    "cookie-parser": "^1.4.3",
     "errorhandler": "^1.4.2",
     "grunt": "^0.4.5",
-    "grunt-contrib-clean": "^0.7.0",
-    "grunt-contrib-jshint": "^0.11.3",
+    "grunt-cli": "^1.2.0",
+    "grunt-contrib-clean": "^1.1.0",
+    "grunt-contrib-jshint": "^1.1.0",
     "grunt-contrib-less": "^1.1.0",
-    "grunt-contrib-qunit": "^0.7.0",
+    "grunt-contrib-qunit": "^2.0.0",
     "grunt-contrib-requirejs": "^1.0.0",
-    "grunt-contrib-watch": "^0.6.1",
-    "jshint-stylish": "^2.1.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "jshint-stylish": "^2.2.1",
     "load-grunt-tasks": "^3.4.0",
     "lodash": "^4.0.0",
     "morgan": "^1.6.1",
@@ -43,5 +45,8 @@
     "serve-index": "^1.7.2",
     "serve-static": "^1.10.0"
   },
-  "keywords": []
+  "keywords": [],
+  "dependencies": {
+    "cldr-data-downloader": "^0.2.5"
+  }
 }

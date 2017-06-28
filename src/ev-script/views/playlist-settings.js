@@ -4,7 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
+        Globalize = require('globalize'),
         SettingsView = require('ev-script/views/settings'),
         Categories = require('ev-script/collections/categories');
 
@@ -64,7 +64,7 @@ define(function(require) {
         render: function() {
             var content = this.field.model.get('content'),
                 html = this.template({
-                    messages: messages,
+                    Globalize: Globalize,
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio(),
                     isSecure: content && content.IsSecure,
@@ -85,7 +85,7 @@ define(function(require) {
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
                 height: Math.min(420, $(window).height() - this.config.dialogMargin),
-                closeText: messages['Close']
+                closeText: Globalize.formatMessage('Close')
             });
         },
         changeLayout: function(e) {

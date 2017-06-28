@@ -4,7 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
+        Globalize = require('globalize'),
         platform = require('platform'),
         PickerView = require('ev-script/views/picker'),
         SearchView = require('ev-script/views/search'),
@@ -28,9 +28,9 @@ define(function(require) {
             this.$filterBlock = this.$('div.ev-filter-block');
             if (this.info.get('ApplicationVersion')) {
                 this.$actions = $('<div class="ev-actions"></div>');
-                this.$upload = $('<button type="button" class="action-upload" title="' + messages['Upload'] + '"><i class="fa fa-upload fa-fw"></i><span>' + messages['Upload'] + '<span></button>').css('display', 'none');
+                this.$upload = $('<button type="button" class="action-upload" title="' + Globalize.formatMessage('Upload') + '"><i class="fa fa-upload fa-fw"></i><span>' + Globalize.formatMessage('Upload') + '<span></button>').css('display', 'none');
                 this.$actions.append(this.$upload);
-                this.$record = $('<button type="button" class="action-record" title="' + messages['Record'] + '"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>' + messages['Record'] + '<span></button>').css('display', 'none');
+                this.$record = $('<button type="button" class="action-record" title="' + Globalize.formatMessage('Record') + '"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>' + Globalize.formatMessage('Record') + '<span></button>').css('display', 'none');
                 this.$actions.append(this.$record);
                 this.$filterBlock.prepend(this.$actions);
             }

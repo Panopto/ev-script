@@ -1,8 +1,8 @@
 <div>
-  <label for="<%= id %>"><%= messages['Type:'] %></label>
-  <select id="<%= id %>" class="form-select source" title="<%= messages['Select Library Type'] %>">
-    <option value="content" <% if (sourceId === 'content') { print('selected="selected"'); } %>><%= messages['Media Library'] %></option>
-    <option value="shared" <% if (sourceId === 'shared') { print('selected="selected"'); } %>><%= messages['Shared Library'] %></option>
+  <label for="<%= id %>"><%= Globalize.formatMessage('Type:') %></label>
+  <select id="<%= id %>" class="form-select source" title="<%= Globalize.formatMessage('Select Library Type') %>">
+    <option value="content" <% if (sourceId === 'content') { print('selected="selected"'); } %>><%= Globalize.formatMessage('Media Library') %></option>
+    <option value="shared" <% if (sourceId === 'shared') { print('selected="selected"'); } %>><%= Globalize.formatMessage('Shared Library') %></option>
   </select>
-  <input type="submit" value="<%= messages['Go'] %>" class="form-submit" />
+  <input type="submit" value="<%= Globalize.formatMessage('Go') %>" class="form-submit" />
 </div>

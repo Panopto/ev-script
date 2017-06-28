@@ -1,70 +1,70 @@
 <form>
     <fieldset>
         <div class="fieldWrap">
-            <label for="size"><%= messages['Size'] %></label>
+            <label for="size"><%= Globalize.formatMessage('Size') %></label>
             <select class="form-select size" id="size" name="size">
-                <option value="original"><%= messages['Original'] %></option>
+                <option value="original"><%= Globalize.formatMessage('Original') %></option>
             </select>
         </div>
         <div>
             <div class="fieldWrap inline-option">
                 <input id="showtitle" class="form-checkbox" <% if (model.get('showtitle')) { print('checked="checked"'); } %> name="showtitle" type="checkbox"/>
-                <label for="showtitle"><%= messages['Title'] %></label>
+                <label for="showtitle"><%= Globalize.formatMessage('Title') %></label>
             </div>
             <div class="fieldWrap inline-option">
                 <input id="socialsharing" class="form-checkbox" <% if (model.get('socialsharing')) { print('checked="checked"'); } %> name="socialsharing" type="checkbox"/>
-                <label for="socialsharing"><%= messages['Social Tools'] %></label>
+                <label for="socialsharing"><%= Globalize.formatMessage('Social Tools') %></label>
             </div>
             <div class="fieldWrap inline-option">
                 <input id="annotations" class="form-checkbox" <% if (model.get('annotations')) { print('checked="checked"'); } %> name="annotations" type="checkbox"/>
-                <label for="annotations"><%= messages['Annotations'] %></label>
+                <label for="annotations"><%= Globalize.formatMessage('Annotations') %></label>
             </div>
             <div class="fieldWrap inline-option">
                 <input id="captionsearch" class="form-checkbox" <% if (model.get('captionsearch')) { print('checked="checked"'); } %> name="captionsearch" type="checkbox"/>
-                <label for="captionsearch"><%= messages['Caption Search'] %></label>
+                <label for="captionsearch"><%= Globalize.formatMessage('Caption Search') %></label>
             </div>
             <div class="fieldWrap inline-option">
                 <input id="autoplay" class="form-checkbox" <% if (model.get('autoplay')) { print('checked="checked"'); } %>  name="autoplay" type="checkbox"/>
-                <label for="autoplay"><%= messages['Auto Play (PC Only)'] %></label>
+                <label for="autoplay"><%= Globalize.formatMessage('Auto Play (PC Only)') %></label>
             </div>
             <div class="fieldWrap inline-option">
                 <input id="attachments" class="form-checkbox" <% if (model.get('attachments')) { print('checked="checked"'); } %> name="attachments" type="checkbox"/>
-                <label for="attachments"><%= messages['Attachments'] %></label>
+                <label for="attachments"><%= Globalize.formatMessage('Attachments') %></label>
             </div>
             <div class="fieldWrap inline-option">
                 <input id="links" class="form-checkbox" <% if (model.get('links')) { print('checked="checked"'); } %> name="links" type="checkbox"/>
-                <label for="links"><%= messages['Links'] %></label>
+                <label for="links"><%= Globalize.formatMessage('Links') %></label>
             </div>
             <div class="fieldWrap inline-option">
                 <input id="metadata" class="form-checkbox" <% if (model.get('metadata')) { print('checked="checked"'); } %> name="metadata" type="checkbox"/>
-                <label for="metadata"><%= messages['Meta Data'] %></label>
+                <label for="metadata"><%= Globalize.formatMessage('Meta Data') %></label>
             </div>
             <div class="fieldWrap inline-option">
                 <input id="dateproduced" class="form-checkbox" <% if (model.get('dateproduced')) { print('checked="checked"'); } %> name="dateproduced" type="checkbox"/>
-                <label for="dateproduced"><%= messages['Date Produced'] %></label>
+                <label for="dateproduced"><%= Globalize.formatMessage('Date Produced') %></label>
             </div>
             <div class="fieldWrap inline-option">
                 <input id="embedcode" class="form-checkbox" <% if (model.get('embedcode')) { print('checked="checked"'); } %> name="embedcode" type="checkbox"/>
-                <label for="embedcode"><%= messages['Embed Code'] %></label>
+                <label for="embedcode"><%= Globalize.formatMessage('Embed Code') %></label>
             </div>
             <div class="fieldWrap inline-option">
                 <input id="download" class="form-checkbox" <% if (model.get('download')) { print('checked="checked"'); } %> name="download" type="checkbox"/>
-                <label for="download"><%= messages['Download Link'] %></label>
+                <label for="download"><%= Globalize.formatMessage('Download Link') %></label>
             </div>
             <div class="fieldWrap inline-option">
                 <input id="showcaptions" class="form-checkbox" <% if (model.get('showcaptions')) { print('checked="checked"'); } %>  name="showcaptions" type="checkbox"/>
-                <label for="showcaptions"><%= messages['Captions "On" By Default'] %></label>
+                <label for="showcaptions"><%= Globalize.formatMessage('Captions "On" By Default') %></label>
             </div>
             <% if (isAudio) { %>
                 <div class="fieldWrap inline-option">
                     <input id="audiopreviewimage" class="form-checkbox" <% if (model.get('audiopreviewimage')) { print('checked="checked"'); } %>  name="audiopreviewimage" type="checkbox"/>
-                    <label for="audiopreviewimage"><%= messages['Audio Preview Image'] %></label>
+                    <label for="audiopreviewimage"><%= Globalize.formatMessage('Audio Preview Image') %></label>
                 </div>
             <% } %>
          </div>
         <div class="form-actions">
-            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= messages['Save'] %></span></button>
-            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= messages['Cancel'] %></span></button>
+            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= Globalize.formatMessage('Save') %></span></button>
+            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= Globalize.formatMessage('Cancel') %></span></button>
         </div>
     </fieldset>
 </form>

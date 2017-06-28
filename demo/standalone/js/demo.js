@@ -6,7 +6,8 @@
     var app = new EV.EnsembleApp(_.extend(evSettings, {
         hidePickers: false,
         scrollHeight: false,
-        fitToParent: true
+        fitToParent: true,
+        getLocaleCallback: function() { return 'es-MX'; }
     }));
 
     app.appEvents.bind('fieldUpdated', function($field, value) {

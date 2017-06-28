@@ -3,7 +3,7 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
+        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -12,7 +12,7 @@ define(function(require) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render');
             this.picker = options.picker;
-            this.$el.html('<option value="-1">' + messages['Loading...'] + '</option>');
+            this.$el.html('<option value="-1">' + Globalize.formatMessage('Loading...') + '</option>');
             this.collection.on('reset', this.render);
         },
         render: function() {

@@ -1,5 +1,5 @@
 /**
- * ev-script 1.3.0 2017-06-27
+ * ev-script 1.3.0 2017-06-28
  * Ensemble Video Integration Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2017 Symphony Video, Inc.
@@ -3901,6 +3901,3558 @@ define("bower_components/almond/almond", function(){});
 
 }));
 
+/**
+ * CLDR JavaScript Library v0.4.8
+ * http://jquery.com/
+ *
+ * Copyright 2013 Rafael Xavier de Souza
+ * Released under the MIT license
+ * http://jquery.org/license
+ *
+ * Date: 2016-11-26T15:03Z
+ */
+/*!
+ * CLDR JavaScript Library v0.4.8 2016-11-26T15:03Z MIT license © Rafael Xavier
+ * http://git.io/h4lmVg
+ */
+(function( root, factory ) {
+
+	if ( typeof define === "function" && define.amd ) {
+		// AMD.
+		define( 'cldr',factory );
+	} else if ( typeof module === "object" && typeof module.exports === "object" ) {
+		// Node. CommonJS.
+		module.exports = factory();
+	} else {
+		// Global
+		root.Cldr = factory();
+	}
+
+}( this, function() {
+
+
+	var arrayIsArray = Array.isArray || function( obj ) {
+		return Object.prototype.toString.call( obj ) === "[object Array]";
+	};
+
+
+
+
+	var pathNormalize = function( path, attributes ) {
+		if ( arrayIsArray( path ) ) {
+			path = path.join( "/" );
+		}
+		if ( typeof path !== "string" ) {
+			throw new Error( "invalid path \"" + path + "\"" );
+		}
+		// 1: Ignore leading slash `/`
+		// 2: Ignore leading `cldr/`
+		path = path
+			.replace( /^\// , "" ) /* 1 */
+			.replace( /^cldr\// , "" ); /* 2 */
+
+		// Replace {attribute}'s
+		path = path.replace( /{[a-zA-Z]+}/g, function( name ) {
+			name = name.replace( /^{([^}]*)}$/, "$1" );
+			return attributes[ name ];
+		});
+
+		return path.split( "/" );
+	};
+
+
+
+
+	var arraySome = function( array, callback ) {
+		var i, length;
+		if ( array.some ) {
+			return array.some( callback );
+		}
+		for ( i = 0, length = array.length; i < length; i++ ) {
+			if ( callback( array[ i ], i, array ) ) {
+				return true;
+			}
+		}
+		return false;
+	};
+
+
+
+
+	/**
+	 * Return the maximized language id as defined in
+	 * http://www.unicode.org/reports/tr35/#Likely_Subtags
+	 * 1. Canonicalize.
+	 * 1.1 Make sure the input locale is in canonical form: uses the right
+	 * separator, and has the right casing.
+	 * TODO Right casing? What df? It seems languages are lowercase, scripts are
+	 * Capitalized, territory is uppercase. I am leaving this as an exercise to
+	 * the user.
+	 *
+	 * 1.2 Replace any deprecated subtags with their canonical values using the
+	 * <alias> data in supplemental metadata. Use the first value in the
+	 * replacement list, if it exists. Language tag replacements may have multiple
+	 * parts, such as "sh" ➞ "sr_Latn" or mo" ➞ "ro_MD". In such a case, the
+	 * original script and/or region are retained if there is one. Thus
+	 * "sh_Arab_AQ" ➞ "sr_Arab_AQ", not "sr_Latn_AQ".
+	 * TODO What <alias> data?
+	 *
+	 * 1.3 If the tag is grandfathered (see <variable id="$grandfathered"
+	 * type="choice"> in the supplemental data), then return it.
+	 * TODO grandfathered?
+	 *
+	 * 1.4 Remove the script code 'Zzzz' and the region code 'ZZ' if they occur.
+	 * 1.5 Get the components of the cleaned-up source tag (languages, scripts,
+	 * and regions), plus any variants and extensions.
+	 * 2. Lookup. Lookup each of the following in order, and stop on the first
+	 * match:
+	 * 2.1 languages_scripts_regions
+	 * 2.2 languages_regions
+	 * 2.3 languages_scripts
+	 * 2.4 languages
+	 * 2.5 und_scripts
+	 * 3. Return
+	 * 3.1 If there is no match, either return an error value, or the match for
+	 * "und" (in APIs where a valid language tag is required).
+	 * 3.2 Otherwise there is a match = languagem_scriptm_regionm
+	 * 3.3 Let xr = xs if xs is not empty, and xm otherwise.
+	 * 3.4 Return the language tag composed of languager _ scriptr _ regionr +
+	 * variants + extensions.
+	 *
+	 * @subtags [Array] normalized language id subtags tuple (see init.js).
+	 */
+	var coreLikelySubtags = function( Cldr, cldr, subtags, options ) {
+		var match, matchFound,
+			language = subtags[ 0 ],
+			script = subtags[ 1 ],
+			sep = Cldr.localeSep,
+			territory = subtags[ 2 ],
+			variants = subtags.slice( 3, 4 );
+		options = options || {};
+
+		// Skip if (language, script, territory) is not empty [3.3]
+		if ( language !== "und" && script !== "Zzzz" && territory !== "ZZ" ) {
+			return [ language, script, territory ].concat( variants );
+		}
+
+		// Skip if no supplemental likelySubtags data is present
+		if ( typeof cldr.get( "supplemental/likelySubtags" ) === "undefined" ) {
+			return;
+		}
+
+		// [2]
+		matchFound = arraySome([
+			[ language, script, territory ],
+			[ language, territory ],
+			[ language, script ],
+			[ language ],
+			[ "und", script ]
+		], function( test ) {
+			return match = !(/\b(Zzzz|ZZ)\b/).test( test.join( sep ) ) /* [1.4] */ && cldr.get( [ "supplemental/likelySubtags", test.join( sep ) ] );
+		});
+
+		// [3]
+		if ( matchFound ) {
+			// [3.2 .. 3.4]
+			match = match.split( sep );
+			return [
+				language !== "und" ? language : match[ 0 ],
+				script !== "Zzzz" ? script : match[ 1 ],
+				territory !== "ZZ" ? territory : match[ 2 ]
+			].concat( variants );
+		} else if ( options.force ) {
+			// [3.1.2]
+			return cldr.get( "supplemental/likelySubtags/und" ).split( sep );
+		} else {
+			// [3.1.1]
+			return;
+		}
+	};
+
+
+
+	/**
+	 * Given a locale, remove any fields that Add Likely Subtags would add.
+	 * http://www.unicode.org/reports/tr35/#Likely_Subtags
+	 * 1. First get max = AddLikelySubtags(inputLocale). If an error is signaled,
+	 * return it.
+	 * 2. Remove the variants from max.
+	 * 3. Then for trial in {language, language _ region, language _ script}. If
+	 * AddLikelySubtags(trial) = max, then return trial + variants.
+	 * 4. If you do not get a match, return max + variants.
+	 * 
+	 * @maxLanguageId [Array] maxLanguageId tuple (see init.js).
+	 */
+	var coreRemoveLikelySubtags = function( Cldr, cldr, maxLanguageId ) {
+		var match, matchFound,
+			language = maxLanguageId[ 0 ],
+			script = maxLanguageId[ 1 ],
+			territory = maxLanguageId[ 2 ],
+			variants = maxLanguageId[ 3 ];
+
+		// [3]
+		matchFound = arraySome([
+			[ [ language, "Zzzz", "ZZ" ], [ language ] ],
+			[ [ language, "Zzzz", territory ], [ language, territory ] ],
+			[ [ language, script, "ZZ" ], [ language, script ] ]
+		], function( test ) {
+			var result = coreLikelySubtags( Cldr, cldr, test[ 0 ] );
+			match = test[ 1 ];
+			return result && result[ 0 ] === maxLanguageId[ 0 ] &&
+				result[ 1 ] === maxLanguageId[ 1 ] &&
+				result[ 2 ] === maxLanguageId[ 2 ];
+		});
+
+		if ( matchFound ) {
+			if ( variants ) {
+				match.push( variants );
+			}
+			return match;
+		}
+
+		// [4]
+		return maxLanguageId;
+	};
+
+
+
+
+	/**
+	 * subtags( locale )
+	 *
+	 * @locale [String]
+	 */
+	var coreSubtags = function( locale ) {
+		var aux, unicodeLanguageId,
+			subtags = [];
+
+		locale = locale.replace( /_/, "-" );
+
+		// Unicode locale extensions.
+		aux = locale.split( "-u-" );
+		if ( aux[ 1 ] ) {
+			aux[ 1 ] = aux[ 1 ].split( "-t-" );
+			locale = aux[ 0 ] + ( aux[ 1 ][ 1 ] ? "-t-" + aux[ 1 ][ 1 ] : "");
+			subtags[ 4 /* unicodeLocaleExtensions */ ] = aux[ 1 ][ 0 ];
+		}
+
+		// TODO normalize transformed extensions. Currently, skipped.
+		// subtags[ x ] = locale.split( "-t-" )[ 1 ];
+		unicodeLanguageId = locale.split( "-t-" )[ 0 ];
+
+		// unicode_language_id = "root"
+		//   | unicode_language_subtag         
+		//     (sep unicode_script_subtag)? 
+		//     (sep unicode_region_subtag)?
+		//     (sep unicode_variant_subtag)* ;
+		//
+		// Although unicode_language_subtag = alpha{2,8}, I'm using alpha{2,3}. Because, there's no language on CLDR lengthier than 3.
+		aux = unicodeLanguageId.match( /^(([a-z]{2,3})(-([A-Z][a-z]{3}))?(-([A-Z]{2}|[0-9]{3}))?)((-([a-zA-Z0-9]{5,8}|[0-9][a-zA-Z0-9]{3}))*)$|^(root)$/ );
+		if ( aux === null ) {
+			return [ "und", "Zzzz", "ZZ" ];
+		}
+		subtags[ 0 /* language */ ] = aux[ 10 ] /* root */ || aux[ 2 ] || "und";
+		subtags[ 1 /* script */ ] = aux[ 4 ] || "Zzzz";
+		subtags[ 2 /* territory */ ] = aux[ 6 ] || "ZZ";
+		if ( aux[ 7 ] && aux[ 7 ].length ) {
+			subtags[ 3 /* variant */ ] = aux[ 7 ].slice( 1 ) /* remove leading "-" */;
+		}
+
+		// 0: language
+		// 1: script
+		// 2: territory (aka region)
+		// 3: variant
+		// 4: unicodeLocaleExtensions
+		return subtags;
+	};
+
+
+
+
+	var arrayForEach = function( array, callback ) {
+		var i, length;
+		if ( array.forEach ) {
+			return array.forEach( callback );
+		}
+		for ( i = 0, length = array.length; i < length; i++ ) {
+			callback( array[ i ], i, array );
+		}
+	};
+
+
+
+
+	/**
+	 * bundleLookup( minLanguageId )
+	 *
+	 * @Cldr [Cldr class]
+	 *
+	 * @cldr [Cldr instance]
+	 *
+	 * @minLanguageId [String] requested languageId after applied remove likely subtags.
+	 */
+	var bundleLookup = function( Cldr, cldr, minLanguageId ) {
+		var availableBundleMap = Cldr._availableBundleMap,
+			availableBundleMapQueue = Cldr._availableBundleMapQueue;
+
+		if ( availableBundleMapQueue.length ) {
+			arrayForEach( availableBundleMapQueue, function( bundle ) {
+				var existing, maxBundle, minBundle, subtags;
+				subtags = coreSubtags( bundle );
+				maxBundle = coreLikelySubtags( Cldr, cldr, subtags );
+				minBundle = coreRemoveLikelySubtags( Cldr, cldr, maxBundle );
+				minBundle = minBundle.join( Cldr.localeSep );
+				existing = availableBundleMapQueue[ minBundle ];
+				if ( existing && existing.length < bundle.length ) {
+					return;
+				}
+				availableBundleMap[ minBundle ] = bundle;
+			});
+			Cldr._availableBundleMapQueue = [];
+		}
+
+		return availableBundleMap[ minLanguageId ] || null;
+	};
+
+
+
+
+	var objectKeys = function( object ) {
+		var i,
+			result = [];
+
+		if ( Object.keys ) {
+			return Object.keys( object );
+		}
+
+		for ( i in object ) {
+			result.push( i );
+		}
+
+		return result;
+	};
+
+
+
+
+	var createError = function( code, attributes ) {
+		var error, message;
+
+		message = code + ( attributes && JSON ? ": " + JSON.stringify( attributes ) : "" );
+		error = new Error( message );
+		error.code = code;
+
+		// extend( error, attributes );
+		arrayForEach( objectKeys( attributes ), function( attribute ) {
+			error[ attribute ] = attributes[ attribute ];
+		});
+
+		return error;
+	};
+
+
+
+
+	var validate = function( code, check, attributes ) {
+		if ( !check ) {
+			throw createError( code, attributes );
+		}
+	};
+
+
+
+
+	var validatePresence = function( value, name ) {
+		validate( "E_MISSING_PARAMETER", typeof value !== "undefined", {
+			name: name
+		});
+	};
+
+
+
+
+	var validateType = function( value, name, check, expected ) {
+		validate( "E_INVALID_PAR_TYPE", check, {
+			expected: expected,
+			name: name,
+			value: value
+		});
+	};
+
+
+
+
+	var validateTypePath = function( value, name ) {
+		validateType( value, name, typeof value === "string" || arrayIsArray( value ), "String or Array" );
+	};
+
+
+
+
+	/**
+	 * Function inspired by jQuery Core, but reduced to our use case.
+	 */
+	var isPlainObject = function( obj ) {
+		return obj !== null && "" + obj === "[object Object]";
+	};
+
+
+
+
+	var validateTypePlainObject = function( value, name ) {
+		validateType( value, name, typeof value === "undefined" || isPlainObject( value ), "Plain Object" );
+	};
+
+
+
+
+	var validateTypeString = function( value, name ) {
+		validateType( value, name, typeof value === "string", "a string" );
+	};
+
+
+
+
+	// @path: normalized path
+	var resourceGet = function( data, path ) {
+		var i,
+			node = data,
+			length = path.length;
+
+		for ( i = 0; i < length - 1; i++ ) {
+			node = node[ path[ i ] ];
+			if ( !node ) {
+				return undefined;
+			}
+		}
+		return node[ path[ i ] ];
+	};
+
+
+
+
+	/**
+	 * setAvailableBundles( Cldr, json )
+	 *
+	 * @Cldr [Cldr class]
+	 *
+	 * @json resolved/unresolved cldr data.
+	 *
+	 * Set available bundles queue based on passed json CLDR data. Considers a bundle as any String at /main/{bundle}.
+	 */
+	var coreSetAvailableBundles = function( Cldr, json ) {
+		var bundle,
+			availableBundleMapQueue = Cldr._availableBundleMapQueue,
+			main = resourceGet( json, [ "main" ] );
+
+		if ( main ) {
+			for ( bundle in main ) {
+				if ( main.hasOwnProperty( bundle ) && bundle !== "root" &&
+							availableBundleMapQueue.indexOf( bundle ) === -1 ) {
+					availableBundleMapQueue.push( bundle );
+				}
+			}
+		}
+	};
+
+
+
+	var alwaysArray = function( somethingOrArray ) {
+		return arrayIsArray( somethingOrArray ) ?  somethingOrArray : [ somethingOrArray ];
+	};
+
+
+	var jsonMerge = (function() {
+
+	// Returns new deeply merged JSON.
+	//
+	// Eg.
+	// merge( { a: { b: 1, c: 2 } }, { a: { b: 3, d: 4 } } )
+	// -> { a: { b: 3, c: 2, d: 4 } }
+	//
+	// @arguments JSON's
+	// 
+	var merge = function() {
+		var destination = {},
+			sources = [].slice.call( arguments, 0 );
+		arrayForEach( sources, function( source ) {
+			var prop;
+			for ( prop in source ) {
+				if ( prop in destination && typeof destination[ prop ] === "object" && !arrayIsArray( destination[ prop ] ) ) {
+
+					// Merge Objects
+					destination[ prop ] = merge( destination[ prop ], source[ prop ] );
+
+				} else {
+
+					// Set new values
+					destination[ prop ] = source[ prop ];
+
+				}
+			}
+		});
+		return destination;
+	};
+
+	return merge;
+
+}());
+
+
+	/**
+	 * load( Cldr, source, jsons )
+	 *
+	 * @Cldr [Cldr class]
+	 *
+	 * @source [Object]
+	 *
+	 * @jsons [arguments]
+	 */
+	var coreLoad = function( Cldr, source, jsons ) {
+		var i, j, json;
+
+		validatePresence( jsons[ 0 ], "json" );
+
+		// Support arbitrary parameters, e.g., `Cldr.load({...}, {...})`.
+		for ( i = 0; i < jsons.length; i++ ) {
+
+			// Support array parameters, e.g., `Cldr.load([{...}, {...}])`.
+			json = alwaysArray( jsons[ i ] );
+
+			for ( j = 0; j < json.length; j++ ) {
+				validateTypePlainObject( json[ j ], "json" );
+				source = jsonMerge( source, json[ j ] );
+				coreSetAvailableBundles( Cldr, json[ j ] );
+			}
+		}
+
+		return source;
+	};
+
+
+
+	var itemGetResolved = function( Cldr, path, attributes ) {
+		// Resolve path
+		var normalizedPath = pathNormalize( path, attributes );
+
+		return resourceGet( Cldr._resolved, normalizedPath );
+	};
+
+
+
+
+	/**
+	 * new Cldr()
+	 */
+	var Cldr = function( locale ) {
+		this.init( locale );
+	};
+
+	// Build optimization hack to avoid duplicating functions across modules.
+	Cldr._alwaysArray = alwaysArray;
+	Cldr._coreLoad = coreLoad;
+	Cldr._createError = createError;
+	Cldr._itemGetResolved = itemGetResolved;
+	Cldr._jsonMerge = jsonMerge;
+	Cldr._pathNormalize = pathNormalize;
+	Cldr._resourceGet = resourceGet;
+	Cldr._validatePresence = validatePresence;
+	Cldr._validateType = validateType;
+	Cldr._validateTypePath = validateTypePath;
+	Cldr._validateTypePlainObject = validateTypePlainObject;
+
+	Cldr._availableBundleMap = {};
+	Cldr._availableBundleMapQueue = [];
+	Cldr._resolved = {};
+
+	// Allow user to override locale separator "-" (default) | "_". According to http://www.unicode.org/reports/tr35/#Unicode_language_identifier, both "-" and "_" are valid locale separators (eg. "en_GB", "en-GB"). According to http://unicode.org/cldr/trac/ticket/6786 its usage must be consistent throughout the data set.
+	Cldr.localeSep = "-";
+
+	/**
+	 * Cldr.load( json [, json, ...] )
+	 *
+	 * @json [JSON] CLDR data or [Array] Array of @json's.
+	 *
+	 * Load resolved cldr data.
+	 */
+	Cldr.load = function() {
+		Cldr._resolved = coreLoad( Cldr, Cldr._resolved, arguments );
+	};
+
+	/**
+	 * .init() automatically run on instantiation/construction.
+	 */
+	Cldr.prototype.init = function( locale ) {
+		var attributes, language, maxLanguageId, minLanguageId, script, subtags, territory, unicodeLocaleExtensions, variant,
+			sep = Cldr.localeSep,
+			unicodeLocaleExtensionsRaw = "";
+
+		validatePresence( locale, "locale" );
+		validateTypeString( locale, "locale" );
+
+		subtags = coreSubtags( locale );
+
+		if ( subtags.length === 5 ) {
+			unicodeLocaleExtensions = subtags.pop();
+			unicodeLocaleExtensionsRaw = sep + "u" + sep + unicodeLocaleExtensions;
+			// Remove trailing null when there is unicodeLocaleExtensions but no variants.
+			if ( !subtags[ 3 ] ) {
+				subtags.pop();
+			}
+		}
+		variant = subtags[ 3 ];
+
+		// Normalize locale code.
+		// Get (or deduce) the "triple subtags": language, territory (also aliased as region), and script subtags.
+		// Get the variant subtags (calendar, collation, currency, etc).
+		// refs:
+		// - http://www.unicode.org/reports/tr35/#Field_Definitions
+		// - http://www.unicode.org/reports/tr35/#Language_and_Locale_IDs
+		// - http://www.unicode.org/reports/tr35/#Unicode_locale_identifier
+
+		// When a locale id does not specify a language, or territory (region), or script, they are obtained by Likely Subtags.
+		maxLanguageId = coreLikelySubtags( Cldr, this, subtags, { force: true } ) || subtags;
+		language = maxLanguageId[ 0 ];
+		script = maxLanguageId[ 1 ];
+		territory = maxLanguageId[ 2 ];
+
+		minLanguageId = coreRemoveLikelySubtags( Cldr, this, maxLanguageId ).join( sep );
+
+		// Set attributes
+		this.attributes = attributes = {
+			bundle: bundleLookup( Cldr, this, minLanguageId ),
+
+			// Unicode Language Id
+			minLanguageId: minLanguageId + unicodeLocaleExtensionsRaw,
+			maxLanguageId: maxLanguageId.join( sep ) + unicodeLocaleExtensionsRaw,
+
+			// Unicode Language Id Subtabs
+			language: language,
+			script: script,
+			territory: territory,
+			region: territory, /* alias */
+			variant: variant
+		};
+
+		// Unicode locale extensions.
+		unicodeLocaleExtensions && ( "-" + unicodeLocaleExtensions ).replace( /-[a-z]{3,8}|(-[a-z]{2})-([a-z]{3,8})/g, function( attribute, key, type ) {
+
+			if ( key ) {
+
+				// Extension is in the `keyword` form.
+				attributes[ "u" + key ] = type;
+			} else {
+
+				// Extension is in the `attribute` form.
+				attributes[ "u" + attribute ] = true;
+			}
+		});
+
+		this.locale = locale;
+	};
+
+	/**
+	 * .get()
+	 */
+	Cldr.prototype.get = function( path ) {
+
+		validatePresence( path, "path" );
+		validateTypePath( path, "path" );
+
+		return itemGetResolved( Cldr, path, this.attributes );
+	};
+
+	/**
+	 * .main()
+	 */
+	Cldr.prototype.main = function( path ) {
+		validatePresence( path, "path" );
+		validateTypePath( path, "path" );
+
+		validate( "E_MISSING_BUNDLE", this.attributes.bundle !== null, {
+			locale: this.locale
+		});
+
+		path = alwaysArray( path );
+		return this.get( [ "main/{bundle}" ].concat( path ) );
+	};
+
+	return Cldr;
+
+
+
+
+}));
+
+/**
+ * CLDR JavaScript Library v0.4.8
+ * http://jquery.com/
+ *
+ * Copyright 2013 Rafael Xavier de Souza
+ * Released under the MIT license
+ * http://jquery.org/license
+ *
+ * Date: 2016-11-26T15:03Z
+ */
+/*!
+ * CLDR JavaScript Library v0.4.8 2016-11-26T15:03Z MIT license © Rafael Xavier
+ * http://git.io/h4lmVg
+ */
+(function( factory ) {
+
+	if ( typeof define === "function" && define.amd ) {
+		// AMD.
+		define( 'cldr/event',[ "../cldr" ], factory );
+	} else if ( typeof module === "object" && typeof module.exports === "object" ) {
+		// Node. CommonJS.
+		module.exports = factory( require( "../cldr" ) );
+	} else {
+		// Global
+		factory( Cldr );
+	}
+
+}(function( Cldr ) {
+
+	// Build optimization hack to avoid duplicating functions across modules.
+	var pathNormalize = Cldr._pathNormalize,
+		validatePresence = Cldr._validatePresence,
+		validateType = Cldr._validateType;
+
+/*!
+ * EventEmitter v4.2.7 - git.io/ee
+ * Oliver Caldwell
+ * MIT license
+ * @preserve
+ */
+
+var EventEmitter;
+/* jshint ignore:start */
+EventEmitter = (function () {
+
+
+	/**
+	 * Class for managing events.
+	 * Can be extended to provide event functionality in other classes.
+	 *
+	 * @class EventEmitter Manages event registering and emitting.
+	 */
+	function EventEmitter() {}
+
+	// Shortcuts to improve speed and size
+	var proto = EventEmitter.prototype;
+	var exports = this;
+	var originalGlobalValue = exports.EventEmitter;
+
+	/**
+	 * Finds the index of the listener for the event in it's storage array.
+	 *
+	 * @param {Function[]} listeners Array of listeners to search through.
+	 * @param {Function} listener Method to look for.
+	 * @return {Number} Index of the specified listener, -1 if not found
+	 * @api private
+	 */
+	function indexOfListener(listeners, listener) {
+		var i = listeners.length;
+		while (i--) {
+			if (listeners[i].listener === listener) {
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
+	/**
+	 * Alias a method while keeping the context correct, to allow for overwriting of target method.
+	 *
+	 * @param {String} name The name of the target method.
+	 * @return {Function} The aliased method
+	 * @api private
+	 */
+	function alias(name) {
+		return function aliasClosure() {
+			return this[name].apply(this, arguments);
+		};
+	}
+
+	/**
+	 * Returns the listener array for the specified event.
+	 * Will initialise the event object and listener arrays if required.
+	 * Will return an object if you use a regex search. The object contains keys for each matched event. So /ba[rz]/ might return an object containing bar and baz. But only if you have either defined them with defineEvent or added some listeners to them.
+	 * Each property in the object response is an array of listener functions.
+	 *
+	 * @param {String|RegExp} evt Name of the event to return the listeners from.
+	 * @return {Function[]|Object} All listener functions for the event.
+	 */
+	proto.getListeners = function getListeners(evt) {
+		var events = this._getEvents();
+		var response;
+		var key;
+
+		// Return a concatenated array of all matching events if
+		// the selector is a regular expression.
+		if (evt instanceof RegExp) {
+			response = {};
+			for (key in events) {
+				if (events.hasOwnProperty(key) && evt.test(key)) {
+					response[key] = events[key];
+				}
+			}
+		}
+		else {
+			response = events[evt] || (events[evt] = []);
+		}
+
+		return response;
+	};
+
+	/**
+	 * Takes a list of listener objects and flattens it into a list of listener functions.
+	 *
+	 * @param {Object[]} listeners Raw listener objects.
+	 * @return {Function[]} Just the listener functions.
+	 */
+	proto.flattenListeners = function flattenListeners(listeners) {
+		var flatListeners = [];
+		var i;
+
+		for (i = 0; i < listeners.length; i += 1) {
+			flatListeners.push(listeners[i].listener);
+		}
+
+		return flatListeners;
+	};
+
+	/**
+	 * Fetches the requested listeners via getListeners but will always return the results inside an object. This is mainly for internal use but others may find it useful.
+	 *
+	 * @param {String|RegExp} evt Name of the event to return the listeners from.
+	 * @return {Object} All listener functions for an event in an object.
+	 */
+	proto.getListenersAsObject = function getListenersAsObject(evt) {
+		var listeners = this.getListeners(evt);
+		var response;
+
+		if (listeners instanceof Array) {
+			response = {};
+			response[evt] = listeners;
+		}
+
+		return response || listeners;
+	};
+
+	/**
+	 * Adds a listener function to the specified event.
+	 * The listener will not be added if it is a duplicate.
+	 * If the listener returns true then it will be removed after it is called.
+	 * If you pass a regular expression as the event name then the listener will be added to all events that match it.
+	 *
+	 * @param {String|RegExp} evt Name of the event to attach the listener to.
+	 * @param {Function} listener Method to be called when the event is emitted. If the function returns true then it will be removed after calling.
+	 * @return {Object} Current instance of EventEmitter for chaining.
+	 */
+	proto.addListener = function addListener(evt, listener) {
+		var listeners = this.getListenersAsObject(evt);
+		var listenerIsWrapped = typeof listener === 'object';
+		var key;
+
+		for (key in listeners) {
+			if (listeners.hasOwnProperty(key) && indexOfListener(listeners[key], listener) === -1) {
+				listeners[key].push(listenerIsWrapped ? listener : {
+					listener: listener,
+					once: false
+				});
+			}
+		}
+
+		return this;
+	};
+
+	/**
+	 * Alias of addListener
+	 */
+	proto.on = alias('addListener');
+
+	/**
+	 * Semi-alias of addListener. It will add a listener that will be
+	 * automatically removed after it's first execution.
+	 *
+	 * @param {String|RegExp} evt Name of the event to attach the listener to.
+	 * @param {Function} listener Method to be called when the event is emitted. If the function returns true then it will be removed after calling.
+	 * @return {Object} Current instance of EventEmitter for chaining.
+	 */
+	proto.addOnceListener = function addOnceListener(evt, listener) {
+		return this.addListener(evt, {
+			listener: listener,
+			once: true
+		});
+	};
+
+	/**
+	 * Alias of addOnceListener.
+	 */
+	proto.once = alias('addOnceListener');
+
+	/**
+	 * Defines an event name. This is required if you want to use a regex to add a listener to multiple events at once. If you don't do this then how do you expect it to know what event to add to? Should it just add to every possible match for a regex? No. That is scary and bad.
+	 * You need to tell it what event names should be matched by a regex.
+	 *
+	 * @param {String} evt Name of the event to create.
+	 * @return {Object} Current instance of EventEmitter for chaining.
+	 */
+	proto.defineEvent = function defineEvent(evt) {
+		this.getListeners(evt);
+		return this;
+	};
+
+	/**
+	 * Uses defineEvent to define multiple events.
+	 *
+	 * @param {String[]} evts An array of event names to define.
+	 * @return {Object} Current instance of EventEmitter for chaining.
+	 */
+	proto.defineEvents = function defineEvents(evts) {
+		for (var i = 0; i < evts.length; i += 1) {
+			this.defineEvent(evts[i]);
+		}
+		return this;
+	};
+
+	/**
+	 * Removes a listener function from the specified event.
+	 * When passed a regular expression as the event name, it will remove the listener from all events that match it.
+	 *
+	 * @param {String|RegExp} evt Name of the event to remove the listener from.
+	 * @param {Function} listener Method to remove from the event.
+	 * @return {Object} Current instance of EventEmitter for chaining.
+	 */
+	proto.removeListener = function removeListener(evt, listener) {
+		var listeners = this.getListenersAsObject(evt);
+		var index;
+		var key;
+
+		for (key in listeners) {
+			if (listeners.hasOwnProperty(key)) {
+				index = indexOfListener(listeners[key], listener);
+
+				if (index !== -1) {
+					listeners[key].splice(index, 1);
+				}
+			}
+		}
+
+		return this;
+	};
+
+	/**
+	 * Alias of removeListener
+	 */
+	proto.off = alias('removeListener');
+
+	/**
+	 * Adds listeners in bulk using the manipulateListeners method.
+	 * If you pass an object as the second argument you can add to multiple events at once. The object should contain key value pairs of events and listeners or listener arrays. You can also pass it an event name and an array of listeners to be added.
+	 * You can also pass it a regular expression to add the array of listeners to all events that match it.
+	 * Yeah, this function does quite a bit. That's probably a bad thing.
+	 *
+	 * @param {String|Object|RegExp} evt An event name if you will pass an array of listeners next. An object if you wish to add to multiple events at once.
+	 * @param {Function[]} [listeners] An optional array of listener functions to add.
+	 * @return {Object} Current instance of EventEmitter for chaining.
+	 */
+	proto.addListeners = function addListeners(evt, listeners) {
+		// Pass through to manipulateListeners
+		return this.manipulateListeners(false, evt, listeners);
+	};
+
+	/**
+	 * Removes listeners in bulk using the manipulateListeners method.
+	 * If you pass an object as the second argument you can remove from multiple events at once. The object should contain key value pairs of events and listeners or listener arrays.
+	 * You can also pass it an event name and an array of listeners to be removed.
+	 * You can also pass it a regular expression to remove the listeners from all events that match it.
+	 *
+	 * @param {String|Object|RegExp} evt An event name if you will pass an array of listeners next. An object if you wish to remove from multiple events at once.
+	 * @param {Function[]} [listeners] An optional array of listener functions to remove.
+	 * @return {Object} Current instance of EventEmitter for chaining.
+	 */
+	proto.removeListeners = function removeListeners(evt, listeners) {
+		// Pass through to manipulateListeners
+		return this.manipulateListeners(true, evt, listeners);
+	};
+
+	/**
+	 * Edits listeners in bulk. The addListeners and removeListeners methods both use this to do their job. You should really use those instead, this is a little lower level.
+	 * The first argument will determine if the listeners are removed (true) or added (false).
+	 * If you pass an object as the second argument you can add/remove from multiple events at once. The object should contain key value pairs of events and listeners or listener arrays.
+	 * You can also pass it an event name and an array of listeners to be added/removed.
+	 * You can also pass it a regular expression to manipulate the listeners of all events that match it.
+	 *
+	 * @param {Boolean} remove True if you want to remove listeners, false if you want to add.
+	 * @param {String|Object|RegExp} evt An event name if you will pass an array of listeners next. An object if you wish to add/remove from multiple events at once.
+	 * @param {Function[]} [listeners] An optional array of listener functions to add/remove.
+	 * @return {Object} Current instance of EventEmitter for chaining.
+	 */
+	proto.manipulateListeners = function manipulateListeners(remove, evt, listeners) {
+		var i;
+		var value;
+		var single = remove ? this.removeListener : this.addListener;
+		var multiple = remove ? this.removeListeners : this.addListeners;
+
+		// If evt is an object then pass each of it's properties to this method
+		if (typeof evt === 'object' && !(evt instanceof RegExp)) {
+			for (i in evt) {
+				if (evt.hasOwnProperty(i) && (value = evt[i])) {
+					// Pass the single listener straight through to the singular method
+					if (typeof value === 'function') {
+						single.call(this, i, value);
+					}
+					else {
+						// Otherwise pass back to the multiple function
+						multiple.call(this, i, value);
+					}
+				}
+			}
+		}
+		else {
+			// So evt must be a string
+			// And listeners must be an array of listeners
+			// Loop over it and pass each one to the multiple method
+			i = listeners.length;
+			while (i--) {
+				single.call(this, evt, listeners[i]);
+			}
+		}
+
+		return this;
+	};
+
+	/**
+	 * Removes all listeners from a specified event.
+	 * If you do not specify an event then all listeners will be removed.
+	 * That means every event will be emptied.
+	 * You can also pass a regex to remove all events that match it.
+	 *
+	 * @param {String|RegExp} [evt] Optional name of the event to remove all listeners for. Will remove from every event if not passed.
+	 * @return {Object} Current instance of EventEmitter for chaining.
+	 */
+	proto.removeEvent = function removeEvent(evt) {
+		var type = typeof evt;
+		var events = this._getEvents();
+		var key;
+
+		// Remove different things depending on the state of evt
+		if (type === 'string') {
+			// Remove all listeners for the specified event
+			delete events[evt];
+		}
+		else if (evt instanceof RegExp) {
+			// Remove all events matching the regex.
+			for (key in events) {
+				if (events.hasOwnProperty(key) && evt.test(key)) {
+					delete events[key];
+				}
+			}
+		}
+		else {
+			// Remove all listeners in all events
+			delete this._events;
+		}
+
+		return this;
+	};
+
+	/**
+	 * Alias of removeEvent.
+	 *
+	 * Added to mirror the node API.
+	 */
+	proto.removeAllListeners = alias('removeEvent');
+
+	/**
+	 * Emits an event of your choice.
+	 * When emitted, every listener attached to that event will be executed.
+	 * If you pass the optional argument array then those arguments will be passed to every listener upon execution.
+	 * Because it uses `apply`, your array of arguments will be passed as if you wrote them out separately.
+	 * So they will not arrive within the array on the other side, they will be separate.
+	 * You can also pass a regular expression to emit to all events that match it.
+	 *
+	 * @param {String|RegExp} evt Name of the event to emit and execute listeners for.
+	 * @param {Array} [args] Optional array of arguments to be passed to each listener.
+	 * @return {Object} Current instance of EventEmitter for chaining.
+	 */
+	proto.emitEvent = function emitEvent(evt, args) {
+		var listeners = this.getListenersAsObject(evt);
+		var listener;
+		var i;
+		var key;
+		var response;
+
+		for (key in listeners) {
+			if (listeners.hasOwnProperty(key)) {
+				i = listeners[key].length;
+
+				while (i--) {
+					// If the listener returns true then it shall be removed from the event
+					// The function is executed either with a basic call or an apply if there is an args array
+					listener = listeners[key][i];
+
+					if (listener.once === true) {
+						this.removeListener(evt, listener.listener);
+					}
+
+					response = listener.listener.apply(this, args || []);
+
+					if (response === this._getOnceReturnValue()) {
+						this.removeListener(evt, listener.listener);
+					}
+				}
+			}
+		}
+
+		return this;
+	};
+
+	/**
+	 * Alias of emitEvent
+	 */
+	proto.trigger = alias('emitEvent');
+
+	/**
+	 * Subtly different from emitEvent in that it will pass its arguments on to the listeners, as opposed to taking a single array of arguments to pass on.
+	 * As with emitEvent, you can pass a regex in place of the event name to emit to all events that match it.
+	 *
+	 * @param {String|RegExp} evt Name of the event to emit and execute listeners for.
+	 * @param {...*} Optional additional arguments to be passed to each listener.
+	 * @return {Object} Current instance of EventEmitter for chaining.
+	 */
+	proto.emit = function emit(evt) {
+		var args = Array.prototype.slice.call(arguments, 1);
+		return this.emitEvent(evt, args);
+	};
+
+	/**
+	 * Sets the current value to check against when executing listeners. If a
+	 * listeners return value matches the one set here then it will be removed
+	 * after execution. This value defaults to true.
+	 *
+	 * @param {*} value The new value to check for when executing listeners.
+	 * @return {Object} Current instance of EventEmitter for chaining.
+	 */
+	proto.setOnceReturnValue = function setOnceReturnValue(value) {
+		this._onceReturnValue = value;
+		return this;
+	};
+
+	/**
+	 * Fetches the current value to check against when executing listeners. If
+	 * the listeners return value matches this one then it should be removed
+	 * automatically. It will return true by default.
+	 *
+	 * @return {*|Boolean} The current value to check for or the default, true.
+	 * @api private
+	 */
+	proto._getOnceReturnValue = function _getOnceReturnValue() {
+		if (this.hasOwnProperty('_onceReturnValue')) {
+			return this._onceReturnValue;
+		}
+		else {
+			return true;
+		}
+	};
+
+	/**
+	 * Fetches the events object and creates one if required.
+	 *
+	 * @return {Object} The events storage object.
+	 * @api private
+	 */
+	proto._getEvents = function _getEvents() {
+		return this._events || (this._events = {});
+	};
+
+	/**
+	 * Reverts the global {@link EventEmitter} to its previous value and returns a reference to this version.
+	 *
+	 * @return {Function} Non conflicting EventEmitter class.
+	 */
+	EventEmitter.noConflict = function noConflict() {
+		exports.EventEmitter = originalGlobalValue;
+		return EventEmitter;
+	};
+
+	return EventEmitter;
+}());
+/* jshint ignore:end */
+
+
+
+	var validateTypeFunction = function( value, name ) {
+		validateType( value, name, typeof value === "undefined" || typeof value === "function", "Function" );
+	};
+
+
+
+
+	var superGet, superInit,
+		globalEe = new EventEmitter();
+
+	function validateTypeEvent( value, name ) {
+		validateType( value, name, typeof value === "string" || value instanceof RegExp, "String or RegExp" );
+	}
+
+	function validateThenCall( method, self ) {
+		return function( event, listener ) {
+			validatePresence( event, "event" );
+			validateTypeEvent( event, "event" );
+
+			validatePresence( listener, "listener" );
+			validateTypeFunction( listener, "listener" );
+
+			return self[ method ].apply( self, arguments );
+		};
+	}
+
+	function off( self ) {
+		return validateThenCall( "off", self );
+	}
+
+	function on( self ) {
+		return validateThenCall( "on", self );
+	}
+
+	function once( self ) {
+		return validateThenCall( "once", self );
+	}
+
+	Cldr.off = off( globalEe );
+	Cldr.on = on( globalEe );
+	Cldr.once = once( globalEe );
+
+	/**
+	 * Overload Cldr.prototype.init().
+	 */
+	superInit = Cldr.prototype.init;
+	Cldr.prototype.init = function() {
+		var ee;
+		this.ee = ee = new EventEmitter();
+		this.off = off( ee );
+		this.on = on( ee );
+		this.once = once( ee );
+		superInit.apply( this, arguments );
+	};
+
+	/**
+	 * getOverload is encapsulated, because of cldr/unresolved. If it's loaded
+	 * after cldr/event (and note it overwrites .get), it can trigger this
+	 * overload again.
+	 */
+	function getOverload() {
+
+		/**
+		 * Overload Cldr.prototype.get().
+		 */
+		superGet = Cldr.prototype.get;
+		Cldr.prototype.get = function( path ) {
+			var value = superGet.apply( this, arguments );
+			path = pathNormalize( path, this.attributes ).join( "/" );
+			globalEe.trigger( "get", [ path, value ] );
+			this.ee.trigger( "get", [ path, value ] );
+			return value;
+		};
+	}
+
+	Cldr._eventInit = getOverload;
+	getOverload();
+
+	return Cldr;
+
+
+
+
+}));
+
+/**
+ * Globalize v1.2.3
+ *
+ * http://github.com/jquery/globalize
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license
+ * http://jquery.org/license
+ *
+ * Date: 2017-03-17T01:41Z
+ */
+/*!
+ * Globalize v1.2.3 2017-03-17T01:41Z Released under the MIT license
+ * http://git.io/TrdQbw
+ */
+(function( root, factory ) {
+
+	// UMD returnExports
+	if ( typeof define === "function" && define.amd ) {
+
+		// AMD
+		define('globalize',[
+			"cldr",
+			"cldr/event"
+		], factory );
+	} else if ( typeof exports === "object" ) {
+
+		// Node, CommonJS
+		module.exports = factory( require( "cldrjs" ) );
+	} else {
+
+		// Global
+		root.Globalize = factory( root.Cldr );
+	}
+}( this, function( Cldr ) {
+
+
+/**
+ * A toString method that outputs meaningful values for objects or arrays and
+ * still performs as fast as a plain string in case variable is string, or as
+ * fast as `"" + number` in case variable is a number.
+ * Ref: http://jsperf.com/my-stringify
+ */
+var toString = function( variable ) {
+	return typeof variable === "string" ? variable : ( typeof variable === "number" ? "" +
+		variable : JSON.stringify( variable ) );
+};
+
+
+
+
+/**
+ * formatMessage( message, data )
+ *
+ * @message [String] A message with optional {vars} to be replaced.
+ *
+ * @data [Array or JSON] Object with replacing-variables content.
+ *
+ * Return the formatted message. For example:
+ *
+ * - formatMessage( "{0} second", [ 1 ] ); // 1 second
+ *
+ * - formatMessage( "{0}/{1}", ["m", "s"] ); // m/s
+ *
+ * - formatMessage( "{name} <{email}>", {
+ *     name: "Foo",
+ *     email: "bar@baz.qux"
+ *   }); // Foo <bar@baz.qux>
+ */
+var formatMessage = function( message, data ) {
+
+	// Replace {attribute}'s
+	message = message.replace( /{[0-9a-zA-Z-_. ]+}/g, function( name ) {
+		name = name.replace( /^{([^}]*)}$/, "$1" );
+		return toString( data[ name ] );
+	});
+
+	return message;
+};
+
+
+
+
+var objectExtend = function() {
+	var destination = arguments[ 0 ],
+		sources = [].slice.call( arguments, 1 );
+
+	sources.forEach(function( source ) {
+		var prop;
+		for ( prop in source ) {
+			destination[ prop ] = source[ prop ];
+		}
+	});
+
+	return destination;
+};
+
+
+
+
+var createError = function( code, message, attributes ) {
+	var error;
+
+	message = code + ( message ? ": " + formatMessage( message, attributes ) : "" );
+	error = new Error( message );
+	error.code = code;
+
+	objectExtend( error, attributes );
+
+	return error;
+};
+
+
+
+
+// Based on http://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript-jquery
+var stringHash = function( str ) {
+	return [].reduce.call( str, function( hash, i ) {
+		var chr = i.charCodeAt( 0 );
+		hash = ( ( hash << 5 ) - hash ) + chr;
+		return hash | 0;
+	}, 0 );
+};
+
+
+
+
+var runtimeKey = function( fnName, locale, args, argsStr ) {
+	var hash;
+	argsStr = argsStr || JSON.stringify( args );
+	hash = stringHash( fnName + locale + argsStr );
+	return hash > 0 ? "a" + hash : "b" + Math.abs( hash );
+};
+
+
+
+
+var functionName = function( fn ) {
+	if ( fn.name !== undefined ) {
+		return fn.name;
+	}
+
+	// fn.name is not supported by IE.
+	var matches = /^function\s+([\w\$]+)\s*\(/.exec( fn.toString() );
+
+	if ( matches && matches.length > 0 ) {
+		return matches[ 1 ];
+	}
+};
+
+
+
+
+var runtimeBind = function( args, cldr, fn, runtimeArgs ) {
+
+	var argsStr = JSON.stringify( args ),
+		fnName = functionName( fn ),
+		locale = cldr.locale;
+
+	// If name of the function is not available, this is most likely due uglification,
+	// which most likely means we are in production, and runtimeBind here is not necessary.
+	if ( !fnName ) {
+		return fn;
+	}
+
+	fn.runtimeKey = runtimeKey( fnName, locale, null, argsStr );
+
+	fn.generatorString = function() {
+		return "Globalize(\"" + locale + "\")." + fnName + "(" + argsStr.slice( 1, -1 ) + ")";
+	};
+
+	fn.runtimeArgs = runtimeArgs;
+
+	return fn;
+};
+
+
+
+
+var validate = function( code, message, check, attributes ) {
+	if ( !check ) {
+		throw createError( code, message, attributes );
+	}
+};
+
+
+
+
+var alwaysArray = function( stringOrArray ) {
+	return Array.isArray( stringOrArray ) ? stringOrArray : stringOrArray ? [ stringOrArray ] : [];
+};
+
+
+
+
+var validateCldr = function( path, value, options ) {
+	var skipBoolean;
+	options = options || {};
+
+	skipBoolean = alwaysArray( options.skip ).some(function( pathRe ) {
+		return pathRe.test( path );
+	});
+
+	validate( "E_MISSING_CLDR", "Missing required CLDR content `{path}`.", value || skipBoolean, {
+		path: path
+	});
+};
+
+
+
+
+var validateDefaultLocale = function( value ) {
+	validate( "E_DEFAULT_LOCALE_NOT_DEFINED", "Default locale has not been defined.",
+		value !== undefined, {} );
+};
+
+
+
+
+var validateParameterPresence = function( value, name ) {
+	validate( "E_MISSING_PARAMETER", "Missing required parameter `{name}`.",
+		value !== undefined, { name: name });
+};
+
+
+
+
+/**
+ * range( value, name, minimum, maximum )
+ *
+ * @value [Number].
+ *
+ * @name [String] name of variable.
+ *
+ * @minimum [Number]. The lowest valid value, inclusive.
+ *
+ * @maximum [Number]. The greatest valid value, inclusive.
+ */
+var validateParameterRange = function( value, name, minimum, maximum ) {
+	validate(
+		"E_PAR_OUT_OF_RANGE",
+		"Parameter `{name}` has value `{value}` out of range [{minimum}, {maximum}].",
+		value === undefined || value >= minimum && value <= maximum,
+		{
+			maximum: maximum,
+			minimum: minimum,
+			name: name,
+			value: value
+		}
+	);
+};
+
+
+
+
+var validateParameterType = function( value, name, check, expected ) {
+	validate(
+		"E_INVALID_PAR_TYPE",
+		"Invalid `{name}` parameter ({value}). {expected} expected.",
+		check,
+		{
+			expected: expected,
+			name: name,
+			value: value
+		}
+	);
+};
+
+
+
+
+var validateParameterTypeLocale = function( value, name ) {
+	validateParameterType(
+		value,
+		name,
+		value === undefined || typeof value === "string" || value instanceof Cldr,
+		"String or Cldr instance"
+	);
+};
+
+
+
+
+/**
+ * Function inspired by jQuery Core, but reduced to our use case.
+ */
+var isPlainObject = function( obj ) {
+	return obj !== null && "" + obj === "[object Object]";
+};
+
+
+
+
+var validateParameterTypePlainObject = function( value, name ) {
+	validateParameterType(
+		value,
+		name,
+		value === undefined || isPlainObject( value ),
+		"Plain Object"
+	);
+};
+
+
+
+
+var alwaysCldr = function( localeOrCldr ) {
+	return localeOrCldr instanceof Cldr ? localeOrCldr : new Cldr( localeOrCldr );
+};
+
+
+
+
+// ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions?redirectlocale=en-US&redirectslug=JavaScript%2FGuide%2FRegular_Expressions
+var regexpEscape = function( string ) {
+	return string.replace( /([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1" );
+};
+
+
+
+
+var stringPad = function( str, count, right ) {
+	var length;
+	if ( typeof str !== "string" ) {
+		str = String( str );
+	}
+	for ( length = str.length; length < count; length += 1 ) {
+		str = ( right ? ( str + "0" ) : ( "0" + str ) );
+	}
+	return str;
+};
+
+
+
+
+function validateLikelySubtags( cldr ) {
+	cldr.once( "get", validateCldr );
+	cldr.get( "supplemental/likelySubtags" );
+}
+
+/**
+ * [new] Globalize( locale|cldr )
+ *
+ * @locale [String]
+ *
+ * @cldr [Cldr instance]
+ *
+ * Create a Globalize instance.
+ */
+function Globalize( locale ) {
+	if ( !( this instanceof Globalize ) ) {
+		return new Globalize( locale );
+	}
+
+	validateParameterPresence( locale, "locale" );
+	validateParameterTypeLocale( locale, "locale" );
+
+	this.cldr = alwaysCldr( locale );
+
+	validateLikelySubtags( this.cldr );
+}
+
+/**
+ * Globalize.load( json, ... )
+ *
+ * @json [JSON]
+ *
+ * Load resolved or unresolved cldr data.
+ * Somewhat equivalent to previous Globalize.addCultureInfo(...).
+ */
+Globalize.load = function() {
+
+	// validations are delegated to Cldr.load().
+	Cldr.load.apply( Cldr, arguments );
+};
+
+/**
+ * Globalize.locale( [locale|cldr] )
+ *
+ * @locale [String]
+ *
+ * @cldr [Cldr instance]
+ *
+ * Set default Cldr instance if locale or cldr argument is passed.
+ *
+ * Return the default Cldr instance.
+ */
+Globalize.locale = function( locale ) {
+	validateParameterTypeLocale( locale, "locale" );
+
+	if ( arguments.length ) {
+		this.cldr = alwaysCldr( locale );
+		validateLikelySubtags( this.cldr );
+	}
+	return this.cldr;
+};
+
+/**
+ * Optimization to avoid duplicating some internal functions across modules.
+ */
+Globalize._alwaysArray = alwaysArray;
+Globalize._createError = createError;
+Globalize._formatMessage = formatMessage;
+Globalize._isPlainObject = isPlainObject;
+Globalize._objectExtend = objectExtend;
+Globalize._regexpEscape = regexpEscape;
+Globalize._runtimeBind = runtimeBind;
+Globalize._stringPad = stringPad;
+Globalize._validate = validate;
+Globalize._validateCldr = validateCldr;
+Globalize._validateDefaultLocale = validateDefaultLocale;
+Globalize._validateParameterPresence = validateParameterPresence;
+Globalize._validateParameterRange = validateParameterRange;
+Globalize._validateParameterTypePlainObject = validateParameterTypePlainObject;
+Globalize._validateParameterType = validateParameterType;
+
+return Globalize;
+
+
+
+
+}));
+
+/**
+ * @license text 2.0.15 Copyright jQuery Foundation and other contributors.
+ * Released under MIT license, http://github.com/requirejs/text/LICENSE
+ */
+/*jslint regexp: true */
+/*global require, XMLHttpRequest, ActiveXObject,
+  define, window, process, Packages,
+  java, location, Components, FileUtils */
+
+define('text',['module'], function (module) {
+    'use strict';
+
+    var text, fs, Cc, Ci, xpcIsWindows,
+        progIds = ['Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'],
+        xmlRegExp = /^\s*<\?xml(\s)+version=[\'\"](\d)*.(\d)*[\'\"](\s)*\?>/im,
+        bodyRegExp = /<body[^>]*>\s*([\s\S]+)\s*<\/body>/im,
+        hasLocation = typeof location !== 'undefined' && location.href,
+        defaultProtocol = hasLocation && location.protocol && location.protocol.replace(/\:/, ''),
+        defaultHostName = hasLocation && location.hostname,
+        defaultPort = hasLocation && (location.port || undefined),
+        buildMap = {},
+        masterConfig = (module.config && module.config()) || {};
+
+    function useDefault(value, defaultValue) {
+        return value === undefined || value === '' ? defaultValue : value;
+    }
+
+    //Allow for default ports for http and https.
+    function isSamePort(protocol1, port1, protocol2, port2) {
+        if (port1 === port2) {
+            return true;
+        } else if (protocol1 === protocol2) {
+            if (protocol1 === 'http') {
+                return useDefault(port1, '80') === useDefault(port2, '80');
+            } else if (protocol1 === 'https') {
+                return useDefault(port1, '443') === useDefault(port2, '443');
+            }
+        }
+        return false;
+    }
+
+    text = {
+        version: '2.0.15',
+
+        strip: function (content) {
+            //Strips <?xml ...?> declarations so that external SVG and XML
+            //documents can be added to a document without worry. Also, if the string
+            //is an HTML document, only the part inside the body tag is returned.
+            if (content) {
+                content = content.replace(xmlRegExp, "");
+                var matches = content.match(bodyRegExp);
+                if (matches) {
+                    content = matches[1];
+                }
+            } else {
+                content = "";
+            }
+            return content;
+        },
+
+        jsEscape: function (content) {
+            return content.replace(/(['\\])/g, '\\$1')
+                .replace(/[\f]/g, "\\f")
+                .replace(/[\b]/g, "\\b")
+                .replace(/[\n]/g, "\\n")
+                .replace(/[\t]/g, "\\t")
+                .replace(/[\r]/g, "\\r")
+                .replace(/[\u2028]/g, "\\u2028")
+                .replace(/[\u2029]/g, "\\u2029");
+        },
+
+        createXhr: masterConfig.createXhr || function () {
+            //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
+            var xhr, i, progId;
+            if (typeof XMLHttpRequest !== "undefined") {
+                return new XMLHttpRequest();
+            } else if (typeof ActiveXObject !== "undefined") {
+                for (i = 0; i < 3; i += 1) {
+                    progId = progIds[i];
+                    try {
+                        xhr = new ActiveXObject(progId);
+                    } catch (e) {}
+
+                    if (xhr) {
+                        progIds = [progId];  // so faster next time
+                        break;
+                    }
+                }
+            }
+
+            return xhr;
+        },
+
+        /**
+         * Parses a resource name into its component parts. Resource names
+         * look like: module/name.ext!strip, where the !strip part is
+         * optional.
+         * @param {String} name the resource name
+         * @returns {Object} with properties "moduleName", "ext" and "strip"
+         * where strip is a boolean.
+         */
+        parseName: function (name) {
+            var modName, ext, temp,
+                strip = false,
+                index = name.lastIndexOf("."),
+                isRelative = name.indexOf('./') === 0 ||
+                             name.indexOf('../') === 0;
+
+            if (index !== -1 && (!isRelative || index > 1)) {
+                modName = name.substring(0, index);
+                ext = name.substring(index + 1);
+            } else {
+                modName = name;
+            }
+
+            temp = ext || modName;
+            index = temp.indexOf("!");
+            if (index !== -1) {
+                //Pull off the strip arg.
+                strip = temp.substring(index + 1) === "strip";
+                temp = temp.substring(0, index);
+                if (ext) {
+                    ext = temp;
+                } else {
+                    modName = temp;
+                }
+            }
+
+            return {
+                moduleName: modName,
+                ext: ext,
+                strip: strip
+            };
+        },
+
+        xdRegExp: /^((\w+)\:)?\/\/([^\/\\]+)/,
+
+        /**
+         * Is an URL on another domain. Only works for browser use, returns
+         * false in non-browser environments. Only used to know if an
+         * optimized .js version of a text resource should be loaded
+         * instead.
+         * @param {String} url
+         * @returns Boolean
+         */
+        useXhr: function (url, protocol, hostname, port) {
+            var uProtocol, uHostName, uPort,
+                match = text.xdRegExp.exec(url);
+            if (!match) {
+                return true;
+            }
+            uProtocol = match[2];
+            uHostName = match[3];
+
+            uHostName = uHostName.split(':');
+            uPort = uHostName[1];
+            uHostName = uHostName[0];
+
+            return (!uProtocol || uProtocol === protocol) &&
+                   (!uHostName || uHostName.toLowerCase() === hostname.toLowerCase()) &&
+                   ((!uPort && !uHostName) || isSamePort(uProtocol, uPort, protocol, port));
+        },
+
+        finishLoad: function (name, strip, content, onLoad) {
+            content = strip ? text.strip(content) : content;
+            if (masterConfig.isBuild) {
+                buildMap[name] = content;
+            }
+            onLoad(content);
+        },
+
+        load: function (name, req, onLoad, config) {
+            //Name has format: some.module.filext!strip
+            //The strip part is optional.
+            //if strip is present, then that means only get the string contents
+            //inside a body tag in an HTML string. For XML/SVG content it means
+            //removing the <?xml ...?> declarations so the content can be inserted
+            //into the current doc without problems.
+
+            // Do not bother with the work if a build and text will
+            // not be inlined.
+            if (config && config.isBuild && !config.inlineText) {
+                onLoad();
+                return;
+            }
+
+            masterConfig.isBuild = config && config.isBuild;
+
+            var parsed = text.parseName(name),
+                nonStripName = parsed.moduleName +
+                    (parsed.ext ? '.' + parsed.ext : ''),
+                url = req.toUrl(nonStripName),
+                useXhr = (masterConfig.useXhr) ||
+                         text.useXhr;
+
+            // Do not load if it is an empty: url
+            if (url.indexOf('empty:') === 0) {
+                onLoad();
+                return;
+            }
+
+            //Load the text. Use XHR if possible and in a browser.
+            if (!hasLocation || useXhr(url, defaultProtocol, defaultHostName, defaultPort)) {
+                text.get(url, function (content) {
+                    text.finishLoad(name, parsed.strip, content, onLoad);
+                }, function (err) {
+                    if (onLoad.error) {
+                        onLoad.error(err);
+                    }
+                });
+            } else {
+                //Need to fetch the resource across domains. Assume
+                //the resource has been optimized into a JS module. Fetch
+                //by the module name + extension, but do not include the
+                //!strip part to avoid file system issues.
+                req([nonStripName], function (content) {
+                    text.finishLoad(parsed.moduleName + '.' + parsed.ext,
+                                    parsed.strip, content, onLoad);
+                });
+            }
+        },
+
+        write: function (pluginName, moduleName, write, config) {
+            if (buildMap.hasOwnProperty(moduleName)) {
+                var content = text.jsEscape(buildMap[moduleName]);
+                write.asModule(pluginName + "!" + moduleName,
+                               "define(function () { return '" +
+                                   content +
+                               "';});\n");
+            }
+        },
+
+        writeFile: function (pluginName, moduleName, req, write, config) {
+            var parsed = text.parseName(moduleName),
+                extPart = parsed.ext ? '.' + parsed.ext : '',
+                nonStripName = parsed.moduleName + extPart,
+                //Use a '.js' file name so that it indicates it is a
+                //script that can be loaded across domains.
+                fileName = req.toUrl(parsed.moduleName + extPart) + '.js';
+
+            //Leverage own load() method to load plugin value, but only
+            //write out values that do not have the strip argument,
+            //to avoid any potential issues with ! in file names.
+            text.load(nonStripName, req, function (value) {
+                //Use own write() method to construct full module value.
+                //But need to create shell that translates writeFile's
+                //write() to the right interface.
+                var textWrite = function (contents) {
+                    return write(fileName, contents);
+                };
+                textWrite.asModule = function (moduleName, contents) {
+                    return write.asModule(moduleName, fileName, contents);
+                };
+
+                text.write(pluginName, nonStripName, textWrite, config);
+            }, config);
+        }
+    };
+
+    if (masterConfig.env === 'node' || (!masterConfig.env &&
+            typeof process !== "undefined" &&
+            process.versions &&
+            !!process.versions.node &&
+            !process.versions['node-webkit'] &&
+            !process.versions['atom-shell'])) {
+        //Using special require.nodeRequire, something added by r.js.
+        fs = require.nodeRequire('fs');
+
+        text.get = function (url, callback, errback) {
+            try {
+                var file = fs.readFileSync(url, 'utf8');
+                //Remove BOM (Byte Mark Order) from utf8 files if it is there.
+                if (file[0] === '\uFEFF') {
+                    file = file.substring(1);
+                }
+                callback(file);
+            } catch (e) {
+                if (errback) {
+                    errback(e);
+                }
+            }
+        };
+    } else if (masterConfig.env === 'xhr' || (!masterConfig.env &&
+            text.createXhr())) {
+        text.get = function (url, callback, errback, headers) {
+            var xhr = text.createXhr(), header;
+            xhr.open('GET', url, true);
+
+            //Allow plugins direct access to xhr headers
+            if (headers) {
+                for (header in headers) {
+                    if (headers.hasOwnProperty(header)) {
+                        xhr.setRequestHeader(header.toLowerCase(), headers[header]);
+                    }
+                }
+            }
+
+            //Allow overrides specified in config
+            if (masterConfig.onXhr) {
+                masterConfig.onXhr(xhr, url);
+            }
+
+            xhr.onreadystatechange = function (evt) {
+                var status, err;
+                //Do not explicitly handle errors, those should be
+                //visible via console output in the browser.
+                if (xhr.readyState === 4) {
+                    status = xhr.status || 0;
+                    if (status > 399 && status < 600) {
+                        //An http 4xx or 5xx error. Signal an error.
+                        err = new Error(url + ' HTTP status: ' + status);
+                        err.xhr = xhr;
+                        if (errback) {
+                            errback(err);
+                        }
+                    } else {
+                        callback(xhr.responseText);
+                    }
+
+                    if (masterConfig.onXhrComplete) {
+                        masterConfig.onXhrComplete(xhr, url);
+                    }
+                }
+            };
+            xhr.send(null);
+        };
+    } else if (masterConfig.env === 'rhino' || (!masterConfig.env &&
+            typeof Packages !== 'undefined' && typeof java !== 'undefined')) {
+        //Why Java, why is this so awkward?
+        text.get = function (url, callback) {
+            var stringBuffer, line,
+                encoding = "utf-8",
+                file = new java.io.File(url),
+                lineSeparator = java.lang.System.getProperty("line.separator"),
+                input = new java.io.BufferedReader(new java.io.InputStreamReader(new java.io.FileInputStream(file), encoding)),
+                content = '';
+            try {
+                stringBuffer = new java.lang.StringBuffer();
+                line = input.readLine();
+
+                // Byte Order Mark (BOM) - The Unicode Standard, version 3.0, page 324
+                // http://www.unicode.org/faq/utf_bom.html
+
+                // Note that when we use utf-8, the BOM should appear as "EF BB BF", but it doesn't due to this bug in the JDK:
+                // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4508058
+                if (line && line.length() && line.charAt(0) === 0xfeff) {
+                    // Eat the BOM, since we've already found the encoding on this file,
+                    // and we plan to concatenating this buffer with others; the BOM should
+                    // only appear at the top of a file.
+                    line = line.substring(1);
+                }
+
+                if (line !== null) {
+                    stringBuffer.append(line);
+                }
+
+                while ((line = input.readLine()) !== null) {
+                    stringBuffer.append(lineSeparator);
+                    stringBuffer.append(line);
+                }
+                //Make sure we return a JavaScript string and not a Java string.
+                content = String(stringBuffer.toString()); //String
+            } finally {
+                input.close();
+            }
+            callback(content);
+        };
+    } else if (masterConfig.env === 'xpconnect' || (!masterConfig.env &&
+            typeof Components !== 'undefined' && Components.classes &&
+            Components.interfaces)) {
+        //Avert your gaze!
+        Cc = Components.classes;
+        Ci = Components.interfaces;
+        Components.utils['import']('resource://gre/modules/FileUtils.jsm');
+        xpcIsWindows = ('@mozilla.org/windows-registry-key;1' in Cc);
+
+        text.get = function (url, callback) {
+            var inStream, convertStream, fileObj,
+                readData = {};
+
+            if (xpcIsWindows) {
+                url = url.replace(/\//g, '\\');
+            }
+
+            fileObj = new FileUtils.File(url);
+
+            //XPCOM, you so crazy
+            try {
+                inStream = Cc['@mozilla.org/network/file-input-stream;1']
+                           .createInstance(Ci.nsIFileInputStream);
+                inStream.init(fileObj, 1, 0, false);
+
+                convertStream = Cc['@mozilla.org/intl/converter-input-stream;1']
+                                .createInstance(Ci.nsIConverterInputStream);
+                convertStream.init(inStream, "utf-8", inStream.available(),
+                Ci.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+
+                convertStream.readString(inStream.available(), readData);
+                convertStream.close();
+                inStream.close();
+                callback(readData.value);
+            } catch (e) {
+                throw new Error((fileObj && fileObj.path || '') + ': ' + e);
+            }
+        };
+    }
+    return text;
+});
+
+define(
+
+	'json',[
+		"text"
+	],
+
+	function (text) {
+
+		var parseJSON = JSON && JSON.parse ? JSON.parse : function (val) {
+			return eval("(" + val + ")"); //quick and dirty
+		};
+
+		return {
+
+			load : function (name, req, load, config) {
+
+				if (!config.isBuild) {
+					req(["text!" + name], function (val) {
+						load(parseJSON(val));
+					});
+				}
+
+				else {
+					load("");
+				}
+			},
+
+			loadFromFileSystem : function (plugin, name) {
+
+				var fs = nodeRequire("fs");
+				var file = require.toUrl(name);
+				var val = fs.readFileSync(file).toString();
+
+				val = 'define("' + plugin + '!' + name  + '", function () {\nreturn ' + val + ';\n});\n';
+
+				return val;
+			},
+
+			write: function (pluginName, moduleName, write) {
+				write(this.loadFromFileSystem(pluginName, moduleName));
+			}
+
+		};
+	}
+);
+
+define("json!cldr-data/supplemental/likelySubtags.json", function () {
+return {
+  "supplemental": {
+    "version": {
+      "_number": "$Revision: 12447 $",
+      "_unicodeVersion": "8.0.0",
+      "_cldrVersion": "29"
+    },
+    "likelySubtags": {
+      "aa": "aa-Latn-ET",
+      "ab": "ab-Cyrl-GE",
+      "abr": "abr-Latn-GH",
+      "ace": "ace-Latn-ID",
+      "ach": "ach-Latn-UG",
+      "ada": "ada-Latn-GH",
+      "ady": "ady-Cyrl-RU",
+      "ae": "ae-Avst-IR",
+      "aeb": "aeb-Arab-TN",
+      "af": "af-Latn-ZA",
+      "agq": "agq-Latn-CM",
+      "aho": "aho-Ahom-IN",
+      "ak": "ak-Latn-GH",
+      "akk": "akk-Xsux-IQ",
+      "aln": "aln-Latn-XK",
+      "alt": "alt-Cyrl-RU",
+      "am": "am-Ethi-ET",
+      "amo": "amo-Latn-NG",
+      "aoz": "aoz-Latn-ID",
+      "ar": "ar-Arab-EG",
+      "arc": "arc-Armi-IR",
+      "arc-Nbat": "arc-Nbat-JO",
+      "arc-Palm": "arc-Palm-SY",
+      "arn": "arn-Latn-CL",
+      "aro": "aro-Latn-BO",
+      "arq": "arq-Arab-DZ",
+      "ary": "ary-Arab-MA",
+      "arz": "arz-Arab-EG",
+      "as": "as-Beng-IN",
+      "asa": "asa-Latn-TZ",
+      "ase": "ase-Sgnw-US",
+      "ast": "ast-Latn-ES",
+      "atj": "atj-Latn-CA",
+      "av": "av-Cyrl-RU",
+      "awa": "awa-Deva-IN",
+      "ay": "ay-Latn-BO",
+      "az": "az-Latn-AZ",
+      "az-Arab": "az-Arab-IR",
+      "az-IQ": "az-Arab-IQ",
+      "az-IR": "az-Arab-IR",
+      "az-RU": "az-Cyrl-RU",
+      "ba": "ba-Cyrl-RU",
+      "bal": "bal-Arab-PK",
+      "ban": "ban-Latn-ID",
+      "bap": "bap-Deva-NP",
+      "bar": "bar-Latn-AT",
+      "bas": "bas-Latn-CM",
+      "bax": "bax-Bamu-CM",
+      "bbc": "bbc-Latn-ID",
+      "bbj": "bbj-Latn-CM",
+      "bci": "bci-Latn-CI",
+      "be": "be-Cyrl-BY",
+      "bej": "bej-Arab-SD",
+      "bem": "bem-Latn-ZM",
+      "bew": "bew-Latn-ID",
+      "bez": "bez-Latn-TZ",
+      "bfd": "bfd-Latn-CM",
+      "bfq": "bfq-Taml-IN",
+      "bft": "bft-Arab-PK",
+      "bfy": "bfy-Deva-IN",
+      "bg": "bg-Cyrl-BG",
+      "bgc": "bgc-Deva-IN",
+      "bgn": "bgn-Arab-PK",
+      "bgx": "bgx-Grek-TR",
+      "bhb": "bhb-Deva-IN",
+      "bhi": "bhi-Deva-IN",
+      "bhk": "bhk-Latn-PH",
+      "bho": "bho-Deva-IN",
+      "bi": "bi-Latn-VU",
+      "bik": "bik-Latn-PH",
+      "bin": "bin-Latn-NG",
+      "bjj": "bjj-Deva-IN",
+      "bjn": "bjn-Latn-ID",
+      "bkm": "bkm-Latn-CM",
+      "bku": "bku-Latn-PH",
+      "blt": "blt-Tavt-VN",
+      "bm": "bm-Latn-ML",
+      "bmq": "bmq-Latn-ML",
+      "bn": "bn-Beng-BD",
+      "bo": "bo-Tibt-CN",
+      "bpy": "bpy-Beng-IN",
+      "bqi": "bqi-Arab-IR",
+      "bqv": "bqv-Latn-CI",
+      "br": "br-Latn-FR",
+      "bra": "bra-Deva-IN",
+      "brh": "brh-Arab-PK",
+      "brx": "brx-Deva-IN",
+      "bs": "bs-Latn-BA",
+      "bsq": "bsq-Bass-LR",
+      "bss": "bss-Latn-CM",
+      "bto": "bto-Latn-PH",
+      "btv": "btv-Deva-PK",
+      "bua": "bua-Cyrl-RU",
+      "buc": "buc-Latn-YT",
+      "bug": "bug-Latn-ID",
+      "bum": "bum-Latn-CM",
+      "bvb": "bvb-Latn-GQ",
+      "byn": "byn-Ethi-ER",
+      "byv": "byv-Latn-CM",
+      "bze": "bze-Latn-ML",
+      "ca": "ca-Latn-ES",
+      "cch": "cch-Latn-NG",
+      "ccp": "ccp-Beng-IN",
+      "ccp-Cakm": "ccp-Cakm-BD",
+      "ce": "ce-Cyrl-RU",
+      "ceb": "ceb-Latn-PH",
+      "cgg": "cgg-Latn-UG",
+      "ch": "ch-Latn-GU",
+      "chk": "chk-Latn-FM",
+      "chm": "chm-Cyrl-RU",
+      "cho": "cho-Latn-US",
+      "chp": "chp-Latn-CA",
+      "chr": "chr-Cher-US",
+      "cja": "cja-Arab-KH",
+      "cjm": "cjm-Cham-VN",
+      "ckb": "ckb-Arab-IQ",
+      "co": "co-Latn-FR",
+      "cop": "cop-Copt-EG",
+      "cps": "cps-Latn-PH",
+      "cr": "cr-Cans-CA",
+      "crj": "crj-Cans-CA",
+      "crk": "crk-Cans-CA",
+      "crl": "crl-Cans-CA",
+      "crm": "crm-Cans-CA",
+      "crs": "crs-Latn-SC",
+      "cs": "cs-Latn-CZ",
+      "csb": "csb-Latn-PL",
+      "csw": "csw-Cans-CA",
+      "ctd": "ctd-Pauc-MM",
+      "cu": "cu-Cyrl-RU",
+      "cu-Glag": "cu-Glag-BG",
+      "cv": "cv-Cyrl-RU",
+      "cy": "cy-Latn-GB",
+      "da": "da-Latn-DK",
+      "dak": "dak-Latn-US",
+      "dar": "dar-Cyrl-RU",
+      "dav": "dav-Latn-KE",
+      "dcc": "dcc-Arab-IN",
+      "de": "de-Latn-DE",
+      "den": "den-Latn-CA",
+      "dgr": "dgr-Latn-CA",
+      "dje": "dje-Latn-NE",
+      "dnj": "dnj-Latn-CI",
+      "doi": "doi-Arab-IN",
+      "dsb": "dsb-Latn-DE",
+      "dtm": "dtm-Latn-ML",
+      "dtp": "dtp-Latn-MY",
+      "dty": "dty-Deva-NP",
+      "dua": "dua-Latn-CM",
+      "dv": "dv-Thaa-MV",
+      "dyo": "dyo-Latn-SN",
+      "dyu": "dyu-Latn-BF",
+      "dz": "dz-Tibt-BT",
+      "ebu": "ebu-Latn-KE",
+      "ee": "ee-Latn-GH",
+      "efi": "efi-Latn-NG",
+      "egl": "egl-Latn-IT",
+      "egy": "egy-Egyp-EG",
+      "eky": "eky-Kali-MM",
+      "el": "el-Grek-GR",
+      "en": "en-Latn-US",
+      "en-Shaw": "en-Shaw-GB",
+      "eo": "eo-Latn-001",
+      "es": "es-Latn-ES",
+      "esu": "esu-Latn-US",
+      "et": "et-Latn-EE",
+      "ett": "ett-Ital-IT",
+      "eu": "eu-Latn-ES",
+      "ewo": "ewo-Latn-CM",
+      "ext": "ext-Latn-ES",
+      "fa": "fa-Arab-IR",
+      "fan": "fan-Latn-GQ",
+      "ff": "ff-Latn-SN",
+      "ff-Adlm": "ff-Adlm-GN",
+      "ffm": "ffm-Latn-ML",
+      "fi": "fi-Latn-FI",
+      "fia": "fia-Arab-SD",
+      "fil": "fil-Latn-PH",
+      "fit": "fit-Latn-SE",
+      "fj": "fj-Latn-FJ",
+      "fo": "fo-Latn-FO",
+      "fon": "fon-Latn-BJ",
+      "fr": "fr-Latn-FR",
+      "frc": "frc-Latn-US",
+      "frp": "frp-Latn-FR",
+      "frr": "frr-Latn-DE",
+      "frs": "frs-Latn-DE",
+      "fud": "fud-Latn-WF",
+      "fuq": "fuq-Latn-NE",
+      "fur": "fur-Latn-IT",
+      "fuv": "fuv-Latn-NG",
+      "fvr": "fvr-Latn-SD",
+      "fy": "fy-Latn-NL",
+      "ga": "ga-Latn-IE",
+      "gaa": "gaa-Latn-GH",
+      "gag": "gag-Latn-MD",
+      "gan": "gan-Hans-CN",
+      "gay": "gay-Latn-ID",
+      "gbm": "gbm-Deva-IN",
+      "gbz": "gbz-Arab-IR",
+      "gcr": "gcr-Latn-GF",
+      "gd": "gd-Latn-GB",
+      "gez": "gez-Ethi-ET",
+      "ggn": "ggn-Deva-NP",
+      "gil": "gil-Latn-KI",
+      "gjk": "gjk-Arab-PK",
+      "gju": "gju-Arab-PK",
+      "gl": "gl-Latn-ES",
+      "glk": "glk-Arab-IR",
+      "gn": "gn-Latn-PY",
+      "gom": "gom-Deva-IN",
+      "gon": "gon-Telu-IN",
+      "gor": "gor-Latn-ID",
+      "gos": "gos-Latn-NL",
+      "got": "got-Goth-UA",
+      "grc": "grc-Cprt-CY",
+      "grc-Linb": "grc-Linb-GR",
+      "grt": "grt-Beng-IN",
+      "gsw": "gsw-Latn-CH",
+      "gu": "gu-Gujr-IN",
+      "gub": "gub-Latn-BR",
+      "guc": "guc-Latn-CO",
+      "gur": "gur-Latn-GH",
+      "guz": "guz-Latn-KE",
+      "gv": "gv-Latn-IM",
+      "gvr": "gvr-Deva-NP",
+      "gwi": "gwi-Latn-CA",
+      "ha": "ha-Latn-NG",
+      "ha-CM": "ha-Arab-CM",
+      "ha-SD": "ha-Arab-SD",
+      "hak": "hak-Hans-CN",
+      "haw": "haw-Latn-US",
+      "haz": "haz-Arab-AF",
+      "he": "he-Hebr-IL",
+      "hi": "hi-Deva-IN",
+      "hif": "hif-Latn-FJ",
+      "hil": "hil-Latn-PH",
+      "hlu": "hlu-Hluw-TR",
+      "hmd": "hmd-Plrd-CN",
+      "hnd": "hnd-Arab-PK",
+      "hne": "hne-Deva-IN",
+      "hnj": "hnj-Hmng-LA",
+      "hnn": "hnn-Latn-PH",
+      "hno": "hno-Arab-PK",
+      "ho": "ho-Latn-PG",
+      "hoc": "hoc-Deva-IN",
+      "hoj": "hoj-Deva-IN",
+      "hr": "hr-Latn-HR",
+      "hsb": "hsb-Latn-DE",
+      "hsn": "hsn-Hans-CN",
+      "ht": "ht-Latn-HT",
+      "hu": "hu-Latn-HU",
+      "hy": "hy-Armn-AM",
+      "hz": "hz-Latn-NA",
+      "ia": "ia-Latn-FR",
+      "iba": "iba-Latn-MY",
+      "ibb": "ibb-Latn-NG",
+      "id": "id-Latn-ID",
+      "ig": "ig-Latn-NG",
+      "ii": "ii-Yiii-CN",
+      "ik": "ik-Latn-US",
+      "ikt": "ikt-Latn-CA",
+      "ilo": "ilo-Latn-PH",
+      "in": "in-Latn-ID",
+      "inh": "inh-Cyrl-RU",
+      "is": "is-Latn-IS",
+      "it": "it-Latn-IT",
+      "iu": "iu-Cans-CA",
+      "iw": "iw-Hebr-IL",
+      "izh": "izh-Latn-RU",
+      "ja": "ja-Jpan-JP",
+      "jam": "jam-Latn-JM",
+      "jgo": "jgo-Latn-CM",
+      "ji": "ji-Hebr-UA",
+      "jmc": "jmc-Latn-TZ",
+      "jml": "jml-Deva-NP",
+      "jut": "jut-Latn-DK",
+      "jv": "jv-Latn-ID",
+      "jw": "jw-Latn-ID",
+      "ka": "ka-Geor-GE",
+      "kaa": "kaa-Cyrl-UZ",
+      "kab": "kab-Latn-DZ",
+      "kac": "kac-Latn-MM",
+      "kaj": "kaj-Latn-NG",
+      "kam": "kam-Latn-KE",
+      "kao": "kao-Latn-ML",
+      "kbd": "kbd-Cyrl-RU",
+      "kcg": "kcg-Latn-NG",
+      "kck": "kck-Latn-ZW",
+      "kde": "kde-Latn-TZ",
+      "kdt": "kdt-Thai-TH",
+      "kea": "kea-Latn-CV",
+      "ken": "ken-Latn-CM",
+      "kfo": "kfo-Latn-CI",
+      "kfr": "kfr-Deva-IN",
+      "kfy": "kfy-Deva-IN",
+      "kg": "kg-Latn-CD",
+      "kge": "kge-Latn-ID",
+      "kgp": "kgp-Latn-BR",
+      "kha": "kha-Latn-IN",
+      "khb": "khb-Talu-CN",
+      "khn": "khn-Deva-IN",
+      "khq": "khq-Latn-ML",
+      "kht": "kht-Mymr-IN",
+      "khw": "khw-Arab-PK",
+      "ki": "ki-Latn-KE",
+      "kiu": "kiu-Latn-TR",
+      "kj": "kj-Latn-NA",
+      "kjg": "kjg-Laoo-LA",
+      "kk": "kk-Cyrl-KZ",
+      "kk-AF": "kk-Arab-AF",
+      "kk-Arab": "kk-Arab-CN",
+      "kk-CN": "kk-Arab-CN",
+      "kk-IR": "kk-Arab-IR",
+      "kk-MN": "kk-Arab-MN",
+      "kkj": "kkj-Latn-CM",
+      "kl": "kl-Latn-GL",
+      "kln": "kln-Latn-KE",
+      "km": "km-Khmr-KH",
+      "kmb": "kmb-Latn-AO",
+      "kn": "kn-Knda-IN",
+      "ko": "ko-Kore-KR",
+      "koi": "koi-Cyrl-RU",
+      "kok": "kok-Deva-IN",
+      "kos": "kos-Latn-FM",
+      "kpe": "kpe-Latn-LR",
+      "krc": "krc-Cyrl-RU",
+      "kri": "kri-Latn-SL",
+      "krj": "krj-Latn-PH",
+      "krl": "krl-Latn-RU",
+      "kru": "kru-Deva-IN",
+      "ks": "ks-Arab-IN",
+      "ksb": "ksb-Latn-TZ",
+      "ksf": "ksf-Latn-CM",
+      "ksh": "ksh-Latn-DE",
+      "ku": "ku-Latn-TR",
+      "ku-Arab": "ku-Arab-IQ",
+      "ku-LB": "ku-Arab-LB",
+      "kum": "kum-Cyrl-RU",
+      "kv": "kv-Cyrl-RU",
+      "kvr": "kvr-Latn-ID",
+      "kvx": "kvx-Arab-PK",
+      "kw": "kw-Latn-GB",
+      "kxm": "kxm-Thai-TH",
+      "kxp": "kxp-Arab-PK",
+      "ky": "ky-Cyrl-KG",
+      "ky-Arab": "ky-Arab-CN",
+      "ky-CN": "ky-Arab-CN",
+      "ky-Latn": "ky-Latn-TR",
+      "ky-TR": "ky-Latn-TR",
+      "la": "la-Latn-VA",
+      "lab": "lab-Lina-GR",
+      "lad": "lad-Hebr-IL",
+      "lag": "lag-Latn-TZ",
+      "lah": "lah-Arab-PK",
+      "laj": "laj-Latn-UG",
+      "lb": "lb-Latn-LU",
+      "lbe": "lbe-Cyrl-RU",
+      "lbw": "lbw-Latn-ID",
+      "lcp": "lcp-Thai-CN",
+      "lep": "lep-Lepc-IN",
+      "lez": "lez-Cyrl-RU",
+      "lg": "lg-Latn-UG",
+      "li": "li-Latn-NL",
+      "lif": "lif-Deva-NP",
+      "lif-Limb": "lif-Limb-IN",
+      "lij": "lij-Latn-IT",
+      "lis": "lis-Lisu-CN",
+      "ljp": "ljp-Latn-ID",
+      "lki": "lki-Arab-IR",
+      "lkt": "lkt-Latn-US",
+      "lmn": "lmn-Telu-IN",
+      "lmo": "lmo-Latn-IT",
+      "ln": "ln-Latn-CD",
+      "lo": "lo-Laoo-LA",
+      "lol": "lol-Latn-CD",
+      "loz": "loz-Latn-ZM",
+      "lrc": "lrc-Arab-IR",
+      "lt": "lt-Latn-LT",
+      "ltg": "ltg-Latn-LV",
+      "lu": "lu-Latn-CD",
+      "lua": "lua-Latn-CD",
+      "luo": "luo-Latn-KE",
+      "luy": "luy-Latn-KE",
+      "luz": "luz-Arab-IR",
+      "lv": "lv-Latn-LV",
+      "lwl": "lwl-Thai-TH",
+      "lzh": "lzh-Hans-CN",
+      "lzz": "lzz-Latn-TR",
+      "mad": "mad-Latn-ID",
+      "maf": "maf-Latn-CM",
+      "mag": "mag-Deva-IN",
+      "mai": "mai-Deva-IN",
+      "mak": "mak-Latn-ID",
+      "man": "man-Latn-GM",
+      "man-GN": "man-Nkoo-GN",
+      "man-Nkoo": "man-Nkoo-GN",
+      "mas": "mas-Latn-KE",
+      "maz": "maz-Latn-MX",
+      "mdf": "mdf-Cyrl-RU",
+      "mdh": "mdh-Latn-PH",
+      "mdr": "mdr-Latn-ID",
+      "men": "men-Latn-SL",
+      "mer": "mer-Latn-KE",
+      "mfa": "mfa-Arab-TH",
+      "mfe": "mfe-Latn-MU",
+      "mg": "mg-Latn-MG",
+      "mgh": "mgh-Latn-MZ",
+      "mgo": "mgo-Latn-CM",
+      "mgp": "mgp-Deva-NP",
+      "mgy": "mgy-Latn-TZ",
+      "mh": "mh-Latn-MH",
+      "mi": "mi-Latn-NZ",
+      "min": "min-Latn-ID",
+      "mis": "mis-Hatr-IQ",
+      "mk": "mk-Cyrl-MK",
+      "ml": "ml-Mlym-IN",
+      "mls": "mls-Latn-SD",
+      "mn": "mn-Cyrl-MN",
+      "mn-CN": "mn-Mong-CN",
+      "mn-Mong": "mn-Mong-CN",
+      "mni": "mni-Beng-IN",
+      "mnw": "mnw-Mymr-MM",
+      "moe": "moe-Latn-CA",
+      "moh": "moh-Latn-CA",
+      "mos": "mos-Latn-BF",
+      "mr": "mr-Deva-IN",
+      "mrd": "mrd-Deva-NP",
+      "mrj": "mrj-Cyrl-RU",
+      "mro": "mro-Mroo-BD",
+      "ms": "ms-Latn-MY",
+      "ms-CC": "ms-Arab-CC",
+      "ms-ID": "ms-Arab-ID",
+      "mt": "mt-Latn-MT",
+      "mtr": "mtr-Deva-IN",
+      "mua": "mua-Latn-CM",
+      "mus": "mus-Latn-US",
+      "mvy": "mvy-Arab-PK",
+      "mwk": "mwk-Latn-ML",
+      "mwr": "mwr-Deva-IN",
+      "mwv": "mwv-Latn-ID",
+      "mxc": "mxc-Latn-ZW",
+      "my": "my-Mymr-MM",
+      "myv": "myv-Cyrl-RU",
+      "myx": "myx-Latn-UG",
+      "myz": "myz-Mand-IR",
+      "mzn": "mzn-Arab-IR",
+      "na": "na-Latn-NR",
+      "nan": "nan-Hans-CN",
+      "nap": "nap-Latn-IT",
+      "naq": "naq-Latn-NA",
+      "nb": "nb-Latn-NO",
+      "nch": "nch-Latn-MX",
+      "nd": "nd-Latn-ZW",
+      "ndc": "ndc-Latn-MZ",
+      "nds": "nds-Latn-DE",
+      "ne": "ne-Deva-NP",
+      "new": "new-Deva-NP",
+      "ng": "ng-Latn-NA",
+      "ngl": "ngl-Latn-MZ",
+      "nhe": "nhe-Latn-MX",
+      "nhw": "nhw-Latn-MX",
+      "nij": "nij-Latn-ID",
+      "niu": "niu-Latn-NU",
+      "njo": "njo-Latn-IN",
+      "nl": "nl-Latn-NL",
+      "nmg": "nmg-Latn-CM",
+      "nn": "nn-Latn-NO",
+      "nnh": "nnh-Latn-CM",
+      "no": "no-Latn-NO",
+      "nod": "nod-Lana-TH",
+      "noe": "noe-Deva-IN",
+      "non": "non-Runr-SE",
+      "nqo": "nqo-Nkoo-GN",
+      "nr": "nr-Latn-ZA",
+      "nsk": "nsk-Cans-CA",
+      "nso": "nso-Latn-ZA",
+      "nus": "nus-Latn-SS",
+      "nv": "nv-Latn-US",
+      "nxq": "nxq-Latn-CN",
+      "ny": "ny-Latn-MW",
+      "nym": "nym-Latn-TZ",
+      "nyn": "nyn-Latn-UG",
+      "nzi": "nzi-Latn-GH",
+      "oc": "oc-Latn-FR",
+      "om": "om-Latn-ET",
+      "or": "or-Orya-IN",
+      "os": "os-Cyrl-GE",
+      "osa": "osa-Osge-US",
+      "otk": "otk-Orkh-MN",
+      "pa": "pa-Guru-IN",
+      "pa-Arab": "pa-Arab-PK",
+      "pa-PK": "pa-Arab-PK",
+      "pag": "pag-Latn-PH",
+      "pal": "pal-Phli-IR",
+      "pal-Phlp": "pal-Phlp-CN",
+      "pam": "pam-Latn-PH",
+      "pap": "pap-Latn-AW",
+      "pau": "pau-Latn-PW",
+      "pcd": "pcd-Latn-FR",
+      "pcm": "pcm-Latn-NG",
+      "pdc": "pdc-Latn-US",
+      "pdt": "pdt-Latn-CA",
+      "peo": "peo-Xpeo-IR",
+      "pfl": "pfl-Latn-DE",
+      "phn": "phn-Phnx-LB",
+      "pka": "pka-Brah-IN",
+      "pko": "pko-Latn-KE",
+      "pl": "pl-Latn-PL",
+      "pms": "pms-Latn-IT",
+      "pnt": "pnt-Grek-GR",
+      "pon": "pon-Latn-FM",
+      "pra": "pra-Khar-PK",
+      "prd": "prd-Arab-IR",
+      "prg": "prg-Latn-001",
+      "ps": "ps-Arab-AF",
+      "pt": "pt-Latn-BR",
+      "puu": "puu-Latn-GA",
+      "qu": "qu-Latn-PE",
+      "quc": "quc-Latn-GT",
+      "qug": "qug-Latn-EC",
+      "raj": "raj-Deva-IN",
+      "rcf": "rcf-Latn-RE",
+      "rej": "rej-Latn-ID",
+      "rgn": "rgn-Latn-IT",
+      "ria": "ria-Latn-IN",
+      "rif": "rif-Tfng-MA",
+      "rif-NL": "rif-Latn-NL",
+      "rjs": "rjs-Deva-NP",
+      "rkt": "rkt-Beng-BD",
+      "rm": "rm-Latn-CH",
+      "rmf": "rmf-Latn-FI",
+      "rmo": "rmo-Latn-CH",
+      "rmt": "rmt-Arab-IR",
+      "rmu": "rmu-Latn-SE",
+      "rn": "rn-Latn-BI",
+      "rng": "rng-Latn-MZ",
+      "ro": "ro-Latn-RO",
+      "rob": "rob-Latn-ID",
+      "rof": "rof-Latn-TZ",
+      "rtm": "rtm-Latn-FJ",
+      "ru": "ru-Cyrl-RU",
+      "rue": "rue-Cyrl-UA",
+      "rug": "rug-Latn-SB",
+      "rw": "rw-Latn-RW",
+      "rwk": "rwk-Latn-TZ",
+      "ryu": "ryu-Kana-JP",
+      "sa": "sa-Deva-IN",
+      "saf": "saf-Latn-GH",
+      "sah": "sah-Cyrl-RU",
+      "saq": "saq-Latn-KE",
+      "sas": "sas-Latn-ID",
+      "sat": "sat-Latn-IN",
+      "saz": "saz-Saur-IN",
+      "sbp": "sbp-Latn-TZ",
+      "sc": "sc-Latn-IT",
+      "sck": "sck-Deva-IN",
+      "scn": "scn-Latn-IT",
+      "sco": "sco-Latn-GB",
+      "scs": "scs-Latn-CA",
+      "sd": "sd-Arab-PK",
+      "sd-Deva": "sd-Deva-IN",
+      "sd-Khoj": "sd-Khoj-IN",
+      "sd-Sind": "sd-Sind-IN",
+      "sdc": "sdc-Latn-IT",
+      "sdh": "sdh-Arab-IR",
+      "se": "se-Latn-NO",
+      "sef": "sef-Latn-CI",
+      "seh": "seh-Latn-MZ",
+      "sei": "sei-Latn-MX",
+      "ses": "ses-Latn-ML",
+      "sg": "sg-Latn-CF",
+      "sga": "sga-Ogam-IE",
+      "sgs": "sgs-Latn-LT",
+      "shi": "shi-Tfng-MA",
+      "shn": "shn-Mymr-MM",
+      "si": "si-Sinh-LK",
+      "sid": "sid-Latn-ET",
+      "sk": "sk-Latn-SK",
+      "skr": "skr-Arab-PK",
+      "sl": "sl-Latn-SI",
+      "sli": "sli-Latn-PL",
+      "sly": "sly-Latn-ID",
+      "sm": "sm-Latn-WS",
+      "sma": "sma-Latn-SE",
+      "smj": "smj-Latn-SE",
+      "smn": "smn-Latn-FI",
+      "smp": "smp-Samr-IL",
+      "sms": "sms-Latn-FI",
+      "sn": "sn-Latn-ZW",
+      "snk": "snk-Latn-ML",
+      "so": "so-Latn-SO",
+      "sou": "sou-Thai-TH",
+      "sq": "sq-Latn-AL",
+      "sr": "sr-Cyrl-RS",
+      "sr-ME": "sr-Latn-ME",
+      "sr-RO": "sr-Latn-RO",
+      "sr-RU": "sr-Latn-RU",
+      "sr-TR": "sr-Latn-TR",
+      "srb": "srb-Sora-IN",
+      "srn": "srn-Latn-SR",
+      "srr": "srr-Latn-SN",
+      "srx": "srx-Deva-IN",
+      "ss": "ss-Latn-ZA",
+      "ssy": "ssy-Latn-ER",
+      "st": "st-Latn-ZA",
+      "stq": "stq-Latn-DE",
+      "su": "su-Latn-ID",
+      "suk": "suk-Latn-TZ",
+      "sus": "sus-Latn-GN",
+      "sv": "sv-Latn-SE",
+      "sw": "sw-Latn-TZ",
+      "swb": "swb-Arab-YT",
+      "swc": "swc-Latn-CD",
+      "swg": "swg-Latn-DE",
+      "swv": "swv-Deva-IN",
+      "sxn": "sxn-Latn-ID",
+      "syl": "syl-Beng-BD",
+      "syr": "syr-Syrc-IQ",
+      "szl": "szl-Latn-PL",
+      "ta": "ta-Taml-IN",
+      "taj": "taj-Deva-NP",
+      "tbw": "tbw-Latn-PH",
+      "tcy": "tcy-Knda-IN",
+      "tdd": "tdd-Tale-CN",
+      "tdg": "tdg-Deva-NP",
+      "tdh": "tdh-Deva-NP",
+      "te": "te-Telu-IN",
+      "tem": "tem-Latn-SL",
+      "teo": "teo-Latn-UG",
+      "tet": "tet-Latn-TL",
+      "tg": "tg-Cyrl-TJ",
+      "tg-Arab": "tg-Arab-PK",
+      "tg-PK": "tg-Arab-PK",
+      "th": "th-Thai-TH",
+      "thl": "thl-Deva-NP",
+      "thq": "thq-Deva-NP",
+      "thr": "thr-Deva-NP",
+      "ti": "ti-Ethi-ET",
+      "tig": "tig-Ethi-ER",
+      "tiv": "tiv-Latn-NG",
+      "tk": "tk-Latn-TM",
+      "tkl": "tkl-Latn-TK",
+      "tkr": "tkr-Latn-AZ",
+      "tkt": "tkt-Deva-NP",
+      "tl": "tl-Latn-PH",
+      "tly": "tly-Latn-AZ",
+      "tmh": "tmh-Latn-NE",
+      "tn": "tn-Latn-ZA",
+      "to": "to-Latn-TO",
+      "tog": "tog-Latn-MW",
+      "tpi": "tpi-Latn-PG",
+      "tr": "tr-Latn-TR",
+      "tru": "tru-Latn-TR",
+      "trv": "trv-Latn-TW",
+      "ts": "ts-Latn-ZA",
+      "tsd": "tsd-Grek-GR",
+      "tsf": "tsf-Deva-NP",
+      "tsg": "tsg-Latn-PH",
+      "tsj": "tsj-Tibt-BT",
+      "tt": "tt-Cyrl-RU",
+      "ttj": "ttj-Latn-UG",
+      "tts": "tts-Thai-TH",
+      "ttt": "ttt-Latn-AZ",
+      "tum": "tum-Latn-MW",
+      "tvl": "tvl-Latn-TV",
+      "twq": "twq-Latn-NE",
+      "txg": "txg-Tang-CN",
+      "ty": "ty-Latn-PF",
+      "tyv": "tyv-Cyrl-RU",
+      "tzm": "tzm-Latn-MA",
+      "udm": "udm-Cyrl-RU",
+      "ug": "ug-Arab-CN",
+      "ug-Cyrl": "ug-Cyrl-KZ",
+      "ug-KZ": "ug-Cyrl-KZ",
+      "ug-MN": "ug-Cyrl-MN",
+      "uga": "uga-Ugar-SY",
+      "uk": "uk-Cyrl-UA",
+      "uli": "uli-Latn-FM",
+      "umb": "umb-Latn-AO",
+      "und": "en-Latn-US",
+      "und-002": "en-Latn-NG",
+      "und-003": "en-Latn-US",
+      "und-005": "pt-Latn-BR",
+      "und-009": "en-Latn-AU",
+      "und-011": "en-Latn-NG",
+      "und-013": "es-Latn-MX",
+      "und-014": "sw-Latn-TZ",
+      "und-015": "ar-Arab-EG",
+      "und-017": "sw-Latn-CD",
+      "und-018": "en-Latn-ZA",
+      "und-019": "en-Latn-US",
+      "und-021": "en-Latn-US",
+      "und-029": "es-Latn-CU",
+      "und-030": "zh-Hans-CN",
+      "und-034": "hi-Deva-IN",
+      "und-035": "id-Latn-ID",
+      "und-039": "it-Latn-IT",
+      "und-053": "en-Latn-AU",
+      "und-054": "en-Latn-PG",
+      "und-057": "en-Latn-GU",
+      "und-061": "sm-Latn-WS",
+      "und-142": "zh-Hans-CN",
+      "und-143": "uz-Latn-UZ",
+      "und-145": "ar-Arab-SA",
+      "und-150": "ru-Cyrl-RU",
+      "und-151": "ru-Cyrl-RU",
+      "und-154": "en-Latn-GB",
+      "und-155": "de-Latn-DE",
+      "und-419": "es-Latn-419",
+      "und-AD": "ca-Latn-AD",
+      "und-Adlm": "ff-Adlm-GN",
+      "und-AE": "ar-Arab-AE",
+      "und-AF": "fa-Arab-AF",
+      "und-Aghb": "lez-Aghb-RU",
+      "und-Ahom": "aho-Ahom-IN",
+      "und-AL": "sq-Latn-AL",
+      "und-AM": "hy-Armn-AM",
+      "und-AO": "pt-Latn-AO",
+      "und-AQ": "und-Latn-AQ",
+      "und-AR": "es-Latn-AR",
+      "und-Arab": "ar-Arab-EG",
+      "und-Arab-CC": "ms-Arab-CC",
+      "und-Arab-CN": "ug-Arab-CN",
+      "und-Arab-GB": "ks-Arab-GB",
+      "und-Arab-ID": "ms-Arab-ID",
+      "und-Arab-IN": "ur-Arab-IN",
+      "und-Arab-KH": "cja-Arab-KH",
+      "und-Arab-MN": "kk-Arab-MN",
+      "und-Arab-MU": "ur-Arab-MU",
+      "und-Arab-NG": "ha-Arab-NG",
+      "und-Arab-PK": "ur-Arab-PK",
+      "und-Arab-TH": "mfa-Arab-TH",
+      "und-Arab-TJ": "fa-Arab-TJ",
+      "und-Arab-TR": "az-Arab-TR",
+      "und-Arab-YT": "swb-Arab-YT",
+      "und-Armi": "arc-Armi-IR",
+      "und-Armn": "hy-Armn-AM",
+      "und-AS": "sm-Latn-AS",
+      "und-AT": "de-Latn-AT",
+      "und-Avst": "ae-Avst-IR",
+      "und-AW": "nl-Latn-AW",
+      "und-AX": "sv-Latn-AX",
+      "und-AZ": "az-Latn-AZ",
+      "und-BA": "bs-Latn-BA",
+      "und-Bali": "ban-Bali-ID",
+      "und-Bamu": "bax-Bamu-CM",
+      "und-Bass": "bsq-Bass-LR",
+      "und-Batk": "bbc-Batk-ID",
+      "und-BD": "bn-Beng-BD",
+      "und-BE": "nl-Latn-BE",
+      "und-Beng": "bn-Beng-BD",
+      "und-BF": "fr-Latn-BF",
+      "und-BG": "bg-Cyrl-BG",
+      "und-BH": "ar-Arab-BH",
+      "und-Bhks": "sa-Bhks-IN",
+      "und-BI": "rn-Latn-BI",
+      "und-BJ": "fr-Latn-BJ",
+      "und-BL": "fr-Latn-BL",
+      "und-BN": "ms-Latn-BN",
+      "und-BO": "es-Latn-BO",
+      "und-Bopo": "zh-Bopo-TW",
+      "und-BQ": "pap-Latn-BQ",
+      "und-BR": "pt-Latn-BR",
+      "und-Brah": "pka-Brah-IN",
+      "und-Brai": "fr-Brai-FR",
+      "und-BT": "dz-Tibt-BT",
+      "und-Bugi": "bug-Bugi-ID",
+      "und-Buhd": "bku-Buhd-PH",
+      "und-BV": "und-Latn-BV",
+      "und-BY": "be-Cyrl-BY",
+      "und-Cakm": "ccp-Cakm-BD",
+      "und-Cans": "cr-Cans-CA",
+      "und-Cari": "xcr-Cari-TR",
+      "und-CD": "sw-Latn-CD",
+      "und-CF": "fr-Latn-CF",
+      "und-CG": "fr-Latn-CG",
+      "und-CH": "de-Latn-CH",
+      "und-Cham": "cjm-Cham-VN",
+      "und-Cher": "chr-Cher-US",
+      "und-CI": "fr-Latn-CI",
+      "und-CL": "es-Latn-CL",
+      "und-CM": "fr-Latn-CM",
+      "und-CN": "zh-Hans-CN",
+      "und-CO": "es-Latn-CO",
+      "und-Copt": "cop-Copt-EG",
+      "und-CP": "und-Latn-CP",
+      "und-Cprt": "grc-Cprt-CY",
+      "und-CR": "es-Latn-CR",
+      "und-CU": "es-Latn-CU",
+      "und-CV": "pt-Latn-CV",
+      "und-CW": "pap-Latn-CW",
+      "und-CY": "el-Grek-CY",
+      "und-Cyrl": "ru-Cyrl-RU",
+      "und-Cyrl-AL": "mk-Cyrl-AL",
+      "und-Cyrl-BA": "sr-Cyrl-BA",
+      "und-Cyrl-GE": "ab-Cyrl-GE",
+      "und-Cyrl-GR": "mk-Cyrl-GR",
+      "und-Cyrl-MD": "uk-Cyrl-MD",
+      "und-Cyrl-PL": "be-Cyrl-PL",
+      "und-Cyrl-RO": "bg-Cyrl-RO",
+      "und-Cyrl-SK": "uk-Cyrl-SK",
+      "und-Cyrl-TR": "kbd-Cyrl-TR",
+      "und-Cyrl-XK": "sr-Cyrl-XK",
+      "und-CZ": "cs-Latn-CZ",
+      "und-DE": "de-Latn-DE",
+      "und-Deva": "hi-Deva-IN",
+      "und-Deva-BT": "ne-Deva-BT",
+      "und-Deva-FJ": "hif-Deva-FJ",
+      "und-Deva-MU": "bho-Deva-MU",
+      "und-Deva-PK": "btv-Deva-PK",
+      "und-DJ": "aa-Latn-DJ",
+      "und-DK": "da-Latn-DK",
+      "und-DO": "es-Latn-DO",
+      "und-Dupl": "fr-Dupl-FR",
+      "und-DZ": "ar-Arab-DZ",
+      "und-EA": "es-Latn-EA",
+      "und-EC": "es-Latn-EC",
+      "und-EE": "et-Latn-EE",
+      "und-EG": "ar-Arab-EG",
+      "und-Egyp": "egy-Egyp-EG",
+      "und-EH": "ar-Arab-EH",
+      "und-Elba": "sq-Elba-AL",
+      "und-ER": "ti-Ethi-ER",
+      "und-ES": "es-Latn-ES",
+      "und-ET": "am-Ethi-ET",
+      "und-Ethi": "am-Ethi-ET",
+      "und-EU": "en-Latn-GB",
+      "und-FI": "fi-Latn-FI",
+      "und-FO": "fo-Latn-FO",
+      "und-FR": "fr-Latn-FR",
+      "und-GA": "fr-Latn-GA",
+      "und-GE": "ka-Geor-GE",
+      "und-Geor": "ka-Geor-GE",
+      "und-GF": "fr-Latn-GF",
+      "und-GH": "ak-Latn-GH",
+      "und-GL": "kl-Latn-GL",
+      "und-Glag": "cu-Glag-BG",
+      "und-GN": "fr-Latn-GN",
+      "und-Goth": "got-Goth-UA",
+      "und-GP": "fr-Latn-GP",
+      "und-GQ": "es-Latn-GQ",
+      "und-GR": "el-Grek-GR",
+      "und-Gran": "sa-Gran-IN",
+      "und-Grek": "el-Grek-GR",
+      "und-Grek-TR": "bgx-Grek-TR",
+      "und-GS": "und-Latn-GS",
+      "und-GT": "es-Latn-GT",
+      "und-Gujr": "gu-Gujr-IN",
+      "und-Guru": "pa-Guru-IN",
+      "und-GW": "pt-Latn-GW",
+      "und-Hanb": "zh-Hanb-TW",
+      "und-Hang": "ko-Hang-KR",
+      "und-Hani": "zh-Hani-CN",
+      "und-Hano": "hnn-Hano-PH",
+      "und-Hans": "zh-Hans-CN",
+      "und-Hant": "zh-Hant-TW",
+      "und-Hant-CN": "yue-Hant-CN",
+      "und-Hatr": "mis-Hatr-IQ",
+      "und-Hebr": "he-Hebr-IL",
+      "und-Hebr-CA": "yi-Hebr-CA",
+      "und-Hebr-GB": "yi-Hebr-GB",
+      "und-Hebr-SE": "yi-Hebr-SE",
+      "und-Hebr-UA": "yi-Hebr-UA",
+      "und-Hebr-US": "yi-Hebr-US",
+      "und-Hira": "ja-Hira-JP",
+      "und-HK": "zh-Hant-HK",
+      "und-Hluw": "hlu-Hluw-TR",
+      "und-HM": "und-Latn-HM",
+      "und-Hmng": "hnj-Hmng-LA",
+      "und-HN": "es-Latn-HN",
+      "und-HR": "hr-Latn-HR",
+      "und-HT": "ht-Latn-HT",
+      "und-HU": "hu-Latn-HU",
+      "und-Hung": "hu-Hung-HU",
+      "und-IC": "es-Latn-IC",
+      "und-ID": "id-Latn-ID",
+      "und-IL": "he-Hebr-IL",
+      "und-IN": "hi-Deva-IN",
+      "und-IQ": "ar-Arab-IQ",
+      "und-IR": "fa-Arab-IR",
+      "und-IS": "is-Latn-IS",
+      "und-IT": "it-Latn-IT",
+      "und-Ital": "ett-Ital-IT",
+      "und-Jamo": "ko-Jamo-KR",
+      "und-Java": "jv-Java-ID",
+      "und-JO": "ar-Arab-JO",
+      "und-JP": "ja-Jpan-JP",
+      "und-Jpan": "ja-Jpan-JP",
+      "und-Kali": "eky-Kali-MM",
+      "und-Kana": "ja-Kana-JP",
+      "und-KE": "sw-Latn-KE",
+      "und-KG": "ky-Cyrl-KG",
+      "und-KH": "km-Khmr-KH",
+      "und-Khar": "pra-Khar-PK",
+      "und-Khmr": "km-Khmr-KH",
+      "und-Khoj": "sd-Khoj-IN",
+      "und-KM": "ar-Arab-KM",
+      "und-Knda": "kn-Knda-IN",
+      "und-Kore": "ko-Kore-KR",
+      "und-KP": "ko-Kore-KP",
+      "und-KR": "ko-Kore-KR",
+      "und-Kthi": "bho-Kthi-IN",
+      "und-KW": "ar-Arab-KW",
+      "und-KZ": "ru-Cyrl-KZ",
+      "und-LA": "lo-Laoo-LA",
+      "und-Lana": "nod-Lana-TH",
+      "und-Laoo": "lo-Laoo-LA",
+      "und-Latn-AF": "tk-Latn-AF",
+      "und-Latn-AM": "ku-Latn-AM",
+      "und-Latn-CN": "za-Latn-CN",
+      "und-Latn-CY": "tr-Latn-CY",
+      "und-Latn-DZ": "fr-Latn-DZ",
+      "und-Latn-ET": "en-Latn-ET",
+      "und-Latn-GE": "ku-Latn-GE",
+      "und-Latn-IR": "tk-Latn-IR",
+      "und-Latn-KM": "fr-Latn-KM",
+      "und-Latn-MA": "fr-Latn-MA",
+      "und-Latn-MK": "sq-Latn-MK",
+      "und-Latn-MM": "kac-Latn-MM",
+      "und-Latn-MO": "pt-Latn-MO",
+      "und-Latn-MR": "fr-Latn-MR",
+      "und-Latn-RU": "krl-Latn-RU",
+      "und-Latn-SY": "fr-Latn-SY",
+      "und-Latn-TN": "fr-Latn-TN",
+      "und-Latn-TW": "trv-Latn-TW",
+      "und-Latn-UA": "pl-Latn-UA",
+      "und-LB": "ar-Arab-LB",
+      "und-Lepc": "lep-Lepc-IN",
+      "und-LI": "de-Latn-LI",
+      "und-Limb": "lif-Limb-IN",
+      "und-Lina": "lab-Lina-GR",
+      "und-Linb": "grc-Linb-GR",
+      "und-Lisu": "lis-Lisu-CN",
+      "und-LK": "si-Sinh-LK",
+      "und-LS": "st-Latn-LS",
+      "und-LT": "lt-Latn-LT",
+      "und-LU": "fr-Latn-LU",
+      "und-LV": "lv-Latn-LV",
+      "und-LY": "ar-Arab-LY",
+      "und-Lyci": "xlc-Lyci-TR",
+      "und-Lydi": "xld-Lydi-TR",
+      "und-MA": "ar-Arab-MA",
+      "und-Mahj": "hi-Mahj-IN",
+      "und-Mand": "myz-Mand-IR",
+      "und-Mani": "xmn-Mani-CN",
+      "und-Marc": "bo-Marc-CN",
+      "und-MC": "fr-Latn-MC",
+      "und-MD": "ro-Latn-MD",
+      "und-ME": "sr-Latn-ME",
+      "und-Mend": "men-Mend-SL",
+      "und-Merc": "xmr-Merc-SD",
+      "und-Mero": "xmr-Mero-SD",
+      "und-MF": "fr-Latn-MF",
+      "und-MG": "mg-Latn-MG",
+      "und-MK": "mk-Cyrl-MK",
+      "und-ML": "bm-Latn-ML",
+      "und-Mlym": "ml-Mlym-IN",
+      "und-MM": "my-Mymr-MM",
+      "und-MN": "mn-Cyrl-MN",
+      "und-MO": "zh-Hant-MO",
+      "und-Modi": "mr-Modi-IN",
+      "und-Mong": "mn-Mong-CN",
+      "und-MQ": "fr-Latn-MQ",
+      "und-MR": "ar-Arab-MR",
+      "und-Mroo": "mro-Mroo-BD",
+      "und-MT": "mt-Latn-MT",
+      "und-Mtei": "mni-Mtei-IN",
+      "und-MU": "mfe-Latn-MU",
+      "und-Mult": "skr-Mult-PK",
+      "und-MV": "dv-Thaa-MV",
+      "und-MX": "es-Latn-MX",
+      "und-MY": "ms-Latn-MY",
+      "und-Mymr": "my-Mymr-MM",
+      "und-Mymr-IN": "kht-Mymr-IN",
+      "und-Mymr-TH": "mnw-Mymr-TH",
+      "und-MZ": "pt-Latn-MZ",
+      "und-NA": "af-Latn-NA",
+      "und-Narb": "xna-Narb-SA",
+      "und-Nbat": "arc-Nbat-JO",
+      "und-NC": "fr-Latn-NC",
+      "und-NE": "ha-Latn-NE",
+      "und-Newa": "new-Newa-NP",
+      "und-NI": "es-Latn-NI",
+      "und-Nkoo": "man-Nkoo-GN",
+      "und-NL": "nl-Latn-NL",
+      "und-NO": "nb-Latn-NO",
+      "und-NP": "ne-Deva-NP",
+      "und-Ogam": "sga-Ogam-IE",
+      "und-Olck": "sat-Olck-IN",
+      "und-OM": "ar-Arab-OM",
+      "und-Orkh": "otk-Orkh-MN",
+      "und-Orya": "or-Orya-IN",
+      "und-Osge": "osa-Osge-US",
+      "und-Osma": "so-Osma-SO",
+      "und-PA": "es-Latn-PA",
+      "und-Palm": "arc-Palm-SY",
+      "und-Pauc": "ctd-Pauc-MM",
+      "und-PE": "es-Latn-PE",
+      "und-Perm": "kv-Perm-RU",
+      "und-PF": "fr-Latn-PF",
+      "und-PG": "tpi-Latn-PG",
+      "und-PH": "fil-Latn-PH",
+      "und-Phag": "lzh-Phag-CN",
+      "und-Phli": "pal-Phli-IR",
+      "und-Phlp": "pal-Phlp-CN",
+      "und-Phnx": "phn-Phnx-LB",
+      "und-PK": "ur-Arab-PK",
+      "und-PL": "pl-Latn-PL",
+      "und-Plrd": "hmd-Plrd-CN",
+      "und-PM": "fr-Latn-PM",
+      "und-PR": "es-Latn-PR",
+      "und-Prti": "xpr-Prti-IR",
+      "und-PS": "ar-Arab-PS",
+      "und-PT": "pt-Latn-PT",
+      "und-PW": "pau-Latn-PW",
+      "und-PY": "gn-Latn-PY",
+      "und-QA": "ar-Arab-QA",
+      "und-QO": "en-Latn-IO",
+      "und-RE": "fr-Latn-RE",
+      "und-Rjng": "rej-Rjng-ID",
+      "und-RO": "ro-Latn-RO",
+      "und-RS": "sr-Cyrl-RS",
+      "und-RU": "ru-Cyrl-RU",
+      "und-Runr": "non-Runr-SE",
+      "und-RW": "rw-Latn-RW",
+      "und-SA": "ar-Arab-SA",
+      "und-Samr": "smp-Samr-IL",
+      "und-Sarb": "xsa-Sarb-YE",
+      "und-Saur": "saz-Saur-IN",
+      "und-SC": "fr-Latn-SC",
+      "und-SD": "ar-Arab-SD",
+      "und-SE": "sv-Latn-SE",
+      "und-Sgnw": "ase-Sgnw-US",
+      "und-Shaw": "en-Shaw-GB",
+      "und-Shrd": "sa-Shrd-IN",
+      "und-SI": "sl-Latn-SI",
+      "und-Sidd": "sa-Sidd-IN",
+      "und-Sind": "sd-Sind-IN",
+      "und-Sinh": "si-Sinh-LK",
+      "und-SJ": "nb-Latn-SJ",
+      "und-SK": "sk-Latn-SK",
+      "und-SM": "it-Latn-SM",
+      "und-SN": "fr-Latn-SN",
+      "und-SO": "so-Latn-SO",
+      "und-Sora": "srb-Sora-IN",
+      "und-SR": "nl-Latn-SR",
+      "und-ST": "pt-Latn-ST",
+      "und-Sund": "su-Sund-ID",
+      "und-SV": "es-Latn-SV",
+      "und-SY": "ar-Arab-SY",
+      "und-Sylo": "syl-Sylo-BD",
+      "und-Syrc": "syr-Syrc-IQ",
+      "und-Tagb": "tbw-Tagb-PH",
+      "und-Takr": "doi-Takr-IN",
+      "und-Tale": "tdd-Tale-CN",
+      "und-Talu": "khb-Talu-CN",
+      "und-Taml": "ta-Taml-IN",
+      "und-Tang": "txg-Tang-CN",
+      "und-Tavt": "blt-Tavt-VN",
+      "und-TD": "fr-Latn-TD",
+      "und-Telu": "te-Telu-IN",
+      "und-TF": "fr-Latn-TF",
+      "und-Tfng": "zgh-Tfng-MA",
+      "und-TG": "fr-Latn-TG",
+      "und-Tglg": "fil-Tglg-PH",
+      "und-TH": "th-Thai-TH",
+      "und-Thaa": "dv-Thaa-MV",
+      "und-Thai": "th-Thai-TH",
+      "und-Thai-CN": "lcp-Thai-CN",
+      "und-Thai-KH": "kdt-Thai-KH",
+      "und-Thai-LA": "kdt-Thai-LA",
+      "und-Tibt": "bo-Tibt-CN",
+      "und-Tirh": "mai-Tirh-IN",
+      "und-TJ": "tg-Cyrl-TJ",
+      "und-TK": "tkl-Latn-TK",
+      "und-TL": "pt-Latn-TL",
+      "und-TM": "tk-Latn-TM",
+      "und-TN": "ar-Arab-TN",
+      "und-TO": "to-Latn-TO",
+      "und-TR": "tr-Latn-TR",
+      "und-TV": "tvl-Latn-TV",
+      "und-TW": "zh-Hant-TW",
+      "und-TZ": "sw-Latn-TZ",
+      "und-UA": "uk-Cyrl-UA",
+      "und-UG": "sw-Latn-UG",
+      "und-Ugar": "uga-Ugar-SY",
+      "und-UY": "es-Latn-UY",
+      "und-UZ": "uz-Latn-UZ",
+      "und-VA": "it-Latn-VA",
+      "und-Vaii": "vai-Vaii-LR",
+      "und-VE": "es-Latn-VE",
+      "und-VN": "vi-Latn-VN",
+      "und-VU": "bi-Latn-VU",
+      "und-Wara": "hoc-Wara-IN",
+      "und-WF": "fr-Latn-WF",
+      "und-WS": "sm-Latn-WS",
+      "und-XK": "sq-Latn-XK",
+      "und-Xpeo": "peo-Xpeo-IR",
+      "und-Xsux": "akk-Xsux-IQ",
+      "und-YE": "ar-Arab-YE",
+      "und-Yiii": "ii-Yiii-CN",
+      "und-YT": "fr-Latn-YT",
+      "und-ZW": "sn-Latn-ZW",
+      "unr": "unr-Beng-IN",
+      "unr-Deva": "unr-Deva-NP",
+      "unr-NP": "unr-Deva-NP",
+      "unx": "unx-Beng-IN",
+      "ur": "ur-Arab-PK",
+      "uz": "uz-Latn-UZ",
+      "uz-AF": "uz-Arab-AF",
+      "uz-Arab": "uz-Arab-AF",
+      "uz-CN": "uz-Cyrl-CN",
+      "vai": "vai-Vaii-LR",
+      "ve": "ve-Latn-ZA",
+      "vec": "vec-Latn-IT",
+      "vep": "vep-Latn-RU",
+      "vi": "vi-Latn-VN",
+      "vic": "vic-Latn-SX",
+      "vls": "vls-Latn-BE",
+      "vmf": "vmf-Latn-DE",
+      "vmw": "vmw-Latn-MZ",
+      "vo": "vo-Latn-001",
+      "vot": "vot-Latn-RU",
+      "vro": "vro-Latn-EE",
+      "vun": "vun-Latn-TZ",
+      "wa": "wa-Latn-BE",
+      "wae": "wae-Latn-CH",
+      "wal": "wal-Ethi-ET",
+      "war": "war-Latn-PH",
+      "wbp": "wbp-Latn-AU",
+      "wbq": "wbq-Telu-IN",
+      "wbr": "wbr-Deva-IN",
+      "wls": "wls-Latn-WF",
+      "wni": "wni-Arab-KM",
+      "wo": "wo-Latn-SN",
+      "wtm": "wtm-Deva-IN",
+      "wuu": "wuu-Hans-CN",
+      "xav": "xav-Latn-BR",
+      "xcr": "xcr-Cari-TR",
+      "xh": "xh-Latn-ZA",
+      "xlc": "xlc-Lyci-TR",
+      "xld": "xld-Lydi-TR",
+      "xmf": "xmf-Geor-GE",
+      "xmn": "xmn-Mani-CN",
+      "xmr": "xmr-Merc-SD",
+      "xna": "xna-Narb-SA",
+      "xnr": "xnr-Deva-IN",
+      "xog": "xog-Latn-UG",
+      "xpr": "xpr-Prti-IR",
+      "xsa": "xsa-Sarb-YE",
+      "xsr": "xsr-Deva-NP",
+      "yao": "yao-Latn-MZ",
+      "yap": "yap-Latn-FM",
+      "yav": "yav-Latn-CM",
+      "ybb": "ybb-Latn-CM",
+      "yi": "yi-Hebr-001",
+      "yo": "yo-Latn-NG",
+      "yrl": "yrl-Latn-BR",
+      "yua": "yua-Latn-MX",
+      "yue": "yue-Hant-HK",
+      "yue-CN": "yue-Hans-CN",
+      "yue-Hans": "yue-Hans-CN",
+      "za": "za-Latn-CN",
+      "zag": "zag-Latn-SD",
+      "zdj": "zdj-Arab-KM",
+      "zea": "zea-Latn-NL",
+      "zgh": "zgh-Tfng-MA",
+      "zh": "zh-Hans-CN",
+      "zh-AU": "zh-Hant-AU",
+      "zh-BN": "zh-Hant-BN",
+      "zh-Bopo": "zh-Bopo-TW",
+      "zh-GB": "zh-Hant-GB",
+      "zh-GF": "zh-Hant-GF",
+      "zh-Hanb": "zh-Hanb-TW",
+      "zh-Hant": "zh-Hant-TW",
+      "zh-HK": "zh-Hant-HK",
+      "zh-ID": "zh-Hant-ID",
+      "zh-MO": "zh-Hant-MO",
+      "zh-MY": "zh-Hant-MY",
+      "zh-PA": "zh-Hant-PA",
+      "zh-PF": "zh-Hant-PF",
+      "zh-PH": "zh-Hant-PH",
+      "zh-SR": "zh-Hant-SR",
+      "zh-TH": "zh-Hant-TH",
+      "zh-TW": "zh-Hant-TW",
+      "zh-US": "zh-Hant-US",
+      "zh-VN": "zh-Hant-VN",
+      "zmi": "zmi-Latn-MY",
+      "zu": "zu-Latn-ZA",
+      "zza": "zza-Latn-TR"
+    }
+  }
+}
+;
+});
+
+
+define("json!ev-script/i18n/messages.json", function () {
+return {
+    root: {
+        '{0} Embed Options': '{0} Embed Options',
+        '{0} thumbnail image': '{0} thumbnail image',
+        'Add {0}': 'Add {0}',
+        'Add file': 'Add file',
+        'Annotations': 'Annotations',
+        'An unexpected error occurred.  Check the server log for more details.': 'An unexpected error occurred.  Check the server log for more details.',
+        'Ascending': 'Ascending',
+        'Attachments': 'Attachments',
+        'Audio Preview Image': 'Audio Preview Image',
+        'Auto Play': 'Auto Play',
+        'Auto Play (PC Only)': 'Auto Play (PC Only)',
+        'Cancel': 'Cancel',
+        'Cancel upload': 'Cancel upload',
+        'Caption Search': 'Caption Search',
+        'Captions "On" By Default': 'Captions "On" By Default',
+        'Category': 'Category',
+        'Category List': 'Category List',
+        'CC': 'CC',
+        'Change {0}': 'Change {0}',
+        'Choose {0}': 'Choose {0}',
+        'Choose': 'Choose',
+        'Choose Layout': 'Choose Layout',
+        'Close': 'Close',
+        'Content Details': 'Content Details',
+        'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.': 'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.',
+        'Credits': 'Credits',
+        'Date Added': 'Date Added',
+        'Date Produced': 'Date Produced',
+        'Descending': 'Descending',
+        'Description': 'Description',
+        'Download Link': 'Download Link',
+        'Drag file here.': 'Drag file here.',
+        'Duration': 'Duration',
+        'Embed Code': 'Embed Code',
+        'Ensemble Logo': 'Ensemble Logo',
+        'Ensemble Video Login': 'Ensemble Video Login',
+        'Go': 'Go',
+        'Hide Controls': 'Hide Controls',
+        'Hide': 'Hide',
+        'Hide Picker': 'Hide Picker',
+        'Horizontal': 'Horizontal',
+        'Identity Provider': 'Identity Provider',
+        'It appears there is an issue with the Ensemble Video installation.': 'It appears there is an issue with the Ensemble Video installation.',
+        'Keywords': 'Keywords',
+        'Layout Options': 'Layout Options',
+        'Less': 'Less',
+        'Library:': 'Library:',
+        'Library': 'Library',
+        'Links': 'Links',
+        'Loading...': 'Loading...',
+        'Logout {0}': 'Logout {0}',
+        'Logout': 'Logout',
+        'Media Library': 'Media Library',
+        'Media': 'Media',
+        'Media thumbnail': 'Media thumbnail',
+        'Meta Data': 'Meta Data',
+        'More': 'More',
+        'None': 'None',
+        'No results available.': 'No results available.',
+        'Number of Results': 'Number of Results',
+        'Organization:': 'Organization:',
+        'Original': 'Original',
+        'Password': 'Password',
+        'Playlist': 'Playlist',
+        'Preview: {0}': 'Preview: {0}',
+        'Preview:': 'Preview:',
+        'Record': 'Record',
+        'Reload': 'Reload',
+        'Remember Me': 'Remember Me',
+        'Remove {0}': 'Remove {0}',
+        'Save': 'Save',
+        'Search Media': 'Search Media',
+        'Search returned {0} results.': 'Search returned {0} results.',
+        'Search:': 'Search:',
+        'Search String': 'Search String',
+        'Select Library': 'Select Library',
+        'Select Library Type': 'Select Library Type',
+        'Select Organization': 'Select Organization',
+        'Shared Library': 'Shared Library',
+        'Show Captions': 'Show Captions',
+        'Showcase': 'Showcase',
+        'Show Title': 'Show Title',
+        'Size': 'Size',
+        'Social Tools': 'Social Tools',
+        'Sort By': 'Sort By',
+        'Statistics': 'Statistics',
+        'Submit': 'Submit',
+        'Title': 'Title',
+        'Type:': 'Type:',
+        'Upload Media to Ensemble': 'Upload Media to Ensemble',
+        'Upload': 'Upload',
+        'Username': 'Username',
+        'Vertical': 'Vertical',
+        'You are unauthorized to access this content.': 'You are unauthorized to access this content.'
+    },
+    'en-US': {},
+    'es-MX': {
+        '{0} Embed Options': 'MX-{0} Embed Options',
+        '{0} thumbnail image': 'MX-{0} thumbnail image',
+        'Add {0}': 'Añadir {0}',
+        'Add file': 'Añadir archivo',
+        'Annotations': 'Anotaciones',
+        'An unexpected error occurred.  Check the server log for more details.': 'MX-An unexpected error occurred.  Check the server log for more details.',
+        'Ascending': 'Ascendiendo',
+        'Attachments': 'Adjuntos',
+        'Audio Preview Image': 'Prevista del Audio',
+        'Auto Play': 'Auto Play',
+        'Auto Play (PC Only)': 'Auto Play (Solo PC)',
+        'Cancel': 'Cancelar',
+        'Cancel upload': 'Cancelar cargado',
+        'Caption Search': 'Búsqueda de Subtitulos',
+        'Captions "On" By Default': 'Subtitulos "Encendido" por Defecto',
+        'Category List': 'Lista de Categoría',
+        'Category': 'Categoría',
+        'CC': 'CC',
+        'Change {0}': 'Cambiar {0}',
+        'Choose {0}': 'Seleccione {0}',
+        'Choose Layout': 'Seleccione Diseño',
+        'Choose': 'Seleccione',
+        'Close': 'Cerrar',
+        'Content Details': 'Detalles del Contenido',
+        'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.': 'MX-Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.',
+        'Credits': 'Créditos',
+        'Date Added': 'Fecha Añadida',
+        'Date Produced': 'Fecha de Producción',
+        'Descending': 'Descendiente',
+        'Description': 'Descripción',
+        'Download Link': 'Enlace de descarga',
+        'Drag file here.': 'Arrastre aquí el archivo.',
+        'Duration': 'Duración',
+        'Embed Code': 'Incrustar Código',
+        'Ensemble Logo': 'MX-Ensemble Logo',
+        'Ensemble Video Login': 'MX-Ensemble Video Login',
+        'Go': 'MX-Go',
+        'Hide Controls': 'Ocultar Controles',
+        'Hide': 'Ocultar',
+        'Hide Picker': 'Ocultar Picker',
+        'Horizontal': 'Horizontal',
+        'Identity Provider': 'Proveedor de Identidad',
+        'It appears there is an issue with the Ensemble Video installation.': 'MX-It appears there is an issue with the Ensemble Video installation.',
+        'Keywords': 'Palabras Clave',
+        'Layout Options': 'MX-Layout Options',
+        'Less': 'MX-Less',
+        'Library:': 'Biblioteca:',
+        'Library': 'Biblioteca',
+        'Links': 'Enlaces',
+        'Loading...': 'Cargando...',
+        'Logout {0}': 'Cerrar sesión {0}',
+        'Logout': 'Cerrar sesión',
+        'Media Library': 'Biblioteca de Medios',
+        'Media': 'Medios',
+        'Media thumbnail': 'MX-Media thumbnail',
+        'Meta Data': 'Meta Datos',
+        'More': 'Más',
+        'None': 'Ninguno',
+        'No results available.': 'MX-No results available.',
+        'Number of Results': 'Número de Resultados',
+        'Organization:': 'Organización:',
+        'Original': 'Original',
+        'Password': 'Contraseña',
+        'Playlist': 'Playlist',
+        'Preview: {0}': 'Prevista: {0}',
+        'Preview:': 'Prevista:',
+        'Record': 'Grabar',
+        'Reload': 'MX-Reload',
+        'Remember Me': 'Recuerdame',
+        'Remove {0}': 'Eliminar {0}',
+        'Save': 'Guardar',
+        'Search Media': 'Buscar Medios',
+        'Search:': 'Buscar:',
+        'Search returned {0} results.': 'MX-Search returned {0} results.',
+        'Search String': 'Buscar Cadena de Texto',
+        'Select Library': 'Seleccionar Biblioteca',
+        'Select Library Type': 'Seleccionar Tipo de Biblioteca',
+        'Select Organization': 'Seleccionar Organización',
+        'Shared Library': 'Biblioteca Compartida',
+        'Show Captions': 'MX-Show Captions',
+        'Showcase': 'Escaparate',
+        'Show Title': 'Mostrar Título',
+        'Size': 'Tamaño',
+        'Social Tools': 'Herramientas Sociales',
+        'Sort By': 'Ordenar Por',
+        'Statistics': 'Estadísticas',
+        'Submit': 'Enviar',
+        'Title': 'Título',
+        'Type:': 'Tipo:',
+        'Upload Media to Ensemble': 'MX-Upload Media to Ensemble',
+        'Upload': 'Cargar',
+        'Username': 'Nombre de Usuario',
+        'Vertical': 'Vertical',
+        'You are unauthorized to access this content.': 'MX-You are unauthorized to access this content.'
+    }
+}
+;
+});
+
 define('ev-script/models/video-settings',['backbone'], function(Backbone) {
 
     'use strict';
@@ -3971,511 +7523,6 @@ define('ev-script/models/playlist-settings',['backbone'], function(Backbone) {
     });
 });
 
-/**
- * @license RequireJS i18n 2.0.6 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
- * Available via the MIT or new BSD license.
- * see: http://github.com/requirejs/i18n for details
- */
-/*jslint regexp: true */
-/*global require: false, navigator: false, define: false */
-
-/**
- * This plugin handles i18n! prefixed modules. It does the following:
- *
- * 1) A regular module can have a dependency on an i18n bundle, but the regular
- * module does not want to specify what locale to load. So it just specifies
- * the top-level bundle, like 'i18n!nls/colors'.
- *
- * This plugin will load the i18n bundle at nls/colors, see that it is a root/master
- * bundle since it does not have a locale in its name. It will then try to find
- * the best match locale available in that master bundle, then request all the
- * locale pieces for that best match locale. For instance, if the locale is 'en-us',
- * then the plugin will ask for the 'en-us', 'en' and 'root' bundles to be loaded
- * (but only if they are specified on the master bundle).
- *
- * Once all the bundles for the locale pieces load, then it mixes in all those
- * locale pieces into each other, then finally sets the context.defined value
- * for the nls/colors bundle to be that mixed in locale.
- *
- * 2) A regular module specifies a specific locale to load. For instance,
- * i18n!nls/fr-fr/colors. In this case, the plugin needs to load the master bundle
- * first, at nls/colors, then figure out what the best match locale is for fr-fr,
- * since maybe only fr or just root is defined for that locale. Once that best
- * fit is found, all of its locale pieces need to have their bundles loaded.
- *
- * Once all the bundles for the locale pieces load, then it mixes in all those
- * locale pieces into each other, then finally sets the context.defined value
- * for the nls/fr-fr/colors bundle to be that mixed in locale.
- */
-(function () {
-    'use strict';
-
-    //regexp for reconstructing the master bundle name from parts of the regexp match
-    //nlsRegExp.exec('foo/bar/baz/nls/en-ca/foo') gives:
-    //['foo/bar/baz/nls/en-ca/foo', 'foo/bar/baz/nls/', '/', '/', 'en-ca', 'foo']
-    //nlsRegExp.exec('foo/bar/baz/nls/foo') gives:
-    //['foo/bar/baz/nls/foo', 'foo/bar/baz/nls/', '/', '/', 'foo', '']
-    //so, if match[5] is blank, it means this is the top bundle definition.
-    var nlsRegExp = /(^.*(^|\/)nls(\/|$))([^\/]*)\/?([^\/]*)/;
-
-    //Helper function to avoid repeating code. Lots of arguments in the
-    //desire to stay functional and support RequireJS contexts without having
-    //to know about the RequireJS contexts.
-    function addPart(locale, master, needed, toLoad, prefix, suffix) {
-        if (master[locale]) {
-            needed.push(locale);
-            if (master[locale] === true || master[locale] === 1) {
-                toLoad.push(prefix + locale + '/' + suffix);
-            }
-        }
-    }
-
-    function addIfExists(req, locale, toLoad, prefix, suffix) {
-        var fullName = prefix + locale + '/' + suffix;
-        if (require._fileExists(req.toUrl(fullName + '.js'))) {
-            toLoad.push(fullName);
-        }
-    }
-
-    /**
-     * Simple function to mix in properties from source into target,
-     * but only if target does not already have a property of the same name.
-     * This is not robust in IE for transferring methods that match
-     * Object.prototype names, but the uses of mixin here seem unlikely to
-     * trigger a problem related to that.
-     */
-    function mixin(target, source, force) {
-        var prop;
-        for (prop in source) {
-            if (source.hasOwnProperty(prop) && (!target.hasOwnProperty(prop) || force)) {
-                target[prop] = source[prop];
-            } else if (typeof source[prop] === 'object') {
-                if (!target[prop] && source[prop]) {
-                    target[prop] = {};
-                }
-                mixin(target[prop], source[prop], force);
-            }
-        }
-    }
-
-    define('i18n',['module'], function (module) {
-        var masterConfig = module.config ? module.config() : {};
-
-        return {
-            version: '2.0.6',
-            /**
-             * Called when a dependency needs to be loaded.
-             */
-            load: function (name, req, onLoad, config) {
-                config = config || {};
-
-                if (config.locale) {
-                    masterConfig.locale = config.locale;
-                }
-
-                var masterName,
-                    match = nlsRegExp.exec(name),
-                    prefix = match[1],
-                    locale = match[4],
-                    suffix = match[5],
-                    parts = locale.split('-'),
-                    toLoad = [],
-                    value = {},
-                    i, part, current = '';
-
-                //If match[5] is blank, it means this is the top bundle definition,
-                //so it does not have to be handled. Locale-specific requests
-                //will have a match[4] value but no match[5]
-                if (match[5]) {
-                    //locale-specific bundle
-                    prefix = match[1];
-                    masterName = prefix + suffix;
-                } else {
-                    //Top-level bundle.
-                    masterName = name;
-                    suffix = match[4];
-                    locale = masterConfig.locale;
-                    if (!locale) {
-                        locale = masterConfig.locale =
-                            typeof navigator === 'undefined' ? 'root' :
-                            ((navigator.languages && navigator.languages[0]) ||
-                             navigator.language ||
-                             navigator.userLanguage || 'root').toLowerCase();
-                    }
-                    parts = locale.split('-');
-                }
-
-                if (config.isBuild) {
-                    //Check for existence of all locale possible files and
-                    //require them if exist.
-                    toLoad.push(masterName);
-                    addIfExists(req, 'root', toLoad, prefix, suffix);
-                    for (i = 0; i < parts.length; i++) {
-                        part = parts[i];
-                        current += (current ? '-' : '') + part;
-                        addIfExists(req, current, toLoad, prefix, suffix);
-                    }
-
-                    req(toLoad, function () {
-                        onLoad();
-                    });
-                } else {
-                    //First, fetch the master bundle, it knows what locales are available.
-                    req([masterName], function (master) {
-                        //Figure out the best fit
-                        var needed = [],
-                            part;
-
-                        //Always allow for root, then do the rest of the locale parts.
-                        addPart('root', master, needed, toLoad, prefix, suffix);
-                        for (i = 0; i < parts.length; i++) {
-                            part = parts[i];
-                            current += (current ? '-' : '') + part;
-                            addPart(current, master, needed, toLoad, prefix, suffix);
-                        }
-
-                        //Load all the parts missing.
-                        req(toLoad, function () {
-                            var i, partBundle, part;
-                            for (i = needed.length - 1; i > -1 && needed[i]; i--) {
-                                part = needed[i];
-                                partBundle = master[part];
-                                if (partBundle === true || partBundle === 1) {
-                                    partBundle = req(prefix + part + '/' + suffix);
-                                }
-                                mixin(value, partBundle);
-                            }
-
-                            //All done, notify the loader.
-                            onLoad(value);
-                        });
-                    });
-                }
-            }
-        };
-    });
-}());
-
-define('ev-script/nls/messages',{
-    'root': true,
-    'es-mx': true
-});
-define('ev-script/nls/root/messages',{
-    '%1$s Embed Options': '%1$s Embed Options',
-    '%1$s thumbnail image': '%1$s thumbnail image',
-    'Add %1$s': 'Add %1$s',
-    'Add file': 'Add file',
-    'Annotations': 'Annotations',
-    'An unexpected error occurred.  Check the server log for more details.': 'An unexpected error occurred.  Check the server log for more details.',
-    'Ascending': 'Ascending',
-    'Attachments': 'Attachments',
-    'Audio Preview Image': 'Audio Preview Image',
-    'Auto Play': 'Auto Play',
-    'Auto Play (PC Only)': 'Auto Play (PC Only)',
-    'Cancel': 'Cancel',
-    'Cancel upload': 'Cancel upload',
-    'Caption Search': 'Caption Search',
-    'Captions "On" By Default': 'Captions "On" By Default',
-    'Category': 'Category',
-    'Category List': 'Category List',
-    'CC': 'CC',
-    'Change %1$s': 'Change %1$s',
-    'Choose %1$s': 'Choose %1$s',
-    'Choose': 'Choose',
-    'Choose Layout': 'Choose Layout',
-    'Close': 'Close',
-    'Content Details': 'Content Details',
-    'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.': 'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.',
-    'Credits': 'Credits',
-    'Date Added': 'Date Added',
-    'Date Produced': 'Date Produced',
-    'Descending': 'Descending',
-    'Description': 'Description',
-    'Download Link': 'Download Link',
-    'Drag file here.': 'Drag file here.',
-    'Duration': 'Duration',
-    'Embed Code': 'Embed Code',
-    'Ensemble Logo': 'Ensemble Logo',
-    'Ensemble Video Login': 'Ensemble Video Login',
-    'Go': 'Go',
-    'Hide Controls': 'Hide Controls',
-    'Hide': 'Hide',
-    'Hide Picker': 'Hide Picker',
-    'Horizontal': 'Horizontal',
-    'Identity Provider': 'Identity Provider',
-    'It appears there is an issue with the Ensemble Video installation.': 'It appears there is an issue with the Ensemble Video installation.',
-    'Keywords': 'Keywords',
-    'Layout Options': 'Layout Options',
-    'Less': 'Less',
-    'Library:': 'Library:',
-    'Library': 'Library',
-    'Links': 'Links',
-    'Loading...': 'Loading...',
-    'Logout %1$s': 'Logout %1$s',
-    'Logout': 'Logout',
-    'Media Library': 'Media Library',
-    'Media': 'Media',
-    'Media thumbnail': 'Media thumbnail',
-    'Meta Data': 'Meta Data',
-    'More': 'More',
-    'None': 'None',
-    'No results available.': 'No results available.',
-    'Number of Results': 'Number of Results',
-    'Organization:': 'Organization:',
-    'Original': 'Original',
-    'Password': 'Password',
-    'Playlist': 'Playlist',
-    'Preview: %1$s': 'Preview: %1$s',
-    'Preview:': 'Preview:',
-    'Reload': 'Reload',
-    'Remember Me': 'Remember Me',
-    'Remove %1$s': 'Remove %1$s',
-    'Save': 'Save',
-    'Search Media': 'Search Media',
-    'Search returned %1$s results.': 'Search returned %1$s results.',
-    'Search:': 'Search:',
-    'Search String': 'Search String',
-    'Select Library': 'Select Library',
-    'Select Library Type': 'Select Library Type',
-    'Select Organization': 'Select Organization',
-    'Shared Library': 'Shared Library',
-    'Show Captions': 'Show Captions',
-    'Showcase': 'Showcase',
-    'Show Title': 'Show Title',
-    'Size': 'Size',
-    'Social Tools': 'Social Tools',
-    'Sort By': 'Sort By',
-    'Statistics': 'Statistics',
-    'Submit': 'Submit',
-    'Title': 'Title',
-    'Type:': 'Type:',
-    'Upload Media to Ensemble': 'Upload Media to Ensemble',
-    'Upload': 'Upload',
-    'Username': 'Username',
-    'Vertical': 'Vertical',
-    'You are unauthorized to access this content.': 'You are unauthorized to access this content.'
-});
-
-
-/* global window, exports, define */
-
-!function() {
-    'use strict'
-
-    var re = {
-        not_string: /[^s]/,
-        not_bool: /[^t]/,
-        not_type: /[^T]/,
-        not_primitive: /[^v]/,
-        number: /[diefg]/,
-        numeric_arg: /[bcdiefguxX]/,
-        json: /[j]/,
-        not_json: /[^j]/,
-        text: /^[^\x25]+/,
-        modulo: /^\x25{2}/,
-        placeholder: /^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-gijostTuvxX])/,
-        key: /^([a-z_][a-z_\d]*)/i,
-        key_access: /^\.([a-z_][a-z_\d]*)/i,
-        index_access: /^\[(\d+)\]/,
-        sign: /^[\+\-]/
-    }
-
-    function sprintf(key) {
-        // `arguments` is not an array, but should be fine for this call
-        return sprintf_format(sprintf_parse(key), arguments)
-    }
-
-    function vsprintf(fmt, argv) {
-        return sprintf.apply(null, [fmt].concat(argv || []))
-    }
-
-    function sprintf_format(parse_tree, argv) {
-        var cursor = 1, tree_length = parse_tree.length, arg, output = '', i, k, match, pad, pad_character, pad_length, is_positive, sign
-        for (i = 0; i < tree_length; i++) {
-            if (typeof parse_tree[i] === 'string') {
-                output += parse_tree[i]
-            }
-            else if (Array.isArray(parse_tree[i])) {
-                match = parse_tree[i] // convenience purposes only
-                if (match[2]) { // keyword argument
-                    arg = argv[cursor]
-                    for (k = 0; k < match[2].length; k++) {
-                        if (!arg.hasOwnProperty(match[2][k])) {
-                            throw new Error(sprintf('[sprintf] property "%s" does not exist', match[2][k]))
-                        }
-                        arg = arg[match[2][k]]
-                    }
-                }
-                else if (match[1]) { // positional argument (explicit)
-                    arg = argv[match[1]]
-                }
-                else { // positional argument (implicit)
-                    arg = argv[cursor++]
-                }
-
-                if (re.not_type.test(match[8]) && re.not_primitive.test(match[8]) && arg instanceof Function) {
-                    arg = arg()
-                }
-
-                if (re.numeric_arg.test(match[8]) && (typeof arg !== 'number' && isNaN(arg))) {
-                    throw new TypeError(sprintf('[sprintf] expecting number but found %T', arg))
-                }
-
-                if (re.number.test(match[8])) {
-                    is_positive = arg >= 0
-                }
-
-                switch (match[8]) {
-                    case 'b':
-                        arg = parseInt(arg, 10).toString(2)
-                        break
-                    case 'c':
-                        arg = String.fromCharCode(parseInt(arg, 10))
-                        break
-                    case 'd':
-                    case 'i':
-                        arg = parseInt(arg, 10)
-                        break
-                    case 'j':
-                        arg = JSON.stringify(arg, null, match[6] ? parseInt(match[6]) : 0)
-                        break
-                    case 'e':
-                        arg = match[7] ? parseFloat(arg).toExponential(match[7]) : parseFloat(arg).toExponential()
-                        break
-                    case 'f':
-                        arg = match[7] ? parseFloat(arg).toFixed(match[7]) : parseFloat(arg)
-                        break
-                    case 'g':
-                        arg = match[7] ? String(Number(arg.toPrecision(match[7]))) : parseFloat(arg)
-                        break
-                    case 'o':
-                        arg = (parseInt(arg, 10) >>> 0).toString(8)
-                        break
-                    case 's':
-                        arg = String(arg)
-                        arg = (match[7] ? arg.substring(0, match[7]) : arg)
-                        break
-                    case 't':
-                        arg = String(!!arg)
-                        arg = (match[7] ? arg.substring(0, match[7]) : arg)
-                        break
-                    case 'T':
-                        arg = Object.prototype.toString.call(arg).slice(8, -1).toLowerCase()
-                        arg = (match[7] ? arg.substring(0, match[7]) : arg)
-                        break
-                    case 'u':
-                        arg = parseInt(arg, 10) >>> 0
-                        break
-                    case 'v':
-                        arg = arg.valueOf()
-                        arg = (match[7] ? arg.substring(0, match[7]) : arg)
-                        break
-                    case 'x':
-                        arg = (parseInt(arg, 10) >>> 0).toString(16)
-                        break
-                    case 'X':
-                        arg = (parseInt(arg, 10) >>> 0).toString(16).toUpperCase()
-                        break
-                }
-                if (re.json.test(match[8])) {
-                    output += arg
-                }
-                else {
-                    if (re.number.test(match[8]) && (!is_positive || match[3])) {
-                        sign = is_positive ? '+' : '-'
-                        arg = arg.toString().replace(re.sign, '')
-                    }
-                    else {
-                        sign = ''
-                    }
-                    pad_character = match[4] ? match[4] === '0' ? '0' : match[4].charAt(1) : ' '
-                    pad_length = match[6] - (sign + arg).length
-                    pad = match[6] ? (pad_length > 0 ? pad_character.repeat(pad_length) : '') : ''
-                    output += match[5] ? sign + arg + pad : (pad_character === '0' ? sign + pad + arg : pad + sign + arg)
-                }
-            }
-        }
-        return output
-    }
-
-    var sprintf_cache = Object.create(null)
-
-    function sprintf_parse(fmt) {
-        if (sprintf_cache[fmt]) {
-            return sprintf_cache[fmt]
-        }
-
-        var _fmt = fmt, match, parse_tree = [], arg_names = 0
-        while (_fmt) {
-            if ((match = re.text.exec(_fmt)) !== null) {
-                parse_tree.push(match[0])
-            }
-            else if ((match = re.modulo.exec(_fmt)) !== null) {
-                parse_tree.push('%')
-            }
-            else if ((match = re.placeholder.exec(_fmt)) !== null) {
-                if (match[2]) {
-                    arg_names |= 1
-                    var field_list = [], replacement_field = match[2], field_match = []
-                    if ((field_match = re.key.exec(replacement_field)) !== null) {
-                        field_list.push(field_match[1])
-                        while ((replacement_field = replacement_field.substring(field_match[0].length)) !== '') {
-                            if ((field_match = re.key_access.exec(replacement_field)) !== null) {
-                                field_list.push(field_match[1])
-                            }
-                            else if ((field_match = re.index_access.exec(replacement_field)) !== null) {
-                                field_list.push(field_match[1])
-                            }
-                            else {
-                                throw new SyntaxError('[sprintf] failed to parse named argument key')
-                            }
-                        }
-                    }
-                    else {
-                        throw new SyntaxError('[sprintf] failed to parse named argument key')
-                    }
-                    match[2] = field_list
-                }
-                else {
-                    arg_names |= 2
-                }
-                if (arg_names === 3) {
-                    throw new Error('[sprintf] mixing positional and named placeholders is not (yet) supported')
-                }
-                parse_tree.push(match)
-            }
-            else {
-                throw new SyntaxError('[sprintf] unexpected placeholder')
-            }
-            _fmt = _fmt.substring(match[0].length)
-        }
-        return sprintf_cache[fmt] = parse_tree
-    }
-
-    /**
-     * export to either browser or node.js
-     */
-    /* eslint-disable quote-props */
-    if (typeof exports !== 'undefined') {
-        exports['sprintf'] = sprintf
-        exports['vsprintf'] = vsprintf
-    }
-    if (typeof window !== 'undefined') {
-        window['sprintf'] = sprintf
-        window['vsprintf'] = vsprintf
-
-        if (typeof define === 'function' && define['amd']) {
-            define('sprintf',[],function() {
-                return {
-                    'sprintf': sprintf,
-                    'vsprintf': vsprintf
-                }
-            })
-        }
-    }
-    /* eslint-enable quote-props */
-}()
-;
 define('ev-script/util/events',['require','underscore','backbone'],function(require) {
 
     'use strict';
@@ -4585,16 +7632,16 @@ define('ev-script/util/cache',['require','jquery','underscore','backbone'],funct
 
 });
 
-define('ev-script/views/base',['require','jquery','underscore','backbone','ev-script/util/events','ev-script/util/cache','i18n!ev-script/nls/messages'],function(require) {
+define('ev-script/views/base',['require','jquery','underscore','backbone','globalize','ev-script/util/events','ev-script/util/cache'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
+        Globalize = require('globalize'),
         eventsUtil = require('ev-script/util/events'),
-        cacheUtil = require('ev-script/util/cache'),
-        messages = require('i18n!ev-script/nls/messages');
+        cacheUtil = require('ev-script/util/cache');
 
     return Backbone.View.extend({
         initialize: function(options) {
@@ -4609,11 +7656,11 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
             if (xhr.status === 401) {
                 this.auth.handleUnauthorized(this.el, authCallback);
             } else if (xhr.status === 500) {
-                window.alert(messages['It appears there is an issue with the Ensemble Video installation.']);
+                window.alert(Globalize.formatMessage('It appears there is an issue with the Ensemble Video installation.'));
             } else if (xhr.status === 404) {
-                window.alert(messages['Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.']);
+                window.alert(Globalize.formatMessage('Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.'));
             } else if (xhr.status !== 0) {
-                window.alert(messages['An unexpected error occurred.  Check the server log for more details.']);
+                window.alert(Globalize.formatMessage('An unexpected error occurred.  Check the server log for more details.'));
             }
         },
         unencode: function(encoded) {
@@ -5841,425 +8888,15 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
   }
 }.call(this));
 
-/**
- * @license text 2.0.15 Copyright jQuery Foundation and other contributors.
- * Released under MIT license, http://github.com/requirejs/text/LICENSE
- */
-/*jslint regexp: true */
-/*global require, XMLHttpRequest, ActiveXObject,
-  define, window, process, Packages,
-  java, location, Components, FileUtils */
 
-define('text',['module'], function (module) {
-    'use strict';
+define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="<%= Globalize.formatMessage(\'Hide Picker\') %>"><%= Globalize.formatMessage(\'Hide\') %></a>\n<% if (showLogout) { %>\n    <a class="action-logout" href="#" title="<%= Globalize.formatMessage(\'Logout {0}\', username) %>"><%= Globalize.formatMessage(\'Logout\') %></a>\n<% } %>\n';});
 
-    var text, fs, Cc, Ci, xpcIsWindows,
-        progIds = ['Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'],
-        xmlRegExp = /^\s*<\?xml(\s)+version=[\'\"](\d)*.(\d)*[\'\"](\s)*\?>/im,
-        bodyRegExp = /<body[^>]*>\s*([\s\S]+)\s*<\/body>/im,
-        hasLocation = typeof location !== 'undefined' && location.href,
-        defaultProtocol = hasLocation && location.protocol && location.protocol.replace(/\:/, ''),
-        defaultHostName = hasLocation && location.hostname,
-        defaultPort = hasLocation && (location.port || undefined),
-        buildMap = {},
-        masterConfig = (module.config && module.config()) || {};
-
-    function useDefault(value, defaultValue) {
-        return value === undefined || value === '' ? defaultValue : value;
-    }
-
-    //Allow for default ports for http and https.
-    function isSamePort(protocol1, port1, protocol2, port2) {
-        if (port1 === port2) {
-            return true;
-        } else if (protocol1 === protocol2) {
-            if (protocol1 === 'http') {
-                return useDefault(port1, '80') === useDefault(port2, '80');
-            } else if (protocol1 === 'https') {
-                return useDefault(port1, '443') === useDefault(port2, '443');
-            }
-        }
-        return false;
-    }
-
-    text = {
-        version: '2.0.15',
-
-        strip: function (content) {
-            //Strips <?xml ...?> declarations so that external SVG and XML
-            //documents can be added to a document without worry. Also, if the string
-            //is an HTML document, only the part inside the body tag is returned.
-            if (content) {
-                content = content.replace(xmlRegExp, "");
-                var matches = content.match(bodyRegExp);
-                if (matches) {
-                    content = matches[1];
-                }
-            } else {
-                content = "";
-            }
-            return content;
-        },
-
-        jsEscape: function (content) {
-            return content.replace(/(['\\])/g, '\\$1')
-                .replace(/[\f]/g, "\\f")
-                .replace(/[\b]/g, "\\b")
-                .replace(/[\n]/g, "\\n")
-                .replace(/[\t]/g, "\\t")
-                .replace(/[\r]/g, "\\r")
-                .replace(/[\u2028]/g, "\\u2028")
-                .replace(/[\u2029]/g, "\\u2029");
-        },
-
-        createXhr: masterConfig.createXhr || function () {
-            //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
-            var xhr, i, progId;
-            if (typeof XMLHttpRequest !== "undefined") {
-                return new XMLHttpRequest();
-            } else if (typeof ActiveXObject !== "undefined") {
-                for (i = 0; i < 3; i += 1) {
-                    progId = progIds[i];
-                    try {
-                        xhr = new ActiveXObject(progId);
-                    } catch (e) {}
-
-                    if (xhr) {
-                        progIds = [progId];  // so faster next time
-                        break;
-                    }
-                }
-            }
-
-            return xhr;
-        },
-
-        /**
-         * Parses a resource name into its component parts. Resource names
-         * look like: module/name.ext!strip, where the !strip part is
-         * optional.
-         * @param {String} name the resource name
-         * @returns {Object} with properties "moduleName", "ext" and "strip"
-         * where strip is a boolean.
-         */
-        parseName: function (name) {
-            var modName, ext, temp,
-                strip = false,
-                index = name.lastIndexOf("."),
-                isRelative = name.indexOf('./') === 0 ||
-                             name.indexOf('../') === 0;
-
-            if (index !== -1 && (!isRelative || index > 1)) {
-                modName = name.substring(0, index);
-                ext = name.substring(index + 1);
-            } else {
-                modName = name;
-            }
-
-            temp = ext || modName;
-            index = temp.indexOf("!");
-            if (index !== -1) {
-                //Pull off the strip arg.
-                strip = temp.substring(index + 1) === "strip";
-                temp = temp.substring(0, index);
-                if (ext) {
-                    ext = temp;
-                } else {
-                    modName = temp;
-                }
-            }
-
-            return {
-                moduleName: modName,
-                ext: ext,
-                strip: strip
-            };
-        },
-
-        xdRegExp: /^((\w+)\:)?\/\/([^\/\\]+)/,
-
-        /**
-         * Is an URL on another domain. Only works for browser use, returns
-         * false in non-browser environments. Only used to know if an
-         * optimized .js version of a text resource should be loaded
-         * instead.
-         * @param {String} url
-         * @returns Boolean
-         */
-        useXhr: function (url, protocol, hostname, port) {
-            var uProtocol, uHostName, uPort,
-                match = text.xdRegExp.exec(url);
-            if (!match) {
-                return true;
-            }
-            uProtocol = match[2];
-            uHostName = match[3];
-
-            uHostName = uHostName.split(':');
-            uPort = uHostName[1];
-            uHostName = uHostName[0];
-
-            return (!uProtocol || uProtocol === protocol) &&
-                   (!uHostName || uHostName.toLowerCase() === hostname.toLowerCase()) &&
-                   ((!uPort && !uHostName) || isSamePort(uProtocol, uPort, protocol, port));
-        },
-
-        finishLoad: function (name, strip, content, onLoad) {
-            content = strip ? text.strip(content) : content;
-            if (masterConfig.isBuild) {
-                buildMap[name] = content;
-            }
-            onLoad(content);
-        },
-
-        load: function (name, req, onLoad, config) {
-            //Name has format: some.module.filext!strip
-            //The strip part is optional.
-            //if strip is present, then that means only get the string contents
-            //inside a body tag in an HTML string. For XML/SVG content it means
-            //removing the <?xml ...?> declarations so the content can be inserted
-            //into the current doc without problems.
-
-            // Do not bother with the work if a build and text will
-            // not be inlined.
-            if (config && config.isBuild && !config.inlineText) {
-                onLoad();
-                return;
-            }
-
-            masterConfig.isBuild = config && config.isBuild;
-
-            var parsed = text.parseName(name),
-                nonStripName = parsed.moduleName +
-                    (parsed.ext ? '.' + parsed.ext : ''),
-                url = req.toUrl(nonStripName),
-                useXhr = (masterConfig.useXhr) ||
-                         text.useXhr;
-
-            // Do not load if it is an empty: url
-            if (url.indexOf('empty:') === 0) {
-                onLoad();
-                return;
-            }
-
-            //Load the text. Use XHR if possible and in a browser.
-            if (!hasLocation || useXhr(url, defaultProtocol, defaultHostName, defaultPort)) {
-                text.get(url, function (content) {
-                    text.finishLoad(name, parsed.strip, content, onLoad);
-                }, function (err) {
-                    if (onLoad.error) {
-                        onLoad.error(err);
-                    }
-                });
-            } else {
-                //Need to fetch the resource across domains. Assume
-                //the resource has been optimized into a JS module. Fetch
-                //by the module name + extension, but do not include the
-                //!strip part to avoid file system issues.
-                req([nonStripName], function (content) {
-                    text.finishLoad(parsed.moduleName + '.' + parsed.ext,
-                                    parsed.strip, content, onLoad);
-                });
-            }
-        },
-
-        write: function (pluginName, moduleName, write, config) {
-            if (buildMap.hasOwnProperty(moduleName)) {
-                var content = text.jsEscape(buildMap[moduleName]);
-                write.asModule(pluginName + "!" + moduleName,
-                               "define(function () { return '" +
-                                   content +
-                               "';});\n");
-            }
-        },
-
-        writeFile: function (pluginName, moduleName, req, write, config) {
-            var parsed = text.parseName(moduleName),
-                extPart = parsed.ext ? '.' + parsed.ext : '',
-                nonStripName = parsed.moduleName + extPart,
-                //Use a '.js' file name so that it indicates it is a
-                //script that can be loaded across domains.
-                fileName = req.toUrl(parsed.moduleName + extPart) + '.js';
-
-            //Leverage own load() method to load plugin value, but only
-            //write out values that do not have the strip argument,
-            //to avoid any potential issues with ! in file names.
-            text.load(nonStripName, req, function (value) {
-                //Use own write() method to construct full module value.
-                //But need to create shell that translates writeFile's
-                //write() to the right interface.
-                var textWrite = function (contents) {
-                    return write(fileName, contents);
-                };
-                textWrite.asModule = function (moduleName, contents) {
-                    return write.asModule(moduleName, fileName, contents);
-                };
-
-                text.write(pluginName, nonStripName, textWrite, config);
-            }, config);
-        }
-    };
-
-    if (masterConfig.env === 'node' || (!masterConfig.env &&
-            typeof process !== "undefined" &&
-            process.versions &&
-            !!process.versions.node &&
-            !process.versions['node-webkit'] &&
-            !process.versions['atom-shell'])) {
-        //Using special require.nodeRequire, something added by r.js.
-        fs = require.nodeRequire('fs');
-
-        text.get = function (url, callback, errback) {
-            try {
-                var file = fs.readFileSync(url, 'utf8');
-                //Remove BOM (Byte Mark Order) from utf8 files if it is there.
-                if (file[0] === '\uFEFF') {
-                    file = file.substring(1);
-                }
-                callback(file);
-            } catch (e) {
-                if (errback) {
-                    errback(e);
-                }
-            }
-        };
-    } else if (masterConfig.env === 'xhr' || (!masterConfig.env &&
-            text.createXhr())) {
-        text.get = function (url, callback, errback, headers) {
-            var xhr = text.createXhr(), header;
-            xhr.open('GET', url, true);
-
-            //Allow plugins direct access to xhr headers
-            if (headers) {
-                for (header in headers) {
-                    if (headers.hasOwnProperty(header)) {
-                        xhr.setRequestHeader(header.toLowerCase(), headers[header]);
-                    }
-                }
-            }
-
-            //Allow overrides specified in config
-            if (masterConfig.onXhr) {
-                masterConfig.onXhr(xhr, url);
-            }
-
-            xhr.onreadystatechange = function (evt) {
-                var status, err;
-                //Do not explicitly handle errors, those should be
-                //visible via console output in the browser.
-                if (xhr.readyState === 4) {
-                    status = xhr.status || 0;
-                    if (status > 399 && status < 600) {
-                        //An http 4xx or 5xx error. Signal an error.
-                        err = new Error(url + ' HTTP status: ' + status);
-                        err.xhr = xhr;
-                        if (errback) {
-                            errback(err);
-                        }
-                    } else {
-                        callback(xhr.responseText);
-                    }
-
-                    if (masterConfig.onXhrComplete) {
-                        masterConfig.onXhrComplete(xhr, url);
-                    }
-                }
-            };
-            xhr.send(null);
-        };
-    } else if (masterConfig.env === 'rhino' || (!masterConfig.env &&
-            typeof Packages !== 'undefined' && typeof java !== 'undefined')) {
-        //Why Java, why is this so awkward?
-        text.get = function (url, callback) {
-            var stringBuffer, line,
-                encoding = "utf-8",
-                file = new java.io.File(url),
-                lineSeparator = java.lang.System.getProperty("line.separator"),
-                input = new java.io.BufferedReader(new java.io.InputStreamReader(new java.io.FileInputStream(file), encoding)),
-                content = '';
-            try {
-                stringBuffer = new java.lang.StringBuffer();
-                line = input.readLine();
-
-                // Byte Order Mark (BOM) - The Unicode Standard, version 3.0, page 324
-                // http://www.unicode.org/faq/utf_bom.html
-
-                // Note that when we use utf-8, the BOM should appear as "EF BB BF", but it doesn't due to this bug in the JDK:
-                // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4508058
-                if (line && line.length() && line.charAt(0) === 0xfeff) {
-                    // Eat the BOM, since we've already found the encoding on this file,
-                    // and we plan to concatenating this buffer with others; the BOM should
-                    // only appear at the top of a file.
-                    line = line.substring(1);
-                }
-
-                if (line !== null) {
-                    stringBuffer.append(line);
-                }
-
-                while ((line = input.readLine()) !== null) {
-                    stringBuffer.append(lineSeparator);
-                    stringBuffer.append(line);
-                }
-                //Make sure we return a JavaScript string and not a Java string.
-                content = String(stringBuffer.toString()); //String
-            } finally {
-                input.close();
-            }
-            callback(content);
-        };
-    } else if (masterConfig.env === 'xpconnect' || (!masterConfig.env &&
-            typeof Components !== 'undefined' && Components.classes &&
-            Components.interfaces)) {
-        //Avert your gaze!
-        Cc = Components.classes;
-        Ci = Components.interfaces;
-        Components.utils['import']('resource://gre/modules/FileUtils.jsm');
-        xpcIsWindows = ('@mozilla.org/windows-registry-key;1' in Cc);
-
-        text.get = function (url, callback) {
-            var inStream, convertStream, fileObj,
-                readData = {};
-
-            if (xpcIsWindows) {
-                url = url.replace(/\//g, '\\');
-            }
-
-            fileObj = new FileUtils.File(url);
-
-            //XPCOM, you so crazy
-            try {
-                inStream = Cc['@mozilla.org/network/file-input-stream;1']
-                           .createInstance(Ci.nsIFileInputStream);
-                inStream.init(fileObj, 1, 0, false);
-
-                convertStream = Cc['@mozilla.org/intl/converter-input-stream;1']
-                                .createInstance(Ci.nsIConverterInputStream);
-                convertStream.init(inStream, "utf-8", inStream.available(),
-                Ci.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
-
-                convertStream.readString(inStream.available(), readData);
-                convertStream.close();
-                inStream.close();
-                callback(readData.value);
-            } catch (e) {
-                throw new Error((fileObj && fileObj.path || '') + ': ' + e);
-            }
-        };
-    }
-    return text;
-});
-
-
-define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="<%= messages[\'Hide Picker\'] %>"><%= messages[\'Hide\'] %></a>\n<% if (showLogout) { %>\n    <a class="action-logout" href="#" title="<%= sprintf(messages[\'Logout %1$s\'], username) %>"><%= messages[\'Logout\'] %></a>\n<% } %>\n';});
-
-define('ev-script/views/hider',['require','underscore','i18n!ev-script/nls/messages','sprintf','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
+define('ev-script/views/hider',['require','underscore','globalize','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
-        sprintf = require('sprintf'),
+        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -6286,8 +8923,7 @@ define('ev-script/views/hider',['require','underscore','i18n!ev-script/nls/messa
                 username = this.auth.getUser().get('UserName');
             }
             this.$el.html(this.template({
-                messages: messages,
-                sprintf: sprintf.sprintf,
+                Globalize: Globalize,
                 showLogout: this.auth.isAuthenticated() && this.config.authType !== 'none',
                 username: username
             }));
@@ -6390,14 +9026,14 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
 });
 
 
-define('text!ev-script/templates/search.html',[],function () { return '<label for="<%= id %>"><%= messages[\'Search:\'] %></label>\n<input id="<%= id %>" type="search" class="form-text search" value="<%- searchVal %>" title="<%= messages[\'Search Media\'] %>" />\n<input type="submit" value="<%= messages[\'Go\'] %>" class="form-submit" />\n';});
+define('text!ev-script/templates/search.html',[],function () { return '<label for="<%= id %>"><%= Globalize.formatMessage(\'Search:\') %></label>\n<input id="<%= id %>" type="search" class="form-text search" value="<%- searchVal %>" title="<%= Globalize.formatMessage(\'Search Media\') %>" />\n<input type="submit" value="<%= Globalize.formatMessage(\'Go\') %>" class="form-submit" />\n';});
 
-define('ev-script/views/search',['require','underscore','i18n!ev-script/nls/messages','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
+define('ev-script/views/search',['require','underscore','globalize','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
+        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -6414,7 +9050,7 @@ define('ev-script/views/search',['require','underscore','i18n!ev-script/nls/mess
         },
         render: function() {
             this.$el.html(this.template({
-                messages: messages,
+                Globalize: Globalize,
                 id: this.id + '-input',
                 searchVal: this.picker.model.get('search')
             }));
@@ -6453,14 +9089,14 @@ define('ev-script/views/search',['require','underscore','i18n!ev-script/nls/mess
 });
 
 
-define('text!ev-script/templates/library-type-select.html',[],function () { return '<div>\n  <label for="<%= id %>"><%= messages[\'Type:\'] %></label>\n  <select id="<%= id %>" class="form-select source" title="<%= messages[\'Select Library Type\'] %>">\n    <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>><%= messages[\'Media Library\'] %></option>\n    <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>><%= messages[\'Shared Library\'] %></option>\n  </select>\n  <input type="submit" value="<%= messages[\'Go\'] %>" class="form-submit" />\n</div>\n';});
+define('text!ev-script/templates/library-type-select.html',[],function () { return '<div>\n  <label for="<%= id %>"><%= Globalize.formatMessage(\'Type:\') %></label>\n  <select id="<%= id %>" class="form-select source" title="<%= Globalize.formatMessage(\'Select Library Type\') %>">\n    <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Media Library\') %></option>\n    <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Shared Library\') %></option>\n  </select>\n  <input type="submit" value="<%= Globalize.formatMessage(\'Go\') %>" class="form-submit" />\n</div>\n';});
 
-define('ev-script/views/library-type-select',['require','underscore','i18n!ev-script/nls/messages','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
+define('ev-script/views/library-type-select',['require','underscore','globalize','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
+        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -6476,7 +9112,7 @@ define('ev-script/views/library-type-select',['require','underscore','i18n!ev-sc
         },
         render: function() {
             this.$el.html(this.template({
-                messages: messages,
+                Globalize: Globalize,
                 id: this.id + '-select',
                 sourceId: this.picker.model.get('sourceId')
             }));
@@ -6633,12 +9269,12 @@ define('ev-script/collections/organizations',['require','ev-script/collections/b
 
 });
 
-define('ev-script/views/library-select',['require','underscore','i18n!ev-script/nls/messages','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
+define('ev-script/views/library-select',['require','underscore','globalize','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
+        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -6647,7 +9283,7 @@ define('ev-script/views/library-select',['require','underscore','i18n!ev-script/
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render');
             this.picker = options.picker;
-            this.$el.html('<option value="-1">' + messages['Loading...'] + '</option>');
+            this.$el.html('<option value="-1">' + Globalize.formatMessage('Loading...') + '</option>');
             this.collection.on('reset', this.render);
         },
         render: function() {
@@ -6708,15 +9344,15 @@ define('ev-script/collections/libraries',['require','ev-script/collections/base'
 });
 
 
-define('text!ev-script/templates/unit-selects.html',[],function () { return '<div id="<%= formId %>" class="unit-selects">\n    <label for="<%= orgSelectId %>"><%= messages[\'Organization:\'] %></label><select id="<%= orgSelectId %>" class="form-select organizations" title="<%= messages[\'Select Organization\'] %>"></select><label for="<%= libSelectId %>"><%= messages[\'Library:\'] %></label><select id="<%= libSelectId %>" class="form-select libraries" title="<%= messages[\'Select Library\'] %>"></select><input type="submit" value="<%= messages[\'Go\'] %>" class="form-submit" />\n</div>\n';});
+define('text!ev-script/templates/unit-selects.html',[],function () { return '<div id="<%= formId %>" class="unit-selects">\n    <label for="<%= orgSelectId %>"><%= Globalize.formatMessage(\'Organization:\') %></label><select id="<%= orgSelectId %>" class="form-select organizations" title="<%= Globalize.formatMessage(\'Select Organization\') %>"></select><label for="<%= libSelectId %>"><%= Globalize.formatMessage(\'Library:\') %></label><select id="<%= libSelectId %>" class="form-select libraries" title="<%= Globalize.formatMessage(\'Select Library\') %>"></select><input type="submit" value="<%= Globalize.formatMessage(\'Go\') %>" class="form-submit" />\n</div>\n';});
 
-define('ev-script/views/unit-selects',['require','jquery','underscore','i18n!ev-script/nls/messages','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','text!ev-script/templates/unit-selects.html'],function(require) {
+define('ev-script/views/unit-selects',['require','jquery','underscore','globalize','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','text!ev-script/templates/unit-selects.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
+        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base'),
         OrganizationSelectView = require('ev-script/views/organization-select'),
         Organizations = require('ev-script/collections/organizations'),
@@ -6731,7 +9367,7 @@ define('ev-script/views/unit-selects',['require','jquery','underscore','i18n!ev-
             this.picker = options.picker;
             this.id = options.id;
             this.$el.html(this.template({
-                messages: messages,
+                Globalize: Globalize,
                 formId: this.id + '-unit-selects',
                 orgSelectId: this.id + '-org-select',
                 libSelectId: this.id + '-lib-select'
@@ -6877,19 +9513,18 @@ define('ev-script/views/unit-selects',['require','jquery','underscore','i18n!ev-
 });
 
 
-define('text!ev-script/templates/results.html',[],function () { return '<div class="total">\n    <%= sprintf(messages[\'Search returned %1$s results.\'], totalResults) %>\n    <a href="#" class="action-refresh" title="<%= messages[\'Reload\'] %>"><i class="fa fa-fw fa-lg fa-refresh"></i></a>\n</div>\n<div class="results">\n    <table class="content-list"></table>\n</div>\n';});
+define('text!ev-script/templates/results.html',[],function () { return '<div class="total">\n    <%= Globalize.formatMessage(\'Search returned {0} results.\', totalResults) %>\n    <a href="#" class="action-refresh" title="<%= Globalize.formatMessage(\'Reload\') %>"><i class="fa fa-fw fa-lg fa-refresh"></i></a>\n</div>\n<div class="results">\n    <table class="content-list"></table>\n</div>\n';});
 
 
-define('text!ev-script/templates/no-results.html',[],function () { return '<tr class="odd"><td colspan="2"><%= messages[\'No results available.\'] %></td></tr>\n';});
+define('text!ev-script/templates/no-results.html',[],function () { return '<tr class="odd"><td colspan="2"><%= Globalize.formatMessage(\'No results available.\') %></td></tr>\n';});
 
-define('ev-script/views/results',['require','jquery','underscore','i18n!ev-script/nls/messages','sprintf','ev-script/views/base','ev-scroll-loader','text!ev-script/templates/results.html','text!ev-script/templates/no-results.html'],function(require) {
+define('ev-script/views/results',['require','jquery','underscore','globalize','ev-script/views/base','ev-scroll-loader','text!ev-script/templates/results.html','text!ev-script/templates/no-results.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
-        sprintf = require('sprintf'),
+        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     require('ev-scroll-loader');
@@ -6914,8 +9549,7 @@ define('ev-script/views/results',['require','jquery','underscore','i18n!ev-scrip
         getItemHtml: function(item, index) {
             if (this.resultTemplate) {
                 return this.resultTemplate({
-                    messages: messages,
-                    sprintf: sprintf.sprintf,
+                    Globalize: Globalize,
                     item: item,
                     index: index
                 });
@@ -6974,8 +9608,7 @@ define('ev-script/views/results',['require','jquery','underscore','i18n!ev-scrip
         decorate: function($item) {},
         render: function() {
             this.$el.html(this.resultsTemplate({
-                messages: messages,
-                sprintf: sprintf.sprintf,
+                Globalize: Globalize,
                 totalResults: this.collection.totalResults
             }));
             this.$total = this.$('.total');
@@ -6990,7 +9623,7 @@ define('ev-script/views/results',['require','jquery','underscore','i18n!ev-scrip
                 }, this);
             } else {
                 $contentList.append(this.emptyTemplate({
-                    messages: messages
+                    Globalize: Globalize
                 }));
             }
             var scrollHeight = this.config.scrollHeight;
@@ -7022,13 +9655,13 @@ define('ev-script/views/results',['require','jquery','underscore','i18n!ev-scrip
 
 });
 
-define('ev-script/views/preview',['require','jquery','underscore','i18n!ev-script/nls/messages','ev-script/views/base','ev-script/models/video-settings','jquery-ui'],function(require) {
+define('ev-script/views/preview',['require','jquery','underscore','globalize','ev-script/views/base','ev-script/models/video-settings','jquery-ui'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
+        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base'),
         VideoSettings = require('ev-script/models/video-settings');
 
@@ -7070,7 +9703,7 @@ define('ev-script/views/preview',['require','jquery','underscore','i18n!ev-scrip
                     embedView.render();
                     $dialogWrap.html(embedView.$el);
                 }, this),
-                closeText: messages['Close'],
+                closeText: Globalize.formatMessage('Close'),
                 close: function(event, ui) {
                     $dialogWrap.dialog('destroy').remove();
                 }
@@ -7530,15 +10163,15 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
 define("jquery-truncate-html", function(){});
 
 
-define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %> resultItem">\n    <td class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%= sprintf(messages[\'%1$s thumbnail image\'], item.get(\'Title\')) %>"/>\n            <% if (item.get(\'IsCaptioned\')) { %>\n            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= messages[\'CC\'] %>" alt="CC"></i>\n            <% } %>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= sprintf(messages[\'Choose %1$s\'], item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= messages[\'Choose\'] %></span></a>\n            <a class="action-preview" href="#" title="<%= sprintf(messages[\'Preview: %1$s\'], item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= sprintf(messages[\'Preview: %1$s\'], item.get(\'Title\')) %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="<%= sprintf(messages[\'Preview: %1$s\'], item.get(\'Title\')) %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label"><%= messages[\'Description\'] %></td><td class="value"><%= item.get(\'Description\') %></td></tr>\n                <tr><td class="label"><%= messages[\'Date Added\'] %></td><td class="value"><%- new Date(item.get(\'AddedOn\')).toLocaleString() %></td></tr>\n                <tr class="trunc"><td class="label"><%= messages[\'Keywords\'] %></td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label"><%= messages[\'Library\'] %></td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
+define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %> resultItem">\n    <td class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%= Globalize.formatMessage(\'{0} thumbnail image\', item.get(\'Title\')) %>"/>\n            <% if (item.get(\'IsCaptioned\')) { %>\n            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= Globalize.formatMessage(\'CC\') %>" alt="CC"></i>\n            <% } %>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= Globalize.formatMessage(\'Choose {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= Globalize.formatMessage(\'Choose\') %></span></a>\n            <a class="action-preview" href="#" title="<%= Globalize.formatMessage(\'Preview: {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= Globalize.formatMessage(\'Preview: {0}\', item.get(\'Title\')) %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="<%= Globalize.formatMessage(\'Preview: {0}\', item.get(\'Title\')) %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label"><%= Globalize.formatMessage(\'Description\') %></td><td class="value"><%= item.get(\'Description\') %></td></tr>\n                <tr><td class="label"><%= Globalize.formatMessage(\'Date Added\') %></td><td class="value"><%- new Date(item.get(\'AddedOn\')).toLocaleString() %></td></tr>\n                <tr class="trunc"><td class="label"><%= Globalize.formatMessage(\'Keywords\') %></td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label"><%= Globalize.formatMessage(\'Library\') %></td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
 
-define('ev-script/views/video-results',['require','jquery','underscore','i18n!ev-script/nls/messages','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-truncate-html','text!ev-script/templates/video-result.html'],function(require) {
+define('ev-script/views/video-results',['require','jquery','underscore','globalize','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-truncate-html','text!ev-script/templates/video-result.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
+        Globalize = require('globalize'),
         ResultsView = require('ev-script/views/results'),
         VideoSettings = require('ev-script/models/video-settings'),
         VideoPreviewView = require('ev-script/views/video-preview');
@@ -7570,12 +10203,12 @@ define('ev-script/views/video-results',['require','jquery','underscore','i18n!ev
                     $this.data('fullText', fullText);
                     $full = $('<span>' + fullText + '</span>');
                     $short = $('<span>' + truncText + '</span>');
-                    var $shorten = $('<a href="#">' + messages['Less'] + '</a>').click(function(e) {
+                    var $shorten = $('<a href="#">' + Globalize.formatMessage('Less') + '</a>').click(function(e) {
                         $full.hide();
                         $short.show();
                         e.preventDefault();
                     });
-                    var $expand = $('<a href="#">' + messages['More'] + '</a>').click(function(e) {
+                    var $expand = $('<a href="#">' + Globalize.formatMessage('More') + '</a>').click(function(e) {
                         $short.hide();
                         $full.show();
                         e.preventDefault();
@@ -7715,12 +10348,12 @@ define('ev-script/collections/media-workflows',['require','ev-script/collections
 });
 
 
-define('ev-script/views/workflow-select',['require','underscore','i18n!ev-script/nls/messages','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
+define('ev-script/views/workflow-select',['require','underscore','globalize','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
+        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -7728,7 +10361,7 @@ define('ev-script/views/workflow-select',['require','underscore','i18n!ev-script
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render');
-            this.$el.html('<option value="-1">' + messages['Loading...'] + '</option>');
+            this.$el.html('<option value="-1">' + Globalize.formatMessage('Loading...') + '</option>');
             this.render();
         },
         render: function() {
@@ -7748,15 +10381,15 @@ define('ev-script/views/workflow-select',['require','underscore','i18n!ev-script
 });
 
 
-define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <select class="form-select" name="MediaWorkflowID"></select>\n    <div class="fieldWrap">\n        <label for="Title"><%= messages[\'Title\'] %> *</label>\n        <input class="form-text" type="text" name="Title" id="Title" />\n    </div>\n    <div class="fieldWrap">\n        <label for="Description"><%= messages[\'Description\'] %></label>\n        <textarea class="form-text" name="Description" id="Description" />\n    </div>\n    <div class="upload"></div>\n</form>\n';});
+define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <select class="form-select" name="MediaWorkflowID"></select>\n    <div class="fieldWrap">\n        <label for="Title"><%= Globalize.formatMessage(\'Title\') %> *</label>\n        <input class="form-text" type="text" name="Title" id="Title" />\n    </div>\n    <div class="fieldWrap">\n        <label for="Description"><%= Globalize.formatMessage(\'Description\') %></label>\n        <textarea class="form-text" name="Description" id="Description" />\n    </div>\n    <div class="upload"></div>\n</form>\n';});
 
-define('ev-script/views/upload',['require','jquery','underscore','i18n!ev-script/nls/messages','plupload','ev-script/views/base','backbone','ev-script/views/workflow-select','ev-script/models/video-settings','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
+define('ev-script/views/upload',['require','jquery','underscore','globalize','plupload','ev-script/views/base','backbone','ev-script/views/workflow-select','ev-script/models/video-settings','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
+        Globalize = require('globalize'),
         plupload = require('plupload'),
         BaseView = require('ev-script/views/base'),
         Backbone = require('backbone'),
@@ -7777,7 +10410,7 @@ define('ev-script/views/upload',['require','jquery','underscore','i18n!ev-script
             this.field = options.field;
             this.$anchor = this.$el;
             this.setElement(this.template({
-                messages: messages
+                Globalize: Globalize
             }));
             this.$upload = this.$('.upload');
             this.workflows = options.workflows;
@@ -7831,11 +10464,11 @@ define('ev-script/views/upload',['require','jquery','underscore','i18n!ev-script
                         // Remove runtime tooltip
                         $('.plupload_container', this.$upload).removeAttr('title');
                         // Change text since we only allow single file upload
-                        $('.plupload_add', this.$upload).text(messages['Add file']);
+                        $('.plupload_add', this.$upload).text(Globalize.formatMessage('Add file'));
                     }, this),
                     PostInit: _.bind(function(up, info) {
                         // Change text since we only allow single file upload
-                        $('.plupload_droptext', this.$upload).text(messages['Drag file here.']);
+                        $('.plupload_droptext', this.$upload).text(Globalize.formatMessage('Drag file here.'));
                     }, this),
                     UploadFile: _.bind(function(up, file) {
                         up.settings.multipart_params = {
@@ -7852,7 +10485,7 @@ define('ev-script/views/upload',['require','jquery','underscore','i18n!ev-script
                                 if (up.state === plupload.STARTED) {
                                     if ($('.plupload_cancel', this.$upload).length === 0) {
                                         // Add cancel button
-                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">' + messages['Cancel upload'] + '</a>')
+                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">' + Globalize.formatMessage('Cancel upload') + '</a>')
                                         .insertBefore($('.plupload_filelist_footer .plupload_clearer', this.$upload))
                                         .click(_.bind(function() {
                                             up.stop();
@@ -7929,7 +10562,7 @@ define('ev-script/views/upload',['require','jquery','underscore','i18n!ev-script
                 $dialog;
             this.$anchor.after($dialogWrap);
             this.$dialog = $dialogWrap.dialog({
-                title: messages['Upload Media to Ensemble'],
+                title: Globalize.formatMessage('Upload Media to Ensemble'),
                 modal: true,
                 width: this.getWidth(),
                 height: this.getHeight(),
@@ -7939,7 +10572,7 @@ define('ev-script/views/upload',['require','jquery','underscore','i18n!ev-script
                 create: _.bind(function(event, ui) {
                     $dialogWrap.html(this.$el);
                 }, this),
-                closeText: messages['Close'],
+                closeText: Globalize.formatMessage('Close'),
                 close: _.bind(function(event, ui) {
                     this.$upload.pluploadQueue().destroy();
                     $dialogWrap.dialog('destroy').remove();
@@ -8019,13 +10652,13 @@ define("base64", function(){});
 
 define('text!ev-script/templates/anthem.html',[],function () { return '<iframe src="ensemble://<%= tokenDetailsApiUrl %>" style="display:none;"></iframe>\n';});
 
-define('ev-script/views/video-picker',['require','jquery','underscore','i18n!ev-script/nls/messages','platform','ev-script/views/picker','ev-script/views/search','ev-script/views/library-type-select','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos','ev-script/collections/media-workflows','ev-script/views/upload','base64','text!ev-script/templates/anthem.html'],function(require) {
+define('ev-script/views/video-picker',['require','jquery','underscore','globalize','platform','ev-script/views/picker','ev-script/views/search','ev-script/views/library-type-select','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos','ev-script/collections/media-workflows','ev-script/views/upload','base64','text!ev-script/templates/anthem.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
+        Globalize = require('globalize'),
         platform = require('platform'),
         PickerView = require('ev-script/views/picker'),
         SearchView = require('ev-script/views/search'),
@@ -8049,9 +10682,9 @@ define('ev-script/views/video-picker',['require','jquery','underscore','i18n!ev-
             this.$filterBlock = this.$('div.ev-filter-block');
             if (this.info.get('ApplicationVersion')) {
                 this.$actions = $('<div class="ev-actions"></div>');
-                this.$upload = $('<button type="button" class="action-upload" title="' + messages['Upload'] + '"><i class="fa fa-upload fa-fw"></i><span>' + messages['Upload'] + '<span></button>').css('display', 'none');
+                this.$upload = $('<button type="button" class="action-upload" title="' + Globalize.formatMessage('Upload') + '"><i class="fa fa-upload fa-fw"></i><span>' + Globalize.formatMessage('Upload') + '<span></button>').css('display', 'none');
                 this.$actions.append(this.$upload);
-                this.$record = $('<button type="button" class="action-record" title="' + messages['Record'] + '"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>' + messages['Record'] + '<span></button>').css('display', 'none');
+                this.$record = $('<button type="button" class="action-record" title="' + Globalize.formatMessage('Record') + '"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>' + Globalize.formatMessage('Record') + '<span></button>').css('display', 'none');
                 this.$actions.append(this.$record);
                 this.$filterBlock.prepend(this.$actions);
             }
@@ -8371,21 +11004,21 @@ define('ev-script/util/size',['require','underscore'],function(require) {
 });
 
 
-define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size"><%= messages[\'Size\'] %></label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original"><%= messages[\'Original\'] %></option>\n            </select>\n        </div>\n        <div>\n            <div class="fieldWrap inline-option">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle"><%= messages[\'Title\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="socialsharing" class="form-checkbox" <% if (model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox"/>\n                <label for="socialsharing"><%= messages[\'Social Tools\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                <label for="annotations"><%= messages[\'Annotations\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                <label for="captionsearch"><%= messages[\'Caption Search\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                <label for="autoplay"><%= messages[\'Auto Play (PC Only)\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments"><%= messages[\'Attachments\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links"><%= messages[\'Links\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata"><%= messages[\'Meta Data\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                <label for="dateproduced"><%= messages[\'Date Produced\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="embedcode" class="form-checkbox" <% if (model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox"/>\n                <label for="embedcode"><%= messages[\'Embed Code\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="download" class="form-checkbox" <% if (model.get(\'download\')) { print(\'checked="checked"\'); } %> name="download" type="checkbox"/>\n                <label for="download"><%= messages[\'Download Link\'] %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions"><%= messages[\'Captions "On" By Default\'] %></label>\n            </div>\n            <% if (isAudio) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %>  name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= messages[\'Audio Preview Image\'] %></label>\n                </div>\n            <% } %>\n         </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= messages[\'Save\'] %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= messages[\'Cancel\'] %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size"><%= Globalize.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original"><%= Globalize.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div>\n            <div class="fieldWrap inline-option">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle"><%= Globalize.formatMessage(\'Title\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="socialsharing" class="form-checkbox" <% if (model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox"/>\n                <label for="socialsharing"><%= Globalize.formatMessage(\'Social Tools\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                <label for="annotations"><%= Globalize.formatMessage(\'Annotations\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                <label for="captionsearch"><%= Globalize.formatMessage(\'Caption Search\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                <label for="autoplay"><%= Globalize.formatMessage(\'Auto Play (PC Only)\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments"><%= Globalize.formatMessage(\'Attachments\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links"><%= Globalize.formatMessage(\'Links\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata"><%= Globalize.formatMessage(\'Meta Data\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                <label for="dateproduced"><%= Globalize.formatMessage(\'Date Produced\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="embedcode" class="form-checkbox" <% if (model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox"/>\n                <label for="embedcode"><%= Globalize.formatMessage(\'Embed Code\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="download" class="form-checkbox" <% if (model.get(\'download\')) { print(\'checked="checked"\'); } %> name="download" type="checkbox"/>\n                <label for="download"><%= Globalize.formatMessage(\'Download Link\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions"><%= Globalize.formatMessage(\'Captions "On" By Default\') %></label>\n            </div>\n            <% if (isAudio) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %>  name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= Globalize.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n            <% } %>\n         </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= Globalize.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= Globalize.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
 
 
-define('text!ev-script/templates/video-settings-legacy.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size"><%= messages[\'Size\'] %></label>\n            <select class="form-select size" id="size" name="size" <% if (isAudio) { print(\'disabled\'); } %> >\n                <option value="original"><%= messages[\'Original\'] %></option>\n            </select>\n        </div>\n        <div class="fieldWrap">\n            <label for="showtitle"><%= messages[\'Show Title\'] %></label>\n            <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="autoplay"><%= messages[\'Auto Play\'] %></label>\n            <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="showcaptions"><%= messages[\'Show Captions\'] %></label>\n            <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="fieldWrap">\n            <label for="hidecontrols"><%= messages[\'Hide Controls\'] %></label>\n            <input id="hidecontrols" class="form-checkbox" <% if (model.get(\'hidecontrols\')) { print(\'checked="checked"\'); } %>  name="hidecontrols" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="<%= messages[\'Cancel\'] %>"/>\n            <input type="submit" class="form-submit action-submit" value="<%= messages[\'Submit\'] %>"/>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/templates/video-settings-legacy.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size"><%= Globalize.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size" <% if (isAudio) { print(\'disabled\'); } %> >\n                <option value="original"><%= Globalize.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div class="fieldWrap">\n            <label for="showtitle"><%= Globalize.formatMessage(\'Show Title\') %></label>\n            <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="autoplay"><%= Globalize.formatMessage(\'Auto Play\') %></label>\n            <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="showcaptions"><%= Globalize.formatMessage(\'Show Captions\') %></label>\n            <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="fieldWrap">\n            <label for="hidecontrols"><%= Globalize.formatMessage(\'Hide Controls\') %></label>\n            <input id="hidecontrols" class="form-checkbox" <% if (model.get(\'hidecontrols\')) { print(\'checked="checked"\'); } %>  name="hidecontrols" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="<%= Globalize.formatMessage(\'Cancel\') %>"/>\n            <input type="submit" class="form-submit action-submit" value="<%= Globalize.formatMessage(\'Submit\') %>"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
 
 define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(sizes, function(size) { %>\n    <option value="<%= size %>" <% if (size === target) { print(\'selected="selected"\'); } %>><%= size %></option>\n<% }); %>\n';});
 
-define('ev-script/views/video-settings',['require','jquery','underscore','i18n!ev-script/nls/messages','ev-script/views/settings','ev-script/util/size','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/video-settings-legacy.html','text!ev-script/templates/sizes.html'],function(require) {
+define('ev-script/views/video-settings',['require','jquery','underscore','globalize','ev-script/views/settings','ev-script/util/size','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/video-settings-legacy.html','text!ev-script/templates/sizes.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
+        Globalize = require('globalize'),
         SettingsView = require('ev-script/views/settings'),
         sizeUtil = require('ev-script/util/size');
 
@@ -8464,13 +11097,13 @@ define('ev-script/views/video-settings',['require','jquery','underscore','i18n!e
             var html = '';
             if (!this.info.useLegacyEmbeds()) {
                 html = this.template({
-                    messages: messages,
+                    Globalize: Globalize,
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio()
                 });
             } else {
                 html = this.legacyTemplate({
-                    messages: messages,
+                    Globalize: Globalize,
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio()
                 });
@@ -8489,7 +11122,7 @@ define('ev-script/views/video-settings',['require','jquery','underscore','i18n!e
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
                 height: Math.min(260, $(window).height() - this.config.dialogMargin),
-                closeText: messages['Close']
+                closeText: Globalize.formatMessage('Close')
             });
         }
     });
@@ -8600,7 +11233,7 @@ define('ev-script/views/playlist-preview',['require','ev-script/views/preview','
 });
 
 
-define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= sprintf(messages[\'Choose %1$s\'], item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= messages[\'Choose\'] %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= sprintf(messages[\'Preview: %1$s\'], item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= sprintf(messages[\'Preview: %1$s\'], item.get(\'Name\')) %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <% if (item.get(\'IsSecure\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
+define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= Globalize.formatMessage(\'Choose {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= Globalize.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= Globalize.formatMessage(\'Preview: {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= Globalize.formatMessage(\'Preview: {0}\', item.get(\'Name\')) %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <% if (item.get(\'IsSecure\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
 
 define('ev-script/views/playlist-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/playlist-result.html'],function(require) {
 
@@ -8832,15 +11465,15 @@ define('ev-script/collections/categories',['require','backbone','ev-script/colle
 });
 
 
-define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="accordion">\n            <h4><%= messages[\'Choose Layout\'] %></h4>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="playlist" class="form-radio" <% if (model.get(\'layout\') === \'playlist\') { print(\'checked="checked"\'); } %> name="layout" value="playlist" type="radio"/>\n                    <label for="playlist"><%= messages[\'Playlist\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcase" class="form-radio" <% if (model.get(\'layout\') === \'showcase\') { print(\'checked="checked"\'); } %> name="layout" value="showcase" type="radio"/>\n                    <label for="showcase"><%= messages[\'Showcase\'] %></label>\n                </div>\n            </div>\n            <h4><%= messages[\'Layout Options\'] %></h4>\n            <div>\n                <div class="playlistOptions" <% if (model.get(\'layout\') === \'showcase\') { print(\'style="display:none;"\'); } %>>\n                    <div class="fieldWrap">\n                        <label for="playlistSortBy"><%= messages[\'Sort By\'] %></label>\n                        <select id="playlistSortBy" class="form-select">\n                            <option value="videoDate" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDate\') { print(\'selected="selected"\'); } %>><%= messages[\'Date Added\'] %></option>\n                            <option value="videoDateProduced" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDateProduced\') { print(\'selected="selected"\'); } %>><%= messages[\'Date Produced\'] %></option>\n                            <option value="videoDescription" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDescription\') { print(\'selected="selected"\'); } %>><%= messages[\'Description\'] %></option>\n                            <option value="videoTitle" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoTitle\') { print(\'selected="selected"\'); } %>><%= messages[\'Title\'] %></option>\n                            <option value="videoDuration" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDuration\') { print(\'selected="selected"\'); } %>><%= messages[\'Duration\'] %></option>\n                            <option value="videoKeywords" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoKeywords\') { print(\'selected="selected"\'); } %>><%= messages[\'Keywords\'] %></option>\n                            <!-- <option value="videoCustomPosition">Custom Order</option> -->\n                        </select>\n                    </div>\n                    <div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'asc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="asc" type="radio"/>\n                            <label for="playlist"><%= messages[\'Ascending\'] %></label>\n                        </div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'desc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="desc" type="radio"/>\n                            <label for="playlist"><%= messages[\'Descending\'] %></label>\n                        </div>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <label for="playlistSearchString"><%= messages[\'Search String\'] %></label>\n                            <input id="playlistSearchString" class="form-text" name="playlistSearchString" value="<%- model.get(\'playlistLayout\').playlistSearchString %>" type="text"/>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistCategory"><%= messages[\'Category\'] %></label>\n                            <select id="playlistCategory" class="form-select" name="playlistCategory">\n                                <option value="" <% if (!model.get(\'playlistLayout\').playlistCategory) { print(\'selected="selected"\'); } %>>-- <%= messages[\'None\'] %> --</option>\n                                <% categories.each(function(category) { %>\n                                    <option value="<%= category.id %>" <% if (model.get(\'playlistLayout\').playlistCategory === category.id) { print(\'selected="selected"\'); } %>><%- category.get(\'categoryName\') %></option>\n                                <% }); %>\n                            </select>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistNumberOfResults"><%= messages[\'Number of Results\'] %></label>\n                            <input id="playlistNumberOfResults" class="form-text" name="playlistNumberOfResults" value="<%- model.get(\'playlistLayout\').playlistNumberOfResults %>" type="text"/>\n                        </div>\n                    </div>\n                </div>\n                <div class="showcaseOptions" <% if (model.get(\'layout\') === \'playlist\') { print(\'style="display:none;"\'); } %>>\n<!--\n                    <div class="fieldWrap">\n                        <input id="featuredContent" class="form-checkbox" type="checkbox" name="featuredContent" <% if (model.get(\'showcaseLayout\').featuredContent) { print(\'checked="checked"\'); } %>/>\n                        <label for="featuredContent">Featured Content</label>\n                    </div>\n -->\n                    <div class="fieldWrap">\n                        <input id="categoryList" class="form-checkbox" type="checkbox" name="categoryList" <% if (model.get(\'showcaseLayout\').categoryList) { print(\'checked="checked"\'); } %>/>\n                        <label for="categoryList"><%= messages[\'Category List\'] %></label>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationHorizontal" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'horizontal\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="horizontal" type="radio"/>\n                            <label for="playlist"><%= messages[\'Horizontal\'] %></label>\n                        </div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationVertical" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'vertical\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="vertical" type="radio"/>\n                            <label for="playlist"><%= messages[\'Vertical\'] %></label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <h4><%= messages[\'Content Details\'] %></h4>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="embedcode"><%= messages[\'Embed Code\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="statistics" class="form-checkbox" <% if (model.get(\'statistics\')) { print(\'checked="checked"\'); } %> name="statistics" type="checkbox"/>\n                    <label for="statistics"><%= messages[\'Statistics\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="duration" class="form-checkbox" <% if (model.get(\'duration\')) { print(\'checked="checked"\'); } %> name="duration" type="checkbox"/>\n                    <label for="duration"><%= messages[\'Duration\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                    <label for="attachments"><%= messages[\'Attachments\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                    <label for="annotations"><%= messages[\'Annotations\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                    <label for="links"><%= messages[\'Links\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="credits" class="form-checkbox" <% if (model.get(\'credits\')) { print(\'checked="checked"\'); } %> name="credits" type="checkbox"/>\n                    <label for="credits"><%= messages[\'Credits\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="socialsharing"><%= messages[\'Social Tools\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                    <label for="autoplay"><%= messages[\'Auto Play (PC Only)\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                    <label for="showcaptions"><%= messages[\'Captions "On" By Default\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                    <label for="dateproduced"><%= messages[\'Date Produced\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= messages[\'Audio Preview Image\'] %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                    <label for="captionsearch"><%= messages[\'Caption Search\'] %></label>\n                </div>\n            </div>\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= messages[\'Save\'] %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= messages[\'Cancel\'] %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="accordion">\n            <h4><%= Globalize.formatMessage(\'Choose Layout\') %></h4>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="playlist" class="form-radio" <% if (model.get(\'layout\') === \'playlist\') { print(\'checked="checked"\'); } %> name="layout" value="playlist" type="radio"/>\n                    <label for="playlist"><%= Globalize.formatMessage(\'Playlist\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcase" class="form-radio" <% if (model.get(\'layout\') === \'showcase\') { print(\'checked="checked"\'); } %> name="layout" value="showcase" type="radio"/>\n                    <label for="showcase"><%= Globalize.formatMessage(\'Showcase\') %></label>\n                </div>\n            </div>\n            <h4><%= Globalize.formatMessage(\'Layout Options\') %></h4>\n            <div>\n                <div class="playlistOptions" <% if (model.get(\'layout\') === \'showcase\') { print(\'style="display:none;"\'); } %>>\n                    <div class="fieldWrap">\n                        <label for="playlistSortBy"><%= Globalize.formatMessage(\'Sort By\') %></label>\n                        <select id="playlistSortBy" class="form-select">\n                            <option value="videoDate" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDate\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Date Added\') %></option>\n                            <option value="videoDateProduced" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDateProduced\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Date Produced\') %></option>\n                            <option value="videoDescription" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDescription\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Description\') %></option>\n                            <option value="videoTitle" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoTitle\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Title\') %></option>\n                            <option value="videoDuration" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDuration\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Duration\') %></option>\n                            <option value="videoKeywords" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoKeywords\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Keywords\') %></option>\n                            <!-- <option value="videoCustomPosition">Custom Order</option> -->\n                        </select>\n                    </div>\n                    <div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'asc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="asc" type="radio"/>\n                            <label for="playlist"><%= Globalize.formatMessage(\'Ascending\') %></label>\n                        </div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'desc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="desc" type="radio"/>\n                            <label for="playlist"><%= Globalize.formatMessage(\'Descending\') %></label>\n                        </div>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <label for="playlistSearchString"><%= Globalize.formatMessage(\'Search String\') %></label>\n                            <input id="playlistSearchString" class="form-text" name="playlistSearchString" value="<%- model.get(\'playlistLayout\').playlistSearchString %>" type="text"/>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistCategory"><%= Globalize.formatMessage(\'Category\') %></label>\n                            <select id="playlistCategory" class="form-select" name="playlistCategory">\n                                <option value="" <% if (!model.get(\'playlistLayout\').playlistCategory) { print(\'selected="selected"\'); } %>>-- <%= Globalize.formatMessage(\'None\') %> --</option>\n                                <% categories.each(function(category) { %>\n                                    <option value="<%= category.id %>" <% if (model.get(\'playlistLayout\').playlistCategory === category.id) { print(\'selected="selected"\'); } %>><%- category.get(\'categoryName\') %></option>\n                                <% }); %>\n                            </select>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistNumberOfResults"><%= Globalize.formatMessage(\'Number of Results\') %></label>\n                            <input id="playlistNumberOfResults" class="form-text" name="playlistNumberOfResults" value="<%- model.get(\'playlistLayout\').playlistNumberOfResults %>" type="text"/>\n                        </div>\n                    </div>\n                </div>\n                <div class="showcaseOptions" <% if (model.get(\'layout\') === \'playlist\') { print(\'style="display:none;"\'); } %>>\n<!--\n                    <div class="fieldWrap">\n                        <input id="featuredContent" class="form-checkbox" type="checkbox" name="featuredContent" <% if (model.get(\'showcaseLayout\').featuredContent) { print(\'checked="checked"\'); } %>/>\n                        <label for="featuredContent">Featured Content</label>\n                    </div>\n -->\n                    <div class="fieldWrap">\n                        <input id="categoryList" class="form-checkbox" type="checkbox" name="categoryList" <% if (model.get(\'showcaseLayout\').categoryList) { print(\'checked="checked"\'); } %>/>\n                        <label for="categoryList"><%= Globalize.formatMessage(\'Category List\') %></label>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationHorizontal" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'horizontal\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="horizontal" type="radio"/>\n                            <label for="playlist"><%= Globalize.formatMessage(\'Horizontal\') %></label>\n                        </div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationVertical" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'vertical\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="vertical" type="radio"/>\n                            <label for="playlist"><%= Globalize.formatMessage(\'Vertical\') %></label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <h4><%= Globalize.formatMessage(\'Content Details\') %></h4>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="embedcode"><%= Globalize.formatMessage(\'Embed Code\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="statistics" class="form-checkbox" <% if (model.get(\'statistics\')) { print(\'checked="checked"\'); } %> name="statistics" type="checkbox"/>\n                    <label for="statistics"><%= Globalize.formatMessage(\'Statistics\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="duration" class="form-checkbox" <% if (model.get(\'duration\')) { print(\'checked="checked"\'); } %> name="duration" type="checkbox"/>\n                    <label for="duration"><%= Globalize.formatMessage(\'Duration\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                    <label for="attachments"><%= Globalize.formatMessage(\'Attachments\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                    <label for="annotations"><%= Globalize.formatMessage(\'Annotations\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                    <label for="links"><%= Globalize.formatMessage(\'Links\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="credits" class="form-checkbox" <% if (model.get(\'credits\')) { print(\'checked="checked"\'); } %> name="credits" type="checkbox"/>\n                    <label for="credits"><%= Globalize.formatMessage(\'Credits\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="socialsharing"><%= Globalize.formatMessage(\'Social Tools\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                    <label for="autoplay"><%= Globalize.formatMessage(\'Auto Play (PC Only)\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                    <label for="showcaptions"><%= Globalize.formatMessage(\'Captions "On" By Default\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                    <label for="dateproduced"><%= Globalize.formatMessage(\'Date Produced\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= Globalize.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                    <label for="captionsearch"><%= Globalize.formatMessage(\'Caption Search\') %></label>\n                </div>\n            </div>\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= Globalize.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= Globalize.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
 
-define('ev-script/views/playlist-settings',['require','jquery','underscore','i18n!ev-script/nls/messages','ev-script/views/settings','ev-script/collections/categories','jquery-ui','text!ev-script/templates/playlist-settings.html'],function(require) {
+define('ev-script/views/playlist-settings',['require','jquery','underscore','globalize','ev-script/views/settings','ev-script/collections/categories','jquery-ui','text!ev-script/templates/playlist-settings.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
+        Globalize = require('globalize'),
         SettingsView = require('ev-script/views/settings'),
         Categories = require('ev-script/collections/categories');
 
@@ -8900,7 +11533,7 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','i18
         render: function() {
             var content = this.field.model.get('content'),
                 html = this.template({
-                    messages: messages,
+                    Globalize: Globalize,
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio(),
                     isSecure: content && content.IsSecure,
@@ -8921,7 +11554,7 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','i18
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
                 height: Math.min(420, $(window).height() - this.config.dialogMargin),
-                closeText: messages['Close']
+                closeText: Globalize.formatMessage('Close')
             });
         },
         changeLayout: function(e) {
@@ -8947,16 +11580,15 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','i18
 });
 
 
-define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span><%= messages[\'Ensemble Logo\'] %></span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="<%= messages[\'Media thumbnail\'] %>" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%= name %></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= sprintf(messages[\'Change %1$s\'], label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= sprintf(messages[\'Change %1$s\'], label) %><span></a>\n        <a href="#" class="action-preview" title="<%= messages[\'Preview:\'] %> <%= name %>"><i class="fa fa-play-circle fa-lg"></i><span><%= messages[\'Preview:\'] %> <%= name %><span></a>\n        <% if (type === \'video\' || showPlaylistOptions) { %>\n            <a href="#" class="action-options" title="<%= sprintf(messages[\'%1$s Embed Options\'], label) %>"><i class="fa fa-cog fa-lg"></i><span><%= sprintf(messages[\'%1$s Embed Options\'], label) %><span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="<%= sprintf(messages[\'Remove %1$s\'], label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= sprintf(messages[\'Remove %1$s\'], label) %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em><%= sprintf(messages[\'Add %1$s\'], label) %></em></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= sprintf(messages[\'Choose %1$s\'], label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= sprintf(messages[\'Choose %1$s\'], label) %><span></a>\n    </div>\n<% } %>\n';});
+define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span><%= Globalize.formatMessage(\'Ensemble Logo\') %></span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="<%= Globalize.formatMessage(\'Media thumbnail\') %>" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%= name %></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= Globalize.formatMessage(\'Change {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= Globalize.formatMessage(\'Change {0}\', label) %><span></a>\n        <a href="#" class="action-preview" title="<%= Globalize.formatMessage(\'Preview:\') %> <%= name %>"><i class="fa fa-play-circle fa-lg"></i><span><%= Globalize.formatMessage(\'Preview:\') %> <%= name %><span></a>\n        <% if (type === \'video\' || showPlaylistOptions) { %>\n            <a href="#" class="action-options" title="<%= Globalize.formatMessage(\'{0} Embed Options\', label) %>"><i class="fa fa-cog fa-lg"></i><span><%= Globalize.formatMessage(\'{0} Embed Options\', label) %><span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="<%= Globalize.formatMessage(\'Remove {0}\', label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= Globalize.formatMessage(\'Remove {0}\', label) %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em><%= Globalize.formatMessage(\'Add {0}\', label) %></em></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= Globalize.formatMessage(\'Choose {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= Globalize.formatMessage(\'Choose {0}\', label) %><span></a>\n    </div>\n<% } %>\n';});
 
-define('ev-script/views/field',['require','jquery','underscore','i18n!ev-script/nls/messages','sprintf','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','ev-script/collections/categories','text!ev-script/templates/field.html'],function(require) {
+define('ev-script/views/field',['require','jquery','underscore','globalize','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','ev-script/collections/categories','text!ev-script/templates/field.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
-        sprintf = require('sprintf'),
+        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base'),
         VideoSettings = require('ev-script/models/video-settings'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
@@ -9138,10 +11770,10 @@ define('ev-script/views/field',['require','jquery','underscore','i18n!ev-script/
             var ensembleUrl = this.config.ensembleUrl,
                 name, label, type, thumbnailUrl;
             if (this.model instanceof VideoSettings) {
-                label = messages['Media'];
+                label = Globalize.formatMessage('Media');
                 type = 'video';
             } else {
-                label = messages['Playlist'];
+                label = Globalize.formatMessage('Playlist');
                 type = 'playlist';
             }
             if (this.model.id) {
@@ -9163,8 +11795,7 @@ define('ev-script/views/field',['require','jquery','underscore','i18n!ev-script/
                 this.$field.after(this.$actions);
             }
             this.$actions.html(this.template({
-                messages: messages,
-                sprintf: sprintf.sprintf,
+                Globalize: Globalize,
                 ensembleUrl: ensembleUrl,
                 modelId: this.model.id,
                 label: label,
@@ -10628,18 +13259,18 @@ define('ev-script/auth/base/auth',['require','jquery','underscore','backbone','e
 }));
 
 
-define('text!ev-script/auth/basic/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= messages[\'Username\'] %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= messages[\'Password\'] %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= messages[\'Submit\'] %>"/>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/auth/basic/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= Globalize.formatMessage(\'Username\') %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= Globalize.formatMessage(\'Password\') %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= Globalize.formatMessage(\'Submit\') %>"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
-define('ev-script/auth/basic/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','i18n!ev-script/nls/messages','jquery.cookie','jquery-ui','text!ev-script/auth/basic/template.html'],function(require, template) {
+define('ev-script/auth/basic/view',['require','exports','module','jquery','underscore','backbone','globalize','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/basic/template.html'],function(require, template) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
+        Globalize = require('globalize'),
         cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events'),
-        messages = require('i18n!ev-script/nls/messages');
+        eventsUtil = require('ev-script/util/events');
 
     require('jquery.cookie');
     require('jquery-ui');
@@ -10655,12 +13286,12 @@ define('ev-script/auth/basic/view',['require','exports','module','jquery','under
         },
         render: function() {
             var html = this.template({
-                messages: messages
+                Globalize: Globalize
             });
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
             this.$dialog.dialog({
-                title: messages['Ensemble Video Login'] + ' - ' + this.config.ensembleUrl,
+                title: Globalize.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
                 modal: true,
                 draggable: false,
                 resizable: false,
@@ -10670,7 +13301,7 @@ define('ev-script/auth/basic/view',['require','exports','module','jquery','under
                 create: _.bind(function(event, ui) {
                     this.$dialog.html(html);
                 }, this),
-                closeText: messages['Close'],
+                closeText: Globalize.formatMessage('Close'),
                 close: _.bind(function(event, ui) {
                     this.$dialog.dialog('destroy').remove();
                     this.appEvents.trigger('hidePickers');
@@ -10773,18 +13404,18 @@ define('ev-script/auth/basic/auth',['require','jquery','underscore','backbone','
 });
 
 
-define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= messages[\'Username\'] %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= messages[\'Password\'] %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="provider"><%= messages[\'Identity Provider\'] %></label>\n            <select id="provider" name="provider" class="form-select"></select>\n        </div>\n        <div class="fieldWrap">\n            <label for="remember"><%= messages[\'Remember Me\'] %></label>\n            <input id="remember" name="remember" type="checkbox"></input>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= messages[\'Submit\'] %>"/>\n            <div class="loader"></div>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= Globalize.formatMessage(\'Username\') %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= Globalize.formatMessage(\'Password\') %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="provider"><%= Globalize.formatMessage(\'Identity Provider\') %></label>\n            <select id="provider" name="provider" class="form-select"></select>\n        </div>\n        <div class="fieldWrap">\n            <label for="remember"><%= Globalize.formatMessage(\'Remember Me\') %></label>\n            <input id="remember" name="remember" type="checkbox"></input>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= Globalize.formatMessage(\'Submit\') %>"/>\n            <div class="loader"></div>\n        </div>\n    </fieldset>\n</form>\n';});
 
-define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','i18n!ev-script/nls/messages','jquery.cookie','jquery-ui','text!ev-script/auth/forms/template.html','text!ev-script/templates/options.html'],function(require, template) {
+define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','globalize','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/forms/template.html','text!ev-script/templates/options.html'],function(require, template) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
+        Globalize = require('globalize'),
         cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events'),
-        messages = require('i18n!ev-script/nls/messages');
+        eventsUtil = require('ev-script/util/events');
 
     require('jquery.cookie');
     require('jquery-ui');
@@ -10801,7 +13432,7 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
         },
         render: function() {
             var $html = $(this.template({
-                    messages: messages
+                    Globalize: Globalize
                 })),
                 $select = $('#provider', $html).append(this.optionsTemplate({
                     collection: this.collection,
@@ -10821,7 +13452,7 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
             $(window.document).on('ajaxSend', loadingOn).on('ajaxComplete', loadingOff);
 
             this.$dialog.dialog({
-                title: messages['Ensemble Video Login'] + ' - ' + this.config.ensembleUrl,
+                title: Globalize.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
                 modal: true,
                 draggable: false,
                 resizable: false,
@@ -10831,7 +13462,7 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
                 create: _.bind(function(event, ui) {
                     this.$dialog.html($html);
                 }, this),
-                closeText: messages['Close'],
+                closeText: Globalize.formatMessage('Close'),
                 close: _.bind(function(event, ui) {
                     $(window.document).off('ajaxSend', loadingOn).off('ajaxComplete', loadingOff);
                     this.$dialog.dialog('destroy').remove();
@@ -10963,18 +13594,18 @@ define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/a
 });
 
 
-define('text!ev-script/auth/none/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <h3><%= messages[\'You are unauthorized to access this content.\'] %></h3>\n</form>\n';});
+define('text!ev-script/auth/none/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <h3><%= Globalize.formatMessage(\'You are unauthorized to access this content.\') %></h3>\n</form>\n';});
 
-define('ev-script/auth/none/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','i18n!ev-script/nls/messages','jquery-ui','text!ev-script/auth/none/template.html'],function(require, template) {
+define('ev-script/auth/none/view',['require','exports','module','jquery','underscore','backbone','globalize','ev-script/util/cache','ev-script/util/events','jquery-ui','text!ev-script/auth/none/template.html'],function(require, template) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
+        Globalize = require('globalize'),
         cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events'),
-        messages = require('i18n!ev-script/nls/messages');
+        eventsUtil = require('ev-script/util/events');
 
     require('jquery-ui');
 
@@ -10987,12 +13618,12 @@ define('ev-script/auth/none/view',['require','exports','module','jquery','unders
         },
         render: function() {
             var $html = $(this.template({
-                messages: messages
+                Globalize: Globalize
             }));
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
             this.$dialog.dialog({
-                title: messages['Ensemble Video Login'] + ' - ' + this.config.ensembleUrl,
+                title: Globalize.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
                 modal: true,
                 draggable: false,
                 resizable: false,
@@ -11002,7 +13633,7 @@ define('ev-script/auth/none/view',['require','exports','module','jquery','unders
                 create: _.bind(function(event, ui) {
                     this.$dialog.html($html);
                 }, this),
-                closeText: messages['Close'],
+                closeText: Globalize.formatMessage('Close'),
                 close: _.bind(function(event, ui) {
                     this.$dialog.dialog('destroy').remove();
                     this.appEvents.trigger('hidePickers');
@@ -11045,111 +13676,2361 @@ define('ev-script/auth/none/auth',['require','jquery','underscore','ev-script/au
 
 });
 
-define('ev-script/nls/es-mx/messages',{
-    '%1$s Embed Options': 'MX-%1$s Embed Options',
-    '%1$s thumbnail image': 'MX-%1$s thumbnail image',
-    'Add %1$s': 'Añadir %1$s',
-    'Add file': 'Añadir archivo',
-    'Annotations': 'Anotaciones',
-    'An unexpected error occurred.  Check the server log for more details.': 'MX-An unexpected error occurred.  Check the server log for more details.',
-    'Ascending': 'Ascendiendo',
-    'Attachments': 'Adjuntos',
-    'Audio Preview Image': 'Prevista del Audio',
-    'Auto Play': 'Auto Play',
-    'Auto Play (PC Only)': 'Auto Play (Solo PC)',
-    'Cancel': 'Cancelar',
-    'Cancel upload': 'Cancelar cargado',
-    'Caption Search': 'Búsqueda de Subtitulos',
-    'Captions "On" By Default': 'Subtitulos "Encendido" por Defecto',
-    'Category List': 'Lista de Categoría',
-    'Category': 'Categoría',
-    'CC': 'CC',
-    'Change %1$s': 'Cambiar %1$s',
-    'Choose %1$s': 'Seleccione %1$s',
-    'Choose Layout': 'Seleccione Diseño',
-    'Choose': 'Seleccione',
-    'Close': 'Cerrar',
-    'Content Details': 'Detalles del Contenido',
-    'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.': 'MX-Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.',
-    'Credits': 'Créditos',
-    'Date Added': 'Fecha Añadida',
-    'Date Produced': 'Fecha de Producción',
-    'Descending': 'Descendiente',
-    'Description': 'Descripción',
-    'Download Link': 'Enlace de descarga',
-    'Drag file here.': 'Arrastre aquí el archivo.',
-    'Duration': 'Duración',
-    'Embed Code': 'Incrustar Código',
-    'Ensemble Logo': 'MX-Ensemble Logo',
-    'Ensemble Video Login': 'MX-Ensemble Video Login',
-    'Go': 'MX-Go',
-    'Hide Controls': 'Ocultar Controles',
-    'Hide': 'Ocultar',
-    'Hide Picker': 'Ocultar Picker',
-    'Horizontal': 'Horizontal',
-    'Identity Provider': 'Proveedor de Identidad',
-    'It appears there is an issue with the Ensemble Video installation.': 'MX-It appears there is an issue with the Ensemble Video installation.',
-    'Keywords': 'Palabras Clave',
-    'Layout Options': 'MX-Layout Options',
-    'Less': 'MX-Less',
-    'Library:': 'Biblioteca:',
-    'Library': 'Biblioteca',
-    'Links': 'Enlaces',
-    'Loading...': 'Cargando...',
-    'Logout %1$s': 'Cerrar sesión %1$s',
-    'Logout': 'Cerrar sesión',
-    'Media Library': 'Biblioteca de Medios',
-    'Media': 'Medios',
-    'Media thumbnail': 'MX-Media thumbnail',
-    'Meta Data': 'Meta Datos',
-    'More': 'Más',
-    'None': 'Ninguno',
-    'No results available.': 'MX-No results available.',
-    'Number of Results': 'Número de Resultados',
-    'Organization:': 'Organización:',
-    'Original': 'Original',
-    'Password': 'Contraseña',
-    'Playlist': 'Playlist',
-    'Preview: %1$s': 'Prevista: %1$s',
-    'Preview:': 'Prevista:',
-    'Reload': 'MX-Reload',
-    'Remember Me': 'Recuerdame',
-    'Remove %1$s': 'Eliminar %1$s',
-    'Save': 'Guardar',
-    'Search Media': 'Buscar Medios',
-    'Search:': 'Buscar:',
-    'Search returned %1$s results.': 'MX-Search returned %1$s results.',
-    'Search String': 'Buscar Cadena de Texto',
-    'Select Library': 'Seleccionar Biblioteca',
-    'Select Library Type': 'Seleccionar Tipo de Biblioteca',
-    'Select Organization': 'Seleccionar Organización',
-    'Shared Library': 'Biblioteca Compartida',
-    'Show Captions': 'MX-Show Captions',
-    'Showcase': 'Escaparate',
-    'Show Title': 'Mostrar Título',
-    'Size': 'Tamaño',
-    'Social Tools': 'Herramientas Sociales',
-    'Sort By': 'Ordenar Por',
-    'Statistics': 'Estadísticas',
-    'Submit': 'Enviar',
-    'Title': 'Título',
-    'Type:': 'Tipo:',
-    'Upload Media to Ensemble': 'MX-Upload Media to Ensemble',
-    'Upload': 'Cargar',
-    'Username': 'Nombre de Usuario',
-    'Vertical': 'Vertical',
-    'You are unauthorized to access this content.': 'MX-You are unauthorized to access this content.'
-});
+/**
+ * CLDR JavaScript Library v0.4.8
+ * http://jquery.com/
+ *
+ * Copyright 2013 Rafael Xavier de Souza
+ * Released under the MIT license
+ * http://jquery.org/license
+ *
+ * Date: 2016-11-26T15:03Z
+ */
+/*!
+ * CLDR JavaScript Library v0.4.8 2016-11-26T15:03Z MIT license © Rafael Xavier
+ * http://git.io/h4lmVg
+ */
+(function( factory ) {
 
+	if ( typeof define === "function" && define.amd ) {
+		// AMD.
+		define( 'cldr/supplemental',[ "../cldr" ], factory );
+	} else if ( typeof module === "object" && typeof module.exports === "object" ) {
+		// Node. CommonJS.
+		module.exports = factory( require( "../cldr" ) );
+	} else {
+		// Global
+		factory( Cldr );
+	}
+
+}(function( Cldr ) {
+
+	// Build optimization hack to avoid duplicating functions across modules.
+	var alwaysArray = Cldr._alwaysArray;
+
+
+
+	var supplementalMain = function( cldr ) {
+
+		var prepend, supplemental;
+		
+		prepend = function( prepend ) {
+			return function( path ) {
+				path = alwaysArray( path );
+				return cldr.get( [ prepend ].concat( path ) );
+			};
+		};
+
+		supplemental = prepend( "supplemental" );
+
+		// Week Data
+		// http://www.unicode.org/reports/tr35/tr35-dates.html#Week_Data
+		supplemental.weekData = prepend( "supplemental/weekData" );
+
+		supplemental.weekData.firstDay = function() {
+			return cldr.get( "supplemental/weekData/firstDay/{territory}" ) ||
+				cldr.get( "supplemental/weekData/firstDay/001" );
+		};
+
+		supplemental.weekData.minDays = function() {
+			var minDays = cldr.get( "supplemental/weekData/minDays/{territory}" ) ||
+				cldr.get( "supplemental/weekData/minDays/001" );
+			return parseInt( minDays, 10 );
+		};
+
+		// Time Data
+		// http://www.unicode.org/reports/tr35/tr35-dates.html#Time_Data
+		supplemental.timeData = prepend( "supplemental/timeData" );
+
+		supplemental.timeData.allowed = function() {
+			return cldr.get( "supplemental/timeData/{territory}/_allowed" ) ||
+				cldr.get( "supplemental/timeData/001/_allowed" );
+		};
+
+		supplemental.timeData.preferred = function() {
+			return cldr.get( "supplemental/timeData/{territory}/_preferred" ) ||
+				cldr.get( "supplemental/timeData/001/_preferred" );
+		};
+
+		return supplemental;
+
+	};
+
+
+
+
+	var initSuper = Cldr.prototype.init;
+
+	/**
+	 * .init() automatically ran on construction.
+	 *
+	 * Overload .init().
+	 */
+	Cldr.prototype.init = function() {
+		initSuper.apply( this, arguments );
+		this.supplemental = supplementalMain( this );
+	};
+
+	return Cldr;
+
+
+
+
+}));
+
+/**
+ * CLDR JavaScript Library v0.4.8
+ * http://jquery.com/
+ *
+ * Copyright 2013 Rafael Xavier de Souza
+ * Released under the MIT license
+ * http://jquery.org/license
+ *
+ * Date: 2016-11-26T15:03Z
+ */
+/*!
+ * CLDR JavaScript Library v0.4.8 2016-11-26T15:03Z MIT license © Rafael Xavier
+ * http://git.io/h4lmVg
+ */
+(function( factory ) {
+
+	if ( typeof define === "function" && define.amd ) {
+		// AMD.
+		define( 'cldr/unresolved',[ "../cldr" ], factory );
+	} else if ( typeof module === "object" && typeof module.exports === "object" ) {
+		// Node. CommonJS.
+		module.exports = factory( require( "../cldr" ) );
+	} else {
+		// Global
+		factory( Cldr );
+	}
+
+}(function( Cldr ) {
+
+	// Build optimization hack to avoid duplicating functions across modules.
+	var coreLoad = Cldr._coreLoad;
+	var jsonMerge = Cldr._jsonMerge;
+	var pathNormalize = Cldr._pathNormalize;
+	var resourceGet = Cldr._resourceGet;
+	var validatePresence = Cldr._validatePresence;
+	var validateTypePath = Cldr._validateTypePath;
+
+
+
+	var bundleParentLookup = function( Cldr, locale ) {
+		var normalizedPath, parent;
+
+		if ( locale === "root" ) {
+			return;
+		}
+
+		// First, try to find parent on supplemental data.
+		normalizedPath = pathNormalize( [ "supplemental/parentLocales/parentLocale", locale ] );
+		parent = resourceGet( Cldr._resolved, normalizedPath ) || resourceGet( Cldr._raw, normalizedPath );
+		if ( parent ) {
+			return parent;
+		}
+
+		// Or truncate locale.
+		parent = locale.substr( 0, locale.lastIndexOf( Cldr.localeSep ) );
+		if ( !parent ) {
+			return "root";
+		}
+
+		return parent;
+	};
+
+
+
+
+	// @path: normalized path
+	var resourceSet = function( data, path, value ) {
+		var i,
+			node = data,
+			length = path.length;
+
+		for ( i = 0; i < length - 1; i++ ) {
+			if ( !node[ path[ i ] ] ) {
+				node[ path[ i ] ] = {};
+			}
+			node = node[ path[ i ] ];
+		}
+		node[ path[ i ] ] = value;
+	};
+
+
+	var itemLookup = (function() {
+
+	var lookup;
+
+	lookup = function( Cldr, locale, path, attributes, childLocale ) {
+		var normalizedPath, parent, value;
+
+		// 1: Finish recursion
+		// 2: Avoid infinite loop
+		if ( typeof locale === "undefined" /* 1 */ || locale === childLocale /* 2 */ ) {
+			return;
+		}
+
+		// Resolve path
+		normalizedPath = pathNormalize( path, attributes );
+
+		// Check resolved (cached) data first
+		// 1: Due to #16, never use the cached resolved non-leaf nodes. It may not
+		//    represent its leafs in its entirety.
+		value = resourceGet( Cldr._resolved, normalizedPath );
+		if ( value && typeof value !== "object" /* 1 */ ) {
+			return value;
+		}
+
+		// Check raw data
+		value = resourceGet( Cldr._raw, normalizedPath );
+
+		if ( !value ) {
+			// Or, lookup at parent locale
+			parent = bundleParentLookup( Cldr, locale );
+			value = lookup( Cldr, parent, path, jsonMerge( attributes, { bundle: parent }), locale );
+		}
+
+		if ( value ) {
+			// Set resolved (cached)
+			resourceSet( Cldr._resolved, normalizedPath, value );
+		}
+
+		return value;
+	};
+
+	return lookup;
+
+}());
+
+
+	Cldr._raw = {};
+
+	/**
+	 * Cldr.load( json [, json, ...] )
+	 *
+	 * @json [JSON] CLDR data or [Array] Array of @json's.
+	 *
+	 * Load resolved or unresolved cldr data.
+	 * Overwrite Cldr.load().
+	 */
+	Cldr.load = function() {
+		Cldr._raw = coreLoad( Cldr, Cldr._raw, arguments );
+	};
+
+	/**
+	 * Overwrite Cldr.prototype.get().
+	 */
+	Cldr.prototype.get = function( path ) {
+		validatePresence( path, "path" );
+		validateTypePath( path, "path" );
+
+		// 1: use bundle as locale on item lookup for simplification purposes, because no other extended subtag is used anyway on bundle parent lookup.
+		// 2: during init(), this method is called, but bundle is yet not defined. Use "" as a workaround in this very specific scenario.
+		return itemLookup( Cldr, this.attributes && this.attributes.bundle /* 1 */ || "" /* 2 */, path, this.attributes );
+	};
+
+	// In case cldr/unresolved is loaded after cldr/event, we trigger its overloads again. Because, .get is overwritten in here.
+	if ( Cldr._eventInit ) {
+		Cldr._eventInit();
+	}
+
+	return Cldr;
+
+
+
+
+}));
+
+/**
+ * Globalize v1.2.3
+ *
+ * http://github.com/jquery/globalize
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license
+ * http://jquery.org/license
+ *
+ * Date: 2017-03-17T01:41Z
+ */
+/*!
+ * Globalize v1.2.3 2017-03-17T01:41Z Released under the MIT license
+ * http://git.io/TrdQbw
+ */
+(function( root, factory ) {
+
+	// UMD returnExports
+	if ( typeof define === "function" && define.amd ) {
+
+		// AMD
+		define('globalize/message',[
+			"cldr",
+			"../globalize",
+			"cldr/event"
+		], factory );
+	} else if ( typeof exports === "object" ) {
+
+		// Node, CommonJS
+		module.exports = factory( require( "cldrjs" ), require( "../globalize" ) );
+	} else {
+
+		// Extend global
+		factory( root.Cldr, root.Globalize );
+	}
+}(this, function( Cldr, Globalize ) {
+
+var alwaysArray = Globalize._alwaysArray,
+	createError = Globalize._createError,
+	isPlainObject = Globalize._isPlainObject,
+	runtimeBind = Globalize._runtimeBind,
+	validateDefaultLocale = Globalize._validateDefaultLocale,
+	validate = Globalize._validate,
+	validateParameterPresence = Globalize._validateParameterPresence,
+	validateParameterType = Globalize._validateParameterType,
+	validateParameterTypePlainObject = Globalize._validateParameterTypePlainObject;
+var MessageFormat;
+/* jshint ignore:start */
+MessageFormat = (function() {
+MessageFormat._parse = (function() {
+
+  /*
+   * Generated by PEG.js 0.8.0.
+   *
+   * http://pegjs.majda.cz/
+   */
+
+  function peg$subclass(child, parent) {
+    function ctor() { this.constructor = child; }
+    ctor.prototype = parent.prototype;
+    child.prototype = new ctor();
+  }
+
+  function SyntaxError(message, expected, found, offset, line, column) {
+    this.message  = message;
+    this.expected = expected;
+    this.found    = found;
+    this.offset   = offset;
+    this.line     = line;
+    this.column   = column;
+
+    this.name     = "SyntaxError";
+  }
+
+  peg$subclass(SyntaxError, Error);
+
+  function parse(input) {
+    var options = arguments.length > 1 ? arguments[1] : {},
+
+        peg$FAILED = {},
+
+        peg$startRuleFunctions = { start: peg$parsestart },
+        peg$startRuleFunction  = peg$parsestart,
+
+        peg$c0 = [],
+        peg$c1 = function(st) {
+              return { type: 'messageFormatPattern', statements: st };
+            },
+        peg$c2 = peg$FAILED,
+        peg$c3 = "{",
+        peg$c4 = { type: "literal", value: "{", description: "\"{\"" },
+        peg$c5 = null,
+        peg$c6 = ",",
+        peg$c7 = { type: "literal", value: ",", description: "\",\"" },
+        peg$c8 = "}",
+        peg$c9 = { type: "literal", value: "}", description: "\"}\"" },
+        peg$c10 = function(argIdx, efmt) {
+              var res = {
+                type: "messageFormatElement",
+                argumentIndex: argIdx
+              };
+              if (efmt && efmt.length) {
+                res.elementFormat = efmt[1];
+              } else {
+                res.output = true;
+              }
+              return res;
+            },
+        peg$c11 = "plural",
+        peg$c12 = { type: "literal", value: "plural", description: "\"plural\"" },
+        peg$c13 = function(t, s) {
+              return { type: "elementFormat", key: t, val: s };
+            },
+        peg$c14 = "selectordinal",
+        peg$c15 = { type: "literal", value: "selectordinal", description: "\"selectordinal\"" },
+        peg$c16 = "select",
+        peg$c17 = { type: "literal", value: "select", description: "\"select\"" },
+        peg$c18 = function(t, p) {
+              return { type: "elementFormat", key: t, val: p };
+            },
+        peg$c19 = function(op, pf) {
+              return { type: "pluralFormatPattern", pluralForms: pf, offset: op || 0 };
+            },
+        peg$c20 = "offset",
+        peg$c21 = { type: "literal", value: "offset", description: "\"offset\"" },
+        peg$c22 = ":",
+        peg$c23 = { type: "literal", value: ":", description: "\":\"" },
+        peg$c24 = function(d) { return d; },
+        peg$c25 = function(k, mfp) {
+              return { key: k, val: mfp };
+            },
+        peg$c26 = function(i) { return i; },
+        peg$c27 = "=",
+        peg$c28 = { type: "literal", value: "=", description: "\"=\"" },
+        peg$c29 = function(pf) { return { type: "selectFormatPattern", pluralForms: pf }; },
+        peg$c30 = function(p) { return p; },
+        peg$c31 = "#",
+        peg$c32 = { type: "literal", value: "#", description: "\"#\"" },
+        peg$c33 = function() { return {type: 'octothorpe'}; },
+        peg$c34 = function(s) { return { type: "string", val: s.join('') }; },
+        peg$c35 = { type: "other", description: "identifier" },
+        peg$c36 = /^[0-9a-zA-Z$_]/,
+        peg$c37 = { type: "class", value: "[0-9a-zA-Z$_]", description: "[0-9a-zA-Z$_]" },
+        peg$c38 = /^[^ \t\n\r,.+={}]/,
+        peg$c39 = { type: "class", value: "[^ \\t\\n\\r,.+={}]", description: "[^ \\t\\n\\r,.+={}]" },
+        peg$c40 = function(s) { return s; },
+        peg$c41 = function(chars) { return chars.join(''); },
+        peg$c42 = /^[^{}#\\\0-\x1F \t\n\r]/,
+        peg$c43 = { type: "class", value: "[^{}#\\\\\\0-\\x1F \\t\\n\\r]", description: "[^{}#\\\\\\0-\\x1F \\t\\n\\r]" },
+        peg$c44 = function(x) { return x; },
+        peg$c45 = "\\\\",
+        peg$c46 = { type: "literal", value: "\\\\", description: "\"\\\\\\\\\"" },
+        peg$c47 = function() { return "\\"; },
+        peg$c48 = "\\#",
+        peg$c49 = { type: "literal", value: "\\#", description: "\"\\\\#\"" },
+        peg$c50 = function() { return "#"; },
+        peg$c51 = "\\{",
+        peg$c52 = { type: "literal", value: "\\{", description: "\"\\\\{\"" },
+        peg$c53 = function() { return "\u007B"; },
+        peg$c54 = "\\}",
+        peg$c55 = { type: "literal", value: "\\}", description: "\"\\\\}\"" },
+        peg$c56 = function() { return "\u007D"; },
+        peg$c57 = "\\u",
+        peg$c58 = { type: "literal", value: "\\u", description: "\"\\\\u\"" },
+        peg$c59 = function(h1, h2, h3, h4) {
+              return String.fromCharCode(parseInt("0x" + h1 + h2 + h3 + h4));
+            },
+        peg$c60 = /^[0-9]/,
+        peg$c61 = { type: "class", value: "[0-9]", description: "[0-9]" },
+        peg$c62 = function(ds) {
+            //the number might start with 0 but must not be interpreted as an octal number
+            //Hence, the base is passed to parseInt explicitely
+            return parseInt((ds.join('')), 10);
+          },
+        peg$c63 = /^[0-9a-fA-F]/,
+        peg$c64 = { type: "class", value: "[0-9a-fA-F]", description: "[0-9a-fA-F]" },
+        peg$c65 = { type: "other", description: "whitespace" },
+        peg$c66 = function(w) { return w.join(''); },
+        peg$c67 = /^[ \t\n\r]/,
+        peg$c68 = { type: "class", value: "[ \\t\\n\\r]", description: "[ \\t\\n\\r]" },
+
+        peg$currPos          = 0,
+        peg$reportedPos      = 0,
+        peg$cachedPos        = 0,
+        peg$cachedPosDetails = { line: 1, column: 1, seenCR: false },
+        peg$maxFailPos       = 0,
+        peg$maxFailExpected  = [],
+        peg$silentFails      = 0,
+
+        peg$result;
+
+    if ("startRule" in options) {
+      if (!(options.startRule in peg$startRuleFunctions)) {
+        throw new Error("Can't start parsing from rule \"" + options.startRule + "\".");
+      }
+
+      peg$startRuleFunction = peg$startRuleFunctions[options.startRule];
+    }
+
+    function text() {
+      return input.substring(peg$reportedPos, peg$currPos);
+    }
+
+    function offset() {
+      return peg$reportedPos;
+    }
+
+    function line() {
+      return peg$computePosDetails(peg$reportedPos).line;
+    }
+
+    function column() {
+      return peg$computePosDetails(peg$reportedPos).column;
+    }
+
+    function expected(description) {
+      throw peg$buildException(
+        null,
+        [{ type: "other", description: description }],
+        peg$reportedPos
+      );
+    }
+
+    function error(message) {
+      throw peg$buildException(message, null, peg$reportedPos);
+    }
+
+    function peg$computePosDetails(pos) {
+      function advance(details, startPos, endPos) {
+        var p, ch;
+
+        for (p = startPos; p < endPos; p++) {
+          ch = input.charAt(p);
+          if (ch === "\n") {
+            if (!details.seenCR) { details.line++; }
+            details.column = 1;
+            details.seenCR = false;
+          } else if (ch === "\r" || ch === "\u2028" || ch === "\u2029") {
+            details.line++;
+            details.column = 1;
+            details.seenCR = true;
+          } else {
+            details.column++;
+            details.seenCR = false;
+          }
+        }
+      }
+
+      if (peg$cachedPos !== pos) {
+        if (peg$cachedPos > pos) {
+          peg$cachedPos = 0;
+          peg$cachedPosDetails = { line: 1, column: 1, seenCR: false };
+        }
+        advance(peg$cachedPosDetails, peg$cachedPos, pos);
+        peg$cachedPos = pos;
+      }
+
+      return peg$cachedPosDetails;
+    }
+
+    function peg$fail(expected) {
+      if (peg$currPos < peg$maxFailPos) { return; }
+
+      if (peg$currPos > peg$maxFailPos) {
+        peg$maxFailPos = peg$currPos;
+        peg$maxFailExpected = [];
+      }
+
+      peg$maxFailExpected.push(expected);
+    }
+
+    function peg$buildException(message, expected, pos) {
+      function cleanupExpected(expected) {
+        var i = 1;
+
+        expected.sort(function(a, b) {
+          if (a.description < b.description) {
+            return -1;
+          } else if (a.description > b.description) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
+
+        while (i < expected.length) {
+          if (expected[i - 1] === expected[i]) {
+            expected.splice(i, 1);
+          } else {
+            i++;
+          }
+        }
+      }
+
+      function buildMessage(expected, found) {
+        function stringEscape(s) {
+          function hex(ch) { return ch.charCodeAt(0).toString(16).toUpperCase(); }
+
+          return s
+            .replace(/\\/g,   '\\\\')
+            .replace(/"/g,    '\\"')
+            .replace(/\x08/g, '\\b')
+            .replace(/\t/g,   '\\t')
+            .replace(/\n/g,   '\\n')
+            .replace(/\f/g,   '\\f')
+            .replace(/\r/g,   '\\r')
+            .replace(/[\x00-\x07\x0B\x0E\x0F]/g, function(ch) { return '\\x0' + hex(ch); })
+            .replace(/[\x10-\x1F\x80-\xFF]/g,    function(ch) { return '\\x'  + hex(ch); })
+            .replace(/[\u0180-\u0FFF]/g,         function(ch) { return '\\u0' + hex(ch); })
+            .replace(/[\u1080-\uFFFF]/g,         function(ch) { return '\\u'  + hex(ch); });
+        }
+
+        var expectedDescs = new Array(expected.length),
+            expectedDesc, foundDesc, i;
+
+        for (i = 0; i < expected.length; i++) {
+          expectedDescs[i] = expected[i].description;
+        }
+
+        expectedDesc = expected.length > 1
+          ? expectedDescs.slice(0, -1).join(", ")
+              + " or "
+              + expectedDescs[expected.length - 1]
+          : expectedDescs[0];
+
+        foundDesc = found ? "\"" + stringEscape(found) + "\"" : "end of input";
+
+        return "Expected " + expectedDesc + " but " + foundDesc + " found.";
+      }
+
+      var posDetails = peg$computePosDetails(pos),
+          found      = pos < input.length ? input.charAt(pos) : null;
+
+      if (expected !== null) {
+        cleanupExpected(expected);
+      }
+
+      return new SyntaxError(
+        message !== null ? message : buildMessage(expected, found),
+        expected,
+        found,
+        pos,
+        posDetails.line,
+        posDetails.column
+      );
+    }
+
+    function peg$parsestart() {
+      var s0;
+
+      s0 = peg$parsemessageFormatPattern();
+
+      return s0;
+    }
+
+    function peg$parsemessageFormatPattern() {
+      var s0, s1, s2;
+
+      s0 = peg$currPos;
+      s1 = [];
+      s2 = peg$parsemessageFormatElement();
+      if (s2 === peg$FAILED) {
+        s2 = peg$parsestring();
+        if (s2 === peg$FAILED) {
+          s2 = peg$parseoctothorpe();
+        }
+      }
+      while (s2 !== peg$FAILED) {
+        s1.push(s2);
+        s2 = peg$parsemessageFormatElement();
+        if (s2 === peg$FAILED) {
+          s2 = peg$parsestring();
+          if (s2 === peg$FAILED) {
+            s2 = peg$parseoctothorpe();
+          }
+        }
+      }
+      if (s1 !== peg$FAILED) {
+        peg$reportedPos = s0;
+        s1 = peg$c1(s1);
+      }
+      s0 = s1;
+
+      return s0;
+    }
+
+    function peg$parsemessageFormatElement() {
+      var s0, s1, s2, s3, s4, s5, s6;
+
+      s0 = peg$currPos;
+      if (input.charCodeAt(peg$currPos) === 123) {
+        s1 = peg$c3;
+        peg$currPos++;
+      } else {
+        s1 = peg$FAILED;
+        if (peg$silentFails === 0) { peg$fail(peg$c4); }
+      }
+      if (s1 !== peg$FAILED) {
+        s2 = peg$parse_();
+        if (s2 !== peg$FAILED) {
+          s3 = peg$parseid();
+          if (s3 !== peg$FAILED) {
+            s4 = peg$currPos;
+            if (input.charCodeAt(peg$currPos) === 44) {
+              s5 = peg$c6;
+              peg$currPos++;
+            } else {
+              s5 = peg$FAILED;
+              if (peg$silentFails === 0) { peg$fail(peg$c7); }
+            }
+            if (s5 !== peg$FAILED) {
+              s6 = peg$parseelementFormat();
+              if (s6 !== peg$FAILED) {
+                s5 = [s5, s6];
+                s4 = s5;
+              } else {
+                peg$currPos = s4;
+                s4 = peg$c2;
+              }
+            } else {
+              peg$currPos = s4;
+              s4 = peg$c2;
+            }
+            if (s4 === peg$FAILED) {
+              s4 = peg$c5;
+            }
+            if (s4 !== peg$FAILED) {
+              s5 = peg$parse_();
+              if (s5 !== peg$FAILED) {
+                if (input.charCodeAt(peg$currPos) === 125) {
+                  s6 = peg$c8;
+                  peg$currPos++;
+                } else {
+                  s6 = peg$FAILED;
+                  if (peg$silentFails === 0) { peg$fail(peg$c9); }
+                }
+                if (s6 !== peg$FAILED) {
+                  peg$reportedPos = s0;
+                  s1 = peg$c10(s3, s4);
+                  s0 = s1;
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$c2;
+                }
+              } else {
+                peg$currPos = s0;
+                s0 = peg$c2;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$c2;
+            }
+          } else {
+            peg$currPos = s0;
+            s0 = peg$c2;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$c2;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$c2;
+      }
+
+      return s0;
+    }
+
+    function peg$parseelementFormat() {
+      var s0, s1, s2, s3, s4, s5, s6, s7;
+
+      s0 = peg$currPos;
+      s1 = peg$parse_();
+      if (s1 !== peg$FAILED) {
+        if (input.substr(peg$currPos, 6) === peg$c11) {
+          s2 = peg$c11;
+          peg$currPos += 6;
+        } else {
+          s2 = peg$FAILED;
+          if (peg$silentFails === 0) { peg$fail(peg$c12); }
+        }
+        if (s2 !== peg$FAILED) {
+          s3 = peg$parse_();
+          if (s3 !== peg$FAILED) {
+            if (input.charCodeAt(peg$currPos) === 44) {
+              s4 = peg$c6;
+              peg$currPos++;
+            } else {
+              s4 = peg$FAILED;
+              if (peg$silentFails === 0) { peg$fail(peg$c7); }
+            }
+            if (s4 !== peg$FAILED) {
+              s5 = peg$parse_();
+              if (s5 !== peg$FAILED) {
+                s6 = peg$parsepluralFormatPattern();
+                if (s6 !== peg$FAILED) {
+                  s7 = peg$parse_();
+                  if (s7 !== peg$FAILED) {
+                    peg$reportedPos = s0;
+                    s1 = peg$c13(s2, s6);
+                    s0 = s1;
+                  } else {
+                    peg$currPos = s0;
+                    s0 = peg$c2;
+                  }
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$c2;
+                }
+              } else {
+                peg$currPos = s0;
+                s0 = peg$c2;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$c2;
+            }
+          } else {
+            peg$currPos = s0;
+            s0 = peg$c2;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$c2;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$c2;
+      }
+      if (s0 === peg$FAILED) {
+        s0 = peg$currPos;
+        s1 = peg$parse_();
+        if (s1 !== peg$FAILED) {
+          if (input.substr(peg$currPos, 13) === peg$c14) {
+            s2 = peg$c14;
+            peg$currPos += 13;
+          } else {
+            s2 = peg$FAILED;
+            if (peg$silentFails === 0) { peg$fail(peg$c15); }
+          }
+          if (s2 !== peg$FAILED) {
+            s3 = peg$parse_();
+            if (s3 !== peg$FAILED) {
+              if (input.charCodeAt(peg$currPos) === 44) {
+                s4 = peg$c6;
+                peg$currPos++;
+              } else {
+                s4 = peg$FAILED;
+                if (peg$silentFails === 0) { peg$fail(peg$c7); }
+              }
+              if (s4 !== peg$FAILED) {
+                s5 = peg$parse_();
+                if (s5 !== peg$FAILED) {
+                  s6 = peg$parsepluralFormatPattern();
+                  if (s6 !== peg$FAILED) {
+                    s7 = peg$parse_();
+                    if (s7 !== peg$FAILED) {
+                      peg$reportedPos = s0;
+                      s1 = peg$c13(s2, s6);
+                      s0 = s1;
+                    } else {
+                      peg$currPos = s0;
+                      s0 = peg$c2;
+                    }
+                  } else {
+                    peg$currPos = s0;
+                    s0 = peg$c2;
+                  }
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$c2;
+                }
+              } else {
+                peg$currPos = s0;
+                s0 = peg$c2;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$c2;
+            }
+          } else {
+            peg$currPos = s0;
+            s0 = peg$c2;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$c2;
+        }
+        if (s0 === peg$FAILED) {
+          s0 = peg$currPos;
+          s1 = peg$parse_();
+          if (s1 !== peg$FAILED) {
+            if (input.substr(peg$currPos, 6) === peg$c16) {
+              s2 = peg$c16;
+              peg$currPos += 6;
+            } else {
+              s2 = peg$FAILED;
+              if (peg$silentFails === 0) { peg$fail(peg$c17); }
+            }
+            if (s2 !== peg$FAILED) {
+              s3 = peg$parse_();
+              if (s3 !== peg$FAILED) {
+                if (input.charCodeAt(peg$currPos) === 44) {
+                  s4 = peg$c6;
+                  peg$currPos++;
+                } else {
+                  s4 = peg$FAILED;
+                  if (peg$silentFails === 0) { peg$fail(peg$c7); }
+                }
+                if (s4 !== peg$FAILED) {
+                  s5 = peg$parse_();
+                  if (s5 !== peg$FAILED) {
+                    s6 = peg$parseselectFormatPattern();
+                    if (s6 !== peg$FAILED) {
+                      s7 = peg$parse_();
+                      if (s7 !== peg$FAILED) {
+                        peg$reportedPos = s0;
+                        s1 = peg$c13(s2, s6);
+                        s0 = s1;
+                      } else {
+                        peg$currPos = s0;
+                        s0 = peg$c2;
+                      }
+                    } else {
+                      peg$currPos = s0;
+                      s0 = peg$c2;
+                    }
+                  } else {
+                    peg$currPos = s0;
+                    s0 = peg$c2;
+                  }
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$c2;
+                }
+              } else {
+                peg$currPos = s0;
+                s0 = peg$c2;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$c2;
+            }
+          } else {
+            peg$currPos = s0;
+            s0 = peg$c2;
+          }
+          if (s0 === peg$FAILED) {
+            s0 = peg$currPos;
+            s1 = peg$parse_();
+            if (s1 !== peg$FAILED) {
+              s2 = peg$parseid();
+              if (s2 !== peg$FAILED) {
+                s3 = [];
+                s4 = peg$parseargStylePattern();
+                while (s4 !== peg$FAILED) {
+                  s3.push(s4);
+                  s4 = peg$parseargStylePattern();
+                }
+                if (s3 !== peg$FAILED) {
+                  peg$reportedPos = s0;
+                  s1 = peg$c18(s2, s3);
+                  s0 = s1;
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$c2;
+                }
+              } else {
+                peg$currPos = s0;
+                s0 = peg$c2;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$c2;
+            }
+          }
+        }
+      }
+
+      return s0;
+    }
+
+    function peg$parsepluralFormatPattern() {
+      var s0, s1, s2, s3;
+
+      s0 = peg$currPos;
+      s1 = peg$parseoffsetPattern();
+      if (s1 === peg$FAILED) {
+        s1 = peg$c5;
+      }
+      if (s1 !== peg$FAILED) {
+        s2 = [];
+        s3 = peg$parsepluralForm();
+        if (s3 !== peg$FAILED) {
+          while (s3 !== peg$FAILED) {
+            s2.push(s3);
+            s3 = peg$parsepluralForm();
+          }
+        } else {
+          s2 = peg$c2;
+        }
+        if (s2 !== peg$FAILED) {
+          peg$reportedPos = s0;
+          s1 = peg$c19(s1, s2);
+          s0 = s1;
+        } else {
+          peg$currPos = s0;
+          s0 = peg$c2;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$c2;
+      }
+
+      return s0;
+    }
+
+    function peg$parseoffsetPattern() {
+      var s0, s1, s2, s3, s4, s5, s6, s7;
+
+      s0 = peg$currPos;
+      s1 = peg$parse_();
+      if (s1 !== peg$FAILED) {
+        if (input.substr(peg$currPos, 6) === peg$c20) {
+          s2 = peg$c20;
+          peg$currPos += 6;
+        } else {
+          s2 = peg$FAILED;
+          if (peg$silentFails === 0) { peg$fail(peg$c21); }
+        }
+        if (s2 !== peg$FAILED) {
+          s3 = peg$parse_();
+          if (s3 !== peg$FAILED) {
+            if (input.charCodeAt(peg$currPos) === 58) {
+              s4 = peg$c22;
+              peg$currPos++;
+            } else {
+              s4 = peg$FAILED;
+              if (peg$silentFails === 0) { peg$fail(peg$c23); }
+            }
+            if (s4 !== peg$FAILED) {
+              s5 = peg$parse_();
+              if (s5 !== peg$FAILED) {
+                s6 = peg$parsedigits();
+                if (s6 !== peg$FAILED) {
+                  s7 = peg$parse_();
+                  if (s7 !== peg$FAILED) {
+                    peg$reportedPos = s0;
+                    s1 = peg$c24(s6);
+                    s0 = s1;
+                  } else {
+                    peg$currPos = s0;
+                    s0 = peg$c2;
+                  }
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$c2;
+                }
+              } else {
+                peg$currPos = s0;
+                s0 = peg$c2;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$c2;
+            }
+          } else {
+            peg$currPos = s0;
+            s0 = peg$c2;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$c2;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$c2;
+      }
+
+      return s0;
+    }
+
+    function peg$parsepluralForm() {
+      var s0, s1, s2, s3, s4, s5, s6, s7, s8;
+
+      s0 = peg$currPos;
+      s1 = peg$parse_();
+      if (s1 !== peg$FAILED) {
+        s2 = peg$parsepluralKey();
+        if (s2 !== peg$FAILED) {
+          s3 = peg$parse_();
+          if (s3 !== peg$FAILED) {
+            if (input.charCodeAt(peg$currPos) === 123) {
+              s4 = peg$c3;
+              peg$currPos++;
+            } else {
+              s4 = peg$FAILED;
+              if (peg$silentFails === 0) { peg$fail(peg$c4); }
+            }
+            if (s4 !== peg$FAILED) {
+              s5 = peg$parse_();
+              if (s5 !== peg$FAILED) {
+                s6 = peg$parsemessageFormatPattern();
+                if (s6 !== peg$FAILED) {
+                  s7 = peg$parse_();
+                  if (s7 !== peg$FAILED) {
+                    if (input.charCodeAt(peg$currPos) === 125) {
+                      s8 = peg$c8;
+                      peg$currPos++;
+                    } else {
+                      s8 = peg$FAILED;
+                      if (peg$silentFails === 0) { peg$fail(peg$c9); }
+                    }
+                    if (s8 !== peg$FAILED) {
+                      peg$reportedPos = s0;
+                      s1 = peg$c25(s2, s6);
+                      s0 = s1;
+                    } else {
+                      peg$currPos = s0;
+                      s0 = peg$c2;
+                    }
+                  } else {
+                    peg$currPos = s0;
+                    s0 = peg$c2;
+                  }
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$c2;
+                }
+              } else {
+                peg$currPos = s0;
+                s0 = peg$c2;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$c2;
+            }
+          } else {
+            peg$currPos = s0;
+            s0 = peg$c2;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$c2;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$c2;
+      }
+
+      return s0;
+    }
+
+    function peg$parsepluralKey() {
+      var s0, s1, s2;
+
+      s0 = peg$currPos;
+      s1 = peg$parseid();
+      if (s1 !== peg$FAILED) {
+        peg$reportedPos = s0;
+        s1 = peg$c26(s1);
+      }
+      s0 = s1;
+      if (s0 === peg$FAILED) {
+        s0 = peg$currPos;
+        if (input.charCodeAt(peg$currPos) === 61) {
+          s1 = peg$c27;
+          peg$currPos++;
+        } else {
+          s1 = peg$FAILED;
+          if (peg$silentFails === 0) { peg$fail(peg$c28); }
+        }
+        if (s1 !== peg$FAILED) {
+          s2 = peg$parsedigits();
+          if (s2 !== peg$FAILED) {
+            peg$reportedPos = s0;
+            s1 = peg$c24(s2);
+            s0 = s1;
+          } else {
+            peg$currPos = s0;
+            s0 = peg$c2;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$c2;
+        }
+      }
+
+      return s0;
+    }
+
+    function peg$parseselectFormatPattern() {
+      var s0, s1, s2;
+
+      s0 = peg$currPos;
+      s1 = [];
+      s2 = peg$parseselectForm();
+      if (s2 !== peg$FAILED) {
+        while (s2 !== peg$FAILED) {
+          s1.push(s2);
+          s2 = peg$parseselectForm();
+        }
+      } else {
+        s1 = peg$c2;
+      }
+      if (s1 !== peg$FAILED) {
+        peg$reportedPos = s0;
+        s1 = peg$c29(s1);
+      }
+      s0 = s1;
+
+      return s0;
+    }
+
+    function peg$parseselectForm() {
+      var s0, s1, s2, s3, s4, s5, s6, s7, s8;
+
+      s0 = peg$currPos;
+      s1 = peg$parse_();
+      if (s1 !== peg$FAILED) {
+        s2 = peg$parseid();
+        if (s2 !== peg$FAILED) {
+          s3 = peg$parse_();
+          if (s3 !== peg$FAILED) {
+            if (input.charCodeAt(peg$currPos) === 123) {
+              s4 = peg$c3;
+              peg$currPos++;
+            } else {
+              s4 = peg$FAILED;
+              if (peg$silentFails === 0) { peg$fail(peg$c4); }
+            }
+            if (s4 !== peg$FAILED) {
+              s5 = peg$parse_();
+              if (s5 !== peg$FAILED) {
+                s6 = peg$parsemessageFormatPattern();
+                if (s6 !== peg$FAILED) {
+                  s7 = peg$parse_();
+                  if (s7 !== peg$FAILED) {
+                    if (input.charCodeAt(peg$currPos) === 125) {
+                      s8 = peg$c8;
+                      peg$currPos++;
+                    } else {
+                      s8 = peg$FAILED;
+                      if (peg$silentFails === 0) { peg$fail(peg$c9); }
+                    }
+                    if (s8 !== peg$FAILED) {
+                      peg$reportedPos = s0;
+                      s1 = peg$c25(s2, s6);
+                      s0 = s1;
+                    } else {
+                      peg$currPos = s0;
+                      s0 = peg$c2;
+                    }
+                  } else {
+                    peg$currPos = s0;
+                    s0 = peg$c2;
+                  }
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$c2;
+                }
+              } else {
+                peg$currPos = s0;
+                s0 = peg$c2;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$c2;
+            }
+          } else {
+            peg$currPos = s0;
+            s0 = peg$c2;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$c2;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$c2;
+      }
+
+      return s0;
+    }
+
+    function peg$parseargStylePattern() {
+      var s0, s1, s2, s3, s4, s5;
+
+      s0 = peg$currPos;
+      s1 = peg$parse_();
+      if (s1 !== peg$FAILED) {
+        if (input.charCodeAt(peg$currPos) === 44) {
+          s2 = peg$c6;
+          peg$currPos++;
+        } else {
+          s2 = peg$FAILED;
+          if (peg$silentFails === 0) { peg$fail(peg$c7); }
+        }
+        if (s2 !== peg$FAILED) {
+          s3 = peg$parse_();
+          if (s3 !== peg$FAILED) {
+            s4 = peg$parseid();
+            if (s4 !== peg$FAILED) {
+              s5 = peg$parse_();
+              if (s5 !== peg$FAILED) {
+                peg$reportedPos = s0;
+                s1 = peg$c30(s4);
+                s0 = s1;
+              } else {
+                peg$currPos = s0;
+                s0 = peg$c2;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$c2;
+            }
+          } else {
+            peg$currPos = s0;
+            s0 = peg$c2;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$c2;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$c2;
+      }
+
+      return s0;
+    }
+
+    function peg$parseoctothorpe() {
+      var s0, s1;
+
+      s0 = peg$currPos;
+      if (input.charCodeAt(peg$currPos) === 35) {
+        s1 = peg$c31;
+        peg$currPos++;
+      } else {
+        s1 = peg$FAILED;
+        if (peg$silentFails === 0) { peg$fail(peg$c32); }
+      }
+      if (s1 !== peg$FAILED) {
+        peg$reportedPos = s0;
+        s1 = peg$c33();
+      }
+      s0 = s1;
+
+      return s0;
+    }
+
+    function peg$parsestring() {
+      var s0, s1, s2;
+
+      s0 = peg$currPos;
+      s1 = [];
+      s2 = peg$parsechars();
+      if (s2 === peg$FAILED) {
+        s2 = peg$parsewhitespace();
+      }
+      if (s2 !== peg$FAILED) {
+        while (s2 !== peg$FAILED) {
+          s1.push(s2);
+          s2 = peg$parsechars();
+          if (s2 === peg$FAILED) {
+            s2 = peg$parsewhitespace();
+          }
+        }
+      } else {
+        s1 = peg$c2;
+      }
+      if (s1 !== peg$FAILED) {
+        peg$reportedPos = s0;
+        s1 = peg$c34(s1);
+      }
+      s0 = s1;
+
+      return s0;
+    }
+
+    function peg$parseid() {
+      var s0, s1, s2, s3, s4, s5, s6;
+
+      peg$silentFails++;
+      s0 = peg$currPos;
+      s1 = peg$parse_();
+      if (s1 !== peg$FAILED) {
+        s2 = peg$currPos;
+        s3 = peg$currPos;
+        if (peg$c36.test(input.charAt(peg$currPos))) {
+          s4 = input.charAt(peg$currPos);
+          peg$currPos++;
+        } else {
+          s4 = peg$FAILED;
+          if (peg$silentFails === 0) { peg$fail(peg$c37); }
+        }
+        if (s4 !== peg$FAILED) {
+          s5 = [];
+          if (peg$c38.test(input.charAt(peg$currPos))) {
+            s6 = input.charAt(peg$currPos);
+            peg$currPos++;
+          } else {
+            s6 = peg$FAILED;
+            if (peg$silentFails === 0) { peg$fail(peg$c39); }
+          }
+          while (s6 !== peg$FAILED) {
+            s5.push(s6);
+            if (peg$c38.test(input.charAt(peg$currPos))) {
+              s6 = input.charAt(peg$currPos);
+              peg$currPos++;
+            } else {
+              s6 = peg$FAILED;
+              if (peg$silentFails === 0) { peg$fail(peg$c39); }
+            }
+          }
+          if (s5 !== peg$FAILED) {
+            s4 = [s4, s5];
+            s3 = s4;
+          } else {
+            peg$currPos = s3;
+            s3 = peg$c2;
+          }
+        } else {
+          peg$currPos = s3;
+          s3 = peg$c2;
+        }
+        if (s3 !== peg$FAILED) {
+          s3 = input.substring(s2, peg$currPos);
+        }
+        s2 = s3;
+        if (s2 !== peg$FAILED) {
+          s3 = peg$parse_();
+          if (s3 !== peg$FAILED) {
+            peg$reportedPos = s0;
+            s1 = peg$c40(s2);
+            s0 = s1;
+          } else {
+            peg$currPos = s0;
+            s0 = peg$c2;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$c2;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$c2;
+      }
+      peg$silentFails--;
+      if (s0 === peg$FAILED) {
+        s1 = peg$FAILED;
+        if (peg$silentFails === 0) { peg$fail(peg$c35); }
+      }
+
+      return s0;
+    }
+
+    function peg$parsechars() {
+      var s0, s1, s2;
+
+      s0 = peg$currPos;
+      s1 = [];
+      s2 = peg$parsechar();
+      if (s2 !== peg$FAILED) {
+        while (s2 !== peg$FAILED) {
+          s1.push(s2);
+          s2 = peg$parsechar();
+        }
+      } else {
+        s1 = peg$c2;
+      }
+      if (s1 !== peg$FAILED) {
+        peg$reportedPos = s0;
+        s1 = peg$c41(s1);
+      }
+      s0 = s1;
+
+      return s0;
+    }
+
+    function peg$parsechar() {
+      var s0, s1, s2, s3, s4, s5;
+
+      s0 = peg$currPos;
+      if (peg$c42.test(input.charAt(peg$currPos))) {
+        s1 = input.charAt(peg$currPos);
+        peg$currPos++;
+      } else {
+        s1 = peg$FAILED;
+        if (peg$silentFails === 0) { peg$fail(peg$c43); }
+      }
+      if (s1 !== peg$FAILED) {
+        peg$reportedPos = s0;
+        s1 = peg$c44(s1);
+      }
+      s0 = s1;
+      if (s0 === peg$FAILED) {
+        s0 = peg$currPos;
+        if (input.substr(peg$currPos, 2) === peg$c45) {
+          s1 = peg$c45;
+          peg$currPos += 2;
+        } else {
+          s1 = peg$FAILED;
+          if (peg$silentFails === 0) { peg$fail(peg$c46); }
+        }
+        if (s1 !== peg$FAILED) {
+          peg$reportedPos = s0;
+          s1 = peg$c47();
+        }
+        s0 = s1;
+        if (s0 === peg$FAILED) {
+          s0 = peg$currPos;
+          if (input.substr(peg$currPos, 2) === peg$c48) {
+            s1 = peg$c48;
+            peg$currPos += 2;
+          } else {
+            s1 = peg$FAILED;
+            if (peg$silentFails === 0) { peg$fail(peg$c49); }
+          }
+          if (s1 !== peg$FAILED) {
+            peg$reportedPos = s0;
+            s1 = peg$c50();
+          }
+          s0 = s1;
+          if (s0 === peg$FAILED) {
+            s0 = peg$currPos;
+            if (input.substr(peg$currPos, 2) === peg$c51) {
+              s1 = peg$c51;
+              peg$currPos += 2;
+            } else {
+              s1 = peg$FAILED;
+              if (peg$silentFails === 0) { peg$fail(peg$c52); }
+            }
+            if (s1 !== peg$FAILED) {
+              peg$reportedPos = s0;
+              s1 = peg$c53();
+            }
+            s0 = s1;
+            if (s0 === peg$FAILED) {
+              s0 = peg$currPos;
+              if (input.substr(peg$currPos, 2) === peg$c54) {
+                s1 = peg$c54;
+                peg$currPos += 2;
+              } else {
+                s1 = peg$FAILED;
+                if (peg$silentFails === 0) { peg$fail(peg$c55); }
+              }
+              if (s1 !== peg$FAILED) {
+                peg$reportedPos = s0;
+                s1 = peg$c56();
+              }
+              s0 = s1;
+              if (s0 === peg$FAILED) {
+                s0 = peg$currPos;
+                if (input.substr(peg$currPos, 2) === peg$c57) {
+                  s1 = peg$c57;
+                  peg$currPos += 2;
+                } else {
+                  s1 = peg$FAILED;
+                  if (peg$silentFails === 0) { peg$fail(peg$c58); }
+                }
+                if (s1 !== peg$FAILED) {
+                  s2 = peg$parsehexDigit();
+                  if (s2 !== peg$FAILED) {
+                    s3 = peg$parsehexDigit();
+                    if (s3 !== peg$FAILED) {
+                      s4 = peg$parsehexDigit();
+                      if (s4 !== peg$FAILED) {
+                        s5 = peg$parsehexDigit();
+                        if (s5 !== peg$FAILED) {
+                          peg$reportedPos = s0;
+                          s1 = peg$c59(s2, s3, s4, s5);
+                          s0 = s1;
+                        } else {
+                          peg$currPos = s0;
+                          s0 = peg$c2;
+                        }
+                      } else {
+                        peg$currPos = s0;
+                        s0 = peg$c2;
+                      }
+                    } else {
+                      peg$currPos = s0;
+                      s0 = peg$c2;
+                    }
+                  } else {
+                    peg$currPos = s0;
+                    s0 = peg$c2;
+                  }
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$c2;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      return s0;
+    }
+
+    function peg$parsedigits() {
+      var s0, s1, s2;
+
+      s0 = peg$currPos;
+      s1 = [];
+      if (peg$c60.test(input.charAt(peg$currPos))) {
+        s2 = input.charAt(peg$currPos);
+        peg$currPos++;
+      } else {
+        s2 = peg$FAILED;
+        if (peg$silentFails === 0) { peg$fail(peg$c61); }
+      }
+      if (s2 !== peg$FAILED) {
+        while (s2 !== peg$FAILED) {
+          s1.push(s2);
+          if (peg$c60.test(input.charAt(peg$currPos))) {
+            s2 = input.charAt(peg$currPos);
+            peg$currPos++;
+          } else {
+            s2 = peg$FAILED;
+            if (peg$silentFails === 0) { peg$fail(peg$c61); }
+          }
+        }
+      } else {
+        s1 = peg$c2;
+      }
+      if (s1 !== peg$FAILED) {
+        peg$reportedPos = s0;
+        s1 = peg$c62(s1);
+      }
+      s0 = s1;
+
+      return s0;
+    }
+
+    function peg$parsehexDigit() {
+      var s0;
+
+      if (peg$c63.test(input.charAt(peg$currPos))) {
+        s0 = input.charAt(peg$currPos);
+        peg$currPos++;
+      } else {
+        s0 = peg$FAILED;
+        if (peg$silentFails === 0) { peg$fail(peg$c64); }
+      }
+
+      return s0;
+    }
+
+    function peg$parse_() {
+      var s0, s1, s2;
+
+      peg$silentFails++;
+      s0 = peg$currPos;
+      s1 = [];
+      s2 = peg$parsewhitespace();
+      while (s2 !== peg$FAILED) {
+        s1.push(s2);
+        s2 = peg$parsewhitespace();
+      }
+      if (s1 !== peg$FAILED) {
+        peg$reportedPos = s0;
+        s1 = peg$c66(s1);
+      }
+      s0 = s1;
+      peg$silentFails--;
+      if (s0 === peg$FAILED) {
+        s1 = peg$FAILED;
+        if (peg$silentFails === 0) { peg$fail(peg$c65); }
+      }
+
+      return s0;
+    }
+
+    function peg$parsewhitespace() {
+      var s0;
+
+      if (peg$c67.test(input.charAt(peg$currPos))) {
+        s0 = input.charAt(peg$currPos);
+        peg$currPos++;
+      } else {
+        s0 = peg$FAILED;
+        if (peg$silentFails === 0) { peg$fail(peg$c68); }
+      }
+
+      return s0;
+    }
+
+    peg$result = peg$startRuleFunction();
+
+    if (peg$result !== peg$FAILED && peg$currPos === input.length) {
+      return peg$result;
+    } else {
+      if (peg$result !== peg$FAILED && peg$currPos < input.length) {
+        peg$fail({ type: "end", description: "end of input" });
+      }
+
+      throw peg$buildException(null, peg$maxFailExpected, peg$maxFailPos);
+    }
+  }
+
+  return {
+    SyntaxError: SyntaxError,
+    parse:       parse
+  };
+}()).parse;
+
+
+/** @file messageformat.js - ICU PluralFormat + SelectFormat for JavaScript
+ *  @author Alex Sexton - @SlexAxton
+ *  @version 0.3.0-1
+ *  @copyright 2012-2015 Alex Sexton, Eemeli Aro, and Contributors
+ *  @license To use or fork, MIT. To contribute back, Dojo CLA  */
+
+
+/** Utility function for quoting an Object's key value iff required
+ *  @private  */
+function propname(key, obj) {
+  if (/^[A-Z_$][0-9A-Z_$]*$/i.test(key)) {
+    return obj ? obj + '.' + key : key;
+  } else {
+    var jkey = JSON.stringify(key);
+    return obj ? obj + '[' + jkey + ']' : jkey;
+  }
+};
+
+
+/** Create a new message formatter
+ *
+ *  @class
+ *  @global
+ *  @param {string|string[]} [locale="en"] - The locale to use, with fallbacks
+ *  @param {function} [pluralFunc] - Optional custom pluralization function
+ *  @param {function[]} [formatters] - Optional custom formatting functions  */
+function MessageFormat(locale, pluralFunc, formatters) {
+  this.lc = [locale];  
+  this.runtime.pluralFuncs = {};
+  this.runtime.pluralFuncs[this.lc[0]] = pluralFunc;
+  this.runtime.fmt = {};
+  if (formatters) for (var f in formatters) {
+    this.runtime.fmt[f] = formatters[f];
+  }
+}
+
+
+
+
+/** Parse an input string to its AST
+ *
+ *  Precompiled from `lib/messageformat-parser.pegjs` by
+ *  {@link http://pegjs.org/ PEG.js}. Included in MessageFormat object
+ *  to enable testing.
+ *
+ *  @private  */
+
+
+
+/** Pluralization functions from
+ *  {@link http://github.com/eemeli/make-plural.js make-plural}
+ *
+ *  @memberof MessageFormat
+ *  @type Object.<string,function>  */
+MessageFormat.plurals = {};
+
+
+/** Default number formatting functions in the style of ICU's
+ *  {@link http://icu-project.org/apiref/icu4j/com/ibm/icu/text/MessageFormat.html simpleArg syntax}
+ *  implemented using the
+ *  {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl Intl}
+ *  object defined by ECMA-402.
+ *
+ *  **Note**: Intl is not defined in default Node until 0.11.15 / 0.12.0, so
+ *  earlier versions require a {@link https://www.npmjs.com/package/intl polyfill}.
+ *  Therefore {@link MessageFormat.withIntlSupport} needs to be true for these
+ *  functions to be available for inclusion in the output.
+ *
+ *  @see MessageFormat#setIntlSupport
+ *
+ *  @namespace
+ *  @memberof MessageFormat
+ *  @property {function} number - Represent a number as an integer, percent or currency value
+ *  @property {function} date - Represent a date as a full/long/default/short string
+ *  @property {function} time - Represent a time as a full/long/default/short string
+ *
+ *  @example
+ *  > var MessageFormat = require('messageformat');
+ *  > var mf = (new MessageFormat('en')).setIntlSupport(true);
+ *  > mf.currency = 'EUR';
+ *  > var mfunc = mf.compile("The total is {V,number,currency}.");
+ *  > mfunc({V:5.5})
+ *  "The total is €5.50."
+ *
+ *  @example
+ *  > var MessageFormat = require('messageformat');
+ *  > var mf = new MessageFormat('en', null, {number: MessageFormat.number});
+ *  > mf.currency = 'EUR';
+ *  > var mfunc = mf.compile("The total is {V,number,currency}.");
+ *  > mfunc({V:5.5})
+ *  "The total is €5.50."  */
+MessageFormat.formatters = {};
+
+/** Enable or disable support for the default formatters, which require the
+ *  `Intl` object. Note that this can't be autodetected, as the environment
+ *  in which the formatted text is compiled into Javascript functions is not
+ *  necessarily the same environment in which they will get executed.
+ *
+ *  @see MessageFormat.formatters
+ *
+ *  @memberof MessageFormat
+ *  @param {boolean} [enable=true]
+ *  @returns {Object} The MessageFormat instance, to allow for chaining
+ *  @example
+ *  > var Intl = require('intl');
+ *  > var MessageFormat = require('messageformat');
+ *  > var mf = (new MessageFormat('en')).setIntlSupport(true);
+ *  > mf.currency = 'EUR';
+ *  > mf.compile("The total is {V,number,currency}.")({V:5.5});
+ *  "The total is €5.50."  */
+
+
+
+/** A set of utility functions that are called by the compiled Javascript
+ *  functions, these are included locally in the output of {@link
+ *  MessageFormat#compile compile()}.
+ *
+ *  @namespace
+ *  @memberof MessageFormat  */
+MessageFormat.prototype.runtime = {
+
+  /** Utility function for `#` in plural rules
+   *
+   *  @param {number} value - The value to operate on
+   *  @param {number} [offset=0] - An optional offset, set by the surrounding context  */
+  number: function(value, offset) {
+    if (isNaN(value)) throw new Error("'" + value + "' isn't a number.");
+    return value - (offset || 0);
+  },
+
+  /** Utility function for `{N, plural|selectordinal, ...}`
+   *
+   *  @param {number} value - The key to use to find a pluralization rule
+   *  @param {number} offset - An offset to apply to `value`
+   *  @param {function} lcfunc - A locale function from `pluralFuncs`
+   *  @param {Object.<string,string>} data - The object from which results are looked up
+   *  @param {?boolean} isOrdinal - If true, use ordinal rather than cardinal rules
+   *  @returns {string} The result of the pluralization  */
+  plural: function(value, offset, lcfunc, data, isOrdinal) {
+    if ({}.hasOwnProperty.call(data, value)) return data[value]();
+    if (offset) value -= offset;
+    var key = lcfunc(value, isOrdinal);
+    if (key in data) return data[key]();
+    return data.other();
+  },
+
+  /** Utility function for `{N, select, ...}`
+   *
+   *  @param {number} value - The key to use to find a selection
+   *  @param {Object.<string,string>} data - The object from which results are looked up
+   *  @returns {string} The result of the select statement  */
+  select: function(value, data) {
+    if ({}.hasOwnProperty.call(data, value)) return data[value]();
+    return data.other()
+  },
+
+  /** Pluralization functions included in compiled output
+   *  @instance
+   *  @type Object.<string,function>  */
+  pluralFuncs: {},
+
+  /** Custom formatting functions called by `{var, fn[, args]*}` syntax
+   *
+   *  For examples, see {@link MessageFormat.formatters}
+   *
+   *  @instance
+   *  @see MessageFormat.formatters
+   *  @type Object.<string,function>  */
+  fmt: {},
+
+  /** Custom stringifier to clean up browser inconsistencies
+   *  @instance  */
+  toString: function () {
+    var _stringify = function(o, level) {
+      if (typeof o != 'object') {
+        var funcStr = o.toString().replace(/^(function )\w*/, '$1');
+        var indent = /([ \t]*)\S.*$/.exec(funcStr);
+        return indent ? funcStr.replace(new RegExp('^' + indent[1], 'mg'), '') : funcStr;
+      }
+      var s = [];
+      for (var i in o) if (i != 'toString') {
+        if (level == 0) s.push('var ' + i + ' = ' + _stringify(o[i], level + 1) + ';\n');
+        else s.push(propname(i) + ': ' + _stringify(o[i], level + 1));
+      }
+      if (level == 0) return s.join('');
+      if (s.length == 0) return '{}';
+      var indent = '  '; while (--level) indent += '  ';
+      return '{\n' + s.join(',\n').replace(/^/gm, indent) + '\n}';
+    };
+    return _stringify(this, 0);
+  }
+};
+
+
+/** Recursively map an AST to its resulting string
+ *
+ *  @memberof MessageFormat
+ *
+ *  @param ast - the Ast node for which the JS code should be generated
+ *
+ *  @private  */
+MessageFormat.prototype._precompile = function(ast, data) {
+  data = data || { keys: {}, offset: {} };
+  var r = [], i, tmp, args = [];
+
+  switch ( ast.type ) {
+    case 'messageFormatPattern':
+      for ( i = 0; i < ast.statements.length; ++i ) {
+        r.push(this._precompile( ast.statements[i], data ));
+      }
+      tmp = r.join(' + ') || '""';
+      return data.pf_count ? tmp : 'function(d) { return ' + tmp + '; }';
+
+    case 'messageFormatElement':
+      data.pf_count = data.pf_count || 0;
+      if ( ast.output ) {
+        return propname(ast.argumentIndex, 'd');
+      }
+      else {
+        data.keys[data.pf_count] = ast.argumentIndex;
+        return this._precompile( ast.elementFormat, data );
+      }
+      return '';
+
+    case 'elementFormat':
+      args = [ propname(data.keys[data.pf_count], 'd') ];
+      switch (ast.key) {
+        case 'select':
+          args.push(this._precompile(ast.val, data));
+          return 'select(' + args.join(', ') + ')';
+        case 'selectordinal':
+          args = args.concat([ 0, propname(this.lc[0], 'pluralFuncs'), this._precompile(ast.val, data), 1 ]);
+          return 'plural(' + args.join(', ') + ')';
+        case 'plural':
+          data.offset[data.pf_count || 0] = ast.val.offset || 0;
+          args = args.concat([ data.offset[data.pf_count] || 0, propname(this.lc[0], 'pluralFuncs'), this._precompile(ast.val, data) ]);
+          return 'plural(' + args.join(', ') + ')';
+        default:
+          if (this.withIntlSupport && !(ast.key in this.runtime.fmt) && (ast.key in MessageFormat.formatters)) {
+            tmp = MessageFormat.formatters[ast.key];
+            this.runtime.fmt[ast.key] = (typeof tmp(this) == 'function') ? tmp(this) : tmp;
+          }
+          args.push(JSON.stringify(this.lc));
+          if (ast.val && ast.val.length) args.push(JSON.stringify(ast.val.length == 1 ? ast.val[0] : ast.val));
+          return 'fmt.' + ast.key + '(' + args.join(', ') + ')';
+      }
+
+    case 'pluralFormatPattern':
+    case 'selectFormatPattern':
+      data.pf_count = data.pf_count || 0;
+      if (ast.type == 'selectFormatPattern') data.offset[data.pf_count] = 0;
+      var needOther = true;
+      for (i = 0; i < ast.pluralForms.length; ++i) {
+        var key = ast.pluralForms[i].key;
+        if (key === 'other') needOther = false;
+        var data_copy = JSON.parse(JSON.stringify(data));
+        data_copy.pf_count++;
+        r.push(propname(key) + ': function() { return ' + this._precompile(ast.pluralForms[i].val, data_copy) + ';}');
+      }
+      if (needOther) throw new Error("No 'other' form found in " + ast.type + " " + data.pf_count);
+      return '{ ' + r.join(', ') + ' }';
+
+    case 'string':
+      return JSON.stringify(ast.val || "");
+
+    case 'octothorpe':
+      if (!data.pf_count) return '"#"';
+      args = [ propname(data.keys[data.pf_count-1], 'd') ];
+      if (data.offset[data.pf_count-1]) args.push(data.offset[data.pf_count-1]);
+      return 'number(' + args.join(', ') + ')';
+
+    default:
+      throw new Error( 'Bad AST type: ' + ast.type );
+  }
+};
+
+/** Compile messages into an executable function with clean string
+ *  representation.
+ *
+ *  If `messages` is a single string including ICU MessageFormat declarations,
+ *  `opt` is ignored and the returned function takes a single Object parameter
+ *  `d` representing each of the input's defined variables. The returned
+ *  function will be defined in a local scope that includes all the required
+ *  runtime variables.
+ *
+ *  If `messages` is a map of keys to strings, or a map of namespace keys to
+ *  such key/string maps, the returned function will fill the specified global
+ *  with javascript functions matching the structure of the input. In such use,
+ *  the output of `compile()` is expected to be serialized using `.toString()`,
+ *  and will include definitions of the runtime functions. If `opt.global` is
+ *  null, calling the output function will return the object itself.
+ *
+ *  Together, the input parameters should match the following patterns:
+ *  ```js
+ *  messages = "string" || { key0: "string0", key1: "string1", ... } || {
+ *    ns0: { key0: "string0", key1: "string1", ...  },
+ *    ns1: { key0: "string0", key1: "string1", ...  },
+ *    ...
+ *  }
+ *
+ *  opt = null || {
+ *    locale: null || {
+ *      ns0: "lc0" || [ "lc0", ... ],
+ *      ns1: "lc1" || [ "lc1", ... ],
+ *      ...
+ *    },
+ *    global: null || "module.exports" || "exports" || "i18n" || ...
+ *  }
+ *  ```
+ *
+ *  @memberof MessageFormat
+ *  @param {string|Object}
+ *      messages - The input message(s) to be compiled, in ICU MessageFormat
+ *  @param {Object} [opt={}] - Options controlling output for non-simple intput
+ *  @param {Object} [opt.locale] - The locales to use for the messages, with a
+ *      structure matching that of `messages`
+ *  @param {string} [opt.global=""] - The global variable that the output
+ *      function should use, or a null string for none. "exports" and
+ *      "module.exports" are recognised as special cases.
+ *  @returns {function} The first match found for the given locale(s)
+ *
+ *  @example
+ * > var MessageFormat = require('messageformat'),
+ * ...   mf = new MessageFormat('en'),
+ * ...   mfunc0 = mf.compile('A {TYPE} example.');
+ * > mfunc0({TYPE:'simple'})
+ * 'A simple example.'
+ * > mfunc0.toString()
+ * 'function (d) { return "A " + d.TYPE + " example."; }'
+ *
+ *  @example
+ * > var msgSet = { a: 'A {TYPE} example.',
+ * ...              b: 'This has {COUNT, plural, one{one member} other{# members}}.' },
+ * ...   mfuncSet = mf.compile(msgSet);
+ * > mfuncSet().a({TYPE:'more complex'})
+ * 'A more complex example.'
+ * > mfuncSet().b({COUNT:2})
+ * 'This has 2 members.'
+ *
+ * > console.log(mfuncSet.toString())
+ * function anonymous() {
+ * var number = function (value, offset) {
+ *   if (isNaN(value)) throw new Error("'" + value + "' isn't a number.");
+ *   return value - (offset || 0);
+ * };
+ * var plural = function (value, offset, lcfunc, data, isOrdinal) {
+ *   if ({}.hasOwnProperty.call(data, value)) return data[value]();
+ *   if (offset) value -= offset;
+ *   var key = lcfunc(value, isOrdinal);
+ *   if (key in data) return data[key]();
+ *   return data.other();
+ * };
+ * var select = function (value, data) {
+ *   if ({}.hasOwnProperty.call(data, value)) return data[value]();
+ *   return data.other()
+ * };
+ * var pluralFuncs = {
+ *   en: function (n, ord) {
+ *     var s = String(n).split('.'), v0 = !s[1], t0 = Number(s[0]) == n,
+ *         n10 = t0 && s[0].slice(-1), n100 = t0 && s[0].slice(-2);
+ *     if (ord) return (n10 == 1 && n100 != 11) ? 'one'
+ *         : (n10 == 2 && n100 != 12) ? 'two'
+ *         : (n10 == 3 && n100 != 13) ? 'few'
+ *         : 'other';
+ *     return (n == 1 && v0) ? 'one' : 'other';
+ *   }
+ * };
+ * var fmt = {};
+ *
+ * return {
+ *   a: function(d) { return "A " + d.TYPE + " example."; },
+ *   b: function(d) { return "This has " + plural(d.COUNT, 0, pluralFuncs.en, { one: function() { return "one member";}, other: function() { return number(d.COUNT)+" members";} }) + "."; }
+ * }
+ * }
+ *
+ *  @example
+ * > mf.runtime.pluralFuncs.fi = MessageFormat.plurals.fi;
+ * > var multiSet = { en: { a: 'A {TYPE} example.',
+ * ...                      b: 'This is the {COUNT, selectordinal, one{#st} two{#nd} few{#rd} other{#th}} example.' },
+ * ...                fi: { a: '{TYPE} esimerkki.',
+ * ...                      b: 'Tämä on {COUNT, selectordinal, other{#.}} esimerkki.' } },
+ * ...   multiSetLocales = { en: 'en', fi: 'fi' },
+ * ...   mfuncSet = mf.compile(multiSet, { locale: multiSetLocales, global: 'i18n' });
+ * > mfuncSet(this);
+ * > i18n.en.b({COUNT:3})
+ * 'This is the 3rd example.'
+ * > i18n.fi.b({COUNT:3})
+ * 'Tämä on 3. esimerkki.'  */
+MessageFormat.prototype.compile = function ( messages, opt ) {
+  var r = {}, lc0 = this.lc,
+      compileMsg = function(self, msg) {
+        try {
+          var ast = MessageFormat._parse(msg);
+          return self._precompile(ast);
+        } catch (e) {
+          throw new Error((ast ? 'Precompiler' : 'Parser') + ' error: ' + e.toString());
+        }
+      },
+      stringify = function(r, level) {
+        if (!level) level = 0;
+        if (typeof r != 'object') return r;
+        var o = [], indent = '';
+        for (var i = 0; i < level; ++i) indent += '  ';
+        for (var k in r) o.push('\n' + indent + '  ' + propname(k) + ': ' + stringify(r[k], level + 1));
+        return '{' + o.join(',') + '\n' + indent + '}';
+      };
+
+  if (typeof messages == 'string') {
+    var f = new Function(
+        'number, plural, select, pluralFuncs, fmt',
+        'return ' + compileMsg(this, messages));
+    return f(this.runtime.number, this.runtime.plural, this.runtime.select,
+        this.runtime.pluralFuncs, this.runtime.fmt);
+  }
+
+  opt = opt || {};
+
+  for (var ns in messages) {
+    if (opt.locale) this.lc = opt.locale[ns] && [].concat(opt.locale[ns]) || lc0;
+    if (typeof messages[ns] == 'string') {
+      try { r[ns] = compileMsg(this, messages[ns]); }
+      catch (e) { e.message = e.message.replace(':', ' with `' + ns + '`:'); throw e; }
+    } else {
+      r[ns] = {};
+      for (var key in messages[ns]) {
+        try { r[ns][key] = compileMsg(this, messages[ns][key]); }
+        catch (e) { e.message = e.message.replace(':', ' with `' + key + '` in `' + ns + '`:'); throw e; }
+      }
+    }
+  }
+
+  this.lc = lc0;
+  var s = this.runtime.toString() + '\n';
+  switch (opt.global || '') {
+    case 'exports':
+      var o = [];
+      for (var k in r) o.push(propname(k, 'exports') + ' = ' + stringify(r[k]));
+      return new Function(s + o.join(';\n'));
+    case 'module.exports':
+      return new Function(s + 'module.exports = ' + stringify(r));
+    case '':
+      return new Function(s + 'return ' + stringify(r));
+    default:
+      return new Function('G', s + propname(opt.global, 'G') + ' = ' + stringify(r));
+  }
+};
+
+
+return MessageFormat;
+}());
+/* jshint ignore:end */
+
+
+var createErrorPluralModulePresence = function() {
+	return createError( "E_MISSING_PLURAL_MODULE", "Plural module not loaded." );
+};
+
+
+
+
+var validateMessageBundle = function( cldr ) {
+	validate(
+		"E_MISSING_MESSAGE_BUNDLE",
+		"Missing message bundle for locale `{locale}`.",
+		cldr.attributes.bundle && cldr.get( "globalize-messages/{bundle}" ) !== undefined,
+		{
+			locale: cldr.locale
+		}
+	);
+};
+
+
+
+
+var validateMessagePresence = function( path, value ) {
+	path = path.join( "/" );
+	validate( "E_MISSING_MESSAGE", "Missing required message content `{path}`.",
+		value !== undefined, { path: path } );
+};
+
+
+
+
+var validateMessageType = function( path, value ) {
+	path = path.join( "/" );
+	validate(
+		"E_INVALID_MESSAGE",
+		"Invalid message content `{path}`. {expected} expected.",
+		typeof value === "string",
+		{
+			expected: "a string",
+			path: path
+		}
+	);
+};
+
+
+
+
+var validateParameterTypeMessageVariables = function( value, name ) {
+	validateParameterType(
+		value,
+		name,
+		value === undefined || isPlainObject( value ) || Array.isArray( value ),
+		"Array or Plain Object"
+	);
+};
+
+
+
+
+var messageFormatterFn = function( formatter ) {
+	return function messageFormatter( variables ) {
+		if ( typeof variables === "number" || typeof variables === "string" ) {
+			variables = [].slice.call( arguments, 0 );
+		}
+		validateParameterTypeMessageVariables( variables, "variables" );
+		return formatter( variables );
+	};
+};
+
+
+
+
+var messageFormatterRuntimeBind = function( cldr, messageformatter ) {
+	var locale = cldr.locale,
+		origToString = messageformatter.toString;
+
+	messageformatter.toString = function() {
+		var argNames, argValues, output,
+			args = {};
+
+		// Properly adjust SlexAxton/messageformat.js compiled variables with Globalize variables:
+		output = origToString.call( messageformatter );
+
+		if ( /number\(/.test( output ) ) {
+			args.number = "messageFormat.number";
+		}
+
+		if ( /plural\(/.test( output ) ) {
+			args.plural = "messageFormat.plural";
+		}
+
+		if ( /select\(/.test( output ) ) {
+			args.select = "messageFormat.select";
+		}
+
+		output.replace( /pluralFuncs(\[([^\]]+)\]|\.([a-zA-Z]+))/, function( match ) {
+			args.pluralFuncs = "{" +
+				"\"" + locale + "\": Globalize(\"" + locale + "\").pluralGenerator()" +
+				"}";
+			return match;
+		});
+
+		argNames = Object.keys( args ).join( ", " );
+		argValues = Object.keys( args ).map(function( key ) {
+			return args[ key ];
+		}).join( ", " );
+
+		return "(function( " + argNames + " ) {\n" +
+			"  return " + output + "\n" +
+			"})(" + argValues + ")";
+	};
+
+	return messageformatter;
+};
+
+
+
+
+var slice = [].slice;
+
+/**
+ * .loadMessages( json )
+ *
+ * @json [JSON]
+ *
+ * Load translation data.
+ */
+Globalize.loadMessages = function( json ) {
+	var locale,
+		customData = {
+			"globalize-messages": json,
+			"main": {}
+		};
+
+	validateParameterPresence( json, "json" );
+	validateParameterTypePlainObject( json, "json" );
+
+	// Set available bundles by populating customData main dataset.
+	for ( locale in json ) {
+		if ( json.hasOwnProperty( locale ) ) {
+			customData.main[ locale ] = {};
+		}
+	}
+
+	Cldr.load( customData );
+};
+
+/**
+ * .messageFormatter( path )
+ *
+ * @path [String or Array]
+ *
+ * Format a message given its path.
+ */
+Globalize.messageFormatter =
+Globalize.prototype.messageFormatter = function( path ) {
+	var cldr, formatter, message, pluralGenerator, returnFn,
+		args = slice.call( arguments, 0 );
+
+	validateParameterPresence( path, "path" );
+	validateParameterType( path, "path", typeof path === "string" || Array.isArray( path ),
+		"a String nor an Array" );
+
+	path = alwaysArray( path );
+	cldr = this.cldr;
+
+	validateDefaultLocale( cldr );
+	validateMessageBundle( cldr );
+
+	message = cldr.get( [ "globalize-messages/{bundle}" ].concat( path ) );
+	validateMessagePresence( path, message );
+
+	// If message is an Array, concatenate it.
+	if ( Array.isArray( message ) ) {
+		message = message.join( " " );
+	}
+	validateMessageType( path, message );
+
+	// Is plural module present? Yes, use its generator. Nope, use an error generator.
+	pluralGenerator = this.plural !== undefined ?
+		this.pluralGenerator() :
+		createErrorPluralModulePresence;
+
+	formatter = new MessageFormat( cldr.locale, pluralGenerator ).compile( message );
+
+	returnFn = messageFormatterFn( formatter );
+
+	runtimeBind( args, cldr, returnFn,
+		[ messageFormatterRuntimeBind( cldr, formatter ), pluralGenerator ] );
+
+	return returnFn;
+};
+
+/**
+ * .formatMessage( path [, variables] )
+ *
+ * @path [String or Array]
+ *
+ * @variables [Number, String, Array or Object]
+ *
+ * Format a message given its path.
+ */
+Globalize.formatMessage =
+Globalize.prototype.formatMessage = function( path /* , variables */ ) {
+	return this.messageFormatter( path ).apply( {}, slice.call( arguments, 1 ) );
+};
+
+return Globalize;
+
+
+
+
+}));
 
 /*global requirejs*/
-define('ev-script',['require','backbone','underscore','jquery','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/models/app-info','ev-script/auth/basic/auth','ev-script/auth/forms/auth','ev-script/auth/none/auth','ev-script/util/events','ev-script/util/cache','i18n!ev-script/nls/es-mx/messages'],function(require) {
+define('ev-script',['require','backbone','underscore','jquery','globalize','json!cldr-data/supplemental/likelySubtags.json','json!ev-script/i18n/messages.json','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/models/app-info','ev-script/auth/basic/auth','ev-script/auth/forms/auth','ev-script/auth/none/auth','ev-script/util/events','ev-script/util/cache','cldr/supplemental','cldr/unresolved','globalize/message'],function(require) {
 
     'use strict';
 
     var Backbone = require('backbone'),
         _ = require('underscore'),
         $ = require('jquery'),
+        Globalize = require('globalize'),
+        likelySubtags = require('json!cldr-data/supplemental/likelySubtags.json'),
+        messages = require('json!ev-script/i18n/messages.json'),
         VideoSettings = require('ev-script/models/video-settings'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
         FieldView = require('ev-script/views/field'),
@@ -11162,8 +16043,13 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
 
-    // TODO - Workaround to force r.js to bundle language files (will automatically bundle "root")
-    require('i18n!ev-script/nls/es-mx/messages');
+    // Load globalize deps
+    require('cldr/supplemental');
+    require('cldr/unresolved');
+    require('globalize/message');
+    // Setup globalize
+    Globalize.load(likelySubtags);
+    Globalize.loadMessages(messages);
 
     var EnsembleApp = function(appOptions) {
 
@@ -11210,13 +16096,18 @@ define('ev-script',['require','backbone','underscore','jquery','ev-script/models
             // Set this in order to select the default width in video settings
             defaultVideoWidth: '',
             // Location for plupload flash runtime
-            pluploadFlashPath: ''
+            pluploadFlashPath: '',
+            // Callback to set current locale
+            getLocaleCallback: function() { return 'en-US'; }
         };
 
         // Add our configuration to the app cache...this is specific to this
         // 'app' instance.  There may be multiple instances on a single page w/
         // unique settings.
         var config = cacheUtil.setAppConfig(appId, _.extend({}, defaults, appOptions));
+
+        // Set locale for globalize
+        Globalize.locale(config.getLocaleCallback());
 
         // Create an event aggregator specific to our app
         eventsUtil.initEvents(appId);

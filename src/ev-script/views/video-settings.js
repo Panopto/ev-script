@@ -4,7 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        messages = require('i18n!ev-script/nls/messages'),
+        Globalize = require('globalize'),
         SettingsView = require('ev-script/views/settings'),
         sizeUtil = require('ev-script/util/size');
 
@@ -83,13 +83,13 @@ define(function(require) {
             var html = '';
             if (!this.info.useLegacyEmbeds()) {
                 html = this.template({
-                    messages: messages,
+                    Globalize: Globalize,
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio()
                 });
             } else {
                 html = this.legacyTemplate({
-                    messages: messages,
+                    Globalize: Globalize,
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio()
                 });
@@ -108,7 +108,7 @@ define(function(require) {
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
                 height: Math.min(260, $(window).height() - this.config.dialogMargin),
-                closeText: messages['Close']
+                closeText: Globalize.formatMessage('Close')
             });
         }
     });

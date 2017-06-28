@@ -5,9 +5,9 @@ define(function(require, template) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
+        Globalize = require('globalize'),
         cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events'),
-        messages = require('i18n!ev-script/nls/messages');
+        eventsUtil = require('ev-script/util/events');
 
     require('jquery.cookie');
     require('jquery-ui');
@@ -23,12 +23,12 @@ define(function(require, template) {
         },
         render: function() {
             var html = this.template({
-                messages: messages
+                Globalize: Globalize
             });
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
             this.$dialog.dialog({
-                title: messages['Ensemble Video Login'] + ' - ' + this.config.ensembleUrl,
+                title: Globalize.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
                 modal: true,
                 draggable: false,
                 resizable: false,
@@ -38,7 +38,7 @@ define(function(require, template) {
                 create: _.bind(function(event, ui) {
                     this.$dialog.html(html);
                 }, this),
-                closeText: messages['Close'],
+                closeText: Globalize.formatMessage('Close'),
                 close: _.bind(function(event, ui) {
                     this.$dialog.dialog('destroy').remove();
                     this.appEvents.trigger('hidePickers');

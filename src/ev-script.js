@@ -6,6 +6,9 @@ define(function(require) {
     var Backbone = require('backbone'),
         _ = require('underscore'),
         $ = require('jquery'),
+        Globalize = require('globalize'),
+        likelySubtags = require('json!cldr-data/supplemental/likelySubtags.json'),
+        messages = require('json!ev-script/i18n/messages.json'),
         VideoSettings = require('ev-script/models/video-settings'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
         FieldView = require('ev-script/views/field'),
@@ -18,8 +21,13 @@ define(function(require) {
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
 
-    // TODO - Workaround to force r.js to bundle language files (will automatically bundle "root")
-    require('i18n!ev-script/nls/es-mx/messages');
+    // Load globalize deps
+    require('cldr/supplemental');
+    require('cldr/unresolved');
+    require('globalize/message');
+    // Setup globalize
+    Globalize.load(likelySubtags);
+    Globalize.loadMessages(messages);
 
     var EnsembleApp = function(appOptions) {
 
@@ -66,13 +74,18 @@ define(function(require) {
             // Set this in order to select the default width in video settings
             defaultVideoWidth: '',
             // Location for plupload flash runtime
-            pluploadFlashPath: ''
+            pluploadFlashPath: '',
+            // Callback to set current locale
+            getLocaleCallback: function() { return 'en-US'; }
         };
 
         // Add our configuration to the app cache...this is specific to this
         // 'app' instance.  There may be multiple instances on a single page w/
         // unique settings.
         var config = cacheUtil.setAppConfig(appId, _.extend({}, defaults, appOptions));
+
+        // Set locale for globalize
+        Globalize.locale(config.getLocaleCallback());
 
         // Create an event aggregator specific to our app
         eventsUtil.initEvents(appId);

@@ -5,9 +5,9 @@ define(function(require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
+        Globalize = require('globalize'),
         eventsUtil = require('ev-script/util/events'),
-        cacheUtil = require('ev-script/util/cache'),
-        messages = require('i18n!ev-script/nls/messages');
+        cacheUtil = require('ev-script/util/cache');
 
     return Backbone.View.extend({
         initialize: function(options) {
@@ -22,11 +22,11 @@ define(function(require) {
             if (xhr.status === 401) {
                 this.auth.handleUnauthorized(this.el, authCallback);
             } else if (xhr.status === 500) {
-                window.alert(messages['It appears there is an issue with the Ensemble Video installation.']);
+                window.alert(Globalize.formatMessage('It appears there is an issue with the Ensemble Video installation.'));
             } else if (xhr.status === 404) {
-                window.alert(messages['Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.']);
+                window.alert(Globalize.formatMessage('Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.'));
             } else if (xhr.status !== 0) {
-                window.alert(messages['An unexpected error occurred.  Check the server log for more details.']);
+                window.alert(Globalize.formatMessage('An unexpected error occurred.  Check the server log for more details.'));
             }
         },
         unencode: function(encoded) {
