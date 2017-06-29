@@ -3,7 +3,6 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
-        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -19,7 +18,7 @@ define(function(require) {
         },
         render: function() {
             this.$el.html(this.template({
-                Globalize: Globalize,
+                i18n: this.i18n,
                 id: this.id + '-select',
                 sourceId: this.picker.model.get('sourceId')
             }));

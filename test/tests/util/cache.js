@@ -8,7 +8,7 @@ define(function(require) {
 
     q.module('Testing ev-script/util/cache');
 
-    q.test('check api', 10, function() {
+    q.test('check api', 12, function() {
         q.ok(_.isObject(cacheUtil.caches), 'expected caches object');
         q.ok(_.isFunction(cacheUtil.Cache), 'expected Cache function');
         q.ok(_.isFunction(cacheUtil.setAppConfig), 'expected setAppConfig function');
@@ -17,8 +17,10 @@ define(function(require) {
         q.ok(_.isFunction(cacheUtil.getAppAuth), 'expected getAppAuth function');
         q.ok(_.isFunction(cacheUtil.setAppInfo), 'expected setAppInfo function');
         q.ok(_.isFunction(cacheUtil.getAppInfo), 'expected getAppInfo function');
+        q.ok(_.isFunction(cacheUtil.setAppI18n), 'expected setAppI18n function');
+        q.ok(_.isFunction(cacheUtil.getAppI18n), 'expected getAppI18n function');
         q.ok(_.isFunction(cacheUtil.getUserCache), 'expected getUserCache function');
-        q.equal(_.size(cacheUtil), 9, 'is something exposed but not tested?');
+        q.equal(_.size(cacheUtil), 11, 'is something exposed but not tested?');
     });
 
     q.test('check Cache api', 4, function() {
@@ -69,6 +71,10 @@ define(function(require) {
     // Should work the exact same as above
     q.test('test setAppAuth/getAppAuth', 6, function() {
         testHelper('auth', 'AppAuth');
+    });
+
+    q.test('test setAppI18n/getAppI18n', 6, function() {
+        testHelper('i18n', 'AppI18n');
     });
 
     q.test('test getUserCache', 3, function() {

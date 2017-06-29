@@ -4,7 +4,6 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base'),
         VideoSettings = require('ev-script/models/video-settings');
 
@@ -46,7 +45,7 @@ define(function(require) {
                     embedView.render();
                     $dialogWrap.html(embedView.$el);
                 }, this),
-                closeText: Globalize.formatMessage('Close'),
+                closeText: this.i18n.formatMessage('Close'),
                 close: function(event, ui) {
                     $dialogWrap.dialog('destroy').remove();
                 }

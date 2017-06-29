@@ -6,37 +6,27 @@ define(function(require) {
         $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
+        testUtil = require('test/util'),
         cacheUtil = require('ev-script/util/cache'),
         BasicAuth = require('ev-script/auth/forms/auth'),
         eventsUtil = require('ev-script/util/events'),
         evSettings = require('ev-config'),
         AuthView = require('ev-script/auth/forms/view');
 
-    // TODO - this was copied from basic...make sure this is all valid
-
     q.module('Testing ev-script/auth/forms/view', {
-        setup: function() {
-            this.appId = 'ev-script/auth/forms/view';
-            eventsUtil.initEvents(this.appId);
-            this.config = _.extend({}, evSettings);
-            this.config.authType = 'forms';
-            this.config.urlCallback = function() {};
-            cacheUtil.setAppConfig(this.appId, this.config);
-            this.auth = new BasicAuth(this.appId);
-            this.view = new AuthView({
-                auth: this.auth,
-                appId: this.appId
-            });
-        },
-        teardown: function() {
-            if (this.auth.isAuthenticated()) {
-                q.stop();
-                this.auth.logout()
-                .always(function() {
-                    q.start();
+        setup: testUtil.setupHelper('ev-script/auth/forms/view', {
+            configCallback: function() {
+                this.config.authType = 'forms';
+            },
+            postAuthCallback: function() {
+                this.view = new AuthView({
+                    auth: this.auth,
+                    appId: this.appId
                 });
-            }
-        }
+            },
+            authenticate: false
+        }),
+        teardown: testUtil.teardownHelper()
     });
 
     // Note that AuthView can't extend our Base as that would (currently)

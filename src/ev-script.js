@@ -9,7 +9,7 @@ define(function(require) {
         Globalize = require('globalize'),
         moment = require('moment'),
         likelySubtags = require('json!cldr-data/supplemental/likelySubtags.json'),
-        messages = require('json!ev-script/i18n/messages.json'),
+        messages = require('json!ev-script/i18n/root/messages.json'),
         VideoSettings = require('ev-script/models/video-settings'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
         FieldView = require('ev-script/views/field'),
@@ -26,9 +26,6 @@ define(function(require) {
     require('cldr/supplemental');
     require('cldr/unresolved');
     require('globalize/message');
-    // Setup globalize
-    Globalize.load(likelySubtags);
-    Globalize.loadMessages(messages);
 
     var EnsembleApp = function(appOptions) {
 
@@ -82,20 +79,24 @@ define(function(require) {
             getTimeFormatCallback: function() { return 'hh:mmA'; },
             getDateTimeFormat: function() {
                 return this.getDateFormatCallback() + ' ' + this.getTimeFormatCallback();
-            }
+            },
+            // Relative path to i18n folder
+            relativeI18nPath: 'i18n'
         };
 
         // Add our configuration to the app cache...this is specific to this
         // 'app' instance.  There may be multiple instances on a single page w/
         // unique settings.
-        var config = cacheUtil.setAppConfig(appId, _.extend({}, defaults, appOptions)),
-            locale = config.getLocaleCallback();
+        var config = cacheUtil.setAppConfig(appId, _.extend({}, defaults, appOptions));
 
-        // Set locale for globalize
-        Globalize.locale(locale);
-
+        var locale = config.getLocaleCallback();
         // Set locale for moment
         moment.locale(locale);
+
+        // Features depend on asynchronously retreival of data below...so leverage
+        // promises to coordinate loading
+        var loading = $.Deferred();
+        _.extend(this, loading.promise());
 
         // Create an event aggregator specific to our app
         eventsUtil.initEvents(appId);
@@ -103,84 +104,98 @@ define(function(require) {
         // eventsUtil also provides us with a global event aggregator for events
         // that span app instances
         this.globalEvents = eventsUtil.getEvents();
-
-        // Features depend on info asynchronously retreived below...so leverage
-        // promises to coordinate loading
-        var loading = $.Deferred();
-        _.extend(this, loading.promise());
-
         var info = new AppInfo({}, {
             appId: appId
         });
         cacheUtil.setAppInfo(appId, info);
-        info.fetch({})
-        .always(_.bind(function() {
-            // This is kinda lazy...but this will only be set in 3.6+ versions
-            // so we don't actually need to check the version number
-            if (!info.get('ApplicationVersion') && config.authType === 'forms') {
-                loading.reject('Configured to use forms authentication against a pre-3.6 API.');
-            } else {
-                // This will initialize and cache an auth object for our app
-                var auth;
-                switch (config.authType) {
-                    case 'forms':
-                        auth = new FormsAuth(appId);
-                        break;
-                    case 'none':
-                        auth = new NoneAuth(appId);
-                        break;
-                    default:
-                        auth = new BasicAuth(appId);
-                        break;
+
+        var finishLoading = _.bind(function() {
+
+            // Setup globalize
+            Globalize.load(likelySubtags);
+            Globalize.loadMessages(messages);
+            cacheUtil.setAppI18n(appId, new Globalize(!messages[locale] ? 'en-US' : locale));
+
+            // Load application info from EV
+            info.fetch({})
+            .always(_.bind(function() {
+                // This is kinda lazy...but this will only be set in 3.6+ versions
+                // so we don't actually need to check the version number
+                if (!info.get('ApplicationVersion') && config.authType === 'forms') {
+                    loading.reject('Configured to use forms authentication against a pre-3.6 API.');
+                } else {
+                    // This will initialize and cache an auth object for our app
+                    var auth;
+                    switch (config.authType) {
+                        case 'forms':
+                            auth = new FormsAuth(appId);
+                            break;
+                        case 'none':
+                            auth = new NoneAuth(appId);
+                            break;
+                        default:
+                            auth = new BasicAuth(appId);
+                            break;
+                    }
+                    cacheUtil.setAppAuth(appId, auth);
+
+                    // TODO - document and add some flexibility to params (e.g. in addition
+                    // to selector allow element or object).
+                    this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
+                        var $field = $(fieldSelector, fieldWrap);
+                        var fieldView = new FieldView({
+                            id: fieldWrap.id || appId,
+                            el: fieldWrap,
+                            model: settingsModel,
+                            $field: $field,
+                            appId: appId
+                        });
+                    };
+
+                    // TODO - document.  See handleField comment too.
+                    this.handleEmbed = function(embedWrap, settingsModel) {
+                        if (settingsModel instanceof VideoSettings) {
+                            var videoEmbed = new VideoEmbedView({
+                                el: embedWrap,
+                                model: settingsModel,
+                                appId: appId
+                            });
+                            videoEmbed.render();
+                        } else {
+                            var playlistEmbed = new PlaylistEmbedView({
+                                el: embedWrap,
+                                model: settingsModel,
+                                appId: appId
+                            });
+                            playlistEmbed.render();
+                        }
+                    };
+
+                    this.getEmbedCode = function(settings) {
+                        var $div = $('<div/>');
+                        if (settings.type === 'video') {
+                            this.handleEmbed($div[0], new VideoSettings(settings));
+                        } else {
+                            this.handleEmbed($div[0], new PlaylistSettings(settings));
+                        }
+                        return $div.html();
+                    };
+
+                    this.appEvents.trigger('appLoaded');
+                    loading.resolve();
                 }
-                cacheUtil.setAppAuth(appId, auth);
+            }, this));
+        }, this);
 
-                // TODO - document and add some flexibility to params (e.g. in addition
-                // to selector allow element or object).
-                this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
-                    var $field = $(fieldSelector, fieldWrap);
-                    var fieldView = new FieldView({
-                        id: fieldWrap.id || appId,
-                        el: fieldWrap,
-                        model: settingsModel,
-                        $field: $field,
-                        appId: appId
-                    });
-                };
-
-                // TODO - document.  See handleField comment too.
-                this.handleEmbed = function(embedWrap, settingsModel) {
-                    if (settingsModel instanceof VideoSettings) {
-                        var videoEmbed = new VideoEmbedView({
-                            el: embedWrap,
-                            model: settingsModel,
-                            appId: appId
-                        });
-                        videoEmbed.render();
-                    } else {
-                        var playlistEmbed = new PlaylistEmbedView({
-                            el: embedWrap,
-                            model: settingsModel,
-                            appId: appId
-                        });
-                        playlistEmbed.render();
-                    }
-                };
-
-                this.getEmbedCode = function(settings) {
-                    var $div = $('<div/>');
-                    if (settings.type === 'video') {
-                        this.handleEmbed($div[0], new VideoSettings(settings));
-                    } else {
-                        this.handleEmbed($div[0], new PlaylistSettings(settings));
-                    }
-                    return $div.html();
-                };
-
-                this.appEvents.trigger('appLoaded');
-                loading.resolve();
-            }
-        }, this));
+        // Load messages for locale
+        $.getJSON(config.relativeI18nPath + '/' + locale + '/messages.json')
+        .done(function(data, status, xhr) {
+            _.extend(messages, data);
+            finishLoading();
+        })
+        .fail(function(xhr, status, error) {
+            finishLoading();
+        });
     };
 
     return {

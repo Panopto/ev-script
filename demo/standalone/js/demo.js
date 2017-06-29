@@ -9,7 +9,8 @@
         fitToParent: true,
         getLocaleCallback: function() { return 'es-MX'; },
         getDateFormatCallback: function() { return 'DD/MM/YYYY'; },
-        getTimeFormatCallback: function() { return 'hh:mm A'; }
+        getTimeFormatCallback: function() { return 'hh:mm A'; },
+        relativeI18nPath: '../../src/ev-script/i18n'
     }));
 
     app.appEvents.bind('fieldUpdated', function($field, value) {

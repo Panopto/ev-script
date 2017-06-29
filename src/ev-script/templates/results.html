@@ -1,6 +1,6 @@
 <div class="total">
-    <%= Globalize.formatMessage('Search returned {0} results.', totalResults) %>
-    <a href="#" class="action-refresh" title="<%= Globalize.formatMessage('Reload') %>"><i class="fa fa-fw fa-lg fa-refresh"></i></a>
+    <%= i18n.formatMessage('Search returned {0} results.', totalResults) %>
+    <a href="#" class="action-refresh" title="<%= i18n.formatMessage('Reload') %>"><i class="fa fa-fw fa-lg fa-refresh"></i></a>
 </div>
 <div class="results">
     <table class="content-list"></table>

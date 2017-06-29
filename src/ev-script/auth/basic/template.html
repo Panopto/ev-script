@@ -2,16 +2,16 @@
 <form>
     <fieldset>
         <div class="fieldWrap">
-            <label for="username"><%= Globalize.formatMessage('Username') %></label>
+            <label for="username"><%= i18n.formatMessage('Username') %></label>
             <input id="username" name="username" class="form-text" type="text"/>
         </div>
         <div class="fieldWrap">
-            <label for="password"><%= Globalize.formatMessage('Password') %></label>
+            <label for="password"><%= i18n.formatMessage('Password') %></label>
             <input id="password" name="password" class="form-text" type="password"/>
         </div>
         <div class="form-actions">
             <label></label>
-            <input type="submit" class="form-submit action-submit" value="<%= Globalize.formatMessage('Submit') %>"/>
+            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage('Submit') %>"/>
         </div>
     </fieldset>
 </form>

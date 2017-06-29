@@ -4,7 +4,6 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base'),
         VideoSettings = require('ev-script/models/video-settings'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
@@ -186,10 +185,10 @@ define(function(require) {
             var ensembleUrl = this.config.ensembleUrl,
                 name, label, type, thumbnailUrl;
             if (this.model instanceof VideoSettings) {
-                label = Globalize.formatMessage('Media');
+                label = this.i18n.formatMessage('Media');
                 type = 'video';
             } else {
-                label = Globalize.formatMessage('Playlist');
+                label = this.i18n.formatMessage('Playlist');
                 type = 'playlist';
             }
             if (this.model.id) {
@@ -211,7 +210,7 @@ define(function(require) {
                 this.$field.after(this.$actions);
             }
             this.$actions.html(this.template({
-                Globalize: Globalize,
+                i18n: this.i18n,
                 ensembleUrl: ensembleUrl,
                 modelId: this.model.id,
                 label: label,

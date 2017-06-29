@@ -2,24 +2,24 @@
 <form>
     <fieldset>
         <div class="fieldWrap">
-            <label for="username"><%= Globalize.formatMessage('Username') %></label>
+            <label for="username"><%= i18n.formatMessage('Username') %></label>
             <input id="username" name="username" class="form-text" type="text"/>
         </div>
         <div class="fieldWrap">
-            <label for="password"><%= Globalize.formatMessage('Password') %></label>
+            <label for="password"><%= i18n.formatMessage('Password') %></label>
             <input id="password" name="password" class="form-text" type="password"/>
         </div>
         <div class="fieldWrap">
-            <label for="provider"><%= Globalize.formatMessage('Identity Provider') %></label>
+            <label for="provider"><%= i18n.formatMessage('Identity Provider') %></label>
             <select id="provider" name="provider" class="form-select"></select>
         </div>
         <div class="fieldWrap">
-            <label for="remember"><%= Globalize.formatMessage('Remember Me') %></label>
+            <label for="remember"><%= i18n.formatMessage('Remember Me') %></label>
             <input id="remember" name="remember" type="checkbox"></input>
         </div>
         <div class="form-actions">
             <label></label>
-            <input type="submit" class="form-submit action-submit" value="<%= Globalize.formatMessage('Submit') %>"/>
+            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage('Submit') %>"/>
             <div class="loader"></div>
         </div>
     </fieldset>

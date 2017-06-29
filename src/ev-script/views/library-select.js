@@ -3,7 +3,6 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
-        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -12,7 +11,7 @@ define(function(require) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render');
             this.picker = options.picker;
-            this.$el.html('<option value="-1">' + Globalize.formatMessage('Loading...') + '</option>');
+            this.$el.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
             this.collection.on('reset', this.render);
         },
         render: function() {

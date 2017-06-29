@@ -1,58 +1,58 @@
 <form>
     <fieldset>
         <div class="accordion">
-            <h4><%= Globalize.formatMessage('Choose Layout') %></h4>
+            <h4><%= i18n.formatMessage('Choose Layout') %></h4>
             <div>
                 <div class="fieldWrap inline-option">
                     <input id="playlist" class="form-radio" <% if (model.get('layout') === 'playlist') { print('checked="checked"'); } %> name="layout" value="playlist" type="radio"/>
-                    <label for="playlist"><%= Globalize.formatMessage('Playlist') %></label>
+                    <label for="playlist"><%= i18n.formatMessage('Playlist') %></label>
                 </div>
                 <div class="fieldWrap inline-option">
                     <input id="showcase" class="form-radio" <% if (model.get('layout') === 'showcase') { print('checked="checked"'); } %> name="layout" value="showcase" type="radio"/>
-                    <label for="showcase"><%= Globalize.formatMessage('Showcase') %></label>
+                    <label for="showcase"><%= i18n.formatMessage('Showcase') %></label>
                 </div>
             </div>
-            <h4><%= Globalize.formatMessage('Layout Options') %></h4>
+            <h4><%= i18n.formatMessage('Layout Options') %></h4>
             <div>
                 <div class="playlistOptions" <% if (model.get('layout') === 'showcase') { print('style="display:none;"'); } %>>
                     <div class="fieldWrap">
-                        <label for="playlistSortBy"><%= Globalize.formatMessage('Sort By') %></label>
+                        <label for="playlistSortBy"><%= i18n.formatMessage('Sort By') %></label>
                         <select id="playlistSortBy" class="form-select">
-                            <option value="videoDate" <% if (model.get('playlistLayout').playlistSortBy === 'videoDate') { print('selected="selected"'); } %>><%= Globalize.formatMessage('Date Added') %></option>
-                            <option value="videoDateProduced" <% if (model.get('playlistLayout').playlistSortBy === 'videoDateProduced') { print('selected="selected"'); } %>><%= Globalize.formatMessage('Date Produced') %></option>
-                            <option value="videoDescription" <% if (model.get('playlistLayout').playlistSortBy === 'videoDescription') { print('selected="selected"'); } %>><%= Globalize.formatMessage('Description') %></option>
-                            <option value="videoTitle" <% if (model.get('playlistLayout').playlistSortBy === 'videoTitle') { print('selected="selected"'); } %>><%= Globalize.formatMessage('Title') %></option>
-                            <option value="videoDuration" <% if (model.get('playlistLayout').playlistSortBy === 'videoDuration') { print('selected="selected"'); } %>><%= Globalize.formatMessage('Duration') %></option>
-                            <option value="videoKeywords" <% if (model.get('playlistLayout').playlistSortBy === 'videoKeywords') { print('selected="selected"'); } %>><%= Globalize.formatMessage('Keywords') %></option>
+                            <option value="videoDate" <% if (model.get('playlistLayout').playlistSortBy === 'videoDate') { print('selected="selected"'); } %>><%= i18n.formatMessage('Date Added') %></option>
+                            <option value="videoDateProduced" <% if (model.get('playlistLayout').playlistSortBy === 'videoDateProduced') { print('selected="selected"'); } %>><%= i18n.formatMessage('Date Produced') %></option>
+                            <option value="videoDescription" <% if (model.get('playlistLayout').playlistSortBy === 'videoDescription') { print('selected="selected"'); } %>><%= i18n.formatMessage('Description') %></option>
+                            <option value="videoTitle" <% if (model.get('playlistLayout').playlistSortBy === 'videoTitle') { print('selected="selected"'); } %>><%= i18n.formatMessage('Title') %></option>
+                            <option value="videoDuration" <% if (model.get('playlistLayout').playlistSortBy === 'videoDuration') { print('selected="selected"'); } %>><%= i18n.formatMessage('Duration') %></option>
+                            <option value="videoKeywords" <% if (model.get('playlistLayout').playlistSortBy === 'videoKeywords') { print('selected="selected"'); } %>><%= i18n.formatMessage('Keywords') %></option>
                             <!-- <option value="videoCustomPosition">Custom Order</option> -->
                         </select>
                     </div>
                     <div>
                         <div class="fieldWrap inline-option">
                             <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get('playlistLayout').playlistSortDirection === 'asc') { print('checked="checked"'); } %> name="playlistSortDirection" value="asc" type="radio"/>
-                            <label for="playlist"><%= Globalize.formatMessage('Ascending') %></label>
+                            <label for="playlist"><%= i18n.formatMessage('Ascending') %></label>
                         </div>
                         <div class="fieldWrap inline-option">
                             <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get('playlistLayout').playlistSortDirection === 'desc') { print('checked="checked"'); } %> name="playlistSortDirection" value="desc" type="radio"/>
-                            <label for="playlist"><%= Globalize.formatMessage('Descending') %></label>
+                            <label for="playlist"><%= i18n.formatMessage('Descending') %></label>
                         </div>
                     </div>
                     <div>
                         <div class="fieldWrap">
-                            <label for="playlistSearchString"><%= Globalize.formatMessage('Search String') %></label>
+                            <label for="playlistSearchString"><%= i18n.formatMessage('Search String') %></label>
                             <input id="playlistSearchString" class="form-text" name="playlistSearchString" value="<%- model.get('playlistLayout').playlistSearchString %>" type="text"/>
                         </div>
                         <div class="fieldWrap">
-                            <label for="playlistCategory"><%= Globalize.formatMessage('Category') %></label>
+                            <label for="playlistCategory"><%= i18n.formatMessage('Category') %></label>
                             <select id="playlistCategory" class="form-select" name="playlistCategory">
-                                <option value="" <% if (!model.get('playlistLayout').playlistCategory) { print('selected="selected"'); } %>>-- <%= Globalize.formatMessage('None') %> --</option>
+                                <option value="" <% if (!model.get('playlistLayout').playlistCategory) { print('selected="selected"'); } %>>-- <%= i18n.formatMessage('None') %> --</option>
                                 <% categories.each(function(category) { %>
                                     <option value="<%= category.id %>" <% if (model.get('playlistLayout').playlistCategory === category.id) { print('selected="selected"'); } %>><%- category.get('categoryName') %></option>
                                 <% }); %>
                             </select>
                         </div>
                         <div class="fieldWrap">
-                            <label for="playlistNumberOfResults"><%= Globalize.formatMessage('Number of Results') %></label>
+                            <label for="playlistNumberOfResults"><%= i18n.formatMessage('Number of Results') %></label>
                             <input id="playlistNumberOfResults" class="form-text" name="playlistNumberOfResults" value="<%- model.get('playlistLayout').playlistNumberOfResults %>" type="text"/>
                         </div>
                     </div>
@@ -66,79 +66,79 @@
  -->
                     <div class="fieldWrap">
                         <input id="categoryList" class="form-checkbox" type="checkbox" name="categoryList" <% if (model.get('showcaseLayout').categoryList) { print('checked="checked"'); } %>/>
-                        <label for="categoryList"><%= Globalize.formatMessage('Category List') %></label>
+                        <label for="categoryList"><%= i18n.formatMessage('Category List') %></label>
                     </div>
                     <div>
                         <div class="fieldWrap">
                             <input id="categoryOrientationHorizontal" class="form-radio" <% if (model.get('showcaseLayout').categoryOrientation === 'horizontal') { print('checked="checked"'); } %> <% if (!model.get('showcaseLayout').categoryList) { print('disabled'); } %> name="categoryOrientation" value="horizontal" type="radio"/>
-                            <label for="playlist"><%= Globalize.formatMessage('Horizontal') %></label>
+                            <label for="playlist"><%= i18n.formatMessage('Horizontal') %></label>
                         </div>
                         <div class="fieldWrap">
                             <input id="categoryOrientationVertical" class="form-radio" <% if (model.get('showcaseLayout').categoryOrientation === 'vertical') { print('checked="checked"'); } %> <% if (!model.get('showcaseLayout').categoryList) { print('disabled'); } %> name="categoryOrientation" value="vertical" type="radio"/>
-                            <label for="playlist"><%= Globalize.formatMessage('Vertical') %></label>
+                            <label for="playlist"><%= i18n.formatMessage('Vertical') %></label>
                         </div>
                     </div>
                 </div>
             </div>
-            <h4><%= Globalize.formatMessage('Content Details') %></h4>
+            <h4><%= i18n.formatMessage('Content Details') %></h4>
             <div>
                 <div class="fieldWrap inline-option">
                     <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get('embedcode')) { print('checked="checked"'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print('disabled') } %> />
-                    <label for="embedcode"><%= Globalize.formatMessage('Embed Code') %></label>
+                    <label for="embedcode"><%= i18n.formatMessage('Embed Code') %></label>
                 </div>
                 <div class="fieldWrap inline-option">
                     <input id="statistics" class="form-checkbox" <% if (model.get('statistics')) { print('checked="checked"'); } %> name="statistics" type="checkbox"/>
-                    <label for="statistics"><%= Globalize.formatMessage('Statistics') %></label>
+                    <label for="statistics"><%= i18n.formatMessage('Statistics') %></label>
                 </div>
                 <div class="fieldWrap inline-option">
                     <input id="duration" class="form-checkbox" <% if (model.get('duration')) { print('checked="checked"'); } %> name="duration" type="checkbox"/>
-                    <label for="duration"><%= Globalize.formatMessage('Duration') %></label>
+                    <label for="duration"><%= i18n.formatMessage('Duration') %></label>
                 </div>
                 <div class="fieldWrap inline-option">
                     <input id="attachments" class="form-checkbox" <% if (model.get('attachments')) { print('checked="checked"'); } %> name="attachments" type="checkbox"/>
-                    <label for="attachments"><%= Globalize.formatMessage('Attachments') %></label>
+                    <label for="attachments"><%= i18n.formatMessage('Attachments') %></label>
                 </div>
                 <div class="fieldWrap inline-option">
                     <input id="annotations" class="form-checkbox" <% if (model.get('annotations')) { print('checked="checked"'); } %> name="annotations" type="checkbox"/>
-                    <label for="annotations"><%= Globalize.formatMessage('Annotations') %></label>
+                    <label for="annotations"><%= i18n.formatMessage('Annotations') %></label>
                 </div>
                 <div class="fieldWrap inline-option">
                     <input id="links" class="form-checkbox" <% if (model.get('links')) { print('checked="checked"'); } %> name="links" type="checkbox"/>
-                    <label for="links"><%= Globalize.formatMessage('Links') %></label>
+                    <label for="links"><%= i18n.formatMessage('Links') %></label>
                 </div>
                 <div class="fieldWrap inline-option">
                     <input id="credits" class="form-checkbox" <% if (model.get('credits')) { print('checked="checked"'); } %> name="credits" type="checkbox"/>
-                    <label for="credits"><%= Globalize.formatMessage('Credits') %></label>
+                    <label for="credits"><%= i18n.formatMessage('Credits') %></label>
                 </div>
                 <div class="fieldWrap inline-option">
                     <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get('socialsharing')) { print('checked="checked"'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print('disabled') } %> />
-                    <label for="socialsharing"><%= Globalize.formatMessage('Social Tools') %></label>
+                    <label for="socialsharing"><%= i18n.formatMessage('Social Tools') %></label>
                 </div>
                 <div class="fieldWrap inline-option">
                     <input id="autoplay" class="form-checkbox" <% if (model.get('autoplay')) { print('checked="checked"'); } %>  name="autoplay" type="checkbox"/>
-                    <label for="autoplay"><%= Globalize.formatMessage('Auto Play (PC Only)') %></label>
+                    <label for="autoplay"><%= i18n.formatMessage('Auto Play (PC Only)') %></label>
                 </div>
                 <div class="fieldWrap inline-option">
                     <input id="showcaptions" class="form-checkbox" <% if (model.get('showcaptions')) { print('checked="checked"'); } %>  name="showcaptions" type="checkbox"/>
-                    <label for="showcaptions"><%= Globalize.formatMessage('Captions "On" By Default') %></label>
+                    <label for="showcaptions"><%= i18n.formatMessage('Captions "On" By Default') %></label>
                 </div>
                 <div class="fieldWrap inline-option">
                     <input id="dateproduced" class="form-checkbox" <% if (model.get('dateproduced')) { print('checked="checked"'); } %> name="dateproduced" type="checkbox"/>
-                    <label for="dateproduced"><%= Globalize.formatMessage('Date Produced') %></label>
+                    <label for="dateproduced"><%= i18n.formatMessage('Date Produced') %></label>
                 </div>
                 <div class="fieldWrap inline-option">
                     <input id="audiopreviewimage" class="form-checkbox" <% if (model.get('audiopreviewimage')) { print('checked="checked"'); } %> name="audiopreviewimage" type="checkbox"/>
-                    <label for="audiopreviewimage"><%= Globalize.formatMessage('Audio Preview Image') %></label>
+                    <label for="audiopreviewimage"><%= i18n.formatMessage('Audio Preview Image') %></label>
                 </div>
                 <div class="fieldWrap inline-option">
                     <input id="captionsearch" class="form-checkbox" <% if (model.get('captionsearch')) { print('checked="checked"'); } %> name="captionsearch" type="checkbox"/>
-                    <label for="captionsearch"><%= Globalize.formatMessage('Caption Search') %></label>
+                    <label for="captionsearch"><%= i18n.formatMessage('Caption Search') %></label>
                 </div>
             </div>
         </div>
         <div class="form-actions">
-            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= Globalize.formatMessage('Save') %></span></button>
-            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= Globalize.formatMessage('Cancel') %></span></button>
+            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage('Save') %></span></button>
+            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage('Cancel') %></span></button>
         </div>
     </fieldset>
 </form>

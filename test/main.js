@@ -19,11 +19,16 @@
             'moxie': 'plupload/js/moxie',
             'plupload': 'plupload/js/plupload.dev',
             'text': 'text/text',
+            'json': 'requirejs-json/json',
             'underscore': 'underscore/underscore',
             'backbone': 'backbone/backbone',
             'semver': 'semver/semver.browser',
             'platform': 'platform.js/platform',
-            'base64': 'base64/base64'
+            'base64': 'base64/base64',
+            'cldr': 'cldrjs/dist/cldr',
+            'cldr-data': 'cldr-data',
+            'globalize': 'globalize/dist/globalize',
+            'moment': 'moment/min/moment-with-locales'
         },
         shim: {
             'moxie': [],

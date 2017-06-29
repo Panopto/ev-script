@@ -5,7 +5,6 @@ define(function(require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         moment = require('moment'),
-        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     require('ev-scroll-loader');
@@ -30,7 +29,7 @@ define(function(require) {
         getItemHtml: function(item, index) {
             if (this.resultTemplate) {
                 return this.resultTemplate({
-                    Globalize: Globalize,
+                    i18n: this.i18n,
                     dateTimeFormat: this.config.getDateTimeFormat(),
                     moment: moment,
                     item: item,
@@ -91,7 +90,7 @@ define(function(require) {
         decorate: function($item) {},
         render: function() {
             this.$el.html(this.resultsTemplate({
-                Globalize: Globalize,
+                i18n: this.i18n,
                 totalResults: this.collection.totalResults
             }));
             this.$total = this.$('.total');
@@ -106,7 +105,7 @@ define(function(require) {
                 }, this);
             } else {
                 $contentList.append(this.emptyTemplate({
-                    Globalize: Globalize
+                    i18n: this.i18n
                 }));
             }
             var scrollHeight = this.config.scrollHeight;

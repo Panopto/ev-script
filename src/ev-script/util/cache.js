@@ -54,6 +54,14 @@ define(function(require) {
         return _getAppCache(appId).get('info');
     };
 
+    var setAppI18n = function(appId, i18n) {
+        return _getAppCache(appId).set('i18n', i18n);
+    };
+
+    var getAppI18n = function(appId) {
+        return _getAppCache(appId).get('i18n');
+    };
+
     var getUserCache = function(ensembleUrl, user) {
         var appCache = caches.get(ensembleUrl);
         if (!appCache) {
@@ -75,6 +83,8 @@ define(function(require) {
         getAppAuth: getAppAuth,
         setAppInfo: setAppInfo,
         getAppInfo: getAppInfo,
+        setAppI18n: setAppI18n,
+        getAppI18n: getAppI18n,
         getUserCache: getUserCache
     };
 

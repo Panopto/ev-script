@@ -1,24 +1,24 @@
 <div class="logo">
-    <a target="_blank" href="<%= ensembleUrl %>"><span><%= Globalize.formatMessage('Ensemble Logo') %></span></a>
+    <a target="_blank" href="<%= ensembleUrl %>"><span><%= i18n.formatMessage('Ensemble Logo') %></span></a>
 </div>
 <% if (modelId) { %>
     <% if (thumbnailUrl) { %>
         <div class="thumbnail">
-            <img alt="<%= Globalize.formatMessage('Media thumbnail') %>" src="<%= thumbnailUrl %>"/>
+            <img alt="<%= i18n.formatMessage('Media thumbnail') %>" src="<%= thumbnailUrl %>"/>
         </div>
     <% } %>
     <div class="title"><%= name %></div>
     <div class="ev-actions">
-        <a href="#" class="action-choose" title="<%= Globalize.formatMessage('Change {0}', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= Globalize.formatMessage('Change {0}', label) %><span></a>
-        <a href="#" class="action-preview" title="<%= Globalize.formatMessage('Preview:') %> <%= name %>"><i class="fa fa-play-circle fa-lg"></i><span><%= Globalize.formatMessage('Preview:') %> <%= name %><span></a>
+        <a href="#" class="action-choose" title="<%= i18n.formatMessage('Change {0}', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage('Change {0}', label) %><span></a>
+        <a href="#" class="action-preview" title="<%= i18n.formatMessage('Preview:') %> <%= name %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage('Preview:') %> <%= name %><span></a>
         <% if (type === 'video' || showPlaylistOptions) { %>
-            <a href="#" class="action-options" title="<%= Globalize.formatMessage('{0} Embed Options', label) %>"><i class="fa fa-cog fa-lg"></i><span><%= Globalize.formatMessage('{0} Embed Options', label) %><span></a>
+            <a href="#" class="action-options" title="<%= i18n.formatMessage('{0} Embed Options', label) %>"><i class="fa fa-cog fa-lg"></i><span><%= i18n.formatMessage('{0} Embed Options', label) %><span></a>
         <% } %>
-        <a href="#" class="action-remove" title="<%= Globalize.formatMessage('Remove {0}', label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= Globalize.formatMessage('Remove {0}', label) %><span></a>
+        <a href="#" class="action-remove" title="<%= i18n.formatMessage('Remove {0}', label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= i18n.formatMessage('Remove {0}', label) %><span></a>
     </div>
 <% } else { %>
-    <div class="title"><em><%= Globalize.formatMessage('Add {0}', label) %></em></div>
+    <div class="title"><em><%= i18n.formatMessage('Add {0}', label) %></em></div>
     <div class="ev-actions">
-        <a href="#" class="action-choose" title="<%= Globalize.formatMessage('Choose {0}', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= Globalize.formatMessage('Choose {0}', label) %><span></a>
+        <a href="#" class="action-choose" title="<%= i18n.formatMessage('Choose {0}', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage('Choose {0}', label) %><span></a>
     </div>
 <% } %>

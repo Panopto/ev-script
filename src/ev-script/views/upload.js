@@ -4,7 +4,6 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Globalize = require('globalize'),
         plupload = require('plupload'),
         BaseView = require('ev-script/views/base'),
         Backbone = require('backbone'),
@@ -25,7 +24,7 @@ define(function(require) {
             this.field = options.field;
             this.$anchor = this.$el;
             this.setElement(this.template({
-                Globalize: Globalize
+                i18n: this.i18n
             }));
             this.$upload = this.$('.upload');
             this.workflows = options.workflows;
@@ -79,11 +78,11 @@ define(function(require) {
                         // Remove runtime tooltip
                         $('.plupload_container', this.$upload).removeAttr('title');
                         // Change text since we only allow single file upload
-                        $('.plupload_add', this.$upload).text(Globalize.formatMessage('Add file'));
+                        $('.plupload_add', this.$upload).text(this.i18n.formatMessage('Add file'));
                     }, this),
                     PostInit: _.bind(function(up, info) {
                         // Change text since we only allow single file upload
-                        $('.plupload_droptext', this.$upload).text(Globalize.formatMessage('Drag file here.'));
+                        $('.plupload_droptext', this.$upload).text(this.i18n.formatMessage('Drag file here.'));
                     }, this),
                     UploadFile: _.bind(function(up, file) {
                         up.settings.multipart_params = {
@@ -100,7 +99,7 @@ define(function(require) {
                                 if (up.state === plupload.STARTED) {
                                     if ($('.plupload_cancel', this.$upload).length === 0) {
                                         // Add cancel button
-                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">' + Globalize.formatMessage('Cancel upload') + '</a>')
+                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">' + this.i18n.formatMessage('Cancel upload') + '</a>')
                                         .insertBefore($('.plupload_filelist_footer .plupload_clearer', this.$upload))
                                         .click(_.bind(function() {
                                             up.stop();
@@ -177,7 +176,7 @@ define(function(require) {
                 $dialog;
             this.$anchor.after($dialogWrap);
             this.$dialog = $dialogWrap.dialog({
-                title: Globalize.formatMessage('Upload Media to Ensemble'),
+                title: this.i18n.formatMessage('Upload Media to Ensemble'),
                 modal: true,
                 width: this.getWidth(),
                 height: this.getHeight(),
@@ -187,7 +186,7 @@ define(function(require) {
                 create: _.bind(function(event, ui) {
                     $dialogWrap.html(this.$el);
                 }, this),
-                closeText: Globalize.formatMessage('Close'),
+                closeText: this.i18n.formatMessage('Close'),
                 close: _.bind(function(event, ui) {
                     this.$upload.pluploadQueue().destroy();
                     $dialogWrap.dialog('destroy').remove();

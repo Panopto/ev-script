@@ -20955,201 +20955,105 @@ return {
 });
 
 
-define("json!ev-script/i18n/messages.json", function () {
+define("json!ev-script/i18n/root/messages.json", function () {
 return {
-    root: {
-        '{0} Embed Options': '{0} Embed Options',
-        '{0} thumbnail image': '{0} thumbnail image',
-        'Add {0}': 'Add {0}',
-        'Add file': 'Add file',
-        'Annotations': 'Annotations',
-        'An unexpected error occurred.  Check the server log for more details.': 'An unexpected error occurred.  Check the server log for more details.',
-        'Ascending': 'Ascending',
-        'Attachments': 'Attachments',
-        'Audio Preview Image': 'Audio Preview Image',
-        'Auto Play': 'Auto Play',
-        'Auto Play (PC Only)': 'Auto Play (PC Only)',
-        'Cancel': 'Cancel',
-        'Cancel upload': 'Cancel upload',
-        'Caption Search': 'Caption Search',
-        'Captions "On" By Default': 'Captions "On" By Default',
-        'Category': 'Category',
-        'Category List': 'Category List',
-        'CC': 'CC',
-        'Change {0}': 'Change {0}',
-        'Choose {0}': 'Choose {0}',
-        'Choose': 'Choose',
-        'Choose Layout': 'Choose Layout',
-        'Close': 'Close',
-        'Content Details': 'Content Details',
-        'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.': 'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.',
-        'Credits': 'Credits',
-        'Date Added': 'Date Added',
-        'Date Produced': 'Date Produced',
-        'Descending': 'Descending',
-        'Description': 'Description',
-        'Download Link': 'Download Link',
-        'Drag file here.': 'Drag file here.',
-        'Duration': 'Duration',
-        'Embed Code': 'Embed Code',
-        'Ensemble Logo': 'Ensemble Logo',
-        'Ensemble Video Login': 'Ensemble Video Login',
-        'Go': 'Go',
-        'Hide Controls': 'Hide Controls',
-        'Hide': 'Hide',
-        'Hide Picker': 'Hide Picker',
-        'Horizontal': 'Horizontal',
-        'Identity Provider': 'Identity Provider',
-        'It appears there is an issue with the Ensemble Video installation.': 'It appears there is an issue with the Ensemble Video installation.',
-        'Keywords': 'Keywords',
-        'Layout Options': 'Layout Options',
-        'Less': 'Less',
-        'Library:': 'Library:',
-        'Library': 'Library',
-        'Links': 'Links',
-        'Loading...': 'Loading...',
-        'Logout {0}': 'Logout {0}',
-        'Logout': 'Logout',
-        'Media Library': 'Media Library',
-        'Media': 'Media',
-        'Media thumbnail': 'Media thumbnail',
-        'Meta Data': 'Meta Data',
-        'More': 'More',
-        'None': 'None',
-        'No results available.': 'No results available.',
-        'Number of Results': 'Number of Results',
-        'Organization:': 'Organization:',
-        'Original': 'Original',
-        'Password': 'Password',
-        'Playlist': 'Playlist',
-        'Preview: {0}': 'Preview: {0}',
-        'Preview:': 'Preview:',
-        'Record': 'Record',
-        'Reload': 'Reload',
-        'Remember Me': 'Remember Me',
-        'Remove {0}': 'Remove {0}',
-        'Save': 'Save',
-        'Search Media': 'Search Media',
-        'Search returned {0} results.': 'Search returned {0} results.',
-        'Search:': 'Search:',
-        'Search String': 'Search String',
-        'Select Library': 'Select Library',
-        'Select Library Type': 'Select Library Type',
-        'Select Organization': 'Select Organization',
-        'Shared Library': 'Shared Library',
-        'Show Captions': 'Show Captions',
-        'Showcase': 'Showcase',
-        'Show Title': 'Show Title',
-        'Size': 'Size',
-        'Social Tools': 'Social Tools',
-        'Sort By': 'Sort By',
-        'Statistics': 'Statistics',
-        'Submit': 'Submit',
-        'Title': 'Title',
-        'Type:': 'Type:',
-        'Upload Media to Ensemble': 'Upload Media to Ensemble',
-        'Upload': 'Upload',
-        'Username': 'Username',
-        'Vertical': 'Vertical',
-        'You are unauthorized to access this content.': 'You are unauthorized to access this content.'
+    "root": {
+        "{0} Embed Options": "{0} Embed Options",
+        "{0} thumbnail image": "{0} thumbnail image",
+        "Add {0}": "Add {0}",
+        "Add file": "Add file",
+        "Annotations": "Annotations",
+        "An unexpected error occurred.  Check the server log for more details.": "An unexpected error occurred.  Check the server log for more details.",
+        "Ascending": "Ascending",
+        "Attachments": "Attachments",
+        "Audio Preview Image": "Audio Preview Image",
+        "Auto Play": "Auto Play",
+        "Auto Play (PC Only)": "Auto Play (PC Only)",
+        "Cancel": "Cancel",
+        "Cancel upload": "Cancel upload",
+        "Caption Search": "Caption Search",
+        "Captions \"On\" By Default": "Captions \"On\" By Default",
+        "Category": "Category",
+        "Category List": "Category List",
+        "CC": "CC",
+        "Change {0}": "Change {0}",
+        "Choose {0}": "Choose {0}",
+        "Choose": "Choose",
+        "Choose Layout": "Choose Layout",
+        "Close": "Close",
+        "Content Details": "Content Details",
+        "Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.": "Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.",
+        "Credits": "Credits",
+        "Date Added": "Date Added",
+        "Date Produced": "Date Produced",
+        "Descending": "Descending",
+        "Description": "Description",
+        "Download Link": "Download Link",
+        "Drag file here.": "Drag file here.",
+        "Duration": "Duration",
+        "Embed Code": "Embed Code",
+        "Ensemble Logo": "Ensemble Logo",
+        "Ensemble Video Login": "Ensemble Video Login",
+        "Go": "Go",
+        "Hide Controls": "Hide Controls",
+        "Hide": "Hide",
+        "Hide Picker": "Hide Picker",
+        "Horizontal": "Horizontal",
+        "Identity Provider": "Identity Provider",
+        "It appears there is an issue with the Ensemble Video installation.": "It appears there is an issue with the Ensemble Video installation.",
+        "Keywords": "Keywords",
+        "Layout Options": "Layout Options",
+        "Less": "Less",
+        "Library:": "Library:",
+        "Library": "Library",
+        "Links": "Links",
+        "Loading...": "Loading...",
+        "Logout {0}": "Logout {0}",
+        "Logout": "Logout",
+        "Media Library": "Media Library",
+        "Media": "Media",
+        "Media thumbnail": "Media thumbnail",
+        "Meta Data": "Meta Data",
+        "More": "More",
+        "None": "None",
+        "No results available.": "No results available.",
+        "Number of Results": "Number of Results",
+        "Organization:": "Organization:",
+        "Original": "Original",
+        "Password": "Password",
+        "Playlist": "Playlist",
+        "Preview: {0}": "Preview: {0}",
+        "Preview:": "Preview:",
+        "Record": "Record",
+        "Reload": "Reload",
+        "Remember Me": "Remember Me",
+        "Remove {0}": "Remove {0}",
+        "Save": "Save",
+        "Search Media": "Search Media",
+        "Search returned {0} results.": "Search returned {0} results.",
+        "Search:": "Search:",
+        "Search String": "Search String",
+        "Select Library": "Select Library",
+        "Select Library Type": "Select Library Type",
+        "Select Organization": "Select Organization",
+        "Shared Library": "Shared Library",
+        "Show Captions": "Show Captions",
+        "Showcase": "Showcase",
+        "Show Title": "Show Title",
+        "Size": "Size",
+        "Social Tools": "Social Tools",
+        "Sort By": "Sort By",
+        "Statistics": "Statistics",
+        "Submit": "Submit",
+        "Title": "Title",
+        "Type:": "Type:",
+        "Upload Media to Ensemble": "Upload Media to Ensemble",
+        "Upload": "Upload",
+        "Username": "Username",
+        "Vertical": "Vertical",
+        "You are unauthorized to access this content.": "You are unauthorized to access this content."
     },
-    'en-US': {},
-    'es-MX': {
-        '{0} Embed Options': '{0} Opciones de Inserción',
-        '{0} thumbnail image': '{0} imagen miniatura',
-        'Add {0}': 'Añadir {0}',
-        'Add file': 'Añadir archivo',
-        'Annotations': 'Anotaciones',
-        'An unexpected error occurred.  Check the server log for more details.': 'Ha ocurrido un error. Revise los registros del servidor para mayores detalles.',
-        'Ascending': 'Ascendente',
-        'Attachments': 'Adjuntos',
-        'Audio Preview Image': 'Prevista del Audio',
-        'Auto Play': 'Auto Play',
-        'Auto Play (PC Only)': 'Auto Play (Solo PC)',
-        'Cancel': 'Cancelar',
-        'Cancel upload': 'Cancelar carga',
-        'Caption Search': 'Búsqueda de Subtítulos',
-        'Captions "On" By Default': 'Subtítulos "Encendido" por Defecto',
-        'Category List': 'Lista de Categoría',
-        'Category': 'Categoría',
-        'CC': 'CC',
-        'Change {0}': 'Cambiar {0}',
-        'Choose {0}': 'Seleccionar {0}',
-        'Choose Layout': 'Seleccionar Diseño',
-        'Choose': 'Seleccionar',
-        'Close': 'Cerrar',
-        'Content Details': 'Detalles del Contenido',
-        'Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.': 'No se encuentra el recurso solicitado. Este parece ser un problema con la configuración del url base de Ensemble Video.',
-        'Credits': 'Créditos',
-        'Date Added': 'Fecha Agregada',
-        'Date Produced': 'Fecha de Producción',
-        'Descending': 'Descendente',
-        'Description': 'Descripción',
-        'Download Link': 'Enlace de descarga',
-        'Drag file here.': 'Arrastre aquí el archivo.',
-        'Duration': 'Duración',
-        'Embed Code': 'Incrustar Código',
-        'Ensemble Logo': 'Logotipo de Ensemble',
-        'Ensemble Video Login': 'Inicio de Sesión de Ensemble Video',
-        'Go': 'Go',
-        'Hide Controls': 'Ocultar Controles',
-        'Hide': 'Ocultar',
-        'Hide Picker': 'Ocultar Selector',
-        'Horizontal': 'Horizontal',
-        'Identity Provider': 'Proveedor de Identidad',
-        'It appears there is an issue with the Ensemble Video installation.': 'Al parecer hay un problema con la instalación de Ensemble Video.',
-        'Keywords': 'Palabras Clave',
-        'Layout Options': 'Opciones de Diseño',
-        'Less': 'Menos',
-        'Library:': 'Biblioteca:',
-        'Library': 'Biblioteca',
-        'Links': 'Enlaces',
-        'Loading...': 'Cargando...',
-        'Logout {0}': 'Cerrar sesión {0}',
-        'Logout': 'Cerrar sesión',
-        'Media Library': 'Biblioteca de Medios',
-        'Media': 'Medios',
-        'Media thumbnail': 'Miniatura de Medios',
-        'Meta Data': 'Meta Datos',
-        'More': 'Más',
-        'None': 'Ninguno',
-        'No results available.': 'No hay resultados disponibles.',
-        'Number of Results': 'Número de Resultados',
-        'Organization:': 'Organización:',
-        'Original': 'Original',
-        'Password': 'Contraseña',
-        'Playlist': 'Playlist',
-        'Preview: {0}': 'Prevista: {0}',
-        'Preview:': 'Prevista:',
-        'Record': 'Grabar',
-        'Reload': 'Recargar',
-        'Remember Me': 'Recordarme',
-        'Remove {0}': 'Remover {0}',
-        'Save': 'Guardar',
-        'Search Media': 'Buscar Medios',
-        'Search:': 'Buscar:',
-        'Search returned {0} results.': 'La búsqueda ha devuelto {0} resultados.',
-        'Search String': 'Buscar Cadena de Texto',
-        'Select Library': 'Seleccionar Biblioteca',
-        'Select Library Type': 'Seleccionar Tipo de Biblioteca',
-        'Select Organization': 'Seleccionar Organización',
-        'Shared Library': 'Biblioteca Compartida',
-        'Show Captions': 'Mostrar Subtitulos',
-        'Showcase': 'Escaparate',
-        'Show Title': 'Mostrar Título',
-        'Size': 'Tamaño',
-        'Social Tools': 'Herramientas Sociales',
-        'Sort By': 'Ordenar Por',
-        'Statistics': 'Estadísticas',
-        'Submit': 'Enviar',
-        'Title': 'Título',
-        'Type:': 'Tipo:',
-        'Upload Media to Ensemble': 'Cargar Archivos Multimedia a Ensemble',
-        'Upload': 'Cargar',
-        'Username': 'Nombre de Usuario',
-        'Vertical': 'Vertical',
-        'You are unauthorized to access this content.': 'No estás autorizado a accede a este contenido.'
-    }
+    "en-US": {}
 }
 ;
 });
@@ -21307,6 +21211,14 @@ define('ev-script/util/cache',['require','jquery','underscore','backbone'],funct
         return _getAppCache(appId).get('info');
     };
 
+    var setAppI18n = function(appId, i18n) {
+        return _getAppCache(appId).set('i18n', i18n);
+    };
+
+    var getAppI18n = function(appId) {
+        return _getAppCache(appId).get('i18n');
+    };
+
     var getUserCache = function(ensembleUrl, user) {
         var appCache = caches.get(ensembleUrl);
         if (!appCache) {
@@ -21328,19 +21240,20 @@ define('ev-script/util/cache',['require','jquery','underscore','backbone'],funct
         getAppAuth: getAppAuth,
         setAppInfo: setAppInfo,
         getAppInfo: getAppInfo,
+        setAppI18n: setAppI18n,
+        getAppI18n: getAppI18n,
         getUserCache: getUserCache
     };
 
 });
 
-define('ev-script/views/base',['require','jquery','underscore','backbone','globalize','ev-script/util/events','ev-script/util/cache'],function(require) {
+define('ev-script/views/base',['require','jquery','underscore','backbone','ev-script/util/events','ev-script/util/cache'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        Globalize = require('globalize'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
 
@@ -21352,16 +21265,17 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','globa
             this.info = cacheUtil.getAppInfo(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
             this.globalEvents = eventsUtil.getEvents('global');
+            this.i18n = cacheUtil.getAppI18n(this.appId);
         },
         ajaxError: function(xhr, authCallback) {
             if (xhr.status === 401) {
                 this.auth.handleUnauthorized(this.el, authCallback);
             } else if (xhr.status === 500) {
-                window.alert(Globalize.formatMessage('It appears there is an issue with the Ensemble Video installation.'));
+                window.alert(this.i18n.formatMessage('It appears there is an issue with the Ensemble Video installation.'));
             } else if (xhr.status === 404) {
-                window.alert(Globalize.formatMessage('Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.'));
+                window.alert(this.i18n.formatMessage('Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.'));
             } else if (xhr.status !== 0) {
-                window.alert(Globalize.formatMessage('An unexpected error occurred.  Check the server log for more details.'));
+                window.alert(this.i18n.formatMessage('An unexpected error occurred.  Check the server log for more details.'));
             }
         },
         unencode: function(encoded) {
@@ -22590,14 +22504,13 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','globa
 }.call(this));
 
 
-define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="<%= Globalize.formatMessage(\'Hide Picker\') %>"><%= Globalize.formatMessage(\'Hide\') %></a>\n<% if (showLogout) { %>\n    <a class="action-logout" href="#" title="<%= Globalize.formatMessage(\'Logout {0}\', username) %>"><%= Globalize.formatMessage(\'Logout\') %></a>\n<% } %>\n';});
+define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="<%= i18n.formatMessage(\'Hide Picker\') %>"><%= i18n.formatMessage(\'Hide\') %></a>\n<% if (showLogout) { %>\n    <a class="action-logout" href="#" title="<%= i18n.formatMessage(\'Logout {0}\', username) %>"><%= i18n.formatMessage(\'Logout\') %></a>\n<% } %>\n';});
 
-define('ev-script/views/hider',['require','underscore','globalize','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
+define('ev-script/views/hider',['require','underscore','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
-        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -22624,7 +22537,7 @@ define('ev-script/views/hider',['require','underscore','globalize','ev-script/vi
                 username = this.auth.getUser().get('UserName');
             }
             this.$el.html(this.template({
-                Globalize: Globalize,
+                i18n: this.i18n,
                 showLogout: this.auth.isAuthenticated() && this.config.authType !== 'none',
                 username: username
             }));
@@ -22727,14 +22640,13 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
 });
 
 
-define('text!ev-script/templates/search.html',[],function () { return '<label for="<%= id %>"><%= Globalize.formatMessage(\'Search:\') %></label>\n<input id="<%= id %>" type="search" class="form-text search" value="<%- searchVal %>" title="<%= Globalize.formatMessage(\'Search Media\') %>" />\n<input type="submit" value="<%= Globalize.formatMessage(\'Go\') %>" class="form-submit" />\n';});
+define('text!ev-script/templates/search.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Search:\') %></label>\n<input id="<%= id %>" type="search" class="form-text search" value="<%- searchVal %>" title="<%= i18n.formatMessage(\'Search Media\') %>" />\n<input type="submit" value="<%= i18n.formatMessage(\'Go\') %>" class="form-submit" />\n';});
 
-define('ev-script/views/search',['require','underscore','globalize','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
+define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
-        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -22751,7 +22663,7 @@ define('ev-script/views/search',['require','underscore','globalize','ev-script/v
         },
         render: function() {
             this.$el.html(this.template({
-                Globalize: Globalize,
+                i18n: this.i18n,
                 id: this.id + '-input',
                 searchVal: this.picker.model.get('search')
             }));
@@ -22790,14 +22702,13 @@ define('ev-script/views/search',['require','underscore','globalize','ev-script/v
 });
 
 
-define('text!ev-script/templates/library-type-select.html',[],function () { return '<div>\n  <label for="<%= id %>"><%= Globalize.formatMessage(\'Type:\') %></label>\n  <select id="<%= id %>" class="form-select source" title="<%= Globalize.formatMessage(\'Select Library Type\') %>">\n    <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Media Library\') %></option>\n    <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Shared Library\') %></option>\n  </select>\n  <input type="submit" value="<%= Globalize.formatMessage(\'Go\') %>" class="form-submit" />\n</div>\n';});
+define('text!ev-script/templates/library-type-select.html',[],function () { return '<div>\n  <label for="<%= id %>"><%= i18n.formatMessage(\'Type:\') %></label>\n  <select id="<%= id %>" class="form-select source" title="<%= i18n.formatMessage(\'Select Library Type\') %>">\n    <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Media Library\') %></option>\n    <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Shared Library\') %></option>\n  </select>\n  <input type="submit" value="<%= i18n.formatMessage(\'Go\') %>" class="form-submit" />\n</div>\n';});
 
-define('ev-script/views/library-type-select',['require','underscore','globalize','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
+define('ev-script/views/library-type-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
-        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -22813,7 +22724,7 @@ define('ev-script/views/library-type-select',['require','underscore','globalize'
         },
         render: function() {
             this.$el.html(this.template({
-                Globalize: Globalize,
+                i18n: this.i18n,
                 id: this.id + '-select',
                 sourceId: this.picker.model.get('sourceId')
             }));
@@ -22970,12 +22881,11 @@ define('ev-script/collections/organizations',['require','ev-script/collections/b
 
 });
 
-define('ev-script/views/library-select',['require','underscore','globalize','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
+define('ev-script/views/library-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
-        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -22984,7 +22894,7 @@ define('ev-script/views/library-select',['require','underscore','globalize','ev-
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render');
             this.picker = options.picker;
-            this.$el.html('<option value="-1">' + Globalize.formatMessage('Loading...') + '</option>');
+            this.$el.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
             this.collection.on('reset', this.render);
         },
         render: function() {
@@ -23045,15 +22955,14 @@ define('ev-script/collections/libraries',['require','ev-script/collections/base'
 });
 
 
-define('text!ev-script/templates/unit-selects.html',[],function () { return '<div id="<%= formId %>" class="unit-selects">\n    <label for="<%= orgSelectId %>"><%= Globalize.formatMessage(\'Organization:\') %></label><select id="<%= orgSelectId %>" class="form-select organizations" title="<%= Globalize.formatMessage(\'Select Organization\') %>"></select><label for="<%= libSelectId %>"><%= Globalize.formatMessage(\'Library:\') %></label><select id="<%= libSelectId %>" class="form-select libraries" title="<%= Globalize.formatMessage(\'Select Library\') %>"></select><input type="submit" value="<%= Globalize.formatMessage(\'Go\') %>" class="form-submit" />\n</div>\n';});
+define('text!ev-script/templates/unit-selects.html',[],function () { return '<div id="<%= formId %>" class="unit-selects">\n    <label for="<%= orgSelectId %>"><%= i18n.formatMessage(\'Organization:\') %></label><select id="<%= orgSelectId %>" class="form-select organizations" title="<%= i18n.formatMessage(\'Select Organization\') %>"></select><label for="<%= libSelectId %>"><%= i18n.formatMessage(\'Library:\') %></label><select id="<%= libSelectId %>" class="form-select libraries" title="<%= i18n.formatMessage(\'Select Library\') %>"></select><input type="submit" value="<%= i18n.formatMessage(\'Go\') %>" class="form-submit" />\n</div>\n';});
 
-define('ev-script/views/unit-selects',['require','jquery','underscore','globalize','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','text!ev-script/templates/unit-selects.html'],function(require) {
+define('ev-script/views/unit-selects',['require','jquery','underscore','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','text!ev-script/templates/unit-selects.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base'),
         OrganizationSelectView = require('ev-script/views/organization-select'),
         Organizations = require('ev-script/collections/organizations'),
@@ -23068,7 +22977,7 @@ define('ev-script/views/unit-selects',['require','jquery','underscore','globaliz
             this.picker = options.picker;
             this.id = options.id;
             this.$el.html(this.template({
-                Globalize: Globalize,
+                i18n: this.i18n,
                 formId: this.id + '-unit-selects',
                 orgSelectId: this.id + '-org-select',
                 libSelectId: this.id + '-lib-select'
@@ -23214,19 +23123,18 @@ define('ev-script/views/unit-selects',['require','jquery','underscore','globaliz
 });
 
 
-define('text!ev-script/templates/results.html',[],function () { return '<div class="total">\n    <%= Globalize.formatMessage(\'Search returned {0} results.\', totalResults) %>\n    <a href="#" class="action-refresh" title="<%= Globalize.formatMessage(\'Reload\') %>"><i class="fa fa-fw fa-lg fa-refresh"></i></a>\n</div>\n<div class="results">\n    <table class="content-list"></table>\n</div>\n';});
+define('text!ev-script/templates/results.html',[],function () { return '<div class="total">\n    <%= i18n.formatMessage(\'Search returned {0} results.\', totalResults) %>\n    <a href="#" class="action-refresh" title="<%= i18n.formatMessage(\'Reload\') %>"><i class="fa fa-fw fa-lg fa-refresh"></i></a>\n</div>\n<div class="results">\n    <table class="content-list"></table>\n</div>\n';});
 
 
-define('text!ev-script/templates/no-results.html',[],function () { return '<tr class="odd"><td colspan="2"><%= Globalize.formatMessage(\'No results available.\') %></td></tr>\n';});
+define('text!ev-script/templates/no-results.html',[],function () { return '<tr class="odd"><td colspan="2"><%= i18n.formatMessage(\'No results available.\') %></td></tr>\n';});
 
-define('ev-script/views/results',['require','jquery','underscore','moment','globalize','ev-script/views/base','ev-scroll-loader','text!ev-script/templates/results.html','text!ev-script/templates/no-results.html'],function(require) {
+define('ev-script/views/results',['require','jquery','underscore','moment','ev-script/views/base','ev-scroll-loader','text!ev-script/templates/results.html','text!ev-script/templates/no-results.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         moment = require('moment'),
-        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     require('ev-scroll-loader');
@@ -23251,7 +23159,7 @@ define('ev-script/views/results',['require','jquery','underscore','moment','glob
         getItemHtml: function(item, index) {
             if (this.resultTemplate) {
                 return this.resultTemplate({
-                    Globalize: Globalize,
+                    i18n: this.i18n,
                     dateTimeFormat: this.config.getDateTimeFormat(),
                     moment: moment,
                     item: item,
@@ -23312,7 +23220,7 @@ define('ev-script/views/results',['require','jquery','underscore','moment','glob
         decorate: function($item) {},
         render: function() {
             this.$el.html(this.resultsTemplate({
-                Globalize: Globalize,
+                i18n: this.i18n,
                 totalResults: this.collection.totalResults
             }));
             this.$total = this.$('.total');
@@ -23327,7 +23235,7 @@ define('ev-script/views/results',['require','jquery','underscore','moment','glob
                 }, this);
             } else {
                 $contentList.append(this.emptyTemplate({
-                    Globalize: Globalize
+                    i18n: this.i18n
                 }));
             }
             var scrollHeight = this.config.scrollHeight;
@@ -23359,13 +23267,12 @@ define('ev-script/views/results',['require','jquery','underscore','moment','glob
 
 });
 
-define('ev-script/views/preview',['require','jquery','underscore','globalize','ev-script/views/base','ev-script/models/video-settings','jquery-ui'],function(require) {
+define('ev-script/views/preview',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','jquery-ui'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base'),
         VideoSettings = require('ev-script/models/video-settings');
 
@@ -23407,7 +23314,7 @@ define('ev-script/views/preview',['require','jquery','underscore','globalize','e
                     embedView.render();
                     $dialogWrap.html(embedView.$el);
                 }, this),
-                closeText: Globalize.formatMessage('Close'),
+                closeText: this.i18n.formatMessage('Close'),
                 close: function(event, ui) {
                     $dialogWrap.dialog('destroy').remove();
                 }
@@ -23867,15 +23774,14 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
 define("jquery-truncate-html", function(){});
 
 
-define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %> resultItem">\n    <td class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%= Globalize.formatMessage(\'{0} thumbnail image\', item.get(\'Title\')) %>"/>\n            <% if (item.get(\'IsCaptioned\')) { %>\n            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= Globalize.formatMessage(\'CC\') %>" alt="CC"></i>\n            <% } %>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= Globalize.formatMessage(\'Choose {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= Globalize.formatMessage(\'Choose\') %></span></a>\n            <a class="action-preview" href="#" title="<%= Globalize.formatMessage(\'Preview: {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= Globalize.formatMessage(\'Preview: {0}\', item.get(\'Title\')) %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="<%= Globalize.formatMessage(\'Preview: {0}\', item.get(\'Title\')) %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label"><%= Globalize.formatMessage(\'Description\') %></td><td class="value"><%= item.get(\'Description\') %></td></tr>\n                <tr>\n                    <td class="label"><%= Globalize.formatMessage(\'Date Added\') %></td>\n                    <td class="value">\n                        <%\n                            var dateAdded = new Date(item.get(\'AddedOn\')),\n                                localDate = dateAdded.setMinutes(dateAdded.getMinutes() - dateAdded.getTimezoneOffset());\n                            print(moment(localDate).format(dateTimeFormat));\n                        %>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label"><%= Globalize.formatMessage(\'Keywords\') %></td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label"><%= Globalize.formatMessage(\'Library\') %></td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
+define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %> resultItem">\n    <td class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%= i18n.formatMessage(\'{0} thumbnail image\', item.get(\'Title\')) %>"/>\n            <% if (item.get(\'IsCaptioned\')) { %>\n            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage(\'CC\') %>" alt="CC"></i>\n            <% } %>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Choose {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span></a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Preview: {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview: {0}\', item.get(\'Title\')) %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="<%= i18n.formatMessage(\'Preview: {0}\', item.get(\'Title\')) %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label"><%= i18n.formatMessage(\'Description\') %></td><td class="value"><%= item.get(\'Description\') %></td></tr>\n                <tr>\n                    <td class="label"><%= i18n.formatMessage(\'Date Added\') %></td>\n                    <td class="value">\n                        <%\n                            var dateAdded = new Date(item.get(\'AddedOn\')),\n                                localDate = dateAdded.setMinutes(dateAdded.getMinutes() - dateAdded.getTimezoneOffset());\n                            print(moment(localDate).format(dateTimeFormat));\n                        %>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label"><%= i18n.formatMessage(\'Keywords\') %></td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label"><%= i18n.formatMessage(\'Library\') %></td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
 
-define('ev-script/views/video-results',['require','jquery','underscore','globalize','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-truncate-html','text!ev-script/templates/video-result.html'],function(require) {
+define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-truncate-html','text!ev-script/templates/video-result.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Globalize = require('globalize'),
         ResultsView = require('ev-script/views/results'),
         VideoSettings = require('ev-script/models/video-settings'),
         VideoPreviewView = require('ev-script/views/video-preview');
@@ -23907,12 +23813,12 @@ define('ev-script/views/video-results',['require','jquery','underscore','globali
                     $this.data('fullText', fullText);
                     $full = $('<span>' + fullText + '</span>');
                     $short = $('<span>' + truncText + '</span>');
-                    var $shorten = $('<a href="#">' + Globalize.formatMessage('Less') + '</a>').click(function(e) {
+                    var $shorten = $('<a href="#">' + this.i18n.formatMessage('Less') + '</a>').click(function(e) {
                         $full.hide();
                         $short.show();
                         e.preventDefault();
                     });
-                    var $expand = $('<a href="#">' + Globalize.formatMessage('More') + '</a>').click(function(e) {
+                    var $expand = $('<a href="#">' + this.i18n.formatMessage('More') + '</a>').click(function(e) {
                         $short.hide();
                         $full.show();
                         e.preventDefault();
@@ -24052,12 +23958,11 @@ define('ev-script/collections/media-workflows',['require','ev-script/collections
 });
 
 
-define('ev-script/views/workflow-select',['require','underscore','globalize','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
+define('ev-script/views/workflow-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
-        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -24065,7 +23970,7 @@ define('ev-script/views/workflow-select',['require','underscore','globalize','ev
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render');
-            this.$el.html('<option value="-1">' + Globalize.formatMessage('Loading...') + '</option>');
+            this.$el.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
             this.render();
         },
         render: function() {
@@ -24085,15 +23990,14 @@ define('ev-script/views/workflow-select',['require','underscore','globalize','ev
 });
 
 
-define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <select class="form-select" name="MediaWorkflowID"></select>\n    <div class="fieldWrap">\n        <label for="Title"><%= Globalize.formatMessage(\'Title\') %> *</label>\n        <input class="form-text" type="text" name="Title" id="Title" />\n    </div>\n    <div class="fieldWrap">\n        <label for="Description"><%= Globalize.formatMessage(\'Description\') %></label>\n        <textarea class="form-text" name="Description" id="Description" />\n    </div>\n    <div class="upload"></div>\n</form>\n';});
+define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <select class="form-select" name="MediaWorkflowID"></select>\n    <div class="fieldWrap">\n        <label for="Title"><%= i18n.formatMessage(\'Title\') %> *</label>\n        <input class="form-text" type="text" name="Title" id="Title" />\n    </div>\n    <div class="fieldWrap">\n        <label for="Description"><%= i18n.formatMessage(\'Description\') %></label>\n        <textarea class="form-text" name="Description" id="Description" />\n    </div>\n    <div class="upload"></div>\n</form>\n';});
 
-define('ev-script/views/upload',['require','jquery','underscore','globalize','plupload','ev-script/views/base','backbone','ev-script/views/workflow-select','ev-script/models/video-settings','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
+define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-script/views/base','backbone','ev-script/views/workflow-select','ev-script/models/video-settings','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Globalize = require('globalize'),
         plupload = require('plupload'),
         BaseView = require('ev-script/views/base'),
         Backbone = require('backbone'),
@@ -24114,7 +24018,7 @@ define('ev-script/views/upload',['require','jquery','underscore','globalize','pl
             this.field = options.field;
             this.$anchor = this.$el;
             this.setElement(this.template({
-                Globalize: Globalize
+                i18n: this.i18n
             }));
             this.$upload = this.$('.upload');
             this.workflows = options.workflows;
@@ -24168,11 +24072,11 @@ define('ev-script/views/upload',['require','jquery','underscore','globalize','pl
                         // Remove runtime tooltip
                         $('.plupload_container', this.$upload).removeAttr('title');
                         // Change text since we only allow single file upload
-                        $('.plupload_add', this.$upload).text(Globalize.formatMessage('Add file'));
+                        $('.plupload_add', this.$upload).text(this.i18n.formatMessage('Add file'));
                     }, this),
                     PostInit: _.bind(function(up, info) {
                         // Change text since we only allow single file upload
-                        $('.plupload_droptext', this.$upload).text(Globalize.formatMessage('Drag file here.'));
+                        $('.plupload_droptext', this.$upload).text(this.i18n.formatMessage('Drag file here.'));
                     }, this),
                     UploadFile: _.bind(function(up, file) {
                         up.settings.multipart_params = {
@@ -24189,7 +24093,7 @@ define('ev-script/views/upload',['require','jquery','underscore','globalize','pl
                                 if (up.state === plupload.STARTED) {
                                     if ($('.plupload_cancel', this.$upload).length === 0) {
                                         // Add cancel button
-                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">' + Globalize.formatMessage('Cancel upload') + '</a>')
+                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">' + this.i18n.formatMessage('Cancel upload') + '</a>')
                                         .insertBefore($('.plupload_filelist_footer .plupload_clearer', this.$upload))
                                         .click(_.bind(function() {
                                             up.stop();
@@ -24266,7 +24170,7 @@ define('ev-script/views/upload',['require','jquery','underscore','globalize','pl
                 $dialog;
             this.$anchor.after($dialogWrap);
             this.$dialog = $dialogWrap.dialog({
-                title: Globalize.formatMessage('Upload Media to Ensemble'),
+                title: this.i18n.formatMessage('Upload Media to Ensemble'),
                 modal: true,
                 width: this.getWidth(),
                 height: this.getHeight(),
@@ -24276,7 +24180,7 @@ define('ev-script/views/upload',['require','jquery','underscore','globalize','pl
                 create: _.bind(function(event, ui) {
                     $dialogWrap.html(this.$el);
                 }, this),
-                closeText: Globalize.formatMessage('Close'),
+                closeText: this.i18n.formatMessage('Close'),
                 close: _.bind(function(event, ui) {
                     this.$upload.pluploadQueue().destroy();
                     $dialogWrap.dialog('destroy').remove();
@@ -24356,13 +24260,12 @@ define("base64", function(){});
 
 define('text!ev-script/templates/anthem.html',[],function () { return '<iframe src="ensemble://<%= tokenDetailsApiUrl %>" style="display:none;"></iframe>\n';});
 
-define('ev-script/views/video-picker',['require','jquery','underscore','globalize','platform','ev-script/views/picker','ev-script/views/search','ev-script/views/library-type-select','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos','ev-script/collections/media-workflows','ev-script/views/upload','base64','text!ev-script/templates/anthem.html'],function(require) {
+define('ev-script/views/video-picker',['require','jquery','underscore','platform','ev-script/views/picker','ev-script/views/search','ev-script/views/library-type-select','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos','ev-script/collections/media-workflows','ev-script/views/upload','base64','text!ev-script/templates/anthem.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Globalize = require('globalize'),
         platform = require('platform'),
         PickerView = require('ev-script/views/picker'),
         SearchView = require('ev-script/views/search'),
@@ -24386,9 +24289,9 @@ define('ev-script/views/video-picker',['require','jquery','underscore','globaliz
             this.$filterBlock = this.$('div.ev-filter-block');
             if (this.info.get('ApplicationVersion')) {
                 this.$actions = $('<div class="ev-actions"></div>');
-                this.$upload = $('<button type="button" class="action-upload" title="' + Globalize.formatMessage('Upload') + '"><i class="fa fa-upload fa-fw"></i><span>' + Globalize.formatMessage('Upload') + '<span></button>').css('display', 'none');
+                this.$upload = $('<button type="button" class="action-upload" title="' + this.i18n.formatMessage('Upload') + '"><i class="fa fa-upload fa-fw"></i><span>' + this.i18n.formatMessage('Upload') + '<span></button>').css('display', 'none');
                 this.$actions.append(this.$upload);
-                this.$record = $('<button type="button" class="action-record" title="' + Globalize.formatMessage('Record') + '"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>' + Globalize.formatMessage('Record') + '<span></button>').css('display', 'none');
+                this.$record = $('<button type="button" class="action-record" title="' + this.i18n.formatMessage('Record') + '"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>' + this.i18n.formatMessage('Record') + '<span></button>').css('display', 'none');
                 this.$actions.append(this.$record);
                 this.$filterBlock.prepend(this.$actions);
             }
@@ -24708,21 +24611,20 @@ define('ev-script/util/size',['require','underscore'],function(require) {
 });
 
 
-define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size"><%= Globalize.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original"><%= Globalize.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div>\n            <div class="fieldWrap inline-option">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle"><%= Globalize.formatMessage(\'Title\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="socialsharing" class="form-checkbox" <% if (model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox"/>\n                <label for="socialsharing"><%= Globalize.formatMessage(\'Social Tools\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                <label for="annotations"><%= Globalize.formatMessage(\'Annotations\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                <label for="captionsearch"><%= Globalize.formatMessage(\'Caption Search\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                <label for="autoplay"><%= Globalize.formatMessage(\'Auto Play (PC Only)\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments"><%= Globalize.formatMessage(\'Attachments\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links"><%= Globalize.formatMessage(\'Links\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata"><%= Globalize.formatMessage(\'Meta Data\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                <label for="dateproduced"><%= Globalize.formatMessage(\'Date Produced\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="embedcode" class="form-checkbox" <% if (model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox"/>\n                <label for="embedcode"><%= Globalize.formatMessage(\'Embed Code\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="download" class="form-checkbox" <% if (model.get(\'download\')) { print(\'checked="checked"\'); } %> name="download" type="checkbox"/>\n                <label for="download"><%= Globalize.formatMessage(\'Download Link\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions"><%= Globalize.formatMessage(\'Captions "On" By Default\') %></label>\n            </div>\n            <% if (isAudio) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %>  name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= Globalize.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n            <% } %>\n         </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= Globalize.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= Globalize.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div>\n            <div class="fieldWrap inline-option">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle"><%= i18n.formatMessage(\'Title\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="socialsharing" class="form-checkbox" <% if (model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox"/>\n                <label for="socialsharing"><%= i18n.formatMessage(\'Social Tools\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                <label for="captionsearch"><%= i18n.formatMessage(\'Caption Search\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata"><%= i18n.formatMessage(\'Meta Data\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                <label for="dateproduced"><%= i18n.formatMessage(\'Date Produced\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="embedcode" class="form-checkbox" <% if (model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox"/>\n                <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="download" class="form-checkbox" <% if (model.get(\'download\')) { print(\'checked="checked"\'); } %> name="download" type="checkbox"/>\n                <label for="download"><%= i18n.formatMessage(\'Download Link\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n            </div>\n            <% if (isAudio) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %>  name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n            <% } %>\n         </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
 
 
-define('text!ev-script/templates/video-settings-legacy.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size"><%= Globalize.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size" <% if (isAudio) { print(\'disabled\'); } %> >\n                <option value="original"><%= Globalize.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div class="fieldWrap">\n            <label for="showtitle"><%= Globalize.formatMessage(\'Show Title\') %></label>\n            <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="autoplay"><%= Globalize.formatMessage(\'Auto Play\') %></label>\n            <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="showcaptions"><%= Globalize.formatMessage(\'Show Captions\') %></label>\n            <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="fieldWrap">\n            <label for="hidecontrols"><%= Globalize.formatMessage(\'Hide Controls\') %></label>\n            <input id="hidecontrols" class="form-checkbox" <% if (model.get(\'hidecontrols\')) { print(\'checked="checked"\'); } %>  name="hidecontrols" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="<%= Globalize.formatMessage(\'Cancel\') %>"/>\n            <input type="submit" class="form-submit action-submit" value="<%= Globalize.formatMessage(\'Submit\') %>"/>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/templates/video-settings-legacy.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size" <% if (isAudio) { print(\'disabled\'); } %> >\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div class="fieldWrap">\n            <label for="showtitle"><%= i18n.formatMessage(\'Show Title\') %></label>\n            <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="autoplay"><%= i18n.formatMessage(\'Auto Play\') %></label>\n            <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="showcaptions"><%= i18n.formatMessage(\'Show Captions\') %></label>\n            <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="fieldWrap">\n            <label for="hidecontrols"><%= i18n.formatMessage(\'Hide Controls\') %></label>\n            <input id="hidecontrols" class="form-checkbox" <% if (model.get(\'hidecontrols\')) { print(\'checked="checked"\'); } %>  name="hidecontrols" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="<%= i18n.formatMessage(\'Cancel\') %>"/>\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
 
 define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(sizes, function(size) { %>\n    <option value="<%= size %>" <% if (size === target) { print(\'selected="selected"\'); } %>><%= size %></option>\n<% }); %>\n';});
 
-define('ev-script/views/video-settings',['require','jquery','underscore','globalize','ev-script/views/settings','ev-script/util/size','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/video-settings-legacy.html','text!ev-script/templates/sizes.html'],function(require) {
+define('ev-script/views/video-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/video-settings-legacy.html','text!ev-script/templates/sizes.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Globalize = require('globalize'),
         SettingsView = require('ev-script/views/settings'),
         sizeUtil = require('ev-script/util/size');
 
@@ -24801,13 +24703,13 @@ define('ev-script/views/video-settings',['require','jquery','underscore','global
             var html = '';
             if (!this.info.useLegacyEmbeds()) {
                 html = this.template({
-                    Globalize: Globalize,
+                    i18n: this.i18n,
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio()
                 });
             } else {
                 html = this.legacyTemplate({
-                    Globalize: Globalize,
+                    i18n: this.i18n,
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio()
                 });
@@ -24826,7 +24728,7 @@ define('ev-script/views/video-settings',['require','jquery','underscore','global
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
                 height: Math.min(260, $(window).height() - this.config.dialogMargin),
-                closeText: Globalize.formatMessage('Close')
+                closeText: this.i18n.formatMessage('Close')
             });
         }
     });
@@ -24937,7 +24839,7 @@ define('ev-script/views/playlist-preview',['require','ev-script/views/preview','
 });
 
 
-define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= Globalize.formatMessage(\'Choose {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= Globalize.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= Globalize.formatMessage(\'Preview: {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= Globalize.formatMessage(\'Preview: {0}\', item.get(\'Name\')) %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <% if (item.get(\'IsSecure\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
+define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Choose {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Preview: {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview: {0}\', item.get(\'Name\')) %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <% if (item.get(\'IsSecure\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
 
 define('ev-script/views/playlist-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/playlist-result.html'],function(require) {
 
@@ -25169,15 +25071,14 @@ define('ev-script/collections/categories',['require','backbone','ev-script/colle
 });
 
 
-define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="accordion">\n            <h4><%= Globalize.formatMessage(\'Choose Layout\') %></h4>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="playlist" class="form-radio" <% if (model.get(\'layout\') === \'playlist\') { print(\'checked="checked"\'); } %> name="layout" value="playlist" type="radio"/>\n                    <label for="playlist"><%= Globalize.formatMessage(\'Playlist\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcase" class="form-radio" <% if (model.get(\'layout\') === \'showcase\') { print(\'checked="checked"\'); } %> name="layout" value="showcase" type="radio"/>\n                    <label for="showcase"><%= Globalize.formatMessage(\'Showcase\') %></label>\n                </div>\n            </div>\n            <h4><%= Globalize.formatMessage(\'Layout Options\') %></h4>\n            <div>\n                <div class="playlistOptions" <% if (model.get(\'layout\') === \'showcase\') { print(\'style="display:none;"\'); } %>>\n                    <div class="fieldWrap">\n                        <label for="playlistSortBy"><%= Globalize.formatMessage(\'Sort By\') %></label>\n                        <select id="playlistSortBy" class="form-select">\n                            <option value="videoDate" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDate\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Date Added\') %></option>\n                            <option value="videoDateProduced" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDateProduced\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Date Produced\') %></option>\n                            <option value="videoDescription" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDescription\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Description\') %></option>\n                            <option value="videoTitle" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoTitle\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Title\') %></option>\n                            <option value="videoDuration" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDuration\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Duration\') %></option>\n                            <option value="videoKeywords" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoKeywords\') { print(\'selected="selected"\'); } %>><%= Globalize.formatMessage(\'Keywords\') %></option>\n                            <!-- <option value="videoCustomPosition">Custom Order</option> -->\n                        </select>\n                    </div>\n                    <div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'asc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="asc" type="radio"/>\n                            <label for="playlist"><%= Globalize.formatMessage(\'Ascending\') %></label>\n                        </div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'desc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="desc" type="radio"/>\n                            <label for="playlist"><%= Globalize.formatMessage(\'Descending\') %></label>\n                        </div>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <label for="playlistSearchString"><%= Globalize.formatMessage(\'Search String\') %></label>\n                            <input id="playlistSearchString" class="form-text" name="playlistSearchString" value="<%- model.get(\'playlistLayout\').playlistSearchString %>" type="text"/>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistCategory"><%= Globalize.formatMessage(\'Category\') %></label>\n                            <select id="playlistCategory" class="form-select" name="playlistCategory">\n                                <option value="" <% if (!model.get(\'playlistLayout\').playlistCategory) { print(\'selected="selected"\'); } %>>-- <%= Globalize.formatMessage(\'None\') %> --</option>\n                                <% categories.each(function(category) { %>\n                                    <option value="<%= category.id %>" <% if (model.get(\'playlistLayout\').playlistCategory === category.id) { print(\'selected="selected"\'); } %>><%- category.get(\'categoryName\') %></option>\n                                <% }); %>\n                            </select>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistNumberOfResults"><%= Globalize.formatMessage(\'Number of Results\') %></label>\n                            <input id="playlistNumberOfResults" class="form-text" name="playlistNumberOfResults" value="<%- model.get(\'playlistLayout\').playlistNumberOfResults %>" type="text"/>\n                        </div>\n                    </div>\n                </div>\n                <div class="showcaseOptions" <% if (model.get(\'layout\') === \'playlist\') { print(\'style="display:none;"\'); } %>>\n<!--\n                    <div class="fieldWrap">\n                        <input id="featuredContent" class="form-checkbox" type="checkbox" name="featuredContent" <% if (model.get(\'showcaseLayout\').featuredContent) { print(\'checked="checked"\'); } %>/>\n                        <label for="featuredContent">Featured Content</label>\n                    </div>\n -->\n                    <div class="fieldWrap">\n                        <input id="categoryList" class="form-checkbox" type="checkbox" name="categoryList" <% if (model.get(\'showcaseLayout\').categoryList) { print(\'checked="checked"\'); } %>/>\n                        <label for="categoryList"><%= Globalize.formatMessage(\'Category List\') %></label>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationHorizontal" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'horizontal\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="horizontal" type="radio"/>\n                            <label for="playlist"><%= Globalize.formatMessage(\'Horizontal\') %></label>\n                        </div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationVertical" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'vertical\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="vertical" type="radio"/>\n                            <label for="playlist"><%= Globalize.formatMessage(\'Vertical\') %></label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <h4><%= Globalize.formatMessage(\'Content Details\') %></h4>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="embedcode"><%= Globalize.formatMessage(\'Embed Code\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="statistics" class="form-checkbox" <% if (model.get(\'statistics\')) { print(\'checked="checked"\'); } %> name="statistics" type="checkbox"/>\n                    <label for="statistics"><%= Globalize.formatMessage(\'Statistics\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="duration" class="form-checkbox" <% if (model.get(\'duration\')) { print(\'checked="checked"\'); } %> name="duration" type="checkbox"/>\n                    <label for="duration"><%= Globalize.formatMessage(\'Duration\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                    <label for="attachments"><%= Globalize.formatMessage(\'Attachments\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                    <label for="annotations"><%= Globalize.formatMessage(\'Annotations\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                    <label for="links"><%= Globalize.formatMessage(\'Links\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="credits" class="form-checkbox" <% if (model.get(\'credits\')) { print(\'checked="checked"\'); } %> name="credits" type="checkbox"/>\n                    <label for="credits"><%= Globalize.formatMessage(\'Credits\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="socialsharing"><%= Globalize.formatMessage(\'Social Tools\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                    <label for="autoplay"><%= Globalize.formatMessage(\'Auto Play (PC Only)\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                    <label for="showcaptions"><%= Globalize.formatMessage(\'Captions "On" By Default\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                    <label for="dateproduced"><%= Globalize.formatMessage(\'Date Produced\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= Globalize.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                    <label for="captionsearch"><%= Globalize.formatMessage(\'Caption Search\') %></label>\n                </div>\n            </div>\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= Globalize.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= Globalize.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <fieldset>\n        <div class="accordion">\n            <h4><%= i18n.formatMessage(\'Choose Layout\') %></h4>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="playlist" class="form-radio" <% if (model.get(\'layout\') === \'playlist\') { print(\'checked="checked"\'); } %> name="layout" value="playlist" type="radio"/>\n                    <label for="playlist"><%= i18n.formatMessage(\'Playlist\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcase" class="form-radio" <% if (model.get(\'layout\') === \'showcase\') { print(\'checked="checked"\'); } %> name="layout" value="showcase" type="radio"/>\n                    <label for="showcase"><%= i18n.formatMessage(\'Showcase\') %></label>\n                </div>\n            </div>\n            <h4><%= i18n.formatMessage(\'Layout Options\') %></h4>\n            <div>\n                <div class="playlistOptions" <% if (model.get(\'layout\') === \'showcase\') { print(\'style="display:none;"\'); } %>>\n                    <div class="fieldWrap">\n                        <label for="playlistSortBy"><%= i18n.formatMessage(\'Sort By\') %></label>\n                        <select id="playlistSortBy" class="form-select">\n                            <option value="videoDate" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDate\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Added\') %></option>\n                            <option value="videoDateProduced" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDateProduced\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Produced\') %></option>\n                            <option value="videoDescription" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDescription\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Description\') %></option>\n                            <option value="videoTitle" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoTitle\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Title\') %></option>\n                            <option value="videoDuration" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDuration\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Duration\') %></option>\n                            <option value="videoKeywords" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoKeywords\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Keywords\') %></option>\n                            <!-- <option value="videoCustomPosition">Custom Order</option> -->\n                        </select>\n                    </div>\n                    <div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'asc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="asc" type="radio"/>\n                            <label for="playlist"><%= i18n.formatMessage(\'Ascending\') %></label>\n                        </div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'desc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="desc" type="radio"/>\n                            <label for="playlist"><%= i18n.formatMessage(\'Descending\') %></label>\n                        </div>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <label for="playlistSearchString"><%= i18n.formatMessage(\'Search String\') %></label>\n                            <input id="playlistSearchString" class="form-text" name="playlistSearchString" value="<%- model.get(\'playlistLayout\').playlistSearchString %>" type="text"/>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistCategory"><%= i18n.formatMessage(\'Category\') %></label>\n                            <select id="playlistCategory" class="form-select" name="playlistCategory">\n                                <option value="" <% if (!model.get(\'playlistLayout\').playlistCategory) { print(\'selected="selected"\'); } %>>-- <%= i18n.formatMessage(\'None\') %> --</option>\n                                <% categories.each(function(category) { %>\n                                    <option value="<%= category.id %>" <% if (model.get(\'playlistLayout\').playlistCategory === category.id) { print(\'selected="selected"\'); } %>><%- category.get(\'categoryName\') %></option>\n                                <% }); %>\n                            </select>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistNumberOfResults"><%= i18n.formatMessage(\'Number of Results\') %></label>\n                            <input id="playlistNumberOfResults" class="form-text" name="playlistNumberOfResults" value="<%- model.get(\'playlistLayout\').playlistNumberOfResults %>" type="text"/>\n                        </div>\n                    </div>\n                </div>\n                <div class="showcaseOptions" <% if (model.get(\'layout\') === \'playlist\') { print(\'style="display:none;"\'); } %>>\n<!--\n                    <div class="fieldWrap">\n                        <input id="featuredContent" class="form-checkbox" type="checkbox" name="featuredContent" <% if (model.get(\'showcaseLayout\').featuredContent) { print(\'checked="checked"\'); } %>/>\n                        <label for="featuredContent">Featured Content</label>\n                    </div>\n -->\n                    <div class="fieldWrap">\n                        <input id="categoryList" class="form-checkbox" type="checkbox" name="categoryList" <% if (model.get(\'showcaseLayout\').categoryList) { print(\'checked="checked"\'); } %>/>\n                        <label for="categoryList"><%= i18n.formatMessage(\'Category List\') %></label>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationHorizontal" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'horizontal\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="horizontal" type="radio"/>\n                            <label for="playlist"><%= i18n.formatMessage(\'Horizontal\') %></label>\n                        </div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationVertical" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'vertical\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="vertical" type="radio"/>\n                            <label for="playlist"><%= i18n.formatMessage(\'Vertical\') %></label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <h4><%= i18n.formatMessage(\'Content Details\') %></h4>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="statistics" class="form-checkbox" <% if (model.get(\'statistics\')) { print(\'checked="checked"\'); } %> name="statistics" type="checkbox"/>\n                    <label for="statistics"><%= i18n.formatMessage(\'Statistics\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="duration" class="form-checkbox" <% if (model.get(\'duration\')) { print(\'checked="checked"\'); } %> name="duration" type="checkbox"/>\n                    <label for="duration"><%= i18n.formatMessage(\'Duration\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                    <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                    <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                    <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="credits" class="form-checkbox" <% if (model.get(\'credits\')) { print(\'checked="checked"\'); } %> name="credits" type="checkbox"/>\n                    <label for="credits"><%= i18n.formatMessage(\'Credits\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="socialsharing"><%= i18n.formatMessage(\'Social Tools\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                    <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                    <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                    <label for="dateproduced"><%= i18n.formatMessage(\'Date Produced\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                    <label for="captionsearch"><%= i18n.formatMessage(\'Caption Search\') %></label>\n                </div>\n            </div>\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
 
-define('ev-script/views/playlist-settings',['require','jquery','underscore','globalize','ev-script/views/settings','ev-script/collections/categories','jquery-ui','text!ev-script/templates/playlist-settings.html'],function(require) {
+define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/collections/categories','jquery-ui','text!ev-script/templates/playlist-settings.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Globalize = require('globalize'),
         SettingsView = require('ev-script/views/settings'),
         Categories = require('ev-script/collections/categories');
 
@@ -25237,7 +25138,7 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','glo
         render: function() {
             var content = this.field.model.get('content'),
                 html = this.template({
-                    Globalize: Globalize,
+                    i18n: this.i18n,
                     model: this.field.model,
                     isAudio: this.encoding && this.encoding.isAudio(),
                     isSecure: content && content.IsSecure,
@@ -25258,7 +25159,7 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','glo
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
                 height: Math.min(420, $(window).height() - this.config.dialogMargin),
-                closeText: Globalize.formatMessage('Close')
+                closeText: this.i18n.formatMessage('Close')
             });
         },
         changeLayout: function(e) {
@@ -25284,15 +25185,14 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','glo
 });
 
 
-define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span><%= Globalize.formatMessage(\'Ensemble Logo\') %></span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="<%= Globalize.formatMessage(\'Media thumbnail\') %>" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%= name %></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= Globalize.formatMessage(\'Change {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= Globalize.formatMessage(\'Change {0}\', label) %><span></a>\n        <a href="#" class="action-preview" title="<%= Globalize.formatMessage(\'Preview:\') %> <%= name %>"><i class="fa fa-play-circle fa-lg"></i><span><%= Globalize.formatMessage(\'Preview:\') %> <%= name %><span></a>\n        <% if (type === \'video\' || showPlaylistOptions) { %>\n            <a href="#" class="action-options" title="<%= Globalize.formatMessage(\'{0} Embed Options\', label) %>"><i class="fa fa-cog fa-lg"></i><span><%= Globalize.formatMessage(\'{0} Embed Options\', label) %><span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="<%= Globalize.formatMessage(\'Remove {0}\', label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= Globalize.formatMessage(\'Remove {0}\', label) %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em><%= Globalize.formatMessage(\'Add {0}\', label) %></em></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= Globalize.formatMessage(\'Choose {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= Globalize.formatMessage(\'Choose {0}\', label) %><span></a>\n    </div>\n<% } %>\n';});
+define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span><%= i18n.formatMessage(\'Ensemble Logo\') %></span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="<%= i18n.formatMessage(\'Media thumbnail\') %>" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <div class="title"><%= name %></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Change {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Change {0}\', label) %><span></a>\n        <a href="#" class="action-preview" title="<%= i18n.formatMessage(\'Preview:\') %> <%= name %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview:\') %> <%= name %><span></a>\n        <% if (type === \'video\' || showPlaylistOptions) { %>\n            <a href="#" class="action-options" title="<%= i18n.formatMessage(\'{0} Embed Options\', label) %>"><i class="fa fa-cog fa-lg"></i><span><%= i18n.formatMessage(\'{0} Embed Options\', label) %><span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="<%= i18n.formatMessage(\'Remove {0}\', label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Remove {0}\', label) %><span></a>\n    </div>\n<% } else { %>\n    <div class="title"><em><%= i18n.formatMessage(\'Add {0}\', label) %></em></div>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Choose {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Choose {0}\', label) %><span></a>\n    </div>\n<% } %>\n';});
 
-define('ev-script/views/field',['require','jquery','underscore','globalize','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','ev-script/collections/categories','text!ev-script/templates/field.html'],function(require) {
+define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','ev-script/collections/categories','text!ev-script/templates/field.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base'),
         VideoSettings = require('ev-script/models/video-settings'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
@@ -25474,10 +25374,10 @@ define('ev-script/views/field',['require','jquery','underscore','globalize','ev-
             var ensembleUrl = this.config.ensembleUrl,
                 name, label, type, thumbnailUrl;
             if (this.model instanceof VideoSettings) {
-                label = Globalize.formatMessage('Media');
+                label = this.i18n.formatMessage('Media');
                 type = 'video';
             } else {
-                label = Globalize.formatMessage('Playlist');
+                label = this.i18n.formatMessage('Playlist');
                 type = 'playlist';
             }
             if (this.model.id) {
@@ -25499,7 +25399,7 @@ define('ev-script/views/field',['require','jquery','underscore','globalize','ev-
                 this.$field.after(this.$actions);
             }
             this.$actions.html(this.template({
-                Globalize: Globalize,
+                i18n: this.i18n,
                 ensembleUrl: ensembleUrl,
                 modelId: this.model.id,
                 label: label,
@@ -26963,16 +26863,15 @@ define('ev-script/auth/base/auth',['require','jquery','underscore','backbone','e
 }));
 
 
-define('text!ev-script/auth/basic/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= Globalize.formatMessage(\'Username\') %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= Globalize.formatMessage(\'Password\') %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= Globalize.formatMessage(\'Submit\') %>"/>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/auth/basic/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= i18n.formatMessage(\'Username\') %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= i18n.formatMessage(\'Password\') %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
-define('ev-script/auth/basic/view',['require','exports','module','jquery','underscore','backbone','globalize','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/basic/template.html'],function(require, template) {
+define('ev-script/auth/basic/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/basic/template.html'],function(require, template) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        Globalize = require('globalize'),
         cacheUtil = require('ev-script/util/cache'),
         eventsUtil = require('ev-script/util/events');
 
@@ -26985,17 +26884,18 @@ define('ev-script/auth/basic/view',['require','exports','module','jquery','under
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
+            this.i18n = cacheUtil.getAppI18n(this.appId);
             this.submitCallback = options.submitCallback || function() {};
             this.auth = options.auth;
         },
         render: function() {
             var html = this.template({
-                Globalize: Globalize
+                i18n: this.i18n
             });
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
             this.$dialog.dialog({
-                title: Globalize.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
+                title: this.i18n.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
                 modal: true,
                 draggable: false,
                 resizable: false,
@@ -27005,7 +26905,7 @@ define('ev-script/auth/basic/view',['require','exports','module','jquery','under
                 create: _.bind(function(event, ui) {
                     this.$dialog.html(html);
                 }, this),
-                closeText: Globalize.formatMessage('Close'),
+                closeText: this.i18n.formatMessage('Close'),
                 close: _.bind(function(event, ui) {
                     this.$dialog.dialog('destroy').remove();
                     this.appEvents.trigger('hidePickers');
@@ -27108,16 +27008,15 @@ define('ev-script/auth/basic/auth',['require','jquery','underscore','backbone','
 });
 
 
-define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= Globalize.formatMessage(\'Username\') %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= Globalize.formatMessage(\'Password\') %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="provider"><%= Globalize.formatMessage(\'Identity Provider\') %></label>\n            <select id="provider" name="provider" class="form-select"></select>\n        </div>\n        <div class="fieldWrap">\n            <label for="remember"><%= Globalize.formatMessage(\'Remember Me\') %></label>\n            <input id="remember" name="remember" type="checkbox"></input>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= Globalize.formatMessage(\'Submit\') %>"/>\n            <div class="loader"></div>\n        </div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= i18n.formatMessage(\'Username\') %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= i18n.formatMessage(\'Password\') %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="provider"><%= i18n.formatMessage(\'Identity Provider\') %></label>\n            <select id="provider" name="provider" class="form-select"></select>\n        </div>\n        <div class="fieldWrap">\n            <label for="remember"><%= i18n.formatMessage(\'Remember Me\') %></label>\n            <input id="remember" name="remember" type="checkbox"></input>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\n            <div class="loader"></div>\n        </div>\n    </fieldset>\n</form>\n';});
 
-define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','globalize','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/forms/template.html','text!ev-script/templates/options.html'],function(require, template) {
+define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/forms/template.html','text!ev-script/templates/options.html'],function(require, template) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        Globalize = require('globalize'),
         cacheUtil = require('ev-script/util/cache'),
         eventsUtil = require('ev-script/util/events');
 
@@ -27131,12 +27030,13 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
+            this.i18n = cacheUtil.getAppI18n(this.appId);
             this.submitCallback = options.submitCallback || function() {};
             this.auth = options.auth;
         },
         render: function() {
             var $html = $(this.template({
-                    Globalize: Globalize
+                    i18n: this.i18n
                 })),
                 $select = $('#provider', $html).append(this.optionsTemplate({
                     collection: this.collection,
@@ -27156,7 +27056,7 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
             $(window.document).on('ajaxSend', loadingOn).on('ajaxComplete', loadingOff);
 
             this.$dialog.dialog({
-                title: Globalize.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
+                title: this.i18n.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
                 modal: true,
                 draggable: false,
                 resizable: false,
@@ -27166,7 +27066,7 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
                 create: _.bind(function(event, ui) {
                     this.$dialog.html($html);
                 }, this),
-                closeText: Globalize.formatMessage('Close'),
+                closeText: this.i18n.formatMessage('Close'),
                 close: _.bind(function(event, ui) {
                     $(window.document).off('ajaxSend', loadingOn).off('ajaxComplete', loadingOff);
                     this.$dialog.dialog('destroy').remove();
@@ -27298,16 +27198,15 @@ define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/a
 });
 
 
-define('text!ev-script/auth/none/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <h3><%= Globalize.formatMessage(\'You are unauthorized to access this content.\') %></h3>\n</form>\n';});
+define('text!ev-script/auth/none/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <h3><%= i18n.formatMessage(\'You are unauthorized to access this content.\') %></h3>\n</form>\n';});
 
-define('ev-script/auth/none/view',['require','exports','module','jquery','underscore','backbone','globalize','ev-script/util/cache','ev-script/util/events','jquery-ui','text!ev-script/auth/none/template.html'],function(require, template) {
+define('ev-script/auth/none/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery-ui','text!ev-script/auth/none/template.html'],function(require, template) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        Globalize = require('globalize'),
         cacheUtil = require('ev-script/util/cache'),
         eventsUtil = require('ev-script/util/events');
 
@@ -27319,15 +27218,16 @@ define('ev-script/auth/none/view',['require','exports','module','jquery','unders
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
+            this.i18n = cacheUtil.getAppI18n(this.appId);
         },
         render: function() {
             var $html = $(this.template({
-                Globalize: Globalize
+                i18n: this.i18n
             }));
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
             this.$dialog.dialog({
-                title: Globalize.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
+                title: this.i18n.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
                 modal: true,
                 draggable: false,
                 resizable: false,
@@ -27337,7 +27237,7 @@ define('ev-script/auth/none/view',['require','exports','module','jquery','unders
                 create: _.bind(function(event, ui) {
                     this.$dialog.html($html);
                 }, this),
-                closeText: Globalize.formatMessage('Close'),
+                closeText: this.i18n.formatMessage('Close'),
                 close: _.bind(function(event, ui) {
                     this.$dialog.dialog('destroy').remove();
                     this.appEvents.trigger('hidePickers');
@@ -29725,7 +29625,7 @@ return Globalize;
 }));
 
 /*global requirejs*/
-define('ev-script',['require','backbone','underscore','jquery','globalize','moment','json!cldr-data/supplemental/likelySubtags.json','json!ev-script/i18n/messages.json','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/models/app-info','ev-script/auth/basic/auth','ev-script/auth/forms/auth','ev-script/auth/none/auth','ev-script/util/events','ev-script/util/cache','cldr/supplemental','cldr/unresolved','globalize/message'],function(require) {
+define('ev-script',['require','backbone','underscore','jquery','globalize','moment','json!cldr-data/supplemental/likelySubtags.json','json!ev-script/i18n/root/messages.json','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/models/app-info','ev-script/auth/basic/auth','ev-script/auth/forms/auth','ev-script/auth/none/auth','ev-script/util/events','ev-script/util/cache','cldr/supplemental','cldr/unresolved','globalize/message'],function(require) {
 
     'use strict';
 
@@ -29735,7 +29635,7 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
         Globalize = require('globalize'),
         moment = require('moment'),
         likelySubtags = require('json!cldr-data/supplemental/likelySubtags.json'),
-        messages = require('json!ev-script/i18n/messages.json'),
+        messages = require('json!ev-script/i18n/root/messages.json'),
         VideoSettings = require('ev-script/models/video-settings'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
         FieldView = require('ev-script/views/field'),
@@ -29752,9 +29652,6 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
     require('cldr/supplemental');
     require('cldr/unresolved');
     require('globalize/message');
-    // Setup globalize
-    Globalize.load(likelySubtags);
-    Globalize.loadMessages(messages);
 
     var EnsembleApp = function(appOptions) {
 
@@ -29808,20 +29705,24 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
             getTimeFormatCallback: function() { return 'hh:mmA'; },
             getDateTimeFormat: function() {
                 return this.getDateFormatCallback() + ' ' + this.getTimeFormatCallback();
-            }
+            },
+            // Relative path to i18n folder
+            relativeI18nPath: 'i18n'
         };
 
         // Add our configuration to the app cache...this is specific to this
         // 'app' instance.  There may be multiple instances on a single page w/
         // unique settings.
-        var config = cacheUtil.setAppConfig(appId, _.extend({}, defaults, appOptions)),
-            locale = config.getLocaleCallback();
+        var config = cacheUtil.setAppConfig(appId, _.extend({}, defaults, appOptions));
 
-        // Set locale for globalize
-        Globalize.locale(locale);
-
+        var locale = config.getLocaleCallback();
         // Set locale for moment
         moment.locale(locale);
+
+        // Features depend on asynchronously retreival of data below...so leverage
+        // promises to coordinate loading
+        var loading = $.Deferred();
+        _.extend(this, loading.promise());
 
         // Create an event aggregator specific to our app
         eventsUtil.initEvents(appId);
@@ -29829,84 +29730,98 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
         // eventsUtil also provides us with a global event aggregator for events
         // that span app instances
         this.globalEvents = eventsUtil.getEvents();
-
-        // Features depend on info asynchronously retreived below...so leverage
-        // promises to coordinate loading
-        var loading = $.Deferred();
-        _.extend(this, loading.promise());
-
         var info = new AppInfo({}, {
             appId: appId
         });
         cacheUtil.setAppInfo(appId, info);
-        info.fetch({})
-        .always(_.bind(function() {
-            // This is kinda lazy...but this will only be set in 3.6+ versions
-            // so we don't actually need to check the version number
-            if (!info.get('ApplicationVersion') && config.authType === 'forms') {
-                loading.reject('Configured to use forms authentication against a pre-3.6 API.');
-            } else {
-                // This will initialize and cache an auth object for our app
-                var auth;
-                switch (config.authType) {
-                    case 'forms':
-                        auth = new FormsAuth(appId);
-                        break;
-                    case 'none':
-                        auth = new NoneAuth(appId);
-                        break;
-                    default:
-                        auth = new BasicAuth(appId);
-                        break;
+
+        var finishLoading = _.bind(function() {
+
+            // Setup globalize
+            Globalize.load(likelySubtags);
+            Globalize.loadMessages(messages);
+            cacheUtil.setAppI18n(appId, new Globalize(!messages[locale] ? 'en-US' : locale));
+
+            // Load application info from EV
+            info.fetch({})
+            .always(_.bind(function() {
+                // This is kinda lazy...but this will only be set in 3.6+ versions
+                // so we don't actually need to check the version number
+                if (!info.get('ApplicationVersion') && config.authType === 'forms') {
+                    loading.reject('Configured to use forms authentication against a pre-3.6 API.');
+                } else {
+                    // This will initialize and cache an auth object for our app
+                    var auth;
+                    switch (config.authType) {
+                        case 'forms':
+                            auth = new FormsAuth(appId);
+                            break;
+                        case 'none':
+                            auth = new NoneAuth(appId);
+                            break;
+                        default:
+                            auth = new BasicAuth(appId);
+                            break;
+                    }
+                    cacheUtil.setAppAuth(appId, auth);
+
+                    // TODO - document and add some flexibility to params (e.g. in addition
+                    // to selector allow element or object).
+                    this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
+                        var $field = $(fieldSelector, fieldWrap);
+                        var fieldView = new FieldView({
+                            id: fieldWrap.id || appId,
+                            el: fieldWrap,
+                            model: settingsModel,
+                            $field: $field,
+                            appId: appId
+                        });
+                    };
+
+                    // TODO - document.  See handleField comment too.
+                    this.handleEmbed = function(embedWrap, settingsModel) {
+                        if (settingsModel instanceof VideoSettings) {
+                            var videoEmbed = new VideoEmbedView({
+                                el: embedWrap,
+                                model: settingsModel,
+                                appId: appId
+                            });
+                            videoEmbed.render();
+                        } else {
+                            var playlistEmbed = new PlaylistEmbedView({
+                                el: embedWrap,
+                                model: settingsModel,
+                                appId: appId
+                            });
+                            playlistEmbed.render();
+                        }
+                    };
+
+                    this.getEmbedCode = function(settings) {
+                        var $div = $('<div/>');
+                        if (settings.type === 'video') {
+                            this.handleEmbed($div[0], new VideoSettings(settings));
+                        } else {
+                            this.handleEmbed($div[0], new PlaylistSettings(settings));
+                        }
+                        return $div.html();
+                    };
+
+                    this.appEvents.trigger('appLoaded');
+                    loading.resolve();
                 }
-                cacheUtil.setAppAuth(appId, auth);
+            }, this));
+        }, this);
 
-                // TODO - document and add some flexibility to params (e.g. in addition
-                // to selector allow element or object).
-                this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
-                    var $field = $(fieldSelector, fieldWrap);
-                    var fieldView = new FieldView({
-                        id: fieldWrap.id || appId,
-                        el: fieldWrap,
-                        model: settingsModel,
-                        $field: $field,
-                        appId: appId
-                    });
-                };
-
-                // TODO - document.  See handleField comment too.
-                this.handleEmbed = function(embedWrap, settingsModel) {
-                    if (settingsModel instanceof VideoSettings) {
-                        var videoEmbed = new VideoEmbedView({
-                            el: embedWrap,
-                            model: settingsModel,
-                            appId: appId
-                        });
-                        videoEmbed.render();
-                    } else {
-                        var playlistEmbed = new PlaylistEmbedView({
-                            el: embedWrap,
-                            model: settingsModel,
-                            appId: appId
-                        });
-                        playlistEmbed.render();
-                    }
-                };
-
-                this.getEmbedCode = function(settings) {
-                    var $div = $('<div/>');
-                    if (settings.type === 'video') {
-                        this.handleEmbed($div[0], new VideoSettings(settings));
-                    } else {
-                        this.handleEmbed($div[0], new PlaylistSettings(settings));
-                    }
-                    return $div.html();
-                };
-
-                this.appEvents.trigger('appLoaded');
-                loading.resolve();
-            }
-        }, this));
+        // Load messages for locale
+        $.getJSON(config.relativeI18nPath + '/' + locale + '/messages.json')
+        .done(function(data, status, xhr) {
+            _.extend(messages, data);
+            finishLoading();
+        })
+        .fail(function(xhr, status, error) {
+            finishLoading();
+        });
     };
 
     return {

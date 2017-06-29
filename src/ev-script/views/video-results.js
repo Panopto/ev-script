@@ -4,7 +4,6 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        Globalize = require('globalize'),
         ResultsView = require('ev-script/views/results'),
         VideoSettings = require('ev-script/models/video-settings'),
         VideoPreviewView = require('ev-script/views/video-preview');
@@ -36,12 +35,12 @@ define(function(require) {
                     $this.data('fullText', fullText);
                     $full = $('<span>' + fullText + '</span>');
                     $short = $('<span>' + truncText + '</span>');
-                    var $shorten = $('<a href="#">' + Globalize.formatMessage('Less') + '</a>').click(function(e) {
+                    var $shorten = $('<a href="#">' + this.i18n.formatMessage('Less') + '</a>').click(function(e) {
                         $full.hide();
                         $short.show();
                         e.preventDefault();
                     });
-                    var $expand = $('<a href="#">' + Globalize.formatMessage('More') + '</a>').click(function(e) {
+                    var $expand = $('<a href="#">' + this.i18n.formatMessage('More') + '</a>').click(function(e) {
                         $short.hide();
                         $full.show();
                         e.preventDefault();

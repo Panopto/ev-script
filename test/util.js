@@ -4,6 +4,9 @@ define(function(require) {
 
     var q = QUnit,
         _ = require('underscore'),
+        Globalize = require('globalize'),
+        likelySubtags = require('json!cldr-data/supplemental/likelySubtags.json'),
+        messages = require('json!ev-script/i18n/root/messages.json'),
         cacheUtil = require('ev-script/util/cache'),
         eventsUtil = require('ev-script/util/events'),
         evSettings = require('ev-config'),
@@ -22,6 +25,10 @@ define(function(require) {
             authenticate: true
         };
 
+    require('cldr/supplemental');
+    require('cldr/unresolved');
+    require('globalize/message');
+
     return {
         setupHelper: function(appId, options) {
             return function() {
@@ -32,6 +39,12 @@ define(function(require) {
                 eventsUtil.initEvents(this.appId);
                 settings.configCallback.call(this);
                 cacheUtil.setAppConfig(this.appId, this.config);
+
+                // Setup globalize
+                Globalize.load(likelySubtags);
+                Globalize.loadMessages(messages);
+                cacheUtil.setAppI18n(appId, new Globalize('en-US'));
+
                 this.info = new AppInfo({}, {
                     appId: this.appId
                 });

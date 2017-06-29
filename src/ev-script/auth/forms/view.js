@@ -5,7 +5,6 @@ define(function(require, template) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        Globalize = require('globalize'),
         cacheUtil = require('ev-script/util/cache'),
         eventsUtil = require('ev-script/util/events');
 
@@ -19,12 +18,13 @@ define(function(require, template) {
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
+            this.i18n = cacheUtil.getAppI18n(this.appId);
             this.submitCallback = options.submitCallback || function() {};
             this.auth = options.auth;
         },
         render: function() {
             var $html = $(this.template({
-                    Globalize: Globalize
+                    i18n: this.i18n
                 })),
                 $select = $('#provider', $html).append(this.optionsTemplate({
                     collection: this.collection,
@@ -44,7 +44,7 @@ define(function(require, template) {
             $(window.document).on('ajaxSend', loadingOn).on('ajaxComplete', loadingOff);
 
             this.$dialog.dialog({
-                title: Globalize.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
+                title: this.i18n.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
                 modal: true,
                 draggable: false,
                 resizable: false,
@@ -54,7 +54,7 @@ define(function(require, template) {
                 create: _.bind(function(event, ui) {
                     this.$dialog.html($html);
                 }, this),
-                closeText: Globalize.formatMessage('Close'),
+                closeText: this.i18n.formatMessage('Close'),
                 close: _.bind(function(event, ui) {
                     $(window.document).off('ajaxSend', loadingOn).off('ajaxComplete', loadingOff);
                     this.$dialog.dialog('destroy').remove();

@@ -3,7 +3,6 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
-        Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -30,7 +29,7 @@ define(function(require) {
                 username = this.auth.getUser().get('UserName');
             }
             this.$el.html(this.template({
-                Globalize: Globalize,
+                i18n: this.i18n,
                 showLogout: this.auth.isAuthenticated() && this.config.authType !== 'none',
                 username: username
             }));
