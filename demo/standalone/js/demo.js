@@ -7,7 +7,9 @@
         hidePickers: false,
         scrollHeight: false,
         fitToParent: true,
-        getLocaleCallback: function() { return 'es-MX'; }
+        getLocaleCallback: function() { return 'es-MX'; },
+        getDateFormatCallback: function() { return 'DD/MM/YYYY'; },
+        getTimeFormatCallback: function() { return 'hh:mm A'; }
     }));
 
     app.appEvents.bind('fieldUpdated', function($field, value) {

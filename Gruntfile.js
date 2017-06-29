@@ -34,6 +34,7 @@ module.exports = function(grunt) {
         'cldr': 'bower_components/cldrjs/dist/cldr',
         'cldr-data': 'bower_components/cldr-data',
         'globalize': 'bower_components/globalize/dist/globalize',
+        'moment': 'bower_components/moment/min/moment-with-locales'
       },
       name: 'bower_components/almond/almond',
       out: 'dist/ev-script.js',

@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        moment = require('moment'),
         Globalize = require('globalize'),
         BaseView = require('ev-script/views/base');
 
@@ -30,6 +31,8 @@ define(function(require) {
             if (this.resultTemplate) {
                 return this.resultTemplate({
                     Globalize: Globalize,
+                    dateTimeFormat: this.config.getDateTimeFormat(),
+                    moment: moment,
                     item: item,
                     index: index
                 });

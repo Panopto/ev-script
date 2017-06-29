@@ -7,6 +7,7 @@ define(function(require) {
         _ = require('underscore'),
         $ = require('jquery'),
         Globalize = require('globalize'),
+        moment = require('moment'),
         likelySubtags = require('json!cldr-data/supplemental/likelySubtags.json'),
         messages = require('json!ev-script/i18n/messages.json'),
         VideoSettings = require('ev-script/models/video-settings'),
@@ -75,17 +76,26 @@ define(function(require) {
             defaultVideoWidth: '',
             // Location for plupload flash runtime
             pluploadFlashPath: '',
-            // Callback to set current locale
-            getLocaleCallback: function() { return 'en-US'; }
+            // Callbacks to set locale and date/time formats
+            getLocaleCallback: function() { return 'en-US'; },
+            getDateFormatCallback: function() { return 'MM/DD/YYYY'; },
+            getTimeFormatCallback: function() { return 'hh:mmA'; },
+            getDateTimeFormat: function() {
+                return this.getDateFormatCallback() + ' ' + this.getTimeFormatCallback();
+            }
         };
 
         // Add our configuration to the app cache...this is specific to this
         // 'app' instance.  There may be multiple instances on a single page w/
         // unique settings.
-        var config = cacheUtil.setAppConfig(appId, _.extend({}, defaults, appOptions));
+        var config = cacheUtil.setAppConfig(appId, _.extend({}, defaults, appOptions)),
+            locale = config.getLocaleCallback();
 
         // Set locale for globalize
-        Globalize.locale(config.getLocaleCallback());
+        Globalize.locale(locale);
+
+        // Set locale for moment
+        moment.locale(locale);
 
         // Create an event aggregator specific to our app
         eventsUtil.initEvents(appId);
