@@ -123,6 +123,18 @@ module.exports = function(grunt) {
           'assets/css/ev-script.css': 'assets/less/ev-script.less'
         }
       }
+    },
+    copy: {
+      i18n: {
+        files: [
+          {
+            expand: true,
+            cwd: 'src/ev-script',
+            src: ['i18n/**'],
+            dest: 'dist/'
+          }
+        ]
+      }
     }
   });
 
@@ -227,11 +239,11 @@ module.exports = function(grunt) {
 
   // Default task.
   grunt.registerTask('test', ['server', 'qunit']);
-  grunt.registerTask('default', ['clean', 'jshint', 'less', 'test', 'requirejs']);
-  grunt.registerTask('all', ['clean', 'jshint', 'less', 'test', 'requirejs']);
-  grunt.registerTask('all-skip-tests', ['clean', 'jshint', 'less', 'requirejs']);
-  grunt.registerTask('dev', ['clean', 'jshint', 'less', 'test', 'requirejs:development']);
-  grunt.registerTask('prod', ['clean', 'jshint', 'less', 'test', 'requirejs:production']);
+  grunt.registerTask('default', ['clean', 'jshint', 'less', 'test', 'requirejs', 'copy:i18n']);
+  grunt.registerTask('all', ['clean', 'jshint', 'less', 'test', 'requirejs', 'copy:i18n']);
+  grunt.registerTask('all-skip-tests', ['clean', 'jshint', 'less', 'requirejs', 'copy:i18n']);
+  grunt.registerTask('dev', ['clean', 'jshint', 'less', 'test', 'requirejs:development', 'copy:i18n']);
+  grunt.registerTask('prod', ['clean', 'jshint', 'less', 'test', 'requirejs:production', 'copy:i18n']);
   grunt.registerTask('demo', ['server', 'watch']);
 
 };
