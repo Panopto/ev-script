@@ -23147,7 +23147,7 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
         emptyTemplate: _.template(require('text!ev-script/templates/no-results.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render', 'loadMore', 'addHandler', 'previewItem', 'setHeight', 'resizeResults', 'refreshHandler');
+            _.bindAll(this, 'render', 'decorate', 'loadMore', 'addHandler', 'previewItem', 'setHeight', 'resizeResults', 'refreshHandler');
             this.picker = options.picker;
             this.appId = options.appId;
             this.loadLock = false;
@@ -23797,20 +23797,20 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
         },
         decorate: function($item) {
             // Handle truncation (more/less) of truncatable fields
-            $('.trunc .value', $item).each(function(element) {
-                var $this = $(this),
+            $('.trunc .value', $item).each(_.bind(function(index, element) {
+                var $element = $(element),
                     $full,
                     $short,
                     truncLen = 100,
-                    fullText = $this.data('fullText') || $this.html(),
+                    fullText = $element.data('fullText') || $element.html(),
                     truncText = $.truncate(fullText, {
                         length: truncLen,
                         stripTags: true,
                         noBreaks: true
                     });
-                $this.empty();
+                $element.empty();
                 if ($(window).width() < 1100 && fullText.length > truncLen) {
-                    $this.data('fullText', fullText);
+                    $element.data('fullText', fullText);
                     $full = $('<span>' + fullText + '</span>');
                     $short = $('<span>' + truncText + '</span>');
                     var $shorten = $('<a href="#">' + this.i18n.formatMessage('Less') + '</a>').click(function(e) {
@@ -23825,11 +23825,11 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
                     });
                     $full.hide().append($shorten);
                     $short.append($expand);
-                    $this.append($short).append($full);
+                    $element.append($short).append($full);
                 } else {
-                    $this.append(fullText);
+                    $element.append(fullText);
                 }
-            });
+            }, this));
         },
         refreshHandler: function(e) {
             e.preventDefault();
@@ -29706,8 +29706,8 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
             getDateTimeFormat: function() {
                 return this.getDateFormatCallback() + ' ' + this.getTimeFormatCallback();
             },
-            // Relative path to i18n folder
-            relativeI18nPath: 'i18n'
+            // Path to i18n folder
+            i18nPath: 'i18n'
         };
 
         // Add our configuration to the app cache...this is specific to this
@@ -29814,7 +29814,7 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
         }, this);
 
         // Load messages for locale
-        $.getJSON(config.relativeI18nPath + '/' + locale + '/messages.json')
+        $.getJSON(config.i18nPath + '/' + locale + '/messages.json')
         .done(function(data, status, xhr) {
             _.extend(messages, data);
             finishLoading();
