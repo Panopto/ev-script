@@ -19,20 +19,20 @@ define(function(require) {
         },
         decorate: function($item) {
             // Handle truncation (more/less) of truncatable fields
-            $('.trunc .value', $item).each(function(element) {
-                var $this = $(this),
+            $('.trunc .value', $item).each(_.bind(function(index, element) {
+                var $element = $(element),
                     $full,
                     $short,
                     truncLen = 100,
-                    fullText = $this.data('fullText') || $this.html(),
+                    fullText = $element.data('fullText') || $element.html(),
                     truncText = $.truncate(fullText, {
                         length: truncLen,
                         stripTags: true,
                         noBreaks: true
                     });
-                $this.empty();
+                $element.empty();
                 if ($(window).width() < 1100 && fullText.length > truncLen) {
-                    $this.data('fullText', fullText);
+                    $element.data('fullText', fullText);
                     $full = $('<span>' + fullText + '</span>');
                     $short = $('<span>' + truncText + '</span>');
                     var $shorten = $('<a href="#">' + this.i18n.formatMessage('Less') + '</a>').click(function(e) {
@@ -47,11 +47,11 @@ define(function(require) {
                     });
                     $full.hide().append($shorten);
                     $short.append($expand);
-                    $this.append($short).append($full);
+                    $element.append($short).append($full);
                 } else {
-                    $this.append(fullText);
+                    $element.append(fullText);
                 }
-            });
+            }, this));
         },
         refreshHandler: function(e) {
             e.preventDefault();

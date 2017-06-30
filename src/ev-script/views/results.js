@@ -17,7 +17,7 @@ define(function(require) {
         emptyTemplate: _.template(require('text!ev-script/templates/no-results.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render', 'loadMore', 'addHandler', 'previewItem', 'setHeight', 'resizeResults', 'refreshHandler');
+            _.bindAll(this, 'render', 'decorate', 'loadMore', 'addHandler', 'previewItem', 'setHeight', 'resizeResults', 'refreshHandler');
             this.picker = options.picker;
             this.appId = options.appId;
             this.loadLock = false;

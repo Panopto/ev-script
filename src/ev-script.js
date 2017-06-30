@@ -80,8 +80,8 @@ define(function(require) {
             getDateTimeFormat: function() {
                 return this.getDateFormatCallback() + ' ' + this.getTimeFormatCallback();
             },
-            // Relative path to i18n folder
-            relativeI18nPath: 'i18n'
+            // Path to i18n folder
+            i18nPath: 'i18n'
         };
 
         // Add our configuration to the app cache...this is specific to this
@@ -188,7 +188,7 @@ define(function(require) {
         }, this);
 
         // Load messages for locale
-        $.getJSON(config.relativeI18nPath + '/' + locale + '/messages.json')
+        $.getJSON(config.i18nPath + '/' + locale + '/messages.json')
         .done(function(data, status, xhr) {
             _.extend(messages, data);
             finishLoading();
