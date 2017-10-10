@@ -27,9 +27,9 @@ define(function(require) {
             this.$filterBlock = this.$('div.ev-filter-block');
             if (this.info.get('ApplicationVersion')) {
                 this.$actions = $('<div class="ev-actions"></div>');
-                this.$upload = $('<button type="button" class="action-upload" title="' + this.i18n.formatMessage('Upload') + '"><i class="fa fa-upload fa-fw"></i><span>' + this.i18n.formatMessage('Upload') + '<span></button>').css('display', 'none');
+                this.$upload = $('<button type="button" class="action-upload" title="' + this.i18n.formatMessage('Click to upload new media') + '"><i class="fa fa-upload fa-fw"></i><span>' + this.i18n.formatMessage('Upload') + '<span></button>').css('display', 'none');
                 this.$actions.append(this.$upload);
-                this.$record = $('<button type="button" class="action-record" title="' + this.i18n.formatMessage('Record') + '"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>' + this.i18n.formatMessage('Record') + '<span></button>').css('display', 'none');
+                this.$record = $('<button type="button" class="action-record" title="' + this.i18n.formatMessage('Click to record screen') + '"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>' + this.i18n.formatMessage('Record') + '<span></button>').css('display', 'none');
                 this.$actions.append(this.$record);
                 this.$filterBlock.prepend(this.$actions);
             }

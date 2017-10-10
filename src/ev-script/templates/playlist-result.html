@@ -1,11 +1,11 @@
 <tr class="<%= (index % 2 ? 'odd' : 'even') %>">
     <td class="content-actions">
         <div class="action-links">
-            <a class="action-add" href="#" title="<%= i18n.formatMessage('Choose {0}', item.get('Name')) %>" rel="<%= item.get('ID') %>">
+            <a class="action-add" href="#" title="<%= i18n.formatMessage('Click to choose {0}', item.get('Name')) %>" rel="<%= item.get('ID') %>">
                 <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage('Choose') %></span>
             </a>
-            <a class="action-preview" href="#" title="<%= i18n.formatMessage('Preview: {0}', item.get('Name')) %>" rel="<%= item.get('ID') %>">
-                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage('Preview: {0}', item.get('Name')) %></span>
+            <a class="action-preview" href="#" title="<%= i18n.formatMessage('Click to preview {0}', item.get('Name')) %>" rel="<%= item.get('ID') %>">
+                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage('Preview') %></span>
             </a>
         </div>
     </td>

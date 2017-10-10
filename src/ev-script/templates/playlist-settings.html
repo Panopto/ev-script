@@ -1,7 +1,8 @@
 <form>
     <fieldset>
+        <legend style="display:none;"><%= i18n.formatMessage('Playlist Embed Options') %></legend>
         <div class="accordion">
-            <h4><%= i18n.formatMessage('Choose Layout') %></h4>
+            <h3><%= i18n.formatMessage('Choose Layout') %></h3>
             <div>
                 <div class="fieldWrap inline-option">
                     <input id="playlist" class="form-radio" <% if (model.get('layout') === 'playlist') { print('checked="checked"'); } %> name="layout" value="playlist" type="radio"/>
@@ -12,7 +13,7 @@
                     <label for="showcase"><%= i18n.formatMessage('Showcase') %></label>
                 </div>
             </div>
-            <h4><%= i18n.formatMessage('Layout Options') %></h4>
+            <h3><%= i18n.formatMessage('Layout Options') %></h3>
             <div>
                 <div class="playlistOptions" <% if (model.get('layout') === 'showcase') { print('style="display:none;"'); } %>>
                     <div class="fieldWrap">
@@ -30,11 +31,11 @@
                     <div>
                         <div class="fieldWrap inline-option">
                             <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get('playlistLayout').playlistSortDirection === 'asc') { print('checked="checked"'); } %> name="playlistSortDirection" value="asc" type="radio"/>
-                            <label for="playlist"><%= i18n.formatMessage('Ascending') %></label>
+                            <label for="playlistSortDirectionAsc"><%= i18n.formatMessage('Ascending') %></label>
                         </div>
                         <div class="fieldWrap inline-option">
                             <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get('playlistLayout').playlistSortDirection === 'desc') { print('checked="checked"'); } %> name="playlistSortDirection" value="desc" type="radio"/>
-                            <label for="playlist"><%= i18n.formatMessage('Descending') %></label>
+                            <label for="playlistSortDirectionDesc"><%= i18n.formatMessage('Descending') %></label>
                         </div>
                     </div>
                     <div>
@@ -71,16 +72,16 @@
                     <div>
                         <div class="fieldWrap">
                             <input id="categoryOrientationHorizontal" class="form-radio" <% if (model.get('showcaseLayout').categoryOrientation === 'horizontal') { print('checked="checked"'); } %> <% if (!model.get('showcaseLayout').categoryList) { print('disabled'); } %> name="categoryOrientation" value="horizontal" type="radio"/>
-                            <label for="playlist"><%= i18n.formatMessage('Horizontal') %></label>
+                            <label for="categoryOrientationHorizontal"><%= i18n.formatMessage('Horizontal') %></label>
                         </div>
                         <div class="fieldWrap">
                             <input id="categoryOrientationVertical" class="form-radio" <% if (model.get('showcaseLayout').categoryOrientation === 'vertical') { print('checked="checked"'); } %> <% if (!model.get('showcaseLayout').categoryList) { print('disabled'); } %> name="categoryOrientation" value="vertical" type="radio"/>
-                            <label for="playlist"><%= i18n.formatMessage('Vertical') %></label>
+                            <label for="categoryOrientationVertical"><%= i18n.formatMessage('Vertical') %></label>
                         </div>
                     </div>
                 </div>
             </div>
-            <h4><%= i18n.formatMessage('Content Details') %></h4>
+            <h3><%= i18n.formatMessage('Content Details') %></h3>
             <div>
                 <div class="fieldWrap inline-option">
                     <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get('embedcode')) { print('checked="checked"'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print('disabled') } %> />

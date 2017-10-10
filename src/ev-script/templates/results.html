@@ -1,6 +1,6 @@
 <div class="total">
     <%= i18n.formatMessage('Search returned {0} results.', totalResults) %>
-    <a href="#" class="action-refresh" title="<%= i18n.formatMessage('Reload') %>"><i class="fa fa-fw fa-lg fa-refresh"></i></a>
+    <a href="#" class="action-refresh" title="<%= i18n.formatMessage('Click to reload search results') %>"><i class="fa fa-fw fa-lg fa-refresh"></i><span style="display:none;"><%= i18n.formatMessage('Reload') %></span></a>
 </div>
 <div class="results">
     <table class="content-list"></table>

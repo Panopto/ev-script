@@ -231,11 +231,12 @@ div.ev-field .thumbnail img {
   height: 100%;
   vertical-align: middle;
 }
-div.ev-field div.title {
+div.ev-field .title {
   color: #606060;
   display: inline-block;
   font-weight: bold;
-  margin-right: 20px;
+  font-size: 100%;
+  margin: 0 20px 0 0;
   max-width: 400px;
 }
 div.ev-field div.logo {

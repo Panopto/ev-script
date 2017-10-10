@@ -1,14 +1,14 @@
 <tr class="<%= (index % 2 ? 'odd' : 'even') %> resultItem">
     <td class="content-actions">
         <div class="thumbnail-wrap">
-            <img class="thumbnail" src="<%= item.get('ThumbnailUrl').replace(/width=100/i, 'width=200') %>" alt="<%= i18n.formatMessage('{0} thumbnail image', item.get('Title')) %>"/>
+            <img class="thumbnail" src="<%= item.get('ThumbnailUrl').replace(/width=100/i, 'width=200') %>" alt="<%= i18n.formatMessage('{0} preview thumbnail', item.get('Title')) %>"/>
             <% if (item.get('IsCaptioned')) { %>
             <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage('CC') %>" alt="CC"></i>
             <% } %>
         </div>
         <div class="action-links">
-            <a class="action-add" href="#" title="<%= i18n.formatMessage('Choose {0}', item.get('Title')) %>" rel="<%= item.get('ID') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage('Choose') %></span></a>
-            <a class="action-preview" href="#" title="<%= i18n.formatMessage('Preview: {0}', item.get('Title')) %>" rel="<%= item.get('ID') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage('Preview: {0}', item.get('Title')) %></span></a>
+            <a class="action-add" href="#" title="<%= i18n.formatMessage('Click to choose {0}', item.get('Title')) %>" rel="<%= item.get('ID') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage('Choose') %></span></a>
+            <a class="action-preview" href="#" title="<%= i18n.formatMessage('Click to preview {0}', item.get('Title')) %>" rel="<%= item.get('ID') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage('Preview') %></span></a>
         </div>
     </td>
     <td class="content-meta">
@@ -16,7 +16,7 @@
             <tbody>
                 <tr class="title">
                     <td colspan="2">
-                        <a class="action-preview" title="<%= i18n.formatMessage('Preview: {0}', item.get('Title')) %>" href="#" rel="<%= item.get('ID') %>"><%= item.get('Title') %></a>
+                        <a class="action-preview" title="<%= i18n.formatMessage('Click to preview {0}', item.get('Title')) %>" href="#" rel="<%= item.get('ID') %>"><%= item.get('Title') %></a>
                     </td>
                 </tr>
                 <tr class="trunc"><td class="label"><%= i18n.formatMessage('Description') %></td><td class="value"><%= item.get('Description') %></td></tr>
