@@ -5,7 +5,8 @@
         define([
             'jquery',
             'plupload',
-            'jquery-ui',
+            'jquery-ui/ui/widgets/dialog',
+            'jquery-ui/ui/widgets/accordion',
             'jquery.plupload.queue'
         ], factory);
     } else {

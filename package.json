@@ -1,8 +1,8 @@
 {
   "name": "ev-script",
-  "title": "Ensemble Video Integration Library",
-  "description": "JavaScript library for integration with Ensemble Video.",
-  "version": "1.3.0",
+  "title": "Ensemble Video Chooser Library",
+  "description": "JavaScript library providing UI to populate form field w/ user selected media and/or playlist metadata for embedding.",
+  "version": "1.4.0",
   "main": "./dist/ev-script.js",
   "homepage": "https://github.com/ensembleVideo/ev-script",
   "author": {
@@ -20,34 +20,52 @@
   "engines": {
     "node": "*"
   },
-  "scripts": {
-    "test": "grunt test"
-  },
+  "keywords": [],
   "devDependencies": {
-    "body-parser": "^1.14.2",
-    "bower": "^1.8.0",
-    "connect": "^3.4.0",
+    "almond": "^0.3.1",
+    "body-parser": "^1.18.2",
+    "bootstrap-less": "~3.3.4",
+    "cldr-data": "~29.0.0",
+    "cldr-data-downloader": "^0.2.5",
+    "connect": "^3.6.5",
     "cookie-parser": "^1.4.3",
-    "errorhandler": "^1.4.2",
+    "errorhandler": "^1.5.0",
     "grunt": "^0.4.5",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-clean": "^1.1.0",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-jshint": "^1.1.0",
-    "grunt-contrib-less": "^1.1.0",
+    "grunt-contrib-less": "^1.4.1",
     "grunt-contrib-qunit": "^2.0.0",
     "grunt-contrib-requirejs": "^1.0.0",
     "grunt-contrib-watch": "^1.0.0",
     "jshint-stylish": "^2.2.1",
-    "load-grunt-tasks": "^3.4.0",
-    "lodash": "^4.0.0",
-    "morgan": "^1.6.1",
-    "request": "^2.67.0",
-    "serve-index": "^1.7.2",
-    "serve-static": "^1.10.0"
+    "load-grunt-tasks": "^3.5.2",
+    "lodash": "^4.17.4",
+    "morgan": "^1.9.0",
+    "normalize.css": "^7.0.0",
+    "qunitjs": "~1.20.0",
+    "request": "^2.83.0",
+    "requirejs": "~2.1.16",
+    "requirejs-json": "~0.0.3",
+    "requirejs-text": "~2.0.14",
+    "serve-index": "^1.9.1",
+    "serve-static": "^1.13.1"
   },
-  "keywords": [],
   "dependencies": {
-    "cldr-data-downloader": "^0.2.5"
+    "Base64": "^0.3.0",
+    "backbone": "^1.2.3",
+    "ev-scroll-loader": "git://github.com/ensembleVideo/ev-scroll-loader.git",
+    "font-awesome": "^4.7.0",
+    "globalize": "^1.2.3",
+    "jquery": "^2.1.4",
+    "jquery-expander": "^1.7.0",
+    "jquery-ui": "^1.11.3",
+    "jquery.cookie": "^1.4.1",
+    "moment": "^2.18.1",
+    "platform": "^1.3.4",
+    "plupload": "^2.1.2",
+    "semver": "^4.3.4",
+    "underscore": "^1.8.3"
   }
 }

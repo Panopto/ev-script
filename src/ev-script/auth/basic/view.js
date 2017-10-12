@@ -9,7 +9,7 @@ define(function(require, template) {
         eventsUtil = require('ev-script/util/events');
 
     require('jquery.cookie');
-    require('jquery-ui');
+    require('jquery-ui/ui/widgets/dialog');
 
     return Backbone.View.extend({
         template: _.template(require('text!ev-script/auth/basic/template.html')),

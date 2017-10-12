@@ -5,7 +5,7 @@ define(function(require) {
     var _ = require('underscore'),
         BaseView = require('ev-script/views/base');
 
-    require('jquery-ui');
+    require('jquery-ui/ui/widgets/dialog');
 
     return BaseView.extend({
         initialize: function(options) {

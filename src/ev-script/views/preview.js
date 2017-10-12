@@ -7,7 +7,7 @@ define(function(require) {
         BaseView = require('ev-script/views/base'),
         VideoSettings = require('ev-script/models/video-settings');
 
-    require('jquery-ui');
+    require('jquery-ui/ui/widgets/dialog');
 
     return BaseView.extend({
         initialize: function(options) {
@@ -20,11 +20,11 @@ define(function(require) {
                 // Desired difference between media width and containing dialog width
                 widthOffset = 50,
                 // Desired difference between media height and containing dialog height
-                heightOffset = this.info.useLegacyEmbeds() ? 140 : 50,
+                heightOffset = this.info.useLegacyEmbeds() ? 140 : 70,
                 // Actual dialog width taking into account available room
-                dialogWidth = Math.min(embedView.getFrameWidth() + widthOffset, $(window).width() - this.config.dialogMargin),
+                dialogWidth = Math.min(parseInt(embedView.getFrameWidth(), 10) + widthOffset, $(window).width() - this.config.dialogMargin),
                 // Actual dialog height taking into account available room
-                dialogHeight = Math.min(embedView.getFrameHeight() + heightOffset, $(window).height() - this.config.dialogMargin),
+                dialogHeight = Math.min(parseInt(embedView.getFrameHeight(), 10) + heightOffset, $(window).height() - this.config.dialogMargin),
                 // Our dialog
                 $dialog;
 

@@ -7,7 +7,7 @@ define(function(require) {
         SettingsView = require('ev-script/views/settings'),
         sizeUtil = require('ev-script/util/size');
 
-    require('jquery-ui');
+    require('jquery-ui/ui/widgets/dialog');
 
     return SettingsView.extend({
         template: _.template(require('text!ev-script/templates/video-settings.html')),

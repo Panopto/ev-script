@@ -1,6 +1,6 @@
 /**
- * ev-script 1.3.0 2017-10-10
- * Ensemble Video Integration Library
+ * ev-script 1.4.0 2017-10-12
+ * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2017 Symphony Video, Inc.
  * Licensed (MIT AND GPL-2.0)
@@ -12,7 +12,8 @@
         define([
             'jquery',
             'plupload',
-            'jquery-ui',
+            'jquery-ui/ui/widgets/dialog',
+            'jquery-ui/ui/widgets/accordion',
             'jquery.plupload.queue'
         ], factory);
     } else {
@@ -455,7 +456,7 @@ var requirejs, require, define;
     };
 }());
 
-define("bower_components/almond/almond", function(){});
+define("node_modules/almond/almond", function(){});
 
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
@@ -2006,9 +2007,9 @@ define("bower_components/almond/almond", function(){});
   }
 }.call(this));
 
-//     Backbone.js 1.2.3
+//     Backbone.js 1.3.3
 
-//     (c) 2010-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+//     (c) 2010-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 //     Backbone may be freely distributed under the MIT license.
 //     For all details and documentation:
 //     http://backbonejs.org
@@ -2017,8 +2018,8 @@ define("bower_components/almond/almond", function(){});
 
   // Establish the root object, `window` (`self`) in the browser, or `global` on the server.
   // We use `self` instead of `window` for `WebWorker` support.
-  var root = (typeof self == 'object' && self.self == self && self) ||
-            (typeof global == 'object' && global.global == global && global);
+  var root = (typeof self == 'object' && self.self === self && self) ||
+            (typeof global == 'object' && global.global === global && global);
 
   // Set up Backbone appropriately for the environment. Start with AMD.
   if (typeof define === 'function' && define.amd) {
@@ -2031,7 +2032,7 @@ define("bower_components/almond/almond", function(){});
   // Next for Node.js or CommonJS. jQuery may not be needed as a module.
   } else if (typeof exports !== 'undefined') {
     var _ = require('underscore'), $;
-    try { $ = require('jquery'); } catch(e) {}
+    try { $ = require('jquery'); } catch (e) {}
     factory(root, exports, _, $);
 
   // Finally, as a browser global.
@@ -2039,7 +2040,7 @@ define("bower_components/almond/almond", function(){});
     root.Backbone = factory(root, {}, root._, (root.jQuery || root.Zepto || root.ender || root.$));
   }
 
-}(function(root, Backbone, _, $) {
+})(function(root, Backbone, _, $) {
 
   // Initial Setup
   // -------------
@@ -2052,7 +2053,7 @@ define("bower_components/almond/almond", function(){});
   var slice = Array.prototype.slice;
 
   // Current version of the library. Keep in sync with `package.json`.
-  Backbone.VERSION = '1.2.3';
+  Backbone.VERSION = '1.3.3';
 
   // For Backbone's purposes, jQuery, Zepto, Ender, or My Library (kidding) owns
   // the `$` variable.
@@ -2154,7 +2155,7 @@ define("bower_components/almond/almond", function(){});
         events = eventsApi(iteratee, events, names[i], name[names[i]], opts);
       }
     } else if (name && eventSplitter.test(name)) {
-      // Handle space separated event names by delegating them individually.
+      // Handle space-separated event names by delegating them individually.
       for (names = name.split(eventSplitter); i < names.length; i++) {
         events = iteratee(events, names[i], callback, opts);
       }
@@ -2174,9 +2175,9 @@ define("bower_components/almond/almond", function(){});
   // Guard the `listening` argument from the public API.
   var internalOn = function(obj, name, callback, context, listening) {
     obj._events = eventsApi(onApi, obj._events || {}, name, callback, {
-        context: context,
-        ctx: obj,
-        listening: listening
+      context: context,
+      ctx: obj,
+      listening: listening
     });
 
     if (listening) {
@@ -2190,7 +2191,7 @@ define("bower_components/almond/almond", function(){});
   // Inversion-of-control versions of `on`. Tell *this* object to listen to
   // an event in another object... keeping track of what it's listening to
   // for easier unbinding later.
-  Events.listenTo =  function(obj, name, callback) {
+  Events.listenTo = function(obj, name, callback) {
     if (!obj) return this;
     var id = obj._listenId || (obj._listenId = _.uniqueId('l'));
     var listeningTo = this._listeningTo || (this._listeningTo = {});
@@ -2215,7 +2216,7 @@ define("bower_components/almond/almond", function(){});
       var context = options.context, ctx = options.ctx, listening = options.listening;
       if (listening) listening.count++;
 
-      handlers.push({ callback: callback, context: context, ctx: context || ctx, listening: listening });
+      handlers.push({callback: callback, context: context, ctx: context || ctx, listening: listening});
     }
     return events;
   };
@@ -2224,18 +2225,18 @@ define("bower_components/almond/almond", function(){});
   // callbacks with that function. If `callback` is null, removes all
   // callbacks for the event. If `name` is null, removes all bound
   // callbacks for all events.
-  Events.off =  function(name, callback, context) {
+  Events.off = function(name, callback, context) {
     if (!this._events) return this;
     this._events = eventsApi(offApi, this._events, name, callback, {
-        context: context,
-        listeners: this._listeners
+      context: context,
+      listeners: this._listeners
     });
     return this;
   };
 
   // Tell this object to stop listening to either specific events ... or
   // to every object it's currently listening to.
-  Events.stopListening =  function(obj, name, callback) {
+  Events.stopListening = function(obj, name, callback) {
     var listeningTo = this._listeningTo;
     if (!listeningTo) return this;
 
@@ -2250,7 +2251,6 @@ define("bower_components/almond/almond", function(){});
 
       listening.obj.off(name, callback, this);
     }
-    if (_.isEmpty(listeningTo)) this._listeningTo = void 0;
 
     return this;
   };
@@ -2307,21 +2307,22 @@ define("bower_components/almond/almond", function(){});
         delete events[name];
       }
     }
-    if (_.size(events)) return events;
+    return events;
   };
 
   // Bind an event to only be triggered a single time. After the first time
   // the callback is invoked, its listener will be removed. If multiple events
   // are passed in using the space-separated syntax, the handler will fire
   // once for each event, not once for a combination of all events.
-  Events.once =  function(name, callback, context) {
+  Events.once = function(name, callback, context) {
     // Map the event into a `{event: once}` object.
     var events = eventsApi(onceMap, {}, name, callback, _.bind(this.off, this));
-    return this.on(events, void 0, context);
+    if (typeof name === 'string' && context == null) callback = void 0;
+    return this.on(events, callback, context);
   };
 
   // Inversion-of-control versions of `once`.
-  Events.listenToOnce =  function(obj, name, callback) {
+  Events.listenToOnce = function(obj, name, callback) {
     // Map the event into a `{event: once}` object.
     var events = eventsApi(onceMap, {}, name, callback, _.bind(this.stopListening, this, obj));
     return this.listenTo(obj, events);
@@ -2344,7 +2345,7 @@ define("bower_components/almond/almond", function(){});
   // passed the same arguments as `trigger` is, apart from the event name
   // (unless you're listening on `"all"`, which will cause your callback to
   // receive the true name of the event as the first argument).
-  Events.trigger =  function(name) {
+  Events.trigger = function(name) {
     if (!this._events) return this;
 
     var length = Math.max(0, arguments.length - 1);
@@ -2356,7 +2357,7 @@ define("bower_components/almond/almond", function(){});
   };
 
   // Handles triggering the appropriate event callbacks.
-  var triggerApi = function(objEvents, name, cb, args) {
+  var triggerApi = function(objEvents, name, callback, args) {
     if (objEvents) {
       var events = objEvents[name];
       var allEvents = objEvents.all;
@@ -2406,7 +2407,8 @@ define("bower_components/almond/almond", function(){});
     this.attributes = {};
     if (options.collection) this.collection = options.collection;
     if (options.parse) attrs = this.parse(attrs, options) || {};
-    attrs = _.defaults({}, attrs, _.result(this, 'defaults'));
+    var defaults = _.result(this, 'defaults');
+    attrs = _.defaults(_.extend({}, defaults, attrs), defaults);
     this.set(attrs, options);
     this.changed = {};
     this.initialize.apply(this, arguments);
@@ -2514,7 +2516,7 @@ define("bower_components/almond/almond", function(){});
       }
 
       // Update the `id`.
-      this.id = this.get(this.idAttribute);
+      if (this.idAttribute in attrs) this.id = this.get(this.idAttribute);
 
       // Trigger all relevant attribute changes.
       if (!silent) {
@@ -2627,8 +2629,8 @@ define("bower_components/almond/almond", function(){});
       // the model will be valid when the attributes, if any, are set.
       if (attrs && !wait) {
         if (!this.set(attrs, options)) return false;
-      } else {
-        if (!this._validate(attrs, options)) return false;
+      } else if (!this._validate(attrs, options)) {
+        return false;
       }
 
       // After a successful server-side save, the client is (optionally)
@@ -2722,7 +2724,7 @@ define("bower_components/almond/almond", function(){});
 
     // Check if the model is currently in a valid state.
     isValid: function(options) {
-      return this._validate({}, _.defaults({validate: true}, options));
+      return this._validate({}, _.extend({}, options, {validate: true}));
     },
 
     // Run validation against the next complete set of model attributes,
@@ -2740,8 +2742,8 @@ define("bower_components/almond/almond", function(){});
 
   // Underscore methods that we want to implement on the Model, mapped to the
   // number of arguments they take.
-  var modelMethods = { keys: 1, values: 1, pairs: 1, invert: 1, pick: 0,
-      omit: 0, chain: 1, isEmpty: 1 };
+  var modelMethods = {keys: 1, values: 1, pairs: 1, invert: 1, pick: 0,
+      omit: 0, chain: 1, isEmpty: 1};
 
   // Mix in each Underscore method as a proxy to `Model#attributes`.
   addUnderscoreMethods(Model, modelMethods, 'attributes');
@@ -2777,7 +2779,8 @@ define("bower_components/almond/almond", function(){});
     at = Math.min(Math.max(at, 0), array.length);
     var tail = Array(array.length - at);
     var length = insert.length;
-    for (var i = 0; i < tail.length; i++) tail[i] = array[i + at];
+    var i;
+    for (i = 0; i < tail.length; i++) tail[i] = array[i + at];
     for (i = 0; i < length; i++) array[i + at] = insert[i];
     for (i = 0; i < tail.length; i++) array[i + length + at] = tail[i];
   };
@@ -2815,9 +2818,12 @@ define("bower_components/almond/almond", function(){});
     remove: function(models, options) {
       options = _.extend({}, options);
       var singular = !_.isArray(models);
-      models = singular ? [models] : _.clone(models);
+      models = singular ? [models] : models.slice();
       var removed = this._removeModels(models, options);
-      if (!options.silent && removed) this.trigger('update', this, options);
+      if (!options.silent && removed.length) {
+        options.changes = {added: [], merged: [], removed: removed};
+        this.trigger('update', this, options);
+      }
       return singular ? removed[0] : removed;
     },
 
@@ -2828,18 +2834,22 @@ define("bower_components/almond/almond", function(){});
     set: function(models, options) {
       if (models == null) return;
 
-      options = _.defaults({}, options, setOptions);
-      if (options.parse && !this._isModel(models)) models = this.parse(models, options);
+      options = _.extend({}, setOptions, options);
+      if (options.parse && !this._isModel(models)) {
+        models = this.parse(models, options) || [];
+      }
 
       var singular = !_.isArray(models);
       models = singular ? [models] : models.slice();
 
       var at = options.at;
       if (at != null) at = +at;
+      if (at > this.length) at = this.length;
       if (at < 0) at += this.length + 1;
 
       var set = [];
       var toAdd = [];
+      var toMerge = [];
       var toRemove = [];
       var modelMap = {};
 
@@ -2848,13 +2858,13 @@ define("bower_components/almond/almond", function(){});
       var remove = options.remove;
 
       var sort = false;
-      var sortable = this.comparator && (at == null) && options.sort !== false;
+      var sortable = this.comparator && at == null && options.sort !== false;
       var sortAttr = _.isString(this.comparator) ? this.comparator : null;
 
       // Turn bare objects into model references, and prevent invalid models
       // from being added.
-      var model;
-      for (var i = 0; i < models.length; i++) {
+      var model, i;
+      for (i = 0; i < models.length; i++) {
         model = models[i];
 
         // If a duplicate is found, prevent it from being added and
@@ -2865,6 +2875,7 @@ define("bower_components/almond/almond", function(){});
             var attrs = this._isModel(model) ? model.attributes : model;
             if (options.parse) attrs = existing.parse(attrs, options);
             existing.set(attrs, options);
+            toMerge.push(existing);
             if (sortable && !sort) sort = existing.hasChanged(sortAttr);
           }
           if (!modelMap[existing.cid]) {
@@ -2898,8 +2909,8 @@ define("bower_components/almond/almond", function(){});
       var orderChanged = false;
       var replace = !sortable && add && remove;
       if (set.length && replace) {
-        orderChanged = this.length != set.length || _.some(this.models, function(model, index) {
-          return model !== set[index];
+        orderChanged = this.length !== set.length || _.some(this.models, function(m, index) {
+          return m !== set[index];
         });
         this.models.length = 0;
         splice(this.models, set, 0);
@@ -2913,7 +2924,7 @@ define("bower_components/almond/almond", function(){});
       // Silently sort the collection if appropriate.
       if (sort) this.sort({silent: true});
 
-      // Unless silenced, it's time to fire all appropriate add/sort events.
+      // Unless silenced, it's time to fire all appropriate add/sort/update events.
       if (!options.silent) {
         for (i = 0; i < toAdd.length; i++) {
           if (at != null) options.index = at + i;
@@ -2921,7 +2932,14 @@ define("bower_components/almond/almond", function(){});
           model.trigger('add', model, this, options);
         }
         if (sort || orderChanged) this.trigger('sort', this, options);
-        if (toAdd.length || toRemove.length) this.trigger('update', this, options);
+        if (toAdd.length || toRemove.length || toMerge.length) {
+          options.changes = {
+            added: toAdd,
+            removed: toRemove,
+            merged: toMerge
+          };
+          this.trigger('update', this, options);
+        }
       }
 
       // Return the added (or merged) model (or models).
@@ -2971,11 +2989,18 @@ define("bower_components/almond/almond", function(){});
       return slice.apply(this.models, arguments);
     },
 
-    // Get a model from the set by id.
+    // Get a model from the set by id, cid, model object with id or cid
+    // properties, or an attributes object that is transformed through modelId.
     get: function(obj) {
       if (obj == null) return void 0;
-      var id = this.modelId(this._isModel(obj) ? obj.attributes : obj);
-      return this._byId[obj] || this._byId[id] || this._byId[obj.cid];
+      return this._byId[obj] ||
+        this._byId[this.modelId(obj.attributes || obj)] ||
+        obj.cid && this._byId[obj.cid];
+    },
+
+    // Returns `true` if the model is in the collection.
+    has: function(obj) {
+      return this.get(obj) != null;
     },
 
     // Get the model at the given index.
@@ -3019,7 +3044,7 @@ define("bower_components/almond/almond", function(){});
 
     // Pluck an attribute from each model in the collection.
     pluck: function(attr) {
-      return _.invoke(this.models, 'get', attr);
+      return this.map(attr + '');
     },
 
     // Fetch the default set of models for this collection, resetting the
@@ -3050,9 +3075,9 @@ define("bower_components/almond/almond", function(){});
       if (!wait) this.add(model, options);
       var collection = this;
       var success = options.success;
-      options.success = function(model, resp, callbackOpts) {
-        if (wait) collection.add(model, callbackOpts);
-        if (success) success.call(callbackOpts.context, model, resp, callbackOpts);
+      options.success = function(m, resp, callbackOpts) {
+        if (wait) collection.add(m, callbackOpts);
+        if (success) success.call(callbackOpts.context, m, resp, callbackOpts);
       };
       model.save(null, options);
       return model;
@@ -3073,7 +3098,7 @@ define("bower_components/almond/almond", function(){});
     },
 
     // Define how to uniquely identify models in the collection.
-    modelId: function (attrs) {
+    modelId: function(attrs) {
       return attrs[this.model.prototype.idAttribute || 'id'];
     },
 
@@ -3111,6 +3136,12 @@ define("bower_components/almond/almond", function(){});
         this.models.splice(index, 1);
         this.length--;
 
+        // Remove references before triggering 'remove' event to prevent an
+        // infinite loop. #3693
+        delete this._byId[model.cid];
+        var id = this.modelId(model.attributes);
+        if (id != null) delete this._byId[id];
+
         if (!options.silent) {
           options.index = index;
           model.trigger('remove', model, this, options);
@@ -3119,12 +3150,12 @@ define("bower_components/almond/almond", function(){});
         removed.push(model);
         this._removeReference(model, options);
       }
-      return removed.length ? removed : false;
+      return removed;
     },
 
     // Method for checking whether an object should be considered a model for
     // the purposes of adding to the collection.
-    _isModel: function (model) {
+    _isModel: function(model) {
       return model instanceof Model;
     },
 
@@ -3150,14 +3181,16 @@ define("bower_components/almond/almond", function(){});
     // events simply proxy through. "add" and "remove" events that originate
     // in other collections are ignored.
     _onModelEvent: function(event, model, collection, options) {
-      if ((event === 'add' || event === 'remove') && collection !== this) return;
-      if (event === 'destroy') this.remove(model, options);
-      if (event === 'change') {
-        var prevId = this.modelId(model.previousAttributes());
-        var id = this.modelId(model.attributes);
-        if (prevId !== id) {
-          if (prevId != null) delete this._byId[prevId];
-          if (id != null) this._byId[id] = model;
+      if (model) {
+        if ((event === 'add' || event === 'remove') && collection !== this) return;
+        if (event === 'destroy') this.remove(model, options);
+        if (event === 'change') {
+          var prevId = this.modelId(model.previousAttributes());
+          var id = this.modelId(model.attributes);
+          if (prevId !== id) {
+            if (prevId != null) delete this._byId[prevId];
+            if (id != null) this._byId[id] = model;
+          }
         }
       }
       this.trigger.apply(this, arguments);
@@ -3168,14 +3201,14 @@ define("bower_components/almond/almond", function(){});
   // Underscore methods that we want to implement on the Collection.
   // 90% of the core usefulness of Backbone Collections is actually implemented
   // right here:
-  var collectionMethods = { forEach: 3, each: 3, map: 3, collect: 3, reduce: 4,
-      foldl: 4, inject: 4, reduceRight: 4, foldr: 4, find: 3, detect: 3, filter: 3,
+  var collectionMethods = {forEach: 3, each: 3, map: 3, collect: 3, reduce: 0,
+      foldl: 0, inject: 0, reduceRight: 0, foldr: 0, find: 3, detect: 3, filter: 3,
       select: 3, reject: 3, every: 3, all: 3, some: 3, any: 3, include: 3, includes: 3,
       contains: 3, invoke: 0, max: 3, min: 3, toArray: 1, size: 1, first: 3,
       head: 3, take: 3, initial: 3, rest: 3, tail: 3, drop: 3, last: 3,
       without: 0, difference: 0, indexOf: 3, shuffle: 1, lastIndexOf: 3,
       isEmpty: 1, chain: 1, sample: 3, partition: 3, groupBy: 3, countBy: 3,
-      sortBy: 3, indexBy: 3};
+      sortBy: 3, indexBy: 3, findIndex: 3, findLastIndex: 3};
 
   // Mix in each Underscore method as a proxy to `Collection#models`.
   addUnderscoreMethods(Collection, collectionMethods, 'models');
@@ -3425,9 +3458,9 @@ define("bower_components/almond/almond", function(){});
   var methodMap = {
     'create': 'POST',
     'update': 'PUT',
-    'patch':  'PATCH',
+    'patch': 'PATCH',
     'delete': 'DELETE',
-    'read':   'GET'
+    'read': 'GET'
   };
 
   // Set the default implementation of `Backbone.ajax` to proxy through to `$`.
@@ -3584,8 +3617,8 @@ define("bower_components/almond/almond", function(){});
     // Does the pathname match the root?
     matchRoot: function() {
       var path = this.decodeFragment(this.location.pathname);
-      var root = path.slice(0, this.root.length - 1) + '/';
-      return root === this.root;
+      var rootPath = path.slice(0, this.root.length - 1) + '/';
+      return rootPath === this.root;
     },
 
     // Unicode characters in `location.pathname` are percent encoded so they're
@@ -3657,8 +3690,8 @@ define("bower_components/almond/almond", function(){});
         // If we've started off with a route from a `pushState`-enabled
         // browser, but we're currently in a browser that doesn't support it...
         if (!this._hasPushState && !this.atRoot()) {
-          var root = this.root.slice(0, -1) || '/';
-          this.location.replace(root + '#' + this.getPath());
+          var rootPath = this.root.slice(0, -1) || '/';
+          this.location.replace(rootPath + '#' + this.getPath());
           // Return immediately as browser will do redirect to new url
           return true;
 
@@ -3687,7 +3720,7 @@ define("bower_components/almond/almond", function(){});
       }
 
       // Add a cross-platform `addEventListener` shim for older browsers.
-      var addEventListener = window.addEventListener || function (eventName, listener) {
+      var addEventListener = window.addEventListener || function(eventName, listener) {
         return attachEvent('on' + eventName, listener);
       };
 
@@ -3708,7 +3741,7 @@ define("bower_components/almond/almond", function(){});
     // but possibly useful for unit testing Routers.
     stop: function() {
       // Add a cross-platform `removeEventListener` shim for older browsers.
-      var removeEventListener = window.removeEventListener || function (eventName, listener) {
+      var removeEventListener = window.removeEventListener || function(eventName, listener) {
         return detachEvent('on' + eventName, listener);
       };
 
@@ -3782,11 +3815,11 @@ define("bower_components/almond/almond", function(){});
       fragment = this.getFragment(fragment || '');
 
       // Don't include a trailing slash on the root.
-      var root = this.root;
+      var rootPath = this.root;
       if (fragment === '' || fragment.charAt(0) === '?') {
-        root = root.slice(0, -1) || '/';
+        rootPath = rootPath.slice(0, -1) || '/';
       }
-      var url = root + fragment;
+      var url = rootPath + fragment;
 
       // Strip the hash and decode for matching.
       fragment = this.decodeFragment(fragment.replace(pathStripper, ''));
@@ -3802,7 +3835,7 @@ define("bower_components/almond/almond", function(){});
       // fragment to store history.
       } else if (this._wantsHashChange) {
         this._updateHash(this.location, fragment, options.replace);
-        if (this.iframe && (fragment !== this.getHash(this.iframe.contentWindow))) {
+        if (this.iframe && fragment !== this.getHash(this.iframe.contentWindow)) {
           var iWindow = this.iframe.contentWindow;
 
           // Opening and closing the iframe tricks IE7 and earlier to push a
@@ -3864,14 +3897,9 @@ define("bower_components/almond/almond", function(){});
     _.extend(child, parent, staticProps);
 
     // Set the prototype chain to inherit from `parent`, without calling
-    // `parent` constructor function.
-    var Surrogate = function(){ this.constructor = child; };
-    Surrogate.prototype = parent.prototype;
-    child.prototype = new Surrogate;
-
-    // Add prototype properties (instance properties) to the subclass,
-    // if supplied.
-    if (protoProps) _.extend(child.prototype, protoProps);
+    // `parent`'s constructor function and add the prototype properties.
+    child.prototype = _.create(parent.prototype, protoProps);
+    child.prototype.constructor = child;
 
     // Set a convenience property in case the parent's prototype is needed
     // later.
@@ -3898,8 +3926,7 @@ define("bower_components/almond/almond", function(){});
   };
 
   return Backbone;
-
-}));
+});
 
 /**
  * CLDR JavaScript Library v0.4.8
@@ -5171,7 +5198,7 @@ EventEmitter = (function () {
 }));
 
 /**
- * Globalize v1.2.3
+ * Globalize v1.3.0
  *
  * http://github.com/jquery/globalize
  *
@@ -5179,10 +5206,10 @@ EventEmitter = (function () {
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2017-03-17T01:41Z
+ * Date: 2017-07-03T21:37Z
  */
 /*!
- * Globalize v1.2.3 2017-03-17T01:41Z Released under the MIT license
+ * Globalize v1.3.0 2017-07-03T21:37Z Released under the MIT license
  * http://git.io/TrdQbw
  */
 (function( root, factory ) {
@@ -5329,7 +5356,7 @@ var runtimeBind = function( args, cldr, fn, runtimeArgs ) {
 		fnName = functionName( fn ),
 		locale = cldr.locale;
 
-	// If name of the function is not available, this is most likely due uglification,
+	// If name of the function is not available, this is most likely due to uglification,
 	// which most likely means we are in production, and runtimeBind here is not necessary.
 	if ( !fnName ) {
 		return fn;
@@ -5621,12 +5648,17 @@ function isObject(input) {
 }
 
 function isObjectEmpty(obj) {
-    var k;
-    for (k in obj) {
-        // even if its not own property I'd still call it non-empty
-        return false;
+    if (Object.getOwnPropertyNames) {
+        return (Object.getOwnPropertyNames(obj).length === 0);
+    } else {
+        var k;
+        for (k in obj) {
+            if (obj.hasOwnProperty(k)) {
+                return false;
+            }
+        }
+        return true;
     }
-    return true;
 }
 
 function isUndefined(input) {
@@ -5720,12 +5752,10 @@ if (Array.prototype.some) {
     };
 }
 
-var some$1 = some;
-
 function isValid(m) {
     if (m._isValid == null) {
         var flags = getParsingFlags(m);
-        var parsedParts = some$1.call(flags.parsedDateParts, function (i) {
+        var parsedParts = some.call(flags.parsedDateParts, function (i) {
             return i != null;
         });
         var isNowValid = !isNaN(m._d.getTime()) &&
@@ -5733,6 +5763,7 @@ function isValid(m) {
             !flags.empty &&
             !flags.invalidMonth &&
             !flags.invalidWeekday &&
+            !flags.weekdayMismatch &&
             !flags.nullInput &&
             !flags.invalidFormat &&
             !flags.userInvalidated &&
@@ -5998,8 +6029,6 @@ if (Object.keys) {
     };
 }
 
-var keys$1 = keys;
-
 var defaultCalendar = {
     sameDay : '[Today at] LT',
     nextDay : '[Tomorrow at] LT',
@@ -6123,56 +6152,6 @@ function getPrioritizedUnits(unitsObj) {
         return a.priority - b.priority;
     });
     return units;
-}
-
-function makeGetSet (unit, keepTime) {
-    return function (value) {
-        if (value != null) {
-            set$1(this, unit, value);
-            hooks.updateOffset(this, keepTime);
-            return this;
-        } else {
-            return get(this, unit);
-        }
-    };
-}
-
-function get (mom, unit) {
-    return mom.isValid() ?
-        mom._d['get' + (mom._isUTC ? 'UTC' : '') + unit]() : NaN;
-}
-
-function set$1 (mom, unit, value) {
-    if (mom.isValid()) {
-        mom._d['set' + (mom._isUTC ? 'UTC' : '') + unit](value);
-    }
-}
-
-// MOMENTS
-
-function stringGet (units) {
-    units = normalizeUnits(units);
-    if (isFunction(this[units])) {
-        return this[units]();
-    }
-    return this;
-}
-
-
-function stringSet (units, value) {
-    if (typeof units === 'object') {
-        units = normalizeObjectUnits(units);
-        var prioritized = getPrioritizedUnits(units);
-        for (var i = 0; i < prioritized.length; i++) {
-            this[prioritized[i].unit](units[prioritized[i].unit]);
-        }
-    } else {
-        units = normalizeUnits(units);
-        if (isFunction(this[units])) {
-            return this[units](value);
-        }
-    }
-    return this;
 }
 
 function zeroFill(number, targetLength, forceSign) {
@@ -6365,6 +6344,131 @@ var MILLISECOND = 6;
 var WEEK = 7;
 var WEEKDAY = 8;
 
+// FORMATTING
+
+addFormatToken('Y', 0, 0, function () {
+    var y = this.year();
+    return y <= 9999 ? '' + y : '+' + y;
+});
+
+addFormatToken(0, ['YY', 2], 0, function () {
+    return this.year() % 100;
+});
+
+addFormatToken(0, ['YYYY',   4],       0, 'year');
+addFormatToken(0, ['YYYYY',  5],       0, 'year');
+addFormatToken(0, ['YYYYYY', 6, true], 0, 'year');
+
+// ALIASES
+
+addUnitAlias('year', 'y');
+
+// PRIORITIES
+
+addUnitPriority('year', 1);
+
+// PARSING
+
+addRegexToken('Y',      matchSigned);
+addRegexToken('YY',     match1to2, match2);
+addRegexToken('YYYY',   match1to4, match4);
+addRegexToken('YYYYY',  match1to6, match6);
+addRegexToken('YYYYYY', match1to6, match6);
+
+addParseToken(['YYYYY', 'YYYYYY'], YEAR);
+addParseToken('YYYY', function (input, array) {
+    array[YEAR] = input.length === 2 ? hooks.parseTwoDigitYear(input) : toInt(input);
+});
+addParseToken('YY', function (input, array) {
+    array[YEAR] = hooks.parseTwoDigitYear(input);
+});
+addParseToken('Y', function (input, array) {
+    array[YEAR] = parseInt(input, 10);
+});
+
+// HELPERS
+
+function daysInYear(year) {
+    return isLeapYear(year) ? 366 : 365;
+}
+
+function isLeapYear(year) {
+    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+}
+
+// HOOKS
+
+hooks.parseTwoDigitYear = function (input) {
+    return toInt(input) + (toInt(input) > 68 ? 1900 : 2000);
+};
+
+// MOMENTS
+
+var getSetYear = makeGetSet('FullYear', true);
+
+function getIsLeapYear () {
+    return isLeapYear(this.year());
+}
+
+function makeGetSet (unit, keepTime) {
+    return function (value) {
+        if (value != null) {
+            set$1(this, unit, value);
+            hooks.updateOffset(this, keepTime);
+            return this;
+        } else {
+            return get(this, unit);
+        }
+    };
+}
+
+function get (mom, unit) {
+    return mom.isValid() ?
+        mom._d['get' + (mom._isUTC ? 'UTC' : '') + unit]() : NaN;
+}
+
+function set$1 (mom, unit, value) {
+    if (mom.isValid() && !isNaN(value)) {
+        if (unit === 'FullYear' && isLeapYear(mom.year())) {
+            mom._d['set' + (mom._isUTC ? 'UTC' : '') + unit](value, mom.month(), daysInMonth(value, mom.month()));
+        }
+        else {
+            mom._d['set' + (mom._isUTC ? 'UTC' : '') + unit](value);
+        }
+    }
+}
+
+// MOMENTS
+
+function stringGet (units) {
+    units = normalizeUnits(units);
+    if (isFunction(this[units])) {
+        return this[units]();
+    }
+    return this;
+}
+
+
+function stringSet (units, value) {
+    if (typeof units === 'object') {
+        units = normalizeObjectUnits(units);
+        var prioritized = getPrioritizedUnits(units);
+        for (var i = 0; i < prioritized.length; i++) {
+            this[prioritized[i].unit](units[prioritized[i].unit]);
+        }
+    } else {
+        units = normalizeUnits(units);
+        if (isFunction(this[units])) {
+            return this[units](value);
+        }
+    }
+    return this;
+}
+
+function mod(n, x) {
+    return ((n % x) + x) % x;
+}
+
 var indexOf;
 
 if (Array.prototype.indexOf) {
@@ -6382,10 +6486,13 @@ if (Array.prototype.indexOf) {
     };
 }
 
-var indexOf$1 = indexOf;
-
 function daysInMonth(year, month) {
-    return new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+    if (isNaN(year) || isNaN(month)) {
+        return NaN;
+    }
+    var modMonth = mod(month, 12);
+    year += (month - modMonth) / 12;
+    return modMonth === 1 ? (isLeapYear(year) ? 29 : 28) : (31 - modMonth % 7 % 2);
 }
 
 // FORMATTING
@@ -6474,26 +6581,26 @@ function handleStrictParse(monthName, format, strict) {
 
     if (strict) {
         if (format === 'MMM') {
-            ii = indexOf$1.call(this._shortMonthsParse, llc);
+            ii = indexOf.call(this._shortMonthsParse, llc);
             return ii !== -1 ? ii : null;
         } else {
-            ii = indexOf$1.call(this._longMonthsParse, llc);
+            ii = indexOf.call(this._longMonthsParse, llc);
             return ii !== -1 ? ii : null;
         }
     } else {
         if (format === 'MMM') {
-            ii = indexOf$1.call(this._shortMonthsParse, llc);
+            ii = indexOf.call(this._shortMonthsParse, llc);
             if (ii !== -1) {
                 return ii;
             }
-            ii = indexOf$1.call(this._longMonthsParse, llc);
+            ii = indexOf.call(this._longMonthsParse, llc);
             return ii !== -1 ? ii : null;
         } else {
-            ii = indexOf$1.call(this._longMonthsParse, llc);
+            ii = indexOf.call(this._longMonthsParse, llc);
             if (ii !== -1) {
                 return ii;
             }
-            ii = indexOf$1.call(this._shortMonthsParse, llc);
+            ii = indexOf.call(this._shortMonthsParse, llc);
             return ii !== -1 ? ii : null;
         }
     }
@@ -6650,72 +6757,6 @@ function computeMonthsParse () {
     this._monthsShortRegex = this._monthsRegex;
     this._monthsStrictRegex = new RegExp('^(' + longPieces.join('|') + ')', 'i');
     this._monthsShortStrictRegex = new RegExp('^(' + shortPieces.join('|') + ')', 'i');
-}
-
-// FORMATTING
-
-addFormatToken('Y', 0, 0, function () {
-    var y = this.year();
-    return y <= 9999 ? '' + y : '+' + y;
-});
-
-addFormatToken(0, ['YY', 2], 0, function () {
-    return this.year() % 100;
-});
-
-addFormatToken(0, ['YYYY',   4],       0, 'year');
-addFormatToken(0, ['YYYYY',  5],       0, 'year');
-addFormatToken(0, ['YYYYYY', 6, true], 0, 'year');
-
-// ALIASES
-
-addUnitAlias('year', 'y');
-
-// PRIORITIES
-
-addUnitPriority('year', 1);
-
-// PARSING
-
-addRegexToken('Y',      matchSigned);
-addRegexToken('YY',     match1to2, match2);
-addRegexToken('YYYY',   match1to4, match4);
-addRegexToken('YYYYY',  match1to6, match6);
-addRegexToken('YYYYYY', match1to6, match6);
-
-addParseToken(['YYYYY', 'YYYYYY'], YEAR);
-addParseToken('YYYY', function (input, array) {
-    array[YEAR] = input.length === 2 ? hooks.parseTwoDigitYear(input) : toInt(input);
-});
-addParseToken('YY', function (input, array) {
-    array[YEAR] = hooks.parseTwoDigitYear(input);
-});
-addParseToken('Y', function (input, array) {
-    array[YEAR] = parseInt(input, 10);
-});
-
-// HELPERS
-
-function daysInYear(year) {
-    return isLeapYear(year) ? 366 : 365;
-}
-
-function isLeapYear(year) {
-    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-}
-
-// HOOKS
-
-hooks.parseTwoDigitYear = function (input) {
-    return toInt(input) + (toInt(input) > 68 ? 1900 : 2000);
-};
-
-// MOMENTS
-
-var getSetYear = makeGetSet('FullYear', true);
-
-function getIsLeapYear () {
-    return isLeapYear(this.year());
 }
 
 function createDate (y, m, d, h, M, s, ms) {
@@ -6985,48 +7026,48 @@ function handleStrictParse$1(weekdayName, format, strict) {
 
     if (strict) {
         if (format === 'dddd') {
-            ii = indexOf$1.call(this._weekdaysParse, llc);
+            ii = indexOf.call(this._weekdaysParse, llc);
             return ii !== -1 ? ii : null;
         } else if (format === 'ddd') {
-            ii = indexOf$1.call(this._shortWeekdaysParse, llc);
+            ii = indexOf.call(this._shortWeekdaysParse, llc);
             return ii !== -1 ? ii : null;
         } else {
-            ii = indexOf$1.call(this._minWeekdaysParse, llc);
+            ii = indexOf.call(this._minWeekdaysParse, llc);
             return ii !== -1 ? ii : null;
         }
     } else {
         if (format === 'dddd') {
-            ii = indexOf$1.call(this._weekdaysParse, llc);
+            ii = indexOf.call(this._weekdaysParse, llc);
             if (ii !== -1) {
                 return ii;
             }
-            ii = indexOf$1.call(this._shortWeekdaysParse, llc);
+            ii = indexOf.call(this._shortWeekdaysParse, llc);
             if (ii !== -1) {
                 return ii;
             }
-            ii = indexOf$1.call(this._minWeekdaysParse, llc);
+            ii = indexOf.call(this._minWeekdaysParse, llc);
             return ii !== -1 ? ii : null;
         } else if (format === 'ddd') {
-            ii = indexOf$1.call(this._shortWeekdaysParse, llc);
+            ii = indexOf.call(this._shortWeekdaysParse, llc);
             if (ii !== -1) {
                 return ii;
             }
-            ii = indexOf$1.call(this._weekdaysParse, llc);
+            ii = indexOf.call(this._weekdaysParse, llc);
             if (ii !== -1) {
                 return ii;
             }
-            ii = indexOf$1.call(this._minWeekdaysParse, llc);
+            ii = indexOf.call(this._minWeekdaysParse, llc);
             return ii !== -1 ? ii : null;
         } else {
-            ii = indexOf$1.call(this._minWeekdaysParse, llc);
+            ii = indexOf.call(this._minWeekdaysParse, llc);
             if (ii !== -1) {
                 return ii;
             }
-            ii = indexOf$1.call(this._weekdaysParse, llc);
+            ii = indexOf.call(this._weekdaysParse, llc);
             if (ii !== -1) {
                 return ii;
             }
-            ii = indexOf$1.call(this._shortWeekdaysParse, llc);
+            ii = indexOf.call(this._shortWeekdaysParse, llc);
             return ii !== -1 ? ii : null;
         }
     }
@@ -7410,16 +7451,28 @@ function chooseLocale(names) {
 
 function loadLocale(name) {
     var oldLocale = null;
+
     // TODO: Find a better way to register and load all the locales in Node
     if (!locales[name] && (typeof module !== 'undefined') &&
             module && module.exports) {
+        oldLocale = globalLocale._abbr;
         try {
-            oldLocale = globalLocale._abbr;
-            require('./locale/' + name);
-            // because defineLocale currently also sets the global locale, we
-            // want to undo that for lazy loaded locales
-            getSetGlobalLocale(oldLocale);
-        } catch (e) { }
+            // workaround for React Native 0.49+
+            var pretendingNotToRequireV1 = require;
+            pretendingNotToRequireV1('moment/locale/' + name);
+        } catch (e) {
+            // In the test environment, the external module 'moment'
+            // can't be resolved because we're running inside it.
+            // Fallback to using the old relative import
+            try {
+                var pretendingNotToRequireV2 = require;
+                pretendingNotToRequireV2('./locale/' + name);
+            } catch (e) { }
+        }
+
+        // because defineLocale currently also sets the global locale, we
+        // want to undo that for lazy loaded locales
+        getSetGlobalLocale(oldLocale);
     }
     return locales[name];
 }
@@ -7545,7 +7598,7 @@ function getLocale (key) {
 }
 
 function listLocales() {
-    return keys$1(locales);
+    return keys(locales);
 }
 
 function checkOverflow (m) {
@@ -7576,6 +7629,154 @@ function checkOverflow (m) {
     }
 
     return m;
+}
+
+// Pick the first defined of two or three arguments.
+function defaults(a, b, c) {
+    if (a != null) {
+        return a;
+    }
+    if (b != null) {
+        return b;
+    }
+    return c;
+}
+
+function currentDateArray(config) {
+    // hooks is actually the exported moment object
+    var nowValue = new Date(hooks.now());
+    if (config._useUTC) {
+        return [nowValue.getUTCFullYear(), nowValue.getUTCMonth(), nowValue.getUTCDate()];
+    }
+    return [nowValue.getFullYear(), nowValue.getMonth(), nowValue.getDate()];
+}
+
+// convert an array to a date.
+// the array should mirror the parameters below
+// note: all values past the year are optional and will default to the lowest possible value.
+// [year, month, day , hour, minute, second, millisecond]
+function configFromArray (config) {
+    var i, date, input = [], currentDate, yearToUse;
+
+    if (config._d) {
+        return;
+    }
+
+    currentDate = currentDateArray(config);
+
+    //compute day of the year from weeks and weekdays
+    if (config._w && config._a[DATE] == null && config._a[MONTH] == null) {
+        dayOfYearFromWeekInfo(config);
+    }
+
+    //if the day of the year is set, figure out what it is
+    if (config._dayOfYear != null) {
+        yearToUse = defaults(config._a[YEAR], currentDate[YEAR]);
+
+        if (config._dayOfYear > daysInYear(yearToUse) || config._dayOfYear === 0) {
+            getParsingFlags(config)._overflowDayOfYear = true;
+        }
+
+        date = createUTCDate(yearToUse, 0, config._dayOfYear);
+        config._a[MONTH] = date.getUTCMonth();
+        config._a[DATE] = date.getUTCDate();
+    }
+
+    // Default to current date.
+    // * if no year, month, day of month are given, default to today
+    // * if day of month is given, default month and year
+    // * if month is given, default only year
+    // * if year is given, don't default anything
+    for (i = 0; i < 3 && config._a[i] == null; ++i) {
+        config._a[i] = input[i] = currentDate[i];
+    }
+
+    // Zero out whatever was not defaulted, including time
+    for (; i < 7; i++) {
+        config._a[i] = input[i] = (config._a[i] == null) ? (i === 2 ? 1 : 0) : config._a[i];
+    }
+
+    // Check for 24:00:00.000
+    if (config._a[HOUR] === 24 &&
+            config._a[MINUTE] === 0 &&
+            config._a[SECOND] === 0 &&
+            config._a[MILLISECOND] === 0) {
+        config._nextDay = true;
+        config._a[HOUR] = 0;
+    }
+
+    config._d = (config._useUTC ? createUTCDate : createDate).apply(null, input);
+    // Apply timezone offset from input. The actual utcOffset can be changed
+    // with parseZone.
+    if (config._tzm != null) {
+        config._d.setUTCMinutes(config._d.getUTCMinutes() - config._tzm);
+    }
+
+    if (config._nextDay) {
+        config._a[HOUR] = 24;
+    }
+
+    // check for mismatching day of week
+    if (config._w && typeof config._w.d !== 'undefined' && config._w.d !== config._d.getDay()) {
+        getParsingFlags(config).weekdayMismatch = true;
+    }
+}
+
+function dayOfYearFromWeekInfo(config) {
+    var w, weekYear, week, weekday, dow, doy, temp, weekdayOverflow;
+
+    w = config._w;
+    if (w.GG != null || w.W != null || w.E != null) {
+        dow = 1;
+        doy = 4;
+
+        // TODO: We need to take the current isoWeekYear, but that depends on
+        // how we interpret now (local, utc, fixed offset). So create
+        // a now version of current config (take local/utc/offset flags, and
+        // create now).
+        weekYear = defaults(w.GG, config._a[YEAR], weekOfYear(createLocal(), 1, 4).year);
+        week = defaults(w.W, 1);
+        weekday = defaults(w.E, 1);
+        if (weekday < 1 || weekday > 7) {
+            weekdayOverflow = true;
+        }
+    } else {
+        dow = config._locale._week.dow;
+        doy = config._locale._week.doy;
+
+        var curWeek = weekOfYear(createLocal(), dow, doy);
+
+        weekYear = defaults(w.gg, config._a[YEAR], curWeek.year);
+
+        // Default to current week.
+        week = defaults(w.w, curWeek.week);
+
+        if (w.d != null) {
+            // weekday -- low day numbers are considered next week
+            weekday = w.d;
+            if (weekday < 0 || weekday > 6) {
+                weekdayOverflow = true;
+            }
+        } else if (w.e != null) {
+            // local weekday -- counting starts from begining of week
+            weekday = w.e + dow;
+            if (w.e < 0 || w.e > 6) {
+                weekdayOverflow = true;
+            }
+        } else {
+            // default to begining of week
+            weekday = dow;
+        }
+    }
+    if (week < 1 || week > weeksInYear(weekYear, dow, doy)) {
+        getParsingFlags(config)._overflowWeeks = true;
+    } else if (weekdayOverflow != null) {
+        getParsingFlags(config)._overflowWeekday = true;
+    } else {
+        temp = dayOfYearFromWeeks(weekYear, week, weekday, dow, doy);
+        config._a[YEAR] = temp.year;
+        config._dayOfYear = temp.dayOfYear;
+    }
 }
 
 // iso 8601 regex
@@ -7669,70 +7870,94 @@ function configFromISO(config) {
 }
 
 // RFC 2822 regex: For details see https://tools.ietf.org/html/rfc2822#section-3.3
-var basicRfcRegex = /^((?:Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s)?(\d?\d\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(?:\d\d)?\d\d\s)(\d\d:\d\d)(\:\d\d)?(\s(?:UT|GMT|[ECMP][SD]T|[A-IK-Za-ik-z]|[+-]\d{4}))$/;
+var rfc2822 = /^(?:(Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s)?(\d{1,2})\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(\d{2,4})\s(\d\d):(\d\d)(?::(\d\d))?\s(?:(UT|GMT|[ECMP][SD]T)|([Zz])|([+-]\d{4}))$/;
+
+function extractFromRFC2822Strings(yearStr, monthStr, dayStr, hourStr, minuteStr, secondStr) {
+    var result = [
+        untruncateYear(yearStr),
+        defaultLocaleMonthsShort.indexOf(monthStr),
+        parseInt(dayStr, 10),
+        parseInt(hourStr, 10),
+        parseInt(minuteStr, 10)
+    ];
+
+    if (secondStr) {
+        result.push(parseInt(secondStr, 10));
+    }
+
+    return result;
+}
+
+function untruncateYear(yearStr) {
+    var year = parseInt(yearStr, 10);
+    if (year <= 49) {
+        return 2000 + year;
+    } else if (year <= 999) {
+        return 1900 + year;
+    }
+    return year;
+}
+
+function preprocessRFC2822(s) {
+    // Remove comments and folding whitespace and replace multiple-spaces with a single space
+    return s.replace(/\([^)]*\)|[\n\t]/g, ' ').replace(/(\s\s+)/g, ' ').trim();
+}
+
+function checkWeekday(weekdayStr, parsedInput, config) {
+    if (weekdayStr) {
+        // TODO: Replace the vanilla JS Date object with an indepentent day-of-week check.
+        var weekdayProvided = defaultLocaleWeekdaysShort.indexOf(weekdayStr),
+            weekdayActual = new Date(parsedInput[0], parsedInput[1], parsedInput[2]).getDay();
+        if (weekdayProvided !== weekdayActual) {
+            getParsingFlags(config).weekdayMismatch = true;
+            config._isValid = false;
+            return false;
+        }
+    }
+    return true;
+}
+
+var obsOffsets = {
+    UT: 0,
+    GMT: 0,
+    EDT: -4 * 60,
+    EST: -5 * 60,
+    CDT: -5 * 60,
+    CST: -6 * 60,
+    MDT: -6 * 60,
+    MST: -7 * 60,
+    PDT: -7 * 60,
+    PST: -8 * 60
+};
+
+function calculateOffset(obsOffset, militaryOffset, numOffset) {
+    if (obsOffset) {
+        return obsOffsets[obsOffset];
+    } else if (militaryOffset) {
+        // the only allowed military tz is Z
+        return 0;
+    } else {
+        var hm = parseInt(numOffset, 10);
+        var m = hm % 100, h = (hm - m) / 100;
+        return h * 60 + m;
+    }
+}
 
 // date and time from ref 2822 format
 function configFromRFC2822(config) {
-    var string, match, dayFormat,
-        dateFormat, timeFormat, tzFormat;
-    var timezones = {
-        ' GMT': ' +0000',
-        ' EDT': ' -0400',
-        ' EST': ' -0500',
-        ' CDT': ' -0500',
-        ' CST': ' -0600',
-        ' MDT': ' -0600',
-        ' MST': ' -0700',
-        ' PDT': ' -0700',
-        ' PST': ' -0800'
-    };
-    var military = 'YXWVUTSRQPONZABCDEFGHIKLM';
-    var timezone, timezoneIndex;
-
-    string = config._i
-        .replace(/\([^\)]*\)|[\n\t]/g, ' ') // Remove comments and folding whitespace
-        .replace(/(\s\s+)/g, ' ') // Replace multiple-spaces with a single space
-        .replace(/^\s|\s$/g, ''); // Remove leading and trailing spaces
-    match = basicRfcRegex.exec(string);
-
+    var match = rfc2822.exec(preprocessRFC2822(config._i));
     if (match) {
-        dayFormat = match[1] ? 'ddd' + ((match[1].length === 5) ? ', ' : ' ') : '';
-        dateFormat = 'D MMM ' + ((match[2].length > 10) ? 'YYYY ' : 'YY ');
-        timeFormat = 'HH:mm' + (match[4] ? ':ss' : '');
-
-        // TODO: Replace the vanilla JS Date object with an indepentent day-of-week check.
-        if (match[1]) { // day of week given
-            var momentDate = new Date(match[2]);
-            var momentDay = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][momentDate.getDay()];
-
-            if (match[1].substr(0,3) !== momentDay) {
-                getParsingFlags(config).weekdayMismatch = true;
-                config._isValid = false;
-                return;
-            }
+        var parsedArray = extractFromRFC2822Strings(match[4], match[3], match[2], match[5], match[6], match[7]);
+        if (!checkWeekday(match[1], parsedArray, config)) {
+            return;
         }
 
-        switch (match[5].length) {
-            case 2: // military
-                if (timezoneIndex === 0) {
-                    timezone = ' +0000';
-                } else {
-                    timezoneIndex = military.indexOf(match[5][1].toUpperCase()) - 12;
-                    timezone = ((timezoneIndex < 0) ? ' -' : ' +') +
-                        (('' + timezoneIndex).replace(/^-?/, '0')).match(/..$/)[0] + '00';
-                }
-                break;
-            case 4: // Zone
-                timezone = timezones[match[5]];
-                break;
-            default: // UT or +/-9999
-                timezone = timezones[' GMT'];
-        }
-        match[5] = timezone;
-        config._i = match.splice(1).join('');
-        tzFormat = ' ZZ';
-        config._f = dayFormat + dateFormat + timeFormat + tzFormat;
-        configFromStringAndFormat(config);
+        config._a = parsedArray;
+        config._tzm = calculateOffset(match[8], match[9], match[10]);
+
+        config._d = createUTCDate.apply(null, config._a);
+        config._d.setUTCMinutes(config._d.getUTCMinutes() - config._tzm);
+
         getParsingFlags(config).rfc2822 = true;
     } else {
         config._isValid = false;
@@ -7775,149 +8000,6 @@ hooks.createFromInputFallback = deprecate(
         config._d = new Date(config._i + (config._useUTC ? ' UTC' : ''));
     }
 );
-
-// Pick the first defined of two or three arguments.
-function defaults(a, b, c) {
-    if (a != null) {
-        return a;
-    }
-    if (b != null) {
-        return b;
-    }
-    return c;
-}
-
-function currentDateArray(config) {
-    // hooks is actually the exported moment object
-    var nowValue = new Date(hooks.now());
-    if (config._useUTC) {
-        return [nowValue.getUTCFullYear(), nowValue.getUTCMonth(), nowValue.getUTCDate()];
-    }
-    return [nowValue.getFullYear(), nowValue.getMonth(), nowValue.getDate()];
-}
-
-// convert an array to a date.
-// the array should mirror the parameters below
-// note: all values past the year are optional and will default to the lowest possible value.
-// [year, month, day , hour, minute, second, millisecond]
-function configFromArray (config) {
-    var i, date, input = [], currentDate, yearToUse;
-
-    if (config._d) {
-        return;
-    }
-
-    currentDate = currentDateArray(config);
-
-    //compute day of the year from weeks and weekdays
-    if (config._w && config._a[DATE] == null && config._a[MONTH] == null) {
-        dayOfYearFromWeekInfo(config);
-    }
-
-    //if the day of the year is set, figure out what it is
-    if (config._dayOfYear != null) {
-        yearToUse = defaults(config._a[YEAR], currentDate[YEAR]);
-
-        if (config._dayOfYear > daysInYear(yearToUse) || config._dayOfYear === 0) {
-            getParsingFlags(config)._overflowDayOfYear = true;
-        }
-
-        date = createUTCDate(yearToUse, 0, config._dayOfYear);
-        config._a[MONTH] = date.getUTCMonth();
-        config._a[DATE] = date.getUTCDate();
-    }
-
-    // Default to current date.
-    // * if no year, month, day of month are given, default to today
-    // * if day of month is given, default month and year
-    // * if month is given, default only year
-    // * if year is given, don't default anything
-    for (i = 0; i < 3 && config._a[i] == null; ++i) {
-        config._a[i] = input[i] = currentDate[i];
-    }
-
-    // Zero out whatever was not defaulted, including time
-    for (; i < 7; i++) {
-        config._a[i] = input[i] = (config._a[i] == null) ? (i === 2 ? 1 : 0) : config._a[i];
-    }
-
-    // Check for 24:00:00.000
-    if (config._a[HOUR] === 24 &&
-            config._a[MINUTE] === 0 &&
-            config._a[SECOND] === 0 &&
-            config._a[MILLISECOND] === 0) {
-        config._nextDay = true;
-        config._a[HOUR] = 0;
-    }
-
-    config._d = (config._useUTC ? createUTCDate : createDate).apply(null, input);
-    // Apply timezone offset from input. The actual utcOffset can be changed
-    // with parseZone.
-    if (config._tzm != null) {
-        config._d.setUTCMinutes(config._d.getUTCMinutes() - config._tzm);
-    }
-
-    if (config._nextDay) {
-        config._a[HOUR] = 24;
-    }
-}
-
-function dayOfYearFromWeekInfo(config) {
-    var w, weekYear, week, weekday, dow, doy, temp, weekdayOverflow;
-
-    w = config._w;
-    if (w.GG != null || w.W != null || w.E != null) {
-        dow = 1;
-        doy = 4;
-
-        // TODO: We need to take the current isoWeekYear, but that depends on
-        // how we interpret now (local, utc, fixed offset). So create
-        // a now version of current config (take local/utc/offset flags, and
-        // create now).
-        weekYear = defaults(w.GG, config._a[YEAR], weekOfYear(createLocal(), 1, 4).year);
-        week = defaults(w.W, 1);
-        weekday = defaults(w.E, 1);
-        if (weekday < 1 || weekday > 7) {
-            weekdayOverflow = true;
-        }
-    } else {
-        dow = config._locale._week.dow;
-        doy = config._locale._week.doy;
-
-        var curWeek = weekOfYear(createLocal(), dow, doy);
-
-        weekYear = defaults(w.gg, config._a[YEAR], curWeek.year);
-
-        // Default to current week.
-        week = defaults(w.w, curWeek.week);
-
-        if (w.d != null) {
-            // weekday -- low day numbers are considered next week
-            weekday = w.d;
-            if (weekday < 0 || weekday > 6) {
-                weekdayOverflow = true;
-            }
-        } else if (w.e != null) {
-            // local weekday -- counting starts from begining of week
-            weekday = w.e + dow;
-            if (w.e < 0 || w.e > 6) {
-                weekdayOverflow = true;
-            }
-        } else {
-            // default to begining of week
-            weekday = dow;
-        }
-    }
-    if (week < 1 || week > weeksInYear(weekYear, dow, doy)) {
-        getParsingFlags(config)._overflowWeeks = true;
-    } else if (weekdayOverflow != null) {
-        getParsingFlags(config)._overflowWeekday = true;
-    } else {
-        temp = dayOfYearFromWeeks(weekYear, week, weekday, dow, doy);
-        config._a[YEAR] = temp.year;
-        config._dayOfYear = temp.dayOfYear;
-    }
-}
 
 // constant that refers to the ISO standard
 hooks.ISO_8601 = function () {};
@@ -8243,7 +8325,7 @@ var ordering = ['year', 'quarter', 'month', 'week', 'day', 'hour', 'minute', 'se
 
 function isDurationValid(m) {
     for (var key in m) {
-        if (!(ordering.indexOf(key) !== -1 && (m[key] == null || !isNaN(m[key])))) {
+        if (!(indexOf.call(ordering, key) !== -1 && (m[key] == null || !isNaN(m[key])))) {
             return false;
         }
     }
@@ -8294,7 +8376,7 @@ function Duration (duration) {
     // day when working around DST, we need to store them separately
     this._days = +days +
         weeks * 7;
-    // It is impossible translate months into days without knowing
+    // It is impossible to translate months into days without knowing
     // which months you are are talking about, so we have to store
     // it separately.
     this._months = +months +
@@ -8541,12 +8623,12 @@ function isUtc () {
 }
 
 // ASP.NET json date format regex
-var aspNetRegex = /^(\-)?(?:(\d*)[. ])?(\d+)\:(\d+)(?:\:(\d+)(\.\d*)?)?$/;
+var aspNetRegex = /^(\-|\+)?(?:(\d*)[. ])?(\d+)\:(\d+)(?:\:(\d+)(\.\d*)?)?$/;
 
 // from http://docs.closure-library.googlecode.com/git/closure_goog_date_date.js.source.html
 // somewhat more in line with 4.4.3.2 2004 spec, but allows decimal anywhere
 // and further modified to allow for strings containing both week and day
-var isoRegex = /^(-)?P(?:(-?[0-9,.]*)Y)?(?:(-?[0-9,.]*)M)?(?:(-?[0-9,.]*)W)?(?:(-?[0-9,.]*)D)?(?:T(?:(-?[0-9,.]*)H)?(?:(-?[0-9,.]*)M)?(?:(-?[0-9,.]*)S)?)?$/;
+var isoRegex = /^(-|\+)?P(?:([-+]?[0-9,.]*)Y)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)W)?(?:([-+]?[0-9,.]*)D)?(?:T(?:([-+]?[0-9,.]*)H)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)S)?)?$/;
 
 function createDuration (input, key) {
     var duration = input,
@@ -8580,7 +8662,7 @@ function createDuration (input, key) {
             ms : toInt(absRound(match[MILLISECOND] * 1000)) * sign // the millisecond decimal point is included in the match
         };
     } else if (!!(match = isoRegex.exec(input))) {
-        sign = (match[1] === '-') ? -1 : 1;
+        sign = (match[1] === '-') ? -1 : (match[1] === '+') ? 1 : 1;
         duration = {
             y : parseIso(match[2], sign),
             M : parseIso(match[3], sign),
@@ -8683,14 +8765,14 @@ function addSubtract (mom, duration, isAdding, updateOffset) {
 
     updateOffset = updateOffset == null ? true : updateOffset;
 
-    if (milliseconds) {
-        mom._d.setTime(mom._d.valueOf() + milliseconds * isAdding);
+    if (months) {
+        setMonth(mom, get(mom, 'Month') + months * isAdding);
     }
     if (days) {
         set$1(mom, 'Date', get(mom, 'Date') + days * isAdding);
     }
-    if (months) {
-        setMonth(mom, get(mom, 'Month') + months * isAdding);
+    if (milliseconds) {
+        mom._d.setTime(mom._d.valueOf() + milliseconds * isAdding);
     }
     if (updateOffset) {
         hooks.updateOffset(mom, days || months);
@@ -8800,22 +8882,18 @@ function diff (input, units, asFloat) {
 
     units = normalizeUnits(units);
 
-    if (units === 'year' || units === 'month' || units === 'quarter') {
-        output = monthDiff(this, that);
-        if (units === 'quarter') {
-            output = output / 3;
-        } else if (units === 'year') {
-            output = output / 12;
-        }
-    } else {
-        delta = this - that;
-        output = units === 'second' ? delta / 1e3 : // 1000
-            units === 'minute' ? delta / 6e4 : // 1000 * 60
-            units === 'hour' ? delta / 36e5 : // 1000 * 60 * 60
-            units === 'day' ? (delta - zoneDelta) / 864e5 : // 1000 * 60 * 60 * 24, negate dst
-            units === 'week' ? (delta - zoneDelta) / 6048e5 : // 1000 * 60 * 60 * 24 * 7, negate dst
-            delta;
+    switch (units) {
+        case 'year': output = monthDiff(this, that) / 12; break;
+        case 'month': output = monthDiff(this, that); break;
+        case 'quarter': output = monthDiff(this, that) / 3; break;
+        case 'second': output = (this - that) / 1e3; break; // 1000
+        case 'minute': output = (this - that) / 6e4; break; // 1000 * 60
+        case 'hour': output = (this - that) / 36e5; break; // 1000 * 60 * 60
+        case 'day': output = (this - that - zoneDelta) / 864e5; break; // 1000 * 60 * 60 * 24, negate dst
+        case 'week': output = (this - that - zoneDelta) / 6048e5; break; // 1000 * 60 * 60 * 24 * 7, negate dst
+        default: output = this - that;
     }
+
     return asFloat ? output : absFloor(output);
 }
 
@@ -9793,6 +9871,10 @@ var asWeeks        = makeAs('w');
 var asMonths       = makeAs('M');
 var asYears        = makeAs('y');
 
+function clone$1 () {
+    return createDuration(this);
+}
+
 function get$2 (units) {
     units = normalizeUnits(units);
     return this.isValid() ? this[units + 's']() : NaN;
@@ -9902,6 +9984,10 @@ function humanize (withSuffix) {
 
 var abs$1 = Math.abs;
 
+function sign(x) {
+    return ((x > 0) - (x < 0)) || +x;
+}
+
 function toISOString$1() {
     // for ISO strings we do not use the normal bubbling rules:
     //  * milliseconds bubble up until they become hours
@@ -9936,7 +10022,7 @@ function toISOString$1() {
     var D = days;
     var h = hours;
     var m = minutes;
-    var s = seconds;
+    var s = seconds ? seconds.toFixed(3).replace(/\.?0+$/, '') : '';
     var total = this.asSeconds();
 
     if (!total) {
@@ -9945,15 +10031,19 @@ function toISOString$1() {
         return 'P0D';
     }
 
-    return (total < 0 ? '-' : '') +
-        'P' +
-        (Y ? Y + 'Y' : '') +
-        (M ? M + 'M' : '') +
-        (D ? D + 'D' : '') +
+    var totalSign = total < 0 ? '-' : '';
+    var ymSign = sign(this._months) !== sign(total) ? '-' : '';
+    var daysSign = sign(this._days) !== sign(total) ? '-' : '';
+    var hmsSign = sign(this._milliseconds) !== sign(total) ? '-' : '';
+
+    return totalSign + 'P' +
+        (Y ? ymSign + Y + 'Y' : '') +
+        (M ? ymSign + M + 'M' : '') +
+        (D ? daysSign + D + 'D' : '') +
         ((h || m || s) ? 'T' : '') +
-        (h ? h + 'H' : '') +
-        (m ? m + 'M' : '') +
-        (s ? s + 'S' : '');
+        (h ? hmsSign + h + 'H' : '') +
+        (m ? hmsSign + m + 'M' : '') +
+        (s ? hmsSign + s + 'S' : '');
 }
 
 var proto$2 = Duration.prototype;
@@ -9973,6 +10063,7 @@ proto$2.asMonths       = asMonths;
 proto$2.asYears        = asYears;
 proto$2.valueOf        = valueOf$1;
 proto$2._bubble        = bubble;
+proto$2.clone          = clone$1;
 proto$2.get            = get$2;
 proto$2.milliseconds   = milliseconds;
 proto$2.seconds        = seconds;
@@ -10014,12 +10105,12 @@ addParseToken('x', function (input, array, config) {
 // Side effect imports
 
 //! moment.js
-//! version : 2.18.1
+//! version : 2.19.0
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
 //! license : MIT
 //! momentjs.com
 
-hooks.version = '2.18.1';
+hooks.version = '2.19.0';
 
 setHookCallback(createLocal);
 
@@ -10046,7 +10137,7 @@ hooks.updateLocale          = updateLocale;
 hooks.locales               = listLocales;
 hooks.weekdaysShort         = listWeekdaysShort;
 hooks.normalizeUnits        = normalizeUnits;
-hooks.relativeTimeRounding = getSetRelativeTimeRounding;
+hooks.relativeTimeRounding  = getSetRelativeTimeRounding;
 hooks.relativeTimeThreshold = getSetRelativeTimeThreshold;
 hooks.calendarFormat        = getCalendarFormat;
 hooks.prototype             = proto;
@@ -10311,7 +10402,7 @@ hooks.defineLocale('ar-ly', {
         yy : pluralize('y')
     },
     preparse: function (string) {
-        return string.replace(/\u200f/g, '').replace(/،/g, ',');
+        return string.replace(/،/g, ',');
     },
     postformat: function (string) {
         return string.replace(/\d/g, function (match) {
@@ -10631,7 +10722,7 @@ hooks.defineLocale('ar', {
         yy : pluralize$1('y')
     },
     preparse: function (string) {
-        return string.replace(/\u200f/g, '').replace(/[١٢٣٤٥٦٧٨٩٠]/g, function (match) {
+        return string.replace(/[١٢٣٤٥٦٧٨٩٠]/g, function (match) {
             return numberMap$1[match];
         }).replace(/،/g, ',');
     },
@@ -10939,6 +11030,54 @@ hooks.defineLocale('bg', {
     week : {
         dow : 1, // Monday is the first day of the week.
         doy : 7  // The week that contains Jan 1st is the first week of the year.
+    }
+});
+
+//! moment.js locale configuration
+//! locale : Bambara [bm]
+//! author : Estelle Comment : https://github.com/estellecomment
+// Language contact person : Abdoufata Kane : https://github.com/abdoufata
+
+hooks.defineLocale('bm', {
+    months : 'Zanwuyekalo_Fewuruyekalo_Marisikalo_Awirilikalo_Mɛkalo_Zuwɛnkalo_Zuluyekalo_Utikalo_Sɛtanburukalo_ɔkutɔburukalo_Nowanburukalo_Desanburukalo'.split('_'),
+    monthsShort : 'Zan_Few_Mar_Awi_Mɛ_Zuw_Zul_Uti_Sɛt_ɔku_Now_Des'.split('_'),
+    weekdays : 'Kari_Ntɛnɛn_Tarata_Araba_Alamisa_Juma_Sibiri'.split('_'),
+    weekdaysShort : 'Kar_Ntɛ_Tar_Ara_Ala_Jum_Sib'.split('_'),
+    weekdaysMin : 'Ka_Nt_Ta_Ar_Al_Ju_Si'.split('_'),
+    longDateFormat : {
+        LT : 'HH:mm',
+        LTS : 'HH:mm:ss',
+        L : 'DD/MM/YYYY',
+        LL : 'MMMM [tile] D [san] YYYY',
+        LLL : 'MMMM [tile] D [san] YYYY [lɛrɛ] HH:mm',
+        LLLL : 'dddd MMMM [tile] D [san] YYYY [lɛrɛ] HH:mm'
+    },
+    calendar : {
+        sameDay : '[Bi lɛrɛ] LT',
+        nextDay : '[Sini lɛrɛ] LT',
+        nextWeek : 'dddd [don lɛrɛ] LT',
+        lastDay : '[Kunu lɛrɛ] LT',
+        lastWeek : 'dddd [tɛmɛnen lɛrɛ] LT',
+        sameElse : 'L'
+    },
+    relativeTime : {
+        future : '%s kɔnɔ',
+        past : 'a bɛ %s bɔ',
+        s : 'sanga dama dama',
+        m : 'miniti kelen',
+        mm : 'miniti %d',
+        h : 'lɛrɛ kelen',
+        hh : 'lɛrɛ %d',
+        d : 'tile kelen',
+        dd : 'tile %d',
+        M : 'kalo kelen',
+        MM : 'kalo %d',
+        y : 'san kelen',
+        yy : 'san %d'
+    },
+    week : {
+        dow : 1, // Monday is the first day of the week.
+        doy : 4  // The week that contains Jan 4th is the first week of the year.
     }
 });
 
@@ -11401,17 +11540,17 @@ hooks.defineLocale('ca', {
     monthsParseExact : true,
     weekdays : 'diumenge_dilluns_dimarts_dimecres_dijous_divendres_dissabte'.split('_'),
     weekdaysShort : 'dg._dl._dt._dc._dj._dv._ds.'.split('_'),
-    weekdaysMin : 'Dg_Dl_Dt_Dc_Dj_Dv_Ds'.split('_'),
+    weekdaysMin : 'dg_dl_dt_dc_dj_dv_ds'.split('_'),
     weekdaysParseExact : true,
     longDateFormat : {
         LT : 'H:mm',
         LTS : 'H:mm:ss',
         L : 'DD/MM/YYYY',
-        LL : '[el] D MMMM [de] YYYY',
+        LL : 'D MMMM [de] YYYY',
         ll : 'D MMM YYYY',
-        LLL : '[el] D MMMM [de] YYYY [a les] H:mm',
+        LLL : 'D MMMM [de] YYYY [a les] H:mm',
         lll : 'D MMM YYYY, H:mm',
-        LLLL : '[el] dddd D MMMM [de] YYYY [a les] H:mm',
+        LLLL : 'dddd D MMMM [de] YYYY [a les] H:mm',
         llll : 'ddd D MMM YYYY, H:mm'
     },
     calendar : {
@@ -11760,7 +11899,7 @@ hooks.defineLocale('da', {
     longDateFormat : {
         LT : 'HH:mm',
         LTS : 'HH:mm:ss',
-        L : 'DD/MM/YYYY',
+        L : 'DD.MM.YYYY',
         LL : 'D. MMMM YYYY',
         LLL : 'D. MMMM YYYY HH:mm',
         LLLL : 'dddd [d.] D. MMMM YYYY [kl.] HH:mm'
@@ -11819,7 +11958,7 @@ function processRelativeTime(number, withoutSuffix, key, isFuture) {
 
 hooks.defineLocale('de-at', {
     months : 'Jänner_Februar_März_April_Mai_Juni_Juli_August_September_Oktober_November_Dezember'.split('_'),
-    monthsShort : 'Jän._Febr._Mrz._Apr._Mai_Jun._Jul._Aug._Sept._Okt._Nov._Dez.'.split('_'),
+    monthsShort : 'Jän._Feb._März_Apr._Mai_Juni_Juli_Aug._Sep._Okt._Nov._Dez.'.split('_'),
     monthsParseExact : true,
     weekdays : 'Sonntag_Montag_Dienstag_Mittwoch_Donnerstag_Freitag_Samstag'.split('_'),
     weekdaysShort : 'So._Mo._Di._Mi._Do._Fr._Sa.'.split('_'),
@@ -11886,7 +12025,7 @@ function processRelativeTime$1(number, withoutSuffix, key, isFuture) {
 
 hooks.defineLocale('de-ch', {
     months : 'Januar_Februar_März_April_Mai_Juni_Juli_August_September_Oktober_November_Dezember'.split('_'),
-    monthsShort : 'Jan._Febr._März_April_Mai_Juni_Juli_Aug._Sept._Okt._Nov._Dez.'.split('_'),
+    monthsShort : 'Jan._Feb._März_Apr._Mai_Juni_Juli_Aug._Sep._Okt._Nov._Dez.'.split('_'),
     monthsParseExact : true,
     weekdays : 'Sonntag_Montag_Dienstag_Mittwoch_Donnerstag_Freitag_Samstag'.split('_'),
     weekdaysShort : 'So_Mo_Di_Mi_Do_Fr_Sa'.split('_'),
@@ -11953,7 +12092,7 @@ function processRelativeTime$2(number, withoutSuffix, key, isFuture) {
 
 hooks.defineLocale('de', {
     months : 'Januar_Februar_März_April_Mai_Juni_Juli_August_September_Oktober_November_Dezember'.split('_'),
-    monthsShort : 'Jan._Febr._Mrz._Apr._Mai_Jun._Jul._Aug._Sept._Okt._Nov._Dez.'.split('_'),
+    monthsShort : 'Jan._Feb._März_Apr._Mai_Juni_Juli_Aug._Sep._Okt._Nov._Dez.'.split('_'),
     monthsParseExact : true,
     weekdays : 'Sonntag_Montag_Dienstag_Mittwoch_Donnerstag_Freitag_Samstag'.split('_'),
     weekdaysShort : 'So._Mo._Di._Mi._Do._Fr._Sa.'.split('_'),
@@ -12097,7 +12236,7 @@ hooks.defineLocale('el', {
     months : function (momentToFormat, format) {
         if (!momentToFormat) {
             return this._monthsNominativeEl;
-        } else if (/D/.test(format.substring(0, format.indexOf('MMMM')))) { // if there is a day number before 'MMMM'
+        } else if (typeof format === 'string' && /D/.test(format.substring(0, format.indexOf('MMMM')))) { // if there is a day number before 'MMMM'
             return this._monthsGenitiveEl[momentToFormat.month()];
         } else {
             return this._monthsNominativeEl[momentToFormat.month()];
@@ -12516,6 +12655,9 @@ hooks.defineLocale('eo', {
 var monthsShortDot = 'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split('_');
 var monthsShort$1 = 'ene_feb_mar_abr_may_jun_jul_ago_sep_oct_nov_dic'.split('_');
 
+var monthsParse = [/^ene/i, /^feb/i, /^mar/i, /^abr/i, /^may/i, /^jun/i, /^jul/i, /^ago/i, /^sep/i, /^oct/i, /^nov/i, /^dic/i];
+var monthsRegex$1 = /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|ene\.?|feb\.?|mar\.?|abr\.?|may\.?|jun\.?|jul\.?|ago\.?|sep\.?|oct\.?|nov\.?|dic\.?)/i;
+
 hooks.defineLocale('es-do', {
     months : 'enero_febrero_marzo_abril_mayo_junio_julio_agosto_septiembre_octubre_noviembre_diciembre'.split('_'),
     monthsShort : function (m, format) {
@@ -12527,7 +12669,13 @@ hooks.defineLocale('es-do', {
             return monthsShortDot[m.month()];
         }
     },
-    monthsParseExact : true,
+    monthsRegex: monthsRegex$1,
+    monthsShortRegex: monthsRegex$1,
+    monthsStrictRegex: /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/i,
+    monthsShortStrictRegex: /^(ene\.?|feb\.?|mar\.?|abr\.?|may\.?|jun\.?|jul\.?|ago\.?|sep\.?|oct\.?|nov\.?|dic\.?)/i,
+    monthsParse: monthsParse,
+    longMonthsParse: monthsParse,
+    shortMonthsParse: monthsParse,
     weekdays : 'domingo_lunes_martes_miércoles_jueves_viernes_sábado'.split('_'),
     weekdaysShort : 'dom._lun._mar._mié._jue._vie._sáb.'.split('_'),
     weekdaysMin : 'do_lu_ma_mi_ju_vi_sá'.split('_'),
@@ -12582,13 +12730,13 @@ hooks.defineLocale('es-do', {
 });
 
 //! moment.js locale configuration
-//! locale : Spanish [es]
-//! author : Julio Napurí : https://github.com/julionc
+//! locale : Spanish(United State) [es-us]
+//! author : bustta : https://github.com/bustta
 
 var monthsShortDot$1 = 'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split('_');
 var monthsShort$2 = 'ene_feb_mar_abr_may_jun_jul_ago_sep_oct_nov_dic'.split('_');
 
-hooks.defineLocale('es', {
+hooks.defineLocale('es-us', {
     months : 'enero_febrero_marzo_abril_mayo_junio_julio_agosto_septiembre_octubre_noviembre_diciembre'.split('_'),
     monthsShort : function (m, format) {
         if (!m) {
@@ -12600,6 +12748,87 @@ hooks.defineLocale('es', {
         }
     },
     monthsParseExact : true,
+    weekdays : 'domingo_lunes_martes_miércoles_jueves_viernes_sábado'.split('_'),
+    weekdaysShort : 'dom._lun._mar._mié._jue._vie._sáb.'.split('_'),
+    weekdaysMin : 'do_lu_ma_mi_ju_vi_sá'.split('_'),
+    weekdaysParseExact : true,
+    longDateFormat : {
+        LT : 'H:mm',
+        LTS : 'H:mm:ss',
+        L : 'MM/DD/YYYY',
+        LL : 'MMMM [de] D [de] YYYY',
+        LLL : 'MMMM [de] D [de] YYYY H:mm',
+        LLLL : 'dddd, MMMM [de] D [de] YYYY H:mm'
+    },
+    calendar : {
+        sameDay : function () {
+            return '[hoy a la' + ((this.hours() !== 1) ? 's' : '') + '] LT';
+        },
+        nextDay : function () {
+            return '[mañana a la' + ((this.hours() !== 1) ? 's' : '') + '] LT';
+        },
+        nextWeek : function () {
+            return 'dddd [a la' + ((this.hours() !== 1) ? 's' : '') + '] LT';
+        },
+        lastDay : function () {
+            return '[ayer a la' + ((this.hours() !== 1) ? 's' : '') + '] LT';
+        },
+        lastWeek : function () {
+            return '[el] dddd [pasado a la' + ((this.hours() !== 1) ? 's' : '') + '] LT';
+        },
+        sameElse : 'L'
+    },
+    relativeTime : {
+        future : 'en %s',
+        past : 'hace %s',
+        s : 'unos segundos',
+        m : 'un minuto',
+        mm : '%d minutos',
+        h : 'una hora',
+        hh : '%d horas',
+        d : 'un día',
+        dd : '%d días',
+        M : 'un mes',
+        MM : '%d meses',
+        y : 'un año',
+        yy : '%d años'
+    },
+    dayOfMonthOrdinalParse : /\d{1,2}º/,
+    ordinal : '%dº',
+    week : {
+        dow : 0, // Sunday is the first day of the week.
+        doy : 6  // The week that contains Jan 1st is the first week of the year.
+    }
+});
+
+//! moment.js locale configuration
+//! locale : Spanish [es]
+//! author : Julio Napurí : https://github.com/julionc
+
+var monthsShortDot$2 = 'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split('_');
+var monthsShort$3 = 'ene_feb_mar_abr_may_jun_jul_ago_sep_oct_nov_dic'.split('_');
+
+var monthsParse$1 = [/^ene/i, /^feb/i, /^mar/i, /^abr/i, /^may/i, /^jun/i, /^jul/i, /^ago/i, /^sep/i, /^oct/i, /^nov/i, /^dic/i];
+var monthsRegex$2 = /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|ene\.?|feb\.?|mar\.?|abr\.?|may\.?|jun\.?|jul\.?|ago\.?|sep\.?|oct\.?|nov\.?|dic\.?)/i;
+
+hooks.defineLocale('es', {
+    months : 'enero_febrero_marzo_abril_mayo_junio_julio_agosto_septiembre_octubre_noviembre_diciembre'.split('_'),
+    monthsShort : function (m, format) {
+        if (!m) {
+            return monthsShortDot$2;
+        } else if (/-MMM-/.test(format)) {
+            return monthsShort$3[m.month()];
+        } else {
+            return monthsShortDot$2[m.month()];
+        }
+    },
+    monthsRegex : monthsRegex$2,
+    monthsShortRegex : monthsRegex$2,
+    monthsStrictRegex : /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/i,
+    monthsShortStrictRegex : /^(ene\.?|feb\.?|mar\.?|abr\.?|may\.?|jun\.?|jul\.?|ago\.?|sep\.?|oct\.?|nov\.?|dic\.?)/i,
+    monthsParse : monthsParse$1,
+    longMonthsParse : monthsParse$1,
+    shortMonthsParse : monthsParse$1,
     weekdays : 'domingo_lunes_martes_miércoles_jueves_viernes_sábado'.split('_'),
     weekdaysShort : 'dom._lun._mar._mié._jue._vie._sáb.'.split('_'),
     weekdaysMin : 'do_lu_ma_mi_ju_vi_sá'.split('_'),
@@ -13292,7 +13521,7 @@ var months$5 = [
     'Am Faoilleach', 'An Gearran', 'Am Màrt', 'An Giblean', 'An Cèitean', 'An t-Ògmhios', 'An t-Iuchar', 'An Lùnastal', 'An t-Sultain', 'An Dàmhair', 'An t-Samhain', 'An Dùbhlachd'
 ];
 
-var monthsShort$3 = ['Faoi', 'Gear', 'Màrt', 'Gibl', 'Cèit', 'Ògmh', 'Iuch', 'Lùn', 'Sult', 'Dàmh', 'Samh', 'Dùbh'];
+var monthsShort$4 = ['Faoi', 'Gear', 'Màrt', 'Gibl', 'Cèit', 'Ògmh', 'Iuch', 'Lùn', 'Sult', 'Dàmh', 'Samh', 'Dùbh'];
 
 var weekdays$1 = ['Didòmhnaich', 'Diluain', 'Dimàirt', 'Diciadain', 'Diardaoin', 'Dihaoine', 'Disathairne'];
 
@@ -13302,7 +13531,7 @@ var weekdaysMin = ['Dò', 'Lu', 'Mà', 'Ci', 'Ar', 'Ha', 'Sa'];
 
 hooks.defineLocale('gd', {
     months : months$5,
-    monthsShort : monthsShort$3,
+    monthsShort : monthsShort$4,
     monthsParseExact : true,
     weekdays : weekdays$1,
     weekdaysShort : weekdaysShort,
@@ -13527,6 +13756,119 @@ hooks.defineLocale('gom-latn', {
 });
 
 //! moment.js locale configuration
+//! locale : Gujarati [gu]
+//! author : Kaushik Thanki : https://github.com/Kaushik1987
+
+var symbolMap$6 = {
+        '1': '૧',
+        '2': '૨',
+        '3': '૩',
+        '4': '૪',
+        '5': '૫',
+        '6': '૬',
+        '7': '૭',
+        '8': '૮',
+        '9': '૯',
+        '0': '૦'
+    };
+var numberMap$5 = {
+        '૧': '1',
+        '૨': '2',
+        '૩': '3',
+        '૪': '4',
+        '૫': '5',
+        '૬': '6',
+        '૭': '7',
+        '૮': '8',
+        '૯': '9',
+        '૦': '0'
+    };
+
+hooks.defineLocale('gu', {
+    months: 'જાન્યુઆરી_ફેબ્રુઆરી_માર્ચ_એપ્રિલ_મે_જૂન_જુલાઈ_ઑગસ્ટ_સપ્ટેમ્બર_ઑક્ટ્બર_નવેમ્બર_ડિસેમ્બર'.split('_'),
+    monthsShort: 'જાન્યુ._ફેબ્રુ._માર્ચ_એપ્રિ._મે_જૂન_જુલા._ઑગ._સપ્ટે._ઑક્ટ્._નવે._ડિસે.'.split('_'),
+    monthsParseExact: true,
+    weekdays: 'રવિવાર_સોમવાર_મંગળવાર_બુધ્વાર_ગુરુવાર_શુક્રવાર_શનિવાર'.split('_'),
+    weekdaysShort: 'રવિ_સોમ_મંગળ_બુધ્_ગુરુ_શુક્ર_શનિ'.split('_'),
+    weekdaysMin: 'ર_સો_મં_બુ_ગુ_શુ_શ'.split('_'),
+    longDateFormat: {
+        LT: 'A h:mm વાગ્યે',
+        LTS: 'A h:mm:ss વાગ્યે',
+        L: 'DD/MM/YYYY',
+        LL: 'D MMMM YYYY',
+        LLL: 'D MMMM YYYY, A h:mm વાગ્યે',
+        LLLL: 'dddd, D MMMM YYYY, A h:mm વાગ્યે'
+    },
+    calendar: {
+        sameDay: '[આજ] LT',
+        nextDay: '[કાલે] LT',
+        nextWeek: 'dddd, LT',
+        lastDay: '[ગઇકાલે] LT',
+        lastWeek: '[પાછલા] dddd, LT',
+        sameElse: 'L'
+    },
+    relativeTime: {
+        future: '%s મા',
+        past: '%s પેહલા',
+        s: 'અમુક પળો',
+        m: 'એક મિનિટ',
+        mm: '%d મિનિટ',
+        h: 'એક કલાક',
+        hh: '%d કલાક',
+        d: 'એક દિવસ',
+        dd: '%d દિવસ',
+        M: 'એક મહિનો',
+        MM: '%d મહિનો',
+        y: 'એક વર્ષ',
+        yy: '%d વર્ષ'
+    },
+    preparse: function (string) {
+        return string.replace(/[૧૨૩૪૫૬૭૮૯૦]/g, function (match) {
+            return numberMap$5[match];
+        });
+    },
+    postformat: function (string) {
+        return string.replace(/\d/g, function (match) {
+            return symbolMap$6[match];
+        });
+    },
+    // Gujarati notation for meridiems are quite fuzzy in practice. While there exists
+    // a rigid notion of a 'Pahar' it is not used as rigidly in modern Gujarati.
+    meridiemParse: /રાત|બપોર|સવાર|સાંજ/,
+    meridiemHour: function (hour, meridiem) {
+        if (hour === 12) {
+            hour = 0;
+        }
+        if (meridiem === 'રાત') {
+            return hour < 4 ? hour : hour + 12;
+        } else if (meridiem === 'સવાર') {
+            return hour;
+        } else if (meridiem === 'બપોર') {
+            return hour >= 10 ? hour : hour + 12;
+        } else if (meridiem === 'સાંજ') {
+            return hour + 12;
+        }
+    },
+    meridiem: function (hour, minute, isLower) {
+        if (hour < 4) {
+            return 'રાત';
+        } else if (hour < 10) {
+            return 'સવાર';
+        } else if (hour < 17) {
+            return 'બપોર';
+        } else if (hour < 20) {
+            return 'સાંજ';
+        } else {
+            return 'રાત';
+        }
+    },
+    week: {
+        dow: 0, // Sunday is the first day of the week.
+        doy: 6 // The week that contains Jan 1st is the first week of the year.
+    }
+});
+
+//! moment.js locale configuration
 //! locale : Hebrew [he]
 //! author : Tomer Cohen : https://github.com/tomer
 //! author : Moshe Simantov : https://github.com/DevelopmentIL
@@ -13618,7 +13960,7 @@ hooks.defineLocale('he', {
 //! locale : Hindi [hi]
 //! author : Mayank Singhal : https://github.com/mayanksinghal
 
-var symbolMap$6 = {
+var symbolMap$7 = {
     '1': '१',
     '2': '२',
     '3': '३',
@@ -13630,7 +13972,7 @@ var symbolMap$6 = {
     '9': '९',
     '0': '०'
 };
-var numberMap$5 = {
+var numberMap$6 = {
     '१': '1',
     '२': '2',
     '३': '3',
@@ -13683,12 +14025,12 @@ hooks.defineLocale('hi', {
     },
     preparse: function (string) {
         return string.replace(/[१२३४५६७८९०]/g, function (match) {
-            return numberMap$5[match];
+            return numberMap$6[match];
         });
     },
     postformat: function (string) {
         return string.replace(/\d/g, function (match) {
-            return symbolMap$6[match];
+            return symbolMap$7[match];
         });
     },
     // Hindi notation for meridiems are quite fuzzy in practice. While there exists
@@ -14636,7 +14978,7 @@ hooks.defineLocale('km', {
 //! locale : Kannada [kn]
 //! author : Rajeev Naik : https://github.com/rajeevnaikte
 
-var symbolMap$7 = {
+var symbolMap$8 = {
     '1': '೧',
     '2': '೨',
     '3': '೩',
@@ -14648,7 +14990,7 @@ var symbolMap$7 = {
     '9': '೯',
     '0': '೦'
 };
-var numberMap$6 = {
+var numberMap$7 = {
     '೧': '1',
     '೨': '2',
     '೩': '3',
@@ -14701,12 +15043,12 @@ hooks.defineLocale('kn', {
     },
     preparse: function (string) {
         return string.replace(/[೧೨೩೪೫೬೭೮೯೦]/g, function (match) {
-            return numberMap$6[match];
+            return numberMap$7[match];
         });
     },
     postformat: function (string) {
         return string.replace(/\d/g, function (match) {
-            return symbolMap$7[match];
+            return symbolMap$8[match];
         });
     },
     meridiemParse: /ರಾತ್ರಿ|ಬೆಳಿಗ್ಗೆ|ಮಧ್ಯಾಹ್ನ|ಸಂಜೆ/,
@@ -14794,8 +15136,22 @@ hooks.defineLocale('ko', {
         y : '일 년',
         yy : '%d년'
     },
-    dayOfMonthOrdinalParse : /\d{1,2}일/,
-    ordinal : '%d일',
+    dayOfMonthOrdinalParse : /\d{1,2}(일|월|주)/,
+    ordinal : function (number, period) {
+        switch (period) {
+            case 'd':
+            case 'D':
+            case 'DDD':
+                return number + '일';
+            case 'M':
+                return number + '월';
+            case 'w':
+            case 'W':
+                return number + '주';
+            default:
+                return number;
+        }
+    },
     meridiemParse : /오전|오후/,
     isPM : function (token) {
         return token === '오후';
@@ -15566,7 +15922,7 @@ hooks.defineLocale('ml', {
 //! author : Harshad Kale : https://github.com/kalehv
 //! author : Vivek Athalye : https://github.com/vnathalye
 
-var symbolMap$8 = {
+var symbolMap$9 = {
     '1': '१',
     '2': '२',
     '3': '३',
@@ -15578,7 +15934,7 @@ var symbolMap$8 = {
     '9': '९',
     '0': '०'
 };
-var numberMap$7 = {
+var numberMap$8 = {
     '१': '1',
     '२': '2',
     '३': '3',
@@ -15667,12 +16023,12 @@ hooks.defineLocale('mr', {
     },
     preparse: function (string) {
         return string.replace(/[१२३४५६७८९०]/g, function (match) {
-            return numberMap$7[match];
+            return numberMap$8[match];
         });
     },
     postformat: function (string) {
         return string.replace(/\d/g, function (match) {
-            return symbolMap$8[match];
+            return symbolMap$9[match];
         });
     },
     meridiemParse: /रात्री|सकाळी|दुपारी|सायंकाळी/,
@@ -15858,7 +16214,7 @@ hooks.defineLocale('ms', {
 //! author : David Rossellat : https://github.com/gholadr
 //! author : Tin Aung Lin : https://github.com/thanyawzinmin
 
-var symbolMap$9 = {
+var symbolMap$10 = {
     '1': '၁',
     '2': '၂',
     '3': '၃',
@@ -15870,7 +16226,7 @@ var symbolMap$9 = {
     '9': '၉',
     '0': '၀'
 };
-var numberMap$8 = {
+var numberMap$9 = {
     '၁': '1',
     '၂': '2',
     '၃': '3',
@@ -15923,12 +16279,12 @@ hooks.defineLocale('my', {
     },
     preparse: function (string) {
         return string.replace(/[၁၂၃၄၅၆၇၈၉၀]/g, function (match) {
-            return numberMap$8[match];
+            return numberMap$9[match];
         });
     },
     postformat: function (string) {
         return string.replace(/\d/g, function (match) {
-            return symbolMap$9[match];
+            return symbolMap$10[match];
         });
     },
     week: {
@@ -15993,7 +16349,7 @@ hooks.defineLocale('nb', {
 //! locale : Nepalese [ne]
 //! author : suvash : https://github.com/suvash
 
-var symbolMap$10 = {
+var symbolMap$11 = {
     '1': '१',
     '2': '२',
     '3': '३',
@@ -16005,7 +16361,7 @@ var symbolMap$10 = {
     '9': '९',
     '0': '०'
 };
-var numberMap$9 = {
+var numberMap$10 = {
     '१': '1',
     '२': '2',
     '३': '3',
@@ -16036,12 +16392,12 @@ hooks.defineLocale('ne', {
     },
     preparse: function (string) {
         return string.replace(/[१२३४५६७८९०]/g, function (match) {
-            return numberMap$9[match];
+            return numberMap$10[match];
         });
     },
     postformat: function (string) {
         return string.replace(/\d/g, function (match) {
-            return symbolMap$10[match];
+            return symbolMap$11[match];
         });
     },
     meridiemParse: /राति|बिहान|दिउँसो|साँझ/,
@@ -16109,8 +16465,8 @@ hooks.defineLocale('ne', {
 var monthsShortWithDots$1 = 'jan._feb._mrt._apr._mei_jun._jul._aug._sep._okt._nov._dec.'.split('_');
 var monthsShortWithoutDots$1 = 'jan_feb_mrt_apr_mei_jun_jul_aug_sep_okt_nov_dec'.split('_');
 
-var monthsParse = [/^jan/i, /^feb/i, /^maart|mrt.?$/i, /^apr/i, /^mei$/i, /^jun[i.]?$/i, /^jul[i.]?$/i, /^aug/i, /^sep/i, /^okt/i, /^nov/i, /^dec/i];
-var monthsRegex$1 = /^(januari|februari|maart|april|mei|april|ju[nl]i|augustus|september|oktober|november|december|jan\.?|feb\.?|mrt\.?|apr\.?|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i;
+var monthsParse$2 = [/^jan/i, /^feb/i, /^maart|mrt.?$/i, /^apr/i, /^mei$/i, /^jun[i.]?$/i, /^jul[i.]?$/i, /^aug/i, /^sep/i, /^okt/i, /^nov/i, /^dec/i];
+var monthsRegex$3 = /^(januari|februari|maart|april|mei|april|ju[nl]i|augustus|september|oktober|november|december|jan\.?|feb\.?|mrt\.?|apr\.?|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i;
 
 hooks.defineLocale('nl-be', {
     months : 'januari_februari_maart_april_mei_juni_juli_augustus_september_oktober_november_december'.split('_'),
@@ -16124,18 +16480,18 @@ hooks.defineLocale('nl-be', {
         }
     },
 
-    monthsRegex: monthsRegex$1,
-    monthsShortRegex: monthsRegex$1,
+    monthsRegex: monthsRegex$3,
+    monthsShortRegex: monthsRegex$3,
     monthsStrictRegex: /^(januari|februari|maart|mei|ju[nl]i|april|augustus|september|oktober|november|december)/i,
     monthsShortStrictRegex: /^(jan\.?|feb\.?|mrt\.?|apr\.?|mei|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i,
 
-    monthsParse : monthsParse,
-    longMonthsParse : monthsParse,
-    shortMonthsParse : monthsParse,
+    monthsParse : monthsParse$2,
+    longMonthsParse : monthsParse$2,
+    shortMonthsParse : monthsParse$2,
 
     weekdays : 'zondag_maandag_dinsdag_woensdag_donderdag_vrijdag_zaterdag'.split('_'),
     weekdaysShort : 'zo._ma._di._wo._do._vr._za.'.split('_'),
-    weekdaysMin : 'Zo_Ma_Di_Wo_Do_Vr_Za'.split('_'),
+    weekdaysMin : 'zo_ma_di_wo_do_vr_za'.split('_'),
     weekdaysParseExact : true,
     longDateFormat : {
         LT : 'HH:mm',
@@ -16186,8 +16542,8 @@ hooks.defineLocale('nl-be', {
 var monthsShortWithDots$2 = 'jan._feb._mrt._apr._mei_jun._jul._aug._sep._okt._nov._dec.'.split('_');
 var monthsShortWithoutDots$2 = 'jan_feb_mrt_apr_mei_jun_jul_aug_sep_okt_nov_dec'.split('_');
 
-var monthsParse$1 = [/^jan/i, /^feb/i, /^maart|mrt.?$/i, /^apr/i, /^mei$/i, /^jun[i.]?$/i, /^jul[i.]?$/i, /^aug/i, /^sep/i, /^okt/i, /^nov/i, /^dec/i];
-var monthsRegex$2 = /^(januari|februari|maart|april|mei|april|ju[nl]i|augustus|september|oktober|november|december|jan\.?|feb\.?|mrt\.?|apr\.?|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i;
+var monthsParse$3 = [/^jan/i, /^feb/i, /^maart|mrt.?$/i, /^apr/i, /^mei$/i, /^jun[i.]?$/i, /^jul[i.]?$/i, /^aug/i, /^sep/i, /^okt/i, /^nov/i, /^dec/i];
+var monthsRegex$4 = /^(januari|februari|maart|april|mei|april|ju[nl]i|augustus|september|oktober|november|december|jan\.?|feb\.?|mrt\.?|apr\.?|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i;
 
 hooks.defineLocale('nl', {
     months : 'januari_februari_maart_april_mei_juni_juli_augustus_september_oktober_november_december'.split('_'),
@@ -16201,18 +16557,18 @@ hooks.defineLocale('nl', {
         }
     },
 
-    monthsRegex: monthsRegex$2,
-    monthsShortRegex: monthsRegex$2,
+    monthsRegex: monthsRegex$4,
+    monthsShortRegex: monthsRegex$4,
     monthsStrictRegex: /^(januari|februari|maart|mei|ju[nl]i|april|augustus|september|oktober|november|december)/i,
     monthsShortStrictRegex: /^(jan\.?|feb\.?|mrt\.?|apr\.?|mei|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i,
 
-    monthsParse : monthsParse$1,
-    longMonthsParse : monthsParse$1,
-    shortMonthsParse : monthsParse$1,
+    monthsParse : monthsParse$3,
+    longMonthsParse : monthsParse$3,
+    shortMonthsParse : monthsParse$3,
 
     weekdays : 'zondag_maandag_dinsdag_woensdag_donderdag_vrijdag_zaterdag'.split('_'),
     weekdaysShort : 'zo._ma._di._wo._do._vr._za.'.split('_'),
-    weekdaysMin : 'Zo_Ma_Di_Wo_Do_Vr_Za'.split('_'),
+    weekdaysMin : 'zo_ma_di_wo_do_vr_za'.split('_'),
     weekdaysParseExact : true,
     longDateFormat : {
         LT : 'HH:mm',
@@ -16308,7 +16664,7 @@ hooks.defineLocale('nn', {
 //! locale : Punjabi (India) [pa-in]
 //! author : Harpreet Singh : https://github.com/harpreetkhalsagtbit
 
-var symbolMap$11 = {
+var symbolMap$12 = {
     '1': '੧',
     '2': '੨',
     '3': '੩',
@@ -16320,7 +16676,7 @@ var symbolMap$11 = {
     '9': '੯',
     '0': '੦'
 };
-var numberMap$10 = {
+var numberMap$11 = {
     '੧': '1',
     '੨': '2',
     '੩': '3',
@@ -16373,12 +16729,12 @@ hooks.defineLocale('pa-in', {
     },
     preparse: function (string) {
         return string.replace(/[੧੨੩੪੫੬੭੮੯੦]/g, function (match) {
-            return numberMap$10[match];
+            return numberMap$11[match];
         });
     },
     postformat: function (string) {
         return string.replace(/\d/g, function (match) {
-            return symbolMap$11[match];
+            return symbolMap$12[match];
         });
     },
     // Punjabi notation for meridiems are quite fuzzy in practice. While there exists
@@ -16474,7 +16830,24 @@ hooks.defineLocale('pl', {
     calendar : {
         sameDay: '[Dziś o] LT',
         nextDay: '[Jutro o] LT',
-        nextWeek: '[W] dddd [o] LT',
+        nextWeek: function () {
+            switch (this.day()) {
+                case 0:
+                    return '[W niedzielę o] LT';
+
+                case 2:
+                    return '[We wtorek o] LT';
+
+                case 3:
+                    return '[W środę o] LT';
+
+                case 6:
+                    return '[W sobotę o] LT';
+
+                default:
+                    return '[W] dddd [o] LT';
+            }
+        },
         lastDay: '[Wczoraj o] LT',
         lastWeek: function () {
             switch (this.day()) {
@@ -16518,8 +16891,8 @@ hooks.defineLocale('pl', {
 //! author : Caio Ribeiro Pereira : https://github.com/caio-ribeiro-pereira
 
 hooks.defineLocale('pt-br', {
-    months : 'Janeiro_Fevereiro_Março_Abril_Maio_Junho_Julho_Agosto_Setembro_Outubro_Novembro_Dezembro'.split('_'),
-    monthsShort : 'Jan_Fev_Mar_Abr_Mai_Jun_Jul_Ago_Set_Out_Nov_Dez'.split('_'),
+    months : 'janeiro_fevereiro_março_abril_maio_junho_julho_agosto_setembro_outubro_novembro_dezembro'.split('_'),
+    monthsShort : 'jan_fev_mar_abr_mai_jun_jul_ago_set_out_nov_dez'.split('_'),
     weekdays : 'Domingo_Segunda-feira_Terça-feira_Quarta-feira_Quinta-feira_Sexta-feira_Sábado'.split('_'),
     weekdaysShort : 'Dom_Seg_Ter_Qua_Qui_Sex_Sáb'.split('_'),
     weekdaysMin : 'Do_2ª_3ª_4ª_5ª_6ª_Sá'.split('_'),
@@ -16548,6 +16921,7 @@ hooks.defineLocale('pt-br', {
         future : 'em %s',
         past : '%s atrás',
         s : 'poucos segundos',
+        ss : '%d segundos',
         m : 'um minuto',
         mm : '%d minutos',
         h : 'uma hora',
@@ -16568,9 +16942,9 @@ hooks.defineLocale('pt-br', {
 //! author : Jefferson : https://github.com/jalex79
 
 hooks.defineLocale('pt', {
-    months : 'Janeiro_Fevereiro_Março_Abril_Maio_Junho_Julho_Agosto_Setembro_Outubro_Novembro_Dezembro'.split('_'),
-    monthsShort : 'Jan_Fev_Mar_Abr_Mai_Jun_Jul_Ago_Set_Out_Nov_Dez'.split('_'),
-    weekdays : 'Domingo_Segunda-Feira_Terça-Feira_Quarta-Feira_Quinta-Feira_Sexta-Feira_Sábado'.split('_'),
+    months : 'janeiro_fevereiro_março_abril_maio_junho_julho_agosto_setembro_outubro_novembro_dezembro'.split('_'),
+    monthsShort : 'jan_fev_mar_abr_mai_jun_jul_ago_set_out_nov_dez'.split('_'),
+    weekdays : 'Domingo_Segunda-feira_Terça-feira_Quarta-feira_Quinta-feira_Sexta-feira_Sábado'.split('_'),
     weekdaysShort : 'Dom_Seg_Ter_Qua_Qui_Sex_Sáb'.split('_'),
     weekdaysMin : 'Do_2ª_3ª_4ª_5ª_6ª_Sá'.split('_'),
     weekdaysParseExact : true,
@@ -16706,7 +17080,7 @@ function relativeTimeWithPlural$3(number, withoutSuffix, key) {
         return number + ' ' + plural$4(format[key], +number);
     }
 }
-var monthsParse$2 = [/^янв/i, /^фев/i, /^мар/i, /^апр/i, /^ма[йя]/i, /^июн/i, /^июл/i, /^авг/i, /^сен/i, /^окт/i, /^ноя/i, /^дек/i];
+var monthsParse$4 = [/^янв/i, /^фев/i, /^мар/i, /^апр/i, /^ма[йя]/i, /^июн/i, /^июл/i, /^авг/i, /^сен/i, /^окт/i, /^ноя/i, /^дек/i];
 
 // http://new.gramota.ru/spravka/rules/139-prop : § 103
 // Сокращения месяцев: http://new.gramota.ru/spravka/buro/search-answer?s=242637
@@ -16728,9 +17102,9 @@ hooks.defineLocale('ru', {
     },
     weekdaysShort : 'вс_пн_вт_ср_чт_пт_сб'.split('_'),
     weekdaysMin : 'вс_пн_вт_ср_чт_пт_сб'.split('_'),
-    monthsParse : monthsParse$2,
-    longMonthsParse : monthsParse$2,
-    shortMonthsParse : monthsParse$2,
+    monthsParse : monthsParse$4,
+    longMonthsParse : monthsParse$4,
+    shortMonthsParse : monthsParse$4,
 
     // полные названия с падежами, по три буквы, для некоторых, по 4 буквы, сокращения с точкой и без точки
     monthsRegex: /^(январ[ья]|янв\.?|феврал[ья]|февр?\.?|марта?|мар\.?|апрел[ья]|апр\.?|ма[йя]|июн[ья]|июн\.?|июл[ья]|июл\.?|августа?|авг\.?|сентябр[ья]|сент?\.?|октябр[ья]|окт\.?|ноябр[ья]|нояб?\.?|декабр[ья]|дек\.?)/i,
@@ -16849,7 +17223,7 @@ hooks.defineLocale('ru', {
     },
     week : {
         dow : 1, // Monday is the first day of the week.
-        doy : 7  // The week that contains Jan 1st is the first week of the year.
+        doy : 4  // The week that contains Jan 4th is the first week of the year.
     }
 });
 
@@ -17056,7 +17430,7 @@ hooks.defineLocale('si', {
 //! based on work of petrbela : https://github.com/petrbela
 
 var months$7 = 'január_február_marec_apríl_máj_jún_júl_august_september_október_november_december'.split('_');
-var monthsShort$4 = 'jan_feb_mar_apr_máj_jún_júl_aug_sep_okt_nov_dec'.split('_');
+var monthsShort$5 = 'jan_feb_mar_apr_máj_jún_júl_aug_sep_okt_nov_dec'.split('_');
 function plural$5(n) {
     return (n > 1) && (n < 5);
 }
@@ -17115,7 +17489,7 @@ function translate$8(number, withoutSuffix, key, isFuture) {
 
 hooks.defineLocale('sk', {
     months : months$7,
-    monthsShort : monthsShort$4,
+    monthsShort : monthsShort$5,
     weekdays : 'nedeľa_pondelok_utorok_streda_štvrtok_piatok_sobota'.split('_'),
     weekdaysShort : 'ne_po_ut_st_št_pi_so'.split('_'),
     weekdaysMin : 'ne_po_ut_st_št_pi_so'.split('_'),
@@ -17785,7 +18159,7 @@ hooks.defineLocale('sw', {
 //! locale : Tamil [ta]
 //! author : Arjunkumar Krishnamoorthy : https://github.com/tk120404
 
-var symbolMap$12 = {
+var symbolMap$13 = {
     '1': '௧',
     '2': '௨',
     '3': '௩',
@@ -17797,7 +18171,7 @@ var symbolMap$12 = {
     '9': '௯',
     '0': '௦'
 };
-var numberMap$11 = {
+var numberMap$12 = {
     '௧': '1',
     '௨': '2',
     '௩': '3',
@@ -17853,12 +18227,12 @@ hooks.defineLocale('ta', {
     },
     preparse: function (string) {
         return string.replace(/[௧௨௩௪௫௬௭௮௯௦]/g, function (match) {
-            return numberMap$11[match];
+            return numberMap$12[match];
         });
     },
     postformat: function (string) {
         return string.replace(/\d/g, function (match) {
-            return symbolMap$12[match];
+            return symbolMap$13[match];
         });
     },
     // refer http://ta.wikipedia.org/s/1er1
@@ -18294,9 +18668,9 @@ hooks.defineLocale('tr', {
     calendar : {
         sameDay : '[bugün saat] LT',
         nextDay : '[yarın saat] LT',
-        nextWeek : '[haftaya] dddd [saat] LT',
+        nextWeek : '[gelecek] dddd [saat] LT',
         lastDay : '[dün] LT',
-        lastWeek : '[geçen hafta] dddd [saat] LT',
+        lastWeek : '[geçen] dddd [saat] LT',
         sameElse : 'L'
     },
     relativeTime : {
@@ -22515,7 +22889,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
 }.call(this));
 
 
-define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="<%= i18n.formatMessage(\'Hide Picker\') %>"><%= i18n.formatMessage(\'Hide\') %></a>\r\n<% if (showLogout) { %>\r\n    <a class="action-logout" href="#" title="<%= i18n.formatMessage(\'Logout {0}\', username) %>"><%= i18n.formatMessage(\'Logout\') %></a>\r\n<% } %>\r\n';});
+define('text!ev-script/templates/hider.html',[],function () { return '<a class="action-hide" href="#" title="<%= i18n.formatMessage(\'Hide Picker\') %>"><%= i18n.formatMessage(\'Hide\') %></a>\n<% if (showLogout) { %>\n    <a class="action-logout" href="#" title="<%= i18n.formatMessage(\'Logout {0}\', username) %>"><%= i18n.formatMessage(\'Logout\') %></a>\n<% } %>\n';});
 
 define('ev-script/views/hider',['require','underscore','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
 
@@ -22566,7 +22940,7 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
 });
 
 
-define('text!ev-script/templates/picker.html',[],function () { return '<div id="<%= id %>-hider" class="ev-hider"></div>\r\n<div id="<%= id %>-filter-block" class="ev-filter-block">\r\n    <div class="loader"></div>\r\n</div>\r\n<div id="<%= id %>-results" class="ev-results clearfix"></div>\r\n<div id="anthemContainer"></div>\r\n';});
+define('text!ev-script/templates/picker.html',[],function () { return '<div id="<%= id %>-hider" class="ev-hider"></div>\n<div id="<%= id %>-filter-block" class="ev-filter-block">\n    <div class="loader"></div>\n</div>\n<div id="<%= id %>-results" class="ev-results clearfix"></div>\n<div id="anthemContainer"></div>\n';});
 
 define('ev-script/views/picker',['require','jquery','underscore','ev-script/views/base','ev-script/views/hider','text!ev-script/templates/picker.html'],function(require) {
 
@@ -22651,7 +23025,7 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
 });
 
 
-define('text!ev-script/templates/search.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Search:\') %></label>\r\n<input id="<%= id %>" type="search" class="form-text search" value="<%- searchVal %>" title="<%= i18n.formatMessage(\'Search Media\') %>" />\r\n<input type="submit" value="<%= i18n.formatMessage(\'Go\') %>" class="form-submit" />\r\n';});
+define('text!ev-script/templates/search.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Search:\') %></label>\n<input id="<%= id %>" type="search" class="form-text search" value="<%- searchVal %>" title="<%= i18n.formatMessage(\'Search Media\') %>" />\n<input type="submit" value="<%= i18n.formatMessage(\'Go\') %>" class="form-submit" />\n';});
 
 define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
 
@@ -22713,7 +23087,7 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base','
 });
 
 
-define('text!ev-script/templates/library-type-select.html',[],function () { return '<div>\r\n  <label for="<%= id %>"><%= i18n.formatMessage(\'Type:\') %></label>\r\n  <select id="<%= id %>" class="form-select source" title="<%= i18n.formatMessage(\'Select Library Type\') %>">\r\n    <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Media Library\') %></option>\r\n    <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Shared Library\') %></option>\r\n  </select>\r\n  <input type="submit" value="<%= i18n.formatMessage(\'Go\') %>" class="form-submit" />\r\n</div>\r\n';});
+define('text!ev-script/templates/library-type-select.html',[],function () { return '<div>\n  <label for="<%= id %>"><%= i18n.formatMessage(\'Type:\') %></label>\n  <select id="<%= id %>" class="form-select source" title="<%= i18n.formatMessage(\'Select Library Type\') %>">\n    <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Media Library\') %></option>\n    <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Shared Library\') %></option>\n  </select>\n  <input type="submit" value="<%= i18n.formatMessage(\'Go\') %>" class="form-submit" />\n</div>\n';});
 
 define('ev-script/views/library-type-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
 
@@ -22966,7 +23340,7 @@ define('ev-script/collections/libraries',['require','ev-script/collections/base'
 });
 
 
-define('text!ev-script/templates/unit-selects.html',[],function () { return '<div id="<%= formId %>" class="unit-selects">\r\n    <label for="<%= orgSelectId %>"><%= i18n.formatMessage(\'Organization:\') %></label><select id="<%= orgSelectId %>" class="form-select organizations" title="<%= i18n.formatMessage(\'Select Organization\') %>"></select><label for="<%= libSelectId %>"><%= i18n.formatMessage(\'Library:\') %></label><select id="<%= libSelectId %>" class="form-select libraries" title="<%= i18n.formatMessage(\'Select Library\') %>"></select><input type="submit" value="<%= i18n.formatMessage(\'Go\') %>" class="form-submit" />\r\n</div>\r\n';});
+define('text!ev-script/templates/unit-selects.html',[],function () { return '<div id="<%= formId %>" class="unit-selects">\n    <label for="<%= orgSelectId %>"><%= i18n.formatMessage(\'Organization:\') %></label><select id="<%= orgSelectId %>" class="form-select organizations" title="<%= i18n.formatMessage(\'Select Organization\') %>"></select><label for="<%= libSelectId %>"><%= i18n.formatMessage(\'Library:\') %></label><select id="<%= libSelectId %>" class="form-select libraries" title="<%= i18n.formatMessage(\'Select Library\') %>"></select><input type="submit" value="<%= i18n.formatMessage(\'Go\') %>" class="form-submit" />\n</div>\n';});
 
 define('ev-script/views/unit-selects',['require','jquery','underscore','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','text!ev-script/templates/unit-selects.html'],function(require) {
 
@@ -23134,10 +23508,10 @@ define('ev-script/views/unit-selects',['require','jquery','underscore','ev-scrip
 });
 
 
-define('text!ev-script/templates/results.html',[],function () { return '<div class="total">\r\n    <%= i18n.formatMessage(\'Search returned {0} results.\', totalResults) %>\r\n    <a href="#" class="action-refresh" title="<%= i18n.formatMessage(\'Click to reload search results\') %>"><i class="fa fa-fw fa-lg fa-refresh"></i><span style="display:none;"><%= i18n.formatMessage(\'Reload\') %></span></a>\r\n</div>\r\n<div class="results">\r\n    <table class="content-list"></table>\r\n</div>\r\n';});
+define('text!ev-script/templates/results.html',[],function () { return '<div class="total">\n    <%= i18n.formatMessage(\'Search returned {0} results.\', totalResults) %>\n    <a href="#" class="action-refresh" title="<%= i18n.formatMessage(\'Click to reload search results\') %>"><i class="fa fa-fw fa-lg fa-refresh"></i><span style="display:none;"><%= i18n.formatMessage(\'Reload\') %></span></a>\n</div>\n<div class="results">\n    <table class="content-list"></table>\n</div>\n';});
 
 
-define('text!ev-script/templates/no-results.html',[],function () { return '<tr class="odd"><td colspan="2"><%= i18n.formatMessage(\'No results available.\') %></td></tr>\r\n';});
+define('text!ev-script/templates/no-results.html',[],function () { return '<tr class="odd"><td colspan="2"><%= i18n.formatMessage(\'No results available.\') %></td></tr>\n';});
 
 define('ev-script/views/results',['require','jquery','underscore','moment','ev-script/views/base','ev-scroll-loader','text!ev-script/templates/results.html','text!ev-script/templates/no-results.html'],function(require) {
 
@@ -23278,7 +23652,7 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
 
 });
 
-define('ev-script/views/preview',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','jquery-ui'],function(require) {
+define('ev-script/views/preview',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','jquery-ui/ui/widgets/dialog'],function(require) {
 
     'use strict';
 
@@ -23287,7 +23661,7 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
         BaseView = require('ev-script/views/base'),
         VideoSettings = require('ev-script/models/video-settings');
 
-    require('jquery-ui');
+    require('jquery-ui/ui/widgets/dialog');
 
     return BaseView.extend({
         initialize: function(options) {
@@ -23300,11 +23674,11 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
                 // Desired difference between media width and containing dialog width
                 widthOffset = 50,
                 // Desired difference between media height and containing dialog height
-                heightOffset = this.info.useLegacyEmbeds() ? 140 : 50,
+                heightOffset = this.info.useLegacyEmbeds() ? 140 : 70,
                 // Actual dialog width taking into account available room
-                dialogWidth = Math.min(embedView.getFrameWidth() + widthOffset, $(window).width() - this.config.dialogMargin),
+                dialogWidth = Math.min(parseInt(embedView.getFrameWidth(), 10) + widthOffset, $(window).width() - this.config.dialogMargin),
                 // Actual dialog height taking into account available room
-                dialogHeight = Math.min(embedView.getFrameHeight() + heightOffset, $(window).height() - this.config.dialogMargin),
+                dialogHeight = Math.min(parseInt(embedView.getFrameHeight(), 10) + heightOffset, $(window).height() - this.config.dialogMargin),
                 // Our dialog
                 $dialog;
 
@@ -23371,10 +23745,10 @@ define('ev-script/views/embed',['require','underscore','ev-script/views/base'],f
 });
 
 
-define('text!ev-script/templates/video-embed.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?ID=<%- id %>&autoPlay=<%- autoPlay %>&displayTitle=<%- displayTitle %>&displaySharing=<%- displaySharing %>&displayAnnotations=<%- displayAnnotations %>&displayCaptionSearch=<%- displayCaptionSearch %>&displayAttachments=<%- displayAttachments %>&audioPreviewImage=<%- audioPreviewImage %>&displayLinks=<%- displayLinks %>&displayMetaData=<%- displayMetaData %>&displayDateProduced=<%- displayDateProduced %>&displayEmbedCode=<%- displayEmbedCode %>&displayDownloadIcon=<%- displayDownloadIcon %>&hideControls=true&showCaptions=<%- showCaptions %>&width=<%- width %>&height=<%- height %>&isNewPluginEmbed=true"\r\n        frameborder="0"\r\n        width="<%- width %>"\r\n        height="<%- frameHeight %>"\r\n        allowfullscreen>\r\n</iframe>\r\n';});
+define('text!ev-script/templates/video-embed.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?ID=<%- id %>&autoPlay=<%- autoPlay %>&displayTitle=<%- displayTitle %>&displaySharing=<%- displaySharing %>&displayAnnotations=<%- displayAnnotations %>&displayCaptionSearch=<%- displayCaptionSearch %>&displayAttachments=<%- displayAttachments %>&audioPreviewImage=<%- audioPreviewImage %>&displayLinks=<%- displayLinks %>&displayMetaData=<%- displayMetaData %>&displayDateProduced=<%- displayDateProduced %>&displayEmbedCode=<%- displayEmbedCode %>&displayDownloadIcon=<%- displayDownloadIcon %>&hideControls=true&showCaptions=<%- showCaptions %>&width=<%- width %>&height=<%- height %>&isNewPluginEmbed=true"\n        frameborder="0"\n        width="<%- width %>"\n        height="<%- frameHeight %>"\n        allowfullscreen>\n</iframe>\n';});
 
 
-define('text!ev-script/templates/video-embed-legacy.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?ID=<%- id %>&autoPlay=<%- autoPlay %>&displayTitle=<%- displayTitle %>&hideControls=<%- hideControls %>&showCaptions=<%- showCaptions %>&width=<%- width %>&height=<%- height %>"\r\n        frameborder="0"\r\n        style="width: <%- width %>px;height:<%- (parseInt(height, 10) + 56) %>px;"\r\n        allowfullscreen>\r\n</iframe>\r\n';});
+define('text!ev-script/templates/video-embed-legacy.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?ID=<%- id %>&autoPlay=<%- autoPlay %>&displayTitle=<%- displayTitle %>&hideControls=<%- hideControls %>&showCaptions=<%- showCaptions %>&width=<%- width %>&height=<%- height %>"\n        frameborder="0"\n        style="width: <%- width %>px;height:<%- (parseInt(height, 10) + 56) %>px;"\n        allowfullscreen>\n</iframe>\n';});
 
 define('ev-script/views/video-embed',['require','underscore','ev-script/views/embed','text!ev-script/templates/video-embed.html','text!ev-script/templates/video-embed-legacy.html'],function(require) {
 
@@ -23699,95 +24073,535 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
 
 });
 
-(function($) {
+/* jshint -W003 */
+/*!
+ * jQuery Expander Plugin - v1.7.0 - 2016-03-12
+ * http://plugins.learningjquery.com/expander/
+ * Copyright (c) 2016 Karl Swedberg
+ * Licensed MIT (http://www.opensource.org/licenses/mit-license.php)
+ */
 
-  // Matches trailing non-space characters.
-  var chop = /(\s*\S+|\s)$/;
+(function(factory) {
+  if (typeof define === 'function' && define.amd) {
+    define('jquery-expander',['jquery'], factory);
+  } else if (typeof module === 'object' && typeof module.exports === 'object') {
+    module.exports = factory;
+  } else {
+    factory(jQuery);
+  }
+})(function($) {
+  $.expander = {
+    version: '1.7.0',
+    defaults: {
+      // the number of characters at which the contents will be sliced into two parts.
+      slicePoint: 100,
 
-  // Return a truncated html string.  Delegates to $.fn.truncate.
-  $.truncate = function(html, options) {
-    return $('<div></div>').append(html).truncate(options).html();
+      // a string of characters at which to slice the contents into two parts,
+      // but only if the string appears before slicePoint
+      // Useful for slicing at the first line break, e.g. {sliceOn: '<br'}
+      sliceOn: null,
+
+      // whether to keep the last word of the summary whole (true) or let it slice in the middle of a word (false)
+      preserveWords: true,
+
+      // whether to normalize the whitespace in the data to display (true) or not (false)
+      normalizeWhitespace: true,
+
+      // whether to count and display the number of words inside the collapsed text
+      showWordCount: false,
+
+      // text to include between summary and detail. Default ' ' prevents appearance of
+      // collapsing two words into one.
+      // Was hard-coded in script; now exposed as an option to fix issue #106.
+      detailPrefix: ' ',
+
+      // What to display around the counted number of words, set to '{{count}}' to show only the number
+      wordCountText: ' ({{count}} words)',
+
+      // a threshold of sorts for whether to initially hide/collapse part of the element's contents.
+      // If after slicing the contents in two there are fewer words in the second part than
+      // the value set by widow, we won't bother hiding/collapsing anything.
+      widow: 4,
+
+      // text displayed in a link instead of the hidden part of the element.
+      // clicking this will expand/show the hidden/collapsed text
+      expandText: 'read more',
+      expandPrefix: '&hellip; ',
+
+      expandAfterSummary: false,
+
+      // Possible word endings to test against for when preserveWords: true
+      wordEnd: /(&(?:[^;]+;)?|[0-9a-zA-Z\u00C0-\u0100]+|[^\u0000-\u007F]+)$/,
+
+      // class names for summary element and detail element
+      summaryClass: 'summary',
+      detailClass: 'details',
+
+      // class names for <span> around "read-more" link and "read-less" link
+      moreClass: 'read-more',
+      lessClass: 'read-less',
+
+      // class names for <a> around "read-more" link and "read-less" link
+      moreLinkClass: 'more-link',
+      lessLinkClass: 'less-link',
+
+      // number of milliseconds after text has been expanded at which to collapse the text again.
+      // when 0, no auto-collapsing
+      collapseTimer: 0,
+
+      // effects for expanding and collapsing
+      expandEffect: 'slideDown',
+      expandSpeed: 250,
+      collapseEffect: 'slideUp',
+      collapseSpeed: 200,
+
+      // allow the user to re-collapse the expanded text.
+      userCollapse: true,
+
+      // text to use for the link to re-collapse the text
+      userCollapseText: 'read less',
+      userCollapsePrefix: ' ',
+
+      // all callback functions have the this keyword mapped to the element in the jQuery set when .expander() is called
+      onSlice: null, // function() {}
+      beforeExpand: null, // function() {},
+      afterExpand: null, // function() {},
+      onCollapse: null, // function(byUser) {}
+      afterCollapse: null // function() {}
+    }
   };
 
-  // Truncate the contents of an element in place.
-  $.fn.truncate = function(options) {
-    if ($.isNumeric(options)) options = {length: options};
-    var o = $.extend({}, $.truncate.defaults, options);
+  $.fn.expander = function(options) {
+    var meth = 'init';
 
-    return this.each(function() {
-      var self = $(this);
+    if (typeof options === 'string') {
+      meth = options;
+      options = {};
+    }
 
-      if (o.noBreaks) self.find('br').replaceWith(' ');
+    var opts = $.extend({}, $.expander.defaults, options);
+    var rSelfClose = /^<(?:area|br|col|embed|hr|img|input|link|meta|param).*>$/i;
+    var rAmpWordEnd = opts.wordEnd;
+    var rOpenCloseTag = /<\/?(\w+)[^>]*>/g;
+    var rOpenTag = /<(\w+)[^>]*>/g;
+    var rCloseTag = /<\/(\w+)>/g;
+    var rLastCloseTag = /(<\/([^>]+)>)\s*$/;
+    var rTagPlus = /^(<[^>]+>)+.?/;
+    var rMultiSpace = /\s\s+/g;
+    var delayedCollapse;
 
-      var text = self.text();
-      var excess = text.length - o.length;
+    var removeSpaces = function(str) {
+      return opts.normalizeWhitespace ? $.trim(str || '').replace(rMultiSpace, ' ') : str;
+    };
 
-      if (o.stripTags) self.text(text);
+    var methods = {
+      init: function() {
+        this.each(function() {
+          var i, l, tmp, newChar, summTagless, summOpens, summCloses,
+              lastCloseTag, detailText, detailTagless, html, expand;
+          var $thisDetails, $readMore;
+          var slicePointChanged;
+          var openTagsForDetails = [];
+          var closeTagsForsummaryText = [];
+          var strayChars = '';
+          var defined = {};
+          var thisEl = this;
+          var $this = $(this);
+          var $summEl = $([]);
+          var o = $.extend({}, opts, $this.data('expander') || $.meta && $this.data() || {});
+          var hasDetails = !!$this.find('.' + o.detailClass).length;
+          var hasBlocks = !!$this.find('*').filter(function() {
+            var display = $(this).css('display');
 
-      // Chop off any partial words if appropriate.
-      if (o.words && excess > 0) {
-        excess = text.length - text.slice(0, o.length).replace(chop, '').length - 1;
+            return (/^block|table|list/).test(display);
+          }).length;
+          var el = hasBlocks ? 'div' : 'span';
+          var detailSelector = el + '.' + o.detailClass;
+          var moreClass = o.moreClass + '';
+          var lessClass = o.lessClass + '';
+          var expandSpeed = o.expandSpeed || 0;
+          var allHtml = removeSpaces($this.html());
+          var summaryText = allHtml.slice(0, o.slicePoint);
+
+          // allow multiple classes for more/less links
+          o.moreSelector = 'span.' + moreClass.split(' ').join('.');
+          o.lessSelector = 'span.' + lessClass.split(' ').join('.');
+          // bail out if we've already set up the expander on this element
+          if ($.data(this, 'expanderInit')) {
+            return;
+          }
+
+          $.data(this, 'expanderInit', true);
+          $.data(this, 'expander', o);
+          // determine which callback functions are defined
+          $.each(['onSlice','beforeExpand', 'afterExpand', 'onCollapse', 'afterCollapse'], function(index, val) {
+            defined[val] = $.isFunction(o[val]);
+          });
+
+          // back up if we're in the middle of a tag or word
+          summaryText = backup(summaryText);
+
+          // summary text sans tags length
+          summTagless = summaryText.replace(rOpenCloseTag, '').length;
+
+          // add more characters to the summary, one for each character in the tags
+          while (summTagless < o.slicePoint) {
+            newChar = allHtml.charAt(summaryText.length);
+
+            if (newChar === '<') {
+              newChar = allHtml.slice(summaryText.length).match(rTagPlus)[0];
+            }
+            summaryText += newChar;
+            summTagless++;
+          }
+
+          // SliceOn script, Closes #16, resolves #59
+          // Original SliceEarlierAt code (since modfied): Sascha Peilicke @saschpe
+          if (o.sliceOn) {
+            slicePointChanged = changeSlicePoint({
+              sliceOn: o.sliceOn,
+              slicePoint: o.slicePoint,
+              allHtml: allHtml,
+              summaryText: summaryText
+            });
+
+            summaryText = slicePointChanged.summaryText;
+          }
+
+          summaryText = backup(summaryText, o.preserveWords && allHtml.slice(summaryText.length).length);
+
+          // separate open tags from close tags and clean up the lists
+          summOpens = summaryText.match(rOpenTag) || [];
+          summCloses = summaryText.match(rCloseTag) || [];
+
+          // filter out self-closing tags
+          tmp = [];
+          $.each(summOpens, function(index, val) {
+            if (!rSelfClose.test(val)) {
+              tmp.push(val);
+            }
+          });
+          summOpens = tmp;
+
+          // strip close tags to just the tag name
+          l = summCloses.length;
+
+          for (i = 0; i < l; i++) {
+            summCloses[i] = summCloses[i].replace(rCloseTag, '$1');
+          }
+          // tags that start in summary and end in detail need:
+          // a). close tag at end of summary
+          // b). open tag at beginning of detail
+          $.each(summOpens, function(index, val) {
+            var thisTagName = val.replace(rOpenTag, '$1');
+            var closePosition = $.inArray(thisTagName, summCloses);
+
+            if (closePosition === -1) {
+              openTagsForDetails.push(val);
+              closeTagsForsummaryText.push('</' + thisTagName + '>');
+
+            } else {
+              summCloses.splice(closePosition, 1);
+            }
+          });
+
+          // reverse the order of the close tags for the summary so they line up right
+          closeTagsForsummaryText.reverse();
+
+          // create necessary summary and detail elements if they don't already exist
+          if (!hasDetails) {
+
+            // end script if there is no detail text or if detail has fewer words than widow option
+            detailText = allHtml.slice(summaryText.length);
+            detailTagless = $.trim(detailText.replace(rOpenCloseTag, ''));
+
+            if (detailTagless === '' || detailTagless.split(/\s+/).length < o.widow) {
+              return;
+            }
+            // otherwise, continue...
+            lastCloseTag = closeTagsForsummaryText.pop() || '';
+            summaryText += closeTagsForsummaryText.join('');
+            detailText = openTagsForDetails.join('') + detailText;
+          } else {
+            // assume that even if there are details, we still need readMore/readLess/summary elements
+            // (we already bailed out earlier when readMore el was found)
+            // but we need to create els differently
+
+            // remove the detail from the rest of the content
+            detailText = $this.find(detailSelector).remove().html();
+
+            // The summary is what's left
+            summaryText = $this.html();
+
+            // allHtml is the summary and detail combined (this is needed when content has block-level elements)
+            allHtml = summaryText + detailText;
+
+            lastCloseTag = '';
+          }
+          o.moreLabel = $this.find(o.moreSelector).length ? '' : buildMoreLabel(o, detailText);
+
+          if (hasBlocks) {
+            detailText = allHtml;
+            // Fixes issue #89; Tested by 'split html escapes'
+          } else if (summaryText.charAt(summaryText.length - 1) === '&') {
+            strayChars = /^[#\w\d\\]+;/.exec(detailText);
+
+            if (strayChars) {
+              detailText = detailText.slice(strayChars[0].length);
+              summaryText += strayChars[0];
+            }
+          }
+          summaryText += lastCloseTag;
+
+          // onSlice callback
+          o.summary = summaryText;
+          o.details = detailText;
+          o.lastCloseTag = lastCloseTag;
+
+          if (defined.onSlice) {
+            // user can choose to return a modified options object
+            // one last chance for user to change the options. sneaky, huh?
+            // but could be tricky so use at your own risk.
+            tmp = o.onSlice.call(thisEl, o);
+
+            // so, if the returned value from the onSlice function is an object with a details property, we'll use that!
+            o = tmp && tmp.details ? tmp : o;
+          }
+
+          // build the html with summary and detail and use it to replace old contents
+          html = buildHTML(o, hasBlocks);
+
+          $this.empty().append(html);
+
+          // set up details and summary for expanding/collapsing
+          $thisDetails = $this.find(detailSelector);
+          $readMore = $this.find(o.moreSelector);
+
+          // Hide details span using collapseEffect unless
+          // expandEffect is NOT slideDown and collapseEffect IS slideUp.
+          // The slideUp effect sets span's "default" display to
+          // inline-block. This is necessary for slideDown, but
+          // problematic for other "showing" animations.
+          // Fixes #46
+          if (o.collapseEffect === 'slideUp' && o.expandEffect !== 'slideDown' || $this.is(':hidden')) {
+            $thisDetails.css({display: 'none'});
+          } else {
+            $thisDetails[o.collapseEffect](0);
+          }
+
+          $summEl = $this.find('div.' + o.summaryClass);
+
+          expand = function(event) {
+            event.preventDefault();
+            var exSpeed = event.startExpanded ? 0 : expandSpeed;
+            $readMore.hide();
+            $summEl.hide();
+
+            if (defined.beforeExpand) {
+              o.beforeExpand.call(thisEl);
+            }
+
+            $thisDetails.stop(false, true)[o.expandEffect](exSpeed, function() {
+              $thisDetails.css({zoom: ''});
+
+              if (defined.afterExpand) {
+                o.afterExpand.call(thisEl);
+              }
+              delayCollapse(o, $thisDetails, thisEl);
+            });
+          };
+
+          $readMore.find('a').unbind('click.expander').bind('click.expander', expand);
+
+          if (o.userCollapse && !$this.find(o.lessSelector).length) {
+            $this
+            .find(detailSelector)
+            .append('<span class="' + o.lessClass + '">' + o.userCollapsePrefix + '<a href="#" class="' + o.lessLinkClass + '">' + o.userCollapseText + '</a></span>');
+          }
+
+          $this
+          .find(o.lessSelector + ' a')
+          .unbind('click.expander')
+          .bind('click.expander', function(event) {
+            event.preventDefault();
+            clearTimeout(delayedCollapse);
+            var $detailsCollapsed = $(this).closest(detailSelector);
+            reCollapse(o, $detailsCollapsed);
+
+            if (defined.onCollapse) {
+              o.onCollapse.call(thisEl, true);
+            }
+          });
+
+          if (o.startExpanded) {
+            expand({
+              preventDefault: function() {},
+              startExpanded: true
+            });
+          }
+
+        }); // this.each
+      },
+      destroy: function() {
+
+        this.each(function() {
+          var o, details;
+          var $this = $(this);
+
+          if (!$this.data('expanderInit')) {
+            return;
+          }
+
+          o = $.extend({}, $this.data('expander') || {}, opts);
+          details = $this.find('.' + o.detailClass).contents();
+
+          $this.removeData('expanderInit');
+          $this.removeData('expander');
+
+          $this.find(o.moreSelector).remove();
+          $this.find('.' + o.summaryClass).remove();
+          $this.find('.' + o.detailClass).after(details).remove();
+          $this.find(o.lessSelector).remove();
+
+        });
+      }
+    };
+
+    // run the methods (almost always "init")
+    if (methods[meth]) {
+      methods[ meth ].call(this);
+    }
+
+    // utility functions
+    function buildHTML(o, blocks) {
+      var el = 'span';
+      var summary = o.summary;
+      var closingTagParts = rLastCloseTag.exec(summary);
+      var closingTag = closingTagParts ? closingTagParts[2].toLowerCase() : '';
+
+      if (blocks) {
+        el = 'div';
+
+        // if summary ends with a close tag, tuck the moreLabel inside it
+        if (closingTagParts && closingTag !== 'a' && !o.expandAfterSummary) {
+          summary = summary.replace(rLastCloseTag, o.moreLabel + '$1');
+        } else {
+          // otherwise (e.g. if ends with self-closing tag) just add moreLabel after summary
+          // fixes #19
+          summary += o.moreLabel;
+        }
+
+        // and wrap it in a div
+        summary = '<div class="' + o.summaryClass + '">' + summary + '</div>';
+      } else {
+        summary += o.moreLabel;
       }
 
-      if (excess < 0 || !excess && !o.truncated) return;
+      return [
+        summary,
 
-      // Iterate over each child node in reverse, removing excess text.
-      $.each(self.contents().get().reverse(), function(i, el) {
-        var $el = $(el);
-        var text = $el.text();
-        var length = text.length;
+        // after summary, add an optional prefix. Default single space prevents last word of summary
+        // and first word of detail from collapsing together into what looks like a single word.
+        // (could also be done with CSS, but this feels more natural)
+        // Prefix made optional to fix issue #106
+        o.detailPrefix || '',
+        '<',
+        el + ' class="' + o.detailClass + '"',
+        '>',
+        o.details,
+        '</' + el + '>'
+      ].join('');
+    }
 
-        // If the text is longer than the excess, remove the node and continue.
-        if (length <= excess) {
-          o.truncated = true;
-          excess -= length;
-          $el.remove();
-          return;
+    function buildMoreLabel(o, detailText) {
+      var ret = '<span class="' + o.moreClass + '">' + o.expandPrefix;
+
+      if (o.showWordCount) {
+
+        o.wordCountText = o.wordCountText.replace(/\{\{count\}\}/, detailText.replace(rOpenCloseTag, '').replace(/\&(?:amp|nbsp);/g, '').replace(/(?:^\s+|\s+$)/, '').match(/\w+/g).length);
+
+      } else {
+        o.wordCountText = '';
+      }
+      ret += '<a href="#" class="' + o.moreLinkClass + '">' + o.expandText + o.wordCountText + '</a></span>';
+
+      return ret;
+    }
+
+    function backup(txt, preserveWords) {
+      if (txt.lastIndexOf('<') > txt.lastIndexOf('>')) {
+        txt = txt.slice(0, txt.lastIndexOf('<'));
+      }
+
+      if (preserveWords) {
+        txt = txt.replace(rAmpWordEnd, '');
+      }
+
+      return $.trim(txt);
+    }
+
+    function reCollapse(o, el) {
+      el.stop(true, true)[o.collapseEffect](o.collapseSpeed, function() {
+        var prevMore = el.prev('span.' + o.moreClass).show();
+
+        if (!prevMore.length) {
+          el.parent().children('div.' + o.summaryClass).show()
+            .find('span.' + o.moreClass).show();
         }
 
-        // Remove the excess text and append the ellipsis.
-        if (el.nodeType === 3) {
-          $(el.splitText(length - excess - 1)).replaceWith(o.ellipsis);
-          return false;
+        if (o.afterCollapse) {
+          o.afterCollapse.call(el);
         }
-
-        // Recursively truncate child nodes.
-        $el.truncate($.extend(o, {length: length - excess}));
-        return false;
       });
-    });
+    }
+
+    function delayCollapse(option, $collapseEl, thisEl) {
+      if (option.collapseTimer) {
+        delayedCollapse = setTimeout(function() {
+          reCollapse(option, $collapseEl);
+
+          if ($.isFunction(option.onCollapse)) {
+            option.onCollapse.call(thisEl, false);
+          }
+        }, option.collapseTimer);
+      }
+    }
+
+    function changeSlicePoint(info) {
+      // Create placeholder string text
+      var sliceOnTemp = 'ExpandMoreHere374216623';
+
+      // Replace sliceOn with placeholder unaffected by .text() cleaning
+      // (in case sliceOn contains html)
+      var summaryTextClean = info.summaryText.replace(info.sliceOn, sliceOnTemp);
+      summaryTextClean = $('<div>' + summaryTextClean + '</div>').text();
+
+      // Find true location of sliceOn placeholder
+      var sliceOnIndexClean = summaryTextClean.indexOf(sliceOnTemp);
+
+      // Store location of html version too
+      var sliceOnIndexHtml = info.summaryText.indexOf(info.sliceOn);
+
+      // Base condition off of true sliceOn location...
+      if (sliceOnIndexClean !== -1 && sliceOnIndexClean < info.slicePoint) {
+        // ...but keep html in summaryText
+        info.summaryText = info.allHtml.slice(0, sliceOnIndexHtml);
+      }
+
+      return info;
+    }
+
+    return this;
   };
 
-  $.truncate.defaults = {
-
-    // Strip all html elements, leaving only plain text.
-    stripTags: false,
-
-    // Only truncate at word boundaries.
-    words: false,
-
-    // Replace instances of <br> with a single space.
-    noBreaks: false,
-
-    // The maximum length of the truncated html.
-    length: Infinity,
-
-    // The character to use as the ellipsis.  The word joiner (U+2060) can be
-    // used to prevent a hanging ellipsis, but displays incorrectly in Chrome
-    // on Windows 7.
-    // http://code.google.com/p/chromium/issues/detail?id=68323
-    ellipsis: '\u2026' // '\u2060\u2026'
-
-  };
-
-})(jQuery);
-
-define("jquery-truncate-html", function(){});
+  // plugin defaults
+  $.fn.expander.defaults = $.expander.defaults;
+});
 
 
-define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %> resultItem">\r\n    <td class="content-actions">\r\n        <div class="thumbnail-wrap">\r\n            <img class="thumbnail" src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%= i18n.formatMessage(\'{0} preview thumbnail\', item.get(\'Title\')) %>"/>\r\n            <% if (item.get(\'IsCaptioned\')) { %>\r\n            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage(\'CC\') %>" alt="CC"></i>\r\n            <% } %>\r\n        </div>\r\n        <div class="action-links">\r\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span></a>\r\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span></a>\r\n        </div>\r\n    </td>\r\n    <td class="content-meta">\r\n        <table class="content-item">\r\n            <tbody>\r\n                <tr class="title">\r\n                    <td colspan="2">\r\n                        <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Title\')) %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\r\n                    </td>\r\n                </tr>\r\n                <tr class="trunc"><td class="label"><%= i18n.formatMessage(\'Description\') %></td><td class="value"><%= item.get(\'Description\') %></td></tr>\r\n                <tr>\r\n                    <td class="label"><%= i18n.formatMessage(\'Date Added\') %></td>\r\n                    <td class="value">\r\n                        <%\r\n                            var dateAdded = new Date(item.get(\'AddedOn\')),\r\n                                localDate = dateAdded.setMinutes(dateAdded.getMinutes() - dateAdded.getTimezoneOffset());\r\n                            print(moment(localDate).format(dateTimeFormat));\r\n                        %>\r\n                    </td>\r\n                </tr>\r\n                <tr class="trunc"><td class="label"><%= i18n.formatMessage(\'Keywords\') %></td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\r\n                <tr><td class="label"><%= i18n.formatMessage(\'Library\') %></td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\r\n            </tbody>\r\n        </table>\r\n    </td>\r\n</tr>\r\n';});
+define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %> resultItem">\n    <td class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%= i18n.formatMessage(\'{0} preview thumbnail\', item.get(\'Title\')) %>"/>\n            <% if (item.get(\'IsCaptioned\')) { %>\n            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage(\'CC\') %>" alt="CC"></i>\n            <% } %>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span></a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Title\')) %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label"><%= i18n.formatMessage(\'Description\') %></td><td class="value"><%= item.get(\'Description\') %></td></tr>\n                <tr>\n                    <td class="label"><%= i18n.formatMessage(\'Date Added\') %></td>\n                    <td class="value">\n                        <%\n                            var dateAdded = new Date(item.get(\'AddedOn\')),\n                                localDate = dateAdded.setMinutes(dateAdded.getMinutes() - dateAdded.getTimezoneOffset());\n                            print(moment(localDate).format(dateTimeFormat));\n                        %>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label"><%= i18n.formatMessage(\'Keywords\') %></td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label"><%= i18n.formatMessage(\'Library\') %></td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
 
-define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-truncate-html','text!ev-script/templates/video-result.html'],function(require) {
+define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-expander','text!ev-script/templates/video-result.html'],function(require) {
 
     'use strict';
 
@@ -23797,7 +24611,7 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
         VideoSettings = require('ev-script/models/video-settings'),
         VideoPreviewView = require('ev-script/views/video-preview');
 
-    require('jquery-truncate-html');
+    require('jquery-expander');
 
     return ResultsView.extend({
         modelClass: VideoSettings,
@@ -23808,39 +24622,14 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
         },
         decorate: function($item) {
             // Handle truncation (more/less) of truncatable fields
-            $('.trunc .value', $item).each(_.bind(function(index, element) {
-                var $element = $(element),
-                    $full,
-                    $short,
-                    truncLen = 100,
-                    fullText = $element.data('fullText') || $element.html(),
-                    truncText = $.truncate(fullText, {
-                        length: truncLen,
-                        stripTags: true,
-                        noBreaks: true
+            if ($(window).width() < 1100) {
+                $('.trunc .value', $item).each(_.bind(function(index, element) {
+                    $(element).expander({
+                        'expandText': this.i18n.formatMessage('More'),
+                        'userCollapseText': this.i18n.formatMessage('Less')
                     });
-                $element.empty();
-                if ($(window).width() < 1100 && fullText.length > truncLen) {
-                    $element.data('fullText', fullText);
-                    $full = $('<span>' + fullText + '</span>');
-                    $short = $('<span>' + truncText + '</span>');
-                    var $shorten = $('<a href="#">' + this.i18n.formatMessage('Less') + '</a>').click(function(e) {
-                        $full.hide();
-                        $short.show();
-                        e.preventDefault();
-                    });
-                    var $expand = $('<a href="#">' + this.i18n.formatMessage('More') + '</a>').click(function(e) {
-                        $short.hide();
-                        $full.show();
-                        e.preventDefault();
-                    });
-                    $full.hide().append($shorten);
-                    $short.append($expand);
-                    $element.append($short).append($full);
-                } else {
-                    $element.append(fullText);
-                }
-            }, this));
+                }, this));
+            }
         },
         refreshHandler: function(e) {
             e.preventDefault();
@@ -24001,7 +24790,7 @@ define('ev-script/views/workflow-select',['require','underscore','ev-script/view
 });
 
 
-define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\r\n    <fieldset>\r\n        <legend style="display: none;"><%= i18n.formatMessage(\'Upload Media to Ensemble\') %></legend>\r\n        <select class="form-select" name="MediaWorkflowID" id="MediaWorkflowID"></select>\r\n        <label for="MediaWorkflowID" style="display: none;"><%= i18n.formatMessage(\'Media Workflow\') %></label>\r\n        <div class="fieldWrap">\r\n            <label for="Title"><%= i18n.formatMessage(\'Title\') %> *</label>\r\n            <input class="form-text" type="text" name="Title" id="Title" />\r\n        </div>\r\n        <div class="fieldWrap">\r\n            <label for="Description"><%= i18n.formatMessage(\'Description\') %></label>\r\n            <textarea class="form-text" name="Description" id="Description" />\r\n        </div>\r\n        <div class="upload"></div>\r\n    </fieldset>\r\n</form>\r\n';});
+define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <fieldset>\n        <legend style="display: none;"><%= i18n.formatMessage(\'Upload Media to Ensemble\') %></legend>\n        <select class="form-select" name="MediaWorkflowID" id="MediaWorkflowID"></select>\n        <label for="MediaWorkflowID" style="display: none;"><%= i18n.formatMessage(\'Media Workflow\') %></label>\n        <div class="fieldWrap">\n            <label for="Title"><%= i18n.formatMessage(\'Title\') %> *</label>\n            <input class="form-text" type="text" name="Title" id="Title" />\n        </div>\n        <div class="fieldWrap">\n            <label for="Description"><%= i18n.formatMessage(\'Description\') %></label>\n            <textarea class="form-text" name="Description" id="Description" />\n        </div>\n        <div class="upload"></div>\n    </fieldset>\n</form>\n';});
 
 define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-script/views/base','backbone','ev-script/views/workflow-select','ev-script/models/video-settings','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
 
@@ -24269,7 +25058,7 @@ define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-
 define("base64", function(){});
 
 
-define('text!ev-script/templates/anthem.html',[],function () { return '<iframe src="ensemble://<%= tokenDetailsApiUrl %>" style="display:none;"></iframe>\r\n';});
+define('text!ev-script/templates/anthem.html',[],function () { return '<iframe src="ensemble://<%= tokenDetailsApiUrl %>" style="display:none;"></iframe>\n';});
 
 define('ev-script/views/video-picker',['require','jquery','underscore','platform','ev-script/views/picker','ev-script/views/search','ev-script/views/library-type-select','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos','ev-script/collections/media-workflows','ev-script/views/upload','base64','text!ev-script/templates/anthem.html'],function(require) {
 
@@ -24542,14 +25331,14 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
 
 });
 
-define('ev-script/views/settings',['require','underscore','ev-script/views/base','jquery-ui'],function(require) {
+define('ev-script/views/settings',['require','underscore','ev-script/views/base','jquery-ui/ui/widgets/dialog'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
         BaseView = require('ev-script/views/base');
 
-    require('jquery-ui');
+    require('jquery-ui/ui/widgets/dialog');
 
     return BaseView.extend({
         initialize: function(options) {
@@ -24622,15 +25411,15 @@ define('ev-script/util/size',['require','underscore'],function(require) {
 });
 
 
-define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\r\n    <fieldset>\r\n        <legend style="display:none;"><%= i18n.formatMessage(\'Media Embed Options\') %></legend>\r\n        <div class="fieldWrap">\r\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\r\n            <select class="form-select size" id="size" name="size">\r\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\r\n            </select>\r\n        </div>\r\n        <div>\r\n            <div class="fieldWrap inline-option">\r\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\r\n                <label for="showtitle"><%= i18n.formatMessage(\'Title\') %></label>\r\n            </div>\r\n            <div class="fieldWrap inline-option">\r\n                <input id="socialsharing" class="form-checkbox" <% if (model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox"/>\r\n                <label for="socialsharing"><%= i18n.formatMessage(\'Social Tools\') %></label>\r\n            </div>\r\n            <div class="fieldWrap inline-option">\r\n                <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\r\n                <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\r\n            </div>\r\n            <div class="fieldWrap inline-option">\r\n                <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\r\n                <label for="captionsearch"><%= i18n.formatMessage(\'Caption Search\') %></label>\r\n            </div>\r\n            <div class="fieldWrap inline-option">\r\n                <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\r\n                <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\r\n            </div>\r\n            <div class="fieldWrap inline-option">\r\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\r\n                <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\r\n            </div>\r\n            <div class="fieldWrap inline-option">\r\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\r\n                <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\r\n            </div>\r\n            <div class="fieldWrap inline-option">\r\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\r\n                <label for="metadata"><%= i18n.formatMessage(\'Meta Data\') %></label>\r\n            </div>\r\n            <div class="fieldWrap inline-option">\r\n                <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\r\n                <label for="dateproduced"><%= i18n.formatMessage(\'Date Produced\') %></label>\r\n            </div>\r\n            <div class="fieldWrap inline-option">\r\n                <input id="embedcode" class="form-checkbox" <% if (model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox"/>\r\n                <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\r\n            </div>\r\n            <div class="fieldWrap inline-option">\r\n                <input id="download" class="form-checkbox" <% if (model.get(\'download\')) { print(\'checked="checked"\'); } %> name="download" type="checkbox"/>\r\n                <label for="download"><%= i18n.formatMessage(\'Download Link\') %></label>\r\n            </div>\r\n            <div class="fieldWrap inline-option">\r\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\r\n                <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\r\n            </div>\r\n            <% if (isAudio) { %>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %>  name="audiopreviewimage" type="checkbox"/>\r\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\r\n                </div>\r\n            <% } %>\r\n         </div>\r\n        <div class="form-actions">\r\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\r\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\r\n        </div>\r\n    </fieldset>\r\n</form>\r\n';});
+define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <fieldset>\n        <legend style="display:none;"><%= i18n.formatMessage(\'Media Embed Options\') %></legend>\n        <div class="fieldWrap">\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div>\n            <div class="fieldWrap inline-option">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle"><%= i18n.formatMessage(\'Title\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="socialsharing" class="form-checkbox" <% if (model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox"/>\n                <label for="socialsharing"><%= i18n.formatMessage(\'Social Tools\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                <label for="captionsearch"><%= i18n.formatMessage(\'Caption Search\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata"><%= i18n.formatMessage(\'Meta Data\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                <label for="dateproduced"><%= i18n.formatMessage(\'Date Produced\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="embedcode" class="form-checkbox" <% if (model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox"/>\n                <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="download" class="form-checkbox" <% if (model.get(\'download\')) { print(\'checked="checked"\'); } %> name="download" type="checkbox"/>\n                <label for="download"><%= i18n.formatMessage(\'Download Link\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n            </div>\n            <% if (isAudio) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %>  name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n            <% } %>\n         </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
 
 
-define('text!ev-script/templates/video-settings-legacy.html',[],function () { return '<form>\r\n    <fieldset>\r\n        <div class="fieldWrap">\r\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\r\n            <select class="form-select size" id="size" name="size" <% if (isAudio) { print(\'disabled\'); } %> >\r\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\r\n            </select>\r\n        </div>\r\n        <div class="fieldWrap">\r\n            <label for="showtitle"><%= i18n.formatMessage(\'Show Title\') %></label>\r\n            <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\r\n        </div>\r\n        <div class="fieldWrap">\r\n            <label for="autoplay"><%= i18n.formatMessage(\'Auto Play\') %></label>\r\n            <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\r\n        </div>\r\n        <div class="fieldWrap">\r\n            <label for="showcaptions"><%= i18n.formatMessage(\'Show Captions\') %></label>\r\n            <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\r\n        </div>\r\n        <div class="fieldWrap">\r\n            <label for="hidecontrols"><%= i18n.formatMessage(\'Hide Controls\') %></label>\r\n            <input id="hidecontrols" class="form-checkbox" <% if (model.get(\'hidecontrols\')) { print(\'checked="checked"\'); } %>  name="hidecontrols" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\r\n        </div>\r\n        <div class="form-actions">\r\n            <input type="button" class="form-submit action-cancel" value="<%= i18n.formatMessage(\'Cancel\') %>"/>\r\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\r\n        </div>\r\n    </fieldset>\r\n</form>\r\n';});
+define('text!ev-script/templates/video-settings-legacy.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size" <% if (isAudio) { print(\'disabled\'); } %> >\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div class="fieldWrap">\n            <label for="showtitle"><%= i18n.formatMessage(\'Show Title\') %></label>\n            <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="autoplay"><%= i18n.formatMessage(\'Auto Play\') %></label>\n            <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="showcaptions"><%= i18n.formatMessage(\'Show Captions\') %></label>\n            <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="fieldWrap">\n            <label for="hidecontrols"><%= i18n.formatMessage(\'Hide Controls\') %></label>\n            <input id="hidecontrols" class="form-checkbox" <% if (model.get(\'hidecontrols\')) { print(\'checked="checked"\'); } %>  name="hidecontrols" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="<%= i18n.formatMessage(\'Cancel\') %>"/>\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
 
 define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(sizes, function(size) { %>\n    <option value="<%= size %>" <% if (size === target) { print(\'selected="selected"\'); } %>><%= size %></option>\n<% }); %>\n';});
 
-define('ev-script/views/video-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','jquery-ui','text!ev-script/templates/video-settings.html','text!ev-script/templates/video-settings-legacy.html','text!ev-script/templates/sizes.html'],function(require) {
+define('ev-script/views/video-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','jquery-ui/ui/widgets/dialog','text!ev-script/templates/video-settings.html','text!ev-script/templates/video-settings-legacy.html','text!ev-script/templates/sizes.html'],function(require) {
 
     'use strict';
 
@@ -24639,7 +25428,7 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
         SettingsView = require('ev-script/views/settings'),
         sizeUtil = require('ev-script/util/size');
 
-    require('jquery-ui');
+    require('jquery-ui/ui/widgets/dialog');
 
     return SettingsView.extend({
         template: _.template(require('text!ev-script/templates/video-settings.html')),
@@ -24747,10 +25536,10 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
 });
 
 
-define('text!ev-script/templates/playlist-embed.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%- modelId %>&playlistEmbed=true&isNewPluginEmbed=true&hideControls=true&displayTitle=true&displayEmbedCode=<%- displayEmbedCode %>&displayStatistics=<%- displayStatistics %>&displayVideoDuration=<%- displayDuration %>&displayAttachments=<%- displayAttachments %>&displayAnnotations=<%- displayAnnotations %>&displayLinks=<%- displayLinks %>&displayCredits=<%- displayCredits %>&displaySharing=<%- displaySharing %>&autoPlay=<%- autoPlay %>&showCaptions=<%- showCaptions %>&displayDateProduced=<%- displayDateProduced %>&audioPreviewImage=<%- audioPreviewImage %>&displayCaptionSearch=<%- displayCaptionSearch %>&<% if (isShowcase) { print(showcaseParams); } else { print(playlistParams); } %>"\r\n        frameborder="0"\r\n        style="width:<%- width %>px;height:<%- height %>px;"\r\n        width="<%- width %>"\r\n        height="<%- height %>"\r\n        allowfullscreen>\r\n</iframe>\r\n';});
+define('text!ev-script/templates/playlist-embed.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%- modelId %>&playlistEmbed=true&isNewPluginEmbed=true&hideControls=true&displayTitle=true&displayEmbedCode=<%- displayEmbedCode %>&displayStatistics=<%- displayStatistics %>&displayVideoDuration=<%- displayDuration %>&displayAttachments=<%- displayAttachments %>&displayAnnotations=<%- displayAnnotations %>&displayLinks=<%- displayLinks %>&displayCredits=<%- displayCredits %>&displaySharing=<%- displaySharing %>&autoPlay=<%- autoPlay %>&showCaptions=<%- showCaptions %>&displayDateProduced=<%- displayDateProduced %>&audioPreviewImage=<%- audioPreviewImage %>&displayCaptionSearch=<%- displayCaptionSearch %>&<% if (isShowcase) { print(showcaseParams); } else { print(playlistParams); } %>"\n        frameborder="0"\n        style="width:<%- width %>px;height:<%- height %>px;"\n        width="<%- width %>"\n        height="<%- height %>"\n        allowfullscreen>\n</iframe>\n';});
 
 
-define('text!ev-script/templates/playlist-embed-legacy.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%- modelId %>"\r\n        frameborder="0"\r\n        style="width:<%- width %>px;height:<%- height %>px;"\r\n        width="<%- width %>"\r\n        height="<%- height %>"\r\n        allowfullscreen>\r\n</iframe>\r\n';});
+define('text!ev-script/templates/playlist-embed-legacy.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%- modelId %>"\n        frameborder="0"\n        style="width:<%- width %>px;height:<%- height %>px;"\n        width="<%- width %>"\n        height="<%- height %>"\n        allowfullscreen>\n</iframe>\n';});
 
 
 define('text!ev-script/templates/playlist-embed-playlist-params.html',[],function () { return 'orderBy=<%- playlistSortBy %>&orderByDirection=<%- playlistSortDirection %><% if (playlistSearchString) { print(\'&searchString=\' + playlistSearchString); } %><% if (playlistCategory) { print(\'&categoryID=\' + playlistCategory); } %><% if (playlistNumberOfResults) { print(\'&resultsCount=\' + playlistNumberOfResults); } %>';});
@@ -24850,7 +25639,7 @@ define('ev-script/views/playlist-preview',['require','ev-script/views/preview','
 });
 
 
-define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\r\n    <td class="content-actions">\r\n        <div class="action-links">\r\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\r\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\r\n            </a>\r\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\r\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\r\n            </a>\r\n        </div>\r\n    </td>\r\n    <td class="content-meta">\r\n        <% if (item.get(\'IsSecure\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\r\n        <span><%- item.get(\'Name\') %></span>\r\n    </td>\r\n</tr>\r\n';});
+define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <% if (item.get(\'IsSecure\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
 
 define('ev-script/views/playlist-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/playlist-result.html'],function(require) {
 
@@ -25082,9 +25871,9 @@ define('ev-script/collections/categories',['require','backbone','ev-script/colle
 });
 
 
-define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\r\n    <fieldset>\r\n        <legend style="display:none;"><%= i18n.formatMessage(\'Playlist Embed Options\') %></legend>\r\n        <div class="accordion">\r\n            <h3><%= i18n.formatMessage(\'Choose Layout\') %></h3>\r\n            <div>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="playlist" class="form-radio" <% if (model.get(\'layout\') === \'playlist\') { print(\'checked="checked"\'); } %> name="layout" value="playlist" type="radio"/>\r\n                    <label for="playlist"><%= i18n.formatMessage(\'Playlist\') %></label>\r\n                </div>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="showcase" class="form-radio" <% if (model.get(\'layout\') === \'showcase\') { print(\'checked="checked"\'); } %> name="layout" value="showcase" type="radio"/>\r\n                    <label for="showcase"><%= i18n.formatMessage(\'Showcase\') %></label>\r\n                </div>\r\n            </div>\r\n            <h3><%= i18n.formatMessage(\'Layout Options\') %></h3>\r\n            <div>\r\n                <div class="playlistOptions" <% if (model.get(\'layout\') === \'showcase\') { print(\'style="display:none;"\'); } %>>\r\n                    <div class="fieldWrap">\r\n                        <label for="playlistSortBy"><%= i18n.formatMessage(\'Sort By\') %></label>\r\n                        <select id="playlistSortBy" class="form-select">\r\n                            <option value="videoDate" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDate\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Added\') %></option>\r\n                            <option value="videoDateProduced" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDateProduced\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Produced\') %></option>\r\n                            <option value="videoDescription" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDescription\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Description\') %></option>\r\n                            <option value="videoTitle" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoTitle\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Title\') %></option>\r\n                            <option value="videoDuration" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDuration\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Duration\') %></option>\r\n                            <option value="videoKeywords" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoKeywords\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Keywords\') %></option>\r\n                            <!-- <option value="videoCustomPosition">Custom Order</option> -->\r\n                        </select>\r\n                    </div>\r\n                    <div>\r\n                        <div class="fieldWrap inline-option">\r\n                            <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'asc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="asc" type="radio"/>\r\n                            <label for="playlistSortDirectionAsc"><%= i18n.formatMessage(\'Ascending\') %></label>\r\n                        </div>\r\n                        <div class="fieldWrap inline-option">\r\n                            <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'desc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="desc" type="radio"/>\r\n                            <label for="playlistSortDirectionDesc"><%= i18n.formatMessage(\'Descending\') %></label>\r\n                        </div>\r\n                    </div>\r\n                    <div>\r\n                        <div class="fieldWrap">\r\n                            <label for="playlistSearchString"><%= i18n.formatMessage(\'Search String\') %></label>\r\n                            <input id="playlistSearchString" class="form-text" name="playlistSearchString" value="<%- model.get(\'playlistLayout\').playlistSearchString %>" type="text"/>\r\n                        </div>\r\n                        <div class="fieldWrap">\r\n                            <label for="playlistCategory"><%= i18n.formatMessage(\'Category\') %></label>\r\n                            <select id="playlistCategory" class="form-select" name="playlistCategory">\r\n                                <option value="" <% if (!model.get(\'playlistLayout\').playlistCategory) { print(\'selected="selected"\'); } %>>-- <%= i18n.formatMessage(\'None\') %> --</option>\r\n                                <% categories.each(function(category) { %>\r\n                                    <option value="<%= category.id %>" <% if (model.get(\'playlistLayout\').playlistCategory === category.id) { print(\'selected="selected"\'); } %>><%- category.get(\'categoryName\') %></option>\r\n                                <% }); %>\r\n                            </select>\r\n                        </div>\r\n                        <div class="fieldWrap">\r\n                            <label for="playlistNumberOfResults"><%= i18n.formatMessage(\'Number of Results\') %></label>\r\n                            <input id="playlistNumberOfResults" class="form-text" name="playlistNumberOfResults" value="<%- model.get(\'playlistLayout\').playlistNumberOfResults %>" type="text"/>\r\n                        </div>\r\n                    </div>\r\n                </div>\r\n                <div class="showcaseOptions" <% if (model.get(\'layout\') === \'playlist\') { print(\'style="display:none;"\'); } %>>\r\n<!--\r\n                    <div class="fieldWrap">\r\n                        <input id="featuredContent" class="form-checkbox" type="checkbox" name="featuredContent" <% if (model.get(\'showcaseLayout\').featuredContent) { print(\'checked="checked"\'); } %>/>\r\n                        <label for="featuredContent">Featured Content</label>\r\n                    </div>\r\n -->\r\n                    <div class="fieldWrap">\r\n                        <input id="categoryList" class="form-checkbox" type="checkbox" name="categoryList" <% if (model.get(\'showcaseLayout\').categoryList) { print(\'checked="checked"\'); } %>/>\r\n                        <label for="categoryList"><%= i18n.formatMessage(\'Category List\') %></label>\r\n                    </div>\r\n                    <div>\r\n                        <div class="fieldWrap">\r\n                            <input id="categoryOrientationHorizontal" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'horizontal\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="horizontal" type="radio"/>\r\n                            <label for="categoryOrientationHorizontal"><%= i18n.formatMessage(\'Horizontal\') %></label>\r\n                        </div>\r\n                        <div class="fieldWrap">\r\n                            <input id="categoryOrientationVertical" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'vertical\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="vertical" type="radio"/>\r\n                            <label for="categoryOrientationVertical"><%= i18n.formatMessage(\'Vertical\') %></label>\r\n                        </div>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n            <h3><%= i18n.formatMessage(\'Content Details\') %></h3>\r\n            <div>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\r\n                    <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\r\n                </div>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="statistics" class="form-checkbox" <% if (model.get(\'statistics\')) { print(\'checked="checked"\'); } %> name="statistics" type="checkbox"/>\r\n                    <label for="statistics"><%= i18n.formatMessage(\'Statistics\') %></label>\r\n                </div>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="duration" class="form-checkbox" <% if (model.get(\'duration\')) { print(\'checked="checked"\'); } %> name="duration" type="checkbox"/>\r\n                    <label for="duration"><%= i18n.formatMessage(\'Duration\') %></label>\r\n                </div>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\r\n                    <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\r\n                </div>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\r\n                    <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\r\n                </div>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\r\n                    <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\r\n                </div>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="credits" class="form-checkbox" <% if (model.get(\'credits\')) { print(\'checked="checked"\'); } %> name="credits" type="checkbox"/>\r\n                    <label for="credits"><%= i18n.formatMessage(\'Credits\') %></label>\r\n                </div>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\r\n                    <label for="socialsharing"><%= i18n.formatMessage(\'Social Tools\') %></label>\r\n                </div>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\r\n                    <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\r\n                </div>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\r\n                    <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\r\n                </div>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\r\n                    <label for="dateproduced"><%= i18n.formatMessage(\'Date Produced\') %></label>\r\n                </div>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\r\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\r\n                </div>\r\n                <div class="fieldWrap inline-option">\r\n                    <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\r\n                    <label for="captionsearch"><%= i18n.formatMessage(\'Caption Search\') %></label>\r\n                </div>\r\n            </div>\r\n        </div>\r\n        <div class="form-actions">\r\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\r\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\r\n        </div>\r\n    </fieldset>\r\n</form>\r\n';});
+define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <fieldset>\n        <legend style="display:none;"><%= i18n.formatMessage(\'Playlist Embed Options\') %></legend>\n        <div class="accordion">\n            <h3><%= i18n.formatMessage(\'Choose Layout\') %></h3>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="playlist" class="form-radio" <% if (model.get(\'layout\') === \'playlist\') { print(\'checked="checked"\'); } %> name="layout" value="playlist" type="radio"/>\n                    <label for="playlist"><%= i18n.formatMessage(\'Playlist\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcase" class="form-radio" <% if (model.get(\'layout\') === \'showcase\') { print(\'checked="checked"\'); } %> name="layout" value="showcase" type="radio"/>\n                    <label for="showcase"><%= i18n.formatMessage(\'Showcase\') %></label>\n                </div>\n            </div>\n            <h3><%= i18n.formatMessage(\'Layout Options\') %></h3>\n            <div>\n                <div class="playlistOptions" <% if (model.get(\'layout\') === \'showcase\') { print(\'style="display:none;"\'); } %>>\n                    <div class="fieldWrap">\n                        <label for="playlistSortBy"><%= i18n.formatMessage(\'Sort By\') %></label>\n                        <select id="playlistSortBy" class="form-select">\n                            <option value="videoDate" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDate\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Added\') %></option>\n                            <option value="videoDateProduced" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDateProduced\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Produced\') %></option>\n                            <option value="videoDescription" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDescription\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Description\') %></option>\n                            <option value="videoTitle" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoTitle\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Title\') %></option>\n                            <option value="videoDuration" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDuration\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Duration\') %></option>\n                            <option value="videoKeywords" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoKeywords\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Keywords\') %></option>\n                            <!-- <option value="videoCustomPosition">Custom Order</option> -->\n                        </select>\n                    </div>\n                    <div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'asc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="asc" type="radio"/>\n                            <label for="playlistSortDirectionAsc"><%= i18n.formatMessage(\'Ascending\') %></label>\n                        </div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'desc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="desc" type="radio"/>\n                            <label for="playlistSortDirectionDesc"><%= i18n.formatMessage(\'Descending\') %></label>\n                        </div>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <label for="playlistSearchString"><%= i18n.formatMessage(\'Search String\') %></label>\n                            <input id="playlistSearchString" class="form-text" name="playlistSearchString" value="<%- model.get(\'playlistLayout\').playlistSearchString %>" type="text"/>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistCategory"><%= i18n.formatMessage(\'Category\') %></label>\n                            <select id="playlistCategory" class="form-select" name="playlistCategory">\n                                <option value="" <% if (!model.get(\'playlistLayout\').playlistCategory) { print(\'selected="selected"\'); } %>>-- <%= i18n.formatMessage(\'None\') %> --</option>\n                                <% categories.each(function(category) { %>\n                                    <option value="<%= category.id %>" <% if (model.get(\'playlistLayout\').playlistCategory === category.id) { print(\'selected="selected"\'); } %>><%- category.get(\'categoryName\') %></option>\n                                <% }); %>\n                            </select>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistNumberOfResults"><%= i18n.formatMessage(\'Number of Results\') %></label>\n                            <input id="playlistNumberOfResults" class="form-text" name="playlistNumberOfResults" value="<%- model.get(\'playlistLayout\').playlistNumberOfResults %>" type="text"/>\n                        </div>\n                    </div>\n                </div>\n                <div class="showcaseOptions" <% if (model.get(\'layout\') === \'playlist\') { print(\'style="display:none;"\'); } %>>\n<!--\n                    <div class="fieldWrap">\n                        <input id="featuredContent" class="form-checkbox" type="checkbox" name="featuredContent" <% if (model.get(\'showcaseLayout\').featuredContent) { print(\'checked="checked"\'); } %>/>\n                        <label for="featuredContent">Featured Content</label>\n                    </div>\n -->\n                    <div class="fieldWrap">\n                        <input id="categoryList" class="form-checkbox" type="checkbox" name="categoryList" <% if (model.get(\'showcaseLayout\').categoryList) { print(\'checked="checked"\'); } %>/>\n                        <label for="categoryList"><%= i18n.formatMessage(\'Category List\') %></label>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationHorizontal" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'horizontal\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="horizontal" type="radio"/>\n                            <label for="categoryOrientationHorizontal"><%= i18n.formatMessage(\'Horizontal\') %></label>\n                        </div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationVertical" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'vertical\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="vertical" type="radio"/>\n                            <label for="categoryOrientationVertical"><%= i18n.formatMessage(\'Vertical\') %></label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <h3><%= i18n.formatMessage(\'Content Details\') %></h3>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="statistics" class="form-checkbox" <% if (model.get(\'statistics\')) { print(\'checked="checked"\'); } %> name="statistics" type="checkbox"/>\n                    <label for="statistics"><%= i18n.formatMessage(\'Statistics\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="duration" class="form-checkbox" <% if (model.get(\'duration\')) { print(\'checked="checked"\'); } %> name="duration" type="checkbox"/>\n                    <label for="duration"><%= i18n.formatMessage(\'Duration\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                    <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                    <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                    <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="credits" class="form-checkbox" <% if (model.get(\'credits\')) { print(\'checked="checked"\'); } %> name="credits" type="checkbox"/>\n                    <label for="credits"><%= i18n.formatMessage(\'Credits\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="socialsharing"><%= i18n.formatMessage(\'Social Tools\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                    <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                    <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                    <label for="dateproduced"><%= i18n.formatMessage(\'Date Produced\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                    <label for="captionsearch"><%= i18n.formatMessage(\'Caption Search\') %></label>\n                </div>\n            </div>\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
 
-define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/collections/categories','jquery-ui','text!ev-script/templates/playlist-settings.html'],function(require) {
+define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/collections/categories','jquery-ui/ui/widgets/dialog','jquery-ui/ui/widgets/accordion','text!ev-script/templates/playlist-settings.html'],function(require) {
 
     'use strict';
 
@@ -25093,7 +25882,8 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-
         SettingsView = require('ev-script/views/settings'),
         Categories = require('ev-script/collections/categories');
 
-    require('jquery-ui');
+    require('jquery-ui/ui/widgets/dialog');
+    require('jquery-ui/ui/widgets/accordion');
 
     return SettingsView.extend({
         template: _.template(require('text!ev-script/templates/playlist-settings.html')),
@@ -25196,7 +25986,7 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-
 });
 
 
-define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\r\n    <a target="_blank" href="<%= ensembleUrl %>"><span><%= i18n.formatMessage(\'Ensemble Logo\') %></span></a>\r\n</div>\r\n<% if (modelId) { %>\r\n    <% if (thumbnailUrl) { %>\r\n        <div class="thumbnail">\r\n            <img alt="<%= i18n.formatMessage(\'Media thumbnail\') %>" src="<%= thumbnailUrl %>"/>\r\n        </div>\r\n    <% } %>\r\n    <h2 class="title"><%= name %></h2>\r\n    <div class="ev-actions">\r\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Click to change {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Change {0}\', label) %><span></a>\r\n        <a href="#" class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', name) %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %><span></a>\r\n        <% if (type === \'video\' || showPlaylistOptions) { %>\r\n            <a href="#" class="action-options" title="<%= i18n.formatMessage(\'Click to manage {0} embed options\', label) %>"><i class="fa fa-cog fa-lg"></i><span><%= i18n.formatMessage(\'{0} Embed Options\', label) %><span></a>\r\n        <% } %>\r\n        <a href="#" class="action-remove" title="<%= i18n.formatMessage(\'Click to remove {0}\', label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Remove {0}\', label) %><span></a>\r\n    </div>\r\n<% } else { %>\r\n    <h3 class="title"><em><%= i18n.formatMessage(\'Add {0}\', label) %></em></h3>\r\n    <div class="ev-actions">\r\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Click to Choose {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Choose {0}\', label) %><span></a>\r\n    </div>\r\n<% } %>\r\n';});
+define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span><%= i18n.formatMessage(\'Ensemble Logo\') %></span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="<%= i18n.formatMessage(\'Media thumbnail\') %>" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <h2 class="title"><%= name %></h2>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Click to change {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Change {0}\', label) %><span></a>\n        <a href="#" class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', name) %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %><span></a>\n        <% if (type === \'video\' || showPlaylistOptions) { %>\n            <a href="#" class="action-options" title="<%= i18n.formatMessage(\'Click to manage {0} embed options\', label) %>"><i class="fa fa-cog fa-lg"></i><span><%= i18n.formatMessage(\'{0} Embed Options\', label) %><span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="<%= i18n.formatMessage(\'Click to remove {0}\', label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Remove {0}\', label) %><span></a>\n    </div>\n<% } else { %>\n    <h3 class="title"><em><%= i18n.formatMessage(\'Add {0}\', label) %></em></h3>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Click to Choose {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Choose {0}\', label) %><span></a>\n    </div>\n<% } %>\n';});
 
 define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','ev-script/collections/categories','text!ev-script/templates/field.html'],function(require) {
 
@@ -26495,7 +27285,7 @@ function testSet(set, version) {
     for (var i = 0; i < set.length; i++) {
       ;
       if (set[i].semver === ANY)
-        return true;
+        continue;
 
       if (set[i].semver.prerelease.length > 0) {
         var allowed = set[i].semver;
@@ -26595,6 +27385,9 @@ function outside(version, range, hilo, loose) {
     var low = null;
 
     comparators.forEach(function(comparator) {
+      if (comparator.semver === ANY) {
+        comparator = new Comparator('>=0.0.0')
+      }
       high = high || comparator;
       low = low || comparator;
       if (gtfn(comparator.semver, high.semver, loose)) {
@@ -26874,9 +27667,9 @@ define('ev-script/auth/base/auth',['require','jquery','underscore','backbone','e
 }));
 
 
-define('text!ev-script/auth/basic/template.html',[],function () { return '<div class="logo"></div>\r\n<form>\r\n    <fieldset>\r\n        <div class="fieldWrap">\r\n            <label for="username"><%= i18n.formatMessage(\'Username\') %></label>\r\n            <input id="username" name="username" class="form-text" type="text"/>\r\n        </div>\r\n        <div class="fieldWrap">\r\n            <label for="password"><%= i18n.formatMessage(\'Password\') %></label>\r\n            <input id="password" name="password" class="form-text" type="password"/>\r\n        </div>\r\n        <div class="form-actions">\r\n            <label></label>\r\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\r\n        </div>\r\n    </fieldset>\r\n</form>\r\n';});
+define('text!ev-script/auth/basic/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= i18n.formatMessage(\'Username\') %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= i18n.formatMessage(\'Password\') %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\n        </div>\n    </fieldset>\n</form>\n';});
 
-define('ev-script/auth/basic/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/basic/template.html'],function(require, template) {
+define('ev-script/auth/basic/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui/ui/widgets/dialog','text!ev-script/auth/basic/template.html'],function(require, template) {
 
     'use strict';
 
@@ -26887,7 +27680,7 @@ define('ev-script/auth/basic/view',['require','exports','module','jquery','under
         eventsUtil = require('ev-script/util/events');
 
     require('jquery.cookie');
-    require('jquery-ui');
+    require('jquery-ui/ui/widgets/dialog');
 
     return Backbone.View.extend({
         template: _.template(require('text!ev-script/auth/basic/template.html')),
@@ -27019,9 +27812,9 @@ define('ev-script/auth/basic/auth',['require','jquery','underscore','backbone','
 });
 
 
-define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\r\n<form>\r\n    <fieldset>\r\n        <div class="fieldWrap">\r\n            <label for="username"><%= i18n.formatMessage(\'Username\') %></label>\r\n            <input id="username" name="username" class="form-text" type="text"/>\r\n        </div>\r\n        <div class="fieldWrap">\r\n            <label for="password"><%= i18n.formatMessage(\'Password\') %></label>\r\n            <input id="password" name="password" class="form-text" type="password"/>\r\n        </div>\r\n        <div class="fieldWrap">\r\n            <label for="provider"><%= i18n.formatMessage(\'Identity Provider\') %></label>\r\n            <select id="provider" name="provider" class="form-select"></select>\r\n        </div>\r\n        <div class="fieldWrap">\r\n            <label for="remember"><%= i18n.formatMessage(\'Remember Me\') %></label>\r\n            <input id="remember" name="remember" type="checkbox"></input>\r\n        </div>\r\n        <div class="form-actions">\r\n            <label></label>\r\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\r\n            <div class="loader"></div>\r\n        </div>\r\n    </fieldset>\r\n</form>\r\n';});
+define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= i18n.formatMessage(\'Username\') %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= i18n.formatMessage(\'Password\') %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="provider"><%= i18n.formatMessage(\'Identity Provider\') %></label>\n            <select id="provider" name="provider" class="form-select"></select>\n        </div>\n        <div class="fieldWrap">\n            <label for="remember"><%= i18n.formatMessage(\'Remember Me\') %></label>\n            <input id="remember" name="remember" type="checkbox"></input>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\n            <div class="loader"></div>\n        </div>\n    </fieldset>\n</form>\n';});
 
-define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui','text!ev-script/auth/forms/template.html','text!ev-script/templates/options.html'],function(require, template) {
+define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui/ui/widgets/dialog','text!ev-script/auth/forms/template.html','text!ev-script/templates/options.html'],function(require, template) {
 
     'use strict';
 
@@ -27032,7 +27825,7 @@ define('ev-script/auth/forms/view',['require','exports','module','jquery','under
         eventsUtil = require('ev-script/util/events');
 
     require('jquery.cookie');
-    require('jquery-ui');
+    require('jquery-ui/ui/widgets/dialog');
 
     return Backbone.View.extend({
         template: _.template(require('text!ev-script/auth/forms/template.html')),
@@ -27209,9 +28002,9 @@ define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/a
 });
 
 
-define('text!ev-script/auth/none/template.html',[],function () { return '<div class="logo"></div>\r\n<form>\r\n    <h3><%= i18n.formatMessage(\'You are unauthorized to access this content.\') %></h3>\r\n</form>\r\n';});
+define('text!ev-script/auth/none/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <h3><%= i18n.formatMessage(\'You are unauthorized to access this content.\') %></h3>\n</form>\n';});
 
-define('ev-script/auth/none/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery-ui','text!ev-script/auth/none/template.html'],function(require, template) {
+define('ev-script/auth/none/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery-ui/ui/widgets/dialog','text!ev-script/auth/none/template.html'],function(require, template) {
 
     'use strict';
 
@@ -27221,7 +28014,7 @@ define('ev-script/auth/none/view',['require','exports','module','jquery','unders
         cacheUtil = require('ev-script/util/cache'),
         eventsUtil = require('ev-script/util/events');
 
-    require('jquery-ui');
+    require('jquery-ui/ui/widgets/dialog');
 
     return Backbone.View.extend({
         template: _.template(require('text!ev-script/auth/none/template.html')),
@@ -27559,7 +28352,7 @@ define('ev-script/auth/none/auth',['require','jquery','underscore','ev-script/au
 }));
 
 /**
- * Globalize v1.2.3
+ * Globalize v1.3.0
  *
  * http://github.com/jquery/globalize
  *
@@ -27567,10 +28360,10 @@ define('ev-script/auth/none/auth',['require','jquery','underscore','ev-script/au
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2017-03-17T01:41Z
+ * Date: 2017-07-03T21:37Z
  */
 /*!
- * Globalize v1.2.3 2017-03-17T01:41Z Released under the MIT license
+ * Globalize v1.3.0 2017-07-03T21:37Z Released under the MIT license
  * http://git.io/TrdQbw
  */
 (function( root, factory ) {
@@ -29850,7 +30643,8 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
         return $ || jQuery;
     });
 
-    define('jquery-ui', ['jquery'], function() {});
+    define('jquery-ui/ui/widgets/dialog', ['jquery'], function() {});
+    define('jquery-ui/ui/widgets/accordion', ['jquery'], function() {});
 
     define('plupload', function() {
         return plupload;

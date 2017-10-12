@@ -1,6 +1,6 @@
 // Bootstrap less mixins
-@import (reference) '../../bower_components/bootstrap-less/less/variables.less';
-@import (reference) '../../bower_components/bootstrap-less/less/mixins.less';
+@import (reference) '../../node_modules/bootstrap-less/bootstrap/variables.less';
+@import (reference) '../../node_modules/bootstrap-less/bootstrap/mixins.less';
 
 // Colors
 @border-color: #999999;
@@ -428,6 +428,7 @@ div.ev-results {
     font-size: 1em;
   }
   .content-list {
+    border-spacing: 0;
     width: 100%;
     .even {
         background-color: @alt-gray;
@@ -493,6 +494,10 @@ div.ev-dialog {
     border-width: 0;
   }
   form.upload-form {
+    fieldset {
+      border: none;
+      padding: 0;
+    }
     .form-text,
     .form-select,
     .form-submit {

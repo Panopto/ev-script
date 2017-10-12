@@ -5,7 +5,8 @@
         return $ || jQuery;
     });
 
-    define('jquery-ui', ['jquery'], function() {});
+    define('jquery-ui/ui/widgets/dialog', ['jquery'], function() {});
+    define('jquery-ui/ui/widgets/accordion', ['jquery'], function() {});
 
     define('plupload', function() {
         return plupload;

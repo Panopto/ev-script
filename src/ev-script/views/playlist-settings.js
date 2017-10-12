@@ -7,7 +7,8 @@ define(function(require) {
         SettingsView = require('ev-script/views/settings'),
         Categories = require('ev-script/collections/categories');
 
-    require('jquery-ui');
+    require('jquery-ui/ui/widgets/dialog');
+    require('jquery-ui/ui/widgets/accordion');
 
     return SettingsView.extend({
         template: _.template(require('text!ev-script/templates/playlist-settings.html')),

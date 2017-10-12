@@ -3,11 +3,11 @@
     'use strict';
 
     require.config({
-        baseUrl: '../../bower_components',
+        baseUrl: '../../node_modules',
         paths: {
             'ev-script': '../../dist/ev-script',
             'jquery':  'jquery/dist/jquery',
-            'jquery-ui': 'jquery-ui/jquery-ui',
+            'jquery-ui': 'jquery-ui',
             'jquery.cookie': 'jquery.cookie/jquery.cookie',
             'jquery.plupload.queue': 'plupload/js/jquery.plupload.queue/jquery.plupload.queue',
             'moxie': 'plupload/js/moxie',
@@ -16,17 +16,37 @@
             'backbone': 'backbone/backbone',
             'ev-config': '../../ev-config'
         },
+        map: {
+            '*': {
+                'plupload': 'plupload-adapter'
+            },
+            'plupload-adapter': {
+                'plupload': 'plupload'
+            }
+        },
         shim: {
-            'moxie': [],
-            'plupload': ['moxie'],
-            'jquery.plupload.queue': ['jquery', 'plupload']
+            'jquery.plupload.queue': {
+                deps: ['jquery', 'plupload'],
+                init: function(jquery, plupload) {
+                    window.plupload = plupload;
+                }
+            }
         }
+    });
+
+    // plupload when loaded as module doesn't attach a global, which jquery.plupload.queue requires
+    // so we use an adapter that does so
+    define('plupload-adapter', ['plupload'], function(plupload) {
+        window.plupload = plupload;
+
+        return plupload;
     });
 
     require(['ev-config', 'ev-script', 'jquery', 'underscore'], function(evSettings, EV, $, _) {
 
         var app = new EV.EnsembleApp(_.extend(evSettings, {
-            scrollHeight: 600
+            scrollHeight: 600,
+            i18nPath: '../../src/ev-script/i18n'
         }));
 
         app.appEvents.bind('fieldUpdated', function($field, value) {

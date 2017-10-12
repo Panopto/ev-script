@@ -8,7 +8,7 @@ define(function(require, template) {
         cacheUtil = require('ev-script/util/cache'),
         eventsUtil = require('ev-script/util/events');
 
-    require('jquery-ui');
+    require('jquery-ui/ui/widgets/dialog');
 
     return Backbone.View.extend({
         template: _.template(require('text!ev-script/auth/none/template.html')),

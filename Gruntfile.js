@@ -19,24 +19,24 @@ module.exports = function(grunt) {
         'ev-script': 'src/ev-script',
         'jquery': 'empty:',
         'jquery-ui': 'empty:',
-        'jquery.cookie': 'bower_components/jquery.cookie/jquery.cookie',
+        'jquery.cookie': 'node_modules/jquery.cookie/jquery.cookie',
         'jquery.plupload.queue': 'empty:',
-        'jquery-truncate-html': 'bower_components/jquery-truncate-html/jquery.truncate',
+        'jquery-expander': 'node_modules/jquery-expander/jquery.expander',
         'plupload': 'empty:',
-        'ev-scroll-loader': 'bower_components/ev-scroll-loader/dist/jquery.ev-scroll-loader',
-        'underscore': 'bower_components/underscore/underscore',
-        'backbone': 'bower_components/backbone/backbone',
-        'text': 'bower_components/requirejs-text/text',
-        'json': 'bower_components/requirejs-json/json',
-        'semver': 'bower_components/semver/semver.browser',
-        'platform': 'bower_components/platform.js/platform',
-        'base64': 'bower_components/base64/base64',
-        'cldr': 'bower_components/cldrjs/dist/cldr',
-        'cldr-data': 'bower_components/cldr-data',
-        'globalize': 'bower_components/globalize/dist/globalize',
-        'moment': 'bower_components/moment/min/moment-with-locales'
+        'ev-scroll-loader': 'node_modules/ev-scroll-loader/dist/jquery.ev-scroll-loader',
+        'underscore': 'node_modules/underscore/underscore',
+        'backbone': 'node_modules/backbone/backbone',
+        'text': 'node_modules/requirejs-text/text',
+        'json': 'node_modules/requirejs-json/json',
+        'semver': 'node_modules/semver/semver.browser',
+        'platform': 'node_modules/platform/platform',
+        'base64': 'node_modules/Base64/base64',
+        'cldr': 'node_modules/cldrjs/dist/cldr',
+        'cldr-data': 'node_modules/cldr-data',
+        'globalize': 'node_modules/globalize/dist/globalize',
+        'moment': 'node_modules/moment/min/moment-with-locales'
       },
-      name: 'bower_components/almond/almond',
+      name: 'node_modules/almond/almond',
       out: 'dist/ev-script.js',
       wrap: {
         start: '<%= banner %>' + grunt.file.read('wrap/wrap.start'),
@@ -218,16 +218,6 @@ module.exports = function(grunt) {
             res.statusCode = 400;
             res.end('Missing request parameter.');
           }
-        }
-        // LTI demo launch path
-        else if (parsed.pathname === '/demo/lti/launch' && req.method === 'POST') {
-          console.log(req);
-          var returnUrl = req.body.launch_presentation_return_url;
-          // We're just doing a simple redirect here
-          res.writeHead(302, {
-            'Location': 'https://' + req.headers['host'] + '/demo/lti/index.html?return_url=' + encodeURIComponent(returnUrl)
-          });
-          res.end();
         }
       })
       .use(errorhandler());
