@@ -18,12 +18,15 @@ define(function(require) {
             ResultsView.prototype.initialize.call(this, options);
         },
         decorate: function($item) {
+            ResultsView.prototype.decorate.call(this, $item);
+
             // Handle truncation (more/less) of truncatable fields
             if ($(window).width() < 1100) {
                 $('.trunc .value', $item).each(_.bind(function(index, element) {
-                    $(element).expander({
+                    var $element = $(element);
+                    $element.expander({
                         'expandText': this.i18n.formatMessage('More'),
-                        'userCollapseText': this.i18n.formatMessage('Less')
+                        'userCollapseText': this.i18n.formatMessage('Less'),
                     });
                 }, this));
             }

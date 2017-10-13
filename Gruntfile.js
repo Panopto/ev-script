@@ -94,11 +94,11 @@ module.exports = function(grunt) {
     watch: {
       gruntfile: {
         files: '<%= jshint.gruntfile.src %>',
-        tasks: ['jshint:gruntfile', 'requirejs']
+        tasks: ['jshint:gruntfile', 'requirejs:development']
       },
       src: {
         files: ['<%= jshint.src.src %>', 'src/**/*.html', 'wrap/*'],
-        tasks: ['jshint:src', /*'qunit',*/ 'requirejs']
+        tasks: ['jshint:src', /*'qunit',*/ 'requirejs:development']
       },
       test: {
         files: ['<%= jshint.test.src %>'],

@@ -593,7 +593,8 @@ div.ev-results table {
 }
 div.ev-results .content-list {
   border-spacing: 0;
-  width: 100%;
+  width: 99%;
+  margin: auto;
 }
 div.ev-results .content-list .even {
   background-color: #f3f4ee;

@@ -1,5 +1,5 @@
 /**
- * ev-script 1.4.0 2017-10-12
+ * ev-script 1.4.0 2017-10-13
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2017 Symphony Video, Inc.
@@ -7451,28 +7451,15 @@ function chooseLocale(names) {
 
 function loadLocale(name) {
     var oldLocale = null;
-
     // TODO: Find a better way to register and load all the locales in Node
     if (!locales[name] && (typeof module !== 'undefined') &&
             module && module.exports) {
-        oldLocale = globalLocale._abbr;
         try {
-            // workaround for React Native 0.49+
-            var pretendingNotToRequireV1 = require;
-            pretendingNotToRequireV1('moment/locale/' + name);
-        } catch (e) {
-            // In the test environment, the external module 'moment'
-            // can't be resolved because we're running inside it.
-            // Fallback to using the old relative import
-            try {
-                var pretendingNotToRequireV2 = require;
-                pretendingNotToRequireV2('./locale/' + name);
-            } catch (e) { }
-        }
-
-        // because defineLocale currently also sets the global locale, we
-        // want to undo that for lazy loaded locales
-        getSetGlobalLocale(oldLocale);
+            oldLocale = globalLocale._abbr;
+            var aliasedRequire = require;
+            aliasedRequire('./locale/' + name);
+            getSetGlobalLocale(oldLocale);
+        } catch (e) {}
     }
     return locales[name];
 }
@@ -10105,12 +10092,12 @@ addParseToken('x', function (input, array, config) {
 // Side effect imports
 
 //! moment.js
-//! version : 2.19.0
+//! version : 2.19.1
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
 //! license : MIT
 //! momentjs.com
 
-hooks.version = '2.19.0';
+hooks.version = '2.19.1';
 
 setHookCallback(createLocal);
 
@@ -23439,10 +23426,10 @@ define('ev-script/views/unit-selects',['require','jquery','underscore','ev-scrip
 });
 
 /**
- * ev-scroll-loader 1.0.0 2016-02-24
+ * ev-scroll-loader 1.1.0 2017-10-13
  * Ensemble Video jQuery Scroll Loader Plugin
  * https://github.com/ensembleVideo/ev-scroll-loader
- * Copyright (c) 2016 Symphony Video, Inc.
+ * Copyright (c) 2017 Symphony Video, Inc.
  * Licensed (MIT AND GPL-2.0)
  */
 (function(factory) {
@@ -23493,6 +23480,11 @@ define('ev-script/views/unit-selects',['require','jquery','underscore','ev-scrip
         hideLoader: function() {
             var $wrap = $(this).closest('.scrollWrap');
             $('.loader', $wrap).hide();
+            return this;
+        },
+        scrollTo: function(offset) {
+            var $wrap = $(this).closest('.scrollWrap');
+            $wrap.scrollTop(offset - $wrap.offset().top + $wrap.scrollTop());
             return this;
         }
     };
@@ -23601,8 +23593,55 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
             this.decorate($item);
             this.$('.content-list').append($item);
         },
-        // Override this in extending views to update the DOM when items are added
-        decorate: function($item) {},
+        decorate: function($item) {
+            // For keyboard accessibility, add result item to tab flow
+            $item.attr('tabindex', '0');
+            // ...and programmatically focus on interactive elements
+            var $interEls = $('a', $item),
+                focusedIndex = -1,
+                lastIndex = $interEls.length - 1;
+            $interEls.attr('tabindex', '-1');
+            $item.keydown(function(e) {
+                if (e.which === 35 || e.keyCode === 35) {
+                    e.preventDefault();
+                    // end key should jump to bottom
+                    $item.siblings().last().focus();
+                } else if (e.which === 36 || e.keyCode === 36) {
+                    e.preventDefault();
+                    // home key should jump to top
+                    $item.siblings().first().focus();
+                } else if (e.which === 37 || e.keyCode === 37) {
+                    e.preventDefault();
+                    // left arrow move to previous item action
+                    focusedIndex = --focusedIndex < 0 ? lastIndex : focusedIndex;
+                    $interEls.eq(focusedIndex).focus();
+                } else if (e.which === 38 || e.keyCode === 38) {
+                    e.preventDefault();
+                    // up arrow move to previous item
+                    var $previous = $item.prev();
+                    if ($previous && $previous.length) {
+                        $previous.focus();
+                    }
+                } else if (e.which === 39 || e.keyCode === 39) {
+                    e.preventDefault();
+                    // right arrow move to next item action
+                    focusedIndex = ++focusedIndex > lastIndex ? 0 : focusedIndex;
+                    $interEls.eq(focusedIndex).focus();
+                } else if (e.which === 40 || e.keyCode === 40) {
+                    e.preventDefault();
+                    // down arrow move to next item
+                    var $next = $item.next();
+                    if ($next && $next.length) {
+                        $next.focus();
+                    }
+                }
+            });
+            // when item receives focus reset item action index and scroll to top
+            $item.focus(_.bind(function() {
+                focusedIndex = -1;
+                this.$scrollLoader.evScrollLoader('scrollTo', $item.offset().top - 2);
+            }, this));
+        },
         render: function() {
             this.$el.html(this.resultsTemplate({
                 i18n: this.i18n,
@@ -23643,6 +23682,7 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
                 this.$results.height(this.$el.height() - this.$total.outerHeight(true));
                 // Truncation of metadata depends on window size...so re-decorate
                 this.$('.resultItem').each(_.bind(function(index, element) {
+                    // TODO - revisit this given truncate -> expander lib change
                     this.decorate($(element));
                 }, this));
             }
@@ -23651,7 +23691,6 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
     });
 
 });
-
 define('ev-script/views/preview',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','jquery-ui/ui/widgets/dialog'],function(require) {
 
     'use strict';
@@ -24621,12 +24660,15 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
             ResultsView.prototype.initialize.call(this, options);
         },
         decorate: function($item) {
+            ResultsView.prototype.decorate.call(this, $item);
+
             // Handle truncation (more/less) of truncatable fields
             if ($(window).width() < 1100) {
                 $('.trunc .value', $item).each(_.bind(function(index, element) {
-                    $(element).expander({
+                    var $element = $(element);
+                    $element.expander({
                         'expandText': this.i18n.formatMessage('More'),
-                        'userCollapseText': this.i18n.formatMessage('Less')
+                        'userCollapseText': this.i18n.formatMessage('Less'),
                     });
                 }, this));
             }

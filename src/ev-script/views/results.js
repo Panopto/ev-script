@@ -86,8 +86,55 @@ define(function(require) {
             this.decorate($item);
             this.$('.content-list').append($item);
         },
-        // Override this in extending views to update the DOM when items are added
-        decorate: function($item) {},
+        decorate: function($item) {
+            // For keyboard accessibility, add result item to tab flow
+            $item.attr('tabindex', '0');
+            // ...and programmatically focus on interactive elements
+            var $interEls = $('a', $item),
+                focusedIndex = -1,
+                lastIndex = $interEls.length - 1;
+            $interEls.attr('tabindex', '-1');
+            $item.keydown(function(e) {
+                if (e.which === 35 || e.keyCode === 35) {
+                    e.preventDefault();
+                    // end key should jump to bottom
+                    $item.siblings().last().focus();
+                } else if (e.which === 36 || e.keyCode === 36) {
+                    e.preventDefault();
+                    // home key should jump to top
+                    $item.siblings().first().focus();
+                } else if (e.which === 37 || e.keyCode === 37) {
+                    e.preventDefault();
+                    // left arrow move to previous item action
+                    focusedIndex = --focusedIndex < 0 ? lastIndex : focusedIndex;
+                    $interEls.eq(focusedIndex).focus();
+                } else if (e.which === 38 || e.keyCode === 38) {
+                    e.preventDefault();
+                    // up arrow move to previous item
+                    var $previous = $item.prev();
+                    if ($previous && $previous.length) {
+                        $previous.focus();
+                    }
+                } else if (e.which === 39 || e.keyCode === 39) {
+                    e.preventDefault();
+                    // right arrow move to next item action
+                    focusedIndex = ++focusedIndex > lastIndex ? 0 : focusedIndex;
+                    $interEls.eq(focusedIndex).focus();
+                } else if (e.which === 40 || e.keyCode === 40) {
+                    e.preventDefault();
+                    // down arrow move to next item
+                    var $next = $item.next();
+                    if ($next && $next.length) {
+                        $next.focus();
+                    }
+                }
+            });
+            // when item receives focus reset item action index and scroll to top
+            $item.focus(_.bind(function() {
+                focusedIndex = -1;
+                this.$scrollLoader.evScrollLoader('scrollTo', $item.offset().top - 2);
+            }, this));
+        },
         render: function() {
             this.$el.html(this.resultsTemplate({
                 i18n: this.i18n,
@@ -128,6 +175,7 @@ define(function(require) {
                 this.$results.height(this.$el.height() - this.$total.outerHeight(true));
                 // Truncation of metadata depends on window size...so re-decorate
                 this.$('.resultItem').each(_.bind(function(index, element) {
+                    // TODO - revisit this given truncate -> expander lib change
                     this.decorate($(element));
                 }, this));
             }
