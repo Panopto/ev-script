@@ -90,11 +90,17 @@ define(function(require) {
             // For keyboard accessibility, add result item to tab flow
             $item.attr('tabindex', '0');
             // ...and programmatically focus on interactive elements
-            var $interEls = $('a', $item),
-                focusedIndex = -1,
-                lastIndex = $interEls.length - 1;
-            $interEls.attr('tabindex', '-1');
+            var focusedIndex;
+            // when item receives focus reset item action index and scroll to top
+            $item.focus(_.bind(function() {
+                var $interEls = $('a', $item);
+                $interEls.attr('tabindex', '-1');
+                focusedIndex = -1;
+                this.$scrollLoader.evScrollLoader('scrollTo', $item.offset().top - 2);
+            }, this));
             $item.keydown(function(e) {
+                var $interEls,
+                    lastIndex;
                 if (e.which === 35 || e.keyCode === 35) {
                     e.preventDefault();
                     // end key should jump to bottom
@@ -106,7 +112,13 @@ define(function(require) {
                 } else if (e.which === 37 || e.keyCode === 37) {
                     e.preventDefault();
                     // left arrow move to previous item action
+                    $interEls = $('a:visible', $item);
+                    if (!$interEls.length) {
+                        return;
+                    }
+                    lastIndex = $interEls.length - 1;
                     focusedIndex = --focusedIndex < 0 ? lastIndex : focusedIndex;
+                    focusedIndex = focusedIndex > lastIndex ? lastIndex : focusedIndex;
                     $interEls.eq(focusedIndex).focus();
                 } else if (e.which === 38 || e.keyCode === 38) {
                     e.preventDefault();
@@ -118,6 +130,11 @@ define(function(require) {
                 } else if (e.which === 39 || e.keyCode === 39) {
                     e.preventDefault();
                     // right arrow move to next item action
+                    $interEls = $('a:visible', $item);
+                    if (!$interEls.length) {
+                        return;
+                    }
+                    lastIndex = $interEls.length - 1;
                     focusedIndex = ++focusedIndex > lastIndex ? 0 : focusedIndex;
                     $interEls.eq(focusedIndex).focus();
                 } else if (e.which === 40 || e.keyCode === 40) {
@@ -129,11 +146,6 @@ define(function(require) {
                     }
                 }
             });
-            // when item receives focus reset item action index and scroll to top
-            $item.focus(_.bind(function() {
-                focusedIndex = -1;
-                this.$scrollLoader.evScrollLoader('scrollTo', $item.offset().top - 2);
-            }, this));
         },
         render: function() {
             this.$el.html(this.resultsTemplate({

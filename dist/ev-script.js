@@ -1,5 +1,5 @@
 /**
- * ev-script 1.4.0 2017-10-13
+ * ev-script 1.4.0 2017-10-15
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2017 Symphony Video, Inc.
@@ -24211,11 +24211,17 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
             // For keyboard accessibility, add result item to tab flow
             $item.attr('tabindex', '0');
             // ...and programmatically focus on interactive elements
-            var $interEls = $('a', $item),
-                focusedIndex = -1,
-                lastIndex = $interEls.length - 1;
-            $interEls.attr('tabindex', '-1');
+            var focusedIndex;
+            // when item receives focus reset item action index and scroll to top
+            $item.focus(_.bind(function() {
+                var $interEls = $('a', $item);
+                $interEls.attr('tabindex', '-1');
+                focusedIndex = -1;
+                this.$scrollLoader.evScrollLoader('scrollTo', $item.offset().top - 2);
+            }, this));
             $item.keydown(function(e) {
+                var $interEls,
+                    lastIndex;
                 if (e.which === 35 || e.keyCode === 35) {
                     e.preventDefault();
                     // end key should jump to bottom
@@ -24227,7 +24233,13 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
                 } else if (e.which === 37 || e.keyCode === 37) {
                     e.preventDefault();
                     // left arrow move to previous item action
+                    $interEls = $('a:visible', $item);
+                    if (!$interEls.length) {
+                        return;
+                    }
+                    lastIndex = $interEls.length - 1;
                     focusedIndex = --focusedIndex < 0 ? lastIndex : focusedIndex;
+                    focusedIndex = focusedIndex > lastIndex ? lastIndex : focusedIndex;
                     $interEls.eq(focusedIndex).focus();
                 } else if (e.which === 38 || e.keyCode === 38) {
                     e.preventDefault();
@@ -24239,6 +24251,11 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
                 } else if (e.which === 39 || e.keyCode === 39) {
                     e.preventDefault();
                     // right arrow move to next item action
+                    $interEls = $('a:visible', $item);
+                    if (!$interEls.length) {
+                        return;
+                    }
+                    lastIndex = $interEls.length - 1;
                     focusedIndex = ++focusedIndex > lastIndex ? 0 : focusedIndex;
                     $interEls.eq(focusedIndex).focus();
                 } else if (e.which === 40 || e.keyCode === 40) {
@@ -24250,11 +24267,6 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
                     }
                 }
             });
-            // when item receives focus reset item action index and scroll to top
-            $item.focus(_.bind(function() {
-                focusedIndex = -1;
-                this.$scrollLoader.evScrollLoader('scrollTo', $item.offset().top - 2);
-            }, this));
         },
         render: function() {
             this.$el.html(this.resultsTemplate({
@@ -25274,18 +25286,18 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
             ResultsView.prototype.initialize.call(this, options);
         },
         decorate: function($item) {
-            ResultsView.prototype.decorate.call(this, $item);
-
             // Handle truncation (more/less) of truncatable fields
             if ($(window).width() < 1100) {
                 $('.trunc .value', $item).each(_.bind(function(index, element) {
                     var $element = $(element);
                     $element.expander({
                         'expandText': this.i18n.formatMessage('More'),
-                        'userCollapseText': this.i18n.formatMessage('Less'),
+                        'userCollapseText': this.i18n.formatMessage('Less')
                     });
                 }, this));
             }
+            // Call our base impl
+            ResultsView.prototype.decorate.call(this, $item);
         },
         refreshHandler: function(e) {
             e.preventDefault();
