@@ -1,5 +1,5 @@
 /**
- * ev-script 1.4.0 2017-10-15
+ * ev-script 1.4.0 2017-10-16
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2017 Symphony Video, Inc.
@@ -24221,8 +24221,32 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
             }, this));
             $item.keydown(function(e) {
                 var $interEls,
-                    lastIndex;
-                if (e.which === 35 || e.keyCode === 35) {
+                    lastIndex,
+                    index;
+                if (e.which === 33 || e.keyCode === 33) {
+                    e.preventDefault();
+                    // page up
+                    var $prevAll = $item.prevAll();
+                    if (!$prevAll.length) {
+                        return;
+                    }
+                    // Note: items are searched up in order
+                    index = 10;
+                    lastIndex = $prevAll.length - 1;
+                    index = index > lastIndex ? lastIndex : index;
+                    $prevAll.eq(index).focus();
+                } else if (e.which === 34 || e.keyCode === 34) {
+                    e.preventDefault();
+                    // page down
+                    var $nextAll = $item.nextAll();
+                    if (!$nextAll.length) {
+                        return;
+                    }
+                    index = 10;
+                    lastIndex = $nextAll.length - 1;
+                    index = index > lastIndex ? lastIndex : index;
+                    $nextAll.eq(index).focus();
+                } else if (e.which === 35 || e.keyCode === 35) {
                     e.preventDefault();
                     // end key should jump to bottom
                     $item.siblings().last().focus();
