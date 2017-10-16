@@ -100,12 +100,14 @@ define(function(require) {
             }, this));
             $item.keydown(function(e) {
                 var $interEls,
+                    $prevAll,
+                    $nextAll,
                     lastIndex,
                     index;
                 if (e.which === 33 || e.keyCode === 33) {
                     e.preventDefault();
                     // page up
-                    var $prevAll = $item.prevAll();
+                    $prevAll = $item.prevAll();
                     if (!$prevAll.length) {
                         return;
                     }
@@ -117,7 +119,7 @@ define(function(require) {
                 } else if (e.which === 34 || e.keyCode === 34) {
                     e.preventDefault();
                     // page down
-                    var $nextAll = $item.nextAll();
+                    $nextAll = $item.nextAll();
                     if (!$nextAll.length) {
                         return;
                     }
@@ -128,11 +130,21 @@ define(function(require) {
                 } else if (e.which === 35 || e.keyCode === 35) {
                     e.preventDefault();
                     // end key should jump to bottom
-                    $item.siblings().last().focus();
+                    $nextAll = $item.nextAll();
+                    if (!$nextAll.length) {
+                        return;
+                    }
+                    $nextAll.last().focus();
                 } else if (e.which === 36 || e.keyCode === 36) {
                     e.preventDefault();
                     // home key should jump to top
-                    $item.siblings().first().focus();
+                    // Note: as w/ page up above, the last previous item is the
+                    // first in our list of results
+                    $prevAll = $item.prevAll();
+                    if (!$prevAll.length) {
+                        return;
+                    }
+                    $prevAll.last().focus();
                 } else if (e.which === 37 || e.keyCode === 37) {
                     e.preventDefault();
                     // left arrow move to previous item action
