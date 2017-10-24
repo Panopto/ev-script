@@ -46,7 +46,10 @@ define(function(require) {
         decorateUploader: function() {
             var extensions = '',
                 selected = this.workflowSelect.getSelected(),
-                maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10);
+                maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10),
+                policyMessage = this.info.checkVersion('>=4.8.0') ? _.unescape(selected.get('PolicyMessage')) : '';
+
+            this.$('.policy-message').html(policyMessage);
 
             if (this.workflows.settings.SupportedVideo) {
                 extensions += this.workflows.settings.SupportedVideo.replace(/\*\./g, '').replace(/;/g, ',').replace(/\s/g, '');

@@ -1,5 +1,5 @@
 /**
- * ev-script 1.4.0 2017-10-16
+ * ev-script 1.4.0 2017-10-24
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2017 Symphony Video, Inc.
@@ -25494,7 +25494,7 @@ define('ev-script/views/workflow-select',['require','underscore','ev-script/view
 });
 
 
-define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <fieldset>\n        <legend style="display: none;"><%= i18n.formatMessage(\'Upload Media to Ensemble\') %></legend>\n        <select class="form-select" name="MediaWorkflowID" id="MediaWorkflowID"></select>\n        <label for="MediaWorkflowID" style="display: none;"><%= i18n.formatMessage(\'Media Workflow\') %></label>\n        <div class="fieldWrap">\n            <label for="Title"><%= i18n.formatMessage(\'Title\') %> *</label>\n            <input class="form-text" type="text" name="Title" id="Title" />\n        </div>\n        <div class="fieldWrap">\n            <label for="Description"><%= i18n.formatMessage(\'Description\') %></label>\n            <textarea class="form-text" name="Description" id="Description" />\n        </div>\n        <div class="upload"></div>\n    </fieldset>\n</form>\n';});
+define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <fieldset>\n        <legend style="display: none;"><%= i18n.formatMessage(\'Upload Media to Ensemble\') %></legend>\n        <select class="form-select" name="MediaWorkflowID" id="MediaWorkflowID"></select>\n        <label for="MediaWorkflowID" style="display: none;"><%= i18n.formatMessage(\'Media Workflow\') %></label>\n        <div class="policy-message"></div>\n        <div class="fieldWrap">\n            <label for="Title"><%= i18n.formatMessage(\'Title\') %> *</label>\n            <input class="form-text" type="text" name="Title" id="Title" />\n        </div>\n        <div class="fieldWrap">\n            <label for="Description"><%= i18n.formatMessage(\'Description\') %></label>\n            <textarea class="form-text" name="Description" id="Description" />\n        </div>\n        <div class="upload"></div>\n    </fieldset>\n</form>\n';});
 
 define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-script/views/base','backbone','ev-script/views/workflow-select','ev-script/models/video-settings','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
 
@@ -25544,7 +25544,10 @@ define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-
         decorateUploader: function() {
             var extensions = '',
                 selected = this.workflowSelect.getSelected(),
-                maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10);
+                maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10),
+                policyMessage = this.info.checkVersion('>=4.8.0') ? _.unescape(selected.get('PolicyMessage')) : '';
+
+            this.$('.policy-message').html(policyMessage);
 
             if (this.workflows.settings.SupportedVideo) {
                 extensions += this.workflows.settings.SupportedVideo.replace(/\*\./g, '').replace(/;/g, ',').replace(/\s/g, '');

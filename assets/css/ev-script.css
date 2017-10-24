@@ -702,6 +702,9 @@ div.ev-dialog form.upload-form div.info {
   color: #606060;
   font-size: 0.9em;
 }
+div.ev-dialog form.upload-form .policy-message {
+  color: #e55e20;
+}
 div.ev-dialog .ev-preview {
   text-align: center;
 }
