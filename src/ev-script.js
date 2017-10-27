@@ -18,6 +18,7 @@ define(function(require) {
         AppInfo = require('ev-script/models/app-info'),
         BasicAuth = require('ev-script/auth/basic/auth'),
         FormsAuth = require('ev-script/auth/forms/auth'),
+        EnsembleAuth = require('ev-script/auth/ensemble/auth'),
         NoneAuth = require('ev-script/auth/none/auth'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
@@ -81,7 +82,9 @@ define(function(require) {
                 return this.getDateFormatCallback() + ' ' + this.getTimeFormatCallback();
             },
             // Path to i18n folder
-            i18nPath: 'i18n'
+            i18nPath: 'i18n',
+            // Path to ensemble login page when using 'ensemble' authType
+            ensembleAuthPath: '/app/lti/login.aspx'
         };
 
         // Add our configuration to the app cache...this is specific to this
@@ -132,6 +135,9 @@ define(function(require) {
                             break;
                         case 'none':
                             auth = new NoneAuth(appId);
+                            break;
+                        case 'ensemble':
+                            auth = new EnsembleAuth(appId);
                             break;
                         default:
                             auth = new BasicAuth(appId);
