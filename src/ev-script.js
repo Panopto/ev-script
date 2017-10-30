@@ -63,9 +63,9 @@ define(function(require) {
             hidePickers: true,
             // The difference between window dimensions and maximum dialog size.
             dialogMargin: 40,
-            // This can be 'forms', 'basic' (default) or 'none' (in which case
-            // an access denied message is displayed and user is not prompted
-            // to authenticate).
+            // This can be 'forms', 'basic' (default), 'none' (in which case an
+            // access denied message is displayed and user is not prompted to
+            // authenticate), or 'ensemble' (loads a login widget in an iframe).
             authType: 'basic',
             // Set this in order to select the default identity provider in the
             // forms auth identity provider dropdown.
@@ -83,8 +83,12 @@ define(function(require) {
             },
             // Path to i18n folder
             i18nPath: 'i18n',
-            // Path to ensemble login page when using 'ensemble' authType
-            ensembleAuthPath: '/app/lti/login.aspx'
+            // Options used for 'ensemble' authType
+            ensembleAuthOptions: {
+                // Path to ensemble login page when using 'ensemble' authType
+                authPath: '/app/lti/login.aspx',
+                authCompleteMessage: 'ev_auth_complete'
+            }
         };
 
         // Add our configuration to the app cache...this is specific to this

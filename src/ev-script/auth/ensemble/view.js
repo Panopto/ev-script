@@ -17,13 +17,15 @@ define(function(require, template) {
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
+            this.globalEvents = eventsUtil.getEvents('global');
             this.i18n = cacheUtil.getAppI18n(this.appId);
+            this.submitCallback = options.submitCallback || function() {};
         },
         render: function() {
             var dialogWidth = Math.min(540, $(window).width() - this.config.dialogMargin),
                 dialogHeight = Math.min(250, $(window).height() - this.config.dialogMargin),
                 frameSrc = URI(this.config.ensembleUrl)
-                    .path(this.config.ensembleAuthPath)
+                    .path(this.config.ensembleAuthOptions.authPath)
                     .addQuery('idp', this.config.defaultProvider),
                 $html = $(this.template({
                     i18n: this.i18n,
@@ -31,10 +33,6 @@ define(function(require, template) {
                     frameWidth: dialogWidth - 50,
                     frameHeight: dialogHeight - 60
                 }));
-                $(window).on('message', function(e) {
-                    window.alert('message recieved');
-                    console.log(e);
-                });
             this.$dialog = $('<div class="ev-auth"></div>');
             this.$el.after(this.$dialog);
             this.$dialog.dialog({
@@ -54,6 +52,13 @@ define(function(require, template) {
                     this.appEvents.trigger('hidePickers');
                 }, this)
             });
+            $(window).on('message', _.bind(function(e) {
+                if (e.originalEvent.data === this.config.ensembleAuthOptions.authCompleteMessage) {
+                    this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
+                    this.$dialog.dialog('destroy').remove();
+                    this.submitCallback();
+                }
+            }, this));
         }
     });
 
