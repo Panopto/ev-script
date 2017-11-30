@@ -16,33 +16,7 @@ define(function(require) {
                 BasicAuth.__super__.constructor.call(this, appId);
             },
             fetchUser: function() {
-                // Hack to handle legacy (pre-3.6) API which doesn't have a
-                // currentUser endpoint.  See if we can successfully query orgs
-                // instead (probably least expensive due to minimal data) to see
-                // if valid credentials are set, then use a randomly generated
-                // user id
-                if (this.info.get('ApplicationVersion')) {
-                    return BasicAuth.__super__.fetchUser.call(this);
-                } else {
-                    var orgs = new Organizations({}, {
-                        appId: this.appId
-                    });
-                    // Don't want special treatment of failure due to
-                    // authentication in this case
-                    orgs.requiresAuth = false;
-                    return orgs.fetch({
-                        success: _.bind(function(collection, response, options) {
-                            this.user = new Backbone.Model({
-                                id: Math.floor(Math.random() * 10000000000000001).toString(16)
-                            });
-                            this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
-                        }, this),
-                        error: _.bind(function(collection, xhr, options) {
-                            this.user = null;
-                            this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                        }, this)
-                    }).promise();
-                }
+                return BasicAuth.__super__.fetchUser.call(this);
             },
             login: function(loginInfo) {
                 var cookieOptions = { path: this.config.authPath };

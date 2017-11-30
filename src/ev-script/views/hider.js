@@ -25,7 +25,7 @@ define(function(require) {
         },
         render: function() {
             var username = '';
-            if (this.info.get('ApplicationVersion') && this.auth.isAuthenticated()) {
+            if (this.auth.isAuthenticated()) {
                 username = this.auth.getUser().get('UserName');
             }
             this.$el.html(this.template({

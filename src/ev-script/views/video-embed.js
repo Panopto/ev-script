@@ -3,11 +3,11 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
+        URI = require('urijs/URI'),
         EmbedView = require('ev-script/views/embed');
 
     return EmbedView.extend({
         template: _.template(require('text!ev-script/templates/video-embed.html')),
-        legacyTemplate: _.template(require('text!ev-script/templates/video-embed-legacy.html')),
         initialize: function(options) {
             EmbedView.prototype.initialize.call(this, options);
         },
@@ -15,42 +15,45 @@ define(function(require) {
             // Width and height really should be set by now...but use a reasonable default if not
             var width = this.getMediaWidth(),
                 height = this.getMediaHeight(),
-                showTitle = this.model.get('showtitle'),
-                embed = '';
-            if (!this.info.useLegacyEmbeds()) {
                 embed = this.template({
-                    ensembleUrl: this.config.ensembleUrl,
-                    id: this.model.get('id'),
-                    autoPlay: this.model.get('autoplay'),
-                    displayTitle: showTitle,
-                    displaySharing: this.model.get('socialsharing'),
-                    displayAnnotations: this.model.get('annotations'),
-                    displayCaptionSearch: this.model.get('captionsearch'),
-                    displayAttachments: this.model.get('attachments'),
-                    audioPreviewImage: this.model.get('audiopreviewimage'),
-                    displayLinks: this.model.get('links'),
-                    displayMetaData: this.model.get('metadata'),
-                    displayDateProduced: this.model.get('dateproduced'),
-                    displayEmbedCode: this.model.get('embedcode'),
-                    displayDownloadIcon: this.model.get('download'),
-                    showCaptions: this.model.get('showcaptions'),
+                    src: this.getSrcUrl(width, height),
                     width: width,
                     height: height,
                     frameHeight: this.getFrameHeight()
                 });
-            } else {
-                embed = this.legacyTemplate({
-                    ensembleUrl: this.config.ensembleUrl,
-                    id: this.model.get('id'),
-                    autoPlay: this.model.get('autoplay'),
-                    displayTitle: showTitle,
-                    hideControls: this.model.get('hidecontrols'),
-                    showCaptions: this.model.get('showcaptions'),
-                    width: width,
-                    height: (showTitle ? height + 25 : height)
-                });
-            }
             this.$el.html(embed);
+        },
+        getSrcUrl: function(width, height) {
+            var atLeast480 = this.info.checkVersion('>=4.8.0'),
+                id = this.model.get('id'),
+                url = URI(this.config.ensembleUrl);
+            if (atLeast480) {
+                url.path('/hapi/v1/contents/' + id + '/plugin');
+                url.addQuery('displayViewersReport', this.model.get('viewersreport'));
+            } else {
+                url.path('/app/plugin/embed.aspx');
+                url.addQuery('ID', id);
+            }
+            url.addQuery({
+                'autoPlay': this.model.get('autoplay'),
+                'displayTitle': this.model.get('showtitle'),
+                'displaySharing': this.model.get('socialsharing'),
+                'displayAnnotations': this.model.get('annotations'),
+                'displayCaptionSearch': this.model.get('captionsearch'),
+                'displayAttachments': this.model.get('attachments'),
+                'audioPreviewImage': this.model.get('audiopreviewimage'),
+                'displayLinks': this.model.get('links'),
+                'displayMetaData': this.model.get('metadata'),
+                'displayDateProduced': this.model.get('dateproduced'),
+                'displayEmbedCode': this.model.get('embedcode'),
+                'displayDownloadIcon': this.model.get('download'),
+                'showCaptions': this.model.get('showcaptions'),
+                'hideControls': true,
+                'width': width,
+                'height': height,
+                'isNewPluginEmbed': true
+            });
+            return url;
         },
         getMediaWidth: function() {
             return parseInt(this.model.get('width'), 10) || 640;

@@ -126,10 +126,8 @@ define(function(require) {
             // Load application info from EV
             info.fetch({})
             .always(_.bind(function() {
-                // This is kinda lazy...but this will only be set in 3.6+ versions
-                // so we don't actually need to check the version number
-                if (!info.get('ApplicationVersion') && config.authType === 'forms') {
-                    loading.reject('Configured to use forms authentication against a pre-3.6 API.');
+                if (!info.get('ApplicationVersion')) {
+                    loading.reject('Failed to retrieve application info.');
                 } else {
                     // This will initialize and cache an auth object for our app
                     var auth;

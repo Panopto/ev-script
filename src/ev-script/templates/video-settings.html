@@ -62,6 +62,12 @@
                     <label for="audiopreviewimage"><%= i18n.formatMessage('Audio Preview Image') %></label>
                 </div>
             <% } %>
+            <% if (appInfo.checkVersion('>=4.8.0')) { %>
+                <div class="fieldWrap inline-option">
+                    <input id="viewersreport" class="form-checkbox" <% if (model.get('viewersreport')) { print('checked="checked"'); } %>  name="viewersreport" type="checkbox"/>
+                    <label for="viewersreport"><%= i18n.formatMessage('Viewers Report') %></label>
+                </div>
+            <% } %>
          </div>
         <div class="form-actions">
             <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage('Save') %></span></button>

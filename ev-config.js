@@ -20,7 +20,7 @@
         // testUser: 'hasp',
         // testPass: 'hasp'
         testUser: 'admin',
-        testPass: 'admin',
+        testPass: '4rfv%TGB',
         authType: 'forms'
     };
 

@@ -20,7 +20,7 @@ define(function(require) {
                 // Desired difference between media width and containing dialog width
                 widthOffset = 50,
                 // Desired difference between media height and containing dialog height
-                heightOffset = this.info.useLegacyEmbeds() ? 140 : 70,
+                heightOffset = 70,
                 // Actual dialog width taking into account available room
                 dialogWidth = Math.min(parseInt(embedView.getFrameWidth(), 10) + widthOffset, $(window).width() - this.config.dialogMargin),
                 // Actual dialog height taking into account available room

@@ -216,8 +216,7 @@ define(function(require) {
                 label: label,
                 type: type,
                 name: name,
-                thumbnailUrl: thumbnailUrl,
-                showPlaylistOptions: !this.info.useLegacyEmbeds()
+                thumbnailUrl: thumbnailUrl
             }));
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {

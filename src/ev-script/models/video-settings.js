@@ -21,6 +21,7 @@ define(['backbone'], function(Backbone) {
             dateproduced: true,
             embedcode: false,
             download: false,
+            viewersreport: true,
             search: '',
             sourceId: 'content',
             isaudio: false

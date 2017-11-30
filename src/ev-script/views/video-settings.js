@@ -11,7 +11,6 @@ define(function(require) {
 
     return SettingsView.extend({
         template: _.template(require('text!ev-script/templates/video-settings.html')),
-        legacyTemplate: _.template(require('text!ev-script/templates/video-settings-legacy.html')),
         sizesTemplate: _.template(require('text!ev-script/templates/sizes.html')),
         initialize: function(options) {
             SettingsView.prototype.initialize.call(this, options);
@@ -22,13 +21,10 @@ define(function(require) {
         },
         updateModel: function() {
             var attrs = {
-                'showtitle': this.$('#showtitle').is(':checked'),
-                'autoplay': this.$('#autoplay').is(':checked'),
-                'showcaptions': this.$('#showcaptions').is(':checked'),
-                'hidecontrols': this.$('#hidecontrols').is(':checked')
-            };
-            if (!this.info.useLegacyEmbeds()) {
-                attrs = _.extend(attrs, {
+                    'showtitle': this.$('#showtitle').is(':checked'),
+                    'autoplay': this.$('#autoplay').is(':checked'),
+                    'showcaptions': this.$('#showcaptions').is(':checked'),
+                    'hidecontrols': this.$('#hidecontrols').is(':checked'),
                     'socialsharing': this.$('#socialsharing').is(':checked'),
                     'annotations': this.$('#annotations').is(':checked'),
                     'captionsearch': this.$('#captionsearch').is(':checked'),
@@ -38,10 +34,11 @@ define(function(require) {
                     'metadata': this.$('#metadata').is(':checked'),
                     'dateproduced': this.$('#dateproduced').is(':checked'),
                     'embedcode': this.$('#embedcode').is(':checked'),
-                    'download': this.$('#download').is(':checked')
-                });
-            }
-            var sizeVal = this.$('#size').val();
+                    'download': this.$('#download').is(':checked'),
+                    'viewersreport': this.$('#viewersreport').is(':checked')
+                },
+                sizeVal = this.$('#size').val();
+
             if (!sizeVal || sizeVal === 'original') {
                 // isNew signifies that the encoding hasn't been fetched yet
                 if (this.encoding && !this.encoding.isNew()) {
@@ -57,6 +54,7 @@ define(function(require) {
                     height: parseInt(dims[1], 10)
                 });
             }
+
             this.field.model.set(attrs);
         },
         renderSize: function() {
@@ -79,21 +77,12 @@ define(function(require) {
             }));
         },
         render: function() {
-            var html = '';
-            if (!this.info.useLegacyEmbeds()) {
-                html = this.template({
-                    i18n: this.i18n,
-                    model: this.field.model,
-                    isAudio: this.encoding && this.encoding.isAudio()
-                });
-            } else {
-                html = this.legacyTemplate({
-                    i18n: this.i18n,
-                    model: this.field.model,
-                    isAudio: this.encoding && this.encoding.isAudio()
-                });
-            }
-            this.$el.html(html);
+            this.$el.html(this.template({
+                appInfo: this.info,
+                i18n: this.i18n,
+                model: this.field.model,
+                isAudio: this.encoding && this.encoding.isAudio()
+            }));
             if (this.encoding) {
                 this.renderSize();
             }
@@ -106,7 +95,7 @@ define(function(require) {
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
-                height: Math.min(260, $(window).height() - this.config.dialogMargin),
+                height: Math.min(300, $(window).height() - this.config.dialogMargin),
                 closeText: this.i18n.formatMessage('Close')
             });
         }

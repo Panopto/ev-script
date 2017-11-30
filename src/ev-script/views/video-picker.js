@@ -25,14 +25,12 @@ define(function(require) {
                 this.loadVideos();
             }, this);
             this.$filterBlock = this.$('div.ev-filter-block');
-            if (this.info.get('ApplicationVersion')) {
-                this.$actions = $('<div class="ev-actions"></div>');
-                this.$upload = $('<button type="button" class="action-upload" title="' + this.i18n.formatMessage('Click to upload new media') + '"><i class="fa fa-upload fa-fw"></i><span>' + this.i18n.formatMessage('Upload') + '<span></button>').css('display', 'none');
-                this.$actions.append(this.$upload);
-                this.$record = $('<button type="button" class="action-record" title="' + this.i18n.formatMessage('Click to record screen') + '"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>' + this.i18n.formatMessage('Record') + '<span></button>').css('display', 'none');
-                this.$actions.append(this.$record);
-                this.$filterBlock.prepend(this.$actions);
-            }
+            this.$actions = $('<div class="ev-actions"></div>');
+            this.$upload = $('<button type="button" class="action-upload" title="' + this.i18n.formatMessage('Click to upload new media') + '"><i class="fa fa-upload fa-fw"></i><span>' + this.i18n.formatMessage('Upload') + '<span></button>').css('display', 'none');
+            this.$actions.append(this.$upload);
+            this.$record = $('<button type="button" class="action-record" title="' + this.i18n.formatMessage('Click to record screen') + '"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>' + this.i18n.formatMessage('Record') + '<span></button>').css('display', 'none');
+            this.$actions.append(this.$record);
+            this.$filterBlock.prepend(this.$actions);
             this.searchView = new SearchView({
                 id: this.id + '-search',
                 tagName: 'div',
@@ -53,16 +51,14 @@ define(function(require) {
             });
             this.$filterBlock.prepend(this.typeSelectView.$el);
             this.typeSelectView.render();
-            if (this.info.get('ApplicationVersion')) {
-                this.unitSelects = new UnitSelectsView({
-                    id: this.id + '-unit-selects',
-                    tagName: 'div',
-                    className: 'ev-unit-selects',
-                    picker: this,
-                    appId: this.appId
-                });
-                this.$filterBlock.prepend(this.unitSelects.$el);
-            }
+            this.unitSelects = new UnitSelectsView({
+                id: this.id + '-unit-selects',
+                tagName: 'div',
+                className: 'ev-unit-selects',
+                picker: this,
+                appId: this.appId
+            });
+            this.$filterBlock.prepend(this.unitSelects.$el);
             this.resultsView = new VideoResultsView({
                 el: this.$('div.ev-results'),
                 picker: this,
@@ -171,13 +167,8 @@ define(function(require) {
         },
         showPicker: function() {
             PickerView.prototype.showPicker.call(this);
-            if (this.info.get('ApplicationVersion')) {
-                this.unitSelects.loadOrgs();
-                this.unitSelects.$('select').filter(':visible').first().focus();
-            } else {
-                this.searchView.$('input[type="text"]').focus();
-                this.loadVideos();
-            }
+            this.unitSelects.loadOrgs();
+            this.unitSelects.$('select').filter(':visible').first().focus();
         },
         loadVideos: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),

@@ -1,5 +1,5 @@
 /**
- * ev-script 1.4.0 2017-10-30
+ * ev-script 1.4.0 2017-11-29
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2017 Symphony Video, Inc.
@@ -22037,6 +22037,7 @@ return {
         "Upload": "Upload",
         "Username": "Username",
         "Vertical": "Vertical",
+        "Viewers Report": "Viewers Report",
         "You are unauthorized to access this content.": "You are unauthorized to access this content."
     },
     "en-US": {}
@@ -22067,6 +22068,7 @@ define('ev-script/models/video-settings',['backbone'], function(Backbone) {
             dateproduced: true,
             embedcode: false,
             download: false,
+            viewersreport: true,
             search: '',
             sourceId: 'content',
             isaudio: false
@@ -22109,6 +22111,7 @@ define('ev-script/models/playlist-settings',['backbone'], function(Backbone) {
             dateproduced: true,
             audiopreviewimage: false,
             captionsearch: true,
+            viewersreport: true,
             search: ''
         }
     });
@@ -23519,7 +23522,7 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
         },
         render: function() {
             var username = '';
-            if (this.info.get('ApplicationVersion') && this.auth.isAuthenticated()) {
+            if (this.auth.isAuthenticated()) {
                 username = this.auth.getUser().get('UserName');
             }
             this.$el.html(this.template({
@@ -24375,7 +24378,7 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
                 // Desired difference between media width and containing dialog width
                 widthOffset = 50,
                 // Desired difference between media height and containing dialog height
-                heightOffset = this.info.useLegacyEmbeds() ? 140 : 70,
+                heightOffset = 70,
                 // Actual dialog width taking into account available room
                 dialogWidth = Math.min(parseInt(embedView.getFrameWidth(), 10) + widthOffset, $(window).width() - this.config.dialogMargin),
                 // Actual dialog height taking into account available room
@@ -24413,4302 +24416,6 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
             return this.unencode(content.Title || content.Name);
         }
     });
-
-});
-
-define('ev-script/views/embed',['require','underscore','ev-script/views/base'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    return BaseView.extend({
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-        },
-        // Override to render the actual embed
-        render: function() {},
-        // Return width of embed frame
-        getFrameWidth: function() {
-            return this.model.get('width');
-        },
-        // Return height of embed frame
-        getFrameHeight: function() {
-            return this.model.get('height');
-        },
-        // Override if we can scale our embed to fit desired dimensions
-        // Maximum width available
-        // Maximum height available
-        scale: function(maxWidth, maxHeight) {}
-    });
-
-});
-
-
-define('text!ev-script/templates/video-embed.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?ID=<%- id %>&autoPlay=<%- autoPlay %>&displayTitle=<%- displayTitle %>&displaySharing=<%- displaySharing %>&displayAnnotations=<%- displayAnnotations %>&displayCaptionSearch=<%- displayCaptionSearch %>&displayAttachments=<%- displayAttachments %>&audioPreviewImage=<%- audioPreviewImage %>&displayLinks=<%- displayLinks %>&displayMetaData=<%- displayMetaData %>&displayDateProduced=<%- displayDateProduced %>&displayEmbedCode=<%- displayEmbedCode %>&displayDownloadIcon=<%- displayDownloadIcon %>&hideControls=true&showCaptions=<%- showCaptions %>&width=<%- width %>&height=<%- height %>&isNewPluginEmbed=true"\n        frameborder="0"\n        width="<%- width %>"\n        height="<%- frameHeight %>"\n        allowfullscreen>\n</iframe>\n';});
-
-
-define('text!ev-script/templates/video-embed-legacy.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?ID=<%- id %>&autoPlay=<%- autoPlay %>&displayTitle=<%- displayTitle %>&hideControls=<%- hideControls %>&showCaptions=<%- showCaptions %>&width=<%- width %>&height=<%- height %>"\n        frameborder="0"\n        style="width: <%- width %>px;height:<%- (parseInt(height, 10) + 56) %>px;"\n        allowfullscreen>\n</iframe>\n';});
-
-define('ev-script/views/video-embed',['require','underscore','ev-script/views/embed','text!ev-script/templates/video-embed.html','text!ev-script/templates/video-embed-legacy.html'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        EmbedView = require('ev-script/views/embed');
-
-    return EmbedView.extend({
-        template: _.template(require('text!ev-script/templates/video-embed.html')),
-        legacyTemplate: _.template(require('text!ev-script/templates/video-embed-legacy.html')),
-        initialize: function(options) {
-            EmbedView.prototype.initialize.call(this, options);
-        },
-        render: function() {
-            // Width and height really should be set by now...but use a reasonable default if not
-            var width = this.getMediaWidth(),
-                height = this.getMediaHeight(),
-                showTitle = this.model.get('showtitle'),
-                embed = '';
-            if (!this.info.useLegacyEmbeds()) {
-                embed = this.template({
-                    ensembleUrl: this.config.ensembleUrl,
-                    id: this.model.get('id'),
-                    autoPlay: this.model.get('autoplay'),
-                    displayTitle: showTitle,
-                    displaySharing: this.model.get('socialsharing'),
-                    displayAnnotations: this.model.get('annotations'),
-                    displayCaptionSearch: this.model.get('captionsearch'),
-                    displayAttachments: this.model.get('attachments'),
-                    audioPreviewImage: this.model.get('audiopreviewimage'),
-                    displayLinks: this.model.get('links'),
-                    displayMetaData: this.model.get('metadata'),
-                    displayDateProduced: this.model.get('dateproduced'),
-                    displayEmbedCode: this.model.get('embedcode'),
-                    displayDownloadIcon: this.model.get('download'),
-                    showCaptions: this.model.get('showcaptions'),
-                    width: width,
-                    height: height,
-                    frameHeight: this.getFrameHeight()
-                });
-            } else {
-                embed = this.legacyTemplate({
-                    ensembleUrl: this.config.ensembleUrl,
-                    id: this.model.get('id'),
-                    autoPlay: this.model.get('autoplay'),
-                    displayTitle: showTitle,
-                    hideControls: this.model.get('hidecontrols'),
-                    showCaptions: this.model.get('showcaptions'),
-                    width: width,
-                    height: (showTitle ? height + 25 : height)
-                });
-            }
-            this.$el.html(embed);
-        },
-        getMediaWidth: function() {
-            return parseInt(this.model.get('width'), 10) || 640;
-        },
-        getMediaHeight: function() {
-            return parseInt(this.model.get('height'), 10) || 360;
-        },
-        getFrameWidth: function() {
-            return this.getMediaWidth();
-        },
-        getFrameHeight: function() {
-            var height = this.getMediaHeight(),
-                isAudio = this.model.get('isaudio'),
-                audioPreviewImage = this.model.get('audiopreviewimage');
-            if (isAudio) {
-                if (this.isMenuVisible()) {
-                    height = audioPreviewImage ? height + 40 : 155;
-                } else {
-                    height = audioPreviewImage ? height : 40;
-                }
-            } else {
-                height += 40;
-            }
-            return height;
-        },
-        isMenuVisible: function() {
-            return this.model.get('showtitle') ||
-                   this.model.get('socialsharing') ||
-                   this.model.get('annotations') ||
-                   this.model.get('captionsearch') ||
-                   this.model.get('attachments') ||
-                   this.model.get('links') ||
-                   this.model.get('metadata') ||
-                   this.model.get('dateproduced') ||
-                   this.model.get('embedcode') ||
-                   this.model.get('download');
-        },
-        scale: function(maxWidth, maxHeight) {
-            var ratio,
-                embedWidth = this.getFrameWidth(),
-                embedHeight = this.getFrameHeight(),
-                mediaWidth = this.getMediaWidth(),
-                mediaHeight = this.getMediaHeight();
-            // We can't scale our audio
-            if (this.model.get('isaudio')) {
-                return;
-            }
-            while (embedWidth > maxWidth || embedHeight > maxHeight) {
-                ratio = embedWidth > maxWidth ? maxWidth / embedWidth : maxHeight / embedHeight;
-                this.model.set('width', Math.floor(mediaWidth * ratio));
-                this.model.set('height', Math.floor(mediaHeight * ratio));
-                embedWidth = this.getFrameWidth();
-                embedHeight = this.getFrameHeight();
-                mediaWidth = this.getMediaWidth();
-                mediaHeight = this.getMediaHeight();
-            }
-        }
-    });
-
-});
-
-define('ev-script/models/base',['require','jquery','underscore','backbone','ev-script/util/cache','ev-script/collections/base'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        cacheUtil = require('ev-script/util/cache'),
-        BaseCollection = require('ev-script/collections/base');
-
-    return Backbone.Model.extend({
-        initialize: function(attributes, options) {
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
-        },
-        getCached: function() {},
-        setCached: function() {},
-        fetch: function(options) {
-            if (options && options.success) {
-                options.success = _.wrap(options.success, _.bind(function(success) {
-                    // We've successfully queried the API for something that
-                    // requires authentication but we're in an unauthenticated
-                    // state.  Double-check our authentication and proceed.
-                    var args = Array.prototype.slice.call(arguments, 1);
-                    if (this.requiresAuth && !this.auth.isAuthenticated()) {
-                        this.auth.fetchUser()
-                        .always(function() {
-                            success.apply(this, args);
-                        });
-                    } else {
-                        success.apply(this, args);
-                    }
-                }, this));
-                // TODO - maybe wrap error to handle 401?
-            }
-            return Backbone.Model.prototype.fetch.call(this, options);
-        },
-        sync: function(method, collection, options) {
-            _.defaults(options || (options = {}), {
-                xhrFields: { withCredentials: true }
-            });
-            if (method === 'read') {
-                var cached = this.getCached(options.cacheKey);
-                if (cached) {
-                    var deferred = $.Deferred();
-                    if (options.success) {
-                        deferred.done(options.success);
-                    }
-                    return deferred.resolve(cached).promise();
-                } else {
-                    // Grab the response and cache
-                    options.success = options.success || function(collection, response, options) {};
-                    options.success = _.wrap(options.success, _.bind(function(success) {
-                        this.setCached(options.cacheKey, arguments[1]);
-                        success.apply(this, Array.prototype.slice.call(arguments, 1));
-                    }, this));
-                    return Backbone.Model.prototype.sync.call(this, method, collection, options);
-                }
-            } else {
-                return Backbone.Model.prototype.sync.call(this, method, collection, options);
-            }
-        }
-    });
-
-});
-
-define('ev-script/models/video-encoding',['require','backbone','ev-script/models/base','underscore','ev-script/util/cache'],function(require) {
-
-    'use strict';
-
-    var Backbone = require('backbone'),
-        BaseModel = require('ev-script/models/base'),
-        _ = require('underscore'),
-        cacheUtil = require('ev-script/util/cache');
-
-    return BaseModel.extend({
-        idAttribute: 'videoID',
-        initialize: function(attributes, options) {
-            BaseModel.prototype.initialize.call(this, attributes, options);
-            this.requiresAuth = false;
-        },
-        // TODO - cache responses
-        getCached: function(key) {},
-        setCached: function(key, resp) {},
-        url: function() {
-            // Note the response is actually JSONP.  We'll strip the padding
-            // below with our dataFilter.
-            var url = this.config.ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        },
-        getDims: function() {
-            var dimsRaw = this.get('dimensions') || '640x360',
-                dimsStrs = dimsRaw.split('x'),
-                dims = [],
-                originalWidth = parseInt(dimsStrs[0], 10) || 640,
-                originalHeight = parseInt(dimsStrs[1], 10) || 360;
-            if (this.isAudio()) {
-                dims[0] = 400;
-                dims[1] = 26;
-            } else if (this.config.defaultVideoWidth) {
-                dims[0] = parseInt(this.config.defaultVideoWidth, 10) || 640;
-                dims[1] = Math.ceil(dims[0] / (originalWidth / originalHeight));
-            } else {
-                dims[0] = originalWidth;
-                dims[1] = originalHeight;
-            }
-            return dims;
-        },
-        getRatio: function() {
-            var dims = this.getDims();
-            return dims[0] / dims[1];
-        },
-        getWidth: function() {
-            return this.getDims()[0];
-        },
-        getHeight: function() {
-            return this.getDims()[1];
-        },
-        isAudio: function() {
-            return (/^audio/i).test(this.get('contentType') || '');
-        },
-        parse: function(response) {
-            if (_.isArray(response.dataSet.encodings)) {
-                // This is a collection, so return the highest bitrate encoding
-                return _.max(response.dataSet.encodings, function(encoding, index, encodings) {
-                    return parseInt(encoding.bitRate, 10);
-                });
-            } else {
-                return response.dataSet.encodings;
-            }
-        },
-        sync: function(method, model, options) {
-            _.extend(options, {
-                dataFilter: function(data) {
-                    // Strip padding from JSONP response
-                    var match = data.match(/\{[\s\S]*\}/);
-                    return match ? match[0] : data;
-                }
-            });
-            return Backbone.sync.call(this, method, model, options);
-        },
-        updateSettingsModel: function(settingsModel) {
-            var attrs = {
-                width: this.getWidth(),
-                height: this.getHeight(),
-                isaudio: this.isAudio()
-            };
-            // TODO - this needs to be handled better
-            // If the settings model hasn't been updated yet with default audio settings
-            // if (this.isAudio() && !settingsModel.get('isaudio')) {
-            //     _.extend(attrs, {
-            //         showtitle: false,
-            //         annotations: false,
-            //         captionsearch: false,
-            //         attachments: false,
-            //         links: false,
-            //         metadata: false,
-            //         dateproduced: false,
-            //         isaudio: true
-            //     });
-            // }
-            settingsModel.set(attrs);
-        }
-    });
-
-});
-
-define('ev-script/views/video-preview',['require','underscore','ev-script/views/preview','ev-script/views/video-embed','ev-script/models/video-encoding'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        PreviewView = require('ev-script/views/preview'),
-        VideoEmbedView = require('ev-script/views/video-embed'),
-        VideoEncoding = require('ev-script/models/video-encoding');
-
-    return PreviewView.extend({
-        embedClass: VideoEmbedView,
-        initialize: function(options) {
-            // Although our super sets this...we don't call our super init until
-            // later so we should set appId here
-            this.appId = options.appId;
-            this.encoding = options.encoding || new VideoEncoding({
-                fetchId: this.model.id
-            }, {
-                appId: this.appId
-            });
-            this.picker = options.picker;
-            var success = _.bind(function() {
-                this.encoding.updateSettingsModel(this.model);
-                // Picker model is a copy so need to update that as well
-                this.encoding.updateSettingsModel(this.picker.model);
-                PreviewView.prototype.initialize.call(this, options);
-            }, this);
-            if (this.encoding.isNew()) {
-                this.encoding.fetch({
-                    success: success,
-                    // The loader indicator will show if it detects an AJAX
-                    // request on our picker
-                    picker: this.picker
-                });
-            } else {
-                success();
-            }
-        }
-    });
-
-});
-
-/* jshint -W003 */
-/*!
- * jQuery Expander Plugin - v1.7.0 - 2016-03-12
- * http://plugins.learningjquery.com/expander/
- * Copyright (c) 2016 Karl Swedberg
- * Licensed MIT (http://www.opensource.org/licenses/mit-license.php)
- */
-
-(function(factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('jquery-expander',['jquery'], factory);
-  } else if (typeof module === 'object' && typeof module.exports === 'object') {
-    module.exports = factory;
-  } else {
-    factory(jQuery);
-  }
-})(function($) {
-  $.expander = {
-    version: '1.7.0',
-    defaults: {
-      // the number of characters at which the contents will be sliced into two parts.
-      slicePoint: 100,
-
-      // a string of characters at which to slice the contents into two parts,
-      // but only if the string appears before slicePoint
-      // Useful for slicing at the first line break, e.g. {sliceOn: '<br'}
-      sliceOn: null,
-
-      // whether to keep the last word of the summary whole (true) or let it slice in the middle of a word (false)
-      preserveWords: true,
-
-      // whether to normalize the whitespace in the data to display (true) or not (false)
-      normalizeWhitespace: true,
-
-      // whether to count and display the number of words inside the collapsed text
-      showWordCount: false,
-
-      // text to include between summary and detail. Default ' ' prevents appearance of
-      // collapsing two words into one.
-      // Was hard-coded in script; now exposed as an option to fix issue #106.
-      detailPrefix: ' ',
-
-      // What to display around the counted number of words, set to '{{count}}' to show only the number
-      wordCountText: ' ({{count}} words)',
-
-      // a threshold of sorts for whether to initially hide/collapse part of the element's contents.
-      // If after slicing the contents in two there are fewer words in the second part than
-      // the value set by widow, we won't bother hiding/collapsing anything.
-      widow: 4,
-
-      // text displayed in a link instead of the hidden part of the element.
-      // clicking this will expand/show the hidden/collapsed text
-      expandText: 'read more',
-      expandPrefix: '&hellip; ',
-
-      expandAfterSummary: false,
-
-      // Possible word endings to test against for when preserveWords: true
-      wordEnd: /(&(?:[^;]+;)?|[0-9a-zA-Z\u00C0-\u0100]+|[^\u0000-\u007F]+)$/,
-
-      // class names for summary element and detail element
-      summaryClass: 'summary',
-      detailClass: 'details',
-
-      // class names for <span> around "read-more" link and "read-less" link
-      moreClass: 'read-more',
-      lessClass: 'read-less',
-
-      // class names for <a> around "read-more" link and "read-less" link
-      moreLinkClass: 'more-link',
-      lessLinkClass: 'less-link',
-
-      // number of milliseconds after text has been expanded at which to collapse the text again.
-      // when 0, no auto-collapsing
-      collapseTimer: 0,
-
-      // effects for expanding and collapsing
-      expandEffect: 'slideDown',
-      expandSpeed: 250,
-      collapseEffect: 'slideUp',
-      collapseSpeed: 200,
-
-      // allow the user to re-collapse the expanded text.
-      userCollapse: true,
-
-      // text to use for the link to re-collapse the text
-      userCollapseText: 'read less',
-      userCollapsePrefix: ' ',
-
-      // all callback functions have the this keyword mapped to the element in the jQuery set when .expander() is called
-      onSlice: null, // function() {}
-      beforeExpand: null, // function() {},
-      afterExpand: null, // function() {},
-      onCollapse: null, // function(byUser) {}
-      afterCollapse: null // function() {}
-    }
-  };
-
-  $.fn.expander = function(options) {
-    var meth = 'init';
-
-    if (typeof options === 'string') {
-      meth = options;
-      options = {};
-    }
-
-    var opts = $.extend({}, $.expander.defaults, options);
-    var rSelfClose = /^<(?:area|br|col|embed|hr|img|input|link|meta|param).*>$/i;
-    var rAmpWordEnd = opts.wordEnd;
-    var rOpenCloseTag = /<\/?(\w+)[^>]*>/g;
-    var rOpenTag = /<(\w+)[^>]*>/g;
-    var rCloseTag = /<\/(\w+)>/g;
-    var rLastCloseTag = /(<\/([^>]+)>)\s*$/;
-    var rTagPlus = /^(<[^>]+>)+.?/;
-    var rMultiSpace = /\s\s+/g;
-    var delayedCollapse;
-
-    var removeSpaces = function(str) {
-      return opts.normalizeWhitespace ? $.trim(str || '').replace(rMultiSpace, ' ') : str;
-    };
-
-    var methods = {
-      init: function() {
-        this.each(function() {
-          var i, l, tmp, newChar, summTagless, summOpens, summCloses,
-              lastCloseTag, detailText, detailTagless, html, expand;
-          var $thisDetails, $readMore;
-          var slicePointChanged;
-          var openTagsForDetails = [];
-          var closeTagsForsummaryText = [];
-          var strayChars = '';
-          var defined = {};
-          var thisEl = this;
-          var $this = $(this);
-          var $summEl = $([]);
-          var o = $.extend({}, opts, $this.data('expander') || $.meta && $this.data() || {});
-          var hasDetails = !!$this.find('.' + o.detailClass).length;
-          var hasBlocks = !!$this.find('*').filter(function() {
-            var display = $(this).css('display');
-
-            return (/^block|table|list/).test(display);
-          }).length;
-          var el = hasBlocks ? 'div' : 'span';
-          var detailSelector = el + '.' + o.detailClass;
-          var moreClass = o.moreClass + '';
-          var lessClass = o.lessClass + '';
-          var expandSpeed = o.expandSpeed || 0;
-          var allHtml = removeSpaces($this.html());
-          var summaryText = allHtml.slice(0, o.slicePoint);
-
-          // allow multiple classes for more/less links
-          o.moreSelector = 'span.' + moreClass.split(' ').join('.');
-          o.lessSelector = 'span.' + lessClass.split(' ').join('.');
-          // bail out if we've already set up the expander on this element
-          if ($.data(this, 'expanderInit')) {
-            return;
-          }
-
-          $.data(this, 'expanderInit', true);
-          $.data(this, 'expander', o);
-          // determine which callback functions are defined
-          $.each(['onSlice','beforeExpand', 'afterExpand', 'onCollapse', 'afterCollapse'], function(index, val) {
-            defined[val] = $.isFunction(o[val]);
-          });
-
-          // back up if we're in the middle of a tag or word
-          summaryText = backup(summaryText);
-
-          // summary text sans tags length
-          summTagless = summaryText.replace(rOpenCloseTag, '').length;
-
-          // add more characters to the summary, one for each character in the tags
-          while (summTagless < o.slicePoint) {
-            newChar = allHtml.charAt(summaryText.length);
-
-            if (newChar === '<') {
-              newChar = allHtml.slice(summaryText.length).match(rTagPlus)[0];
-            }
-            summaryText += newChar;
-            summTagless++;
-          }
-
-          // SliceOn script, Closes #16, resolves #59
-          // Original SliceEarlierAt code (since modfied): Sascha Peilicke @saschpe
-          if (o.sliceOn) {
-            slicePointChanged = changeSlicePoint({
-              sliceOn: o.sliceOn,
-              slicePoint: o.slicePoint,
-              allHtml: allHtml,
-              summaryText: summaryText
-            });
-
-            summaryText = slicePointChanged.summaryText;
-          }
-
-          summaryText = backup(summaryText, o.preserveWords && allHtml.slice(summaryText.length).length);
-
-          // separate open tags from close tags and clean up the lists
-          summOpens = summaryText.match(rOpenTag) || [];
-          summCloses = summaryText.match(rCloseTag) || [];
-
-          // filter out self-closing tags
-          tmp = [];
-          $.each(summOpens, function(index, val) {
-            if (!rSelfClose.test(val)) {
-              tmp.push(val);
-            }
-          });
-          summOpens = tmp;
-
-          // strip close tags to just the tag name
-          l = summCloses.length;
-
-          for (i = 0; i < l; i++) {
-            summCloses[i] = summCloses[i].replace(rCloseTag, '$1');
-          }
-          // tags that start in summary and end in detail need:
-          // a). close tag at end of summary
-          // b). open tag at beginning of detail
-          $.each(summOpens, function(index, val) {
-            var thisTagName = val.replace(rOpenTag, '$1');
-            var closePosition = $.inArray(thisTagName, summCloses);
-
-            if (closePosition === -1) {
-              openTagsForDetails.push(val);
-              closeTagsForsummaryText.push('</' + thisTagName + '>');
-
-            } else {
-              summCloses.splice(closePosition, 1);
-            }
-          });
-
-          // reverse the order of the close tags for the summary so they line up right
-          closeTagsForsummaryText.reverse();
-
-          // create necessary summary and detail elements if they don't already exist
-          if (!hasDetails) {
-
-            // end script if there is no detail text or if detail has fewer words than widow option
-            detailText = allHtml.slice(summaryText.length);
-            detailTagless = $.trim(detailText.replace(rOpenCloseTag, ''));
-
-            if (detailTagless === '' || detailTagless.split(/\s+/).length < o.widow) {
-              return;
-            }
-            // otherwise, continue...
-            lastCloseTag = closeTagsForsummaryText.pop() || '';
-            summaryText += closeTagsForsummaryText.join('');
-            detailText = openTagsForDetails.join('') + detailText;
-          } else {
-            // assume that even if there are details, we still need readMore/readLess/summary elements
-            // (we already bailed out earlier when readMore el was found)
-            // but we need to create els differently
-
-            // remove the detail from the rest of the content
-            detailText = $this.find(detailSelector).remove().html();
-
-            // The summary is what's left
-            summaryText = $this.html();
-
-            // allHtml is the summary and detail combined (this is needed when content has block-level elements)
-            allHtml = summaryText + detailText;
-
-            lastCloseTag = '';
-          }
-          o.moreLabel = $this.find(o.moreSelector).length ? '' : buildMoreLabel(o, detailText);
-
-          if (hasBlocks) {
-            detailText = allHtml;
-            // Fixes issue #89; Tested by 'split html escapes'
-          } else if (summaryText.charAt(summaryText.length - 1) === '&') {
-            strayChars = /^[#\w\d\\]+;/.exec(detailText);
-
-            if (strayChars) {
-              detailText = detailText.slice(strayChars[0].length);
-              summaryText += strayChars[0];
-            }
-          }
-          summaryText += lastCloseTag;
-
-          // onSlice callback
-          o.summary = summaryText;
-          o.details = detailText;
-          o.lastCloseTag = lastCloseTag;
-
-          if (defined.onSlice) {
-            // user can choose to return a modified options object
-            // one last chance for user to change the options. sneaky, huh?
-            // but could be tricky so use at your own risk.
-            tmp = o.onSlice.call(thisEl, o);
-
-            // so, if the returned value from the onSlice function is an object with a details property, we'll use that!
-            o = tmp && tmp.details ? tmp : o;
-          }
-
-          // build the html with summary and detail and use it to replace old contents
-          html = buildHTML(o, hasBlocks);
-
-          $this.empty().append(html);
-
-          // set up details and summary for expanding/collapsing
-          $thisDetails = $this.find(detailSelector);
-          $readMore = $this.find(o.moreSelector);
-
-          // Hide details span using collapseEffect unless
-          // expandEffect is NOT slideDown and collapseEffect IS slideUp.
-          // The slideUp effect sets span's "default" display to
-          // inline-block. This is necessary for slideDown, but
-          // problematic for other "showing" animations.
-          // Fixes #46
-          if (o.collapseEffect === 'slideUp' && o.expandEffect !== 'slideDown' || $this.is(':hidden')) {
-            $thisDetails.css({display: 'none'});
-          } else {
-            $thisDetails[o.collapseEffect](0);
-          }
-
-          $summEl = $this.find('div.' + o.summaryClass);
-
-          expand = function(event) {
-            event.preventDefault();
-            var exSpeed = event.startExpanded ? 0 : expandSpeed;
-            $readMore.hide();
-            $summEl.hide();
-
-            if (defined.beforeExpand) {
-              o.beforeExpand.call(thisEl);
-            }
-
-            $thisDetails.stop(false, true)[o.expandEffect](exSpeed, function() {
-              $thisDetails.css({zoom: ''});
-
-              if (defined.afterExpand) {
-                o.afterExpand.call(thisEl);
-              }
-              delayCollapse(o, $thisDetails, thisEl);
-            });
-          };
-
-          $readMore.find('a').unbind('click.expander').bind('click.expander', expand);
-
-          if (o.userCollapse && !$this.find(o.lessSelector).length) {
-            $this
-            .find(detailSelector)
-            .append('<span class="' + o.lessClass + '">' + o.userCollapsePrefix + '<a href="#" class="' + o.lessLinkClass + '">' + o.userCollapseText + '</a></span>');
-          }
-
-          $this
-          .find(o.lessSelector + ' a')
-          .unbind('click.expander')
-          .bind('click.expander', function(event) {
-            event.preventDefault();
-            clearTimeout(delayedCollapse);
-            var $detailsCollapsed = $(this).closest(detailSelector);
-            reCollapse(o, $detailsCollapsed);
-
-            if (defined.onCollapse) {
-              o.onCollapse.call(thisEl, true);
-            }
-          });
-
-          if (o.startExpanded) {
-            expand({
-              preventDefault: function() {},
-              startExpanded: true
-            });
-          }
-
-        }); // this.each
-      },
-      destroy: function() {
-
-        this.each(function() {
-          var o, details;
-          var $this = $(this);
-
-          if (!$this.data('expanderInit')) {
-            return;
-          }
-
-          o = $.extend({}, $this.data('expander') || {}, opts);
-          details = $this.find('.' + o.detailClass).contents();
-
-          $this.removeData('expanderInit');
-          $this.removeData('expander');
-
-          $this.find(o.moreSelector).remove();
-          $this.find('.' + o.summaryClass).remove();
-          $this.find('.' + o.detailClass).after(details).remove();
-          $this.find(o.lessSelector).remove();
-
-        });
-      }
-    };
-
-    // run the methods (almost always "init")
-    if (methods[meth]) {
-      methods[ meth ].call(this);
-    }
-
-    // utility functions
-    function buildHTML(o, blocks) {
-      var el = 'span';
-      var summary = o.summary;
-      var closingTagParts = rLastCloseTag.exec(summary);
-      var closingTag = closingTagParts ? closingTagParts[2].toLowerCase() : '';
-
-      if (blocks) {
-        el = 'div';
-
-        // if summary ends with a close tag, tuck the moreLabel inside it
-        if (closingTagParts && closingTag !== 'a' && !o.expandAfterSummary) {
-          summary = summary.replace(rLastCloseTag, o.moreLabel + '$1');
-        } else {
-          // otherwise (e.g. if ends with self-closing tag) just add moreLabel after summary
-          // fixes #19
-          summary += o.moreLabel;
-        }
-
-        // and wrap it in a div
-        summary = '<div class="' + o.summaryClass + '">' + summary + '</div>';
-      } else {
-        summary += o.moreLabel;
-      }
-
-      return [
-        summary,
-
-        // after summary, add an optional prefix. Default single space prevents last word of summary
-        // and first word of detail from collapsing together into what looks like a single word.
-        // (could also be done with CSS, but this feels more natural)
-        // Prefix made optional to fix issue #106
-        o.detailPrefix || '',
-        '<',
-        el + ' class="' + o.detailClass + '"',
-        '>',
-        o.details,
-        '</' + el + '>'
-      ].join('');
-    }
-
-    function buildMoreLabel(o, detailText) {
-      var ret = '<span class="' + o.moreClass + '">' + o.expandPrefix;
-
-      if (o.showWordCount) {
-
-        o.wordCountText = o.wordCountText.replace(/\{\{count\}\}/, detailText.replace(rOpenCloseTag, '').replace(/\&(?:amp|nbsp);/g, '').replace(/(?:^\s+|\s+$)/, '').match(/\w+/g).length);
-
-      } else {
-        o.wordCountText = '';
-      }
-      ret += '<a href="#" class="' + o.moreLinkClass + '">' + o.expandText + o.wordCountText + '</a></span>';
-
-      return ret;
-    }
-
-    function backup(txt, preserveWords) {
-      if (txt.lastIndexOf('<') > txt.lastIndexOf('>')) {
-        txt = txt.slice(0, txt.lastIndexOf('<'));
-      }
-
-      if (preserveWords) {
-        txt = txt.replace(rAmpWordEnd, '');
-      }
-
-      return $.trim(txt);
-    }
-
-    function reCollapse(o, el) {
-      el.stop(true, true)[o.collapseEffect](o.collapseSpeed, function() {
-        var prevMore = el.prev('span.' + o.moreClass).show();
-
-        if (!prevMore.length) {
-          el.parent().children('div.' + o.summaryClass).show()
-            .find('span.' + o.moreClass).show();
-        }
-
-        if (o.afterCollapse) {
-          o.afterCollapse.call(el);
-        }
-      });
-    }
-
-    function delayCollapse(option, $collapseEl, thisEl) {
-      if (option.collapseTimer) {
-        delayedCollapse = setTimeout(function() {
-          reCollapse(option, $collapseEl);
-
-          if ($.isFunction(option.onCollapse)) {
-            option.onCollapse.call(thisEl, false);
-          }
-        }, option.collapseTimer);
-      }
-    }
-
-    function changeSlicePoint(info) {
-      // Create placeholder string text
-      var sliceOnTemp = 'ExpandMoreHere374216623';
-
-      // Replace sliceOn with placeholder unaffected by .text() cleaning
-      // (in case sliceOn contains html)
-      var summaryTextClean = info.summaryText.replace(info.sliceOn, sliceOnTemp);
-      summaryTextClean = $('<div>' + summaryTextClean + '</div>').text();
-
-      // Find true location of sliceOn placeholder
-      var sliceOnIndexClean = summaryTextClean.indexOf(sliceOnTemp);
-
-      // Store location of html version too
-      var sliceOnIndexHtml = info.summaryText.indexOf(info.sliceOn);
-
-      // Base condition off of true sliceOn location...
-      if (sliceOnIndexClean !== -1 && sliceOnIndexClean < info.slicePoint) {
-        // ...but keep html in summaryText
-        info.summaryText = info.allHtml.slice(0, sliceOnIndexHtml);
-      }
-
-      return info;
-    }
-
-    return this;
-  };
-
-  // plugin defaults
-  $.fn.expander.defaults = $.expander.defaults;
-});
-
-
-define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %> resultItem">\n    <td class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%= i18n.formatMessage(\'{0} preview thumbnail\', item.get(\'Title\')) %>"/>\n            <% if (item.get(\'IsCaptioned\')) { %>\n            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage(\'CC\') %>" alt="CC"></i>\n            <% } %>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span></a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Title\')) %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label"><%= i18n.formatMessage(\'Description\') %></td><td class="value"><%= item.get(\'Description\') %></td></tr>\n                <tr>\n                    <td class="label"><%= i18n.formatMessage(\'Date Added\') %></td>\n                    <td class="value">\n                        <%\n                            var dateAdded = new Date(item.get(\'AddedOn\')),\n                                localDate = dateAdded.setMinutes(dateAdded.getMinutes() - dateAdded.getTimezoneOffset());\n                            print(moment(localDate).format(dateTimeFormat));\n                        %>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label"><%= i18n.formatMessage(\'Keywords\') %></td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label"><%= i18n.formatMessage(\'Library\') %></td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
-
-define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-expander','text!ev-script/templates/video-result.html'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        ResultsView = require('ev-script/views/results'),
-        VideoSettings = require('ev-script/models/video-settings'),
-        VideoPreviewView = require('ev-script/views/video-preview');
-
-    require('jquery-expander');
-
-    return ResultsView.extend({
-        modelClass: VideoSettings,
-        previewClass: VideoPreviewView,
-        resultTemplate: _.template(require('text!ev-script/templates/video-result.html')),
-        initialize: function(options) {
-            ResultsView.prototype.initialize.call(this, options);
-        },
-        decorate: function($item) {
-            // Handle truncation (more/less) of truncatable fields
-            if ($(window).width() < 1100) {
-                $('.trunc .value', $item).each(_.bind(function(index, element) {
-                    var $element = $(element);
-                    $element.expander({
-                        'expandText': this.i18n.formatMessage('More'),
-                        'userCollapseText': this.i18n.formatMessage('Less')
-                    });
-                }, this));
-            }
-            // Call our base impl
-            ResultsView.prototype.decorate.call(this, $item);
-        },
-        refreshHandler: function(e) {
-            e.preventDefault();
-            this.appEvents.trigger('reloadVideos');
-        }
-    });
-
-});
-
-define('ev-script/collections/videos',['require','ev-script/collections/base','ev-script/util/cache','underscore'],function(require) {
-
-    'use strict';
-
-    var BaseCollection = require('ev-script/collections/base'),
-        cacheUtil = require('ev-script/util/cache'),
-        _ = require('underscore');
-
-    return BaseCollection.extend({
-        initialize: function(models, options) {
-            BaseCollection.prototype.initialize.call(this, models, options);
-            this.libraryId = options.libraryId || '';
-            this.filterOn = options.filterOn || '';
-            this.filterValue = options.filterValue || '';
-            if (this.info.checkVersion('>=4.1.0')) {
-                this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedLibrary' : '/api/MediaLibrary';
-            } else {
-                this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedContent' : '/api/Content';
-            }
-            this.pageIndex = 1;
-        },
-        _cache: function(key, resp) {
-            var cachedValue = null,
-                user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                var videosCache = userCache.get('videos');
-                if (!videosCache) {
-                    userCache.set('videos', videosCache = new cacheUtil.Cache());
-                }
-                cachedValue = videosCache[resp ? 'set' : 'get'](key, resp);
-            }
-            return cachedValue;
-        },
-        getCached: function(key) {
-            return this._cache(key);
-        },
-        setCached: function(key, resp) {
-            return this._cache(key, resp);
-        },
-        clearCache: function() {
-            var user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                userCache.set('videos', null);
-            }
-        },
-        url: function() {
-            var api_url = this.config.ensembleUrl + this.sourceUrl,
-                sizeParam = 'PageSize=' + this.config.pageSize,
-                indexParam = 'PageIndex=' + this.pageIndex,
-                onParam = 'FilterOn=' + encodeURIComponent(this.filterOn),
-                valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue),
-                url = api_url + '/' + this.libraryId + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        },
-        parse: function(response) {
-            var videos = response.Data;
-            _.each(videos, function(video) {
-                video.Description = _.unescape(video.Description);
-                video.Keywords = _.unescape(video.Keywords);
-            });
-            return videos;
-        }
-    });
-
-});
-
-define('ev-script/collections/media-workflows',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
-
-    'use strict';
-
-    var BaseCollection = require('ev-script/collections/base'),
-        cacheUtil = require('ev-script/util/cache');
-
-    return BaseCollection.extend({
-        initialize: function(models, options) {
-            BaseCollection.prototype.initialize.call(this, models, options);
-            this.filterValue = options.libraryId || '';
-        },
-        _cache: function(key, resp) {
-            var cachedValue = null,
-                user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                var workflowsCache = userCache.get('workflows');
-                if (!workflowsCache) {
-                    userCache.set('workflows', workflowsCache = new cacheUtil.Cache());
-                }
-                cachedValue = workflowsCache[resp ? 'set' : 'get'](key, resp);
-            }
-            return cachedValue;
-        },
-        getCached: function(key) {
-            return this._cache(key);
-        },
-        setCached: function(key, resp) {
-            return this._cache(key, resp);
-        },
-        url: function() {
-            var api_url = this.config.ensembleUrl + '/api/MediaWorkflows';
-            // Make this arbitrarily large so we can retrieve ALL workflows in a single request
-            var sizeParam = 'PageSize=9999';
-            var indexParam = 'PageIndex=1';
-            var onParam = 'FilterOn=LibraryId';
-            var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
-            var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        },
-        // Override base parse in order to grab settings
-        parse: function(response) {
-            this.settings = response.Settings;
-            return response.Data;
-        }
-    });
-
-});
-
-
-define('ev-script/views/workflow-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/options.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render');
-            this.$el.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
-            this.render();
-        },
-        render: function() {
-            var selected = this.collection.findWhere({
-                'IsDefault': true
-            }) || this.collection.at(0);
-            this.$el.html(this.template({
-                selectedId: selected.id,
-                collection: this.collection
-            }));
-        },
-        getSelected: function() {
-            return this.collection.get(this.$('option:selected').val());
-        }
-    });
-
-});
-
-
-define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <fieldset>\n        <legend style="display: none;"><%= i18n.formatMessage(\'Upload Media to Ensemble\') %></legend>\n        <select class="form-select" name="MediaWorkflowID" id="MediaWorkflowID"></select>\n        <label for="MediaWorkflowID" style="display: none;"><%= i18n.formatMessage(\'Media Workflow\') %></label>\n        <div class="policy-message"></div>\n        <div class="fieldWrap">\n            <label for="Title"><%= i18n.formatMessage(\'Title\') %> *</label>\n            <input class="form-text" type="text" name="Title" id="Title" />\n        </div>\n        <div class="fieldWrap">\n            <label for="Description"><%= i18n.formatMessage(\'Description\') %></label>\n            <textarea class="form-text" name="Description" id="Description" />\n        </div>\n        <div class="upload"></div>\n    </fieldset>\n</form>\n';});
-
-define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-script/views/base','backbone','ev-script/views/workflow-select','ev-script/models/video-settings','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        plupload = require('plupload'),
-        BaseView = require('ev-script/views/base'),
-        Backbone = require('backbone'),
-        WorkflowSelect = require('ev-script/views/workflow-select'),
-        VideoSettings = require('ev-script/models/video-settings');
-
-    // Explicit dependency declaration
-    require('jquery.plupload.queue');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/upload.html')),
-        events: {
-            'change select': 'handleSelect'
-        },
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render', 'decorateUploader', 'closeDialog', 'handleSelect');
-            this.field = options.field;
-            this.$anchor = this.$el;
-            this.setElement(this.template({
-                i18n: this.i18n
-            }));
-            this.$upload = this.$('.upload');
-            this.workflows = options.workflows;
-            this.workflowSelect = new WorkflowSelect({
-                appId: this.appId,
-                el: this.$('select')[0],
-                collection: this.workflows
-            });
-            this.render();
-            this.decorateUploader();
-            this.appEvents.on('hidePickers', this.closeDialog);
-        },
-        getWidth: function() {
-            return Math.min(600, $(window).width() - this.config.dialogMargin);
-        },
-        getHeight: function() {
-            return Math.min(400, $(window).height() - this.config.dialogMargin);
-        },
-        decorateUploader: function() {
-            var extensions = '',
-                selected = this.workflowSelect.getSelected(),
-                maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10),
-                policyMessage = this.info.checkVersion('>=4.8.0') ? _.unescape(selected.get('PolicyMessage')) : '';
-
-            this.$('.policy-message').html(policyMessage);
-
-            if (this.workflows.settings.SupportedVideo) {
-                extensions += this.workflows.settings.SupportedVideo.replace(/\*\./g, '').replace(/;/g, ',').replace(/\s/g, '');
-            }
-
-            if (this.workflows.settings.SupportedAudio) {
-                extensions += this.workflows.settings.SupportedAudio.replace(/\*\./g, '').replace(/;/g, ',').replace(/\s/g, '');
-            }
-
-            if (this.$upload.pluploadQueue()) {
-                this.$upload.pluploadQueue().destroy();
-            }
-
-            this.$upload.pluploadQueue({
-                url: this.workflows.settings.SubmitUrl,
-                runtimes: 'html5,html4,flash',
-                max_file_size: maxUploadSize > 0 ? maxUploadSize + 'gb' : '12gb',
-                max_file_count: 1,
-                max_retries: 5,
-                chunk_size: '2mb',
-                unique_names: false,
-                multiple_queues: false,
-                multi_selection: false,
-                drag_drop: true,
-                multipart: true,
-                flash_swf_url: this.config.pluploadFlashPath,
-                preinit: {
-                    Init: _.bind(function(up, info) {
-                        // Remove runtime tooltip
-                        $('.plupload_container', this.$upload).removeAttr('title');
-                        // Change text since we only allow single file upload
-                        $('.plupload_add', this.$upload).text(this.i18n.formatMessage('Add file'));
-                    }, this),
-                    PostInit: _.bind(function(up, info) {
-                        // Change text since we only allow single file upload
-                        $('.plupload_droptext', this.$upload).text(this.i18n.formatMessage('Drag file here.'));
-                    }, this),
-                    UploadFile: _.bind(function(up, file) {
-                        up.settings.multipart_params = {
-                            'Title': this.$('#Title').val(),
-                            'Description': this.$('#Description').val(),
-                            'MediaWorkflowID': this.$('select').val()
-                        };
-                    }, this)
-                },
-                init: {
-                    StateChanged: _.bind(function(up) {
-                        switch (up.state) {
-                            case plupload.STARTED:
-                                if (up.state === plupload.STARTED) {
-                                    if ($('.plupload_cancel', this.$upload).length === 0) {
-                                        // Add cancel button
-                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">' + this.i18n.formatMessage('Cancel upload') + '</a>')
-                                        .insertBefore($('.plupload_filelist_footer .plupload_clearer', this.$upload))
-                                        .click(_.bind(function() {
-                                            up.stop();
-                                            this.decorateUploader();
-                                        }, this));
-                                    }
-                                    if (this.$cancel) {
-                                        this.$cancel.show();
-                                    }
-                                }
-                                break;
-                            case plupload.STOPPED:
-                                if (this.$cancel) {
-                                    this.$cancel.hide();
-                                }
-                                break;
-                        }
-                    }, this),
-                    BeforeUpload: _.bind(function(up, file) {
-                        var $title = this.$('#Title'),
-                            title = $title.val();
-                        if (!title || title.trim() === '') {
-                            $title.focus();
-                            up.stop();
-                            $('.plupload_upload_status', this.$upload).hide();
-                            $('.plupload_buttons', this.$upload).show();
-                        }
-                    }, this),
-                    FilesAdded: _.bind(function(up, files) {
-                        var validExtensions = extensions.split(',');
-                        _.each(files, function(file) {
-                            var parts = file.name.split('.'),
-                                extension = parts[parts.length - 1];
-                            if (!_.contains(validExtensions, extension.toLowerCase())) {
-                                up.removeFile(file);
-                                up.trigger('Error', {
-                                    code : plupload.FILE_EXTENSION_ERROR,
-                                    message : plupload.translate('File extension error.'),
-                                    file : file
-                                });
-                            }
-                        });
-                        // Keep the last file in the queue
-                        if (up.files.length > 1) {
-                            up.splice(0, up.files.length - 1);
-                        }
-                    }, this),
-                    UploadComplete: _.bind(function() {
-                        this.closeDialog();
-                    }, this),
-                    FileUploaded: _.bind(function(up, file, info) {
-                        this.appEvents.trigger('fileUploaded');
-                    }, this)
-                }
-            });
-            // Hacks to deal with z-index issue in dialog
-            // see https://github.com/moxiecode/plupload/issues/468
-            this.$upload.pluploadQueue().bind('refresh', function() {
-                $('div.upload > div.plupload').css({ 'z-index': '0' });
-                $('.plupload_button').css({ 'z-index': '1' });
-            });
-            this.$upload.pluploadQueue().refresh();
-        },
-        closeDialog: function() {
-            if (this.$dialog) {
-                this.$dialog.dialog('close');
-            }
-        },
-        handleSelect: function(e) {
-            this.decorateUploader();
-        },
-        render: function() {
-            var $dialogWrap = $('<div class="dialogWrap"></div>'),
-                $dialog;
-            this.$anchor.after($dialogWrap);
-            this.$dialog = $dialogWrap.dialog({
-                title: this.i18n.formatMessage('Upload Media to Ensemble'),
-                modal: true,
-                width: this.getWidth(),
-                height: this.getHeight(),
-                draggable: false,
-                resizable: false,
-                dialogClass: 'ev-dialog',
-                create: _.bind(function(event, ui) {
-                    $dialogWrap.html(this.$el);
-                }, this),
-                closeText: this.i18n.formatMessage('Close'),
-                close: _.bind(function(event, ui) {
-                    this.$upload.pluploadQueue().destroy();
-                    $dialogWrap.dialog('destroy').remove();
-                    this.appEvents.off('hidePickers', this.closeDialog);
-                    this.$dialog = null;
-                }, this)
-            });
-        }
-    });
-
-});
-
-;(function () {
-
-  var object =
-    typeof exports != 'undefined' ? exports :
-    typeof self != 'undefined' ? self : // #8: web workers
-    $.global; // #31: ExtendScript
-
-  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-
-  function InvalidCharacterError(message) {
-    this.message = message;
-  }
-  InvalidCharacterError.prototype = new Error;
-  InvalidCharacterError.prototype.name = 'InvalidCharacterError';
-
-  // encoder
-  // [https://gist.github.com/999166] by [https://github.com/nignag]
-  object.btoa || (
-  object.btoa = function (input) {
-    var str = String(input);
-    for (
-      // initialize result and counter
-      var block, charCode, idx = 0, map = chars, output = '';
-      // if the next str index does not exist:
-      //   change the mapping table to "="
-      //   check if d has no fractional digits
-      str.charAt(idx | 0) || (map = '=', idx % 1);
-      // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
-      output += map.charAt(63 & block >> 8 - idx % 1 * 8)
-    ) {
-      charCode = str.charCodeAt(idx += 3/4);
-      if (charCode > 0xFF) {
-        throw new InvalidCharacterError("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");
-      }
-      block = block << 8 | charCode;
-    }
-    return output;
-  });
-
-  // decoder
-  // [https://gist.github.com/1020396] by [https://github.com/atk]
-  object.atob || (
-  object.atob = function (input) {
-    var str = String(input).replace(/[=]+$/, ''); // #31: ExtendScript bad parse of /=
-    if (str.length % 4 == 1) {
-      throw new InvalidCharacterError("'atob' failed: The string to be decoded is not correctly encoded.");
-    }
-    for (
-      // initialize result and counters
-      var bc = 0, bs, buffer, idx = 0, output = '';
-      // get next character
-      buffer = str.charAt(idx++);
-      // character found in table? initialize bit storage and add its ascii value;
-      ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer,
-        // and if not first of each 4 characters,
-        // convert the first 8 bits to one ascii character
-        bc++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0
-    ) {
-      // try to find character in table (0-63, not found => -1)
-      buffer = chars.indexOf(buffer);
-    }
-    return output;
-  });
-
-}());
-
-define("base64", function(){});
-
-
-define('text!ev-script/templates/anthem.html',[],function () { return '<iframe src="ensemble://<%= tokenDetailsApiUrl %>" style="display:none;"></iframe>\n';});
-
-define('ev-script/views/video-picker',['require','jquery','underscore','platform','ev-script/views/picker','ev-script/views/search','ev-script/views/library-type-select','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos','ev-script/collections/media-workflows','ev-script/views/upload','base64','text!ev-script/templates/anthem.html'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        platform = require('platform'),
-        PickerView = require('ev-script/views/picker'),
-        SearchView = require('ev-script/views/search'),
-        TypeSelectView = require('ev-script/views/library-type-select'),
-        UnitSelectsView = require('ev-script/views/unit-selects'),
-        VideoResultsView = require('ev-script/views/video-results'),
-        Videos = require('ev-script/collections/videos'),
-        MediaWorkflows = require('ev-script/collections/media-workflows'),
-        UploadView = require('ev-script/views/upload');
-
-    require('base64');
-
-    return PickerView.extend({
-        anthemTemplate: _.template(require('text!ev-script/templates/anthem.html')),
-        initialize: function(options) {
-            PickerView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary', 'handleSubmit', 'uploadHandler', 'recordHandler');
-            var callback = _.bind(function() {
-                this.loadVideos();
-            }, this);
-            this.$filterBlock = this.$('div.ev-filter-block');
-            if (this.info.get('ApplicationVersion')) {
-                this.$actions = $('<div class="ev-actions"></div>');
-                this.$upload = $('<button type="button" class="action-upload" title="' + this.i18n.formatMessage('Click to upload new media') + '"><i class="fa fa-upload fa-fw"></i><span>' + this.i18n.formatMessage('Upload') + '<span></button>').css('display', 'none');
-                this.$actions.append(this.$upload);
-                this.$record = $('<button type="button" class="action-record" title="' + this.i18n.formatMessage('Click to record screen') + '"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>' + this.i18n.formatMessage('Record') + '<span></button>').css('display', 'none');
-                this.$actions.append(this.$record);
-                this.$filterBlock.prepend(this.$actions);
-            }
-            this.searchView = new SearchView({
-                id: this.id + '-search',
-                tagName: 'div',
-                className: 'ev-search',
-                picker: this,
-                appId: this.appId,
-                callback: callback
-            });
-            this.$filterBlock.prepend(this.searchView.$el);
-            this.searchView.render();
-            this.typeSelectView = new TypeSelectView({
-                id: this.id + '-type-select',
-                tagName: 'div',
-                className: 'ev-type-select',
-                picker: this,
-                appId: this.appId,
-                callback: callback
-            });
-            this.$filterBlock.prepend(this.typeSelectView.$el);
-            this.typeSelectView.render();
-            if (this.info.get('ApplicationVersion')) {
-                this.unitSelects = new UnitSelectsView({
-                    id: this.id + '-unit-selects',
-                    tagName: 'div',
-                    className: 'ev-unit-selects',
-                    picker: this,
-                    appId: this.appId
-                });
-                this.$filterBlock.prepend(this.unitSelects.$el);
-            }
-            this.resultsView = new VideoResultsView({
-                el: this.$('div.ev-results'),
-                picker: this,
-                appId: this.appId
-            });
-            this.$el.append(this.resultsView.$el);
-        },
-        events: {
-            'click .action-add': 'chooseItem',
-            'click .action-upload': 'uploadHandler',
-            'click .action-record': 'recordHandler',
-            'change .unit-selects select.libraries': 'changeLibrary',
-            'submit .unit-selects': 'handleSubmit'
-        },
-        changeLibrary: function(e) {
-            this.loadVideos();
-            this.loadWorkflows();
-        },
-        handleSubmit: function(e) {
-            this.loadVideos();
-            e.preventDefault();
-        },
-        uploadHandler: function(e) {
-            var uploadView = new UploadView({
-                appId: this.appId,
-                field: this.field,
-                workflows: this.workflows
-            });
-            e.preventDefault();
-        },
-        recordHandler: function(e) {
-            var activeIcon = $('.record-active', this.$record),
-                inactiveIcon = $('.record-inactive', this.$record),
-                pollingId,
-                timeoutId,
-                activate = _.bind(function() {
-                    this.anthemLaunching = true;
-                    inactiveIcon.hide();
-                    activeIcon.show();
-                }, this),
-                deactivate = _.bind(function() {
-                    this.anthemLaunching = false;
-                    inactiveIcon.show();
-                    activeIcon.hide();
-                    if (pollingId) {
-                        clearInterval(pollingId);
-                    }
-                    if (timeoutId) {
-                        clearTimeout(timeoutId);
-                    }
-                }, this);
-
-            if (this.anthemLaunching) {
-                e.preventDefault();
-                return false;
-            }
-
-            activate();
-
-            $.ajax({
-                url: this.config.ensembleUrl + '/api/record/token/CreateToken',
-                data: {
-                    'libraryId': this.model.get('libraryId')
-                },
-                xhrFields: {
-                    withCredentials: true
-                }
-            }).done(_.bind(function(newToken) {
-                if (newToken && newToken !== '00000000-0000-0000-0000-000000000000') {
-                    this.$('#anthemContainer').html(this.anthemTemplate({
-                        tokenDetailsApiUrl: window.btoa(this.config.ensembleUrl + '/api/record/token/GetDetails?token=' + newToken)
-                    }));
-
-                    pollingId = setInterval(_.bind(function() {
-                        $.ajax({
-                            url: this.config.ensembleUrl + '/api/record/token/IsActive',
-                            xhrFields: {
-                                withCredentials: true
-                            },
-                            data: {
-                                'token': newToken
-                            }
-                        }).done(function(activeStatus) {
-                            if (!activeStatus) {
-                                deactivate();
-                            }
-                        }).fail(function() {
-                            deactivate();
-                        });
-                    }, this), 5000);
-
-                    // If launch hasn't deactivated in 30 secs, we probably need to install
-                    timeoutId = setTimeout(_.bind(function() {
-                        deactivate();
-                        if (/windows/i.test(platform.os.family)) {
-                            window.location = this.config.ensembleUrl + '/app/unprotected/EnsembleAnthem/EnsembleAnthem.msi';
-                        } else {
-                            window.location = this.config.ensembleUrl + '/app/unprotected/EnsembleAnthem/EnsembleAnthem.dmg';
-                        }
-                    }, this), 30000);
-                } else {
-                    deactivate();
-                }
-            }, this)).fail(deactivate);
-            e.preventDefault();
-        },
-        showPicker: function() {
-            PickerView.prototype.showPicker.call(this);
-            if (this.info.get('ApplicationVersion')) {
-                this.unitSelects.loadOrgs();
-                this.unitSelects.$('select').filter(':visible').first().focus();
-            } else {
-                this.searchView.$('input[type="text"]').focus();
-                this.loadVideos();
-            }
-        },
-        loadVideos: function() {
-            var searchVal = $.trim(this.model.get('search').toLowerCase()),
-                sourceId = this.model.get('sourceId'),
-                libraryId = this.model.get('libraryId'),
-                cacheKey = sourceId + libraryId + searchVal,
-                videos = new Videos({}, {
-                    sourceId: sourceId,
-                    libraryId: libraryId,
-                    filterOn: '',
-                    filterValue: searchVal,
-                    appId: this.appId
-                }),
-                clearVideosCache = _.bind(function() {
-                    videos.clearCache();
-                    this.loadVideos();
-                }, this);
-            videos.fetch({
-                picker: this,
-                cacheKey: cacheKey,
-                success: _.bind(function(collection, response, options) {
-                    var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
-                    var size = _.size(response.Data);
-                    if (size === totalRecords) {
-                        collection.hasMore = false;
-                    } else {
-                        collection.hasMore = true;
-                        collection.pageIndex += 1;
-                    }
-                    this.resultsView.collection = collection;
-                    this.resultsView.render();
-                }, this),
-                error: _.bind(function(collection, xhr, options) {
-                    this.ajaxError(xhr, _.bind(function() {
-                        this.loadVideos();
-                    }, this));
-                }, this)
-            });
-            this.appEvents.off('fileUploaded').on('fileUploaded', clearVideosCache);
-            this.appEvents.off('reloadVideos').on('reloadVideos', clearVideosCache);
-        },
-        loadWorkflows: function() {
-            this.workflows = new MediaWorkflows({}, {
-                appId: this.appId
-            });
-            // FIXME - add libraryId (as with playlists)
-            this.workflows.filterValue = this.model.get('libraryId');
-            this.workflows.fetch({
-                cacheKey: this.workflows.filterValue,
-                success: _.bind(function(collection, response, options) {
-                    if (!collection.isEmpty()) {
-                        this.$upload.css('display', 'inline-block');
-                        if (this.canRecord()) {
-                            this.$record.css('display', 'inline-block');
-                        }
-                    } else {
-                        this.$upload.css('display', 'none');
-                        this.$record.css('display', 'none');
-                    }
-                    // This is the last portion of the filter block that loads
-                    // so now it should be fully rendered...resize our results
-                    // to make sure they have the proper height.
-                    // TODO - better place for this? Or better method of
-                    // handling?
-                    this.resizeResults();
-                }, this),
-                error: _.bind(function(collection, xhr, options) {
-                    this.ajaxError(xhr, _.bind(function() {
-                        this.loadWorkflows();
-                    }, this));
-                }, this),
-                reset: true
-            });
-        },
-        resizeResults: function() {
-            if (this.config.fitToParent) {
-                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true));
-            }
-        },
-        canRecord: function() {
-            var currentUser = this.auth.getUser();
-            return this.info.anthemEnabled() && currentUser && currentUser.get('CanUseAnthem') && !this.isMobile() && platform.os.family !== 'Linux';
-        },
-        isMobile: function() {
-            var family = platform.os.family;
-            return family === 'Android' || family === 'iOS' || family === 'Windows Phone';
-        }
-    });
-
-});
-
-define('ev-script/views/settings',['require','underscore','ev-script/views/base','jquery-ui/ui/widgets/dialog'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    require('jquery-ui/ui/widgets/dialog');
-
-    return BaseView.extend({
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'show', 'cancelHandler', 'submitHandler');
-            this.field = options.field;
-        },
-        events: {
-            'submit': 'submitHandler',
-            'click .action-cancel': 'cancelHandler'
-        },
-        show: function() {
-            this.render();
-            this.$el.dialog('open');
-        },
-        cancelHandler: function(e) {
-            this.$el.dialog('close');
-            e.preventDefault();
-        },
-        submitHandler: function(e) {
-            this.updateModel();
-            this.$el.dialog('close');
-            e.preventDefault();
-        },
-        // Override me
-        updateModel: function() {}
-    });
-
-});
-
-define('ev-script/util/size',['require','underscore'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore');
-
-    return {
-        optionsSixteenByNine: ['1280x720', '1024x576', '848x480', '720x405', '640x360', '610x344', '560x315', '480x270', '400x225', '320x180', '240x135', '160x90'],
-        optionsFourByThree: ['1280x960', '1024x770', '848x636', '720x540', '640x480', '610x460', '560x420', '480x360', '400x300', '320x240', '240x180', '160x120'],
-        ratiosAreRoughlyEqual: function(ratioA, ratioB) {
-            // Use a fuzz factor to determine ratio equality since our sizes are not always accurate
-            return Math.ceil(ratioA * 10) / 10 === Math.ceil(ratioB * 10) / 10;
-        },
-        getAvailableDimensions: function(ratio) {
-            ratio = ratio || 16 / 9;
-            var options = this.optionsSixteenByNine;
-            if (this.ratiosAreRoughlyEqual(ratio, 4 / 3)) {
-                options = this.optionsFourByThree;
-            }
-            return options;
-        },
-        findClosestDimension: function(arg, desiredWidth) {
-            var offset = Number.MAX_VALUE,
-                dimensions = _.isNumber(arg) ? this.getAvailableDimensions(arg) : arg,
-                closest;
-            // Find the first available or closest dimension that matches our desired width
-            var match = _.find(dimensions, _.bind(function(dimension) {
-                var width = parseInt(dimension.split('x')[0], 10),
-                    currentOffset = Math.abs(width - desiredWidth);
-                if (currentOffset < offset) {
-                    offset = currentOffset;
-                    closest = dimension;
-                }
-                return currentOffset === 0;
-            }, this));
-            return match || closest;
-        }
-    };
-
-});
-
-
-define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <fieldset>\n        <legend style="display:none;"><%= i18n.formatMessage(\'Media Embed Options\') %></legend>\n        <div class="fieldWrap">\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div>\n            <div class="fieldWrap inline-option">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle"><%= i18n.formatMessage(\'Title\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="socialsharing" class="form-checkbox" <% if (model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox"/>\n                <label for="socialsharing"><%= i18n.formatMessage(\'Social Tools\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                <label for="captionsearch"><%= i18n.formatMessage(\'Caption Search\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata"><%= i18n.formatMessage(\'Meta Data\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                <label for="dateproduced"><%= i18n.formatMessage(\'Date Produced\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="embedcode" class="form-checkbox" <% if (model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox"/>\n                <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="download" class="form-checkbox" <% if (model.get(\'download\')) { print(\'checked="checked"\'); } %> name="download" type="checkbox"/>\n                <label for="download"><%= i18n.formatMessage(\'Download Link\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n            </div>\n            <% if (isAudio) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %>  name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n            <% } %>\n         </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
-
-
-define('text!ev-script/templates/video-settings-legacy.html',[],function () { return '<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size" <% if (isAudio) { print(\'disabled\'); } %> >\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div class="fieldWrap">\n            <label for="showtitle"><%= i18n.formatMessage(\'Show Title\') %></label>\n            <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="autoplay"><%= i18n.formatMessage(\'Auto Play\') %></label>\n            <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="showcaptions"><%= i18n.formatMessage(\'Show Captions\') %></label>\n            <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="fieldWrap">\n            <label for="hidecontrols"><%= i18n.formatMessage(\'Hide Controls\') %></label>\n            <input id="hidecontrols" class="form-checkbox" <% if (model.get(\'hidecontrols\')) { print(\'checked="checked"\'); } %>  name="hidecontrols" type="checkbox" <% if (isAudio) { print(\'disabled\'); } %> />\n        </div>\n        <div class="form-actions">\n            <input type="button" class="form-submit action-cancel" value="<%= i18n.formatMessage(\'Cancel\') %>"/>\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\n        </div>\n    </fieldset>\n</form>\n';});
-
-
-define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(sizes, function(size) { %>\n    <option value="<%= size %>" <% if (size === target) { print(\'selected="selected"\'); } %>><%= size %></option>\n<% }); %>\n';});
-
-define('ev-script/views/video-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','jquery-ui/ui/widgets/dialog','text!ev-script/templates/video-settings.html','text!ev-script/templates/video-settings-legacy.html','text!ev-script/templates/sizes.html'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        SettingsView = require('ev-script/views/settings'),
-        sizeUtil = require('ev-script/util/size');
-
-    require('jquery-ui/ui/widgets/dialog');
-
-    return SettingsView.extend({
-        template: _.template(require('text!ev-script/templates/video-settings.html')),
-        legacyTemplate: _.template(require('text!ev-script/templates/video-settings-legacy.html')),
-        sizesTemplate: _.template(require('text!ev-script/templates/sizes.html')),
-        initialize: function(options) {
-            SettingsView.prototype.initialize.call(this, options);
-            this.encoding = options.encoding;
-            this.encoding.on('change:id', _.bind(function() {
-                this.render();
-            }, this));
-        },
-        updateModel: function() {
-            var attrs = {
-                'showtitle': this.$('#showtitle').is(':checked'),
-                'autoplay': this.$('#autoplay').is(':checked'),
-                'showcaptions': this.$('#showcaptions').is(':checked'),
-                'hidecontrols': this.$('#hidecontrols').is(':checked')
-            };
-            if (!this.info.useLegacyEmbeds()) {
-                attrs = _.extend(attrs, {
-                    'socialsharing': this.$('#socialsharing').is(':checked'),
-                    'annotations': this.$('#annotations').is(':checked'),
-                    'captionsearch': this.$('#captionsearch').is(':checked'),
-                    'attachments': this.$('#attachments').is(':checked'),
-                    'audiopreviewimage': this.$('#audiopreviewimage').is(':checked'),
-                    'links': this.$('#links').is(':checked'),
-                    'metadata': this.$('#metadata').is(':checked'),
-                    'dateproduced': this.$('#dateproduced').is(':checked'),
-                    'embedcode': this.$('#embedcode').is(':checked'),
-                    'download': this.$('#download').is(':checked')
-                });
-            }
-            var sizeVal = this.$('#size').val();
-            if (!sizeVal || sizeVal === 'original') {
-                // isNew signifies that the encoding hasn't been fetched yet
-                if (this.encoding && !this.encoding.isNew()) {
-                    _.extend(attrs, {
-                        width: this.encoding.getWidth(),
-                        height: this.encoding.getHeight()
-                    });
-                }
-            } else {
-                var dims = sizeVal.split('x');
-                _.extend(attrs, {
-                    width: parseInt(dims[0], 10),
-                    height: parseInt(dims[1], 10)
-                });
-            }
-            this.field.model.set(attrs);
-        },
-        renderSize: function() {
-            var width = this.field.model.get('width'),
-                height = this.field.model.get('height'),
-                ratio = 16 / 9,
-                options = [];
-            if (width && height) {
-                ratio = width / height;
-            } else if (this.encoding.id) {
-                width = this.encoding.getWidth();
-                height = this.encoding.getHeight();
-                ratio = this.encoding.getRatio();
-            }
-            options = sizeUtil.getAvailableDimensions(ratio);
-            this.$('.size').append(this.sizesTemplate({
-                sizes: options,
-                // Select the override or current width
-                target: sizeUtil.findClosestDimension(options, this.config.defaultVideoWidth || width)
-            }));
-        },
-        render: function() {
-            var html = '';
-            if (!this.info.useLegacyEmbeds()) {
-                html = this.template({
-                    i18n: this.i18n,
-                    model: this.field.model,
-                    isAudio: this.encoding && this.encoding.isAudio()
-                });
-            } else {
-                html = this.legacyTemplate({
-                    i18n: this.i18n,
-                    model: this.field.model,
-                    isAudio: this.encoding && this.encoding.isAudio()
-                });
-            }
-            this.$el.html(html);
-            if (this.encoding) {
-                this.renderSize();
-            }
-            var content = this.field.model.get('content');
-            this.$el.dialog({
-                title: this.unencode(content ? content.Title : this.field.model.get('id')),
-                modal: true,
-                autoOpen: false,
-                draggable: false,
-                resizable: false,
-                dialogClass: 'ev-dialog',
-                width: Math.min(680, $(window).width() - this.config.dialogMargin),
-                height: Math.min(260, $(window).height() - this.config.dialogMargin),
-                closeText: this.i18n.formatMessage('Close')
-            });
-        }
-    });
-
-});
-
-
-define('text!ev-script/templates/playlist-embed.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%- modelId %>&playlistEmbed=true&isNewPluginEmbed=true&hideControls=true&displayTitle=true&displayEmbedCode=<%- displayEmbedCode %>&displayStatistics=<%- displayStatistics %>&displayVideoDuration=<%- displayDuration %>&displayAttachments=<%- displayAttachments %>&displayAnnotations=<%- displayAnnotations %>&displayLinks=<%- displayLinks %>&displayCredits=<%- displayCredits %>&displaySharing=<%- displaySharing %>&autoPlay=<%- autoPlay %>&showCaptions=<%- showCaptions %>&displayDateProduced=<%- displayDateProduced %>&audioPreviewImage=<%- audioPreviewImage %>&displayCaptionSearch=<%- displayCaptionSearch %>&<% if (isShowcase) { print(showcaseParams); } else { print(playlistParams); } %>"\n        frameborder="0"\n        style="width:<%- width %>px;height:<%- height %>px;"\n        width="<%- width %>"\n        height="<%- height %>"\n        allowfullscreen>\n</iframe>\n';});
-
-
-define('text!ev-script/templates/playlist-embed-legacy.html',[],function () { return '<iframe src="<%- ensembleUrl %>/app/plugin/embed.aspx?DestinationID=<%- modelId %>"\n        frameborder="0"\n        style="width:<%- width %>px;height:<%- height %>px;"\n        width="<%- width %>"\n        height="<%- height %>"\n        allowfullscreen>\n</iframe>\n';});
-
-
-define('text!ev-script/templates/playlist-embed-playlist-params.html',[],function () { return 'orderBy=<%- playlistSortBy %>&orderByDirection=<%- playlistSortDirection %><% if (playlistSearchString) { print(\'&searchString=\' + playlistSearchString); } %><% if (playlistCategory) { print(\'&categoryID=\' + playlistCategory); } %><% if (playlistNumberOfResults) { print(\'&resultsCount=\' + playlistNumberOfResults); } %>';});
-
-
-define('text!ev-script/templates/playlist-embed-showcase-params.html',[],function () { return 'displayShowcase=true<% if (categoryList) { %>&displayCategoryList=true&categoryOrientation=<%- categoryOrientation %><% } %>';});
-
-define('ev-script/views/playlist-embed',['require','underscore','ev-script/views/embed','text!ev-script/templates/playlist-embed.html','text!ev-script/templates/playlist-embed-legacy.html','text!ev-script/templates/playlist-embed-playlist-params.html','text!ev-script/templates/playlist-embed-showcase-params.html'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        EmbedView = require('ev-script/views/embed');
-
-    return EmbedView.extend({
-        template: _.template(require('text!ev-script/templates/playlist-embed.html')),
-        legacyTemplate: _.template(require('text!ev-script/templates/playlist-embed-legacy.html')),
-        playlistParamsTemplate: _.template(require('text!ev-script/templates/playlist-embed-playlist-params.html')),
-        showcaseParamsTemplate: _.template(require('text!ev-script/templates/playlist-embed-showcase-params.html')),
-        initialize: function(options) {
-            EmbedView.prototype.initialize.call(this, options);
-        },
-        render: function() {
-            var embed = '';
-            if (!this.info.useLegacyEmbeds()) {
-                var data = {
-                    modelId: this.model.get('id'),
-                    width: this.getFrameWidth(),
-                    height: this.getFrameHeight(),
-                    ensembleUrl: this.config.ensembleUrl,
-                    displayEmbedCode: this.model.get('embedcode'),
-                    displayStatistics: this.model.get('statistics'),
-                    displayDuration: this.model.get('duration'),
-                    displayAttachments: this.model.get('attachments'),
-                    displayAnnotations: this.model.get('annotations'),
-                    displayLinks: this.model.get('links'),
-                    displayCredits: this.model.get('credits'),
-                    displaySharing: this.model.get('socialsharing'),
-                    autoPlay: this.model.get('autoplay'),
-                    showCaptions: this.model.get('showcaptions'),
-                    displayDateProduced: this.model.get('dateproduced'),
-                    audioPreviewImage: this.model.get('audiopreviewimage'),
-                    displayCaptionSearch: this.model.get('captionsearch')
-                };
-                if (this.model.get('layout') === 'showcase') {
-                    var showcaseLayout = this.model.get('showcaseLayout');
-                    data = _.extend(data, {
-                        isShowcase: true,
-                        showcaseParams: this.showcaseParamsTemplate({
-                            // featuredContent: showcaseLayout.featuredContent,
-                            categoryList: showcaseLayout.categoryList,
-                            categoryOrientation: showcaseLayout.categoryOrientation
-                        })
-                    });
-                } else {
-                    var playlistLayout = this.model.get('playlistLayout');
-                    data = _.extend(data, {
-                        isShowcase: false,
-                        playlistParams: this.playlistParamsTemplate({
-                            playlistSortBy: playlistLayout.playlistSortBy,
-                            playlistSortDirection: playlistLayout.playlistSortDirection,
-                            playlistSearchString: playlistLayout.playlistSearchString,
-                            playlistCategory: playlistLayout.playlistCategory,
-                            playlistNumberOfResults: playlistLayout.playlistNumberOfResults
-                        })
-                    });
-                }
-                embed = this.template(data);
-            } else {
-                embed = this.legacyTemplate({
-                    modelId: this.model.get('id'),
-                    width: this.getFrameWidth(),
-                    height: this.getFrameHeight(),
-                    ensembleUrl: this.config.ensembleUrl
-                });
-            }
-            this.$el.html(embed);
-        }
-    });
-
-});
-
-define('ev-script/views/playlist-preview',['require','ev-script/views/preview','ev-script/views/playlist-embed'],function(require) {
-
-    'use strict';
-
-    var PreviewView = require('ev-script/views/preview'),
-        PlaylistEmbedView = require('ev-script/views/playlist-embed');
-
-    return PreviewView.extend({
-        initialize: function(options) {
-            PreviewView.prototype.initialize.call(this, options);
-        },
-        embedClass: PlaylistEmbedView
-    });
-
-});
-
-
-define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <% if (item.get(\'IsSecure\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
-
-define('ev-script/views/playlist-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/playlist-result.html'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        $ = require('jquery'),
-        ResultsView = require('ev-script/views/results'),
-        PlaylistSettings = require('ev-script/models/playlist-settings'),
-        PlaylistPreviewView = require('ev-script/views/playlist-preview');
-
-    return ResultsView.extend({
-        modelClass: PlaylistSettings,
-        previewClass: PlaylistPreviewView,
-        resultTemplate: _.template(require('text!ev-script/templates/playlist-result.html')),
-        initialize: function(options) {
-            ResultsView.prototype.initialize.call(this, options);
-        },
-        refreshHandler: function(e) {
-            e.preventDefault();
-            this.appEvents.trigger('reloadPlaylists');
-        }
-    });
-
-});
-
-define('ev-script/collections/playlists',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
-
-    'use strict';
-
-    var BaseCollection = require('ev-script/collections/base'),
-        cacheUtil = require('ev-script/util/cache');
-
-    return BaseCollection.extend({
-        initialize: function(models, options) {
-            BaseCollection.prototype.initialize.call(this, models, options);
-            this.libraryId = options.libraryId || '';
-            this.filterValue = options.filterValue || '';
-            this.pageIndex = 1;
-        },
-        _cache: function(key, resp) {
-            var cachedValue = null,
-                user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                var playlistsCache = userCache.get('playlists');
-                if (!playlistsCache) {
-                    userCache.set('playlists', playlistsCache = new cacheUtil.Cache());
-                }
-                cachedValue = playlistsCache[resp ? 'set' : 'get'](key, resp);
-            }
-            return cachedValue;
-        },
-        getCached: function(key) {
-            return this._cache(key);
-        },
-        setCached: function(key, resp) {
-            return this._cache(key, resp);
-        },
-        clearCache: function() {
-            var user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                userCache.set('playlists', null);
-            }
-        },
-        url: function() {
-            var api_url = this.config.ensembleUrl + '/api/Playlists',
-                sizeParam = 'PageSize=' + this.config.pageSize,
-                indexParam = 'PageIndex=' + this.pageIndex,
-                url, onParam, valueParam;
-            if (this.info.get('ApplicationVersion')) {
-                onParam = 'FilterOn=Name';
-                valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
-                url = api_url + '/' + encodeURIComponent(this.libraryId) + '?' + sizeParam + '&' + indexParam + (this.filterValue ? '&' + onParam + '&' + valueParam : '');
-            } else {
-                onParam = 'FilterOn=LibraryId';
-                valueParam = 'FilterValue=' + encodeURIComponent(this.libraryId);
-                url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
-            }
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        }
-    });
-
-});
-
-define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/unit-selects','ev-script/views/search','ev-script/views/playlist-results','ev-script/collections/playlists'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        PickerView = require('ev-script/views/picker'),
-        UnitSelectsView = require('ev-script/views/unit-selects'),
-        SearchView = require('ev-script/views/search'),
-        PlaylistResultsView = require('ev-script/views/playlist-results'),
-        Playlists = require('ev-script/collections/playlists');
-
-    return PickerView.extend({
-        initialize: function(options) {
-            PickerView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit');
-            this.$filterBlock = this.$('div.ev-filter-block');
-            if (this.info.get('ApplicationVersion')) {
-                this.searchView = new SearchView({
-                    id: this.id + '-search',
-                    tagName: 'div',
-                    className: 'ev-search',
-                    picker: this,
-                    appId: this.appId,
-                    callback: _.bind(function() {
-                        this.loadPlaylists();
-                    }, this)
-                });
-                this.$filterBlock.prepend(this.searchView.$el);
-                this.searchView.render();
-            }
-            this.unitSelects = new UnitSelectsView({
-                id: this.id + '-unit-selects',
-                tagName: 'div',
-                className: 'ev-unit-selects',
-                picker: this,
-                appId: this.appId
-            });
-            this.$filterBlock.prepend(this.unitSelects.$el);
-            this.resultsView = new PlaylistResultsView({
-                el: this.$('div.ev-results'),
-                picker: this,
-                appId: this.appId
-            });
-            this.$el.append(this.resultsView.$el);
-        },
-        events: {
-            'click a.action-add': 'chooseItem',
-            'change .unit-selects select.libraries': 'changeLibrary',
-            'submit .unit-selects': 'handleSubmit'
-        },
-        changeLibrary: function(e) {
-            this.loadPlaylists();
-        },
-        handleSubmit: function(e) {
-            this.loadPlaylists();
-            e.preventDefault();
-        },
-        showPicker: function() {
-            PickerView.prototype.showPicker.call(this);
-            this.unitSelects.loadOrgs();
-            this.unitSelects.$('select').filter(':visible').first().focus();
-        },
-        loadPlaylists: function() {
-            var searchVal = $.trim(this.model.get('search').toLowerCase()),
-                libraryId = this.model.get('libraryId'),
-                playlists = new Playlists({}, {
-                    libraryId: libraryId,
-                    filterValue: searchVal,
-                    appId: this.appId
-                }),
-                clearPlaylistsCache = _.bind(function() {
-                    playlists.clearCache();
-                    this.loadPlaylists();
-                }, this);
-            playlists.fetch({
-                picker: this,
-                cacheKey: libraryId + searchVal,
-                success: _.bind(function(collection, response, options) {
-                    var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
-                    var size = _.size(response.Data);
-                    if (size === totalRecords) {
-                        collection.hasMore = false;
-                    } else {
-                        collection.hasMore = true;
-                        collection.pageIndex += 1;
-                    }
-                    this.resultsView.collection = collection;
-                    this.resultsView.render();
-                    // TODO - better place for this?
-                    this.resizeResults();
-                }, this),
-                error: _.bind(function(collection, xhr, options) {
-                    this.ajaxError(xhr, _.bind(function() {
-                        this.loadPlaylists();
-                    }, this));
-                }, this)
-            });
-            this.appEvents.off('reloadPlaylists').on('reloadPlaylists', clearPlaylistsCache);
-        },
-        resizeResults: function() {
-            if (this.config.fitToParent) {
-                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true));
-            }
-        }
-    });
-
-});
-
-define('ev-script/collections/categories',['require','backbone','ev-script/collections/base','underscore'],function(require) {
-
-    'use strict';
-
-    var Backbone = require('backbone'),
-        BaseCollection = require('ev-script/collections/base'),
-        _ = require('underscore');
-
-    return BaseCollection.extend({
-        initialize: function(models, options) {
-            BaseCollection.prototype.initialize.call(this, models, options);
-            this.requiresAuth = false;
-            this.playlistId = options.playlistId || '';
-        },
-        url: function() {
-            var url = this.config.ensembleUrl + '/app/api/category/list.json/' + this.playlistId;
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        },
-        parse: function(response) {
-            return response.dataSet ? (response.dataSet.category || []) : [];
-        },
-        sync: function(method, model, options) {
-            _.extend(options, {
-                dataFilter: function(data) {
-                    // Strip padding from JSONP response
-                    var match = data.match(/\{[\s\S]*\}/);
-                    return match ? match[0] : data;
-                }
-            });
-            return Backbone.sync.call(this, method, model, options);
-        }
-    });
-
-});
-
-
-define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <fieldset>\n        <legend style="display:none;"><%= i18n.formatMessage(\'Playlist Embed Options\') %></legend>\n        <div class="accordion">\n            <h3><%= i18n.formatMessage(\'Choose Layout\') %></h3>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="playlist" class="form-radio" <% if (model.get(\'layout\') === \'playlist\') { print(\'checked="checked"\'); } %> name="layout" value="playlist" type="radio"/>\n                    <label for="playlist"><%= i18n.formatMessage(\'Playlist\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcase" class="form-radio" <% if (model.get(\'layout\') === \'showcase\') { print(\'checked="checked"\'); } %> name="layout" value="showcase" type="radio"/>\n                    <label for="showcase"><%= i18n.formatMessage(\'Showcase\') %></label>\n                </div>\n            </div>\n            <h3><%= i18n.formatMessage(\'Layout Options\') %></h3>\n            <div>\n                <div class="playlistOptions" <% if (model.get(\'layout\') === \'showcase\') { print(\'style="display:none;"\'); } %>>\n                    <div class="fieldWrap">\n                        <label for="playlistSortBy"><%= i18n.formatMessage(\'Sort By\') %></label>\n                        <select id="playlistSortBy" class="form-select">\n                            <option value="videoDate" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDate\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Added\') %></option>\n                            <option value="videoDateProduced" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDateProduced\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Produced\') %></option>\n                            <option value="videoDescription" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDescription\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Description\') %></option>\n                            <option value="videoTitle" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoTitle\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Title\') %></option>\n                            <option value="videoDuration" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDuration\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Duration\') %></option>\n                            <option value="videoKeywords" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoKeywords\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Keywords\') %></option>\n                            <!-- <option value="videoCustomPosition">Custom Order</option> -->\n                        </select>\n                    </div>\n                    <div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'asc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="asc" type="radio"/>\n                            <label for="playlistSortDirectionAsc"><%= i18n.formatMessage(\'Ascending\') %></label>\n                        </div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'desc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="desc" type="radio"/>\n                            <label for="playlistSortDirectionDesc"><%= i18n.formatMessage(\'Descending\') %></label>\n                        </div>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <label for="playlistSearchString"><%= i18n.formatMessage(\'Search String\') %></label>\n                            <input id="playlistSearchString" class="form-text" name="playlistSearchString" value="<%- model.get(\'playlistLayout\').playlistSearchString %>" type="text"/>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistCategory"><%= i18n.formatMessage(\'Category\') %></label>\n                            <select id="playlistCategory" class="form-select" name="playlistCategory">\n                                <option value="" <% if (!model.get(\'playlistLayout\').playlistCategory) { print(\'selected="selected"\'); } %>>-- <%= i18n.formatMessage(\'None\') %> --</option>\n                                <% categories.each(function(category) { %>\n                                    <option value="<%= category.id %>" <% if (model.get(\'playlistLayout\').playlistCategory === category.id) { print(\'selected="selected"\'); } %>><%- category.get(\'categoryName\') %></option>\n                                <% }); %>\n                            </select>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistNumberOfResults"><%= i18n.formatMessage(\'Number of Results\') %></label>\n                            <input id="playlistNumberOfResults" class="form-text" name="playlistNumberOfResults" value="<%- model.get(\'playlistLayout\').playlistNumberOfResults %>" type="text"/>\n                        </div>\n                    </div>\n                </div>\n                <div class="showcaseOptions" <% if (model.get(\'layout\') === \'playlist\') { print(\'style="display:none;"\'); } %>>\n<!--\n                    <div class="fieldWrap">\n                        <input id="featuredContent" class="form-checkbox" type="checkbox" name="featuredContent" <% if (model.get(\'showcaseLayout\').featuredContent) { print(\'checked="checked"\'); } %>/>\n                        <label for="featuredContent">Featured Content</label>\n                    </div>\n -->\n                    <div class="fieldWrap">\n                        <input id="categoryList" class="form-checkbox" type="checkbox" name="categoryList" <% if (model.get(\'showcaseLayout\').categoryList) { print(\'checked="checked"\'); } %>/>\n                        <label for="categoryList"><%= i18n.formatMessage(\'Category List\') %></label>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationHorizontal" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'horizontal\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="horizontal" type="radio"/>\n                            <label for="categoryOrientationHorizontal"><%= i18n.formatMessage(\'Horizontal\') %></label>\n                        </div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationVertical" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'vertical\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="vertical" type="radio"/>\n                            <label for="categoryOrientationVertical"><%= i18n.formatMessage(\'Vertical\') %></label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <h3><%= i18n.formatMessage(\'Content Details\') %></h3>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="statistics" class="form-checkbox" <% if (model.get(\'statistics\')) { print(\'checked="checked"\'); } %> name="statistics" type="checkbox"/>\n                    <label for="statistics"><%= i18n.formatMessage(\'Statistics\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="duration" class="form-checkbox" <% if (model.get(\'duration\')) { print(\'checked="checked"\'); } %> name="duration" type="checkbox"/>\n                    <label for="duration"><%= i18n.formatMessage(\'Duration\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                    <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                    <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                    <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="credits" class="form-checkbox" <% if (model.get(\'credits\')) { print(\'checked="checked"\'); } %> name="credits" type="checkbox"/>\n                    <label for="credits"><%= i18n.formatMessage(\'Credits\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="socialsharing"><%= i18n.formatMessage(\'Social Tools\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                    <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                    <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                    <label for="dateproduced"><%= i18n.formatMessage(\'Date Produced\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                    <label for="captionsearch"><%= i18n.formatMessage(\'Caption Search\') %></label>\n                </div>\n            </div>\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
-
-define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/collections/categories','jquery-ui/ui/widgets/dialog','jquery-ui/ui/widgets/accordion','text!ev-script/templates/playlist-settings.html'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        SettingsView = require('ev-script/views/settings'),
-        Categories = require('ev-script/collections/categories');
-
-    require('jquery-ui/ui/widgets/dialog');
-    require('jquery-ui/ui/widgets/accordion');
-
-    return SettingsView.extend({
-        template: _.template(require('text!ev-script/templates/playlist-settings.html')),
-        initialize: function(options) {
-            SettingsView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'changeLayout', 'changeCategoryList');
-            this.categories = options.categories;
-            this.categories.on('reset', _.bind(function() {
-                this.render();
-            }, this));
-        },
-        events: {
-            'submit': 'submitHandler',
-            'click .action-cancel': 'cancelHandler',
-            'change input[name="layout"]': 'changeLayout',
-            'change input[name="categoryList"]': 'changeCategoryList'
-        },
-        updateModel: function() {
-            var content = this.field.model.get('content'),
-                attrs = {
-                    'layout': this.$('input[name="layout"]:checked').val(),
-                    'embedcode': content && content.IsSecure ? false : this.$('#embedcode').is(':checked'),
-                    'statistics': this.$('#statistics').is(':checked'),
-                    'duration': this.$('#duration').is(':checked'),
-                    'attachments': this.$('#attachments').is(':checked'),
-                    'annotations': this.$('#annotations').is(':checked'),
-                    'links': this.$('#links').is(':checked'),
-                    'credits': this.$('#credits').is(':checked'),
-                    'socialsharing': content && content.IsSecure ? false : this.$('#socialsharing').is(':checked'),
-                    'autoplay': this.$('#autoplay').is(':checked'),
-                    'showcaptions': this.$('#showcaptions').is(':checked'),
-                    'dateproduced': this.$('#dateproduced').is(':checked'),
-                    'audiopreviewimage': this.$('#audiopreviewimage').is(':checked'),
-                    'captionsearch': this.$('#captionsearch').is(':checked')
-                };
-            if (attrs.layout === 'playlist') {
-                attrs.playlistLayout = {
-                    playlistSortBy: this.$('#playlistSortBy option:selected').val(),
-                    playlistSortDirection: this.$('input[name="playlistSortDirection"]:checked').val(),
-                    playlistSearchString: this.$('#playlistSearchString').val(),
-                    playlistCategory: this.$('#playlistCategory option:selected').val(),
-                    playlistNumberOfResults: this.$('#playlistNumberOfResults').val()
-                };
-            } else {
-                attrs.showcaseLayout = {
-                    // featuredContent: this.$('#featuredContent').is(':checked')
-                    categoryList: this.$('#categoryList').is(':checked'),
-                    categoryOrientation: this.$('input[name="categoryOrientation"]:checked').val()
-                };
-            }
-            this.field.model.set(attrs);
-        },
-        render: function() {
-            var content = this.field.model.get('content'),
-                html = this.template({
-                    i18n: this.i18n,
-                    model: this.field.model,
-                    isAudio: this.encoding && this.encoding.isAudio(),
-                    isSecure: content && content.IsSecure,
-                    categories: this.categories || new Categories([], {})
-                });
-            this.$el.html(html);
-            this.$('.accordion').accordion({
-                active: 2,
-                heightStyle: 'content',
-                collapsible: true
-            });
-            this.$el.dialog({
-                title: this.unencode(content ? content.Name : this.field.model.get('id')),
-                modal: true,
-                autoOpen: false,
-                draggable: false,
-                resizable: false,
-                dialogClass: 'ev-dialog',
-                width: Math.min(680, $(window).width() - this.config.dialogMargin),
-                height: Math.min(420, $(window).height() - this.config.dialogMargin),
-                closeText: this.i18n.formatMessage('Close')
-            });
-        },
-        changeLayout: function(e) {
-            if (e.currentTarget.value === 'playlist') {
-                this.$('.playlistOptions').show();
-                this.$('.showcaseOptions').hide();
-            } else {
-                this.$('.playlistOptions').hide();
-                this.$('.showcaseOptions').show();
-            }
-        },
-        changeCategoryList: function(e) {
-            if ($(e.currentTarget).is(':checked')) {
-                this.$('#categoryOrientationHorizontal').attr('disabled', false);
-                this.$('#categoryOrientationVertical').attr('disabled', false);
-            } else {
-                this.$('#categoryOrientationHorizontal').attr('disabled', true);
-                this.$('#categoryOrientationVertical').attr('disabled', true);
-            }
-        }
-    });
-
-});
-
-
-define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span><%= i18n.formatMessage(\'Ensemble Logo\') %></span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="<%= i18n.formatMessage(\'Media thumbnail\') %>" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <h2 class="title"><%= name %></h2>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Click to change {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Change {0}\', label) %><span></a>\n        <a href="#" class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', name) %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %><span></a>\n        <% if (type === \'video\' || showPlaylistOptions) { %>\n            <a href="#" class="action-options" title="<%= i18n.formatMessage(\'Click to manage {0} embed options\', label) %>"><i class="fa fa-cog fa-lg"></i><span><%= i18n.formatMessage(\'{0} Embed Options\', label) %><span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="<%= i18n.formatMessage(\'Click to remove {0}\', label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Remove {0}\', label) %><span></a>\n    </div>\n<% } else { %>\n    <h3 class="title"><em><%= i18n.formatMessage(\'Add {0}\', label) %></em></h3>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Click to Choose {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Choose {0}\', label) %><span></a>\n    </div>\n<% } %>\n';});
-
-define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','ev-script/collections/categories','text!ev-script/templates/field.html'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        BaseView = require('ev-script/views/base'),
-        VideoSettings = require('ev-script/models/video-settings'),
-        PlaylistSettings = require('ev-script/models/playlist-settings'),
-        VideoPickerView = require('ev-script/views/video-picker'),
-        VideoSettingsView = require('ev-script/views/video-settings'),
-        VideoPreviewView = require('ev-script/views/video-preview'),
-        VideoEncoding = require('ev-script/models/video-encoding'),
-        PlaylistPickerView = require('ev-script/views/playlist-picker'),
-        PlaylistSettingsView = require('ev-script/views/playlist-settings'),
-        PlaylistPreviewView = require('ev-script/views/playlist-preview'),
-        Categories = require('ev-script/collections/categories');
-
-    /*
-     * View for our field (element that we set with the selected content identifier)
-     */
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/field.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler', 'resizePicker');
-            this.$field = options.$field;
-            this.showChoose = true;
-            var pickerOptions = {
-                id: this.id + '-picker',
-                tagName: 'div',
-                className: 'ev-' + this.model.get('type') + '-picker',
-                field: this,
-                appId: this.appId
-            };
-            var settingsOptions = {
-                id: this.id + '-settings',
-                tagName: 'div',
-                className: 'ev-settings',
-                field: this,
-                appId: this.appId
-            };
-            if (this.model instanceof VideoSettings) {
-                this.modelClass = VideoSettings;
-                this.pickerClass = VideoPickerView;
-                this.settingsClass = VideoSettingsView;
-                this.previewClass = VideoPreviewView;
-                this.encoding = new VideoEncoding({}, {
-                    appId: this.appId
-                });
-                if (!this.model.isNew()) {
-                    this.encoding.set({
-                        fetchId: this.model.id
-                    });
-                    this.encoding.fetch();
-                }
-                this.model.on('change:id', _.bind(function() {
-                    // Only fetch encoding if identifier is set
-                    if (this.model.id) {
-                        this.encoding.set({
-                            fetchId: this.model.id
-                        });
-                        this.encoding.fetch({
-                            success: _.bind(function(response) {
-                                // TODO - this is getting messy
-                                this.encoding.updateSettingsModel(this.model);
-                                // Picker model is a copy so need to update that as well
-                                this.encoding.updateSettingsModel(this.picker.model);
-                            }, this)
-                        });
-                    } else {
-                        this.encoding.clear();
-                    }
-                }, this));
-                _.extend(settingsOptions, {
-                    encoding: this.encoding
-                });
-            } else if (this.model instanceof PlaylistSettings) {
-                this.modelClass = PlaylistSettings;
-                this.pickerClass = PlaylistPickerView;
-                this.settingsClass = PlaylistSettingsView;
-                this.previewClass = PlaylistPreviewView;
-                this.categories = new Categories([], {
-                    appId: this.appId
-                });
-                if (!this.model.isNew()) {
-                    this.categories.playlistId = this.model.id;
-                    this.categories.fetch({ reset: true });
-                }
-                this.model.on('change:id', _.bind(function() {
-                    // Only fetch categories if identifier is set
-                    if (this.model.id) {
-                        this.categories.playlistId = this.model.id;
-                        this.categories.fetch({ reset: true });
-                    } else {
-                        this.categories.reset([], { silent: true });
-                        this.categories.playlistId = '';
-                    }
-                }, this));
-                _.extend(settingsOptions, {
-                    categories: this.categories
-                });
-            }
-            this.picker = new this.pickerClass(_.extend({}, pickerOptions, {
-                // We don't want to modify field model until we actually pick a new video...so use a copy as our current model
-                model: new this.modelClass(this.model.toJSON()),
-            }));
-            this.settings = new this.settingsClass(settingsOptions);
-            this.$field.after(this.picker.$el);
-            this.renderActions();
-            this.model.on('change', _.bind(function() {
-                if (!this.model.isNew()) {
-                    var json = this.model.toJSON();
-                    this.$field.val(JSON.stringify(json));
-                    this.appEvents.trigger('fieldUpdated', this.$field, json);
-                    this.renderActions();
-                }
-            }, this));
-            this.appEvents.on('showPicker', function(fieldId) {
-                if (this.id === fieldId) {
-                    this.$('.action-choose').hide();
-                    this.showChoose = false;
-                    // We only want one picker showing at a time so notify all fields to hide them (unless it's ours)
-                    if (this.config.hidePickers) {
-                        this.appEvents.trigger('hidePickers', this.id);
-                    }
-                    this.resizePicker();
-                }
-            }, this);
-            this.appEvents.on('hidePicker', function(fieldId) {
-                if (this.id === fieldId) {
-                    this.$('.action-choose').show();
-                    this.showChoose = true;
-                }
-            }, this);
-            this.appEvents.on('hidePickers', function(fieldId) {
-                // When the picker for our field is hidden we need need to show our 'Choose' button
-                if (!fieldId || (this.id !== fieldId)) {
-                    this.$('.action-choose').show();
-                    this.showChoose = true;
-                }
-            }, this);
-            this.appEvents.on('resize', _.bind(function() {
-                this.resizePicker();
-            }, this));
-        },
-        events: {
-            'click .action-choose': 'chooseHandler',
-            'click .action-preview': 'previewHandler',
-            'click .action-options': 'optionsHandler',
-            'click .action-remove': 'removeHandler'
-        },
-        chooseHandler: function(e) {
-            this.appEvents.trigger('showPicker', this.id);
-            e.preventDefault();
-        },
-        optionsHandler: function(e) {
-            this.settings.show();
-            e.preventDefault();
-        },
-        removeHandler: function(e) {
-            this.model.clear();
-            this.$field.val('');
-            // Silent here because we don't want to trigger our change handler above
-            // (which would set the field value to our model defaults)
-            this.model.set(this.model.defaults, {
-                silent: true
-            });
-            this.appEvents.trigger('fieldUpdated', this.$field);
-            this.renderActions();
-            e.preventDefault();
-        },
-        previewHandler: function(e) {
-            var element = e.currentTarget;
-            var previewView = new this.previewClass({
-                el: element,
-                encoding: this.encoding,
-                model: this.model,
-                picker: this.picker,
-                appId: this.appId
-            });
-            e.preventDefault();
-        },
-        renderActions: function() {
-            var ensembleUrl = this.config.ensembleUrl,
-                name, label, type, thumbnailUrl;
-            if (this.model instanceof VideoSettings) {
-                label = this.i18n.formatMessage('Media');
-                type = 'video';
-            } else {
-                label = this.i18n.formatMessage('Playlist');
-                type = 'playlist';
-            }
-            if (this.model.id) {
-                name = this.model.id;
-                var content = this.model.get('content');
-                if (content) {
-                    name = content.Name || content.Title;
-                    // Validate thumbnailUrl as it could potentially have been modified and we want to protect against XSRF
-                    // (a GET shouldn't have side effects...but make sure we actually have a thumbnail url just in case)
-                    var thumbPath = this.info.checkVersion('>=4.5.0') ? '\/api\/data\/image\/' : '\/app\/assets\/';
-                    var re = new RegExp('^' + ensembleUrl.toLocaleLowerCase() + thumbPath);
-                    if (content.ThumbnailUrl && re.test(content.ThumbnailUrl.toLocaleLowerCase())) {
-                        thumbnailUrl = content.ThumbnailUrl;
-                    }
-                }
-            }
-            if (!this.$actions) {
-                this.$actions = $('<div class="ev-field"/>');
-                this.$field.after(this.$actions);
-            }
-            this.$actions.html(this.template({
-                i18n: this.i18n,
-                ensembleUrl: ensembleUrl,
-                modelId: this.model.id,
-                label: label,
-                type: type,
-                name: name,
-                thumbnailUrl: thumbnailUrl,
-                showPlaylistOptions: !this.info.useLegacyEmbeds()
-            }));
-            // If our picker is shown, hide our 'Choose' button
-            if (!this.showChoose) {
-                this.$('.action-choose').hide();
-            }
-        },
-        resizePicker: function() {
-            if (this.config.fitToParent) {
-                this.picker.setHeight(this.$el.height() - this.$actions.outerHeight(true));
-            }
-        }
-    });
-
-});
-
-;(function(exports) {
-
-// export the class if we are in a Node-like system.
-if (typeof module === 'object' && module.exports === exports)
-  exports = module.exports = SemVer;
-
-// The debug function is excluded entirely from the minified version.
-
-// Note: this is the semver.org version of the spec that it implements
-// Not necessarily the package version of this code.
-exports.SEMVER_SPEC_VERSION = '2.0.0';
-
-var MAX_LENGTH = 256;
-var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
-
-// The actual regexps go on exports.re
-var re = exports.re = [];
-var src = exports.src = [];
-var R = 0;
-
-// The following Regular Expressions can be used for tokenizing,
-// validating, and parsing SemVer version strings.
-
-// ## Numeric Identifier
-// A single `0`, or a non-zero digit followed by zero or more digits.
-
-var NUMERICIDENTIFIER = R++;
-src[NUMERICIDENTIFIER] = '0|[1-9]\\d*';
-var NUMERICIDENTIFIERLOOSE = R++;
-src[NUMERICIDENTIFIERLOOSE] = '[0-9]+';
-
-
-// ## Non-numeric Identifier
-// Zero or more digits, followed by a letter or hyphen, and then zero or
-// more letters, digits, or hyphens.
-
-var NONNUMERICIDENTIFIER = R++;
-src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-][a-zA-Z0-9-]*';
-
-
-// ## Main Version
-// Three dot-separated numeric identifiers.
-
-var MAINVERSION = R++;
-src[MAINVERSION] = '(' + src[NUMERICIDENTIFIER] + ')\\.' +
-                   '(' + src[NUMERICIDENTIFIER] + ')\\.' +
-                   '(' + src[NUMERICIDENTIFIER] + ')';
-
-var MAINVERSIONLOOSE = R++;
-src[MAINVERSIONLOOSE] = '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
-                        '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
-                        '(' + src[NUMERICIDENTIFIERLOOSE] + ')';
-
-// ## Pre-release Version Identifier
-// A numeric identifier, or a non-numeric identifier.
-
-var PRERELEASEIDENTIFIER = R++;
-src[PRERELEASEIDENTIFIER] = '(?:' + src[NUMERICIDENTIFIER] +
-                            '|' + src[NONNUMERICIDENTIFIER] + ')';
-
-var PRERELEASEIDENTIFIERLOOSE = R++;
-src[PRERELEASEIDENTIFIERLOOSE] = '(?:' + src[NUMERICIDENTIFIERLOOSE] +
-                                 '|' + src[NONNUMERICIDENTIFIER] + ')';
-
-
-// ## Pre-release Version
-// Hyphen, followed by one or more dot-separated pre-release version
-// identifiers.
-
-var PRERELEASE = R++;
-src[PRERELEASE] = '(?:-(' + src[PRERELEASEIDENTIFIER] +
-                  '(?:\\.' + src[PRERELEASEIDENTIFIER] + ')*))';
-
-var PRERELEASELOOSE = R++;
-src[PRERELEASELOOSE] = '(?:-?(' + src[PRERELEASEIDENTIFIERLOOSE] +
-                       '(?:\\.' + src[PRERELEASEIDENTIFIERLOOSE] + ')*))';
-
-// ## Build Metadata Identifier
-// Any combination of digits, letters, or hyphens.
-
-var BUILDIDENTIFIER = R++;
-src[BUILDIDENTIFIER] = '[0-9A-Za-z-]+';
-
-// ## Build Metadata
-// Plus sign, followed by one or more period-separated build metadata
-// identifiers.
-
-var BUILD = R++;
-src[BUILD] = '(?:\\+(' + src[BUILDIDENTIFIER] +
-             '(?:\\.' + src[BUILDIDENTIFIER] + ')*))';
-
-
-// ## Full Version String
-// A main version, followed optionally by a pre-release version and
-// build metadata.
-
-// Note that the only major, minor, patch, and pre-release sections of
-// the version string are capturing groups.  The build metadata is not a
-// capturing group, because it should not ever be used in version
-// comparison.
-
-var FULL = R++;
-var FULLPLAIN = 'v?' + src[MAINVERSION] +
-                src[PRERELEASE] + '?' +
-                src[BUILD] + '?';
-
-src[FULL] = '^' + FULLPLAIN + '$';
-
-// like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
-// also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
-// common in the npm registry.
-var LOOSEPLAIN = '[v=\\s]*' + src[MAINVERSIONLOOSE] +
-                 src[PRERELEASELOOSE] + '?' +
-                 src[BUILD] + '?';
-
-var LOOSE = R++;
-src[LOOSE] = '^' + LOOSEPLAIN + '$';
-
-var GTLT = R++;
-src[GTLT] = '((?:<|>)?=?)';
-
-// Something like "2.*" or "1.2.x".
-// Note that "x.x" is a valid xRange identifer, meaning "any version"
-// Only the first item is strictly required.
-var XRANGEIDENTIFIERLOOSE = R++;
-src[XRANGEIDENTIFIERLOOSE] = src[NUMERICIDENTIFIERLOOSE] + '|x|X|\\*';
-var XRANGEIDENTIFIER = R++;
-src[XRANGEIDENTIFIER] = src[NUMERICIDENTIFIER] + '|x|X|\\*';
-
-var XRANGEPLAIN = R++;
-src[XRANGEPLAIN] = '[v=\\s]*(' + src[XRANGEIDENTIFIER] + ')' +
-                   '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
-                   '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
-                   '(?:' + src[PRERELEASE] + ')?' +
-                   src[BUILD] + '?' +
-                   ')?)?';
-
-var XRANGEPLAINLOOSE = R++;
-src[XRANGEPLAINLOOSE] = '[v=\\s]*(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
-                        '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
-                        '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
-                        '(?:' + src[PRERELEASELOOSE] + ')?' +
-                        src[BUILD] + '?' +
-                        ')?)?';
-
-var XRANGE = R++;
-src[XRANGE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAIN] + '$';
-var XRANGELOOSE = R++;
-src[XRANGELOOSE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAINLOOSE] + '$';
-
-// Tilde ranges.
-// Meaning is "reasonably at or greater than"
-var LONETILDE = R++;
-src[LONETILDE] = '(?:~>?)';
-
-var TILDETRIM = R++;
-src[TILDETRIM] = '(\\s*)' + src[LONETILDE] + '\\s+';
-re[TILDETRIM] = new RegExp(src[TILDETRIM], 'g');
-var tildeTrimReplace = '$1~';
-
-var TILDE = R++;
-src[TILDE] = '^' + src[LONETILDE] + src[XRANGEPLAIN] + '$';
-var TILDELOOSE = R++;
-src[TILDELOOSE] = '^' + src[LONETILDE] + src[XRANGEPLAINLOOSE] + '$';
-
-// Caret ranges.
-// Meaning is "at least and backwards compatible with"
-var LONECARET = R++;
-src[LONECARET] = '(?:\\^)';
-
-var CARETTRIM = R++;
-src[CARETTRIM] = '(\\s*)' + src[LONECARET] + '\\s+';
-re[CARETTRIM] = new RegExp(src[CARETTRIM], 'g');
-var caretTrimReplace = '$1^';
-
-var CARET = R++;
-src[CARET] = '^' + src[LONECARET] + src[XRANGEPLAIN] + '$';
-var CARETLOOSE = R++;
-src[CARETLOOSE] = '^' + src[LONECARET] + src[XRANGEPLAINLOOSE] + '$';
-
-// A simple gt/lt/eq thing, or just "" to indicate "any version"
-var COMPARATORLOOSE = R++;
-src[COMPARATORLOOSE] = '^' + src[GTLT] + '\\s*(' + LOOSEPLAIN + ')$|^$';
-var COMPARATOR = R++;
-src[COMPARATOR] = '^' + src[GTLT] + '\\s*(' + FULLPLAIN + ')$|^$';
-
-
-// An expression to strip any whitespace between the gtlt and the thing
-// it modifies, so that `> 1.2.3` ==> `>1.2.3`
-var COMPARATORTRIM = R++;
-src[COMPARATORTRIM] = '(\\s*)' + src[GTLT] +
-                      '\\s*(' + LOOSEPLAIN + '|' + src[XRANGEPLAIN] + ')';
-
-// this one has to use the /g flag
-re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], 'g');
-var comparatorTrimReplace = '$1$2$3';
-
-
-// Something like `1.2.3 - 1.2.4`
-// Note that these all use the loose form, because they'll be
-// checked against either the strict or loose comparator form
-// later.
-var HYPHENRANGE = R++;
-src[HYPHENRANGE] = '^\\s*(' + src[XRANGEPLAIN] + ')' +
-                   '\\s+-\\s+' +
-                   '(' + src[XRANGEPLAIN] + ')' +
-                   '\\s*$';
-
-var HYPHENRANGELOOSE = R++;
-src[HYPHENRANGELOOSE] = '^\\s*(' + src[XRANGEPLAINLOOSE] + ')' +
-                        '\\s+-\\s+' +
-                        '(' + src[XRANGEPLAINLOOSE] + ')' +
-                        '\\s*$';
-
-// Star ranges basically just allow anything at all.
-var STAR = R++;
-src[STAR] = '(<|>)?=?\\s*\\*';
-
-// Compile to actual regexp objects.
-// All are flag-free, unless they were created above with a flag.
-for (var i = 0; i < R; i++) {
-  ;
-  if (!re[i])
-    re[i] = new RegExp(src[i]);
-}
-
-exports.parse = parse;
-function parse(version, loose) {
-  if (version instanceof SemVer)
-    return version;
-
-  if (typeof version !== 'string')
-    return null;
-
-  if (version.length > MAX_LENGTH)
-    return null;
-
-  var r = loose ? re[LOOSE] : re[FULL];
-  if (!r.test(version))
-    return null;
-
-  try {
-    return new SemVer(version, loose);
-  } catch (er) {
-    return null;
-  }
-}
-
-exports.valid = valid;
-function valid(version, loose) {
-  var v = parse(version, loose);
-  return v ? v.version : null;
-}
-
-
-exports.clean = clean;
-function clean(version, loose) {
-  var s = parse(version.trim().replace(/^[=v]+/, ''), loose);
-  return s ? s.version : null;
-}
-
-exports.SemVer = SemVer;
-
-function SemVer(version, loose) {
-  if (version instanceof SemVer) {
-    if (version.loose === loose)
-      return version;
-    else
-      version = version.version;
-  } else if (typeof version !== 'string') {
-    throw new TypeError('Invalid Version: ' + version);
-  }
-
-  if (version.length > MAX_LENGTH)
-    throw new TypeError('version is longer than ' + MAX_LENGTH + ' characters')
-
-  if (!(this instanceof SemVer))
-    return new SemVer(version, loose);
-
-  ;
-  this.loose = loose;
-  var m = version.trim().match(loose ? re[LOOSE] : re[FULL]);
-
-  if (!m)
-    throw new TypeError('Invalid Version: ' + version);
-
-  this.raw = version;
-
-  // these are actually numbers
-  this.major = +m[1];
-  this.minor = +m[2];
-  this.patch = +m[3];
-
-  if (this.major > MAX_SAFE_INTEGER || this.major < 0)
-    throw new TypeError('Invalid major version')
-
-  if (this.minor > MAX_SAFE_INTEGER || this.minor < 0)
-    throw new TypeError('Invalid minor version')
-
-  if (this.patch > MAX_SAFE_INTEGER || this.patch < 0)
-    throw new TypeError('Invalid patch version')
-
-  // numberify any prerelease numeric ids
-  if (!m[4])
-    this.prerelease = [];
-  else
-    this.prerelease = m[4].split('.').map(function(id) {
-      if (/^[0-9]+$/.test(id)) {
-        var num = +id
-        if (num >= 0 && num < MAX_SAFE_INTEGER)
-          return num
-      }
-      return id;
-    });
-
-  this.build = m[5] ? m[5].split('.') : [];
-  this.format();
-}
-
-SemVer.prototype.format = function() {
-  this.version = this.major + '.' + this.minor + '.' + this.patch;
-  if (this.prerelease.length)
-    this.version += '-' + this.prerelease.join('.');
-  return this.version;
-};
-
-SemVer.prototype.inspect = function() {
-  return '<SemVer "' + this + '">';
-};
-
-SemVer.prototype.toString = function() {
-  return this.version;
-};
-
-SemVer.prototype.compare = function(other) {
-  ;
-  if (!(other instanceof SemVer))
-    other = new SemVer(other, this.loose);
-
-  return this.compareMain(other) || this.comparePre(other);
-};
-
-SemVer.prototype.compareMain = function(other) {
-  if (!(other instanceof SemVer))
-    other = new SemVer(other, this.loose);
-
-  return compareIdentifiers(this.major, other.major) ||
-         compareIdentifiers(this.minor, other.minor) ||
-         compareIdentifiers(this.patch, other.patch);
-};
-
-SemVer.prototype.comparePre = function(other) {
-  if (!(other instanceof SemVer))
-    other = new SemVer(other, this.loose);
-
-  // NOT having a prerelease is > having one
-  if (this.prerelease.length && !other.prerelease.length)
-    return -1;
-  else if (!this.prerelease.length && other.prerelease.length)
-    return 1;
-  else if (!this.prerelease.length && !other.prerelease.length)
-    return 0;
-
-  var i = 0;
-  do {
-    var a = this.prerelease[i];
-    var b = other.prerelease[i];
-    ;
-    if (a === undefined && b === undefined)
-      return 0;
-    else if (b === undefined)
-      return 1;
-    else if (a === undefined)
-      return -1;
-    else if (a === b)
-      continue;
-    else
-      return compareIdentifiers(a, b);
-  } while (++i);
-};
-
-// preminor will bump the version up to the next minor release, and immediately
-// down to pre-release. premajor and prepatch work the same way.
-SemVer.prototype.inc = function(release, identifier) {
-  switch (release) {
-    case 'premajor':
-      this.prerelease.length = 0;
-      this.patch = 0;
-      this.minor = 0;
-      this.major++;
-      this.inc('pre', identifier);
-      break;
-    case 'preminor':
-      this.prerelease.length = 0;
-      this.patch = 0;
-      this.minor++;
-      this.inc('pre', identifier);
-      break;
-    case 'prepatch':
-      // If this is already a prerelease, it will bump to the next version
-      // drop any prereleases that might already exist, since they are not
-      // relevant at this point.
-      this.prerelease.length = 0;
-      this.inc('patch', identifier);
-      this.inc('pre', identifier);
-      break;
-    // If the input is a non-prerelease version, this acts the same as
-    // prepatch.
-    case 'prerelease':
-      if (this.prerelease.length === 0)
-        this.inc('patch', identifier);
-      this.inc('pre', identifier);
-      break;
-
-    case 'major':
-      // If this is a pre-major version, bump up to the same major version.
-      // Otherwise increment major.
-      // 1.0.0-5 bumps to 1.0.0
-      // 1.1.0 bumps to 2.0.0
-      if (this.minor !== 0 || this.patch !== 0 || this.prerelease.length === 0)
-        this.major++;
-      this.minor = 0;
-      this.patch = 0;
-      this.prerelease = [];
-      break;
-    case 'minor':
-      // If this is a pre-minor version, bump up to the same minor version.
-      // Otherwise increment minor.
-      // 1.2.0-5 bumps to 1.2.0
-      // 1.2.1 bumps to 1.3.0
-      if (this.patch !== 0 || this.prerelease.length === 0)
-        this.minor++;
-      this.patch = 0;
-      this.prerelease = [];
-      break;
-    case 'patch':
-      // If this is not a pre-release version, it will increment the patch.
-      // If it is a pre-release it will bump up to the same patch version.
-      // 1.2.0-5 patches to 1.2.0
-      // 1.2.0 patches to 1.2.1
-      if (this.prerelease.length === 0)
-        this.patch++;
-      this.prerelease = [];
-      break;
-    // This probably shouldn't be used publicly.
-    // 1.0.0 "pre" would become 1.0.0-0 which is the wrong direction.
-    case 'pre':
-      if (this.prerelease.length === 0)
-        this.prerelease = [0];
-      else {
-        var i = this.prerelease.length;
-        while (--i >= 0) {
-          if (typeof this.prerelease[i] === 'number') {
-            this.prerelease[i]++;
-            i = -2;
-          }
-        }
-        if (i === -1) // didn't increment anything
-          this.prerelease.push(0);
-      }
-      if (identifier) {
-        // 1.2.0-beta.1 bumps to 1.2.0-beta.2,
-        // 1.2.0-beta.fooblz or 1.2.0-beta bumps to 1.2.0-beta.0
-        if (this.prerelease[0] === identifier) {
-          if (isNaN(this.prerelease[1]))
-            this.prerelease = [identifier, 0];
-        } else
-          this.prerelease = [identifier, 0];
-      }
-      break;
-
-    default:
-      throw new Error('invalid increment argument: ' + release);
-  }
-  this.format();
-  return this;
-};
-
-exports.inc = inc;
-function inc(version, release, loose, identifier) {
-  if (typeof(loose) === 'string') {
-    identifier = loose;
-    loose = undefined;
-  }
-
-  try {
-    return new SemVer(version, loose).inc(release, identifier).version;
-  } catch (er) {
-    return null;
-  }
-}
-
-exports.diff = diff;
-function diff(version1, version2) {
-  if (eq(version1, version2)) {
-    return null;
-  } else {
-    var v1 = parse(version1);
-    var v2 = parse(version2);
-    if (v1.prerelease.length || v2.prerelease.length) {
-      for (var key in v1) {
-        if (key === 'major' || key === 'minor' || key === 'patch') {
-          if (v1[key] !== v2[key]) {
-            return 'pre'+key;
-          }
-        }
-      }
-      return 'prerelease';
-    }
-    for (var key in v1) {
-      if (key === 'major' || key === 'minor' || key === 'patch') {
-        if (v1[key] !== v2[key]) {
-          return key;
-        }
-      }
-    }
-  }
-}
-
-exports.compareIdentifiers = compareIdentifiers;
-
-var numeric = /^[0-9]+$/;
-function compareIdentifiers(a, b) {
-  var anum = numeric.test(a);
-  var bnum = numeric.test(b);
-
-  if (anum && bnum) {
-    a = +a;
-    b = +b;
-  }
-
-  return (anum && !bnum) ? -1 :
-         (bnum && !anum) ? 1 :
-         a < b ? -1 :
-         a > b ? 1 :
-         0;
-}
-
-exports.rcompareIdentifiers = rcompareIdentifiers;
-function rcompareIdentifiers(a, b) {
-  return compareIdentifiers(b, a);
-}
-
-exports.major = major;
-function major(a, loose) {
-  return new SemVer(a, loose).major;
-}
-
-exports.minor = minor;
-function minor(a, loose) {
-  return new SemVer(a, loose).minor;
-}
-
-exports.patch = patch;
-function patch(a, loose) {
-  return new SemVer(a, loose).patch;
-}
-
-exports.compare = compare;
-function compare(a, b, loose) {
-  return new SemVer(a, loose).compare(b);
-}
-
-exports.compareLoose = compareLoose;
-function compareLoose(a, b) {
-  return compare(a, b, true);
-}
-
-exports.rcompare = rcompare;
-function rcompare(a, b, loose) {
-  return compare(b, a, loose);
-}
-
-exports.sort = sort;
-function sort(list, loose) {
-  return list.sort(function(a, b) {
-    return exports.compare(a, b, loose);
-  });
-}
-
-exports.rsort = rsort;
-function rsort(list, loose) {
-  return list.sort(function(a, b) {
-    return exports.rcompare(a, b, loose);
-  });
-}
-
-exports.gt = gt;
-function gt(a, b, loose) {
-  return compare(a, b, loose) > 0;
-}
-
-exports.lt = lt;
-function lt(a, b, loose) {
-  return compare(a, b, loose) < 0;
-}
-
-exports.eq = eq;
-function eq(a, b, loose) {
-  return compare(a, b, loose) === 0;
-}
-
-exports.neq = neq;
-function neq(a, b, loose) {
-  return compare(a, b, loose) !== 0;
-}
-
-exports.gte = gte;
-function gte(a, b, loose) {
-  return compare(a, b, loose) >= 0;
-}
-
-exports.lte = lte;
-function lte(a, b, loose) {
-  return compare(a, b, loose) <= 0;
-}
-
-exports.cmp = cmp;
-function cmp(a, op, b, loose) {
-  var ret;
-  switch (op) {
-    case '===':
-      if (typeof a === 'object') a = a.version;
-      if (typeof b === 'object') b = b.version;
-      ret = a === b;
-      break;
-    case '!==':
-      if (typeof a === 'object') a = a.version;
-      if (typeof b === 'object') b = b.version;
-      ret = a !== b;
-      break;
-    case '': case '=': case '==': ret = eq(a, b, loose); break;
-    case '!=': ret = neq(a, b, loose); break;
-    case '>': ret = gt(a, b, loose); break;
-    case '>=': ret = gte(a, b, loose); break;
-    case '<': ret = lt(a, b, loose); break;
-    case '<=': ret = lte(a, b, loose); break;
-    default: throw new TypeError('Invalid operator: ' + op);
-  }
-  return ret;
-}
-
-exports.Comparator = Comparator;
-function Comparator(comp, loose) {
-  if (comp instanceof Comparator) {
-    if (comp.loose === loose)
-      return comp;
-    else
-      comp = comp.value;
-  }
-
-  if (!(this instanceof Comparator))
-    return new Comparator(comp, loose);
-
-  ;
-  this.loose = loose;
-  this.parse(comp);
-
-  if (this.semver === ANY)
-    this.value = '';
-  else
-    this.value = this.operator + this.semver.version;
-
-  ;
-}
-
-var ANY = {};
-Comparator.prototype.parse = function(comp) {
-  var r = this.loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
-  var m = comp.match(r);
-
-  if (!m)
-    throw new TypeError('Invalid comparator: ' + comp);
-
-  this.operator = m[1];
-  if (this.operator === '=')
-    this.operator = '';
-
-  // if it literally is just '>' or '' then allow anything.
-  if (!m[2])
-    this.semver = ANY;
-  else
-    this.semver = new SemVer(m[2], this.loose);
-};
-
-Comparator.prototype.inspect = function() {
-  return '<SemVer Comparator "' + this + '">';
-};
-
-Comparator.prototype.toString = function() {
-  return this.value;
-};
-
-Comparator.prototype.test = function(version) {
-  ;
-
-  if (this.semver === ANY)
-    return true;
-
-  if (typeof version === 'string')
-    version = new SemVer(version, this.loose);
-
-  return cmp(version, this.operator, this.semver, this.loose);
-};
-
-
-exports.Range = Range;
-function Range(range, loose) {
-  if ((range instanceof Range) && range.loose === loose)
-    return range;
-
-  if (!(this instanceof Range))
-    return new Range(range, loose);
-
-  this.loose = loose;
-
-  // First, split based on boolean or ||
-  this.raw = range;
-  this.set = range.split(/\s*\|\|\s*/).map(function(range) {
-    return this.parseRange(range.trim());
-  }, this).filter(function(c) {
-    // throw out any that are not relevant for whatever reason
-    return c.length;
-  });
-
-  if (!this.set.length) {
-    throw new TypeError('Invalid SemVer Range: ' + range);
-  }
-
-  this.format();
-}
-
-Range.prototype.inspect = function() {
-  return '<SemVer Range "' + this.range + '">';
-};
-
-Range.prototype.format = function() {
-  this.range = this.set.map(function(comps) {
-    return comps.join(' ').trim();
-  }).join('||').trim();
-  return this.range;
-};
-
-Range.prototype.toString = function() {
-  return this.range;
-};
-
-Range.prototype.parseRange = function(range) {
-  var loose = this.loose;
-  range = range.trim();
-  ;
-  // `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
-  var hr = loose ? re[HYPHENRANGELOOSE] : re[HYPHENRANGE];
-  range = range.replace(hr, hyphenReplace);
-  ;
-  // `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
-  range = range.replace(re[COMPARATORTRIM], comparatorTrimReplace);
-  ;
-
-  // `~ 1.2.3` => `~1.2.3`
-  range = range.replace(re[TILDETRIM], tildeTrimReplace);
-
-  // `^ 1.2.3` => `^1.2.3`
-  range = range.replace(re[CARETTRIM], caretTrimReplace);
-
-  // normalize spaces
-  range = range.split(/\s+/).join(' ');
-
-  // At this point, the range is completely trimmed and
-  // ready to be split into comparators.
-
-  var compRe = loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
-  var set = range.split(' ').map(function(comp) {
-    return parseComparator(comp, loose);
-  }).join(' ').split(/\s+/);
-  if (this.loose) {
-    // in loose mode, throw out any that are not valid comparators
-    set = set.filter(function(comp) {
-      return !!comp.match(compRe);
-    });
-  }
-  set = set.map(function(comp) {
-    return new Comparator(comp, loose);
-  });
-
-  return set;
-};
-
-// Mostly just for testing and legacy API reasons
-exports.toComparators = toComparators;
-function toComparators(range, loose) {
-  return new Range(range, loose).set.map(function(comp) {
-    return comp.map(function(c) {
-      return c.value;
-    }).join(' ').trim().split(' ');
-  });
-}
-
-// comprised of xranges, tildes, stars, and gtlt's at this point.
-// already replaced the hyphen ranges
-// turn into a set of JUST comparators.
-function parseComparator(comp, loose) {
-  ;
-  comp = replaceCarets(comp, loose);
-  ;
-  comp = replaceTildes(comp, loose);
-  ;
-  comp = replaceXRanges(comp, loose);
-  ;
-  comp = replaceStars(comp, loose);
-  ;
-  return comp;
-}
-
-function isX(id) {
-  return !id || id.toLowerCase() === 'x' || id === '*';
-}
-
-// ~, ~> --> * (any, kinda silly)
-// ~2, ~2.x, ~2.x.x, ~>2, ~>2.x ~>2.x.x --> >=2.0.0 <3.0.0
-// ~2.0, ~2.0.x, ~>2.0, ~>2.0.x --> >=2.0.0 <2.1.0
-// ~1.2, ~1.2.x, ~>1.2, ~>1.2.x --> >=1.2.0 <1.3.0
-// ~1.2.3, ~>1.2.3 --> >=1.2.3 <1.3.0
-// ~1.2.0, ~>1.2.0 --> >=1.2.0 <1.3.0
-function replaceTildes(comp, loose) {
-  return comp.trim().split(/\s+/).map(function(comp) {
-    return replaceTilde(comp, loose);
-  }).join(' ');
-}
-
-function replaceTilde(comp, loose) {
-  var r = loose ? re[TILDELOOSE] : re[TILDE];
-  return comp.replace(r, function(_, M, m, p, pr) {
-    ;
-    var ret;
-
-    if (isX(M))
-      ret = '';
-    else if (isX(m))
-      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
-    else if (isX(p))
-      // ~1.2 == >=1.2.0- <1.3.0-
-      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
-    else if (pr) {
-      ;
-      if (pr.charAt(0) !== '-')
-        pr = '-' + pr;
-      ret = '>=' + M + '.' + m + '.' + p + pr +
-            ' <' + M + '.' + (+m + 1) + '.0';
-    } else
-      // ~1.2.3 == >=1.2.3 <1.3.0
-      ret = '>=' + M + '.' + m + '.' + p +
-            ' <' + M + '.' + (+m + 1) + '.0';
-
-    ;
-    return ret;
-  });
-}
-
-// ^ --> * (any, kinda silly)
-// ^2, ^2.x, ^2.x.x --> >=2.0.0 <3.0.0
-// ^2.0, ^2.0.x --> >=2.0.0 <3.0.0
-// ^1.2, ^1.2.x --> >=1.2.0 <2.0.0
-// ^1.2.3 --> >=1.2.3 <2.0.0
-// ^1.2.0 --> >=1.2.0 <2.0.0
-function replaceCarets(comp, loose) {
-  return comp.trim().split(/\s+/).map(function(comp) {
-    return replaceCaret(comp, loose);
-  }).join(' ');
-}
-
-function replaceCaret(comp, loose) {
-  ;
-  var r = loose ? re[CARETLOOSE] : re[CARET];
-  return comp.replace(r, function(_, M, m, p, pr) {
-    ;
-    var ret;
-
-    if (isX(M))
-      ret = '';
-    else if (isX(m))
-      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
-    else if (isX(p)) {
-      if (M === '0')
-        ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
-      else
-        ret = '>=' + M + '.' + m + '.0 <' + (+M + 1) + '.0.0';
-    } else if (pr) {
-      ;
-      if (pr.charAt(0) !== '-')
-        pr = '-' + pr;
-      if (M === '0') {
-        if (m === '0')
-          ret = '>=' + M + '.' + m + '.' + p + pr +
-                ' <' + M + '.' + m + '.' + (+p + 1);
-        else
-          ret = '>=' + M + '.' + m + '.' + p + pr +
-                ' <' + M + '.' + (+m + 1) + '.0';
-      } else
-        ret = '>=' + M + '.' + m + '.' + p + pr +
-              ' <' + (+M + 1) + '.0.0';
-    } else {
-      ;
-      if (M === '0') {
-        if (m === '0')
-          ret = '>=' + M + '.' + m + '.' + p +
-                ' <' + M + '.' + m + '.' + (+p + 1);
-        else
-          ret = '>=' + M + '.' + m + '.' + p +
-                ' <' + M + '.' + (+m + 1) + '.0';
-      } else
-        ret = '>=' + M + '.' + m + '.' + p +
-              ' <' + (+M + 1) + '.0.0';
-    }
-
-    ;
-    return ret;
-  });
-}
-
-function replaceXRanges(comp, loose) {
-  ;
-  return comp.split(/\s+/).map(function(comp) {
-    return replaceXRange(comp, loose);
-  }).join(' ');
-}
-
-function replaceXRange(comp, loose) {
-  comp = comp.trim();
-  var r = loose ? re[XRANGELOOSE] : re[XRANGE];
-  return comp.replace(r, function(ret, gtlt, M, m, p, pr) {
-    ;
-    var xM = isX(M);
-    var xm = xM || isX(m);
-    var xp = xm || isX(p);
-    var anyX = xp;
-
-    if (gtlt === '=' && anyX)
-      gtlt = '';
-
-    if (xM) {
-      if (gtlt === '>' || gtlt === '<') {
-        // nothing is allowed
-        ret = '<0.0.0';
-      } else {
-        // nothing is forbidden
-        ret = '*';
-      }
-    } else if (gtlt && anyX) {
-      // replace X with 0
-      if (xm)
-        m = 0;
-      if (xp)
-        p = 0;
-
-      if (gtlt === '>') {
-        // >1 => >=2.0.0
-        // >1.2 => >=1.3.0
-        // >1.2.3 => >= 1.2.4
-        gtlt = '>=';
-        if (xm) {
-          M = +M + 1;
-          m = 0;
-          p = 0;
-        } else if (xp) {
-          m = +m + 1;
-          p = 0;
-        }
-      } else if (gtlt === '<=') {
-        // <=0.7.x is actually <0.8.0, since any 0.7.x should
-        // pass.  Similarly, <=7.x is actually <8.0.0, etc.
-        gtlt = '<'
-        if (xm)
-          M = +M + 1
-        else
-          m = +m + 1
-      }
-
-      ret = gtlt + M + '.' + m + '.' + p;
-    } else if (xm) {
-      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
-    } else if (xp) {
-      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
-    }
-
-    ;
-
-    return ret;
-  });
-}
-
-// Because * is AND-ed with everything else in the comparator,
-// and '' means "any version", just remove the *s entirely.
-function replaceStars(comp, loose) {
-  ;
-  // Looseness is ignored here.  star is always as loose as it gets!
-  return comp.trim().replace(re[STAR], '');
-}
-
-// This function is passed to string.replace(re[HYPHENRANGE])
-// M, m, patch, prerelease, build
-// 1.2 - 3.4.5 => >=1.2.0 <=3.4.5
-// 1.2.3 - 3.4 => >=1.2.0 <3.5.0 Any 3.4.x will do
-// 1.2 - 3.4 => >=1.2.0 <3.5.0
-function hyphenReplace($0,
-                       from, fM, fm, fp, fpr, fb,
-                       to, tM, tm, tp, tpr, tb) {
-
-  if (isX(fM))
-    from = '';
-  else if (isX(fm))
-    from = '>=' + fM + '.0.0';
-  else if (isX(fp))
-    from = '>=' + fM + '.' + fm + '.0';
-  else
-    from = '>=' + from;
-
-  if (isX(tM))
-    to = '';
-  else if (isX(tm))
-    to = '<' + (+tM + 1) + '.0.0';
-  else if (isX(tp))
-    to = '<' + tM + '.' + (+tm + 1) + '.0';
-  else if (tpr)
-    to = '<=' + tM + '.' + tm + '.' + tp + '-' + tpr;
-  else
-    to = '<=' + to;
-
-  return (from + ' ' + to).trim();
-}
-
-
-// if ANY of the sets match ALL of its comparators, then pass
-Range.prototype.test = function(version) {
-  if (!version)
-    return false;
-
-  if (typeof version === 'string')
-    version = new SemVer(version, this.loose);
-
-  for (var i = 0; i < this.set.length; i++) {
-    if (testSet(this.set[i], version))
-      return true;
-  }
-  return false;
-};
-
-function testSet(set, version) {
-  for (var i = 0; i < set.length; i++) {
-    if (!set[i].test(version))
-      return false;
-  }
-
-  if (version.prerelease.length) {
-    // Find the set of versions that are allowed to have prereleases
-    // For example, ^1.2.3-pr.1 desugars to >=1.2.3-pr.1 <2.0.0
-    // That should allow `1.2.3-pr.2` to pass.
-    // However, `1.2.4-alpha.notready` should NOT be allowed,
-    // even though it's within the range set by the comparators.
-    for (var i = 0; i < set.length; i++) {
-      ;
-      if (set[i].semver === ANY)
-        continue;
-
-      if (set[i].semver.prerelease.length > 0) {
-        var allowed = set[i].semver;
-        if (allowed.major === version.major &&
-            allowed.minor === version.minor &&
-            allowed.patch === version.patch)
-          return true;
-      }
-    }
-
-    // Version has a -pre, but it's not one of the ones we like.
-    return false;
-  }
-
-  return true;
-}
-
-exports.satisfies = satisfies;
-function satisfies(version, range, loose) {
-  try {
-    range = new Range(range, loose);
-  } catch (er) {
-    return false;
-  }
-  return range.test(version);
-}
-
-exports.maxSatisfying = maxSatisfying;
-function maxSatisfying(versions, range, loose) {
-  return versions.filter(function(version) {
-    return satisfies(version, range, loose);
-  }).sort(function(a, b) {
-    return rcompare(a, b, loose);
-  })[0] || null;
-}
-
-exports.validRange = validRange;
-function validRange(range, loose) {
-  try {
-    // Return '*' instead of '' so that truthiness works.
-    // This will throw if it's invalid anyway
-    return new Range(range, loose).range || '*';
-  } catch (er) {
-    return null;
-  }
-}
-
-// Determine if version is less than all the versions possible in the range
-exports.ltr = ltr;
-function ltr(version, range, loose) {
-  return outside(version, range, '<', loose);
-}
-
-// Determine if version is greater than all the versions possible in the range.
-exports.gtr = gtr;
-function gtr(version, range, loose) {
-  return outside(version, range, '>', loose);
-}
-
-exports.outside = outside;
-function outside(version, range, hilo, loose) {
-  version = new SemVer(version, loose);
-  range = new Range(range, loose);
-
-  var gtfn, ltefn, ltfn, comp, ecomp;
-  switch (hilo) {
-    case '>':
-      gtfn = gt;
-      ltefn = lte;
-      ltfn = lt;
-      comp = '>';
-      ecomp = '>=';
-      break;
-    case '<':
-      gtfn = lt;
-      ltefn = gte;
-      ltfn = gt;
-      comp = '<';
-      ecomp = '<=';
-      break;
-    default:
-      throw new TypeError('Must provide a hilo val of "<" or ">"');
-  }
-
-  // If it satisifes the range it is not outside
-  if (satisfies(version, range, loose)) {
-    return false;
-  }
-
-  // From now on, variable terms are as if we're in "gtr" mode.
-  // but note that everything is flipped for the "ltr" function.
-
-  for (var i = 0; i < range.set.length; ++i) {
-    var comparators = range.set[i];
-
-    var high = null;
-    var low = null;
-
-    comparators.forEach(function(comparator) {
-      if (comparator.semver === ANY) {
-        comparator = new Comparator('>=0.0.0')
-      }
-      high = high || comparator;
-      low = low || comparator;
-      if (gtfn(comparator.semver, high.semver, loose)) {
-        high = comparator;
-      } else if (ltfn(comparator.semver, low.semver, loose)) {
-        low = comparator;
-      }
-    });
-
-    // If the edge version comparator has a operator then our version
-    // isn't outside it
-    if (high.operator === comp || high.operator === ecomp) {
-      return false;
-    }
-
-    // If the lowest version comparator has an operator and our version
-    // is less than it then it isn't higher than the range
-    if ((!low.operator || low.operator === comp) &&
-        ltefn(version, low.semver)) {
-      return false;
-    } else if (low.operator === ecomp && ltfn(version, low.semver)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-// Use the define() function if we're in AMD land
-if (typeof define === 'function' && define.amd)
-  define('semver',exports);
-
-})(
-  typeof exports === 'object' ? exports :
-  typeof define === 'function' && define.amd ? {} :
-  semver = {}
-);
-
-define('ev-script/models/app-info',['require','underscore','semver','ev-script/models/base'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        semver = require('semver'),
-        BaseModel = require('ev-script/models/base');
-
-    return BaseModel.extend({
-        initialize: function(attributes, options) {
-            BaseModel.prototype.initialize.call(this, attributes, options);
-            this.requiresAuth = false;
-        },
-        url: function() {
-            var url = this.config.ensembleUrl + '/api/Info';
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        },
-        parse: function(response) {
-            return response;
-        },
-        checkVersion: function(condition) {
-            var version = this.get('ApplicationVersion');
-            return version && semver.satisfies(version, condition);
-        },
-        useLegacyEmbeds: function() {
-            return this.checkVersion('<3.12.0');
-        },
-        anthemEnabled: function() {
-            return this.checkVersion('>=4.2.0');
-        }
-    });
-
-});
-
-define('ev-script/models/current-user',['require','underscore','ev-script/models/base'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        BaseModel = require('ev-script/models/base');
-
-    return BaseModel.extend({
-        idAttribute: 'ID',
-        initialize: function(attributes, options) {
-            BaseModel.prototype.initialize.call(this, attributes, options);
-            // The API actually does require authentication...but we don't want
-            // special handling
-            this.requiresAuth = false;
-        },
-        url: function() {
-            var url = this.config.ensembleUrl + '/api/CurrentUser';
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        },
-        parse: function(response) {
-            return response.Data[0];
-        }
-    });
-
-});
-
-define('ev-script/auth/base/auth',['require','jquery','underscore','backbone','ev-script/util/events','ev-script/util/cache','ev-script/models/current-user'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        eventsUtil = require('ev-script/util/events'),
-        cacheUtil = require('ev-script/util/cache'),
-        CurrentUser = require('ev-script/models/current-user'),
-        BaseAuth = function(appId) {
-            _.bindAll(this, 'getUser', 'login', 'logout', 'isAuthenticated', 'handleUnauthorized');
-            this.appId = appId;
-            this.config = cacheUtil.getAppConfig(appId);
-            this.info = cacheUtil.getAppInfo(appId);
-            this.globalEvents = eventsUtil.getEvents('global');
-            this.appEvents = eventsUtil.getEvents(appId);
-            this.user = null;
-            this.appEvents.on('appLoaded', function() {
-                this.fetchUser();
-            }, this);
-        };
-
-    // Reusing Backbone's object model for extension
-    BaseAuth.extend = Backbone.Model.extend;
-
-    _.extend(BaseAuth.prototype, {
-        fetchUser: function() {
-            var currentUser = new CurrentUser({}, {
-                appId: this.appId
-            });
-            return currentUser.fetch({
-                success: _.bind(function(model, response, options) {
-                    this.user = model;
-                    this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
-                }, this),
-                error: _.bind(function(model, response, options) {
-                    this.user = null;
-                    this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                }, this)
-            }).promise();
-        },
-        getUser: function() {
-            return this.user;
-        },
-        // Return failed promise...subclasses should override
-        login: function(loginInfo) {
-            return $.Deferred().reject().promise();
-        },
-        // Return failed promise...subclasses should override
-        logout: function() {
-            return $.Deferred().reject().promise();
-        },
-        isAuthenticated: function() {
-            return this.user != null;
-        },
-        handleUnauthorized: function(element, authCallback) {}
-    });
-
-    return BaseAuth;
-
-});
-
-/*!
- * jQuery Cookie Plugin v1.4.1
- * https://github.com/carhartl/jquery-cookie
- *
- * Copyright 2013 Klaus Hartl
- * Released under the MIT license
- */
-(function (factory) {
-	if (typeof define === 'function' && define.amd) {
-		// AMD
-		define('jquery.cookie',['jquery'], factory);
-	} else if (typeof exports === 'object') {
-		// CommonJS
-		factory(require('jquery'));
-	} else {
-		// Browser globals
-		factory(jQuery);
-	}
-}(function ($) {
-
-	var pluses = /\+/g;
-
-	function encode(s) {
-		return config.raw ? s : encodeURIComponent(s);
-	}
-
-	function decode(s) {
-		return config.raw ? s : decodeURIComponent(s);
-	}
-
-	function stringifyCookieValue(value) {
-		return encode(config.json ? JSON.stringify(value) : String(value));
-	}
-
-	function parseCookieValue(s) {
-		if (s.indexOf('"') === 0) {
-			// This is a quoted cookie as according to RFC2068, unescape...
-			s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
-		}
-
-		try {
-			// Replace server-side written pluses with spaces.
-			// If we can't decode the cookie, ignore it, it's unusable.
-			// If we can't parse the cookie, ignore it, it's unusable.
-			s = decodeURIComponent(s.replace(pluses, ' '));
-			return config.json ? JSON.parse(s) : s;
-		} catch(e) {}
-	}
-
-	function read(s, converter) {
-		var value = config.raw ? s : parseCookieValue(s);
-		return $.isFunction(converter) ? converter(value) : value;
-	}
-
-	var config = $.cookie = function (key, value, options) {
-
-		// Write
-
-		if (value !== undefined && !$.isFunction(value)) {
-			options = $.extend({}, config.defaults, options);
-
-			if (typeof options.expires === 'number') {
-				var days = options.expires, t = options.expires = new Date();
-				t.setTime(+t + days * 864e+5);
-			}
-
-			return (document.cookie = [
-				encode(key), '=', stringifyCookieValue(value),
-				options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
-				options.path    ? '; path=' + options.path : '',
-				options.domain  ? '; domain=' + options.domain : '',
-				options.secure  ? '; secure' : ''
-			].join(''));
-		}
-
-		// Read
-
-		var result = key ? undefined : {};
-
-		// To prevent the for loop in the first place assign an empty array
-		// in case there are no cookies at all. Also prevents odd result when
-		// calling $.cookie().
-		var cookies = document.cookie ? document.cookie.split('; ') : [];
-
-		for (var i = 0, l = cookies.length; i < l; i++) {
-			var parts = cookies[i].split('=');
-			var name = decode(parts.shift());
-			var cookie = parts.join('=');
-
-			if (key && key === name) {
-				// If second argument (value) is a function it's a converter...
-				result = read(cookie, value);
-				break;
-			}
-
-			// Prevent storing a cookie that we couldn't decode.
-			if (!key && (cookie = read(cookie)) !== undefined) {
-				result[name] = cookie;
-			}
-		}
-
-		return result;
-	};
-
-	config.defaults = {};
-
-	$.removeCookie = function (key, options) {
-		if ($.cookie(key) === undefined) {
-			return false;
-		}
-
-		// Must not alter options, thus extending a fresh object...
-		$.cookie(key, '', $.extend({}, options, { expires: -1 }));
-		return !$.cookie(key);
-	};
-
-}));
-
-
-define('text!ev-script/auth/basic/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= i18n.formatMessage(\'Username\') %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= i18n.formatMessage(\'Password\') %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\n        </div>\n    </fieldset>\n</form>\n';});
-
-define('ev-script/auth/basic/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui/ui/widgets/dialog','text!ev-script/auth/basic/template.html'],function(require, template) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events');
-
-    require('jquery.cookie');
-    require('jquery-ui/ui/widgets/dialog');
-
-    return Backbone.View.extend({
-        template: _.template(require('text!ev-script/auth/basic/template.html')),
-        initialize: function(options) {
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
-            this.appEvents = eventsUtil.getEvents(this.appId);
-            this.i18n = cacheUtil.getAppI18n(this.appId);
-            this.submitCallback = options.submitCallback || function() {};
-            this.auth = options.auth;
-        },
-        render: function() {
-            var html = this.template({
-                i18n: this.i18n
-            });
-            this.$dialog = $('<div class="ev-auth"></div>');
-            this.$el.after(this.$dialog);
-            this.$dialog.dialog({
-                title: this.i18n.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
-                modal: true,
-                draggable: false,
-                resizable: false,
-                width: Math.min(540, $(window).width() - this.config.dialogMargin),
-                height: Math.min(250, $(window).height() - this.config.dialogMargin),
-                dialogClass: 'ev-dialog',
-                create: _.bind(function(event, ui) {
-                    this.$dialog.html(html);
-                }, this),
-                closeText: this.i18n.formatMessage('Close'),
-                close: _.bind(function(event, ui) {
-                    this.$dialog.dialog('destroy').remove();
-                    this.appEvents.trigger('hidePickers');
-                }, this)
-            });
-            $('form', this.$dialog).submit(_.bind(function(e) {
-                var $form = $(e.target);
-                var username = $('#username', $form).val();
-                var password = $('#password', $form).val();
-                if (username && password) {
-                    this.auth.login({
-                        username: username,
-                        password: password
-                    })
-                    .always(this.submitCallback);
-                    this.$dialog.dialog('destroy').remove();
-                }
-                e.preventDefault();
-            }, this));
-        }
-    });
-
-});
-
-define('ev-script/auth/basic/auth',['require','jquery','underscore','backbone','ev-script/auth/base/auth','ev-script/auth/basic/view','ev-script/collections/organizations'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        BaseAuth = require('ev-script/auth/base/auth'),
-        AuthView = require('ev-script/auth/basic/view'),
-        Organizations = require('ev-script/collections/organizations'),
-        // Note: This isn't really basic authentication at all...we just set
-        // cookies containing credentials to be handled by a proxy.  The proxy
-        // uses these to forward our request with a basic auth header.
-        BasicAuth = BaseAuth.extend({
-            constructor: function(appId) {
-                BasicAuth.__super__.constructor.call(this, appId);
-            },
-            fetchUser: function() {
-                // Hack to handle legacy (pre-3.6) API which doesn't have a
-                // currentUser endpoint.  See if we can successfully query orgs
-                // instead (probably least expensive due to minimal data) to see
-                // if valid credentials are set, then use a randomly generated
-                // user id
-                if (this.info.get('ApplicationVersion')) {
-                    return BasicAuth.__super__.fetchUser.call(this);
-                } else {
-                    var orgs = new Organizations({}, {
-                        appId: this.appId
-                    });
-                    // Don't want special treatment of failure due to
-                    // authentication in this case
-                    orgs.requiresAuth = false;
-                    return orgs.fetch({
-                        success: _.bind(function(collection, response, options) {
-                            this.user = new Backbone.Model({
-                                id: Math.floor(Math.random() * 10000000000000001).toString(16)
-                            });
-                            this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
-                        }, this),
-                        error: _.bind(function(collection, xhr, options) {
-                            this.user = null;
-                            this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                        }, this)
-                    }).promise();
-                }
-            },
-            login: function(loginInfo) {
-                var cookieOptions = { path: this.config.authPath };
-                $.cookie(this.config.ensembleUrl + '-user', loginInfo.username, _.extend({}, cookieOptions));
-                $.cookie(this.config.ensembleUrl + '-pass', loginInfo.password, _.extend({}, cookieOptions));
-                return this.fetchUser();
-            },
-            logout: function() {
-                var deferred = $.Deferred();
-                var cookieOptions = { path: this.config.authPath };
-                $.removeCookie(this.config.ensembleUrl + '-user', _.extend({}, cookieOptions));
-                $.removeCookie(this.config.ensembleUrl + '-pass', _.extend({}, cookieOptions));
-                this.user = null;
-                this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                deferred.resolve();
-                return deferred.promise();
-            },
-            handleUnauthorized: function(element, authCallback) {
-                this.logout();
-                var authView = new AuthView({
-                    el: element,
-                    submitCallback: authCallback,
-                    appId: this.appId,
-                    auth: this
-                });
-                authView.render();
-            }
-        });
-
-    return BasicAuth;
-});
-
-
-define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= i18n.formatMessage(\'Username\') %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= i18n.formatMessage(\'Password\') %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="provider"><%= i18n.formatMessage(\'Identity Provider\') %></label>\n            <select id="provider" name="provider" class="form-select"></select>\n        </div>\n        <div class="fieldWrap">\n            <label for="remember"><%= i18n.formatMessage(\'Remember Me\') %></label>\n            <input id="remember" name="remember" type="checkbox"></input>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\n            <div class="loader"></div>\n        </div>\n    </fieldset>\n</form>\n';});
-
-define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui/ui/widgets/dialog','text!ev-script/auth/forms/template.html','text!ev-script/templates/options.html'],function(require, template) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events');
-
-    require('jquery.cookie');
-    require('jquery-ui/ui/widgets/dialog');
-
-    return Backbone.View.extend({
-        template: _.template(require('text!ev-script/auth/forms/template.html')),
-        optionsTemplate: _.template(require('text!ev-script/templates/options.html')),
-        initialize: function(options) {
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
-            this.appEvents = eventsUtil.getEvents(this.appId);
-            this.i18n = cacheUtil.getAppI18n(this.appId);
-            this.submitCallback = options.submitCallback || function() {};
-            this.auth = options.auth;
-        },
-        render: function() {
-            var $html = $(this.template({
-                    i18n: this.i18n
-                })),
-                $select = $('#provider', $html).append(this.optionsTemplate({
-                    collection: this.collection,
-                    selectedId: this.config.defaultProvider
-                }));
-            this.$dialog = $('<div class="ev-auth"></div>');
-            this.$el.after(this.$dialog);
-
-            // Handle loading indicator in form
-            var $loader = $('div.loader', $html),
-                loadingOn = _.bind(function(e, xhr, settings) {
-                    $loader.addClass('loading');
-                }, this),
-                loadingOff = _.bind(function(e, xhr, settings) {
-                    $loader.removeClass('loading');
-                }, this);
-            $(window.document).on('ajaxSend', loadingOn).on('ajaxComplete', loadingOff);
-
-            this.$dialog.dialog({
-                title: this.i18n.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
-                modal: true,
-                draggable: false,
-                resizable: false,
-                width: Math.min(540, $(window).width() - this.config.dialogMargin),
-                height: Math.min(250, $(window).height() - this.config.dialogMargin),
-                dialogClass: 'ev-dialog',
-                create: _.bind(function(event, ui) {
-                    this.$dialog.html($html);
-                }, this),
-                closeText: this.i18n.formatMessage('Close'),
-                close: _.bind(function(event, ui) {
-                    $(window.document).off('ajaxSend', loadingOn).off('ajaxComplete', loadingOff);
-                    this.$dialog.dialog('destroy').remove();
-                    this.appEvents.trigger('hidePickers');
-                }, this)
-            });
-            $('form', this.$dialog).submit(_.bind(function(e) {
-                var $form = $(e.target);
-                var username = $('#username', $form).val();
-                var password = $('#password', $form).val();
-                if (username && password) {
-                    this.auth.login({
-                        username: username,
-                        password: password,
-                        authSourceId: $('#provider :selected', $form).val(),
-                        persist: $('#remember', $form).is(':checked')
-                    }).then(_.bind(function() {
-                        this.$dialog.dialog('destroy').remove();
-                        this.submitCallback();
-                    }, this));
-                }
-                e.preventDefault();
-            }, this));
-        }
-    });
-
-});
-
-define('ev-script/collections/identity-providers',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
-
-    'use strict';
-
-    var BaseCollection = require('ev-script/collections/base'),
-        cacheUtil = require('ev-script/util/cache'),
-        cached = new cacheUtil.Cache();
-
-    return BaseCollection.extend({
-        initialize: function(models, options) {
-            BaseCollection.prototype.initialize.call(this, models, options);
-            this.requiresAuth = false;
-        },
-        getCached: function(key) {
-            return cached.get(this.config.ensembleUrl);
-        },
-        setCached: function(key, resp) {
-            return cached.set(this.config.ensembleUrl, resp);
-        },
-        url: function() {
-            var api_url = this.config.ensembleUrl + '/api/IdentityProviders';
-            return this.config.urlCallback ? this.config.urlCallback(api_url) : api_url;
-        }
-    });
-
-});
-
-define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/models/current-user','ev-script/auth/forms/view','ev-script/collections/identity-providers'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        BaseAuth = require('ev-script/auth/base/auth'),
-        CurrentUser = require('ev-script/models/current-user'),
-        AuthView = require('ev-script/auth/forms/view'),
-        IdentityProviders = require('ev-script/collections/identity-providers'),
-        FormsAuth = BaseAuth.extend({
-            constructor: function(appId) {
-                BaseAuth.prototype.constructor.call(this, appId);
-                this.identityProviders = new IdentityProviders({}, {
-                    appId: appId
-                });
-                this.asPromise = this.identityProviders.fetch();
-            },
-            login: function(loginInfo) {
-                var url = this.config.ensembleUrl + '/api/Login';
-                return $.ajax({
-                    url: this.config.urlCallback ? this.config.urlCallback(url) : url,
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        user: loginInfo.username,
-                        password: loginInfo.password,
-                        identityProviderId: loginInfo.authSourceId,
-                        persist: loginInfo.persist
-                    },
-                    xhrFields: {
-                        withCredentials: true
-                    },
-                    success: _.bind(function(data, status, xhr) {
-                        this.user = new CurrentUser(data.Data[0], {
-                            appId: this.appId
-                        });
-                        this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
-                    }, this)
-                }).promise();
-            },
-            logout: function() {
-                var url = this.config.ensembleUrl + '/api/Logout';
-                return $.ajax({
-                    url: this.config.urlCallback ? this.config.urlCallback(url) : url,
-                    type: 'POST',
-                    xhrFields: {
-                        withCredentials: true
-                    },
-                    success: _.bind(function(data, status, xhr) {
-                        this.user = null;
-                        this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                    }, this)
-                }).promise();
-            },
-            handleUnauthorized: function(element, authCallback) {
-                this.user = null;
-                this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                this.asPromise.done(_.bind(function() {
-                    var authView = new AuthView({
-                        el: element,
-                        submitCallback: authCallback,
-                        appId: this.appId,
-                        auth: this,
-                        collection: this.identityProviders
-                    });
-                    authView.render();
-                }, this));
-            }
-        });
-
-    return FormsAuth;
 
 });
 
@@ -32015,6 +27722,4241 @@ define("urijs/punycode", function(){});
   return URI;
 }));
 
+define('ev-script/views/embed',['require','underscore','ev-script/views/base'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
+
+    return BaseView.extend({
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+        },
+        // Override to render the actual embed
+        render: function() {},
+        // Return width of embed frame
+        getFrameWidth: function() {
+            return this.model.get('width');
+        },
+        // Return height of embed frame
+        getFrameHeight: function() {
+            return this.model.get('height');
+        },
+        // Override if we can scale our embed to fit desired dimensions
+        // Maximum width available
+        // Maximum height available
+        scale: function(maxWidth, maxHeight) {}
+    });
+
+});
+
+
+define('text!ev-script/templates/video-embed.html',[],function () { return '<iframe src="<%- src %>" frameborder="0" width="<%- width %>" height="<%- frameHeight %>" allowfullscreen></iframe>';});
+
+define('ev-script/views/video-embed',['require','underscore','urijs/URI','ev-script/views/embed','text!ev-script/templates/video-embed.html'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        URI = require('urijs/URI'),
+        EmbedView = require('ev-script/views/embed');
+
+    return EmbedView.extend({
+        template: _.template(require('text!ev-script/templates/video-embed.html')),
+        initialize: function(options) {
+            EmbedView.prototype.initialize.call(this, options);
+        },
+        render: function() {
+            // Width and height really should be set by now...but use a reasonable default if not
+            var width = this.getMediaWidth(),
+                height = this.getMediaHeight(),
+                embed = this.template({
+                    src: this.getSrcUrl(width, height),
+                    width: width,
+                    height: height,
+                    frameHeight: this.getFrameHeight()
+                });
+            this.$el.html(embed);
+        },
+        getSrcUrl: function(width, height) {
+            var atLeast480 = this.info.checkVersion('>=4.8.0'),
+                id = this.model.get('id'),
+                url = URI(this.config.ensembleUrl);
+            if (atLeast480) {
+                url.path('/hapi/v1/contents/' + id + '/plugin');
+                url.addQuery('displayViewersReport', this.model.get('viewersreport'));
+            } else {
+                url.path('/app/plugin/embed.aspx');
+                url.addQuery('ID', id);
+            }
+            url.addQuery({
+                'autoPlay': this.model.get('autoplay'),
+                'displayTitle': this.model.get('showtitle'),
+                'displaySharing': this.model.get('socialsharing'),
+                'displayAnnotations': this.model.get('annotations'),
+                'displayCaptionSearch': this.model.get('captionsearch'),
+                'displayAttachments': this.model.get('attachments'),
+                'audioPreviewImage': this.model.get('audiopreviewimage'),
+                'displayLinks': this.model.get('links'),
+                'displayMetaData': this.model.get('metadata'),
+                'displayDateProduced': this.model.get('dateproduced'),
+                'displayEmbedCode': this.model.get('embedcode'),
+                'displayDownloadIcon': this.model.get('download'),
+                'showCaptions': this.model.get('showcaptions'),
+                'hideControls': true,
+                'width': width,
+                'height': height,
+                'isNewPluginEmbed': true
+            });
+            return url;
+        },
+        getMediaWidth: function() {
+            return parseInt(this.model.get('width'), 10) || 640;
+        },
+        getMediaHeight: function() {
+            return parseInt(this.model.get('height'), 10) || 360;
+        },
+        getFrameWidth: function() {
+            return this.getMediaWidth();
+        },
+        getFrameHeight: function() {
+            var height = this.getMediaHeight(),
+                isAudio = this.model.get('isaudio'),
+                audioPreviewImage = this.model.get('audiopreviewimage');
+            if (isAudio) {
+                if (this.isMenuVisible()) {
+                    height = audioPreviewImage ? height + 40 : 155;
+                } else {
+                    height = audioPreviewImage ? height : 40;
+                }
+            } else {
+                height += 40;
+            }
+            return height;
+        },
+        isMenuVisible: function() {
+            return this.model.get('showtitle') ||
+                   this.model.get('socialsharing') ||
+                   this.model.get('annotations') ||
+                   this.model.get('captionsearch') ||
+                   this.model.get('attachments') ||
+                   this.model.get('links') ||
+                   this.model.get('metadata') ||
+                   this.model.get('dateproduced') ||
+                   this.model.get('embedcode') ||
+                   this.model.get('download');
+        },
+        scale: function(maxWidth, maxHeight) {
+            var ratio,
+                embedWidth = this.getFrameWidth(),
+                embedHeight = this.getFrameHeight(),
+                mediaWidth = this.getMediaWidth(),
+                mediaHeight = this.getMediaHeight();
+            // We can't scale our audio
+            if (this.model.get('isaudio')) {
+                return;
+            }
+            while (embedWidth > maxWidth || embedHeight > maxHeight) {
+                ratio = embedWidth > maxWidth ? maxWidth / embedWidth : maxHeight / embedHeight;
+                this.model.set('width', Math.floor(mediaWidth * ratio));
+                this.model.set('height', Math.floor(mediaHeight * ratio));
+                embedWidth = this.getFrameWidth();
+                embedHeight = this.getFrameHeight();
+                mediaWidth = this.getMediaWidth();
+                mediaHeight = this.getMediaHeight();
+            }
+        }
+    });
+
+});
+
+define('ev-script/models/base',['require','jquery','underscore','backbone','ev-script/util/cache','ev-script/collections/base'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        cacheUtil = require('ev-script/util/cache'),
+        BaseCollection = require('ev-script/collections/base');
+
+    return Backbone.Model.extend({
+        initialize: function(attributes, options) {
+            this.appId = options.appId;
+            this.config = cacheUtil.getAppConfig(this.appId);
+        },
+        getCached: function() {},
+        setCached: function() {},
+        fetch: function(options) {
+            if (options && options.success) {
+                options.success = _.wrap(options.success, _.bind(function(success) {
+                    // We've successfully queried the API for something that
+                    // requires authentication but we're in an unauthenticated
+                    // state.  Double-check our authentication and proceed.
+                    var args = Array.prototype.slice.call(arguments, 1);
+                    if (this.requiresAuth && !this.auth.isAuthenticated()) {
+                        this.auth.fetchUser()
+                        .always(function() {
+                            success.apply(this, args);
+                        });
+                    } else {
+                        success.apply(this, args);
+                    }
+                }, this));
+                // TODO - maybe wrap error to handle 401?
+            }
+            return Backbone.Model.prototype.fetch.call(this, options);
+        },
+        sync: function(method, collection, options) {
+            _.defaults(options || (options = {}), {
+                xhrFields: { withCredentials: true }
+            });
+            if (method === 'read') {
+                var cached = this.getCached(options.cacheKey);
+                if (cached) {
+                    var deferred = $.Deferred();
+                    if (options.success) {
+                        deferred.done(options.success);
+                    }
+                    return deferred.resolve(cached).promise();
+                } else {
+                    // Grab the response and cache
+                    options.success = options.success || function(collection, response, options) {};
+                    options.success = _.wrap(options.success, _.bind(function(success) {
+                        this.setCached(options.cacheKey, arguments[1]);
+                        success.apply(this, Array.prototype.slice.call(arguments, 1));
+                    }, this));
+                    return Backbone.Model.prototype.sync.call(this, method, collection, options);
+                }
+            } else {
+                return Backbone.Model.prototype.sync.call(this, method, collection, options);
+            }
+        }
+    });
+
+});
+
+define('ev-script/models/video-encoding',['require','backbone','ev-script/models/base','underscore','ev-script/util/cache'],function(require) {
+
+    'use strict';
+
+    var Backbone = require('backbone'),
+        BaseModel = require('ev-script/models/base'),
+        _ = require('underscore'),
+        cacheUtil = require('ev-script/util/cache');
+
+    return BaseModel.extend({
+        idAttribute: 'videoID',
+        initialize: function(attributes, options) {
+            BaseModel.prototype.initialize.call(this, attributes, options);
+            this.requiresAuth = false;
+        },
+        // TODO - cache responses
+        getCached: function(key) {},
+        setCached: function(key, resp) {},
+        url: function() {
+            // Note the response is actually JSONP.  We'll strip the padding
+            // below with our dataFilter.
+            var url = this.config.ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        },
+        getDims: function() {
+            var dimsRaw = this.get('dimensions') || '640x360',
+                dimsStrs = dimsRaw.split('x'),
+                dims = [],
+                originalWidth = parseInt(dimsStrs[0], 10) || 640,
+                originalHeight = parseInt(dimsStrs[1], 10) || 360;
+            if (this.isAudio()) {
+                dims[0] = 400;
+                dims[1] = 26;
+            } else if (this.config.defaultVideoWidth) {
+                dims[0] = parseInt(this.config.defaultVideoWidth, 10) || 640;
+                dims[1] = Math.ceil(dims[0] / (originalWidth / originalHeight));
+            } else {
+                dims[0] = originalWidth;
+                dims[1] = originalHeight;
+            }
+            return dims;
+        },
+        getRatio: function() {
+            var dims = this.getDims();
+            return dims[0] / dims[1];
+        },
+        getWidth: function() {
+            return this.getDims()[0];
+        },
+        getHeight: function() {
+            return this.getDims()[1];
+        },
+        isAudio: function() {
+            return (/^audio/i).test(this.get('contentType') || '');
+        },
+        parse: function(response) {
+            if (_.isArray(response.dataSet.encodings)) {
+                // This is a collection, so return the highest bitrate encoding
+                return _.max(response.dataSet.encodings, function(encoding, index, encodings) {
+                    return parseInt(encoding.bitRate, 10);
+                });
+            } else {
+                return response.dataSet.encodings;
+            }
+        },
+        sync: function(method, model, options) {
+            _.extend(options, {
+                dataFilter: function(data) {
+                    // Strip padding from JSONP response
+                    var match = data.match(/\{[\s\S]*\}/);
+                    return match ? match[0] : data;
+                }
+            });
+            return Backbone.sync.call(this, method, model, options);
+        },
+        updateSettingsModel: function(settingsModel) {
+            var attrs = {
+                width: this.getWidth(),
+                height: this.getHeight(),
+                isaudio: this.isAudio()
+            };
+            // TODO - this needs to be handled better
+            // If the settings model hasn't been updated yet with default audio settings
+            // if (this.isAudio() && !settingsModel.get('isaudio')) {
+            //     _.extend(attrs, {
+            //         showtitle: false,
+            //         annotations: false,
+            //         captionsearch: false,
+            //         attachments: false,
+            //         links: false,
+            //         metadata: false,
+            //         dateproduced: false,
+            //         isaudio: true
+            //     });
+            // }
+            settingsModel.set(attrs);
+        }
+    });
+
+});
+
+define('ev-script/views/video-preview',['require','underscore','ev-script/views/preview','ev-script/views/video-embed','ev-script/models/video-encoding'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        PreviewView = require('ev-script/views/preview'),
+        VideoEmbedView = require('ev-script/views/video-embed'),
+        VideoEncoding = require('ev-script/models/video-encoding');
+
+    return PreviewView.extend({
+        embedClass: VideoEmbedView,
+        initialize: function(options) {
+            // Although our super sets this...we don't call our super init until
+            // later so we should set appId here
+            this.appId = options.appId;
+            this.encoding = options.encoding || new VideoEncoding({
+                fetchId: this.model.id
+            }, {
+                appId: this.appId
+            });
+            this.picker = options.picker;
+            var success = _.bind(function() {
+                this.encoding.updateSettingsModel(this.model);
+                // Picker model is a copy so need to update that as well
+                this.encoding.updateSettingsModel(this.picker.model);
+                PreviewView.prototype.initialize.call(this, options);
+            }, this);
+            if (this.encoding.isNew()) {
+                this.encoding.fetch({
+                    success: success,
+                    // The loader indicator will show if it detects an AJAX
+                    // request on our picker
+                    picker: this.picker
+                });
+            } else {
+                success();
+            }
+        }
+    });
+
+});
+
+/* jshint -W003 */
+/*!
+ * jQuery Expander Plugin - v1.7.0 - 2016-03-12
+ * http://plugins.learningjquery.com/expander/
+ * Copyright (c) 2016 Karl Swedberg
+ * Licensed MIT (http://www.opensource.org/licenses/mit-license.php)
+ */
+
+(function(factory) {
+  if (typeof define === 'function' && define.amd) {
+    define('jquery-expander',['jquery'], factory);
+  } else if (typeof module === 'object' && typeof module.exports === 'object') {
+    module.exports = factory;
+  } else {
+    factory(jQuery);
+  }
+})(function($) {
+  $.expander = {
+    version: '1.7.0',
+    defaults: {
+      // the number of characters at which the contents will be sliced into two parts.
+      slicePoint: 100,
+
+      // a string of characters at which to slice the contents into two parts,
+      // but only if the string appears before slicePoint
+      // Useful for slicing at the first line break, e.g. {sliceOn: '<br'}
+      sliceOn: null,
+
+      // whether to keep the last word of the summary whole (true) or let it slice in the middle of a word (false)
+      preserveWords: true,
+
+      // whether to normalize the whitespace in the data to display (true) or not (false)
+      normalizeWhitespace: true,
+
+      // whether to count and display the number of words inside the collapsed text
+      showWordCount: false,
+
+      // text to include between summary and detail. Default ' ' prevents appearance of
+      // collapsing two words into one.
+      // Was hard-coded in script; now exposed as an option to fix issue #106.
+      detailPrefix: ' ',
+
+      // What to display around the counted number of words, set to '{{count}}' to show only the number
+      wordCountText: ' ({{count}} words)',
+
+      // a threshold of sorts for whether to initially hide/collapse part of the element's contents.
+      // If after slicing the contents in two there are fewer words in the second part than
+      // the value set by widow, we won't bother hiding/collapsing anything.
+      widow: 4,
+
+      // text displayed in a link instead of the hidden part of the element.
+      // clicking this will expand/show the hidden/collapsed text
+      expandText: 'read more',
+      expandPrefix: '&hellip; ',
+
+      expandAfterSummary: false,
+
+      // Possible word endings to test against for when preserveWords: true
+      wordEnd: /(&(?:[^;]+;)?|[0-9a-zA-Z\u00C0-\u0100]+|[^\u0000-\u007F]+)$/,
+
+      // class names for summary element and detail element
+      summaryClass: 'summary',
+      detailClass: 'details',
+
+      // class names for <span> around "read-more" link and "read-less" link
+      moreClass: 'read-more',
+      lessClass: 'read-less',
+
+      // class names for <a> around "read-more" link and "read-less" link
+      moreLinkClass: 'more-link',
+      lessLinkClass: 'less-link',
+
+      // number of milliseconds after text has been expanded at which to collapse the text again.
+      // when 0, no auto-collapsing
+      collapseTimer: 0,
+
+      // effects for expanding and collapsing
+      expandEffect: 'slideDown',
+      expandSpeed: 250,
+      collapseEffect: 'slideUp',
+      collapseSpeed: 200,
+
+      // allow the user to re-collapse the expanded text.
+      userCollapse: true,
+
+      // text to use for the link to re-collapse the text
+      userCollapseText: 'read less',
+      userCollapsePrefix: ' ',
+
+      // all callback functions have the this keyword mapped to the element in the jQuery set when .expander() is called
+      onSlice: null, // function() {}
+      beforeExpand: null, // function() {},
+      afterExpand: null, // function() {},
+      onCollapse: null, // function(byUser) {}
+      afterCollapse: null // function() {}
+    }
+  };
+
+  $.fn.expander = function(options) {
+    var meth = 'init';
+
+    if (typeof options === 'string') {
+      meth = options;
+      options = {};
+    }
+
+    var opts = $.extend({}, $.expander.defaults, options);
+    var rSelfClose = /^<(?:area|br|col|embed|hr|img|input|link|meta|param).*>$/i;
+    var rAmpWordEnd = opts.wordEnd;
+    var rOpenCloseTag = /<\/?(\w+)[^>]*>/g;
+    var rOpenTag = /<(\w+)[^>]*>/g;
+    var rCloseTag = /<\/(\w+)>/g;
+    var rLastCloseTag = /(<\/([^>]+)>)\s*$/;
+    var rTagPlus = /^(<[^>]+>)+.?/;
+    var rMultiSpace = /\s\s+/g;
+    var delayedCollapse;
+
+    var removeSpaces = function(str) {
+      return opts.normalizeWhitespace ? $.trim(str || '').replace(rMultiSpace, ' ') : str;
+    };
+
+    var methods = {
+      init: function() {
+        this.each(function() {
+          var i, l, tmp, newChar, summTagless, summOpens, summCloses,
+              lastCloseTag, detailText, detailTagless, html, expand;
+          var $thisDetails, $readMore;
+          var slicePointChanged;
+          var openTagsForDetails = [];
+          var closeTagsForsummaryText = [];
+          var strayChars = '';
+          var defined = {};
+          var thisEl = this;
+          var $this = $(this);
+          var $summEl = $([]);
+          var o = $.extend({}, opts, $this.data('expander') || $.meta && $this.data() || {});
+          var hasDetails = !!$this.find('.' + o.detailClass).length;
+          var hasBlocks = !!$this.find('*').filter(function() {
+            var display = $(this).css('display');
+
+            return (/^block|table|list/).test(display);
+          }).length;
+          var el = hasBlocks ? 'div' : 'span';
+          var detailSelector = el + '.' + o.detailClass;
+          var moreClass = o.moreClass + '';
+          var lessClass = o.lessClass + '';
+          var expandSpeed = o.expandSpeed || 0;
+          var allHtml = removeSpaces($this.html());
+          var summaryText = allHtml.slice(0, o.slicePoint);
+
+          // allow multiple classes for more/less links
+          o.moreSelector = 'span.' + moreClass.split(' ').join('.');
+          o.lessSelector = 'span.' + lessClass.split(' ').join('.');
+          // bail out if we've already set up the expander on this element
+          if ($.data(this, 'expanderInit')) {
+            return;
+          }
+
+          $.data(this, 'expanderInit', true);
+          $.data(this, 'expander', o);
+          // determine which callback functions are defined
+          $.each(['onSlice','beforeExpand', 'afterExpand', 'onCollapse', 'afterCollapse'], function(index, val) {
+            defined[val] = $.isFunction(o[val]);
+          });
+
+          // back up if we're in the middle of a tag or word
+          summaryText = backup(summaryText);
+
+          // summary text sans tags length
+          summTagless = summaryText.replace(rOpenCloseTag, '').length;
+
+          // add more characters to the summary, one for each character in the tags
+          while (summTagless < o.slicePoint) {
+            newChar = allHtml.charAt(summaryText.length);
+
+            if (newChar === '<') {
+              newChar = allHtml.slice(summaryText.length).match(rTagPlus)[0];
+            }
+            summaryText += newChar;
+            summTagless++;
+          }
+
+          // SliceOn script, Closes #16, resolves #59
+          // Original SliceEarlierAt code (since modfied): Sascha Peilicke @saschpe
+          if (o.sliceOn) {
+            slicePointChanged = changeSlicePoint({
+              sliceOn: o.sliceOn,
+              slicePoint: o.slicePoint,
+              allHtml: allHtml,
+              summaryText: summaryText
+            });
+
+            summaryText = slicePointChanged.summaryText;
+          }
+
+          summaryText = backup(summaryText, o.preserveWords && allHtml.slice(summaryText.length).length);
+
+          // separate open tags from close tags and clean up the lists
+          summOpens = summaryText.match(rOpenTag) || [];
+          summCloses = summaryText.match(rCloseTag) || [];
+
+          // filter out self-closing tags
+          tmp = [];
+          $.each(summOpens, function(index, val) {
+            if (!rSelfClose.test(val)) {
+              tmp.push(val);
+            }
+          });
+          summOpens = tmp;
+
+          // strip close tags to just the tag name
+          l = summCloses.length;
+
+          for (i = 0; i < l; i++) {
+            summCloses[i] = summCloses[i].replace(rCloseTag, '$1');
+          }
+          // tags that start in summary and end in detail need:
+          // a). close tag at end of summary
+          // b). open tag at beginning of detail
+          $.each(summOpens, function(index, val) {
+            var thisTagName = val.replace(rOpenTag, '$1');
+            var closePosition = $.inArray(thisTagName, summCloses);
+
+            if (closePosition === -1) {
+              openTagsForDetails.push(val);
+              closeTagsForsummaryText.push('</' + thisTagName + '>');
+
+            } else {
+              summCloses.splice(closePosition, 1);
+            }
+          });
+
+          // reverse the order of the close tags for the summary so they line up right
+          closeTagsForsummaryText.reverse();
+
+          // create necessary summary and detail elements if they don't already exist
+          if (!hasDetails) {
+
+            // end script if there is no detail text or if detail has fewer words than widow option
+            detailText = allHtml.slice(summaryText.length);
+            detailTagless = $.trim(detailText.replace(rOpenCloseTag, ''));
+
+            if (detailTagless === '' || detailTagless.split(/\s+/).length < o.widow) {
+              return;
+            }
+            // otherwise, continue...
+            lastCloseTag = closeTagsForsummaryText.pop() || '';
+            summaryText += closeTagsForsummaryText.join('');
+            detailText = openTagsForDetails.join('') + detailText;
+          } else {
+            // assume that even if there are details, we still need readMore/readLess/summary elements
+            // (we already bailed out earlier when readMore el was found)
+            // but we need to create els differently
+
+            // remove the detail from the rest of the content
+            detailText = $this.find(detailSelector).remove().html();
+
+            // The summary is what's left
+            summaryText = $this.html();
+
+            // allHtml is the summary and detail combined (this is needed when content has block-level elements)
+            allHtml = summaryText + detailText;
+
+            lastCloseTag = '';
+          }
+          o.moreLabel = $this.find(o.moreSelector).length ? '' : buildMoreLabel(o, detailText);
+
+          if (hasBlocks) {
+            detailText = allHtml;
+            // Fixes issue #89; Tested by 'split html escapes'
+          } else if (summaryText.charAt(summaryText.length - 1) === '&') {
+            strayChars = /^[#\w\d\\]+;/.exec(detailText);
+
+            if (strayChars) {
+              detailText = detailText.slice(strayChars[0].length);
+              summaryText += strayChars[0];
+            }
+          }
+          summaryText += lastCloseTag;
+
+          // onSlice callback
+          o.summary = summaryText;
+          o.details = detailText;
+          o.lastCloseTag = lastCloseTag;
+
+          if (defined.onSlice) {
+            // user can choose to return a modified options object
+            // one last chance for user to change the options. sneaky, huh?
+            // but could be tricky so use at your own risk.
+            tmp = o.onSlice.call(thisEl, o);
+
+            // so, if the returned value from the onSlice function is an object with a details property, we'll use that!
+            o = tmp && tmp.details ? tmp : o;
+          }
+
+          // build the html with summary and detail and use it to replace old contents
+          html = buildHTML(o, hasBlocks);
+
+          $this.empty().append(html);
+
+          // set up details and summary for expanding/collapsing
+          $thisDetails = $this.find(detailSelector);
+          $readMore = $this.find(o.moreSelector);
+
+          // Hide details span using collapseEffect unless
+          // expandEffect is NOT slideDown and collapseEffect IS slideUp.
+          // The slideUp effect sets span's "default" display to
+          // inline-block. This is necessary for slideDown, but
+          // problematic for other "showing" animations.
+          // Fixes #46
+          if (o.collapseEffect === 'slideUp' && o.expandEffect !== 'slideDown' || $this.is(':hidden')) {
+            $thisDetails.css({display: 'none'});
+          } else {
+            $thisDetails[o.collapseEffect](0);
+          }
+
+          $summEl = $this.find('div.' + o.summaryClass);
+
+          expand = function(event) {
+            event.preventDefault();
+            var exSpeed = event.startExpanded ? 0 : expandSpeed;
+            $readMore.hide();
+            $summEl.hide();
+
+            if (defined.beforeExpand) {
+              o.beforeExpand.call(thisEl);
+            }
+
+            $thisDetails.stop(false, true)[o.expandEffect](exSpeed, function() {
+              $thisDetails.css({zoom: ''});
+
+              if (defined.afterExpand) {
+                o.afterExpand.call(thisEl);
+              }
+              delayCollapse(o, $thisDetails, thisEl);
+            });
+          };
+
+          $readMore.find('a').unbind('click.expander').bind('click.expander', expand);
+
+          if (o.userCollapse && !$this.find(o.lessSelector).length) {
+            $this
+            .find(detailSelector)
+            .append('<span class="' + o.lessClass + '">' + o.userCollapsePrefix + '<a href="#" class="' + o.lessLinkClass + '">' + o.userCollapseText + '</a></span>');
+          }
+
+          $this
+          .find(o.lessSelector + ' a')
+          .unbind('click.expander')
+          .bind('click.expander', function(event) {
+            event.preventDefault();
+            clearTimeout(delayedCollapse);
+            var $detailsCollapsed = $(this).closest(detailSelector);
+            reCollapse(o, $detailsCollapsed);
+
+            if (defined.onCollapse) {
+              o.onCollapse.call(thisEl, true);
+            }
+          });
+
+          if (o.startExpanded) {
+            expand({
+              preventDefault: function() {},
+              startExpanded: true
+            });
+          }
+
+        }); // this.each
+      },
+      destroy: function() {
+
+        this.each(function() {
+          var o, details;
+          var $this = $(this);
+
+          if (!$this.data('expanderInit')) {
+            return;
+          }
+
+          o = $.extend({}, $this.data('expander') || {}, opts);
+          details = $this.find('.' + o.detailClass).contents();
+
+          $this.removeData('expanderInit');
+          $this.removeData('expander');
+
+          $this.find(o.moreSelector).remove();
+          $this.find('.' + o.summaryClass).remove();
+          $this.find('.' + o.detailClass).after(details).remove();
+          $this.find(o.lessSelector).remove();
+
+        });
+      }
+    };
+
+    // run the methods (almost always "init")
+    if (methods[meth]) {
+      methods[ meth ].call(this);
+    }
+
+    // utility functions
+    function buildHTML(o, blocks) {
+      var el = 'span';
+      var summary = o.summary;
+      var closingTagParts = rLastCloseTag.exec(summary);
+      var closingTag = closingTagParts ? closingTagParts[2].toLowerCase() : '';
+
+      if (blocks) {
+        el = 'div';
+
+        // if summary ends with a close tag, tuck the moreLabel inside it
+        if (closingTagParts && closingTag !== 'a' && !o.expandAfterSummary) {
+          summary = summary.replace(rLastCloseTag, o.moreLabel + '$1');
+        } else {
+          // otherwise (e.g. if ends with self-closing tag) just add moreLabel after summary
+          // fixes #19
+          summary += o.moreLabel;
+        }
+
+        // and wrap it in a div
+        summary = '<div class="' + o.summaryClass + '">' + summary + '</div>';
+      } else {
+        summary += o.moreLabel;
+      }
+
+      return [
+        summary,
+
+        // after summary, add an optional prefix. Default single space prevents last word of summary
+        // and first word of detail from collapsing together into what looks like a single word.
+        // (could also be done with CSS, but this feels more natural)
+        // Prefix made optional to fix issue #106
+        o.detailPrefix || '',
+        '<',
+        el + ' class="' + o.detailClass + '"',
+        '>',
+        o.details,
+        '</' + el + '>'
+      ].join('');
+    }
+
+    function buildMoreLabel(o, detailText) {
+      var ret = '<span class="' + o.moreClass + '">' + o.expandPrefix;
+
+      if (o.showWordCount) {
+
+        o.wordCountText = o.wordCountText.replace(/\{\{count\}\}/, detailText.replace(rOpenCloseTag, '').replace(/\&(?:amp|nbsp);/g, '').replace(/(?:^\s+|\s+$)/, '').match(/\w+/g).length);
+
+      } else {
+        o.wordCountText = '';
+      }
+      ret += '<a href="#" class="' + o.moreLinkClass + '">' + o.expandText + o.wordCountText + '</a></span>';
+
+      return ret;
+    }
+
+    function backup(txt, preserveWords) {
+      if (txt.lastIndexOf('<') > txt.lastIndexOf('>')) {
+        txt = txt.slice(0, txt.lastIndexOf('<'));
+      }
+
+      if (preserveWords) {
+        txt = txt.replace(rAmpWordEnd, '');
+      }
+
+      return $.trim(txt);
+    }
+
+    function reCollapse(o, el) {
+      el.stop(true, true)[o.collapseEffect](o.collapseSpeed, function() {
+        var prevMore = el.prev('span.' + o.moreClass).show();
+
+        if (!prevMore.length) {
+          el.parent().children('div.' + o.summaryClass).show()
+            .find('span.' + o.moreClass).show();
+        }
+
+        if (o.afterCollapse) {
+          o.afterCollapse.call(el);
+        }
+      });
+    }
+
+    function delayCollapse(option, $collapseEl, thisEl) {
+      if (option.collapseTimer) {
+        delayedCollapse = setTimeout(function() {
+          reCollapse(option, $collapseEl);
+
+          if ($.isFunction(option.onCollapse)) {
+            option.onCollapse.call(thisEl, false);
+          }
+        }, option.collapseTimer);
+      }
+    }
+
+    function changeSlicePoint(info) {
+      // Create placeholder string text
+      var sliceOnTemp = 'ExpandMoreHere374216623';
+
+      // Replace sliceOn with placeholder unaffected by .text() cleaning
+      // (in case sliceOn contains html)
+      var summaryTextClean = info.summaryText.replace(info.sliceOn, sliceOnTemp);
+      summaryTextClean = $('<div>' + summaryTextClean + '</div>').text();
+
+      // Find true location of sliceOn placeholder
+      var sliceOnIndexClean = summaryTextClean.indexOf(sliceOnTemp);
+
+      // Store location of html version too
+      var sliceOnIndexHtml = info.summaryText.indexOf(info.sliceOn);
+
+      // Base condition off of true sliceOn location...
+      if (sliceOnIndexClean !== -1 && sliceOnIndexClean < info.slicePoint) {
+        // ...but keep html in summaryText
+        info.summaryText = info.allHtml.slice(0, sliceOnIndexHtml);
+      }
+
+      return info;
+    }
+
+    return this;
+  };
+
+  // plugin defaults
+  $.fn.expander.defaults = $.expander.defaults;
+});
+
+
+define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %> resultItem">\n    <td class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.get(\'ThumbnailUrl\').replace(/width=100/i, \'width=200\') %>" alt="<%= i18n.formatMessage(\'{0} preview thumbnail\', item.get(\'Title\')) %>"/>\n            <% if (item.get(\'IsCaptioned\')) { %>\n            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage(\'CC\') %>" alt="CC"></i>\n            <% } %>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span></a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Title\')) %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label"><%= i18n.formatMessage(\'Description\') %></td><td class="value"><%= item.get(\'Description\') %></td></tr>\n                <tr>\n                    <td class="label"><%= i18n.formatMessage(\'Date Added\') %></td>\n                    <td class="value">\n                        <%\n                            var dateAdded = new Date(item.get(\'AddedOn\')),\n                                localDate = dateAdded.setMinutes(dateAdded.getMinutes() - dateAdded.getTimezoneOffset());\n                            print(moment(localDate).format(dateTimeFormat));\n                        %>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label"><%= i18n.formatMessage(\'Keywords\') %></td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label"><%= i18n.formatMessage(\'Library\') %></td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
+
+define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-expander','text!ev-script/templates/video-result.html'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        ResultsView = require('ev-script/views/results'),
+        VideoSettings = require('ev-script/models/video-settings'),
+        VideoPreviewView = require('ev-script/views/video-preview');
+
+    require('jquery-expander');
+
+    return ResultsView.extend({
+        modelClass: VideoSettings,
+        previewClass: VideoPreviewView,
+        resultTemplate: _.template(require('text!ev-script/templates/video-result.html')),
+        initialize: function(options) {
+            ResultsView.prototype.initialize.call(this, options);
+        },
+        decorate: function($item) {
+            // Handle truncation (more/less) of truncatable fields
+            if ($(window).width() < 1100) {
+                $('.trunc .value', $item).each(_.bind(function(index, element) {
+                    var $element = $(element);
+                    $element.expander({
+                        'expandText': this.i18n.formatMessage('More'),
+                        'userCollapseText': this.i18n.formatMessage('Less')
+                    });
+                }, this));
+            }
+            // Call our base impl
+            ResultsView.prototype.decorate.call(this, $item);
+        },
+        refreshHandler: function(e) {
+            e.preventDefault();
+            this.appEvents.trigger('reloadVideos');
+        }
+    });
+
+});
+
+define('ev-script/collections/videos',['require','ev-script/collections/base','ev-script/util/cache','underscore'],function(require) {
+
+    'use strict';
+
+    var BaseCollection = require('ev-script/collections/base'),
+        cacheUtil = require('ev-script/util/cache'),
+        _ = require('underscore');
+
+    return BaseCollection.extend({
+        initialize: function(models, options) {
+            BaseCollection.prototype.initialize.call(this, models, options);
+            this.libraryId = options.libraryId || '';
+            this.filterOn = options.filterOn || '';
+            this.filterValue = options.filterValue || '';
+            if (this.info.checkVersion('>=4.1.0')) {
+                this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedLibrary' : '/api/MediaLibrary';
+            } else {
+                this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedContent' : '/api/Content';
+            }
+            this.pageIndex = 1;
+        },
+        _cache: function(key, resp) {
+            var cachedValue = null,
+                user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                var videosCache = userCache.get('videos');
+                if (!videosCache) {
+                    userCache.set('videos', videosCache = new cacheUtil.Cache());
+                }
+                cachedValue = videosCache[resp ? 'set' : 'get'](key, resp);
+            }
+            return cachedValue;
+        },
+        getCached: function(key) {
+            return this._cache(key);
+        },
+        setCached: function(key, resp) {
+            return this._cache(key, resp);
+        },
+        clearCache: function() {
+            var user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                userCache.set('videos', null);
+            }
+        },
+        url: function() {
+            var api_url = this.config.ensembleUrl + this.sourceUrl,
+                sizeParam = 'PageSize=' + this.config.pageSize,
+                indexParam = 'PageIndex=' + this.pageIndex,
+                onParam = 'FilterOn=' + encodeURIComponent(this.filterOn),
+                valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue),
+                url = api_url + '/' + this.libraryId + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        },
+        parse: function(response) {
+            var videos = response.Data;
+            _.each(videos, function(video) {
+                video.Description = _.unescape(video.Description);
+                video.Keywords = _.unescape(video.Keywords);
+            });
+            return videos;
+        }
+    });
+
+});
+
+define('ev-script/collections/media-workflows',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
+
+    'use strict';
+
+    var BaseCollection = require('ev-script/collections/base'),
+        cacheUtil = require('ev-script/util/cache');
+
+    return BaseCollection.extend({
+        initialize: function(models, options) {
+            BaseCollection.prototype.initialize.call(this, models, options);
+            this.filterValue = options.libraryId || '';
+        },
+        _cache: function(key, resp) {
+            var cachedValue = null,
+                user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                var workflowsCache = userCache.get('workflows');
+                if (!workflowsCache) {
+                    userCache.set('workflows', workflowsCache = new cacheUtil.Cache());
+                }
+                cachedValue = workflowsCache[resp ? 'set' : 'get'](key, resp);
+            }
+            return cachedValue;
+        },
+        getCached: function(key) {
+            return this._cache(key);
+        },
+        setCached: function(key, resp) {
+            return this._cache(key, resp);
+        },
+        url: function() {
+            var api_url = this.config.ensembleUrl + '/api/MediaWorkflows';
+            // Make this arbitrarily large so we can retrieve ALL workflows in a single request
+            var sizeParam = 'PageSize=9999';
+            var indexParam = 'PageIndex=1';
+            var onParam = 'FilterOn=LibraryId';
+            var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
+            var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        },
+        // Override base parse in order to grab settings
+        parse: function(response) {
+            this.settings = response.Settings;
+            return response.Data;
+        }
+    });
+
+});
+
+
+define('ev-script/views/workflow-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/options.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'render');
+            this.$el.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
+            this.render();
+        },
+        render: function() {
+            var selected = this.collection.findWhere({
+                'IsDefault': true
+            }) || this.collection.at(0);
+            this.$el.html(this.template({
+                selectedId: selected.id,
+                collection: this.collection
+            }));
+        },
+        getSelected: function() {
+            return this.collection.get(this.$('option:selected').val());
+        }
+    });
+
+});
+
+
+define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <fieldset>\n        <legend style="display: none;"><%= i18n.formatMessage(\'Upload Media to Ensemble\') %></legend>\n        <select class="form-select" name="MediaWorkflowID" id="MediaWorkflowID"></select>\n        <label for="MediaWorkflowID" style="display: none;"><%= i18n.formatMessage(\'Media Workflow\') %></label>\n        <div class="policy-message"></div>\n        <div class="fieldWrap">\n            <label for="Title"><%= i18n.formatMessage(\'Title\') %> *</label>\n            <input class="form-text" type="text" name="Title" id="Title" />\n        </div>\n        <div class="fieldWrap">\n            <label for="Description"><%= i18n.formatMessage(\'Description\') %></label>\n            <textarea class="form-text" name="Description" id="Description" />\n        </div>\n        <div class="upload"></div>\n    </fieldset>\n</form>\n';});
+
+define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-script/views/base','backbone','ev-script/views/workflow-select','ev-script/models/video-settings','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        plupload = require('plupload'),
+        BaseView = require('ev-script/views/base'),
+        Backbone = require('backbone'),
+        WorkflowSelect = require('ev-script/views/workflow-select'),
+        VideoSettings = require('ev-script/models/video-settings');
+
+    // Explicit dependency declaration
+    require('jquery.plupload.queue');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/upload.html')),
+        events: {
+            'change select': 'handleSelect'
+        },
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'render', 'decorateUploader', 'closeDialog', 'handleSelect');
+            this.field = options.field;
+            this.$anchor = this.$el;
+            this.setElement(this.template({
+                i18n: this.i18n
+            }));
+            this.$upload = this.$('.upload');
+            this.workflows = options.workflows;
+            this.workflowSelect = new WorkflowSelect({
+                appId: this.appId,
+                el: this.$('select')[0],
+                collection: this.workflows
+            });
+            this.render();
+            this.decorateUploader();
+            this.appEvents.on('hidePickers', this.closeDialog);
+        },
+        getWidth: function() {
+            return Math.min(600, $(window).width() - this.config.dialogMargin);
+        },
+        getHeight: function() {
+            return Math.min(400, $(window).height() - this.config.dialogMargin);
+        },
+        decorateUploader: function() {
+            var extensions = '',
+                selected = this.workflowSelect.getSelected(),
+                maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10),
+                policyMessage = this.info.checkVersion('>=4.8.0') ? _.unescape(selected.get('PolicyMessage')) : '';
+
+            this.$('.policy-message').html(policyMessage);
+
+            if (this.workflows.settings.SupportedVideo) {
+                extensions += this.workflows.settings.SupportedVideo.replace(/\*\./g, '').replace(/;/g, ',').replace(/\s/g, '');
+            }
+
+            if (this.workflows.settings.SupportedAudio) {
+                extensions += this.workflows.settings.SupportedAudio.replace(/\*\./g, '').replace(/;/g, ',').replace(/\s/g, '');
+            }
+
+            if (this.$upload.pluploadQueue()) {
+                this.$upload.pluploadQueue().destroy();
+            }
+
+            this.$upload.pluploadQueue({
+                url: this.workflows.settings.SubmitUrl,
+                runtimes: 'html5,html4,flash',
+                max_file_size: maxUploadSize > 0 ? maxUploadSize + 'gb' : '12gb',
+                max_file_count: 1,
+                max_retries: 5,
+                chunk_size: '2mb',
+                unique_names: false,
+                multiple_queues: false,
+                multi_selection: false,
+                drag_drop: true,
+                multipart: true,
+                flash_swf_url: this.config.pluploadFlashPath,
+                preinit: {
+                    Init: _.bind(function(up, info) {
+                        // Remove runtime tooltip
+                        $('.plupload_container', this.$upload).removeAttr('title');
+                        // Change text since we only allow single file upload
+                        $('.plupload_add', this.$upload).text(this.i18n.formatMessage('Add file'));
+                    }, this),
+                    PostInit: _.bind(function(up, info) {
+                        // Change text since we only allow single file upload
+                        $('.plupload_droptext', this.$upload).text(this.i18n.formatMessage('Drag file here.'));
+                    }, this),
+                    UploadFile: _.bind(function(up, file) {
+                        up.settings.multipart_params = {
+                            'Title': this.$('#Title').val(),
+                            'Description': this.$('#Description').val(),
+                            'MediaWorkflowID': this.$('select').val()
+                        };
+                    }, this)
+                },
+                init: {
+                    StateChanged: _.bind(function(up) {
+                        switch (up.state) {
+                            case plupload.STARTED:
+                                if (up.state === plupload.STARTED) {
+                                    if ($('.plupload_cancel', this.$upload).length === 0) {
+                                        // Add cancel button
+                                        this.$cancel = $('<a class="plupload_button plupload_cancel" href="#">' + this.i18n.formatMessage('Cancel upload') + '</a>')
+                                        .insertBefore($('.plupload_filelist_footer .plupload_clearer', this.$upload))
+                                        .click(_.bind(function() {
+                                            up.stop();
+                                            this.decorateUploader();
+                                        }, this));
+                                    }
+                                    if (this.$cancel) {
+                                        this.$cancel.show();
+                                    }
+                                }
+                                break;
+                            case plupload.STOPPED:
+                                if (this.$cancel) {
+                                    this.$cancel.hide();
+                                }
+                                break;
+                        }
+                    }, this),
+                    BeforeUpload: _.bind(function(up, file) {
+                        var $title = this.$('#Title'),
+                            title = $title.val();
+                        if (!title || title.trim() === '') {
+                            $title.focus();
+                            up.stop();
+                            $('.plupload_upload_status', this.$upload).hide();
+                            $('.plupload_buttons', this.$upload).show();
+                        }
+                    }, this),
+                    FilesAdded: _.bind(function(up, files) {
+                        var validExtensions = extensions.split(',');
+                        _.each(files, function(file) {
+                            var parts = file.name.split('.'),
+                                extension = parts[parts.length - 1];
+                            if (!_.contains(validExtensions, extension.toLowerCase())) {
+                                up.removeFile(file);
+                                up.trigger('Error', {
+                                    code : plupload.FILE_EXTENSION_ERROR,
+                                    message : plupload.translate('File extension error.'),
+                                    file : file
+                                });
+                            }
+                        });
+                        // Keep the last file in the queue
+                        if (up.files.length > 1) {
+                            up.splice(0, up.files.length - 1);
+                        }
+                    }, this),
+                    UploadComplete: _.bind(function() {
+                        this.closeDialog();
+                    }, this),
+                    FileUploaded: _.bind(function(up, file, info) {
+                        this.appEvents.trigger('fileUploaded');
+                    }, this)
+                }
+            });
+            // Hacks to deal with z-index issue in dialog
+            // see https://github.com/moxiecode/plupload/issues/468
+            this.$upload.pluploadQueue().bind('refresh', function() {
+                $('div.upload > div.plupload').css({ 'z-index': '0' });
+                $('.plupload_button').css({ 'z-index': '1' });
+            });
+            this.$upload.pluploadQueue().refresh();
+        },
+        closeDialog: function() {
+            if (this.$dialog) {
+                this.$dialog.dialog('close');
+            }
+        },
+        handleSelect: function(e) {
+            this.decorateUploader();
+        },
+        render: function() {
+            var $dialogWrap = $('<div class="dialogWrap"></div>'),
+                $dialog;
+            this.$anchor.after($dialogWrap);
+            this.$dialog = $dialogWrap.dialog({
+                title: this.i18n.formatMessage('Upload Media to Ensemble'),
+                modal: true,
+                width: this.getWidth(),
+                height: this.getHeight(),
+                draggable: false,
+                resizable: false,
+                dialogClass: 'ev-dialog',
+                create: _.bind(function(event, ui) {
+                    $dialogWrap.html(this.$el);
+                }, this),
+                closeText: this.i18n.formatMessage('Close'),
+                close: _.bind(function(event, ui) {
+                    this.$upload.pluploadQueue().destroy();
+                    $dialogWrap.dialog('destroy').remove();
+                    this.appEvents.off('hidePickers', this.closeDialog);
+                    this.$dialog = null;
+                }, this)
+            });
+        }
+    });
+
+});
+
+;(function () {
+
+  var object =
+    typeof exports != 'undefined' ? exports :
+    typeof self != 'undefined' ? self : // #8: web workers
+    $.global; // #31: ExtendScript
+
+  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+
+  function InvalidCharacterError(message) {
+    this.message = message;
+  }
+  InvalidCharacterError.prototype = new Error;
+  InvalidCharacterError.prototype.name = 'InvalidCharacterError';
+
+  // encoder
+  // [https://gist.github.com/999166] by [https://github.com/nignag]
+  object.btoa || (
+  object.btoa = function (input) {
+    var str = String(input);
+    for (
+      // initialize result and counter
+      var block, charCode, idx = 0, map = chars, output = '';
+      // if the next str index does not exist:
+      //   change the mapping table to "="
+      //   check if d has no fractional digits
+      str.charAt(idx | 0) || (map = '=', idx % 1);
+      // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
+      output += map.charAt(63 & block >> 8 - idx % 1 * 8)
+    ) {
+      charCode = str.charCodeAt(idx += 3/4);
+      if (charCode > 0xFF) {
+        throw new InvalidCharacterError("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");
+      }
+      block = block << 8 | charCode;
+    }
+    return output;
+  });
+
+  // decoder
+  // [https://gist.github.com/1020396] by [https://github.com/atk]
+  object.atob || (
+  object.atob = function (input) {
+    var str = String(input).replace(/[=]+$/, ''); // #31: ExtendScript bad parse of /=
+    if (str.length % 4 == 1) {
+      throw new InvalidCharacterError("'atob' failed: The string to be decoded is not correctly encoded.");
+    }
+    for (
+      // initialize result and counters
+      var bc = 0, bs, buffer, idx = 0, output = '';
+      // get next character
+      buffer = str.charAt(idx++);
+      // character found in table? initialize bit storage and add its ascii value;
+      ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer,
+        // and if not first of each 4 characters,
+        // convert the first 8 bits to one ascii character
+        bc++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0
+    ) {
+      // try to find character in table (0-63, not found => -1)
+      buffer = chars.indexOf(buffer);
+    }
+    return output;
+  });
+
+}());
+
+define("base64", function(){});
+
+
+define('text!ev-script/templates/anthem.html',[],function () { return '<iframe src="ensemble://<%= tokenDetailsApiUrl %>" style="display:none;"></iframe>\n';});
+
+define('ev-script/views/video-picker',['require','jquery','underscore','platform','ev-script/views/picker','ev-script/views/search','ev-script/views/library-type-select','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos','ev-script/collections/media-workflows','ev-script/views/upload','base64','text!ev-script/templates/anthem.html'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        platform = require('platform'),
+        PickerView = require('ev-script/views/picker'),
+        SearchView = require('ev-script/views/search'),
+        TypeSelectView = require('ev-script/views/library-type-select'),
+        UnitSelectsView = require('ev-script/views/unit-selects'),
+        VideoResultsView = require('ev-script/views/video-results'),
+        Videos = require('ev-script/collections/videos'),
+        MediaWorkflows = require('ev-script/collections/media-workflows'),
+        UploadView = require('ev-script/views/upload');
+
+    require('base64');
+
+    return PickerView.extend({
+        anthemTemplate: _.template(require('text!ev-script/templates/anthem.html')),
+        initialize: function(options) {
+            PickerView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary', 'handleSubmit', 'uploadHandler', 'recordHandler');
+            var callback = _.bind(function() {
+                this.loadVideos();
+            }, this);
+            this.$filterBlock = this.$('div.ev-filter-block');
+            this.$actions = $('<div class="ev-actions"></div>');
+            this.$upload = $('<button type="button" class="action-upload" title="' + this.i18n.formatMessage('Click to upload new media') + '"><i class="fa fa-upload fa-fw"></i><span>' + this.i18n.formatMessage('Upload') + '<span></button>').css('display', 'none');
+            this.$actions.append(this.$upload);
+            this.$record = $('<button type="button" class="action-record" title="' + this.i18n.formatMessage('Click to record screen') + '"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>' + this.i18n.formatMessage('Record') + '<span></button>').css('display', 'none');
+            this.$actions.append(this.$record);
+            this.$filterBlock.prepend(this.$actions);
+            this.searchView = new SearchView({
+                id: this.id + '-search',
+                tagName: 'div',
+                className: 'ev-search',
+                picker: this,
+                appId: this.appId,
+                callback: callback
+            });
+            this.$filterBlock.prepend(this.searchView.$el);
+            this.searchView.render();
+            this.typeSelectView = new TypeSelectView({
+                id: this.id + '-type-select',
+                tagName: 'div',
+                className: 'ev-type-select',
+                picker: this,
+                appId: this.appId,
+                callback: callback
+            });
+            this.$filterBlock.prepend(this.typeSelectView.$el);
+            this.typeSelectView.render();
+            this.unitSelects = new UnitSelectsView({
+                id: this.id + '-unit-selects',
+                tagName: 'div',
+                className: 'ev-unit-selects',
+                picker: this,
+                appId: this.appId
+            });
+            this.$filterBlock.prepend(this.unitSelects.$el);
+            this.resultsView = new VideoResultsView({
+                el: this.$('div.ev-results'),
+                picker: this,
+                appId: this.appId
+            });
+            this.$el.append(this.resultsView.$el);
+        },
+        events: {
+            'click .action-add': 'chooseItem',
+            'click .action-upload': 'uploadHandler',
+            'click .action-record': 'recordHandler',
+            'change .unit-selects select.libraries': 'changeLibrary',
+            'submit .unit-selects': 'handleSubmit'
+        },
+        changeLibrary: function(e) {
+            this.loadVideos();
+            this.loadWorkflows();
+        },
+        handleSubmit: function(e) {
+            this.loadVideos();
+            e.preventDefault();
+        },
+        uploadHandler: function(e) {
+            var uploadView = new UploadView({
+                appId: this.appId,
+                field: this.field,
+                workflows: this.workflows
+            });
+            e.preventDefault();
+        },
+        recordHandler: function(e) {
+            var activeIcon = $('.record-active', this.$record),
+                inactiveIcon = $('.record-inactive', this.$record),
+                pollingId,
+                timeoutId,
+                activate = _.bind(function() {
+                    this.anthemLaunching = true;
+                    inactiveIcon.hide();
+                    activeIcon.show();
+                }, this),
+                deactivate = _.bind(function() {
+                    this.anthemLaunching = false;
+                    inactiveIcon.show();
+                    activeIcon.hide();
+                    if (pollingId) {
+                        clearInterval(pollingId);
+                    }
+                    if (timeoutId) {
+                        clearTimeout(timeoutId);
+                    }
+                }, this);
+
+            if (this.anthemLaunching) {
+                e.preventDefault();
+                return false;
+            }
+
+            activate();
+
+            $.ajax({
+                url: this.config.ensembleUrl + '/api/record/token/CreateToken',
+                data: {
+                    'libraryId': this.model.get('libraryId')
+                },
+                xhrFields: {
+                    withCredentials: true
+                }
+            }).done(_.bind(function(newToken) {
+                if (newToken && newToken !== '00000000-0000-0000-0000-000000000000') {
+                    this.$('#anthemContainer').html(this.anthemTemplate({
+                        tokenDetailsApiUrl: window.btoa(this.config.ensembleUrl + '/api/record/token/GetDetails?token=' + newToken)
+                    }));
+
+                    pollingId = setInterval(_.bind(function() {
+                        $.ajax({
+                            url: this.config.ensembleUrl + '/api/record/token/IsActive',
+                            xhrFields: {
+                                withCredentials: true
+                            },
+                            data: {
+                                'token': newToken
+                            }
+                        }).done(function(activeStatus) {
+                            if (!activeStatus) {
+                                deactivate();
+                            }
+                        }).fail(function() {
+                            deactivate();
+                        });
+                    }, this), 5000);
+
+                    // If launch hasn't deactivated in 30 secs, we probably need to install
+                    timeoutId = setTimeout(_.bind(function() {
+                        deactivate();
+                        if (/windows/i.test(platform.os.family)) {
+                            window.location = this.config.ensembleUrl + '/app/unprotected/EnsembleAnthem/EnsembleAnthem.msi';
+                        } else {
+                            window.location = this.config.ensembleUrl + '/app/unprotected/EnsembleAnthem/EnsembleAnthem.dmg';
+                        }
+                    }, this), 30000);
+                } else {
+                    deactivate();
+                }
+            }, this)).fail(deactivate);
+            e.preventDefault();
+        },
+        showPicker: function() {
+            PickerView.prototype.showPicker.call(this);
+            this.unitSelects.loadOrgs();
+            this.unitSelects.$('select').filter(':visible').first().focus();
+        },
+        loadVideos: function() {
+            var searchVal = $.trim(this.model.get('search').toLowerCase()),
+                sourceId = this.model.get('sourceId'),
+                libraryId = this.model.get('libraryId'),
+                cacheKey = sourceId + libraryId + searchVal,
+                videos = new Videos({}, {
+                    sourceId: sourceId,
+                    libraryId: libraryId,
+                    filterOn: '',
+                    filterValue: searchVal,
+                    appId: this.appId
+                }),
+                clearVideosCache = _.bind(function() {
+                    videos.clearCache();
+                    this.loadVideos();
+                }, this);
+            videos.fetch({
+                picker: this,
+                cacheKey: cacheKey,
+                success: _.bind(function(collection, response, options) {
+                    var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
+                    var size = _.size(response.Data);
+                    if (size === totalRecords) {
+                        collection.hasMore = false;
+                    } else {
+                        collection.hasMore = true;
+                        collection.pageIndex += 1;
+                    }
+                    this.resultsView.collection = collection;
+                    this.resultsView.render();
+                }, this),
+                error: _.bind(function(collection, xhr, options) {
+                    this.ajaxError(xhr, _.bind(function() {
+                        this.loadVideos();
+                    }, this));
+                }, this)
+            });
+            this.appEvents.off('fileUploaded').on('fileUploaded', clearVideosCache);
+            this.appEvents.off('reloadVideos').on('reloadVideos', clearVideosCache);
+        },
+        loadWorkflows: function() {
+            this.workflows = new MediaWorkflows({}, {
+                appId: this.appId
+            });
+            // FIXME - add libraryId (as with playlists)
+            this.workflows.filterValue = this.model.get('libraryId');
+            this.workflows.fetch({
+                cacheKey: this.workflows.filterValue,
+                success: _.bind(function(collection, response, options) {
+                    if (!collection.isEmpty()) {
+                        this.$upload.css('display', 'inline-block');
+                        if (this.canRecord()) {
+                            this.$record.css('display', 'inline-block');
+                        }
+                    } else {
+                        this.$upload.css('display', 'none');
+                        this.$record.css('display', 'none');
+                    }
+                    // This is the last portion of the filter block that loads
+                    // so now it should be fully rendered...resize our results
+                    // to make sure they have the proper height.
+                    // TODO - better place for this? Or better method of
+                    // handling?
+                    this.resizeResults();
+                }, this),
+                error: _.bind(function(collection, xhr, options) {
+                    this.ajaxError(xhr, _.bind(function() {
+                        this.loadWorkflows();
+                    }, this));
+                }, this),
+                reset: true
+            });
+        },
+        resizeResults: function() {
+            if (this.config.fitToParent) {
+                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true));
+            }
+        },
+        canRecord: function() {
+            var currentUser = this.auth.getUser();
+            return this.info.anthemEnabled() && currentUser && currentUser.get('CanUseAnthem') && !this.isMobile() && platform.os.family !== 'Linux';
+        },
+        isMobile: function() {
+            var family = platform.os.family;
+            return family === 'Android' || family === 'iOS' || family === 'Windows Phone';
+        }
+    });
+
+});
+
+define('ev-script/views/settings',['require','underscore','ev-script/views/base','jquery-ui/ui/widgets/dialog'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
+
+    require('jquery-ui/ui/widgets/dialog');
+
+    return BaseView.extend({
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'show', 'cancelHandler', 'submitHandler');
+            this.field = options.field;
+        },
+        events: {
+            'submit': 'submitHandler',
+            'click .action-cancel': 'cancelHandler'
+        },
+        show: function() {
+            this.render();
+            this.$el.dialog('open');
+        },
+        cancelHandler: function(e) {
+            this.$el.dialog('close');
+            e.preventDefault();
+        },
+        submitHandler: function(e) {
+            this.updateModel();
+            this.$el.dialog('close');
+            e.preventDefault();
+        },
+        // Override me
+        updateModel: function() {}
+    });
+
+});
+
+define('ev-script/util/size',['require','underscore'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore');
+
+    return {
+        optionsSixteenByNine: ['1280x720', '1024x576', '848x480', '720x405', '640x360', '610x344', '560x315', '480x270', '400x225', '320x180', '240x135', '160x90'],
+        optionsFourByThree: ['1280x960', '1024x770', '848x636', '720x540', '640x480', '610x460', '560x420', '480x360', '400x300', '320x240', '240x180', '160x120'],
+        ratiosAreRoughlyEqual: function(ratioA, ratioB) {
+            // Use a fuzz factor to determine ratio equality since our sizes are not always accurate
+            return Math.ceil(ratioA * 10) / 10 === Math.ceil(ratioB * 10) / 10;
+        },
+        getAvailableDimensions: function(ratio) {
+            ratio = ratio || 16 / 9;
+            var options = this.optionsSixteenByNine;
+            if (this.ratiosAreRoughlyEqual(ratio, 4 / 3)) {
+                options = this.optionsFourByThree;
+            }
+            return options;
+        },
+        findClosestDimension: function(arg, desiredWidth) {
+            var offset = Number.MAX_VALUE,
+                dimensions = _.isNumber(arg) ? this.getAvailableDimensions(arg) : arg,
+                closest;
+            // Find the first available or closest dimension that matches our desired width
+            var match = _.find(dimensions, _.bind(function(dimension) {
+                var width = parseInt(dimension.split('x')[0], 10),
+                    currentOffset = Math.abs(width - desiredWidth);
+                if (currentOffset < offset) {
+                    offset = currentOffset;
+                    closest = dimension;
+                }
+                return currentOffset === 0;
+            }, this));
+            return match || closest;
+        }
+    };
+
+});
+
+
+define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <fieldset>\n        <legend style="display:none;"><%= i18n.formatMessage(\'Media Embed Options\') %></legend>\n        <div class="fieldWrap">\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div>\n            <div class="fieldWrap inline-option">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle"><%= i18n.formatMessage(\'Title\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="socialsharing" class="form-checkbox" <% if (model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox"/>\n                <label for="socialsharing"><%= i18n.formatMessage(\'Social Tools\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                <label for="captionsearch"><%= i18n.formatMessage(\'Caption Search\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata"><%= i18n.formatMessage(\'Meta Data\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                <label for="dateproduced"><%= i18n.formatMessage(\'Date Produced\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="embedcode" class="form-checkbox" <% if (model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox"/>\n                <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="download" class="form-checkbox" <% if (model.get(\'download\')) { print(\'checked="checked"\'); } %> name="download" type="checkbox"/>\n                <label for="download"><%= i18n.formatMessage(\'Download Link\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n            </div>\n            <% if (isAudio) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %>  name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n            <% } %>\n            <% if (appInfo.checkVersion(\'>=4.8.0\')) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="viewersreport" class="form-checkbox" <% if (model.get(\'viewersreport\')) { print(\'checked="checked"\'); } %>  name="viewersreport" type="checkbox"/>\n                    <label for="viewersreport"><%= i18n.formatMessage(\'Viewers Report\') %></label>\n                </div>\n            <% } %>\n         </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
+
+
+define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(sizes, function(size) { %>\n    <option value="<%= size %>" <% if (size === target) { print(\'selected="selected"\'); } %>><%= size %></option>\n<% }); %>\n';});
+
+define('ev-script/views/video-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','jquery-ui/ui/widgets/dialog','text!ev-script/templates/video-settings.html','text!ev-script/templates/sizes.html'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        SettingsView = require('ev-script/views/settings'),
+        sizeUtil = require('ev-script/util/size');
+
+    require('jquery-ui/ui/widgets/dialog');
+
+    return SettingsView.extend({
+        template: _.template(require('text!ev-script/templates/video-settings.html')),
+        sizesTemplate: _.template(require('text!ev-script/templates/sizes.html')),
+        initialize: function(options) {
+            SettingsView.prototype.initialize.call(this, options);
+            this.encoding = options.encoding;
+            this.encoding.on('change:id', _.bind(function() {
+                this.render();
+            }, this));
+        },
+        updateModel: function() {
+            var attrs = {
+                    'showtitle': this.$('#showtitle').is(':checked'),
+                    'autoplay': this.$('#autoplay').is(':checked'),
+                    'showcaptions': this.$('#showcaptions').is(':checked'),
+                    'hidecontrols': this.$('#hidecontrols').is(':checked'),
+                    'socialsharing': this.$('#socialsharing').is(':checked'),
+                    'annotations': this.$('#annotations').is(':checked'),
+                    'captionsearch': this.$('#captionsearch').is(':checked'),
+                    'attachments': this.$('#attachments').is(':checked'),
+                    'audiopreviewimage': this.$('#audiopreviewimage').is(':checked'),
+                    'links': this.$('#links').is(':checked'),
+                    'metadata': this.$('#metadata').is(':checked'),
+                    'dateproduced': this.$('#dateproduced').is(':checked'),
+                    'embedcode': this.$('#embedcode').is(':checked'),
+                    'download': this.$('#download').is(':checked'),
+                    'viewersreport': this.$('#viewersreport').is(':checked')
+                },
+                sizeVal = this.$('#size').val();
+
+            if (!sizeVal || sizeVal === 'original') {
+                // isNew signifies that the encoding hasn't been fetched yet
+                if (this.encoding && !this.encoding.isNew()) {
+                    _.extend(attrs, {
+                        width: this.encoding.getWidth(),
+                        height: this.encoding.getHeight()
+                    });
+                }
+            } else {
+                var dims = sizeVal.split('x');
+                _.extend(attrs, {
+                    width: parseInt(dims[0], 10),
+                    height: parseInt(dims[1], 10)
+                });
+            }
+
+            this.field.model.set(attrs);
+        },
+        renderSize: function() {
+            var width = this.field.model.get('width'),
+                height = this.field.model.get('height'),
+                ratio = 16 / 9,
+                options = [];
+            if (width && height) {
+                ratio = width / height;
+            } else if (this.encoding.id) {
+                width = this.encoding.getWidth();
+                height = this.encoding.getHeight();
+                ratio = this.encoding.getRatio();
+            }
+            options = sizeUtil.getAvailableDimensions(ratio);
+            this.$('.size').append(this.sizesTemplate({
+                sizes: options,
+                // Select the override or current width
+                target: sizeUtil.findClosestDimension(options, this.config.defaultVideoWidth || width)
+            }));
+        },
+        render: function() {
+            this.$el.html(this.template({
+                appInfo: this.info,
+                i18n: this.i18n,
+                model: this.field.model,
+                isAudio: this.encoding && this.encoding.isAudio()
+            }));
+            if (this.encoding) {
+                this.renderSize();
+            }
+            var content = this.field.model.get('content');
+            this.$el.dialog({
+                title: this.unencode(content ? content.Title : this.field.model.get('id')),
+                modal: true,
+                autoOpen: false,
+                draggable: false,
+                resizable: false,
+                dialogClass: 'ev-dialog',
+                width: Math.min(680, $(window).width() - this.config.dialogMargin),
+                height: Math.min(300, $(window).height() - this.config.dialogMargin),
+                closeText: this.i18n.formatMessage('Close')
+            });
+        }
+    });
+
+});
+
+
+define('text!ev-script/templates/playlist-embed.html',[],function () { return '<iframe src="<%- src %>" frameborder="0" style="width:<%- width %>px;height:<%- height %>px;" width="<%- width %>" height="<%- height %>" allowfullscreen></iframe>';});
+
+define('ev-script/views/playlist-embed',['require','underscore','urijs/URI','ev-script/views/embed','text!ev-script/templates/playlist-embed.html'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        URI = require('urijs/URI'),
+        EmbedView = require('ev-script/views/embed');
+
+    return EmbedView.extend({
+        template: _.template(require('text!ev-script/templates/playlist-embed.html')),
+        initialize: function(options) {
+            EmbedView.prototype.initialize.call(this, options);
+        },
+        render: function() {
+            var src = URI(this.config.ensembleUrl + '/app/plugin/embed.aspx'),
+                width = this.getFrameWidth(),
+                height = this.getFrameHeight();
+            src.addQuery({
+                'DestinationID': this.model.get('id'),
+                'playlistEmbed': true,
+                'isNewPluginEmbed': true,
+                'hideControls': true,
+                'width': width,
+                'height': height,
+                'displayTitle': true,
+                'displayEmbedCode': this.model.get('embedcode'),
+                'displayStatistics': this.model.get('statistics'),
+                'displayVideoDuration': this.model.get('duration'),
+                'displayAttachments': this.model.get('attachments'),
+                'displayAnnotations': this.model.get('annotations'),
+                'displayLinks': this.model.get('links'),
+                'displayCredits': this.model.get('credits'),
+                'displaySharing': this.model.get('socialsharing'),
+                'autoPlay': this.model.get('autoplay'),
+                'showCaptions': this.model.get('showcaptions'),
+                'displayDateProduced': this.model.get('dateproduced'),
+                'audioPreviewImage': this.model.get('audiopreviewimage'),
+                'displayCaptionSearch': this.model.get('captionsearch')
+            });
+            if (this.info.checkVersion('>=4.8.0')) {
+                src.addQuery('displayViewersReport', this.model.get('viewersreport'));
+            }
+            if (this.model.get('layout') === 'showcase') {
+                var showcaseLayout = this.model.get('showcaseLayout');
+                src.addQuery('displayShowcase', true);
+                if (showcaseLayout.categoryList) {
+                    src.addQuery({
+                        'displayCategoryList': true,
+                        'categoryOrientation': showcaseLayout.categoryOrientation
+                    });
+                }
+            } else {
+                var playlistLayout = this.model.get('playlistLayout');
+                src.addQuery({
+                    'orderBy': playlistLayout.playlistSortBy,
+                    'orderByDirection': playlistLayout.playlistSortDirection
+                });
+                if (playlistLayout.playlistSearchString) {
+                    src.addQuery('searchString', playlistLayout.playlistSearchString);
+                }
+                if (playlistLayout.playlistCategory) {
+                    src.addQuery('categoryID', playlistLayout.playlistCategory);
+                }
+                if (playlistLayout.playlistNumberOfResults) {
+                    src.addQuery('resultsCount', playlistLayout.playlistNumberOfResults);
+                }
+            }
+            this.$el.html(this.template({
+                'src': src,
+                'width': width,
+                'height': height
+            }));
+        }
+    });
+
+});
+
+define('ev-script/views/playlist-preview',['require','ev-script/views/preview','ev-script/views/playlist-embed'],function(require) {
+
+    'use strict';
+
+    var PreviewView = require('ev-script/views/preview'),
+        PlaylistEmbedView = require('ev-script/views/playlist-embed');
+
+    return PreviewView.extend({
+        initialize: function(options) {
+            PreviewView.prototype.initialize.call(this, options);
+        },
+        embedClass: PlaylistEmbedView
+    });
+
+});
+
+
+define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <% if (item.get(\'IsSecure\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
+
+define('ev-script/views/playlist-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/playlist-result.html'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        $ = require('jquery'),
+        ResultsView = require('ev-script/views/results'),
+        PlaylistSettings = require('ev-script/models/playlist-settings'),
+        PlaylistPreviewView = require('ev-script/views/playlist-preview');
+
+    return ResultsView.extend({
+        modelClass: PlaylistSettings,
+        previewClass: PlaylistPreviewView,
+        resultTemplate: _.template(require('text!ev-script/templates/playlist-result.html')),
+        initialize: function(options) {
+            ResultsView.prototype.initialize.call(this, options);
+        },
+        refreshHandler: function(e) {
+            e.preventDefault();
+            this.appEvents.trigger('reloadPlaylists');
+        }
+    });
+
+});
+
+define('ev-script/collections/playlists',['require','ev-script/collections/base','urijs/URI','ev-script/util/cache'],function(require) {
+
+    'use strict';
+
+    var BaseCollection = require('ev-script/collections/base'),
+        URI = require('urijs/URI'),
+        cacheUtil = require('ev-script/util/cache');
+
+    return BaseCollection.extend({
+        initialize: function(models, options) {
+            BaseCollection.prototype.initialize.call(this, models, options);
+            this.libraryId = options.libraryId || '';
+            this.filterValue = options.filterValue || '';
+            this.pageIndex = 1;
+        },
+        _cache: function(key, resp) {
+            var cachedValue = null,
+                user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                var playlistsCache = userCache.get('playlists');
+                if (!playlistsCache) {
+                    userCache.set('playlists', playlistsCache = new cacheUtil.Cache());
+                }
+                cachedValue = playlistsCache[resp ? 'set' : 'get'](key, resp);
+            }
+            return cachedValue;
+        },
+        getCached: function(key) {
+            return this._cache(key);
+        },
+        setCached: function(key, resp) {
+            return this._cache(key, resp);
+        },
+        clearCache: function() {
+            var user = this.auth.getUser(),
+                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
+            if (userCache) {
+                userCache.set('playlists', null);
+            }
+        },
+        url: function() {
+            var api_url = URI(this.config.ensembleUrl + '/api/Playlists/');
+            api_url.filename(this.libraryId);
+            api_url.addQuery({
+                'PageSize': this.config.pageSize,
+                'PageIndex': this.pageIndex
+            });
+            if (this.filterValue) {
+                api_url.addQuery({
+                    'FilterOn': 'Name',
+                    'FilterValue': this.filterValue
+                });
+            }
+            return this.config.urlCallback ? this.config.urlCallback(api_url) : api_url;
+        }
+    });
+
+});
+
+define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/unit-selects','ev-script/views/search','ev-script/views/playlist-results','ev-script/collections/playlists'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        PickerView = require('ev-script/views/picker'),
+        UnitSelectsView = require('ev-script/views/unit-selects'),
+        SearchView = require('ev-script/views/search'),
+        PlaylistResultsView = require('ev-script/views/playlist-results'),
+        Playlists = require('ev-script/collections/playlists');
+
+    return PickerView.extend({
+        initialize: function(options) {
+            PickerView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit');
+            this.$filterBlock = this.$('div.ev-filter-block');
+            this.searchView = new SearchView({
+                id: this.id + '-search',
+                tagName: 'div',
+                className: 'ev-search',
+                picker: this,
+                appId: this.appId,
+                callback: _.bind(function() {
+                    this.loadPlaylists();
+                }, this)
+            });
+            this.$filterBlock.prepend(this.searchView.$el);
+            this.searchView.render();
+            this.unitSelects = new UnitSelectsView({
+                id: this.id + '-unit-selects',
+                tagName: 'div',
+                className: 'ev-unit-selects',
+                picker: this,
+                appId: this.appId
+            });
+            this.$filterBlock.prepend(this.unitSelects.$el);
+            this.resultsView = new PlaylistResultsView({
+                el: this.$('div.ev-results'),
+                picker: this,
+                appId: this.appId
+            });
+            this.$el.append(this.resultsView.$el);
+        },
+        events: {
+            'click a.action-add': 'chooseItem',
+            'change .unit-selects select.libraries': 'changeLibrary',
+            'submit .unit-selects': 'handleSubmit'
+        },
+        changeLibrary: function(e) {
+            this.loadPlaylists();
+        },
+        handleSubmit: function(e) {
+            this.loadPlaylists();
+            e.preventDefault();
+        },
+        showPicker: function() {
+            PickerView.prototype.showPicker.call(this);
+            this.unitSelects.loadOrgs();
+            this.unitSelects.$('select').filter(':visible').first().focus();
+        },
+        loadPlaylists: function() {
+            var searchVal = $.trim(this.model.get('search').toLowerCase()),
+                libraryId = this.model.get('libraryId'),
+                playlists = new Playlists({}, {
+                    libraryId: libraryId,
+                    filterValue: searchVal,
+                    appId: this.appId
+                }),
+                clearPlaylistsCache = _.bind(function() {
+                    playlists.clearCache();
+                    this.loadPlaylists();
+                }, this);
+            playlists.fetch({
+                picker: this,
+                cacheKey: libraryId + searchVal,
+                success: _.bind(function(collection, response, options) {
+                    var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
+                    var size = _.size(response.Data);
+                    if (size === totalRecords) {
+                        collection.hasMore = false;
+                    } else {
+                        collection.hasMore = true;
+                        collection.pageIndex += 1;
+                    }
+                    this.resultsView.collection = collection;
+                    this.resultsView.render();
+                    // TODO - better place for this?
+                    this.resizeResults();
+                }, this),
+                error: _.bind(function(collection, xhr, options) {
+                    this.ajaxError(xhr, _.bind(function() {
+                        this.loadPlaylists();
+                    }, this));
+                }, this)
+            });
+            this.appEvents.off('reloadPlaylists').on('reloadPlaylists', clearPlaylistsCache);
+        },
+        resizeResults: function() {
+            if (this.config.fitToParent) {
+                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true));
+            }
+        }
+    });
+
+});
+
+define('ev-script/collections/categories',['require','backbone','ev-script/collections/base','underscore'],function(require) {
+
+    'use strict';
+
+    var Backbone = require('backbone'),
+        BaseCollection = require('ev-script/collections/base'),
+        _ = require('underscore');
+
+    return BaseCollection.extend({
+        initialize: function(models, options) {
+            BaseCollection.prototype.initialize.call(this, models, options);
+            this.requiresAuth = false;
+            this.playlistId = options.playlistId || '';
+        },
+        url: function() {
+            var url = this.config.ensembleUrl + '/app/api/category/list.json/' + this.playlistId;
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        },
+        parse: function(response) {
+            return response.dataSet ? (response.dataSet.category || []) : [];
+        },
+        sync: function(method, model, options) {
+            _.extend(options, {
+                dataFilter: function(data) {
+                    // Strip padding from JSONP response
+                    var match = data.match(/\{[\s\S]*\}/);
+                    return match ? match[0] : data;
+                }
+            });
+            return Backbone.sync.call(this, method, model, options);
+        }
+    });
+
+});
+
+
+define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <fieldset>\n        <legend style="display:none;"><%= i18n.formatMessage(\'Playlist Embed Options\') %></legend>\n        <div class="accordion">\n            <h3><%= i18n.formatMessage(\'Choose Layout\') %></h3>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="playlist" class="form-radio" <% if (model.get(\'layout\') === \'playlist\') { print(\'checked="checked"\'); } %> name="layout" value="playlist" type="radio"/>\n                    <label for="playlist"><%= i18n.formatMessage(\'Playlist\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcase" class="form-radio" <% if (model.get(\'layout\') === \'showcase\') { print(\'checked="checked"\'); } %> name="layout" value="showcase" type="radio"/>\n                    <label for="showcase"><%= i18n.formatMessage(\'Showcase\') %></label>\n                </div>\n            </div>\n            <h3><%= i18n.formatMessage(\'Layout Options\') %></h3>\n            <div>\n                <div class="playlistOptions" <% if (model.get(\'layout\') === \'showcase\') { print(\'style="display:none;"\'); } %>>\n                    <div class="fieldWrap">\n                        <label for="playlistSortBy"><%= i18n.formatMessage(\'Sort By\') %></label>\n                        <select id="playlistSortBy" class="form-select">\n                            <option value="videoDate" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDate\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Added\') %></option>\n                            <option value="videoDateProduced" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDateProduced\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Produced\') %></option>\n                            <option value="videoDescription" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDescription\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Description\') %></option>\n                            <option value="videoTitle" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoTitle\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Title\') %></option>\n                            <option value="videoDuration" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDuration\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Duration\') %></option>\n                            <option value="videoKeywords" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoKeywords\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Keywords\') %></option>\n                            <!-- <option value="videoCustomPosition">Custom Order</option> -->\n                        </select>\n                    </div>\n                    <div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'asc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="asc" type="radio"/>\n                            <label for="playlistSortDirectionAsc"><%= i18n.formatMessage(\'Ascending\') %></label>\n                        </div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'desc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="desc" type="radio"/>\n                            <label for="playlistSortDirectionDesc"><%= i18n.formatMessage(\'Descending\') %></label>\n                        </div>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <label for="playlistSearchString"><%= i18n.formatMessage(\'Search String\') %></label>\n                            <input id="playlistSearchString" class="form-text" name="playlistSearchString" value="<%- model.get(\'playlistLayout\').playlistSearchString %>" type="text"/>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistCategory"><%= i18n.formatMessage(\'Category\') %></label>\n                            <select id="playlistCategory" class="form-select" name="playlistCategory">\n                                <option value="" <% if (!model.get(\'playlistLayout\').playlistCategory) { print(\'selected="selected"\'); } %>>-- <%= i18n.formatMessage(\'None\') %> --</option>\n                                <% categories.each(function(category) { %>\n                                    <option value="<%= category.id %>" <% if (model.get(\'playlistLayout\').playlistCategory === category.id) { print(\'selected="selected"\'); } %>><%- category.get(\'categoryName\') %></option>\n                                <% }); %>\n                            </select>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistNumberOfResults"><%= i18n.formatMessage(\'Number of Results\') %></label>\n                            <input id="playlistNumberOfResults" class="form-text" name="playlistNumberOfResults" value="<%- model.get(\'playlistLayout\').playlistNumberOfResults %>" type="text"/>\n                        </div>\n                    </div>\n                </div>\n                <div class="showcaseOptions" <% if (model.get(\'layout\') === \'playlist\') { print(\'style="display:none;"\'); } %>>\n<!--\n                    <div class="fieldWrap">\n                        <input id="featuredContent" class="form-checkbox" type="checkbox" name="featuredContent" <% if (model.get(\'showcaseLayout\').featuredContent) { print(\'checked="checked"\'); } %>/>\n                        <label for="featuredContent">Featured Content</label>\n                    </div>\n -->\n                    <div class="fieldWrap">\n                        <input id="categoryList" class="form-checkbox" type="checkbox" name="categoryList" <% if (model.get(\'showcaseLayout\').categoryList) { print(\'checked="checked"\'); } %>/>\n                        <label for="categoryList"><%= i18n.formatMessage(\'Category List\') %></label>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationHorizontal" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'horizontal\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="horizontal" type="radio"/>\n                            <label for="categoryOrientationHorizontal"><%= i18n.formatMessage(\'Horizontal\') %></label>\n                        </div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationVertical" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'vertical\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="vertical" type="radio"/>\n                            <label for="categoryOrientationVertical"><%= i18n.formatMessage(\'Vertical\') %></label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <h3><%= i18n.formatMessage(\'Content Details\') %></h3>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="statistics" class="form-checkbox" <% if (model.get(\'statistics\')) { print(\'checked="checked"\'); } %> name="statistics" type="checkbox"/>\n                    <label for="statistics"><%= i18n.formatMessage(\'Statistics\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="duration" class="form-checkbox" <% if (model.get(\'duration\')) { print(\'checked="checked"\'); } %> name="duration" type="checkbox"/>\n                    <label for="duration"><%= i18n.formatMessage(\'Duration\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                    <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                    <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                    <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="credits" class="form-checkbox" <% if (model.get(\'credits\')) { print(\'checked="checked"\'); } %> name="credits" type="checkbox"/>\n                    <label for="credits"><%= i18n.formatMessage(\'Credits\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="socialsharing"><%= i18n.formatMessage(\'Social Tools\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                    <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                    <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                    <label for="dateproduced"><%= i18n.formatMessage(\'Date Produced\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                    <label for="captionsearch"><%= i18n.formatMessage(\'Caption Search\') %></label>\n                </div>\n                <% if (appInfo.checkVersion(\'>=4.8.0\')) { %>\n                    <div class="fieldWrap inline-option">\n                        <input id="viewersreport" class="form-checkbox" <% if (model.get(\'viewersreport\')) { print(\'checked="checked"\'); } %>  name="viewersreport" type="checkbox"/>\n                        <label for="viewersreport"><%= i18n.formatMessage(\'Viewers Report\') %></label>\n                    </div>\n                <% } %>\n            </div>\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </fieldset>\n</form>\n';});
+
+define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/collections/categories','jquery-ui/ui/widgets/dialog','jquery-ui/ui/widgets/accordion','text!ev-script/templates/playlist-settings.html'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        SettingsView = require('ev-script/views/settings'),
+        Categories = require('ev-script/collections/categories');
+
+    require('jquery-ui/ui/widgets/dialog');
+    require('jquery-ui/ui/widgets/accordion');
+
+    return SettingsView.extend({
+        template: _.template(require('text!ev-script/templates/playlist-settings.html')),
+        initialize: function(options) {
+            SettingsView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'changeLayout', 'changeCategoryList');
+            this.categories = options.categories;
+            this.categories.on('reset', _.bind(function() {
+                this.render();
+            }, this));
+        },
+        events: {
+            'submit': 'submitHandler',
+            'click .action-cancel': 'cancelHandler',
+            'change input[name="layout"]': 'changeLayout',
+            'change input[name="categoryList"]': 'changeCategoryList'
+        },
+        updateModel: function() {
+            var content = this.field.model.get('content'),
+                attrs = {
+                    'layout': this.$('input[name="layout"]:checked').val(),
+                    'embedcode': content && content.IsSecure ? false : this.$('#embedcode').is(':checked'),
+                    'statistics': this.$('#statistics').is(':checked'),
+                    'duration': this.$('#duration').is(':checked'),
+                    'attachments': this.$('#attachments').is(':checked'),
+                    'annotations': this.$('#annotations').is(':checked'),
+                    'links': this.$('#links').is(':checked'),
+                    'credits': this.$('#credits').is(':checked'),
+                    'socialsharing': content && content.IsSecure ? false : this.$('#socialsharing').is(':checked'),
+                    'autoplay': this.$('#autoplay').is(':checked'),
+                    'showcaptions': this.$('#showcaptions').is(':checked'),
+                    'dateproduced': this.$('#dateproduced').is(':checked'),
+                    'audiopreviewimage': this.$('#audiopreviewimage').is(':checked'),
+                    'captionsearch': this.$('#captionsearch').is(':checked'),
+                    'viewersreport': this.$('#viewersreport').is(':checked')
+                };
+            if (attrs.layout === 'playlist') {
+                attrs.playlistLayout = {
+                    playlistSortBy: this.$('#playlistSortBy option:selected').val(),
+                    playlistSortDirection: this.$('input[name="playlistSortDirection"]:checked').val(),
+                    playlistSearchString: this.$('#playlistSearchString').val(),
+                    playlistCategory: this.$('#playlistCategory option:selected').val(),
+                    playlistNumberOfResults: this.$('#playlistNumberOfResults').val()
+                };
+            } else {
+                attrs.showcaseLayout = {
+                    // featuredContent: this.$('#featuredContent').is(':checked')
+                    categoryList: this.$('#categoryList').is(':checked'),
+                    categoryOrientation: this.$('input[name="categoryOrientation"]:checked').val()
+                };
+            }
+            this.field.model.set(attrs);
+        },
+        render: function() {
+            var content = this.field.model.get('content');
+            this.$el.html(this.template({
+                appInfo: this.info,
+                i18n: this.i18n,
+                model: this.field.model,
+                isAudio: this.encoding && this.encoding.isAudio(),
+                isSecure: content && content.IsSecure,
+                categories: this.categories || new Categories([], {})
+            }));
+            this.$('.accordion').accordion({
+                active: 2,
+                heightStyle: 'content',
+                collapsible: true
+            });
+            this.$el.dialog({
+                title: this.unencode(content ? content.Name : this.field.model.get('id')),
+                modal: true,
+                autoOpen: false,
+                draggable: false,
+                resizable: false,
+                dialogClass: 'ev-dialog',
+                width: Math.min(680, $(window).width() - this.config.dialogMargin),
+                height: Math.min(460, $(window).height() - this.config.dialogMargin),
+                closeText: this.i18n.formatMessage('Close')
+            });
+        },
+        changeLayout: function(e) {
+            if (e.currentTarget.value === 'playlist') {
+                this.$('.playlistOptions').show();
+                this.$('.showcaseOptions').hide();
+            } else {
+                this.$('.playlistOptions').hide();
+                this.$('.showcaseOptions').show();
+            }
+        },
+        changeCategoryList: function(e) {
+            if ($(e.currentTarget).is(':checked')) {
+                this.$('#categoryOrientationHorizontal').attr('disabled', false);
+                this.$('#categoryOrientationVertical').attr('disabled', false);
+            } else {
+                this.$('#categoryOrientationHorizontal').attr('disabled', true);
+                this.$('#categoryOrientationVertical').attr('disabled', true);
+            }
+        }
+    });
+
+});
+
+
+define('text!ev-script/templates/field.html',[],function () { return '<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span><%= i18n.formatMessage(\'Ensemble Logo\') %></span></a>\n</div>\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="thumbnail">\n            <img alt="<%= i18n.formatMessage(\'Media thumbnail\') %>" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <h2 class="title"><%= name %></h2>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Click to change {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Change {0}\', label) %><span></a>\n        <a href="#" class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', name) %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %><span></a>\n        <a href="#" class="action-options" title="<%= i18n.formatMessage(\'Click to manage {0} embed options\', label) %>"><i class="fa fa-cog fa-lg"></i><span><%= i18n.formatMessage(\'{0} Embed Options\', label) %><span></a>\n        <a href="#" class="action-remove" title="<%= i18n.formatMessage(\'Click to remove {0}\', label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Remove {0}\', label) %><span></a>\n    </div>\n<% } else { %>\n    <h3 class="title"><em><%= i18n.formatMessage(\'Add {0}\', label) %></em></h3>\n    <div class="ev-actions">\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Click to Choose {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Choose {0}\', label) %><span></a>\n    </div>\n<% } %>\n';});
+
+define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','ev-script/collections/categories','text!ev-script/templates/field.html'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        BaseView = require('ev-script/views/base'),
+        VideoSettings = require('ev-script/models/video-settings'),
+        PlaylistSettings = require('ev-script/models/playlist-settings'),
+        VideoPickerView = require('ev-script/views/video-picker'),
+        VideoSettingsView = require('ev-script/views/video-settings'),
+        VideoPreviewView = require('ev-script/views/video-preview'),
+        VideoEncoding = require('ev-script/models/video-encoding'),
+        PlaylistPickerView = require('ev-script/views/playlist-picker'),
+        PlaylistSettingsView = require('ev-script/views/playlist-settings'),
+        PlaylistPreviewView = require('ev-script/views/playlist-preview'),
+        Categories = require('ev-script/collections/categories');
+
+    /*
+     * View for our field (element that we set with the selected content identifier)
+     */
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/field.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler', 'resizePicker');
+            this.$field = options.$field;
+            this.showChoose = true;
+            var pickerOptions = {
+                id: this.id + '-picker',
+                tagName: 'div',
+                className: 'ev-' + this.model.get('type') + '-picker',
+                field: this,
+                appId: this.appId
+            };
+            var settingsOptions = {
+                id: this.id + '-settings',
+                tagName: 'div',
+                className: 'ev-settings',
+                field: this,
+                appId: this.appId
+            };
+            if (this.model instanceof VideoSettings) {
+                this.modelClass = VideoSettings;
+                this.pickerClass = VideoPickerView;
+                this.settingsClass = VideoSettingsView;
+                this.previewClass = VideoPreviewView;
+                this.encoding = new VideoEncoding({}, {
+                    appId: this.appId
+                });
+                if (!this.model.isNew()) {
+                    this.encoding.set({
+                        fetchId: this.model.id
+                    });
+                    this.encoding.fetch();
+                }
+                this.model.on('change:id', _.bind(function() {
+                    // Only fetch encoding if identifier is set
+                    if (this.model.id) {
+                        this.encoding.set({
+                            fetchId: this.model.id
+                        });
+                        this.encoding.fetch({
+                            success: _.bind(function(response) {
+                                // TODO - this is getting messy
+                                this.encoding.updateSettingsModel(this.model);
+                                // Picker model is a copy so need to update that as well
+                                this.encoding.updateSettingsModel(this.picker.model);
+                            }, this)
+                        });
+                    } else {
+                        this.encoding.clear();
+                    }
+                }, this));
+                _.extend(settingsOptions, {
+                    encoding: this.encoding
+                });
+            } else if (this.model instanceof PlaylistSettings) {
+                this.modelClass = PlaylistSettings;
+                this.pickerClass = PlaylistPickerView;
+                this.settingsClass = PlaylistSettingsView;
+                this.previewClass = PlaylistPreviewView;
+                this.categories = new Categories([], {
+                    appId: this.appId
+                });
+                if (!this.model.isNew()) {
+                    this.categories.playlistId = this.model.id;
+                    this.categories.fetch({ reset: true });
+                }
+                this.model.on('change:id', _.bind(function() {
+                    // Only fetch categories if identifier is set
+                    if (this.model.id) {
+                        this.categories.playlistId = this.model.id;
+                        this.categories.fetch({ reset: true });
+                    } else {
+                        this.categories.reset([], { silent: true });
+                        this.categories.playlistId = '';
+                    }
+                }, this));
+                _.extend(settingsOptions, {
+                    categories: this.categories
+                });
+            }
+            this.picker = new this.pickerClass(_.extend({}, pickerOptions, {
+                // We don't want to modify field model until we actually pick a new video...so use a copy as our current model
+                model: new this.modelClass(this.model.toJSON()),
+            }));
+            this.settings = new this.settingsClass(settingsOptions);
+            this.$field.after(this.picker.$el);
+            this.renderActions();
+            this.model.on('change', _.bind(function() {
+                if (!this.model.isNew()) {
+                    var json = this.model.toJSON();
+                    this.$field.val(JSON.stringify(json));
+                    this.appEvents.trigger('fieldUpdated', this.$field, json);
+                    this.renderActions();
+                }
+            }, this));
+            this.appEvents.on('showPicker', function(fieldId) {
+                if (this.id === fieldId) {
+                    this.$('.action-choose').hide();
+                    this.showChoose = false;
+                    // We only want one picker showing at a time so notify all fields to hide them (unless it's ours)
+                    if (this.config.hidePickers) {
+                        this.appEvents.trigger('hidePickers', this.id);
+                    }
+                    this.resizePicker();
+                }
+            }, this);
+            this.appEvents.on('hidePicker', function(fieldId) {
+                if (this.id === fieldId) {
+                    this.$('.action-choose').show();
+                    this.showChoose = true;
+                }
+            }, this);
+            this.appEvents.on('hidePickers', function(fieldId) {
+                // When the picker for our field is hidden we need need to show our 'Choose' button
+                if (!fieldId || (this.id !== fieldId)) {
+                    this.$('.action-choose').show();
+                    this.showChoose = true;
+                }
+            }, this);
+            this.appEvents.on('resize', _.bind(function() {
+                this.resizePicker();
+            }, this));
+        },
+        events: {
+            'click .action-choose': 'chooseHandler',
+            'click .action-preview': 'previewHandler',
+            'click .action-options': 'optionsHandler',
+            'click .action-remove': 'removeHandler'
+        },
+        chooseHandler: function(e) {
+            this.appEvents.trigger('showPicker', this.id);
+            e.preventDefault();
+        },
+        optionsHandler: function(e) {
+            this.settings.show();
+            e.preventDefault();
+        },
+        removeHandler: function(e) {
+            this.model.clear();
+            this.$field.val('');
+            // Silent here because we don't want to trigger our change handler above
+            // (which would set the field value to our model defaults)
+            this.model.set(this.model.defaults, {
+                silent: true
+            });
+            this.appEvents.trigger('fieldUpdated', this.$field);
+            this.renderActions();
+            e.preventDefault();
+        },
+        previewHandler: function(e) {
+            var element = e.currentTarget;
+            var previewView = new this.previewClass({
+                el: element,
+                encoding: this.encoding,
+                model: this.model,
+                picker: this.picker,
+                appId: this.appId
+            });
+            e.preventDefault();
+        },
+        renderActions: function() {
+            var ensembleUrl = this.config.ensembleUrl,
+                name, label, type, thumbnailUrl;
+            if (this.model instanceof VideoSettings) {
+                label = this.i18n.formatMessage('Media');
+                type = 'video';
+            } else {
+                label = this.i18n.formatMessage('Playlist');
+                type = 'playlist';
+            }
+            if (this.model.id) {
+                name = this.model.id;
+                var content = this.model.get('content');
+                if (content) {
+                    name = content.Name || content.Title;
+                    // Validate thumbnailUrl as it could potentially have been modified and we want to protect against XSRF
+                    // (a GET shouldn't have side effects...but make sure we actually have a thumbnail url just in case)
+                    var thumbPath = this.info.checkVersion('>=4.5.0') ? '\/api\/data\/image\/' : '\/app\/assets\/';
+                    var re = new RegExp('^' + ensembleUrl.toLocaleLowerCase() + thumbPath);
+                    if (content.ThumbnailUrl && re.test(content.ThumbnailUrl.toLocaleLowerCase())) {
+                        thumbnailUrl = content.ThumbnailUrl;
+                    }
+                }
+            }
+            if (!this.$actions) {
+                this.$actions = $('<div class="ev-field"/>');
+                this.$field.after(this.$actions);
+            }
+            this.$actions.html(this.template({
+                i18n: this.i18n,
+                ensembleUrl: ensembleUrl,
+                modelId: this.model.id,
+                label: label,
+                type: type,
+                name: name,
+                thumbnailUrl: thumbnailUrl
+            }));
+            // If our picker is shown, hide our 'Choose' button
+            if (!this.showChoose) {
+                this.$('.action-choose').hide();
+            }
+        },
+        resizePicker: function() {
+            if (this.config.fitToParent) {
+                this.picker.setHeight(this.$el.height() - this.$actions.outerHeight(true));
+            }
+        }
+    });
+
+});
+
+;(function(exports) {
+
+// export the class if we are in a Node-like system.
+if (typeof module === 'object' && module.exports === exports)
+  exports = module.exports = SemVer;
+
+// The debug function is excluded entirely from the minified version.
+
+// Note: this is the semver.org version of the spec that it implements
+// Not necessarily the package version of this code.
+exports.SEMVER_SPEC_VERSION = '2.0.0';
+
+var MAX_LENGTH = 256;
+var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
+
+// The actual regexps go on exports.re
+var re = exports.re = [];
+var src = exports.src = [];
+var R = 0;
+
+// The following Regular Expressions can be used for tokenizing,
+// validating, and parsing SemVer version strings.
+
+// ## Numeric Identifier
+// A single `0`, or a non-zero digit followed by zero or more digits.
+
+var NUMERICIDENTIFIER = R++;
+src[NUMERICIDENTIFIER] = '0|[1-9]\\d*';
+var NUMERICIDENTIFIERLOOSE = R++;
+src[NUMERICIDENTIFIERLOOSE] = '[0-9]+';
+
+
+// ## Non-numeric Identifier
+// Zero or more digits, followed by a letter or hyphen, and then zero or
+// more letters, digits, or hyphens.
+
+var NONNUMERICIDENTIFIER = R++;
+src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-][a-zA-Z0-9-]*';
+
+
+// ## Main Version
+// Three dot-separated numeric identifiers.
+
+var MAINVERSION = R++;
+src[MAINVERSION] = '(' + src[NUMERICIDENTIFIER] + ')\\.' +
+                   '(' + src[NUMERICIDENTIFIER] + ')\\.' +
+                   '(' + src[NUMERICIDENTIFIER] + ')';
+
+var MAINVERSIONLOOSE = R++;
+src[MAINVERSIONLOOSE] = '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
+                        '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
+                        '(' + src[NUMERICIDENTIFIERLOOSE] + ')';
+
+// ## Pre-release Version Identifier
+// A numeric identifier, or a non-numeric identifier.
+
+var PRERELEASEIDENTIFIER = R++;
+src[PRERELEASEIDENTIFIER] = '(?:' + src[NUMERICIDENTIFIER] +
+                            '|' + src[NONNUMERICIDENTIFIER] + ')';
+
+var PRERELEASEIDENTIFIERLOOSE = R++;
+src[PRERELEASEIDENTIFIERLOOSE] = '(?:' + src[NUMERICIDENTIFIERLOOSE] +
+                                 '|' + src[NONNUMERICIDENTIFIER] + ')';
+
+
+// ## Pre-release Version
+// Hyphen, followed by one or more dot-separated pre-release version
+// identifiers.
+
+var PRERELEASE = R++;
+src[PRERELEASE] = '(?:-(' + src[PRERELEASEIDENTIFIER] +
+                  '(?:\\.' + src[PRERELEASEIDENTIFIER] + ')*))';
+
+var PRERELEASELOOSE = R++;
+src[PRERELEASELOOSE] = '(?:-?(' + src[PRERELEASEIDENTIFIERLOOSE] +
+                       '(?:\\.' + src[PRERELEASEIDENTIFIERLOOSE] + ')*))';
+
+// ## Build Metadata Identifier
+// Any combination of digits, letters, or hyphens.
+
+var BUILDIDENTIFIER = R++;
+src[BUILDIDENTIFIER] = '[0-9A-Za-z-]+';
+
+// ## Build Metadata
+// Plus sign, followed by one or more period-separated build metadata
+// identifiers.
+
+var BUILD = R++;
+src[BUILD] = '(?:\\+(' + src[BUILDIDENTIFIER] +
+             '(?:\\.' + src[BUILDIDENTIFIER] + ')*))';
+
+
+// ## Full Version String
+// A main version, followed optionally by a pre-release version and
+// build metadata.
+
+// Note that the only major, minor, patch, and pre-release sections of
+// the version string are capturing groups.  The build metadata is not a
+// capturing group, because it should not ever be used in version
+// comparison.
+
+var FULL = R++;
+var FULLPLAIN = 'v?' + src[MAINVERSION] +
+                src[PRERELEASE] + '?' +
+                src[BUILD] + '?';
+
+src[FULL] = '^' + FULLPLAIN + '$';
+
+// like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
+// also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
+// common in the npm registry.
+var LOOSEPLAIN = '[v=\\s]*' + src[MAINVERSIONLOOSE] +
+                 src[PRERELEASELOOSE] + '?' +
+                 src[BUILD] + '?';
+
+var LOOSE = R++;
+src[LOOSE] = '^' + LOOSEPLAIN + '$';
+
+var GTLT = R++;
+src[GTLT] = '((?:<|>)?=?)';
+
+// Something like "2.*" or "1.2.x".
+// Note that "x.x" is a valid xRange identifer, meaning "any version"
+// Only the first item is strictly required.
+var XRANGEIDENTIFIERLOOSE = R++;
+src[XRANGEIDENTIFIERLOOSE] = src[NUMERICIDENTIFIERLOOSE] + '|x|X|\\*';
+var XRANGEIDENTIFIER = R++;
+src[XRANGEIDENTIFIER] = src[NUMERICIDENTIFIER] + '|x|X|\\*';
+
+var XRANGEPLAIN = R++;
+src[XRANGEPLAIN] = '[v=\\s]*(' + src[XRANGEIDENTIFIER] + ')' +
+                   '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
+                   '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
+                   '(?:' + src[PRERELEASE] + ')?' +
+                   src[BUILD] + '?' +
+                   ')?)?';
+
+var XRANGEPLAINLOOSE = R++;
+src[XRANGEPLAINLOOSE] = '[v=\\s]*(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
+                        '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
+                        '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
+                        '(?:' + src[PRERELEASELOOSE] + ')?' +
+                        src[BUILD] + '?' +
+                        ')?)?';
+
+var XRANGE = R++;
+src[XRANGE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAIN] + '$';
+var XRANGELOOSE = R++;
+src[XRANGELOOSE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAINLOOSE] + '$';
+
+// Tilde ranges.
+// Meaning is "reasonably at or greater than"
+var LONETILDE = R++;
+src[LONETILDE] = '(?:~>?)';
+
+var TILDETRIM = R++;
+src[TILDETRIM] = '(\\s*)' + src[LONETILDE] + '\\s+';
+re[TILDETRIM] = new RegExp(src[TILDETRIM], 'g');
+var tildeTrimReplace = '$1~';
+
+var TILDE = R++;
+src[TILDE] = '^' + src[LONETILDE] + src[XRANGEPLAIN] + '$';
+var TILDELOOSE = R++;
+src[TILDELOOSE] = '^' + src[LONETILDE] + src[XRANGEPLAINLOOSE] + '$';
+
+// Caret ranges.
+// Meaning is "at least and backwards compatible with"
+var LONECARET = R++;
+src[LONECARET] = '(?:\\^)';
+
+var CARETTRIM = R++;
+src[CARETTRIM] = '(\\s*)' + src[LONECARET] + '\\s+';
+re[CARETTRIM] = new RegExp(src[CARETTRIM], 'g');
+var caretTrimReplace = '$1^';
+
+var CARET = R++;
+src[CARET] = '^' + src[LONECARET] + src[XRANGEPLAIN] + '$';
+var CARETLOOSE = R++;
+src[CARETLOOSE] = '^' + src[LONECARET] + src[XRANGEPLAINLOOSE] + '$';
+
+// A simple gt/lt/eq thing, or just "" to indicate "any version"
+var COMPARATORLOOSE = R++;
+src[COMPARATORLOOSE] = '^' + src[GTLT] + '\\s*(' + LOOSEPLAIN + ')$|^$';
+var COMPARATOR = R++;
+src[COMPARATOR] = '^' + src[GTLT] + '\\s*(' + FULLPLAIN + ')$|^$';
+
+
+// An expression to strip any whitespace between the gtlt and the thing
+// it modifies, so that `> 1.2.3` ==> `>1.2.3`
+var COMPARATORTRIM = R++;
+src[COMPARATORTRIM] = '(\\s*)' + src[GTLT] +
+                      '\\s*(' + LOOSEPLAIN + '|' + src[XRANGEPLAIN] + ')';
+
+// this one has to use the /g flag
+re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], 'g');
+var comparatorTrimReplace = '$1$2$3';
+
+
+// Something like `1.2.3 - 1.2.4`
+// Note that these all use the loose form, because they'll be
+// checked against either the strict or loose comparator form
+// later.
+var HYPHENRANGE = R++;
+src[HYPHENRANGE] = '^\\s*(' + src[XRANGEPLAIN] + ')' +
+                   '\\s+-\\s+' +
+                   '(' + src[XRANGEPLAIN] + ')' +
+                   '\\s*$';
+
+var HYPHENRANGELOOSE = R++;
+src[HYPHENRANGELOOSE] = '^\\s*(' + src[XRANGEPLAINLOOSE] + ')' +
+                        '\\s+-\\s+' +
+                        '(' + src[XRANGEPLAINLOOSE] + ')' +
+                        '\\s*$';
+
+// Star ranges basically just allow anything at all.
+var STAR = R++;
+src[STAR] = '(<|>)?=?\\s*\\*';
+
+// Compile to actual regexp objects.
+// All are flag-free, unless they were created above with a flag.
+for (var i = 0; i < R; i++) {
+  ;
+  if (!re[i])
+    re[i] = new RegExp(src[i]);
+}
+
+exports.parse = parse;
+function parse(version, loose) {
+  if (version instanceof SemVer)
+    return version;
+
+  if (typeof version !== 'string')
+    return null;
+
+  if (version.length > MAX_LENGTH)
+    return null;
+
+  var r = loose ? re[LOOSE] : re[FULL];
+  if (!r.test(version))
+    return null;
+
+  try {
+    return new SemVer(version, loose);
+  } catch (er) {
+    return null;
+  }
+}
+
+exports.valid = valid;
+function valid(version, loose) {
+  var v = parse(version, loose);
+  return v ? v.version : null;
+}
+
+
+exports.clean = clean;
+function clean(version, loose) {
+  var s = parse(version.trim().replace(/^[=v]+/, ''), loose);
+  return s ? s.version : null;
+}
+
+exports.SemVer = SemVer;
+
+function SemVer(version, loose) {
+  if (version instanceof SemVer) {
+    if (version.loose === loose)
+      return version;
+    else
+      version = version.version;
+  } else if (typeof version !== 'string') {
+    throw new TypeError('Invalid Version: ' + version);
+  }
+
+  if (version.length > MAX_LENGTH)
+    throw new TypeError('version is longer than ' + MAX_LENGTH + ' characters')
+
+  if (!(this instanceof SemVer))
+    return new SemVer(version, loose);
+
+  ;
+  this.loose = loose;
+  var m = version.trim().match(loose ? re[LOOSE] : re[FULL]);
+
+  if (!m)
+    throw new TypeError('Invalid Version: ' + version);
+
+  this.raw = version;
+
+  // these are actually numbers
+  this.major = +m[1];
+  this.minor = +m[2];
+  this.patch = +m[3];
+
+  if (this.major > MAX_SAFE_INTEGER || this.major < 0)
+    throw new TypeError('Invalid major version')
+
+  if (this.minor > MAX_SAFE_INTEGER || this.minor < 0)
+    throw new TypeError('Invalid minor version')
+
+  if (this.patch > MAX_SAFE_INTEGER || this.patch < 0)
+    throw new TypeError('Invalid patch version')
+
+  // numberify any prerelease numeric ids
+  if (!m[4])
+    this.prerelease = [];
+  else
+    this.prerelease = m[4].split('.').map(function(id) {
+      if (/^[0-9]+$/.test(id)) {
+        var num = +id
+        if (num >= 0 && num < MAX_SAFE_INTEGER)
+          return num
+      }
+      return id;
+    });
+
+  this.build = m[5] ? m[5].split('.') : [];
+  this.format();
+}
+
+SemVer.prototype.format = function() {
+  this.version = this.major + '.' + this.minor + '.' + this.patch;
+  if (this.prerelease.length)
+    this.version += '-' + this.prerelease.join('.');
+  return this.version;
+};
+
+SemVer.prototype.inspect = function() {
+  return '<SemVer "' + this + '">';
+};
+
+SemVer.prototype.toString = function() {
+  return this.version;
+};
+
+SemVer.prototype.compare = function(other) {
+  ;
+  if (!(other instanceof SemVer))
+    other = new SemVer(other, this.loose);
+
+  return this.compareMain(other) || this.comparePre(other);
+};
+
+SemVer.prototype.compareMain = function(other) {
+  if (!(other instanceof SemVer))
+    other = new SemVer(other, this.loose);
+
+  return compareIdentifiers(this.major, other.major) ||
+         compareIdentifiers(this.minor, other.minor) ||
+         compareIdentifiers(this.patch, other.patch);
+};
+
+SemVer.prototype.comparePre = function(other) {
+  if (!(other instanceof SemVer))
+    other = new SemVer(other, this.loose);
+
+  // NOT having a prerelease is > having one
+  if (this.prerelease.length && !other.prerelease.length)
+    return -1;
+  else if (!this.prerelease.length && other.prerelease.length)
+    return 1;
+  else if (!this.prerelease.length && !other.prerelease.length)
+    return 0;
+
+  var i = 0;
+  do {
+    var a = this.prerelease[i];
+    var b = other.prerelease[i];
+    ;
+    if (a === undefined && b === undefined)
+      return 0;
+    else if (b === undefined)
+      return 1;
+    else if (a === undefined)
+      return -1;
+    else if (a === b)
+      continue;
+    else
+      return compareIdentifiers(a, b);
+  } while (++i);
+};
+
+// preminor will bump the version up to the next minor release, and immediately
+// down to pre-release. premajor and prepatch work the same way.
+SemVer.prototype.inc = function(release, identifier) {
+  switch (release) {
+    case 'premajor':
+      this.prerelease.length = 0;
+      this.patch = 0;
+      this.minor = 0;
+      this.major++;
+      this.inc('pre', identifier);
+      break;
+    case 'preminor':
+      this.prerelease.length = 0;
+      this.patch = 0;
+      this.minor++;
+      this.inc('pre', identifier);
+      break;
+    case 'prepatch':
+      // If this is already a prerelease, it will bump to the next version
+      // drop any prereleases that might already exist, since they are not
+      // relevant at this point.
+      this.prerelease.length = 0;
+      this.inc('patch', identifier);
+      this.inc('pre', identifier);
+      break;
+    // If the input is a non-prerelease version, this acts the same as
+    // prepatch.
+    case 'prerelease':
+      if (this.prerelease.length === 0)
+        this.inc('patch', identifier);
+      this.inc('pre', identifier);
+      break;
+
+    case 'major':
+      // If this is a pre-major version, bump up to the same major version.
+      // Otherwise increment major.
+      // 1.0.0-5 bumps to 1.0.0
+      // 1.1.0 bumps to 2.0.0
+      if (this.minor !== 0 || this.patch !== 0 || this.prerelease.length === 0)
+        this.major++;
+      this.minor = 0;
+      this.patch = 0;
+      this.prerelease = [];
+      break;
+    case 'minor':
+      // If this is a pre-minor version, bump up to the same minor version.
+      // Otherwise increment minor.
+      // 1.2.0-5 bumps to 1.2.0
+      // 1.2.1 bumps to 1.3.0
+      if (this.patch !== 0 || this.prerelease.length === 0)
+        this.minor++;
+      this.patch = 0;
+      this.prerelease = [];
+      break;
+    case 'patch':
+      // If this is not a pre-release version, it will increment the patch.
+      // If it is a pre-release it will bump up to the same patch version.
+      // 1.2.0-5 patches to 1.2.0
+      // 1.2.0 patches to 1.2.1
+      if (this.prerelease.length === 0)
+        this.patch++;
+      this.prerelease = [];
+      break;
+    // This probably shouldn't be used publicly.
+    // 1.0.0 "pre" would become 1.0.0-0 which is the wrong direction.
+    case 'pre':
+      if (this.prerelease.length === 0)
+        this.prerelease = [0];
+      else {
+        var i = this.prerelease.length;
+        while (--i >= 0) {
+          if (typeof this.prerelease[i] === 'number') {
+            this.prerelease[i]++;
+            i = -2;
+          }
+        }
+        if (i === -1) // didn't increment anything
+          this.prerelease.push(0);
+      }
+      if (identifier) {
+        // 1.2.0-beta.1 bumps to 1.2.0-beta.2,
+        // 1.2.0-beta.fooblz or 1.2.0-beta bumps to 1.2.0-beta.0
+        if (this.prerelease[0] === identifier) {
+          if (isNaN(this.prerelease[1]))
+            this.prerelease = [identifier, 0];
+        } else
+          this.prerelease = [identifier, 0];
+      }
+      break;
+
+    default:
+      throw new Error('invalid increment argument: ' + release);
+  }
+  this.format();
+  return this;
+};
+
+exports.inc = inc;
+function inc(version, release, loose, identifier) {
+  if (typeof(loose) === 'string') {
+    identifier = loose;
+    loose = undefined;
+  }
+
+  try {
+    return new SemVer(version, loose).inc(release, identifier).version;
+  } catch (er) {
+    return null;
+  }
+}
+
+exports.diff = diff;
+function diff(version1, version2) {
+  if (eq(version1, version2)) {
+    return null;
+  } else {
+    var v1 = parse(version1);
+    var v2 = parse(version2);
+    if (v1.prerelease.length || v2.prerelease.length) {
+      for (var key in v1) {
+        if (key === 'major' || key === 'minor' || key === 'patch') {
+          if (v1[key] !== v2[key]) {
+            return 'pre'+key;
+          }
+        }
+      }
+      return 'prerelease';
+    }
+    for (var key in v1) {
+      if (key === 'major' || key === 'minor' || key === 'patch') {
+        if (v1[key] !== v2[key]) {
+          return key;
+        }
+      }
+    }
+  }
+}
+
+exports.compareIdentifiers = compareIdentifiers;
+
+var numeric = /^[0-9]+$/;
+function compareIdentifiers(a, b) {
+  var anum = numeric.test(a);
+  var bnum = numeric.test(b);
+
+  if (anum && bnum) {
+    a = +a;
+    b = +b;
+  }
+
+  return (anum && !bnum) ? -1 :
+         (bnum && !anum) ? 1 :
+         a < b ? -1 :
+         a > b ? 1 :
+         0;
+}
+
+exports.rcompareIdentifiers = rcompareIdentifiers;
+function rcompareIdentifiers(a, b) {
+  return compareIdentifiers(b, a);
+}
+
+exports.major = major;
+function major(a, loose) {
+  return new SemVer(a, loose).major;
+}
+
+exports.minor = minor;
+function minor(a, loose) {
+  return new SemVer(a, loose).minor;
+}
+
+exports.patch = patch;
+function patch(a, loose) {
+  return new SemVer(a, loose).patch;
+}
+
+exports.compare = compare;
+function compare(a, b, loose) {
+  return new SemVer(a, loose).compare(b);
+}
+
+exports.compareLoose = compareLoose;
+function compareLoose(a, b) {
+  return compare(a, b, true);
+}
+
+exports.rcompare = rcompare;
+function rcompare(a, b, loose) {
+  return compare(b, a, loose);
+}
+
+exports.sort = sort;
+function sort(list, loose) {
+  return list.sort(function(a, b) {
+    return exports.compare(a, b, loose);
+  });
+}
+
+exports.rsort = rsort;
+function rsort(list, loose) {
+  return list.sort(function(a, b) {
+    return exports.rcompare(a, b, loose);
+  });
+}
+
+exports.gt = gt;
+function gt(a, b, loose) {
+  return compare(a, b, loose) > 0;
+}
+
+exports.lt = lt;
+function lt(a, b, loose) {
+  return compare(a, b, loose) < 0;
+}
+
+exports.eq = eq;
+function eq(a, b, loose) {
+  return compare(a, b, loose) === 0;
+}
+
+exports.neq = neq;
+function neq(a, b, loose) {
+  return compare(a, b, loose) !== 0;
+}
+
+exports.gte = gte;
+function gte(a, b, loose) {
+  return compare(a, b, loose) >= 0;
+}
+
+exports.lte = lte;
+function lte(a, b, loose) {
+  return compare(a, b, loose) <= 0;
+}
+
+exports.cmp = cmp;
+function cmp(a, op, b, loose) {
+  var ret;
+  switch (op) {
+    case '===':
+      if (typeof a === 'object') a = a.version;
+      if (typeof b === 'object') b = b.version;
+      ret = a === b;
+      break;
+    case '!==':
+      if (typeof a === 'object') a = a.version;
+      if (typeof b === 'object') b = b.version;
+      ret = a !== b;
+      break;
+    case '': case '=': case '==': ret = eq(a, b, loose); break;
+    case '!=': ret = neq(a, b, loose); break;
+    case '>': ret = gt(a, b, loose); break;
+    case '>=': ret = gte(a, b, loose); break;
+    case '<': ret = lt(a, b, loose); break;
+    case '<=': ret = lte(a, b, loose); break;
+    default: throw new TypeError('Invalid operator: ' + op);
+  }
+  return ret;
+}
+
+exports.Comparator = Comparator;
+function Comparator(comp, loose) {
+  if (comp instanceof Comparator) {
+    if (comp.loose === loose)
+      return comp;
+    else
+      comp = comp.value;
+  }
+
+  if (!(this instanceof Comparator))
+    return new Comparator(comp, loose);
+
+  ;
+  this.loose = loose;
+  this.parse(comp);
+
+  if (this.semver === ANY)
+    this.value = '';
+  else
+    this.value = this.operator + this.semver.version;
+
+  ;
+}
+
+var ANY = {};
+Comparator.prototype.parse = function(comp) {
+  var r = this.loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
+  var m = comp.match(r);
+
+  if (!m)
+    throw new TypeError('Invalid comparator: ' + comp);
+
+  this.operator = m[1];
+  if (this.operator === '=')
+    this.operator = '';
+
+  // if it literally is just '>' or '' then allow anything.
+  if (!m[2])
+    this.semver = ANY;
+  else
+    this.semver = new SemVer(m[2], this.loose);
+};
+
+Comparator.prototype.inspect = function() {
+  return '<SemVer Comparator "' + this + '">';
+};
+
+Comparator.prototype.toString = function() {
+  return this.value;
+};
+
+Comparator.prototype.test = function(version) {
+  ;
+
+  if (this.semver === ANY)
+    return true;
+
+  if (typeof version === 'string')
+    version = new SemVer(version, this.loose);
+
+  return cmp(version, this.operator, this.semver, this.loose);
+};
+
+
+exports.Range = Range;
+function Range(range, loose) {
+  if ((range instanceof Range) && range.loose === loose)
+    return range;
+
+  if (!(this instanceof Range))
+    return new Range(range, loose);
+
+  this.loose = loose;
+
+  // First, split based on boolean or ||
+  this.raw = range;
+  this.set = range.split(/\s*\|\|\s*/).map(function(range) {
+    return this.parseRange(range.trim());
+  }, this).filter(function(c) {
+    // throw out any that are not relevant for whatever reason
+    return c.length;
+  });
+
+  if (!this.set.length) {
+    throw new TypeError('Invalid SemVer Range: ' + range);
+  }
+
+  this.format();
+}
+
+Range.prototype.inspect = function() {
+  return '<SemVer Range "' + this.range + '">';
+};
+
+Range.prototype.format = function() {
+  this.range = this.set.map(function(comps) {
+    return comps.join(' ').trim();
+  }).join('||').trim();
+  return this.range;
+};
+
+Range.prototype.toString = function() {
+  return this.range;
+};
+
+Range.prototype.parseRange = function(range) {
+  var loose = this.loose;
+  range = range.trim();
+  ;
+  // `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
+  var hr = loose ? re[HYPHENRANGELOOSE] : re[HYPHENRANGE];
+  range = range.replace(hr, hyphenReplace);
+  ;
+  // `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
+  range = range.replace(re[COMPARATORTRIM], comparatorTrimReplace);
+  ;
+
+  // `~ 1.2.3` => `~1.2.3`
+  range = range.replace(re[TILDETRIM], tildeTrimReplace);
+
+  // `^ 1.2.3` => `^1.2.3`
+  range = range.replace(re[CARETTRIM], caretTrimReplace);
+
+  // normalize spaces
+  range = range.split(/\s+/).join(' ');
+
+  // At this point, the range is completely trimmed and
+  // ready to be split into comparators.
+
+  var compRe = loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
+  var set = range.split(' ').map(function(comp) {
+    return parseComparator(comp, loose);
+  }).join(' ').split(/\s+/);
+  if (this.loose) {
+    // in loose mode, throw out any that are not valid comparators
+    set = set.filter(function(comp) {
+      return !!comp.match(compRe);
+    });
+  }
+  set = set.map(function(comp) {
+    return new Comparator(comp, loose);
+  });
+
+  return set;
+};
+
+// Mostly just for testing and legacy API reasons
+exports.toComparators = toComparators;
+function toComparators(range, loose) {
+  return new Range(range, loose).set.map(function(comp) {
+    return comp.map(function(c) {
+      return c.value;
+    }).join(' ').trim().split(' ');
+  });
+}
+
+// comprised of xranges, tildes, stars, and gtlt's at this point.
+// already replaced the hyphen ranges
+// turn into a set of JUST comparators.
+function parseComparator(comp, loose) {
+  ;
+  comp = replaceCarets(comp, loose);
+  ;
+  comp = replaceTildes(comp, loose);
+  ;
+  comp = replaceXRanges(comp, loose);
+  ;
+  comp = replaceStars(comp, loose);
+  ;
+  return comp;
+}
+
+function isX(id) {
+  return !id || id.toLowerCase() === 'x' || id === '*';
+}
+
+// ~, ~> --> * (any, kinda silly)
+// ~2, ~2.x, ~2.x.x, ~>2, ~>2.x ~>2.x.x --> >=2.0.0 <3.0.0
+// ~2.0, ~2.0.x, ~>2.0, ~>2.0.x --> >=2.0.0 <2.1.0
+// ~1.2, ~1.2.x, ~>1.2, ~>1.2.x --> >=1.2.0 <1.3.0
+// ~1.2.3, ~>1.2.3 --> >=1.2.3 <1.3.0
+// ~1.2.0, ~>1.2.0 --> >=1.2.0 <1.3.0
+function replaceTildes(comp, loose) {
+  return comp.trim().split(/\s+/).map(function(comp) {
+    return replaceTilde(comp, loose);
+  }).join(' ');
+}
+
+function replaceTilde(comp, loose) {
+  var r = loose ? re[TILDELOOSE] : re[TILDE];
+  return comp.replace(r, function(_, M, m, p, pr) {
+    ;
+    var ret;
+
+    if (isX(M))
+      ret = '';
+    else if (isX(m))
+      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
+    else if (isX(p))
+      // ~1.2 == >=1.2.0- <1.3.0-
+      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
+    else if (pr) {
+      ;
+      if (pr.charAt(0) !== '-')
+        pr = '-' + pr;
+      ret = '>=' + M + '.' + m + '.' + p + pr +
+            ' <' + M + '.' + (+m + 1) + '.0';
+    } else
+      // ~1.2.3 == >=1.2.3 <1.3.0
+      ret = '>=' + M + '.' + m + '.' + p +
+            ' <' + M + '.' + (+m + 1) + '.0';
+
+    ;
+    return ret;
+  });
+}
+
+// ^ --> * (any, kinda silly)
+// ^2, ^2.x, ^2.x.x --> >=2.0.0 <3.0.0
+// ^2.0, ^2.0.x --> >=2.0.0 <3.0.0
+// ^1.2, ^1.2.x --> >=1.2.0 <2.0.0
+// ^1.2.3 --> >=1.2.3 <2.0.0
+// ^1.2.0 --> >=1.2.0 <2.0.0
+function replaceCarets(comp, loose) {
+  return comp.trim().split(/\s+/).map(function(comp) {
+    return replaceCaret(comp, loose);
+  }).join(' ');
+}
+
+function replaceCaret(comp, loose) {
+  ;
+  var r = loose ? re[CARETLOOSE] : re[CARET];
+  return comp.replace(r, function(_, M, m, p, pr) {
+    ;
+    var ret;
+
+    if (isX(M))
+      ret = '';
+    else if (isX(m))
+      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
+    else if (isX(p)) {
+      if (M === '0')
+        ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
+      else
+        ret = '>=' + M + '.' + m + '.0 <' + (+M + 1) + '.0.0';
+    } else if (pr) {
+      ;
+      if (pr.charAt(0) !== '-')
+        pr = '-' + pr;
+      if (M === '0') {
+        if (m === '0')
+          ret = '>=' + M + '.' + m + '.' + p + pr +
+                ' <' + M + '.' + m + '.' + (+p + 1);
+        else
+          ret = '>=' + M + '.' + m + '.' + p + pr +
+                ' <' + M + '.' + (+m + 1) + '.0';
+      } else
+        ret = '>=' + M + '.' + m + '.' + p + pr +
+              ' <' + (+M + 1) + '.0.0';
+    } else {
+      ;
+      if (M === '0') {
+        if (m === '0')
+          ret = '>=' + M + '.' + m + '.' + p +
+                ' <' + M + '.' + m + '.' + (+p + 1);
+        else
+          ret = '>=' + M + '.' + m + '.' + p +
+                ' <' + M + '.' + (+m + 1) + '.0';
+      } else
+        ret = '>=' + M + '.' + m + '.' + p +
+              ' <' + (+M + 1) + '.0.0';
+    }
+
+    ;
+    return ret;
+  });
+}
+
+function replaceXRanges(comp, loose) {
+  ;
+  return comp.split(/\s+/).map(function(comp) {
+    return replaceXRange(comp, loose);
+  }).join(' ');
+}
+
+function replaceXRange(comp, loose) {
+  comp = comp.trim();
+  var r = loose ? re[XRANGELOOSE] : re[XRANGE];
+  return comp.replace(r, function(ret, gtlt, M, m, p, pr) {
+    ;
+    var xM = isX(M);
+    var xm = xM || isX(m);
+    var xp = xm || isX(p);
+    var anyX = xp;
+
+    if (gtlt === '=' && anyX)
+      gtlt = '';
+
+    if (xM) {
+      if (gtlt === '>' || gtlt === '<') {
+        // nothing is allowed
+        ret = '<0.0.0';
+      } else {
+        // nothing is forbidden
+        ret = '*';
+      }
+    } else if (gtlt && anyX) {
+      // replace X with 0
+      if (xm)
+        m = 0;
+      if (xp)
+        p = 0;
+
+      if (gtlt === '>') {
+        // >1 => >=2.0.0
+        // >1.2 => >=1.3.0
+        // >1.2.3 => >= 1.2.4
+        gtlt = '>=';
+        if (xm) {
+          M = +M + 1;
+          m = 0;
+          p = 0;
+        } else if (xp) {
+          m = +m + 1;
+          p = 0;
+        }
+      } else if (gtlt === '<=') {
+        // <=0.7.x is actually <0.8.0, since any 0.7.x should
+        // pass.  Similarly, <=7.x is actually <8.0.0, etc.
+        gtlt = '<'
+        if (xm)
+          M = +M + 1
+        else
+          m = +m + 1
+      }
+
+      ret = gtlt + M + '.' + m + '.' + p;
+    } else if (xm) {
+      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
+    } else if (xp) {
+      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
+    }
+
+    ;
+
+    return ret;
+  });
+}
+
+// Because * is AND-ed with everything else in the comparator,
+// and '' means "any version", just remove the *s entirely.
+function replaceStars(comp, loose) {
+  ;
+  // Looseness is ignored here.  star is always as loose as it gets!
+  return comp.trim().replace(re[STAR], '');
+}
+
+// This function is passed to string.replace(re[HYPHENRANGE])
+// M, m, patch, prerelease, build
+// 1.2 - 3.4.5 => >=1.2.0 <=3.4.5
+// 1.2.3 - 3.4 => >=1.2.0 <3.5.0 Any 3.4.x will do
+// 1.2 - 3.4 => >=1.2.0 <3.5.0
+function hyphenReplace($0,
+                       from, fM, fm, fp, fpr, fb,
+                       to, tM, tm, tp, tpr, tb) {
+
+  if (isX(fM))
+    from = '';
+  else if (isX(fm))
+    from = '>=' + fM + '.0.0';
+  else if (isX(fp))
+    from = '>=' + fM + '.' + fm + '.0';
+  else
+    from = '>=' + from;
+
+  if (isX(tM))
+    to = '';
+  else if (isX(tm))
+    to = '<' + (+tM + 1) + '.0.0';
+  else if (isX(tp))
+    to = '<' + tM + '.' + (+tm + 1) + '.0';
+  else if (tpr)
+    to = '<=' + tM + '.' + tm + '.' + tp + '-' + tpr;
+  else
+    to = '<=' + to;
+
+  return (from + ' ' + to).trim();
+}
+
+
+// if ANY of the sets match ALL of its comparators, then pass
+Range.prototype.test = function(version) {
+  if (!version)
+    return false;
+
+  if (typeof version === 'string')
+    version = new SemVer(version, this.loose);
+
+  for (var i = 0; i < this.set.length; i++) {
+    if (testSet(this.set[i], version))
+      return true;
+  }
+  return false;
+};
+
+function testSet(set, version) {
+  for (var i = 0; i < set.length; i++) {
+    if (!set[i].test(version))
+      return false;
+  }
+
+  if (version.prerelease.length) {
+    // Find the set of versions that are allowed to have prereleases
+    // For example, ^1.2.3-pr.1 desugars to >=1.2.3-pr.1 <2.0.0
+    // That should allow `1.2.3-pr.2` to pass.
+    // However, `1.2.4-alpha.notready` should NOT be allowed,
+    // even though it's within the range set by the comparators.
+    for (var i = 0; i < set.length; i++) {
+      ;
+      if (set[i].semver === ANY)
+        continue;
+
+      if (set[i].semver.prerelease.length > 0) {
+        var allowed = set[i].semver;
+        if (allowed.major === version.major &&
+            allowed.minor === version.minor &&
+            allowed.patch === version.patch)
+          return true;
+      }
+    }
+
+    // Version has a -pre, but it's not one of the ones we like.
+    return false;
+  }
+
+  return true;
+}
+
+exports.satisfies = satisfies;
+function satisfies(version, range, loose) {
+  try {
+    range = new Range(range, loose);
+  } catch (er) {
+    return false;
+  }
+  return range.test(version);
+}
+
+exports.maxSatisfying = maxSatisfying;
+function maxSatisfying(versions, range, loose) {
+  return versions.filter(function(version) {
+    return satisfies(version, range, loose);
+  }).sort(function(a, b) {
+    return rcompare(a, b, loose);
+  })[0] || null;
+}
+
+exports.validRange = validRange;
+function validRange(range, loose) {
+  try {
+    // Return '*' instead of '' so that truthiness works.
+    // This will throw if it's invalid anyway
+    return new Range(range, loose).range || '*';
+  } catch (er) {
+    return null;
+  }
+}
+
+// Determine if version is less than all the versions possible in the range
+exports.ltr = ltr;
+function ltr(version, range, loose) {
+  return outside(version, range, '<', loose);
+}
+
+// Determine if version is greater than all the versions possible in the range.
+exports.gtr = gtr;
+function gtr(version, range, loose) {
+  return outside(version, range, '>', loose);
+}
+
+exports.outside = outside;
+function outside(version, range, hilo, loose) {
+  version = new SemVer(version, loose);
+  range = new Range(range, loose);
+
+  var gtfn, ltefn, ltfn, comp, ecomp;
+  switch (hilo) {
+    case '>':
+      gtfn = gt;
+      ltefn = lte;
+      ltfn = lt;
+      comp = '>';
+      ecomp = '>=';
+      break;
+    case '<':
+      gtfn = lt;
+      ltefn = gte;
+      ltfn = gt;
+      comp = '<';
+      ecomp = '<=';
+      break;
+    default:
+      throw new TypeError('Must provide a hilo val of "<" or ">"');
+  }
+
+  // If it satisifes the range it is not outside
+  if (satisfies(version, range, loose)) {
+    return false;
+  }
+
+  // From now on, variable terms are as if we're in "gtr" mode.
+  // but note that everything is flipped for the "ltr" function.
+
+  for (var i = 0; i < range.set.length; ++i) {
+    var comparators = range.set[i];
+
+    var high = null;
+    var low = null;
+
+    comparators.forEach(function(comparator) {
+      if (comparator.semver === ANY) {
+        comparator = new Comparator('>=0.0.0')
+      }
+      high = high || comparator;
+      low = low || comparator;
+      if (gtfn(comparator.semver, high.semver, loose)) {
+        high = comparator;
+      } else if (ltfn(comparator.semver, low.semver, loose)) {
+        low = comparator;
+      }
+    });
+
+    // If the edge version comparator has a operator then our version
+    // isn't outside it
+    if (high.operator === comp || high.operator === ecomp) {
+      return false;
+    }
+
+    // If the lowest version comparator has an operator and our version
+    // is less than it then it isn't higher than the range
+    if ((!low.operator || low.operator === comp) &&
+        ltefn(version, low.semver)) {
+      return false;
+    } else if (low.operator === ecomp && ltfn(version, low.semver)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// Use the define() function if we're in AMD land
+if (typeof define === 'function' && define.amd)
+  define('semver',exports);
+
+})(
+  typeof exports === 'object' ? exports :
+  typeof define === 'function' && define.amd ? {} :
+  semver = {}
+);
+
+define('ev-script/models/app-info',['require','underscore','semver','ev-script/models/base'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        semver = require('semver'),
+        BaseModel = require('ev-script/models/base');
+
+    return BaseModel.extend({
+        initialize: function(attributes, options) {
+            BaseModel.prototype.initialize.call(this, attributes, options);
+            this.requiresAuth = false;
+        },
+        url: function() {
+            var url = this.config.ensembleUrl + '/api/Info';
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        },
+        parse: function(response) {
+            return response;
+        },
+        checkVersion: function(condition) {
+            var version = this.get('ApplicationVersion');
+            return version && semver.satisfies(version, condition);
+        },
+        anthemEnabled: function() {
+            return this.checkVersion('>=4.2.0');
+        }
+    });
+
+});
+
+define('ev-script/models/current-user',['require','underscore','ev-script/models/base'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        BaseModel = require('ev-script/models/base');
+
+    return BaseModel.extend({
+        idAttribute: 'ID',
+        initialize: function(attributes, options) {
+            BaseModel.prototype.initialize.call(this, attributes, options);
+            // The API actually does require authentication...but we don't want
+            // special handling
+            this.requiresAuth = false;
+        },
+        url: function() {
+            var url = this.config.ensembleUrl + '/api/CurrentUser';
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        },
+        parse: function(response) {
+            return response.Data[0];
+        }
+    });
+
+});
+
+define('ev-script/auth/base/auth',['require','jquery','underscore','backbone','ev-script/util/events','ev-script/util/cache','ev-script/models/current-user'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        eventsUtil = require('ev-script/util/events'),
+        cacheUtil = require('ev-script/util/cache'),
+        CurrentUser = require('ev-script/models/current-user'),
+        BaseAuth = function(appId) {
+            _.bindAll(this, 'getUser', 'login', 'logout', 'isAuthenticated', 'handleUnauthorized');
+            this.appId = appId;
+            this.config = cacheUtil.getAppConfig(appId);
+            this.info = cacheUtil.getAppInfo(appId);
+            this.globalEvents = eventsUtil.getEvents('global');
+            this.appEvents = eventsUtil.getEvents(appId);
+            this.user = null;
+            this.appEvents.on('appLoaded', function() {
+                this.fetchUser();
+            }, this);
+        };
+
+    // Reusing Backbone's object model for extension
+    BaseAuth.extend = Backbone.Model.extend;
+
+    _.extend(BaseAuth.prototype, {
+        fetchUser: function() {
+            var currentUser = new CurrentUser({}, {
+                appId: this.appId
+            });
+            return currentUser.fetch({
+                success: _.bind(function(model, response, options) {
+                    this.user = model;
+                    this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
+                }, this),
+                error: _.bind(function(model, response, options) {
+                    this.user = null;
+                    this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
+                }, this)
+            }).promise();
+        },
+        getUser: function() {
+            return this.user;
+        },
+        // Return failed promise...subclasses should override
+        login: function(loginInfo) {
+            return $.Deferred().reject().promise();
+        },
+        // Return failed promise...subclasses should override
+        logout: function() {
+            return $.Deferred().reject().promise();
+        },
+        isAuthenticated: function() {
+            return this.user != null;
+        },
+        handleUnauthorized: function(element, authCallback) {}
+    });
+
+    return BaseAuth;
+
+});
+
+/*!
+ * jQuery Cookie Plugin v1.4.1
+ * https://github.com/carhartl/jquery-cookie
+ *
+ * Copyright 2013 Klaus Hartl
+ * Released under the MIT license
+ */
+(function (factory) {
+	if (typeof define === 'function' && define.amd) {
+		// AMD
+		define('jquery.cookie',['jquery'], factory);
+	} else if (typeof exports === 'object') {
+		// CommonJS
+		factory(require('jquery'));
+	} else {
+		// Browser globals
+		factory(jQuery);
+	}
+}(function ($) {
+
+	var pluses = /\+/g;
+
+	function encode(s) {
+		return config.raw ? s : encodeURIComponent(s);
+	}
+
+	function decode(s) {
+		return config.raw ? s : decodeURIComponent(s);
+	}
+
+	function stringifyCookieValue(value) {
+		return encode(config.json ? JSON.stringify(value) : String(value));
+	}
+
+	function parseCookieValue(s) {
+		if (s.indexOf('"') === 0) {
+			// This is a quoted cookie as according to RFC2068, unescape...
+			s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+		}
+
+		try {
+			// Replace server-side written pluses with spaces.
+			// If we can't decode the cookie, ignore it, it's unusable.
+			// If we can't parse the cookie, ignore it, it's unusable.
+			s = decodeURIComponent(s.replace(pluses, ' '));
+			return config.json ? JSON.parse(s) : s;
+		} catch(e) {}
+	}
+
+	function read(s, converter) {
+		var value = config.raw ? s : parseCookieValue(s);
+		return $.isFunction(converter) ? converter(value) : value;
+	}
+
+	var config = $.cookie = function (key, value, options) {
+
+		// Write
+
+		if (value !== undefined && !$.isFunction(value)) {
+			options = $.extend({}, config.defaults, options);
+
+			if (typeof options.expires === 'number') {
+				var days = options.expires, t = options.expires = new Date();
+				t.setTime(+t + days * 864e+5);
+			}
+
+			return (document.cookie = [
+				encode(key), '=', stringifyCookieValue(value),
+				options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
+				options.path    ? '; path=' + options.path : '',
+				options.domain  ? '; domain=' + options.domain : '',
+				options.secure  ? '; secure' : ''
+			].join(''));
+		}
+
+		// Read
+
+		var result = key ? undefined : {};
+
+		// To prevent the for loop in the first place assign an empty array
+		// in case there are no cookies at all. Also prevents odd result when
+		// calling $.cookie().
+		var cookies = document.cookie ? document.cookie.split('; ') : [];
+
+		for (var i = 0, l = cookies.length; i < l; i++) {
+			var parts = cookies[i].split('=');
+			var name = decode(parts.shift());
+			var cookie = parts.join('=');
+
+			if (key && key === name) {
+				// If second argument (value) is a function it's a converter...
+				result = read(cookie, value);
+				break;
+			}
+
+			// Prevent storing a cookie that we couldn't decode.
+			if (!key && (cookie = read(cookie)) !== undefined) {
+				result[name] = cookie;
+			}
+		}
+
+		return result;
+	};
+
+	config.defaults = {};
+
+	$.removeCookie = function (key, options) {
+		if ($.cookie(key) === undefined) {
+			return false;
+		}
+
+		// Must not alter options, thus extending a fresh object...
+		$.cookie(key, '', $.extend({}, options, { expires: -1 }));
+		return !$.cookie(key);
+	};
+
+}));
+
+
+define('text!ev-script/auth/basic/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= i18n.formatMessage(\'Username\') %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= i18n.formatMessage(\'Password\') %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\n        </div>\n    </fieldset>\n</form>\n';});
+
+define('ev-script/auth/basic/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui/ui/widgets/dialog','text!ev-script/auth/basic/template.html'],function(require, template) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        cacheUtil = require('ev-script/util/cache'),
+        eventsUtil = require('ev-script/util/events');
+
+    require('jquery.cookie');
+    require('jquery-ui/ui/widgets/dialog');
+
+    return Backbone.View.extend({
+        template: _.template(require('text!ev-script/auth/basic/template.html')),
+        initialize: function(options) {
+            this.appId = options.appId;
+            this.config = cacheUtil.getAppConfig(this.appId);
+            this.appEvents = eventsUtil.getEvents(this.appId);
+            this.i18n = cacheUtil.getAppI18n(this.appId);
+            this.submitCallback = options.submitCallback || function() {};
+            this.auth = options.auth;
+        },
+        render: function() {
+            var html = this.template({
+                i18n: this.i18n
+            });
+            this.$dialog = $('<div class="ev-auth"></div>');
+            this.$el.after(this.$dialog);
+            this.$dialog.dialog({
+                title: this.i18n.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
+                modal: true,
+                draggable: false,
+                resizable: false,
+                width: Math.min(540, $(window).width() - this.config.dialogMargin),
+                height: Math.min(250, $(window).height() - this.config.dialogMargin),
+                dialogClass: 'ev-dialog',
+                create: _.bind(function(event, ui) {
+                    this.$dialog.html(html);
+                }, this),
+                closeText: this.i18n.formatMessage('Close'),
+                close: _.bind(function(event, ui) {
+                    this.$dialog.dialog('destroy').remove();
+                    this.appEvents.trigger('hidePickers');
+                }, this)
+            });
+            $('form', this.$dialog).submit(_.bind(function(e) {
+                var $form = $(e.target);
+                var username = $('#username', $form).val();
+                var password = $('#password', $form).val();
+                if (username && password) {
+                    this.auth.login({
+                        username: username,
+                        password: password
+                    })
+                    .always(this.submitCallback);
+                    this.$dialog.dialog('destroy').remove();
+                }
+                e.preventDefault();
+            }, this));
+        }
+    });
+
+});
+
+define('ev-script/auth/basic/auth',['require','jquery','underscore','backbone','ev-script/auth/base/auth','ev-script/auth/basic/view','ev-script/collections/organizations'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        BaseAuth = require('ev-script/auth/base/auth'),
+        AuthView = require('ev-script/auth/basic/view'),
+        Organizations = require('ev-script/collections/organizations'),
+        // Note: This isn't really basic authentication at all...we just set
+        // cookies containing credentials to be handled by a proxy.  The proxy
+        // uses these to forward our request with a basic auth header.
+        BasicAuth = BaseAuth.extend({
+            constructor: function(appId) {
+                BasicAuth.__super__.constructor.call(this, appId);
+            },
+            fetchUser: function() {
+                return BasicAuth.__super__.fetchUser.call(this);
+            },
+            login: function(loginInfo) {
+                var cookieOptions = { path: this.config.authPath };
+                $.cookie(this.config.ensembleUrl + '-user', loginInfo.username, _.extend({}, cookieOptions));
+                $.cookie(this.config.ensembleUrl + '-pass', loginInfo.password, _.extend({}, cookieOptions));
+                return this.fetchUser();
+            },
+            logout: function() {
+                var deferred = $.Deferred();
+                var cookieOptions = { path: this.config.authPath };
+                $.removeCookie(this.config.ensembleUrl + '-user', _.extend({}, cookieOptions));
+                $.removeCookie(this.config.ensembleUrl + '-pass', _.extend({}, cookieOptions));
+                this.user = null;
+                this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
+                deferred.resolve();
+                return deferred.promise();
+            },
+            handleUnauthorized: function(element, authCallback) {
+                this.logout();
+                var authView = new AuthView({
+                    el: element,
+                    submitCallback: authCallback,
+                    appId: this.appId,
+                    auth: this
+                });
+                authView.render();
+            }
+        });
+
+    return BasicAuth;
+});
+
+
+define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <fieldset>\n        <div class="fieldWrap">\n            <label for="username"><%= i18n.formatMessage(\'Username\') %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= i18n.formatMessage(\'Password\') %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="provider"><%= i18n.formatMessage(\'Identity Provider\') %></label>\n            <select id="provider" name="provider" class="form-select"></select>\n        </div>\n        <div class="fieldWrap">\n            <label for="remember"><%= i18n.formatMessage(\'Remember Me\') %></label>\n            <input id="remember" name="remember" type="checkbox"></input>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\n            <div class="loader"></div>\n        </div>\n    </fieldset>\n</form>\n';});
+
+define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui/ui/widgets/dialog','text!ev-script/auth/forms/template.html','text!ev-script/templates/options.html'],function(require, template) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        cacheUtil = require('ev-script/util/cache'),
+        eventsUtil = require('ev-script/util/events');
+
+    require('jquery.cookie');
+    require('jquery-ui/ui/widgets/dialog');
+
+    return Backbone.View.extend({
+        template: _.template(require('text!ev-script/auth/forms/template.html')),
+        optionsTemplate: _.template(require('text!ev-script/templates/options.html')),
+        initialize: function(options) {
+            this.appId = options.appId;
+            this.config = cacheUtil.getAppConfig(this.appId);
+            this.appEvents = eventsUtil.getEvents(this.appId);
+            this.i18n = cacheUtil.getAppI18n(this.appId);
+            this.submitCallback = options.submitCallback || function() {};
+            this.auth = options.auth;
+        },
+        render: function() {
+            var $html = $(this.template({
+                    i18n: this.i18n
+                })),
+                $select = $('#provider', $html).append(this.optionsTemplate({
+                    collection: this.collection,
+                    selectedId: this.config.defaultProvider
+                }));
+            this.$dialog = $('<div class="ev-auth"></div>');
+            this.$el.after(this.$dialog);
+
+            // Handle loading indicator in form
+            var $loader = $('div.loader', $html),
+                loadingOn = _.bind(function(e, xhr, settings) {
+                    $loader.addClass('loading');
+                }, this),
+                loadingOff = _.bind(function(e, xhr, settings) {
+                    $loader.removeClass('loading');
+                }, this);
+            $(window.document).on('ajaxSend', loadingOn).on('ajaxComplete', loadingOff);
+
+            this.$dialog.dialog({
+                title: this.i18n.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
+                modal: true,
+                draggable: false,
+                resizable: false,
+                width: Math.min(540, $(window).width() - this.config.dialogMargin),
+                height: Math.min(250, $(window).height() - this.config.dialogMargin),
+                dialogClass: 'ev-dialog',
+                create: _.bind(function(event, ui) {
+                    this.$dialog.html($html);
+                }, this),
+                closeText: this.i18n.formatMessage('Close'),
+                close: _.bind(function(event, ui) {
+                    $(window.document).off('ajaxSend', loadingOn).off('ajaxComplete', loadingOff);
+                    this.$dialog.dialog('destroy').remove();
+                    this.appEvents.trigger('hidePickers');
+                }, this)
+            });
+            $('form', this.$dialog).submit(_.bind(function(e) {
+                var $form = $(e.target);
+                var username = $('#username', $form).val();
+                var password = $('#password', $form).val();
+                if (username && password) {
+                    this.auth.login({
+                        username: username,
+                        password: password,
+                        authSourceId: $('#provider :selected', $form).val(),
+                        persist: $('#remember', $form).is(':checked')
+                    }).then(_.bind(function() {
+                        this.$dialog.dialog('destroy').remove();
+                        this.submitCallback();
+                    }, this));
+                }
+                e.preventDefault();
+            }, this));
+        }
+    });
+
+});
+
+define('ev-script/collections/identity-providers',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
+
+    'use strict';
+
+    var BaseCollection = require('ev-script/collections/base'),
+        cacheUtil = require('ev-script/util/cache'),
+        cached = new cacheUtil.Cache();
+
+    return BaseCollection.extend({
+        initialize: function(models, options) {
+            BaseCollection.prototype.initialize.call(this, models, options);
+            this.requiresAuth = false;
+        },
+        getCached: function(key) {
+            return cached.get(this.config.ensembleUrl);
+        },
+        setCached: function(key, resp) {
+            return cached.set(this.config.ensembleUrl, resp);
+        },
+        url: function() {
+            var api_url = this.config.ensembleUrl + '/api/IdentityProviders';
+            return this.config.urlCallback ? this.config.urlCallback(api_url) : api_url;
+        }
+    });
+
+});
+
+define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/models/current-user','ev-script/auth/forms/view','ev-script/collections/identity-providers'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        BaseAuth = require('ev-script/auth/base/auth'),
+        CurrentUser = require('ev-script/models/current-user'),
+        AuthView = require('ev-script/auth/forms/view'),
+        IdentityProviders = require('ev-script/collections/identity-providers'),
+        FormsAuth = BaseAuth.extend({
+            constructor: function(appId) {
+                BaseAuth.prototype.constructor.call(this, appId);
+                this.identityProviders = new IdentityProviders({}, {
+                    appId: appId
+                });
+                this.asPromise = this.identityProviders.fetch();
+            },
+            login: function(loginInfo) {
+                var url = this.config.ensembleUrl + '/api/Login';
+                return $.ajax({
+                    url: this.config.urlCallback ? this.config.urlCallback(url) : url,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        user: loginInfo.username,
+                        password: loginInfo.password,
+                        identityProviderId: loginInfo.authSourceId,
+                        persist: loginInfo.persist
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: _.bind(function(data, status, xhr) {
+                        this.user = new CurrentUser(data.Data[0], {
+                            appId: this.appId
+                        });
+                        this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
+                    }, this)
+                }).promise();
+            },
+            logout: function() {
+                var url = this.config.ensembleUrl + '/api/Logout';
+                return $.ajax({
+                    url: this.config.urlCallback ? this.config.urlCallback(url) : url,
+                    type: 'POST',
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: _.bind(function(data, status, xhr) {
+                        this.user = null;
+                        this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
+                    }, this)
+                }).promise();
+            },
+            handleUnauthorized: function(element, authCallback) {
+                this.user = null;
+                this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
+                this.asPromise.done(_.bind(function() {
+                    var authView = new AuthView({
+                        el: element,
+                        submitCallback: authCallback,
+                        appId: this.appId,
+                        auth: this,
+                        collection: this.identityProviders
+                    });
+                    authView.render();
+                }, this));
+            }
+        });
+
+    return FormsAuth;
+
+});
+
 
 define('text!ev-script/auth/ensemble/template.html',[],function () { return '<iframe src="<%= frameSrc %>" width="<%= frameWidth %>" height="<%= frameHeight %>" frameborder="0"><iframe>';});
 
@@ -34673,10 +34615,8 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
             // Load application info from EV
             info.fetch({})
             .always(_.bind(function() {
-                // This is kinda lazy...but this will only be set in 3.6+ versions
-                // so we don't actually need to check the version number
-                if (!info.get('ApplicationVersion') && config.authType === 'forms') {
-                    loading.reject('Configured to use forms authentication against a pre-3.6 API.');
+                if (!info.get('ApplicationVersion')) {
+                    loading.reject('Failed to retrieve application info.');
                 } else {
                     // This will initialize and cache an auth object for our app
                     var auth;

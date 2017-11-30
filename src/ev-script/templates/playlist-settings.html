@@ -135,6 +135,12 @@
                     <input id="captionsearch" class="form-checkbox" <% if (model.get('captionsearch')) { print('checked="checked"'); } %> name="captionsearch" type="checkbox"/>
                     <label for="captionsearch"><%= i18n.formatMessage('Caption Search') %></label>
                 </div>
+                <% if (appInfo.checkVersion('>=4.8.0')) { %>
+                    <div class="fieldWrap inline-option">
+                        <input id="viewersreport" class="form-checkbox" <% if (model.get('viewersreport')) { print('checked="checked"'); } %>  name="viewersreport" type="checkbox"/>
+                        <label for="viewersreport"><%= i18n.formatMessage('Viewers Report') %></label>
+                    </div>
+                <% } %>
             </div>
         </div>
         <div class="form-actions">

@@ -15,20 +15,18 @@ define(function(require) {
             PickerView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit');
             this.$filterBlock = this.$('div.ev-filter-block');
-            if (this.info.get('ApplicationVersion')) {
-                this.searchView = new SearchView({
-                    id: this.id + '-search',
-                    tagName: 'div',
-                    className: 'ev-search',
-                    picker: this,
-                    appId: this.appId,
-                    callback: _.bind(function() {
-                        this.loadPlaylists();
-                    }, this)
-                });
-                this.$filterBlock.prepend(this.searchView.$el);
-                this.searchView.render();
-            }
+            this.searchView = new SearchView({
+                id: this.id + '-search',
+                tagName: 'div',
+                className: 'ev-search',
+                picker: this,
+                appId: this.appId,
+                callback: _.bind(function() {
+                    this.loadPlaylists();
+                }, this)
+            });
+            this.$filterBlock.prepend(this.searchView.$el);
+            this.searchView.render();
             this.unitSelects = new UnitSelectsView({
                 id: this.id + '-unit-selects',
                 tagName: 'div',

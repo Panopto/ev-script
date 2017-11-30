@@ -33,6 +33,7 @@ define(['backbone'], function(Backbone) {
             dateproduced: true,
             audiopreviewimage: false,
             captionsearch: true,
+            viewersreport: true,
             search: ''
         }
     });

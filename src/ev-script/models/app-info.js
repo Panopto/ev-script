@@ -22,9 +22,6 @@ define(function(require) {
             var version = this.get('ApplicationVersion');
             return version && semver.satisfies(version, condition);
         },
-        useLegacyEmbeds: function() {
-            return this.checkVersion('<3.12.0');
-        },
         anthemEnabled: function() {
             return this.checkVersion('>=4.2.0');
         }

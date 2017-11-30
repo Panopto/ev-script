@@ -3,6 +3,7 @@ define(function(require) {
     'use strict';
 
     var BaseCollection = require('ev-script/collections/base'),
+        URI = require('urijs/URI'),
         cacheUtil = require('ev-script/util/cache');
 
     return BaseCollection.extend({
@@ -39,20 +40,19 @@ define(function(require) {
             }
         },
         url: function() {
-            var api_url = this.config.ensembleUrl + '/api/Playlists',
-                sizeParam = 'PageSize=' + this.config.pageSize,
-                indexParam = 'PageIndex=' + this.pageIndex,
-                url, onParam, valueParam;
-            if (this.info.get('ApplicationVersion')) {
-                onParam = 'FilterOn=Name';
-                valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
-                url = api_url + '/' + encodeURIComponent(this.libraryId) + '?' + sizeParam + '&' + indexParam + (this.filterValue ? '&' + onParam + '&' + valueParam : '');
-            } else {
-                onParam = 'FilterOn=LibraryId';
-                valueParam = 'FilterValue=' + encodeURIComponent(this.libraryId);
-                url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+            var api_url = URI(this.config.ensembleUrl + '/api/Playlists/');
+            api_url.filename(this.libraryId);
+            api_url.addQuery({
+                'PageSize': this.config.pageSize,
+                'PageIndex': this.pageIndex
+            });
+            if (this.filterValue) {
+                api_url.addQuery({
+                    'FilterOn': 'Name',
+                    'FilterValue': this.filterValue
+                });
             }
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+            return this.config.urlCallback ? this.config.urlCallback(api_url) : api_url;
         }
     });
 

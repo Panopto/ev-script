@@ -28,7 +28,8 @@
             'cldr': 'cldrjs/dist/cldr',
             'cldr-data': 'cldr-data',
             'globalize': 'globalize/dist/globalize',
-            'moment': 'moment/min/moment-with-locales'
+            'moment': 'moment/min/moment-with-locales',
+            'urijs': 'urijs/src'
         },
         map: {
             '*': {

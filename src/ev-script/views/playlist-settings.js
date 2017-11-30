@@ -42,7 +42,8 @@ define(function(require) {
                     'showcaptions': this.$('#showcaptions').is(':checked'),
                     'dateproduced': this.$('#dateproduced').is(':checked'),
                     'audiopreviewimage': this.$('#audiopreviewimage').is(':checked'),
-                    'captionsearch': this.$('#captionsearch').is(':checked')
+                    'captionsearch': this.$('#captionsearch').is(':checked'),
+                    'viewersreport': this.$('#viewersreport').is(':checked')
                 };
             if (attrs.layout === 'playlist') {
                 attrs.playlistLayout = {
@@ -62,15 +63,15 @@ define(function(require) {
             this.field.model.set(attrs);
         },
         render: function() {
-            var content = this.field.model.get('content'),
-                html = this.template({
-                    i18n: this.i18n,
-                    model: this.field.model,
-                    isAudio: this.encoding && this.encoding.isAudio(),
-                    isSecure: content && content.IsSecure,
-                    categories: this.categories || new Categories([], {})
-                });
-            this.$el.html(html);
+            var content = this.field.model.get('content');
+            this.$el.html(this.template({
+                appInfo: this.info,
+                i18n: this.i18n,
+                model: this.field.model,
+                isAudio: this.encoding && this.encoding.isAudio(),
+                isSecure: content && content.IsSecure,
+                categories: this.categories || new Categories([], {})
+            }));
             this.$('.accordion').accordion({
                 active: 2,
                 heightStyle: 'content',
@@ -84,7 +85,7 @@ define(function(require) {
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
-                height: Math.min(420, $(window).height() - this.config.dialogMargin),
+                height: Math.min(460, $(window).height() - this.config.dialogMargin),
                 closeText: this.i18n.formatMessage('Close')
             });
         },
