@@ -11,7 +11,7 @@ define(function(require) {
         initialize: function(options) {
             EmbedView.prototype.initialize.call(this, options);
         },
-        render: function() {
+        render: function(isPreview) {
             var src = URI(this.config.ensembleUrl + '/app/plugin/embed.aspx'),
                 width = this.getFrameWidth(),
                 height = this.getFrameHeight();
@@ -37,6 +37,10 @@ define(function(require) {
                 'audioPreviewImage': this.model.get('audiopreviewimage'),
                 'displayCaptionSearch': this.model.get('captionsearch')
             });
+            if (isPreview) {
+                // Hack to bypass restrictions for preview
+                src.addQuery('isPermalinkPreview', true);
+            }
             if (this.info.checkVersion('>=4.8.0')) {
                 src.addQuery('displayViewersReport', this.model.get('viewersreport'));
             }

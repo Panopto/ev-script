@@ -11,19 +11,19 @@ define(function(require) {
         initialize: function(options) {
             EmbedView.prototype.initialize.call(this, options);
         },
-        render: function() {
+        render: function(isPreview) {
             // Width and height really should be set by now...but use a reasonable default if not
             var width = this.getMediaWidth(),
                 height = this.getMediaHeight(),
                 embed = this.template({
-                    src: this.getSrcUrl(width, height),
+                    src: this.getSrcUrl(width, height, isPreview),
                     width: width,
                     height: height,
                     frameHeight: this.getFrameHeight()
                 });
             this.$el.html(embed);
         },
-        getSrcUrl: function(width, height) {
+        getSrcUrl: function(width, height, isPreview) {
             var atLeast480 = this.info.checkVersion('>=4.8.0'),
                 id = this.model.get('id'),
                 url = URI(this.config.ensembleUrl);
@@ -53,6 +53,9 @@ define(function(require) {
                 'height': height,
                 'isNewPluginEmbed': true
             });
+            if (isPreview) {
+                url.addQuery('isContentPreview', true);
+            }
             return url;
         },
         getMediaWidth: function() {

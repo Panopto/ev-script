@@ -42,7 +42,7 @@ define(function(require) {
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {
-                    embedView.render();
+                    embedView.render(true);
                     $dialogWrap.html(embedView.$el);
                 }, this),
                 closeText: this.i18n.formatMessage('Close'),

@@ -24400,7 +24400,7 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {
-                    embedView.render();
+                    embedView.render(true);
                     $dialogWrap.html(embedView.$el);
                 }, this),
                 closeText: this.i18n.formatMessage('Close'),
@@ -27767,19 +27767,19 @@ define('ev-script/views/video-embed',['require','underscore','urijs/URI','ev-scr
         initialize: function(options) {
             EmbedView.prototype.initialize.call(this, options);
         },
-        render: function() {
+        render: function(isPreview) {
             // Width and height really should be set by now...but use a reasonable default if not
             var width = this.getMediaWidth(),
                 height = this.getMediaHeight(),
                 embed = this.template({
-                    src: this.getSrcUrl(width, height),
+                    src: this.getSrcUrl(width, height, isPreview),
                     width: width,
                     height: height,
                     frameHeight: this.getFrameHeight()
                 });
             this.$el.html(embed);
         },
-        getSrcUrl: function(width, height) {
+        getSrcUrl: function(width, height, isPreview) {
             var atLeast480 = this.info.checkVersion('>=4.8.0'),
                 id = this.model.get('id'),
                 url = URI(this.config.ensembleUrl);
@@ -27809,6 +27809,9 @@ define('ev-script/views/video-embed',['require','underscore','urijs/URI','ev-scr
                 'height': height,
                 'isNewPluginEmbed': true
             });
+            if (isPreview) {
+                url.addQuery('isContentPreview', true);
+            }
             return url;
         },
         getMediaWidth: function() {
@@ -29545,7 +29548,7 @@ define('ev-script/views/playlist-embed',['require','underscore','urijs/URI','ev-
         initialize: function(options) {
             EmbedView.prototype.initialize.call(this, options);
         },
-        render: function() {
+        render: function(isPreview) {
             var src = URI(this.config.ensembleUrl + '/app/plugin/embed.aspx'),
                 width = this.getFrameWidth(),
                 height = this.getFrameHeight();
@@ -29571,6 +29574,10 @@ define('ev-script/views/playlist-embed',['require','underscore','urijs/URI','ev-
                 'audioPreviewImage': this.model.get('audiopreviewimage'),
                 'displayCaptionSearch': this.model.get('captionsearch')
             });
+            if (isPreview) {
+                // Hack to bypass restrictions for preview
+                src.addQuery('isPermalinkPreview', true);
+            }
             if (this.info.checkVersion('>=4.8.0')) {
                 src.addQuery('displayViewersReport', this.model.get('viewersreport'));
             }
