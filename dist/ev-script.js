@@ -1,8 +1,8 @@
 /**
- * ev-script 1.4.0 2017-11-29
+ * ev-script 1.4.0 2018-01-10
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
- * Copyright (c) 2017 Symphony Video, Inc.
+ * Copyright (c) 2018 Symphony Video, Inc.
  * Licensed (MIT AND GPL-2.0)
  */
 (function (root, factory) {
@@ -27990,7 +27990,7 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/models
             return this.getDims()[1];
         },
         isAudio: function() {
-            return (/^audio/i).test(this.get('contentType') || '');
+            return (/^audio\//i).test(this.get('contentType') || '');
         },
         parse: function(response) {
             if (_.isArray(response.dataSet.encodings)) {

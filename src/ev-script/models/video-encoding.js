@@ -51,7 +51,7 @@ define(function(require) {
             return this.getDims()[1];
         },
         isAudio: function() {
-            return (/^audio/i).test(this.get('contentType') || '');
+            return (/^audio\//i).test(this.get('contentType') || '');
         },
         parse: function(response) {
             if (_.isArray(response.dataSet.encodings)) {
