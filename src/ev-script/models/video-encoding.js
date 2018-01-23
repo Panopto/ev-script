@@ -77,7 +77,8 @@ define(function(require) {
             var attrs = {
                 width: this.getWidth(),
                 height: this.getHeight(),
-                isaudio: this.isAudio()
+                isaudio: this.isAudio(),
+                contenttype: this.get('contentType')
             };
             // TODO - this needs to be handled better
             // If the settings model hasn't been updated yet with default audio settings
@@ -93,7 +94,7 @@ define(function(require) {
             //         isaudio: true
             //     });
             // }
-            settingsModel.set(attrs);
+            settingsModel.set(attrs, { silent: true });
         }
     });
 

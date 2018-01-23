@@ -18,6 +18,7 @@ define(function(require) {
 
     /*
      * View for our field (element that we set with the selected content identifier)
+     * TODO - this needs to be broken up, and model event handling is messy/confusing
      */
     return BaseView.extend({
         template: _.template(require('text!ev-script/templates/field.html')),
@@ -27,19 +28,25 @@ define(function(require) {
             this.$field = options.$field;
             this.showChoose = true;
             var pickerOptions = {
-                id: this.id + '-picker',
-                tagName: 'div',
-                className: 'ev-' + this.model.get('type') + '-picker',
-                field: this,
-                appId: this.appId
-            };
-            var settingsOptions = {
-                id: this.id + '-settings',
-                tagName: 'div',
-                className: 'ev-settings',
-                field: this,
-                appId: this.appId
-            };
+                    id: this.id + '-picker',
+                    tagName: 'div',
+                    className: 'ev-' + this.model.get('type') + '-picker',
+                    field: this,
+                    appId: this.appId
+                },
+                settingsOptions = {
+                    id: this.id + '-settings',
+                    tagName: 'div',
+                    className: 'ev-settings',
+                    field: this,
+                    appId: this.appId
+                },
+                updateField = _.bind(function() {
+                    var json = this.model.toJSON();
+                    this.$field.val(JSON.stringify(json));
+                    this.appEvents.trigger('fieldUpdated', this.$field, json);
+                    this.renderActions();
+                }, this);
             if (this.model instanceof VideoSettings) {
                 this.modelClass = VideoSettings;
                 this.pickerClass = VideoPickerView;
@@ -54,22 +61,29 @@ define(function(require) {
                     });
                     this.encoding.fetch();
                 }
-                this.model.on('change:id', _.bind(function() {
-                    // Only fetch encoding if identifier is set
-                    if (this.model.id) {
-                        this.encoding.set({
-                            fetchId: this.model.id
-                        });
-                        this.encoding.fetch({
-                            success: _.bind(function(response) {
-                                // TODO - this is getting messy
-                                this.encoding.updateSettingsModel(this.model);
-                                // Picker model is a copy so need to update that as well
-                                this.encoding.updateSettingsModel(this.picker.model);
-                            }, this)
-                        });
-                    } else {
+                this.model.on('change', _.bind(function() {
+                    // If the id has changed, we need to fetch the relevant encoding
+                    if (this.model.changed.id) {
                         this.encoding.clear();
+                        // Only fetch encoding if identifier is set
+                        if (!this.model.isNew()) {
+                            this.encoding.set({
+                                fetchId: this.model.id
+                            });
+                            this.encoding.fetch({
+                                success: _.bind(function(response) {
+                                    // Note this while trigger another change
+                                    this.encoding.updateSettingsModel(this.model);
+                                    // Picker model is a copy so need to update that as well
+                                    this.encoding.updateSettingsModel(this.picker.model);
+                                    updateField();
+                                }, this)
+                            });
+                        }
+                    } else {
+                        if (!this.model.isNew()) {
+                            updateField();
+                        }
                     }
                 }, this));
                 _.extend(settingsOptions, {
@@ -87,14 +101,20 @@ define(function(require) {
                     this.categories.playlistId = this.model.id;
                     this.categories.fetch({ reset: true });
                 }
-                this.model.on('change:id', _.bind(function() {
-                    // Only fetch categories if identifier is set
-                    if (this.model.id) {
-                        this.categories.playlistId = this.model.id;
-                        this.categories.fetch({ reset: true });
-                    } else {
-                        this.categories.reset([], { silent: true });
-                        this.categories.playlistId = '';
+                this.model.on('change', _.bind(function() {
+                    // If the id has changed, we need to fetch the relevant encoding
+                    if (this.model.changed.id) {
+                        // Only fetch categories if identifier is set
+                        if (!this.model.isNew()) {
+                            this.categories.playlistId = this.model.id;
+                            this.categories.fetch({ reset: true });
+                        } else {
+                            this.categories.reset([], { silent: true });
+                            this.categories.playlistId = '';
+                        }
+                    }
+                    if (!this.model.isNew()) {
+                        updateField();
                     }
                 }, this));
                 _.extend(settingsOptions, {
@@ -108,14 +128,6 @@ define(function(require) {
             this.settings = new this.settingsClass(settingsOptions);
             this.$field.after(this.picker.$el);
             this.renderActions();
-            this.model.on('change', _.bind(function() {
-                if (!this.model.isNew()) {
-                    var json = this.model.toJSON();
-                    this.$field.val(JSON.stringify(json));
-                    this.appEvents.trigger('fieldUpdated', this.$field, json);
-                    this.renderActions();
-                }
-            }, this));
             this.appEvents.on('showPicker', function(fieldId) {
                 if (this.id === fieldId) {
                     this.$('.action-choose').hide();

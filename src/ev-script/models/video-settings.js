@@ -24,7 +24,8 @@ define(['backbone'], function(Backbone) {
             viewersreport: true,
             search: '',
             sourceId: 'content',
-            isaudio: false
+            isaudio: false,
+            contenttype: ''
         }
     });
 });

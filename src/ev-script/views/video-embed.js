@@ -92,7 +92,8 @@ define(function(require) {
                    this.model.get('metadata') ||
                    this.model.get('dateproduced') ||
                    this.model.get('embedcode') ||
-                   this.model.get('download');
+                   this.model.get('download') ||
+                   this.model.get('viewersreport');
         },
         scale: function(maxWidth, maxHeight) {
             var ratio,
