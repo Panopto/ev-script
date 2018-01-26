@@ -24,6 +24,12 @@
                 <input id="captionsearch" class="form-checkbox" <% if (model.get('captionsearch')) { print('checked="checked"'); } %> name="captionsearch" type="checkbox"/>
                 <label for="captionsearch"><%= i18n.formatMessage('Caption Search') %></label>
             </div>
+            <% if (appInfo.checkVersion('>=4.8.0')) { %>
+                <div class="fieldWrap inline-option">
+                    <input id="embedthumbnail" class="form-checkbox" <% if (model.get('embedthumbnail')) { print('checked="checked"'); } %> name="embedthumbnail" type="checkbox"/>
+                    <label for="embedthumbnail"><%= i18n.formatMessage('Embed As Thumbnail') %></label>
+                </div>
+            <% } %>
             <div class="fieldWrap inline-option">
                 <input id="autoplay" class="form-checkbox" <% if (model.get('autoplay')) { print('checked="checked"'); } %>  name="autoplay" type="checkbox"/>
                 <label for="autoplay"><%= i18n.formatMessage('Auto Play (PC Only)') %></label>

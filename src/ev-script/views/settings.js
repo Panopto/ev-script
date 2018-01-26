@@ -10,12 +10,13 @@ define(function(require) {
     return BaseView.extend({
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'show', 'cancelHandler', 'submitHandler');
+            _.bindAll(this, 'show', 'cancelHandler', 'submitHandler', 'checkboxHandler');
             this.field = options.field;
         },
         events: {
             'submit': 'submitHandler',
-            'click .action-cancel': 'cancelHandler'
+            'click .action-cancel': 'cancelHandler',
+            'click input[type="checkbox"]': 'checkboxHandler'
         },
         show: function() {
             this.render();
@@ -31,7 +32,8 @@ define(function(require) {
             e.preventDefault();
         },
         // Override me
-        updateModel: function() {}
+        updateModel: function() {},
+        checkboxHandler: function(e) {}
     });
 
 });

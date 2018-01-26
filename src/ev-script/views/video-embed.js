@@ -29,11 +29,21 @@ define(function(require) {
                 url = URI(this.config.ensembleUrl);
             if (atLeast480) {
                 url.path('/hapi/v1/contents/' + id + '/plugin');
-                url.addQuery('displayViewersReport', this.model.get('viewersreport'));
+                url.addQuery({
+                    'displayViewersReport': this.model.get('viewersreport'),
+                    'embedAsThumbnail': this.model.get('embedthumbnail'),
+                    // TODO - not sure where these are configurable in EV proper
+                    'startTime': 0,
+                    'displayCredits': true
+                });
             } else {
                 url.path('/app/plugin/embed.aspx');
-                url.addQuery('ID', id);
+                url.addQuery({
+                    'ID': id,
+                    'isNewPluginEmbed': true
+                });
             }
+            // Common
             url.addQuery({
                 'autoPlay': this.model.get('autoplay'),
                 'displayTitle': this.model.get('showtitle'),
@@ -50,8 +60,7 @@ define(function(require) {
                 'showCaptions': this.model.get('showcaptions'),
                 'hideControls': true,
                 'width': width,
-                'height': height,
-                'isNewPluginEmbed': true
+                'height': height
             });
             if (isPreview) {
                 url.addQuery('isContentPreview', true);

@@ -19,6 +19,15 @@ define(function(require) {
                 this.render();
             }, this));
         },
+        checkboxHandler: function(e) {
+            var $checkbox = $(e.currentTarget);
+            if ($checkbox.is('#embedthumbnail') && $checkbox.is(':checked')) {
+                this.$('#audiopreviewimage').prop('checked', true);
+            }
+            if ($checkbox.is('#audiopreviewimage') && !$checkbox.is(':checked')) {
+                this.$('#embedthumbnail').prop('checked', false);
+            }
+        },
         updateModel: function() {
             var attrs = {
                     'showtitle': this.$('#showtitle').is(':checked'),
@@ -35,7 +44,8 @@ define(function(require) {
                     'dateproduced': this.$('#dateproduced').is(':checked'),
                     'embedcode': this.$('#embedcode').is(':checked'),
                     'download': this.$('#download').is(':checked'),
-                    'viewersreport': this.$('#viewersreport').is(':checked')
+                    'viewersreport': this.$('#viewersreport').is(':checked'),
+                    'embedthumbnail': this.$('#embedthumbnail').is(':checked')
                 },
                 sizeVal = this.$('#size').val();
 
