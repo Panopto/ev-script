@@ -68,7 +68,6 @@ define(function(require) {
                 appInfo: this.info,
                 i18n: this.i18n,
                 model: this.field.model,
-                isAudio: this.encoding && this.encoding.isAudio(),
                 isSecure: content && content.IsSecure,
                 categories: this.categories || new Categories([], {})
             }));

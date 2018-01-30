@@ -16,15 +16,19 @@
                 <input id="socialsharing" class="form-checkbox" <% if (model.get('socialsharing')) { print('checked="checked"'); } %> name="socialsharing" type="checkbox"/>
                 <label for="socialsharing"><%= i18n.formatMessage('Social Tools') %></label>
             </div>
+            <% if (!isGallery) { %>
             <div class="fieldWrap inline-option">
                 <input id="annotations" class="form-checkbox" <% if (model.get('annotations')) { print('checked="checked"'); } %> name="annotations" type="checkbox"/>
                 <label for="annotations"><%= i18n.formatMessage('Annotations') %></label>
             </div>
+            <% } %>
+            <% if (!isGallery) { %>
             <div class="fieldWrap inline-option">
                 <input id="captionsearch" class="form-checkbox" <% if (model.get('captionsearch')) { print('checked="checked"'); } %> name="captionsearch" type="checkbox"/>
                 <label for="captionsearch"><%= i18n.formatMessage('Caption Search') %></label>
             </div>
-            <% if (appInfo.checkVersion('>=4.8.0')) { %>
+            <% } %>
+            <% if (appInfo.checkVersion('>=4.8.0') && !isGallery) { %>
                 <div class="fieldWrap inline-option">
                     <input id="embedthumbnail" class="form-checkbox" <% if (model.get('embedthumbnail')) { print('checked="checked"'); } %> name="embedthumbnail" type="checkbox"/>
                     <label for="embedthumbnail"><%= i18n.formatMessage('Embed As Thumbnail') %></label>
@@ -58,17 +62,19 @@
                 <input id="download" class="form-checkbox" <% if (model.get('download')) { print('checked="checked"'); } %> name="download" type="checkbox"/>
                 <label for="download"><%= i18n.formatMessage('Download Link') %></label>
             </div>
+            <% if (!isGallery) { %>
             <div class="fieldWrap inline-option">
                 <input id="showcaptions" class="form-checkbox" <% if (model.get('showcaptions')) { print('checked="checked"'); } %>  name="showcaptions" type="checkbox"/>
                 <label for="showcaptions"><%= i18n.formatMessage('Captions "On" By Default') %></label>
             </div>
+            <% } %>
             <% if (isAudio) { %>
                 <div class="fieldWrap inline-option">
                     <input id="audiopreviewimage" class="form-checkbox" <% if (model.get('audiopreviewimage')) { print('checked="checked"'); } %>  name="audiopreviewimage" type="checkbox"/>
                     <label for="audiopreviewimage"><%= i18n.formatMessage('Audio Preview Image') %></label>
                 </div>
             <% } %>
-            <% if (appInfo.checkVersion('>=4.8.0')) { %>
+            <% if (appInfo.checkVersion('>=4.8.0') && !isGallery) { %>
                 <div class="fieldWrap inline-option">
                     <input id="viewersreport" class="form-checkbox" <% if (model.get('viewersreport')) { print('checked="checked"'); } %>  name="viewersreport" type="checkbox"/>
                     <label for="viewersreport"><%= i18n.formatMessage('Viewers Report') %></label>

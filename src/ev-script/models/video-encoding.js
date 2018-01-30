@@ -53,6 +53,11 @@ define(function(require) {
         isAudio: function() {
             return (/^audio\//i).test(this.get('contentType') || '');
         },
+        isGallery: function() {
+            // TODO - Gallery has no encodings, thus no attributes and
+            // contentType is not set. Need a more reliable approach here though.
+            return !this.get('contentType');
+        },
         parse: function(response) {
             if (_.isArray(response.dataSet.encodings)) {
                 // This is a collection, so return the highest bitrate encoding
