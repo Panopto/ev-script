@@ -1,6 +1,7 @@
 .ev-video-picker {
   position: relative;
   padding: 0;
+  margin-top: 1em;
 }
 .ev-video-picker a {
   color: #0074bd;
@@ -31,6 +32,7 @@
 .ev-playlist-picker {
   position: relative;
   padding: 0;
+  margin-top: 1em;
 }
 .ev-playlist-picker a {
   color: #0074bd;
@@ -219,43 +221,57 @@ div.ev-hider a {
   position: relative;
   text-decoration: none;
 }
-div.ev-field .thumbnail {
-  box-shadow: 0 0 10px 1px;
-  display: inline-block;
-  font-size: 0;
-  height: 100%;
-  margin-right: 20px;
+div.ev-field {
+  display: table;
+}
+div.ev-field .ev-field-cell {
+  display: table-cell;
+  padding: 0.6em;
   vertical-align: middle;
 }
 div.ev-field .thumbnail img {
-  height: 100%;
-  vertical-align: middle;
+  box-shadow: 0 0 10px 1px;
+  max-width: 200px;
+  max-height: 112px;
+  object-fit: scale-down;
+  background-color: #000;
 }
 div.ev-field .title {
   color: #606060;
-  display: inline-block;
   font-weight: bold;
   font-size: 100%;
-  margin: 0 20px 0 0;
   max-width: 400px;
 }
-div.ev-field div.logo {
-  display: inline-block;
-  height: 100%;
-  margin-right: 20px;
-  vertical-align: middle;
+@media only screen and (max-width: 800px) {
+  div.ev-field .thumbnail img {
+    max-width: 150px;
+    max-height: 84px;
+  }
+  div.ev-field .title {
+    max-width: 300px;
+  }
 }
-div.ev-field div.logo a {
-  background-image: url('images/logo.png');
-  background-repeat: no-repeat;
-  background-size: 36px auto;
-  display: inline-block;
-  height: 36px;
-  margin-top: 6px;
-  width: 36px;
+@media only screen and (max-width: 680px) {
+  div.ev-field .thumbnail img {
+    max-width: 100px;
+    max-height: 56px;
+  }
+  div.ev-field .title {
+    max-width: 250px;
+  }
 }
-div.ev-field div.logo a span {
-  display: none;
+@media only screen and (max-width: 560px) {
+  div.ev-field {
+    display: block;
+  }
+  div.ev-field .ev-field-cell {
+    display: block;
+    margin: 0.6em auto;
+    width: 100%;
+    text-align: center;
+    max-width: none;
+    padding: 0;
+  }
 }
 div.ev-actions {
   display: inline-block;

@@ -8,14 +8,6 @@ a:visited {
     color: #3399ff;
 }
 
-.ev-field {
-    margin: 1em 0;
-}
-
-div.ev-field div.logo {
-    display: none;
-}
-
 .chooserTab.ui-tabs-panel {
     padding: 0.4em;
 }
@@ -43,9 +35,5 @@ div.ev-results .results {
 
 .embed {
     margin: 1em 0;
-}
-
-.ev-hider .action-hide {
-    display: none;
 }
 

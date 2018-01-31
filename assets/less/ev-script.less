@@ -26,6 +26,7 @@
 .picker-base() {
   position: relative;
   padding: 0;
+  margin-top: 1em;
   a {
     color: @link-color;
     text-decoration: none;
@@ -153,44 +154,60 @@ div.ev-hider {
 }
 
 div.ev-field {
-  .thumbnail {
-    box-shadow: 0 0 10px 1px;
-    display: inline-block;
-    font-size: 0;
-    height: 100%;
-    margin-right: 20px;
+  display: table;
+  .ev-field-cell {
+    display: table-cell;
+    padding: 0.6em;
     vertical-align: middle;
+  }
+  .thumbnail {
     img {
-      height: 100%;
-      vertical-align: middle;
+      box-shadow: 0 0 10px 1px;
+      max-width: 200px;
+      max-height: 112px;
+      object-fit: scale-down;
+      background-color: #000;
     }
   }
   .title {
     color: @label-color;
-    display: inline-block;
     font-weight: bold;
     font-size: 100%;
-    margin: 0 20px 0 0;
     max-width: 400px;
   }
-  div.logo {
-    display: inline-block;
-    height: 100%;
-    margin-right: 20px;
-    vertical-align: middle;
-    a {
-      background-image: url(@logo-image);
-      background-repeat: no-repeat;
-      background-size: 36px auto;
-      display: inline-block;
-      height: 36px;
-      margin-top: 6px;
-      width: 36px;
-      span {
-        display: none;
+  .responsive(800px, {
+    .thumbnail {
+      img {
+        max-width: 150px;
+        max-height: 84px;
       }
     }
-  }
+    .title {
+      max-width: 300px;
+    }
+  });
+  .responsive(680px, {
+    .thumbnail {
+      img {
+        max-width: 100px;
+        max-height: 56px;
+      }
+    }
+    .title {
+      max-width: 250px;
+    }
+  });
+  .responsive(560px, {
+    display: block;
+    .ev-field-cell {
+      display: block;
+      margin: 0.6em auto;
+      width: 100%;
+      text-align: center;
+      max-width: none;
+      padding: 0;
+    }
+  });
 }
 
 div.ev-actions {

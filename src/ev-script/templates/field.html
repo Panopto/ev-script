@@ -1,22 +1,24 @@
+<!--
 <div class="logo">
     <a target="_blank" href="<%= ensembleUrl %>"><span><%= i18n.formatMessage('Ensemble Logo') %></span></a>
 </div>
+-->
 <% if (modelId) { %>
     <% if (thumbnailUrl) { %>
-        <div class="thumbnail">
+        <div class="ev-field-cell thumbnail">
             <img alt="<%= i18n.formatMessage('Media thumbnail') %>" src="<%= thumbnailUrl %>"/>
         </div>
     <% } %>
-    <h2 class="title"><%= name %></h2>
-    <div class="ev-actions">
+    <h2 class="ev-field-cell title"><%= name %></h2>
+    <div class="ev-field-cell ev-actions">
         <a href="#" class="action-choose" title="<%= i18n.formatMessage('Click to change {0}', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage('Change {0}', label) %><span></a>
         <a href="#" class="action-preview" title="<%= i18n.formatMessage('Click to preview {0}', name) %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage('Preview') %><span></a>
         <a href="#" class="action-options" title="<%= i18n.formatMessage('Click to manage {0} embed options', label) %>"><i class="fa fa-cog fa-lg"></i><span><%= i18n.formatMessage('{0} Embed Options', label) %><span></a>
         <a href="#" class="action-remove" title="<%= i18n.formatMessage('Click to remove {0}', label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= i18n.formatMessage('Remove {0}', label) %><span></a>
     </div>
 <% } else { %>
-    <h3 class="title"><em><%= i18n.formatMessage('Add {0}', label) %></em></h3>
-    <div class="ev-actions">
+    <h3 class="ev-field-cell title"><em><%= i18n.formatMessage('Add {0}', label) %></em></h3>
+    <div class="ev-field-cell ev-actions">
         <a href="#" class="action-choose" title="<%= i18n.formatMessage('Click to Choose {0}', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage('Choose {0}', label) %><span></a>
     </div>
 <% } %>

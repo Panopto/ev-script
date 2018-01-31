@@ -4,6 +4,7 @@ define(function(require) {
 
     var BaseCollection = require('ev-script/collections/base'),
         cacheUtil = require('ev-script/util/cache'),
+        URI = require('urijs/URI'),
         _ = require('underscore');
 
     return BaseCollection.extend({
@@ -46,19 +47,27 @@ define(function(require) {
             }
         },
         url: function() {
-            var api_url = this.config.ensembleUrl + this.sourceUrl,
-                sizeParam = 'PageSize=' + this.config.pageSize,
-                indexParam = 'PageIndex=' + this.pageIndex,
-                onParam = 'FilterOn=' + encodeURIComponent(this.filterOn),
-                valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue),
-                url = api_url + '/' + this.libraryId + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
+            var url = URI(this.config.ensembleUrl + this.sourceUrl + '/' + this.libraryId);
+            url.addQuery({
+                'PageSize': this.config.pageSize,
+                'PageIndex': this.pageIndex,
+                'FilterOn': this.filterOn,
+                'FilterValue': this.filterValue
+            });
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
         },
         parse: function(response) {
-            var videos = response.Data;
+            var videos = response.Data,
+                ensembleUrl = this.config.ensembleUrl;
             _.each(videos, function(video) {
                 video.Description = _.unescape(video.Description);
                 video.Keywords = _.unescape(video.Keywords);
+                if (new RegExp('^' + ensembleUrl, 'i').test(video.ThumbnailUrl)) {
+                    video.ThumbnailUrl = URI(video.ThumbnailUrl).setQuery({
+                        Width: 200,
+                        Height: 112
+                    }).toString();
+                }
             });
             return videos;
         }

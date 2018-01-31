@@ -208,13 +208,7 @@ define(function(require) {
                 var content = this.model.get('content');
                 if (content) {
                     name = content.Name || content.Title;
-                    // Validate thumbnailUrl as it could potentially have been modified and we want to protect against XSRF
-                    // (a GET shouldn't have side effects...but make sure we actually have a thumbnail url just in case)
-                    var thumbPath = this.info.checkVersion('>=4.5.0') ? '\/api\/data\/image\/' : '\/app\/assets\/';
-                    var re = new RegExp('^' + ensembleUrl.toLocaleLowerCase() + thumbPath);
-                    if (content.ThumbnailUrl && re.test(content.ThumbnailUrl.toLocaleLowerCase())) {
-                        thumbnailUrl = content.ThumbnailUrl;
-                    }
+                    thumbnailUrl = content.ThumbnailUrl;
                 }
             }
             if (!this.$actions) {

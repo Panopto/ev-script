@@ -1,7 +1,7 @@
 <tr class="<%= (index % 2 ? 'odd' : 'even') %> resultItem">
     <td class="content-actions">
         <div class="thumbnail-wrap">
-            <img class="thumbnail" src="<%= item.get('ThumbnailUrl').replace(/width=100/i, 'width=200') %>" alt="<%= i18n.formatMessage('{0} preview thumbnail', item.get('Title')) %>"/>
+            <img class="thumbnail" src="<%= item.get('ThumbnailUrl') %>" alt="<%= i18n.formatMessage('{0} preview thumbnail', item.get('Title')) %>"/>
             <% if (item.get('IsCaptioned')) { %>
             <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage('CC') %>" alt="CC"></i>
             <% } %>
