@@ -610,6 +610,7 @@ div.ev-results table {
 div.ev-results .content-list {
   border-spacing: 0;
   width: 99%;
+  word-break: break-word;
   margin: auto;
 }
 div.ev-results .content-list .even {
