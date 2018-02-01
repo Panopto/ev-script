@@ -23,20 +23,15 @@ define(function(require) {
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
         },
         getDims: function() {
-            var dimsRaw = this.get('dimensions') || '640x360',
+            var dimsRaw = this.get('dimensions') || '848x480',
                 dimsStrs = dimsRaw.split('x'),
-                dims = [],
-                originalWidth = parseInt(dimsStrs[0], 10) || 640,
-                originalHeight = parseInt(dimsStrs[1], 10) || 360;
+                dims = [];
             if (this.isAudio()) {
                 dims[0] = 400;
                 dims[1] = 26;
-            } else if (this.config.defaultVideoWidth) {
-                dims[0] = parseInt(this.config.defaultVideoWidth, 10) || 640;
-                dims[1] = Math.ceil(dims[0] / (originalWidth / originalHeight));
             } else {
-                dims[0] = originalWidth;
-                dims[1] = originalHeight;
+                dims[0] = parseInt(dimsStrs[0], 10) || 848;
+                dims[1] = parseInt(dimsStrs[1], 10) || 480;
             }
             return dims;
         },

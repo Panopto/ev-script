@@ -70,20 +70,23 @@ define(function(require) {
         renderSize: function() {
             var width = this.field.model.get('width'),
                 height = this.field.model.get('height'),
-                ratio = 16 / 9,
-                options = [];
-            if (width && height) {
-                ratio = width / height;
-            } else if (this.encoding.id) {
+                options = [],
+                targetWidth;
+            if ((!width || !height) && this.encoding.id) {
                 width = this.encoding.getWidth();
                 height = this.encoding.getHeight();
-                ratio = this.encoding.getRatio();
             }
-            options = sizeUtil.getAvailableDimensions(ratio);
+            // Use default IF encoding can handle it
+            if (this.config.defaultVideoWidth && this.config.defaultVideoWidth <= width) {
+                targetWidth =  this.config.defaultVideoWidth;
+            } else {
+                targetWidth = width;
+            }
+            options = sizeUtil.getAvailableDimensions();
             this.$('.size').append(this.sizesTemplate({
                 sizes: options,
                 // Select the override or current width
-                target: sizeUtil.findClosestDimension(options, this.config.defaultVideoWidth || width)
+                target: sizeUtil.findClosestDimension(targetWidth)
             }));
         },
         render: function() {

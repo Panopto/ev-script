@@ -1,5 +1,5 @@
 /**
- * ev-script 1.4.0 2018-01-30
+ * ev-script 1.4.0 2018-02-01
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2018 Symphony Video, Inc.
@@ -22053,8 +22053,8 @@ define('ev-script/models/video-settings',['backbone'], function(Backbone) {
     return Backbone.Model.extend({
         defaults: {
             type: 'video',
-            width: '640',
-            height: '360',
+            width: '848',
+            height: '480',
             showtitle: true,
             autoplay: false,
             showcaptions: false,
@@ -27827,10 +27827,10 @@ define('ev-script/views/video-embed',['require','underscore','urijs/URI','ev-scr
             return url;
         },
         getMediaWidth: function() {
-            return parseInt(this.model.get('width'), 10) || 640;
+            return parseInt(this.model.get('width'), 10) || 848;
         },
         getMediaHeight: function() {
-            return parseInt(this.model.get('height'), 10) || 360;
+            return parseInt(this.model.get('height'), 10) || 480;
         },
         getFrameWidth: function() {
             return this.getMediaWidth();
@@ -27978,20 +27978,15 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/models
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
         },
         getDims: function() {
-            var dimsRaw = this.get('dimensions') || '640x360',
+            var dimsRaw = this.get('dimensions') || '848x480',
                 dimsStrs = dimsRaw.split('x'),
-                dims = [],
-                originalWidth = parseInt(dimsStrs[0], 10) || 640,
-                originalHeight = parseInt(dimsStrs[1], 10) || 360;
+                dims = [];
             if (this.isAudio()) {
                 dims[0] = 400;
                 dims[1] = 26;
-            } else if (this.config.defaultVideoWidth) {
-                dims[0] = parseInt(this.config.defaultVideoWidth, 10) || 640;
-                dims[1] = Math.ceil(dims[0] / (originalWidth / originalHeight));
             } else {
-                dims[0] = originalWidth;
-                dims[1] = originalHeight;
+                dims[0] = parseInt(dimsStrs[0], 10) || 848;
+                dims[1] = parseInt(dimsStrs[1], 10) || 480;
             }
             return dims;
         },
@@ -29418,25 +29413,14 @@ define('ev-script/util/size',['require','underscore'],function(require) {
 
     return {
         optionsSixteenByNine: ['1280x720', '1024x576', '848x480', '720x405', '640x360', '610x344', '560x315', '480x270', '400x225', '320x180', '240x135', '160x90'],
-        optionsFourByThree: ['1280x960', '1024x770', '848x636', '720x540', '640x480', '610x460', '560x420', '480x360', '400x300', '320x240', '240x180', '160x120'],
-        ratiosAreRoughlyEqual: function(ratioA, ratioB) {
-            // Use a fuzz factor to determine ratio equality since our sizes are not always accurate
-            return Math.ceil(ratioA * 10) / 10 === Math.ceil(ratioB * 10) / 10;
+        getAvailableDimensions: function() {
+            return this.optionsSixteenByNine;
         },
-        getAvailableDimensions: function(ratio) {
-            ratio = ratio || 16 / 9;
-            var options = this.optionsSixteenByNine;
-            if (this.ratiosAreRoughlyEqual(ratio, 4 / 3)) {
-                options = this.optionsFourByThree;
-            }
-            return options;
-        },
-        findClosestDimension: function(arg, desiredWidth) {
+        findClosestDimension: function(desiredWidth) {
             var offset = Number.MAX_VALUE,
-                dimensions = _.isNumber(arg) ? this.getAvailableDimensions(arg) : arg,
                 closest;
             // Find the first available or closest dimension that matches our desired width
-            var match = _.find(dimensions, _.bind(function(dimension) {
+            var match = _.find(this.optionsSixteenByNine, _.bind(function(dimension) {
                 var width = parseInt(dimension.split('x')[0], 10),
                     currentOffset = Math.abs(width - desiredWidth);
                 if (currentOffset < offset) {
@@ -29529,20 +29513,23 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
         renderSize: function() {
             var width = this.field.model.get('width'),
                 height = this.field.model.get('height'),
-                ratio = 16 / 9,
-                options = [];
-            if (width && height) {
-                ratio = width / height;
-            } else if (this.encoding.id) {
+                options = [],
+                targetWidth;
+            if ((!width || !height) && this.encoding.id) {
                 width = this.encoding.getWidth();
                 height = this.encoding.getHeight();
-                ratio = this.encoding.getRatio();
             }
-            options = sizeUtil.getAvailableDimensions(ratio);
+            // Use default IF encoding can handle it
+            if (this.config.defaultVideoWidth && this.config.defaultVideoWidth <= width) {
+                targetWidth =  this.config.defaultVideoWidth;
+            } else {
+                targetWidth = width;
+            }
+            options = sizeUtil.getAvailableDimensions();
             this.$('.size').append(this.sizesTemplate({
                 sizes: options,
                 // Select the override or current width
-                target: sizeUtil.findClosestDimension(options, this.config.defaultVideoWidth || width)
+                target: sizeUtil.findClosestDimension(targetWidth)
             }));
         },
         render: function() {
@@ -34613,7 +34600,7 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
             // forms auth identity provider dropdown.
             defaultProvider: '',
             // Set this in order to select the default width in video settings
-            defaultVideoWidth: '',
+            defaultVideoWidth: 848,
             // Location for plupload flash runtime
             pluploadFlashPath: '',
             // Callbacks to set locale and date/time formats

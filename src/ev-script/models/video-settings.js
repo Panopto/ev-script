@@ -5,8 +5,8 @@ define(['backbone'], function(Backbone) {
     return Backbone.Model.extend({
         defaults: {
             type: 'video',
-            width: '640',
-            height: '360',
+            width: '848',
+            height: '480',
             showtitle: true,
             autoplay: false,
             showcaptions: false,

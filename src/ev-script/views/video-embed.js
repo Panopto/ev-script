@@ -68,10 +68,10 @@ define(function(require) {
             return url;
         },
         getMediaWidth: function() {
-            return parseInt(this.model.get('width'), 10) || 640;
+            return parseInt(this.model.get('width'), 10) || 848;
         },
         getMediaHeight: function() {
-            return parseInt(this.model.get('height'), 10) || 360;
+            return parseInt(this.model.get('height'), 10) || 480;
         },
         getFrameWidth: function() {
             return this.getMediaWidth();
