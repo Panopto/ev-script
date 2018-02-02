@@ -22,28 +22,33 @@ define(function(require) {
             var url = this.config.ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
         },
-        getDims: function() {
+        getDims: function(original) {
             var dimsRaw = this.get('dimensions') || '848x480',
                 dimsStrs = dimsRaw.split('x'),
-                dims = [];
+                dims = [],
+                originalWidth = parseInt(dimsStrs[0], 10) || 848,
+                originalHeight = parseInt(dimsStrs[1], 10) || 480;
             if (this.isAudio()) {
                 dims[0] = 400;
                 dims[1] = 26;
+            } else if (!original && this.config.defaultVideoWidth && this.config.defaultVideoWidth <= originalWidth) {
+                dims[0] = parseInt(this.config.defaultVideoWidth, 10) || 848;
+                dims[1] = Math.ceil(dims[0] / (originalWidth / originalHeight));
             } else {
-                dims[0] = parseInt(dimsStrs[0], 10) || 848;
-                dims[1] = parseInt(dimsStrs[1], 10) || 480;
+                dims[0] = originalWidth;
+                dims[1] = originalHeight;
             }
             return dims;
         },
-        getRatio: function() {
-            var dims = this.getDims();
-            return dims[0] / dims[1];
+        // getRatio: function() {
+        //     var dims = this.getDims();
+        //     return dims[0] / dims[1];
+        // },
+        getWidth: function(original) {
+            return this.getDims(original)[0];
         },
-        getWidth: function() {
-            return this.getDims()[0];
-        },
-        getHeight: function() {
-            return this.getDims()[1];
+        getHeight: function(original) {
+            return this.getDims(original)[1];
         },
         isAudio: function() {
             return (/^audio\//i).test(this.get('contentType') || '');

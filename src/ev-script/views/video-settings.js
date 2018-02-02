@@ -47,14 +47,15 @@ define(function(require) {
                     'viewersreport': this.$('#viewersreport').is(':checked'),
                     'embedthumbnail': this.$('#embedthumbnail').is(':checked')
                 },
-                sizeVal = this.$('#size').val();
+                sizeVal = this.$('#size').val(),
+                original = sizeVal === 'original';
 
-            if (!sizeVal || sizeVal === 'original') {
+            if (!sizeVal || original) {
                 // isNew signifies that the encoding hasn't been fetched yet
                 if (this.encoding && !this.encoding.isNew()) {
                     _.extend(attrs, {
-                        width: this.encoding.getWidth(),
-                        height: this.encoding.getHeight()
+                        width: this.encoding.getWidth(original),
+                        height: this.encoding.getHeight(original)
                     });
                 }
             } else {
