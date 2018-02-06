@@ -29,10 +29,6 @@ div.ev-results {
     border: none;
 }
 
-div.ev-results .results {
-    border-bottom: 1px solid #cccccc;
-}
-
 .embed {
     margin: 1em 0;
 }

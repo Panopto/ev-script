@@ -229,8 +229,10 @@ define(function(require) {
             this.resizeResults();
         },
         resizeResults: function() {
+            var extra;
             if (this.config.fitToParent && this.$results) {
-                this.$results.height(this.$el.height() - this.$total.outerHeight(true));
+                extra = this.$el.outerHeight(true) - this.$el.height();
+                this.$results.height(this.$el.height() - this.$total.outerHeight(true) - extra);
                 // Truncation of metadata depends on window size...so re-decorate
                 this.$('.resultItem').each(_.bind(function(index, element) {
                     // TODO - revisit this given truncate -> expander lib change

@@ -24356,8 +24356,10 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
             this.resizeResults();
         },
         resizeResults: function() {
+            var extra;
             if (this.config.fitToParent && this.$results) {
-                this.$results.height(this.$el.height() - this.$total.outerHeight(true));
+                extra = this.$el.outerHeight(true) - this.$el.height();
+                this.$results.height(this.$el.height() - this.$total.outerHeight(true) - extra);
                 // Truncation of metadata depends on window size...so re-decorate
                 this.$('.resultItem').each(_.bind(function(index, element) {
                     // TODO - revisit this given truncate -> expander lib change
@@ -29374,8 +29376,10 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
             });
         },
         resizeResults: function() {
+            var extra;
             if (this.config.fitToParent) {
-                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true));
+                extra = this.$el.outerHeight(true) - this.$el.height();
+                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true) - extra);
             }
         },
         canRecord: function() {
@@ -29879,8 +29883,10 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
             this.appEvents.off('reloadPlaylists').on('reloadPlaylists', clearPlaylistsCache);
         },
         resizeResults: function() {
+            var extra;
             if (this.config.fitToParent) {
-                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true));
+                extra = this.$el.outerHeight(true) - this.$el.height();
+                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true) - extra);
             }
         }
     });
@@ -30272,8 +30278,10 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
             }
         },
         resizePicker: function() {
+            var extra;
             if (this.config.fitToParent) {
-                this.picker.setHeight(this.$el.height() - this.$actions.outerHeight(true));
+                extra = this.picker.$el.outerHeight(true) - this.picker.$el.height();
+                this.picker.setHeight(this.$el.height() - this.$actions.outerHeight(true) - extra);
             }
         }
     });

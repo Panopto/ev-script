@@ -230,8 +230,10 @@ define(function(require) {
             }
         },
         resizePicker: function() {
+            var extra;
             if (this.config.fitToParent) {
-                this.picker.setHeight(this.$el.height() - this.$actions.outerHeight(true));
+                extra = this.picker.$el.outerHeight(true) - this.picker.$el.height();
+                this.picker.setHeight(this.$el.height() - this.$actions.outerHeight(true) - extra);
             }
         }
     });

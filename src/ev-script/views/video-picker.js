@@ -244,8 +244,10 @@ define(function(require) {
             });
         },
         resizeResults: function() {
+            var extra;
             if (this.config.fitToParent) {
-                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true));
+                extra = this.$el.outerHeight(true) - this.$el.height();
+                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true) - extra);
             }
         },
         canRecord: function() {
