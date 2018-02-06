@@ -24,7 +24,6 @@ define(function(require) {
                 'height': height,
                 'displayTitle': true,
                 'displayEmbedCode': this.model.get('embedcode'),
-                'displayStatistics': this.model.get('statistics'),
                 'displayVideoDuration': this.model.get('duration'),
                 'displayAttachments': this.model.get('attachments'),
                 'displayAnnotations': this.model.get('annotations'),
@@ -37,6 +36,11 @@ define(function(require) {
                 'audioPreviewImage': this.model.get('audiopreviewimage'),
                 'displayCaptionSearch': this.model.get('captionsearch')
             });
+            if (!this.info.checkVersion('>=4.8.0')) {
+                src.addQuery({
+                    'displayStatistics': this.model.get('statistics')
+                });
+            }
             if (isPreview) {
                 // Hack to bypass restrictions for preview
                 src.addQuery('isPermalinkPreview', true);
