@@ -61,6 +61,9 @@ define(function(require) {
         isYouTube: function() {
             return (/^audioVideo\/YouTube/i).test(this.get('contentType') || '');
         },
+        isExternal: function() {
+            return (/^external\//i).test(this.get('contentType') || '');
+        },
         parse: function(response) {
             if (_.isArray(response.dataSet.encodings)) {
                 // This is a collection, so return the highest bitrate encoding

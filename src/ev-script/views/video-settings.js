@@ -97,7 +97,8 @@ define(function(require) {
                 model: this.field.model,
                 isAudio: this.encoding && this.encoding.isAudio(),
                 isGallery: this.encoding && this.encoding.isGallery(),
-                isYouTube: this.encoding && this.encoding.isYouTube()
+                isYouTube: this.encoding && this.encoding.isYouTube(),
+                isExternal: this.encoding && this.encoding.isExternal()
             }));
             if (this.encoding) {
                 this.renderSize();

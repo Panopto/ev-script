@@ -34,10 +34,12 @@
                     <label for="embedthumbnail"><%= i18n.formatMessage('Embed As Thumbnail') %></label>
                 </div>
             <% } %>
+            <% if (!isExternal) { %>
             <div class="fieldWrap inline-option">
                 <input id="autoplay" class="form-checkbox" <% if (model.get('autoplay')) { print('checked="checked"'); } %>  name="autoplay" type="checkbox"/>
                 <label for="autoplay"><%= i18n.formatMessage('Auto Play (PC Only)') %></label>
             </div>
+            <% } %>
             <% if (!isYouTube) { %>
             <div class="fieldWrap inline-option">
                 <input id="attachments" class="form-checkbox" <% if (model.get('attachments')) { print('checked="checked"'); } %> name="attachments" type="checkbox"/>
@@ -68,7 +70,7 @@
                 <label for="download"><%= i18n.formatMessage('Download Link') %></label>
             </div>
             <% } %>
-            <% if (!isGallery) { %>
+            <% if (!isGallery && !isExternal) { %>
             <div class="fieldWrap inline-option">
                 <input id="showcaptions" class="form-checkbox" <% if (model.get('showcaptions')) { print('checked="checked"'); } %>  name="showcaptions" type="checkbox"/>
                 <label for="showcaptions"><%= i18n.formatMessage('Captions "On" By Default') %></label>
@@ -80,7 +82,7 @@
                     <label for="audiopreviewimage"><%= i18n.formatMessage('Audio Preview Image') %></label>
                 </div>
             <% } %>
-            <% if (appInfo.checkVersion('>=4.8.0') && !isGallery) { %>
+            <% if (appInfo.checkVersion('>=4.8.0') && !isGallery && !isExternal) { %>
                 <div class="fieldWrap inline-option">
                     <input id="viewersreport" class="form-checkbox" <% if (model.get('viewersreport')) { print('checked="checked"'); } %>  name="viewersreport" type="checkbox"/>
                     <label for="viewersreport"><%= i18n.formatMessage('Viewers Report') %></label>
