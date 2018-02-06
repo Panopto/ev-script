@@ -96,7 +96,8 @@ define(function(require) {
                 i18n: this.i18n,
                 model: this.field.model,
                 isAudio: this.encoding && this.encoding.isAudio(),
-                isGallery: this.encoding && this.encoding.isGallery()
+                isGallery: this.encoding && this.encoding.isGallery(),
+                isYouTube: this.encoding && this.encoding.isYouTube()
             }));
             if (this.encoding) {
                 this.renderSize();

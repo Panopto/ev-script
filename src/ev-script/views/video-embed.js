@@ -32,9 +32,8 @@ define(function(require) {
                 url.addQuery({
                     'displayViewersReport': this.model.get('viewersreport'),
                     'embedAsThumbnail': this.model.get('embedthumbnail'),
-                    // TODO - not sure where these are configurable in EV proper
                     'startTime': 0,
-                    'displayCredits': true
+                    'displayCredits': this.model.get('metadata')
                 });
             } else {
                 url.path('/app/plugin/embed.aspx');
@@ -92,7 +91,7 @@ define(function(require) {
             return height;
         },
         isMenuVisible: function() {
-            return this.model.get('showtitle') ||
+            return (!this.info.checkVersion('>=4.8.0') && this.model.get('showtitle')) ||
                    this.model.get('socialsharing') ||
                    this.model.get('annotations') ||
                    this.model.get('captionsearch') ||

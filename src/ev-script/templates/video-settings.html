@@ -16,13 +16,13 @@
                 <input id="socialsharing" class="form-checkbox" <% if (model.get('socialsharing')) { print('checked="checked"'); } %> name="socialsharing" type="checkbox"/>
                 <label for="socialsharing"><%= i18n.formatMessage('Social Tools') %></label>
             </div>
-            <% if (!isGallery) { %>
+            <% if (!isGallery && !isYouTube) { %>
             <div class="fieldWrap inline-option">
                 <input id="annotations" class="form-checkbox" <% if (model.get('annotations')) { print('checked="checked"'); } %> name="annotations" type="checkbox"/>
                 <label for="annotations"><%= i18n.formatMessage('Annotations') %></label>
             </div>
             <% } %>
-            <% if (!isGallery) { %>
+            <% if (!isGallery && !isYouTube) { %>
             <div class="fieldWrap inline-option">
                 <input id="captionsearch" class="form-checkbox" <% if (model.get('captionsearch')) { print('checked="checked"'); } %> name="captionsearch" type="checkbox"/>
                 <label for="captionsearch"><%= i18n.formatMessage('Caption Search') %></label>
@@ -38,14 +38,18 @@
                 <input id="autoplay" class="form-checkbox" <% if (model.get('autoplay')) { print('checked="checked"'); } %>  name="autoplay" type="checkbox"/>
                 <label for="autoplay"><%= i18n.formatMessage('Auto Play (PC Only)') %></label>
             </div>
+            <% if (!isYouTube) { %>
             <div class="fieldWrap inline-option">
                 <input id="attachments" class="form-checkbox" <% if (model.get('attachments')) { print('checked="checked"'); } %> name="attachments" type="checkbox"/>
                 <label for="attachments"><%= i18n.formatMessage('Attachments') %></label>
             </div>
+            <% } %>
+            <% if (!isYouTube) { %>
             <div class="fieldWrap inline-option">
                 <input id="links" class="form-checkbox" <% if (model.get('links')) { print('checked="checked"'); } %> name="links" type="checkbox"/>
                 <label for="links"><%= i18n.formatMessage('Links') %></label>
             </div>
+            <% } %>
             <div class="fieldWrap inline-option">
                 <input id="metadata" class="form-checkbox" <% if (model.get('metadata')) { print('checked="checked"'); } %> name="metadata" type="checkbox"/>
                 <label for="metadata"><%= i18n.formatMessage('Meta Data') %></label>
@@ -58,10 +62,12 @@
                 <input id="embedcode" class="form-checkbox" <% if (model.get('embedcode')) { print('checked="checked"'); } %> name="embedcode" type="checkbox"/>
                 <label for="embedcode"><%= i18n.formatMessage('Embed Code') %></label>
             </div>
+            <% if (!isYouTube) { %>
             <div class="fieldWrap inline-option">
                 <input id="download" class="form-checkbox" <% if (model.get('download')) { print('checked="checked"'); } %> name="download" type="checkbox"/>
                 <label for="download"><%= i18n.formatMessage('Download Link') %></label>
             </div>
+            <% } %>
             <% if (!isGallery) { %>
             <div class="fieldWrap inline-option">
                 <input id="showcaptions" class="form-checkbox" <% if (model.get('showcaptions')) { print('checked="checked"'); } %>  name="showcaptions" type="checkbox"/>
