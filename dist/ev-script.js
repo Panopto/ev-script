@@ -24225,12 +24225,22 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
                 focusedIndex = -1;
                 this.$scrollLoader.evScrollLoader('scrollTo', $item.offset().top - 2);
             }, this));
-            $item.keydown(function(e) {
+            $item.keydown(_.bind(function(e) {
                 var $interEls,
                     $prevAll,
                     $nextAll,
                     lastIndex,
-                    index;
+                    index,
+                    isScrolled = _.bind(function(reverse) {
+                        var itemHeight = $item.height(),
+                            $wrap = this.$scrollLoader.closest('.scrollWrap'),
+                            scrollHeight = $wrap.height(),
+                            clearReq = itemHeight - scrollHeight,
+                            itemOffset = $item.offset().top,
+                            scrollOffset = $wrap.offset().top,
+                            clearAct = itemOffset - scrollOffset;
+                        return reverse ? clearAct >= 0 : Math.abs(clearAct) >= clearReq;
+                    }, this);
                 if (e.which === 33 || e.keyCode === 33) {
                     e.preventDefault();
                     // page up
@@ -24283,7 +24293,7 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
                     focusedIndex = --focusedIndex < 0 ? lastIndex : focusedIndex;
                     focusedIndex = focusedIndex > lastIndex ? lastIndex : focusedIndex;
                     $interEls.eq(focusedIndex).focus();
-                } else if (e.which === 38 || e.keyCode === 38) {
+                } else if ((e.which === 38 || e.keyCode === 38) && isScrolled(true)) {
                     e.preventDefault();
                     // up arrow move to previous item
                     var $previous = $item.prev();
@@ -24300,7 +24310,7 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
                     lastIndex = $interEls.length - 1;
                     focusedIndex = ++focusedIndex > lastIndex ? 0 : focusedIndex;
                     $interEls.eq(focusedIndex).focus();
-                } else if (e.which === 40 || e.keyCode === 40) {
+                } else if ((e.which === 40 || e.keyCode === 40) && isScrolled()) {
                     e.preventDefault();
                     // down arrow move to next item
                     var $next = $item.next();
@@ -24308,7 +24318,7 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
                         $next.focus();
                     }
                 }
-            });
+            }, this));
         },
         render: function() {
             this.$el.html(this.resultsTemplate({
@@ -28658,10 +28668,15 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
             // Handle truncation (more/less) of truncatable fields
             if ($(window).width() < 1100) {
                 $('.trunc .value', $item).each(_.bind(function(index, element) {
-                    var $element = $(element);
+                    var $element = $(element),
+                        setFocus = function() {
+                            $item.focus();
+                        };
                     $element.expander({
                         'expandText': this.i18n.formatMessage('More'),
-                        'userCollapseText': this.i18n.formatMessage('Less')
+                        'userCollapseText': this.i18n.formatMessage('Less'),
+                        'afterExpand': setFocus,
+                        'afterCollapse': setFocus
                     });
                 }, this));
             }

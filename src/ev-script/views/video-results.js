@@ -21,10 +21,15 @@ define(function(require) {
             // Handle truncation (more/less) of truncatable fields
             if ($(window).width() < 1100) {
                 $('.trunc .value', $item).each(_.bind(function(index, element) {
-                    var $element = $(element);
+                    var $element = $(element),
+                        setFocus = function() {
+                            $item.focus();
+                        };
                     $element.expander({
                         'expandText': this.i18n.formatMessage('More'),
-                        'userCollapseText': this.i18n.formatMessage('Less')
+                        'userCollapseText': this.i18n.formatMessage('Less'),
+                        'afterExpand': setFocus,
+                        'afterCollapse': setFocus
                     });
                 }, this));
             }
