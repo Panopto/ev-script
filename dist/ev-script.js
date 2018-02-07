@@ -23623,7 +23623,8 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
             this.$el.show();
         },
         setHeight: function(height) {
-            this.$el.height(height);
+            var extra = this.$el.outerHeight(true) - this.$el.height();
+            this.$el.height(height - extra);
             this.resizeResults();
         },
         resizeResults: function() {}
@@ -24352,7 +24353,8 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
             this.collection.off('add', this.addHandler).on('add', this.addHandler);
         },
         setHeight: function(height) {
-            this.$el.height(height);
+            var extra = this.$el.outerHeight(true) - this.$el.height();
+            this.$el.height(height - extra);
             this.resizeResults();
         },
         resizeResults: function() {
@@ -30279,10 +30281,9 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
             }
         },
         resizePicker: function() {
-            var extra;
             if (this.config.fitToParent) {
-                extra = this.picker.$el.outerHeight(true) - this.picker.$el.height();
-                this.picker.setHeight(this.$el.height() - this.$actions.outerHeight(true) - extra);
+                // Due to cross-browser fieldset rendering issues...buffer this a bit
+                this.picker.setHeight(this.$el.height() - this.$actions.outerHeight(true) - 10);
             }
         }
     });

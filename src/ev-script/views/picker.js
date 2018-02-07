@@ -72,7 +72,8 @@ define(function(require) {
             this.$el.show();
         },
         setHeight: function(height) {
-            this.$el.height(height);
+            var extra = this.$el.outerHeight(true) - this.$el.height();
+            this.$el.height(height - extra);
             this.resizeResults();
         },
         resizeResults: function() {}

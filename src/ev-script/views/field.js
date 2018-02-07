@@ -230,10 +230,9 @@ define(function(require) {
             }
         },
         resizePicker: function() {
-            var extra;
             if (this.config.fitToParent) {
-                extra = this.picker.$el.outerHeight(true) - this.picker.$el.height();
-                this.picker.setHeight(this.$el.height() - this.$actions.outerHeight(true) - extra);
+                // Due to cross-browser fieldset rendering issues...buffer this a bit
+                this.picker.setHeight(this.$el.height() - this.$actions.outerHeight(true) - 10);
             }
         }
     });

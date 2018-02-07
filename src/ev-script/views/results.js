@@ -225,7 +225,8 @@ define(function(require) {
             this.collection.off('add', this.addHandler).on('add', this.addHandler);
         },
         setHeight: function(height) {
-            this.$el.height(height);
+            var extra = this.$el.outerHeight(true) - this.$el.height();
+            this.$el.height(height - extra);
             this.resizeResults();
         },
         resizeResults: function() {
