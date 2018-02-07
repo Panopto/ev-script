@@ -232,6 +232,7 @@ define(function(require) {
             var extra;
             if (this.config.fitToParent && this.$results) {
                 extra = this.$el.outerHeight(true) - this.$el.height();
+                extra += this.$results.outerHeight(true) - this.$results.height();
                 this.$results.height(this.$el.height() - this.$total.outerHeight(true) - extra);
                 // Truncation of metadata depends on window size...so re-decorate
                 this.$('.resultItem').each(_.bind(function(index, element) {
