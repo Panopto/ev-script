@@ -21,6 +21,9 @@
     display: none;
   }
 }
+.ev-video-picker div.ev-results .results {
+  border: 1px solid #bebfb9;
+}
 .ev-video-picker div.ev-results td.content-actions {
   min-width: 200px;
 }
@@ -51,6 +54,9 @@
   .ev-playlist-picker div.ev-filter-block label {
     display: none;
   }
+}
+.ev-playlist-picker div.ev-results .results {
+  border: 1px solid #bebfb9;
 }
 .ev-playlist-picker div.ev-results td.content-actions {
   min-width: 100px;
@@ -650,9 +656,6 @@ div.ev-results .content-list .content-item .label {
 }
 div.ev-video-picker div.ev-results .content-list tr td {
   vertical-align: top;
-}
-div.scrollWrap {
-  border: 1px solid #bebfb9;
 }
 div.scrollWrap .loader {
   background: url('images/loader.gif') no-repeat scroll center center transparent;
