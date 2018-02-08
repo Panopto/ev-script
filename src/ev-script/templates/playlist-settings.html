@@ -125,10 +125,12 @@
                     <input id="showcaptions" class="form-checkbox" <% if (model.get('showcaptions')) { print('checked="checked"'); } %>  name="showcaptions" type="checkbox"/>
                     <label for="showcaptions"><%= i18n.formatMessage('Captions "On" By Default') %></label>
                 </div>
+                <% if (appInfo.checkVersion('<4.8.0')) { %>
                 <div class="fieldWrap inline-option">
                     <input id="dateproduced" class="form-checkbox" <% if (model.get('dateproduced')) { print('checked="checked"'); } %> name="dateproduced" type="checkbox"/>
                     <label for="dateproduced"><%= i18n.formatMessage('Date Produced') %></label>
                 </div>
+                <% } %>
                 <div class="fieldWrap inline-option">
                     <input id="audiopreviewimage" class="form-checkbox" <% if (model.get('audiopreviewimage')) { print('checked="checked"'); } %> name="audiopreviewimage" type="checkbox"/>
                     <label for="audiopreviewimage"><%= i18n.formatMessage('Audio Preview Image') %></label>

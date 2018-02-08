@@ -56,10 +56,12 @@
                 <input id="metadata" class="form-checkbox" <% if (model.get('metadata')) { print('checked="checked"'); } %> name="metadata" type="checkbox"/>
                 <label for="metadata"><%= i18n.formatMessage('Meta Data') %></label>
             </div>
+            <% if (appInfo.checkVersion('<4.8.0')) { %>
             <div class="fieldWrap inline-option">
                 <input id="dateproduced" class="form-checkbox" <% if (model.get('dateproduced')) { print('checked="checked"'); } %> name="dateproduced" type="checkbox"/>
                 <label for="dateproduced"><%= i18n.formatMessage('Date Produced') %></label>
             </div>
+            <% } %>
             <div class="fieldWrap inline-option">
                 <input id="embedcode" class="form-checkbox" <% if (model.get('embedcode')) { print('checked="checked"'); } %> name="embedcode" type="checkbox"/>
                 <label for="embedcode"><%= i18n.formatMessage('Embed Code') %></label>

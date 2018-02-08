@@ -24,10 +24,9 @@ define(function(require) {
             this.$el.html(embed);
         },
         getSrcUrl: function(width, height, isPreview) {
-            var atLeast480 = this.info.checkVersion('>=4.8.0'),
-                id = this.model.get('id'),
+            var id = this.model.get('id'),
                 url = URI(this.config.ensembleUrl);
-            if (atLeast480) {
+            if (this.info.checkVersion('>=4.8.0')) {
                 url.path('/hapi/v1/contents/' + id + '/plugin');
                 url.addQuery({
                     'displayViewersReport': this.model.get('viewersreport'),
@@ -39,6 +38,7 @@ define(function(require) {
                 url.path('/app/plugin/embed.aspx');
                 url.addQuery({
                     'ID': id,
+                    'displayDateProduced': this.model.get('dateproduced'),
                     'isNewPluginEmbed': true
                 });
             }
@@ -53,7 +53,6 @@ define(function(require) {
                 'audioPreviewImage': this.model.get('audiopreviewimage'),
                 'displayLinks': this.model.get('links'),
                 'displayMetaData': this.model.get('metadata'),
-                'displayDateProduced': this.model.get('dateproduced'),
                 'displayEmbedCode': this.model.get('embedcode'),
                 'displayDownloadIcon': this.model.get('download'),
                 'showCaptions': this.model.get('showcaptions'),
@@ -91,14 +90,14 @@ define(function(require) {
             return height;
         },
         isMenuVisible: function() {
-            return (!this.info.checkVersion('>=4.8.0') && this.model.get('showtitle')) ||
+            return (this.info.checkVersion('<4.8.0') && this.model.get('showtitle')) ||
                    this.model.get('socialsharing') ||
                    this.model.get('annotations') ||
                    this.model.get('captionsearch') ||
                    this.model.get('attachments') ||
                    this.model.get('links') ||
                    this.model.get('metadata') ||
-                   this.model.get('dateproduced') ||
+                   (this.info.checkVersion('<4.8.0') && this.model.get('dateproduced')) ||
                    this.model.get('embedcode') ||
                    this.model.get('download') ||
                    this.model.get('viewersreport');
