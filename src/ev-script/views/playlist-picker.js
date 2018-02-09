@@ -85,8 +85,6 @@ define(function(require) {
                     }
                     this.resultsView.collection = collection;
                     this.resultsView.render();
-                    // TODO - better place for this?
-                    this.resizeResults();
                 }, this),
                 error: _.bind(function(collection, xhr, options) {
                     this.ajaxError(xhr, _.bind(function() {
@@ -95,13 +93,6 @@ define(function(require) {
                 }, this)
             });
             this.appEvents.off('reloadPlaylists').on('reloadPlaylists', clearPlaylistsCache);
-        },
-        resizeResults: function() {
-            var extra;
-            if (this.config.fitToParent) {
-                extra = this.$el.outerHeight(true) - this.$el.height();
-                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true) - extra);
-            }
         }
     });
 

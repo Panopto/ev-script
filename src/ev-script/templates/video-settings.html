@@ -1,6 +1,6 @@
 <form>
-    <fieldset>
-        <legend style="display:none;"><%= i18n.formatMessage('Media Embed Options') %></legend>
+    <div role="group" aria-labelledby="videoSettingsTitle">
+        <div id="videoSettingsTitle" style="display:none;"><%= i18n.formatMessage('Media Embed Options') %></div>
         <div class="fieldWrap">
             <label for="size"><%= i18n.formatMessage('Size') %></label>
             <select class="form-select size" id="size" name="size">
@@ -95,5 +95,5 @@
             <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage('Save') %></span></button>
             <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage('Cancel') %></span></button>
         </div>
-    </fieldset>
+    </div>
 </form>

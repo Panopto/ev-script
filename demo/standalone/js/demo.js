@@ -5,9 +5,9 @@
 
     var app = new EV.EnsembleApp(_.extend(evSettings, {
         hidePickers: false,
-        scrollHeight: false,
+        scrollHeight: 200,
         fitToParent: true,
-        getLocaleCallback: function() { return 'es-MX'; },
+        getLocaleCallback: function() { return 'en-US'; },
         getDateFormatCallback: function() { return 'DD/MM/YYYY'; },
         getTimeFormatCallback: function() { return 'hh:mm A'; },
         i18nPath: '../../src/ev-script/i18n'
@@ -34,7 +34,7 @@
             resize = function(event) {
                 $container.height($(window).height() * 0.8);
                 $tabs.tabs('refresh');
-                app.appEvents.trigger('resize');
+                // app.appEvents.trigger('resize');
             };
         $(window).resize(resize);
         app.done(function() {

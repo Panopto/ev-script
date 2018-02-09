@@ -1,6 +1,6 @@
 <div class="logo"></div>
 <form>
-    <fieldset>
+    <div role="group">
         <div class="fieldWrap">
             <label for="username"><%= i18n.formatMessage('Username') %></label>
             <input id="username" name="username" class="form-text" type="text"/>
@@ -22,5 +22,5 @@
             <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage('Submit') %>"/>
             <div class="loader"></div>
         </div>
-    </fieldset>
+    </div role="group">
 </form>

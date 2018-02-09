@@ -228,12 +228,6 @@ define(function(require) {
                         this.$upload.css('display', 'none');
                         this.$record.css('display', 'none');
                     }
-                    // This is the last portion of the filter block that loads
-                    // so now it should be fully rendered...resize our results
-                    // to make sure they have the proper height.
-                    // TODO - better place for this? Or better method of
-                    // handling?
-                    this.resizeResults();
                 }, this),
                 error: _.bind(function(collection, xhr, options) {
                     this.ajaxError(xhr, _.bind(function() {
@@ -242,13 +236,6 @@ define(function(require) {
                 }, this),
                 reset: true
             });
-        },
-        resizeResults: function() {
-            var extra;
-            if (this.config.fitToParent) {
-                extra = this.$el.outerHeight(true) - this.$el.height();
-                this.resultsView.setHeight(this.$el.height() - this.hider.$el.outerHeight(true) - this.$filterBlock.outerHeight(true) - extra);
-            }
         },
         canRecord: function() {
             var currentUser = this.auth.getUser();

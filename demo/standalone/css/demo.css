@@ -17,8 +17,7 @@ a:visited {
     height: 100%;
 }
 
-#videoWrap,
-#playlistWrap {
+.ev-field-wrap {
     border: none;
     padding: 0;
     position: relative;

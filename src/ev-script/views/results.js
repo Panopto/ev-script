@@ -17,7 +17,7 @@ define(function(require) {
         emptyTemplate: _.template(require('text!ev-script/templates/no-results.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render', 'decorate', 'loadMore', 'addHandler', 'previewItem', 'setHeight', 'resizeResults', 'refreshHandler');
+            _.bindAll(this, 'render', 'decorate', 'loadMore', 'addHandler', 'previewItem', 'refreshHandler');
             this.picker = options.picker;
             this.appId = options.appId;
             this.loadLock = false;
@@ -200,7 +200,6 @@ define(function(require) {
             }));
             this.$total = this.$('.total');
             this.$results = this.$('.results');
-            this.resizeResults();
             var $contentList = this.$('.content-list');
             if (!this.collection.isEmpty()) {
                 this.collection.each(function(item, index) {
@@ -223,24 +222,6 @@ define(function(require) {
             }
             // Prevent multiple bindings if the collection hasn't changed between render calls
             this.collection.off('add', this.addHandler).on('add', this.addHandler);
-        },
-        setHeight: function(height) {
-            var extra = this.$el.outerHeight(true) - this.$el.height();
-            this.$el.height(height - extra);
-            this.resizeResults();
-        },
-        resizeResults: function() {
-            var extra;
-            if (this.config.fitToParent && this.$results) {
-                extra = this.$el.outerHeight(true) - this.$el.height();
-                extra += this.$results.outerHeight(true) - this.$results.height();
-                this.$results.height(this.$el.height() - this.$total.outerHeight(true) - extra);
-                // Truncation of metadata depends on window size...so re-decorate
-                this.$('.resultItem').each(_.bind(function(index, element) {
-                    // TODO - revisit this given truncate -> expander lib change
-                    this.decorate($(element));
-                }, this));
-            }
         },
         refreshHandler: function(e) {}
     });

@@ -1,6 +1,6 @@
 <form>
-    <fieldset>
-        <legend style="display:none;"><%= i18n.formatMessage('Playlist Embed Options') %></legend>
+    <div role="group" aria-labelledby="playlistSettingsTitle">
+        <div id="playlistSettingsTitle" style="display:none;"><%= i18n.formatMessage('Playlist Embed Options') %></div>
         <div class="accordion">
             <h3><%= i18n.formatMessage('Choose Layout') %></h3>
             <div>
@@ -149,5 +149,5 @@
             <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage('Save') %></span></button>
             <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage('Cancel') %></span></button>
         </div>
-    </fieldset>
+    </div>
 </form>

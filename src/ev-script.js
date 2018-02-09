@@ -55,8 +55,6 @@ define(function(require) {
             // The height of our scroll loader. This can be an integer (number
             // of pixels), or css string, e.g. '80%'.
             scrollHeight: null,
-            // If true, content will try to resize to fit parent container.
-            fitToParent: false,
             // In scenarios where we have multiple fields on a page we want to
             // automatically hide inactive pickers to preserve screen real
             // estate.  Set to false to disable.

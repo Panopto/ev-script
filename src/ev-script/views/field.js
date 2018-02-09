@@ -24,8 +24,9 @@ define(function(require) {
         template: _.template(require('text!ev-script/templates/field.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler', 'resizePicker');
+            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler');
             this.$field = options.$field;
+            this.$el.addClass('ev-field-wrap');
             this.showChoose = true;
             var pickerOptions = {
                     id: this.id + '-picker',
@@ -136,7 +137,6 @@ define(function(require) {
                     if (this.config.hidePickers) {
                         this.appEvents.trigger('hidePickers', this.id);
                     }
-                    this.resizePicker();
                 }
             }, this);
             this.appEvents.on('hidePicker', function(fieldId) {
@@ -152,9 +152,6 @@ define(function(require) {
                     this.showChoose = true;
                 }
             }, this);
-            this.appEvents.on('resize', _.bind(function() {
-                this.resizePicker();
-            }, this));
         },
         events: {
             'click .action-choose': 'chooseHandler',
@@ -227,12 +224,6 @@ define(function(require) {
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {
                 this.$('.action-choose').hide();
-            }
-        },
-        resizePicker: function() {
-            if (this.config.fitToParent) {
-                // Due to cross-browser fieldset rendering issues...buffer this a bit
-                this.picker.setHeight(this.$el.height() - this.$actions.outerHeight(true) - 10);
             }
         }
     });
