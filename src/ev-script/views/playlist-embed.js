@@ -32,12 +32,12 @@ define(function(require) {
                 'displaySharing': this.model.get('socialsharing'),
                 'autoPlay': this.model.get('autoplay'),
                 'showCaptions': this.model.get('showcaptions'),
+                'displayDateProduced': this.model.get('dateproduced'),
                 'audioPreviewImage': this.model.get('audiopreviewimage'),
                 'displayCaptionSearch': this.model.get('captionsearch')
             });
             if (this.info.checkVersion('<4.8.0')) {
                 src.addQuery({
-                    'displayDateProduced': this.model.get('dateproduced'),
                     'displayStatistics': this.model.get('statistics')
                 });
             }
