@@ -8,37 +8,73 @@ define(function(require) {
         OrganizationSelectView = require('ev-script/views/organization-select'),
         Organizations = require('ev-script/collections/organizations'),
         LibrarySelectView = require('ev-script/views/library-select'),
-        Libraries = require('ev-script/collections/libraries');
+        Libraries = require('ev-script/collections/libraries'),
+        TypeSelectView = require('ev-script/views/library-type-select'),
+        SearchView = require('ev-script/views/search');
 
     return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/unit-selects.html')),
+        template: _.template(require('text!ev-script/templates/filter.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization', 'changeLibrary');
+            _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization',
+                'changeLibrary', 'activateRecord', 'deactivateRecord',
+                'showUpload', 'hideUpload', 'showRecord', 'hideRecord',
+                'setFocus');
+
             this.picker = options.picker;
             this.id = options.id;
+
             this.$el.html(this.template({
-                i18n: this.i18n,
-                formId: this.id + '-unit-selects',
-                orgSelectId: this.id + '-org-select',
-                libSelectId: this.id + '-lib-select'
+                id: this.id,
+                i18n: this.i18n
             }));
+
             this.orgSelect = new OrganizationSelectView({
-                el: this.$('.organizations'),
+                id: this.id + '-org-select',
+                el: this.$('.ev-org-select'),
                 picker: this.picker,
                 appId: this.appId,
                 collection: new Organizations({}, {
                     appId: this.appId
                 })
             });
+
             this.libSelect = new LibrarySelectView({
-                el: this.$('.libraries'),
+                id: this.id + '-lib-select',
+                el: this.$('.ev-lib-select'),
                 picker: this.picker,
                 appId: this.appId,
                 collection: new Libraries({}, {
                     appId: this.appId
                 })
             });
+
+            if (options.showTypeSelect || _.isUndefined(options.showTypeSelect)) {
+                this.typeSelectView = new TypeSelectView({
+                    id: this.id + '-type-select',
+                    el: this.$('.ev-type-select'),
+                    picker: this.picker,
+                    appId: this.appId
+                });
+            }
+
+            this.searchView = new SearchView({
+                id: this.id + '-search',
+                el: this.$('.ev-search'),
+                picker: this.picker,
+                appId: this.appId
+            });
+
+            var $loader = this.$('div.loader');
+            $(window.document).on('ajaxSend', _.bind(function(e, xhr, settings) {
+                if (this.picker === settings.picker) {
+                    $loader.addClass('loading');
+                }
+            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
+                if (this.picker === settings.picker) {
+                    $loader.removeClass('loading');
+                }
+            }, this));
         },
         events: {
             'change select.organizations': 'changeOrganization',
@@ -89,6 +125,29 @@ define(function(require) {
                     }, this));
                 }, this)
             });
+        },
+        activateRecord: function() {
+            this.$('.record-active').show();
+            this.$('.record-inactive').hide();
+        },
+        deactivateRecord: function() {
+            this.$('.record-active').hide();
+            this.$('.record-inactive').show();
+        },
+        showUpload: function() {
+            this.$('.action-upload').show();
+        },
+        hideUpload: function() {
+            this.$('.action-upload').hide();
+        },
+        showRecord: function() {
+            this.$('.action-record').show();
+        },
+        hideRecord: function() {
+            this.$('.action-record').hide();
+        },
+        setFocus: function() {
+            this.$('select').filter(':visible').first().focus();
         }
     });
 

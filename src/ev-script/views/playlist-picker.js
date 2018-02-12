@@ -5,8 +5,7 @@ define(function(require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         PickerView = require('ev-script/views/picker'),
-        UnitSelectsView = require('ev-script/views/unit-selects'),
-        SearchView = require('ev-script/views/search'),
+        FilterView = require('ev-script/views/filter'),
         PlaylistResultsView = require('ev-script/views/playlist-results'),
         Playlists = require('ev-script/collections/playlists');
 
@@ -14,38 +13,32 @@ define(function(require) {
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit');
-            this.$filterBlock = this.$('div.ev-filter-block');
-            this.searchView = new SearchView({
-                id: this.id + '-search',
-                tagName: 'div',
-                className: 'ev-search',
+
+            this.appEvents.on('search', _.bind(function() {
+                this.loadPlaylists();
+            }, this));
+
+            // TODO - handle callback
+            this.filter = new FilterView({
+                id: this.id + '-filter',
+                el: this.$('.ev-filter-block'),
                 picker: this,
                 appId: this.appId,
-                callback: _.bind(function() {
-                    this.loadPlaylists();
-                }, this)
+                showTypeSelect: false
             });
-            this.$filterBlock.prepend(this.searchView.$el);
-            this.searchView.render();
-            this.unitSelects = new UnitSelectsView({
-                id: this.id + '-unit-selects',
-                tagName: 'div',
-                className: 'ev-unit-selects',
-                picker: this,
-                appId: this.appId
-            });
-            this.$filterBlock.prepend(this.unitSelects.$el);
+
             this.resultsView = new PlaylistResultsView({
                 el: this.$('div.ev-results'),
                 picker: this,
                 appId: this.appId
             });
+
             this.$el.append(this.resultsView.$el);
         },
         events: {
             'click a.action-add': 'chooseItem',
-            'change .unit-selects select.libraries': 'changeLibrary',
-            'submit .unit-selects': 'handleSubmit'
+            'change .ev-filter-block select.libraries': 'changeLibrary',
+            'submit .ev-filter-block': 'handleSubmit'
         },
         changeLibrary: function(e) {
             this.loadPlaylists();
@@ -56,8 +49,8 @@ define(function(require) {
         },
         showPicker: function() {
             PickerView.prototype.showPicker.call(this);
-            this.unitSelects.loadOrgs();
-            this.unitSelects.$('select').filter(':visible').first().focus();
+            this.filter.loadOrgs();
+            this.filter.setFocus();
         },
         loadPlaylists: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),

@@ -11,7 +11,7 @@ define(function(require) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'searchHandler', 'doSearch', 'autoSearch');
             this.picker = options.picker;
-            this.callback = options.callback || function() {};
+            this.render();
         },
         events: {
             'keydown .search': 'searchHandler',
@@ -19,16 +19,17 @@ define(function(require) {
         },
         render: function() {
             this.$el.html(this.template({
-                i18n: this.i18n,
                 id: this.id + '-input',
+                i18n: this.i18n,
                 searchVal: this.picker.model.get('search')
             }));
         },
         doSearch: function() {
+            var searchVal = this.$('.search').val();
             this.picker.model.set({
-                search: this.$('.search').val()
+                search: searchVal
             });
-            this.callback();
+            this.appEvents.trigger('search', searchVal);
         },
         searchHandler: function(e) {
             // Looking for enter key in which case we immediately search

@@ -1,0 +1,15 @@
+<div id="<%= id %>-org-select" class="ev-filter-item ev-org-select"></div>
+<div id="<%= id %>-lib-select" class="ev-filter-item ev-lib-select"></div>
+<div id="<%= id %>-type-select" class="ev-filter-item ev-type-select"></div>
+<div id="<%= id %>-search" class="ev-filter-item ev-search"></div>
+<div class="ev-filter-item ev-actions">
+  <button type="button" class="action-upload" style="display: none;" title="<%= i18n.formatMessage('Click to upload new media') %>">
+    <i class="fa fa-upload fa-fw"></i><span><%= i18n.formatMessage('Upload') %><span>
+  </button>
+  <button type="button" class="action-record" style="display: none;" title="<%= i18n.formatMessage('Click to record screen') %>">
+    <i class="record-inactive fa fa-circle fa-fw"></i>
+    <i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i>
+    <span><%= i18n.formatMessage('Record') %><span>
+  </button>
+</div>
+<div class="ev-filter-item loader"></div>

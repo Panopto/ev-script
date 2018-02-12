@@ -1,3 +1,5 @@
+// TODO - this needs review/cleanup
+
 // Bootstrap less mixins
 @import (reference) '../../node_modules/bootstrap-less/bootstrap/variables.less';
 @import (reference) '../../node_modules/bootstrap-less/bootstrap/mixins.less';
@@ -48,19 +50,6 @@
     }
 }
 
-.loader() {
-  .loader {
-    display: inline-block;
-  }
-  .loading {
-    background: url(@loading-image) no-repeat scroll center center transparent;
-    display: inline-block;
-    height: 16px;
-    vertical-align: middle;
-    width: 16px;
-  }
-}
-
 .filter-form(@max-width) {
   label,
   input,
@@ -76,10 +65,46 @@
   }
 }
 
+.common() {
+  .form-select,
+  .form-text {
+    .input-size(inherit; 0.2em; 0.2em; inherit; inherit; 2px);
+    border: 1px solid @border-color;
+    padding: 0.3em;
+    line-height: 17px;
+  }
+  .form-select {
+    background-color: #fff;
+  }
+  .form-actions {
+    .form-submit {
+      .button-size(0.3em; 0.3em; inherit; inherit; 2px);
+      border: 1px solid transparent;
+      span {
+        margin-left: 0.4em;
+      }
+    }
+    .action-submit {
+      #gradient > .vertical(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.15), 1%, 100%);
+      .button-variant(#fff; @button-green; @button-border-green);
+    }
+    .action-cancel {
+      #gradient > .vertical(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.1), 1%, 100%);
+      .button-variant(@form-color; @alt-gray; @border-color);
+    }
+  }
+
+  form {
+    color: @form-color;
+  }
+}
+
 .ev-field-wrap {
   display: flex;
   flex-flow: column nowrap;
   height: 100%;
+
+  .common();
 
   .ev-video-picker {
     .picker-base();
@@ -106,37 +131,6 @@
         }
       }
     }
-  }
-
-  .form-select,
-  .form-text {
-    .input-size(inherit; 0.2em; 0.2em; inherit; inherit; 2px);
-    border: 1px solid @border-color;
-    padding: 0.3em;
-  }
-  .form-select {
-    background-color: #fff;
-  }
-  .form-actions {
-    .form-submit {
-      .button-size(0.3em; 0.3em; inherit; inherit; 2px);
-      border: 1px solid transparent;
-      span {
-        margin-left: 0.4em;
-      }
-    }
-    .action-submit {
-      #gradient > .vertical(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.15), 1%, 100%);
-      .button-variant(#fff; @button-green; @button-border-green);
-    }
-    .action-cancel {
-      #gradient > .vertical(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.1), 1%, 100%);
-      .button-variant(@form-color; @alt-gray; @border-color);
-    }
-  }
-
-  form {
-    color: @form-color;
   }
 
   .ev-hider {
@@ -225,7 +219,6 @@
 
   .ev-actions {
     display: inline-block;
-    padding: 0.3em;
     a {
       display: inline-block;
       margin: 0.3em;
@@ -256,7 +249,6 @@
       }
       margin-right: 0.4em;
       position: relative;
-      top: 1px;
     }
     .action-upload {
       .button-variant(#fff; @button-green; @button-border-green);
@@ -276,88 +268,19 @@
     background-color: #fbfbfb;
     position: relative;
     padding: 10px 5px 0 5px;
-    flex: 0 0 40px;
+    flex: 1 0 auto;
     display: flex;
     flex-flow: row wrap;
-    .ev-search,
-    .ev-type-select,
-    .ev-unit-selects {
-      display: inline-block;
-      input[type="submit"] {
-        display: none;
-      }
+    align-items: center;
+    .ev-filter-item {
+      flex: initial;
     }
-    .loader();
-  }
-
-  .ev-auth {
-    .logo {
-      background-image: url(@logo-image);
-      background-repeat: no-repeat;
-      background-size: 65px auto;
-      display: inline-block;
-      height: 65px;
-      margin-right: 2em;
-      margin-top: 1em;
-      vertical-align: top;
-      width: 65px;
+    .loader {
+      height: 16px;
+      width: 16px;
     }
-    form {
-      display: inline-block;
-      padding-top: 1em;
-      width: 80%;
-      fieldset {
-        border: none;
-        padding: 0;
-      }
-      .fieldWrap {
-        margin-bottom: 0.6em;
-      }
-      .form-actions {
-        input {
-          margin: 0;
-        }
-      }
-      label {
-        color: @label-color;
-        display: inline-block;
-        margin-right: 1em;
-        width: 30%;
-      }
-      .loader();
-    }
-  }
-
-  .ev-settings {
-    fieldset {
-      border: none;
-      padding: 0;
-    }
-    .fieldWrap {
-      margin-bottom: 0.8em;
-      label {
-        width: auto;
-      }
-      .size {
-        margin-left: 1em;
-      }
-      input[type=checkbox][disabled] {
-        cursor: not-allowed;
-      }
-    }
-    .inline-option {
-      display: inline-block;
-      width: 200px;
-    }
-    label {
-      color: @label-color;
-      display: inline-block;
-      width: 40%;
-    }
-    .form-actions {
-      clear: both;
-      float: left;
-      margin-top: 0.8em;
+    .loading {
+      background: url(@loading-image) no-repeat scroll center center transparent;
     }
   }
 
@@ -520,75 +443,160 @@
       width: 100%;
     }
   }
+}
 
-  .ev-dialog {
-    border-radius: 4px;
-    font-size: 1em;
-    .ui-dialog-titlebar {
-      // TODO - this is compass
-      //@include background(linear-gradient(@ev-yellow, #ffffff));
-      background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #f9d700), color-stop(100%, #ffffff));
-      background: -moz-linear-gradient(#f9d700, #ffffff);
-      background: -webkit-linear-gradient(#f9d700, #ffffff);
-      background: linear-gradient(#f9d700, #ffffff);
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px;
-      border-width: 0;
+.ev-dialog {
+  border-radius: 4px;
+  font-size: 1em;
+
+  .common();
+
+  .ev-auth {
+    .logo {
+      background-image: url(@logo-image);
+      background-repeat: no-repeat;
+      background-size: 65px auto;
+      display: inline-block;
+      height: 65px;
+      margin-right: 2em;
+      margin-top: 1em;
+      vertical-align: top;
+      width: 65px;
     }
-    .upload-form {
+    form {
+      display: inline-block;
+      padding-top: 1em;
+      width: 80%;
       fieldset {
         border: none;
         padding: 0;
       }
-      .form-text,
-      .form-select,
-      .form-submit {
-        padding: 0.2em;
-      }
-      .form-select {
-        width: 100%;
-        margin-bottom: 1em;
-      }
-      .form-text {
-        width: 72%;
-      }
       .fieldWrap {
-        margin-bottom: 1em;
+        margin-bottom: 0.6em;
+      }
+      .form-actions {
+        input {
+          margin: 0;
+        }
       }
       label {
         color: @label-color;
         display: inline-block;
-        width: 25%;
+        margin-right: 1em;
+        width: 30%;
       }
-      .plupload_header {
-        display: none;
+      .loader {
+        display: inline-block;
       }
-      .plupload_cancel {
-        margin-right: 3em;
-        display: block;
-        float: right;
-      }
-      .plupload_container {
-        padding: 0;
-      }
-      .plupload_filelist {
-        overflow-y: auto;
-        height: auto;
-      }
-      .plupload_droptext {
-        line-height: normal;
-      }
-      .info {
-        margin-top: 1em;
-        color: @label-color;
-        font-size: 0.9em;
-      }
-      .policy-message {
-        color: @text-orange;
+      .loading {
+        background: url(@loading-image) no-repeat scroll center center transparent;
+        display: inline-block;
+        height: 16px;
+        vertical-align: middle;
+        width: 16px;
       }
     }
-    .ev-preview {
-      text-align: center;
+  }
+
+  .ev-settings {
+    fieldset {
+      border: none;
+      padding: 0;
     }
+    .fieldWrap {
+      margin-bottom: 0.8em;
+      label {
+        width: auto;
+      }
+      .size {
+        margin-left: 1em;
+      }
+      input[type=checkbox][disabled] {
+        cursor: not-allowed;
+      }
+    }
+    .inline-option {
+      display: inline-block;
+      width: 200px;
+    }
+    label {
+      color: @label-color;
+      display: inline-block;
+      width: 40%;
+    }
+    .form-actions {
+      clear: both;
+      float: left;
+      margin-top: 0.8em;
+    }
+  }
+
+  .ui-dialog-titlebar {
+    // TODO - this is compass
+    //@include background(linear-gradient(@ev-yellow, #ffffff));
+    background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #f9d700), color-stop(100%, #ffffff));
+    background: -moz-linear-gradient(#f9d700, #ffffff);
+    background: -webkit-linear-gradient(#f9d700, #ffffff);
+    background: linear-gradient(#f9d700, #ffffff);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-width: 0;
+  }
+
+  .upload-form {
+    fieldset {
+      border: none;
+      padding: 0;
+    }
+    .form-text,
+    .form-select,
+    .form-submit {
+      padding: 0.2em;
+    }
+    .form-select {
+      width: 100%;
+      margin-bottom: 1em;
+    }
+    .form-text {
+      width: 72%;
+    }
+    .fieldWrap {
+      margin-bottom: 1em;
+    }
+    label {
+      color: @label-color;
+      display: inline-block;
+      width: 25%;
+    }
+    .plupload_header {
+      display: none;
+    }
+    .plupload_cancel {
+      margin-right: 3em;
+      display: block;
+      float: right;
+    }
+    .plupload_container {
+      padding: 0;
+    }
+    .plupload_filelist {
+      overflow-y: auto;
+      height: auto;
+    }
+    .plupload_droptext {
+      line-height: normal;
+    }
+    .info {
+      margin-top: 1em;
+      color: @label-color;
+      font-size: 0.9em;
+    }
+    .policy-message {
+      color: @text-orange;
+    }
+  }
+
+  .ev-preview {
+    text-align: center;
   }
 }

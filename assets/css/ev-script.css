@@ -3,79 +3,6 @@
   flex-flow: column nowrap;
   height: 100%;
 }
-.ev-field-wrap .ev-video-picker {
-  position: relative;
-  padding: 0;
-  flex: 5;
-  display: flex;
-  flex-flow: column nowrap;
-  /*margin-top: 1em;*/
-}
-.ev-field-wrap .ev-video-picker a {
-  color: #0074bd;
-  text-decoration: none;
-}
-.ev-field-wrap .ev-video-picker .ev-filter-block label,
-.ev-field-wrap .ev-video-picker .ev-filter-block input,
-.ev-field-wrap .ev-video-picker .ev-filter-block select {
-  display: inline-block;
-  margin: 0.2em 0.4em 0.2em 0;
-}
-.ev-field-wrap .ev-video-picker .ev-filter-block label {
-  color: #606060;
-}
-@media only screen and (max-width: 1300px) {
-  .ev-field-wrap .ev-video-picker .ev-filter-block label {
-    display: none;
-  }
-}
-.ev-field-wrap .ev-video-picker .ev-results .results {
-  border: 1px solid #bebfb9;
-}
-.ev-field-wrap .ev-video-picker .ev-results .content-actions {
-  min-width: 200px;
-}
-@media only screen and (max-width: 600px) {
-  .ev-field-wrap .ev-video-picker .ev-results .content-actions {
-    min-width: 100px;
-  }
-}
-.ev-field-wrap .ev-playlist-picker {
-  position: relative;
-  padding: 0;
-  flex: 5;
-  display: flex;
-  flex-flow: column nowrap;
-  /*margin-top: 1em;*/
-}
-.ev-field-wrap .ev-playlist-picker a {
-  color: #0074bd;
-  text-decoration: none;
-}
-.ev-field-wrap .ev-playlist-picker .ev-filter-block label,
-.ev-field-wrap .ev-playlist-picker .ev-filter-block input,
-.ev-field-wrap .ev-playlist-picker .ev-filter-block select {
-  display: inline-block;
-  margin: 0.2em 0.4em 0.2em 0;
-}
-.ev-field-wrap .ev-playlist-picker .ev-filter-block label {
-  color: #606060;
-}
-@media only screen and (max-width: 1300px) {
-  .ev-field-wrap .ev-playlist-picker .ev-filter-block label {
-    display: none;
-  }
-}
-.ev-field-wrap .ev-playlist-picker .ev-results .results {
-  border: 1px solid #bebfb9;
-}
-.ev-field-wrap .ev-playlist-picker .ev-results .content-actions {
-  min-width: 100px;
-}
-.ev-field-wrap .ev-playlist-picker .ev-results .content-meta .item-security {
-  margin-right: 0.4em;
-  color: goldenrod;
-}
 .ev-field-wrap .form-select,
 .ev-field-wrap .form-text {
   height: inherit;
@@ -85,6 +12,7 @@
   border-radius: 2px;
   border: 1px solid #999999;
   padding: 0.3em;
+  line-height: 17px;
 }
 select.ev-field-wrap .form-select,
 select.ev-field-wrap .form-text {
@@ -213,6 +141,79 @@ fieldset[disabled] .ev-field-wrap .form-actions .action-cancel.active {
 .ev-field-wrap form {
   color: #555555;
 }
+.ev-field-wrap .ev-video-picker {
+  position: relative;
+  padding: 0;
+  flex: 5;
+  display: flex;
+  flex-flow: column nowrap;
+  /*margin-top: 1em;*/
+}
+.ev-field-wrap .ev-video-picker a {
+  color: #0074bd;
+  text-decoration: none;
+}
+.ev-field-wrap .ev-video-picker .ev-filter-block label,
+.ev-field-wrap .ev-video-picker .ev-filter-block input,
+.ev-field-wrap .ev-video-picker .ev-filter-block select {
+  display: inline-block;
+  margin: 0.2em 0.4em 0.2em 0;
+}
+.ev-field-wrap .ev-video-picker .ev-filter-block label {
+  color: #606060;
+}
+@media only screen and (max-width: 1300px) {
+  .ev-field-wrap .ev-video-picker .ev-filter-block label {
+    display: none;
+  }
+}
+.ev-field-wrap .ev-video-picker .ev-results .results {
+  border: 1px solid #bebfb9;
+}
+.ev-field-wrap .ev-video-picker .ev-results .content-actions {
+  min-width: 200px;
+}
+@media only screen and (max-width: 600px) {
+  .ev-field-wrap .ev-video-picker .ev-results .content-actions {
+    min-width: 100px;
+  }
+}
+.ev-field-wrap .ev-playlist-picker {
+  position: relative;
+  padding: 0;
+  flex: 5;
+  display: flex;
+  flex-flow: column nowrap;
+  /*margin-top: 1em;*/
+}
+.ev-field-wrap .ev-playlist-picker a {
+  color: #0074bd;
+  text-decoration: none;
+}
+.ev-field-wrap .ev-playlist-picker .ev-filter-block label,
+.ev-field-wrap .ev-playlist-picker .ev-filter-block input,
+.ev-field-wrap .ev-playlist-picker .ev-filter-block select {
+  display: inline-block;
+  margin: 0.2em 0.4em 0.2em 0;
+}
+.ev-field-wrap .ev-playlist-picker .ev-filter-block label {
+  color: #606060;
+}
+@media only screen and (max-width: 1300px) {
+  .ev-field-wrap .ev-playlist-picker .ev-filter-block label {
+    display: none;
+  }
+}
+.ev-field-wrap .ev-playlist-picker .ev-results .results {
+  border: 1px solid #bebfb9;
+}
+.ev-field-wrap .ev-playlist-picker .ev-results .content-actions {
+  min-width: 100px;
+}
+.ev-field-wrap .ev-playlist-picker .ev-results .content-meta .item-security {
+  margin-right: 0.4em;
+  color: goldenrod;
+}
 .ev-field-wrap .ev-hider {
   position: relative;
   border-bottom: 1px solid #999999;
@@ -293,7 +294,6 @@ fieldset[disabled] .ev-field-wrap .form-actions .action-cancel.active {
 }
 .ev-field-wrap .ev-actions {
   display: inline-block;
-  padding: 0.3em;
 }
 .ev-field-wrap .ev-actions a {
   display: inline-block;
@@ -329,7 +329,6 @@ fieldset[disabled] .ev-field-wrap .form-actions .action-cancel.active {
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#4dffffff', endColorstr='#26ffffff', GradientType=0);
   margin-right: 0.4em;
   position: relative;
-  top: 1px;
 }
 .ev-field-wrap .ev-actions .action-upload span,
 .ev-field-wrap .ev-actions .action-record span {
@@ -435,101 +434,20 @@ fieldset[disabled] .ev-field-wrap .ev-actions .action-record.active {
   background-color: #fbfbfb;
   position: relative;
   padding: 10px 5px 0 5px;
-  flex: 0 0 40px;
+  flex: 1 0 auto;
   display: flex;
   flex-flow: row wrap;
+  align-items: center;
 }
-.ev-field-wrap .ev-filter-block .ev-search,
-.ev-field-wrap .ev-filter-block .ev-type-select,
-.ev-field-wrap .ev-filter-block .ev-unit-selects {
-  display: inline-block;
-}
-.ev-field-wrap .ev-filter-block .ev-search input[type="submit"],
-.ev-field-wrap .ev-filter-block .ev-type-select input[type="submit"],
-.ev-field-wrap .ev-filter-block .ev-unit-selects input[type="submit"] {
-  display: none;
+.ev-field-wrap .ev-filter-block .ev-filter-item {
+  flex: initial;
 }
 .ev-field-wrap .ev-filter-block .loader {
-  display: inline-block;
+  height: 16px;
+  width: 16px;
 }
 .ev-field-wrap .ev-filter-block .loading {
   background: url('images/loading.gif') no-repeat scroll center center transparent;
-  display: inline-block;
-  height: 16px;
-  vertical-align: middle;
-  width: 16px;
-}
-.ev-field-wrap .ev-auth .logo {
-  background-image: url('images/logo.png');
-  background-repeat: no-repeat;
-  background-size: 65px auto;
-  display: inline-block;
-  height: 65px;
-  margin-right: 2em;
-  margin-top: 1em;
-  vertical-align: top;
-  width: 65px;
-}
-.ev-field-wrap .ev-auth form {
-  display: inline-block;
-  padding-top: 1em;
-  width: 80%;
-}
-.ev-field-wrap .ev-auth form fieldset {
-  border: none;
-  padding: 0;
-}
-.ev-field-wrap .ev-auth form .fieldWrap {
-  margin-bottom: 0.6em;
-}
-.ev-field-wrap .ev-auth form .form-actions input {
-  margin: 0;
-}
-.ev-field-wrap .ev-auth form label {
-  color: #606060;
-  display: inline-block;
-  margin-right: 1em;
-  width: 30%;
-}
-.ev-field-wrap .ev-auth form .loader {
-  display: inline-block;
-}
-.ev-field-wrap .ev-auth form .loading {
-  background: url('images/loading.gif') no-repeat scroll center center transparent;
-  display: inline-block;
-  height: 16px;
-  vertical-align: middle;
-  width: 16px;
-}
-.ev-field-wrap .ev-settings fieldset {
-  border: none;
-  padding: 0;
-}
-.ev-field-wrap .ev-settings .fieldWrap {
-  margin-bottom: 0.8em;
-}
-.ev-field-wrap .ev-settings .fieldWrap label {
-  width: auto;
-}
-.ev-field-wrap .ev-settings .fieldWrap .size {
-  margin-left: 1em;
-}
-.ev-field-wrap .ev-settings .fieldWrap input[type=checkbox][disabled] {
-  cursor: not-allowed;
-}
-.ev-field-wrap .ev-settings .inline-option {
-  display: inline-block;
-  width: 200px;
-}
-.ev-field-wrap .ev-settings label {
-  color: #606060;
-  display: inline-block;
-  width: 40%;
-}
-.ev-field-wrap .ev-settings .form-actions {
-  clear: both;
-  float: left;
-  margin-top: 0.8em;
 }
 .ev-field-wrap .ev-results {
   position: relative;
@@ -686,11 +604,221 @@ fieldset[disabled] .ev-field-wrap .ev-actions .action-record.active {
   height: 60px;
   width: 100%;
 }
-.ev-field-wrap .ev-dialog {
+.ev-dialog {
   border-radius: 4px;
   font-size: 1em;
 }
-.ev-field-wrap .ev-dialog .ui-dialog-titlebar {
+.ev-dialog .form-select,
+.ev-dialog .form-text {
+  height: inherit;
+  padding: 0.2em 0.2em;
+  font-size: inherit;
+  line-height: inherit;
+  border-radius: 2px;
+  border: 1px solid #999999;
+  padding: 0.3em;
+  line-height: 17px;
+}
+select.ev-dialog .form-select,
+select.ev-dialog .form-text {
+  height: inherit;
+  line-height: inherit;
+}
+textarea.ev-dialog .form-select,
+textarea.ev-dialog .form-text,
+select[multiple].ev-dialog .form-select,
+select[multiple].ev-dialog .form-text {
+  height: auto;
+}
+.ev-dialog .form-select {
+  background-color: #fff;
+}
+.ev-dialog .form-actions .form-submit {
+  padding: 0.3em 0.3em;
+  font-size: inherit;
+  line-height: inherit;
+  border-radius: 2px;
+  border: 1px solid transparent;
+}
+.ev-dialog .form-actions .form-submit span {
+  margin-left: 0.4em;
+}
+.ev-dialog .form-actions .action-submit {
+  background-image: -webkit-linear-gradient(top, rgba(255, 255, 255, 0.3) 1%, rgba(255, 255, 255, 0.15) 100%);
+  background-image: -o-linear-gradient(top, rgba(255, 255, 255, 0.3) 1%, rgba(255, 255, 255, 0.15) 100%);
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 1%, rgba(255, 255, 255, 0.15) 100%);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#4dffffff', endColorstr='#26ffffff', GradientType=0);
+  color: #fff;
+  background-color: #44ab00;
+  border-color: #3f9d00;
+}
+.ev-dialog .form-actions .action-submit:hover,
+.ev-dialog .form-actions .action-submit:focus,
+.ev-dialog .form-actions .action-submit.focus,
+.ev-dialog .form-actions .action-submit:active,
+.ev-dialog .form-actions .action-submit.active,
+.open > .dropdown-toggle.ev-dialog .form-actions .action-submit {
+  color: #fff;
+  background-color: #307800;
+  border-color: #266000;
+}
+.ev-dialog .form-actions .action-submit:active,
+.ev-dialog .form-actions .action-submit.active,
+.open > .dropdown-toggle.ev-dialog .form-actions .action-submit {
+  background-image: none;
+}
+.ev-dialog .form-actions .action-submit.disabled,
+.ev-dialog .form-actions .action-submit[disabled],
+fieldset[disabled] .ev-dialog .form-actions .action-submit,
+.ev-dialog .form-actions .action-submit.disabled:hover,
+.ev-dialog .form-actions .action-submit[disabled]:hover,
+fieldset[disabled] .ev-dialog .form-actions .action-submit:hover,
+.ev-dialog .form-actions .action-submit.disabled:focus,
+.ev-dialog .form-actions .action-submit[disabled]:focus,
+fieldset[disabled] .ev-dialog .form-actions .action-submit:focus,
+.ev-dialog .form-actions .action-submit.disabled.focus,
+.ev-dialog .form-actions .action-submit[disabled].focus,
+fieldset[disabled] .ev-dialog .form-actions .action-submit.focus,
+.ev-dialog .form-actions .action-submit.disabled:active,
+.ev-dialog .form-actions .action-submit[disabled]:active,
+fieldset[disabled] .ev-dialog .form-actions .action-submit:active,
+.ev-dialog .form-actions .action-submit.disabled.active,
+.ev-dialog .form-actions .action-submit[disabled].active,
+fieldset[disabled] .ev-dialog .form-actions .action-submit.active {
+  background-color: #44ab00;
+  border-color: #3f9d00;
+}
+.ev-dialog .form-actions .action-submit .badge {
+  color: #44ab00;
+  background-color: #fff;
+}
+.ev-dialog .form-actions .action-cancel {
+  background-image: -webkit-linear-gradient(top, rgba(255, 255, 255, 0.9) 1%, rgba(255, 255, 255, 0.1) 100%);
+  background-image: -o-linear-gradient(top, rgba(255, 255, 255, 0.9) 1%, rgba(255, 255, 255, 0.1) 100%);
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 1%, rgba(255, 255, 255, 0.1) 100%);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#e6ffffff', endColorstr='#1affffff', GradientType=0);
+  color: #555555;
+  background-color: #f3f4ee;
+  border-color: #999999;
+}
+.ev-dialog .form-actions .action-cancel:hover,
+.ev-dialog .form-actions .action-cancel:focus,
+.ev-dialog .form-actions .action-cancel.focus,
+.ev-dialog .form-actions .action-cancel:active,
+.ev-dialog .form-actions .action-cancel.active,
+.open > .dropdown-toggle.ev-dialog .form-actions .action-cancel {
+  color: #555555;
+  background-color: #dde0cf;
+  border-color: #7a7a7a;
+}
+.ev-dialog .form-actions .action-cancel:active,
+.ev-dialog .form-actions .action-cancel.active,
+.open > .dropdown-toggle.ev-dialog .form-actions .action-cancel {
+  background-image: none;
+}
+.ev-dialog .form-actions .action-cancel.disabled,
+.ev-dialog .form-actions .action-cancel[disabled],
+fieldset[disabled] .ev-dialog .form-actions .action-cancel,
+.ev-dialog .form-actions .action-cancel.disabled:hover,
+.ev-dialog .form-actions .action-cancel[disabled]:hover,
+fieldset[disabled] .ev-dialog .form-actions .action-cancel:hover,
+.ev-dialog .form-actions .action-cancel.disabled:focus,
+.ev-dialog .form-actions .action-cancel[disabled]:focus,
+fieldset[disabled] .ev-dialog .form-actions .action-cancel:focus,
+.ev-dialog .form-actions .action-cancel.disabled.focus,
+.ev-dialog .form-actions .action-cancel[disabled].focus,
+fieldset[disabled] .ev-dialog .form-actions .action-cancel.focus,
+.ev-dialog .form-actions .action-cancel.disabled:active,
+.ev-dialog .form-actions .action-cancel[disabled]:active,
+fieldset[disabled] .ev-dialog .form-actions .action-cancel:active,
+.ev-dialog .form-actions .action-cancel.disabled.active,
+.ev-dialog .form-actions .action-cancel[disabled].active,
+fieldset[disabled] .ev-dialog .form-actions .action-cancel.active {
+  background-color: #f3f4ee;
+  border-color: #999999;
+}
+.ev-dialog .form-actions .action-cancel .badge {
+  color: #f3f4ee;
+  background-color: #555555;
+}
+.ev-dialog form {
+  color: #555555;
+}
+.ev-dialog .ev-auth .logo {
+  background-image: url('images/logo.png');
+  background-repeat: no-repeat;
+  background-size: 65px auto;
+  display: inline-block;
+  height: 65px;
+  margin-right: 2em;
+  margin-top: 1em;
+  vertical-align: top;
+  width: 65px;
+}
+.ev-dialog .ev-auth form {
+  display: inline-block;
+  padding-top: 1em;
+  width: 80%;
+}
+.ev-dialog .ev-auth form fieldset {
+  border: none;
+  padding: 0;
+}
+.ev-dialog .ev-auth form .fieldWrap {
+  margin-bottom: 0.6em;
+}
+.ev-dialog .ev-auth form .form-actions input {
+  margin: 0;
+}
+.ev-dialog .ev-auth form label {
+  color: #606060;
+  display: inline-block;
+  margin-right: 1em;
+  width: 30%;
+}
+.ev-dialog .ev-auth form .loader {
+  display: inline-block;
+}
+.ev-dialog .ev-auth form .loading {
+  background: url('images/loading.gif') no-repeat scroll center center transparent;
+  display: inline-block;
+  height: 16px;
+  vertical-align: middle;
+  width: 16px;
+}
+.ev-dialog .ev-settings fieldset {
+  border: none;
+  padding: 0;
+}
+.ev-dialog .ev-settings .fieldWrap {
+  margin-bottom: 0.8em;
+}
+.ev-dialog .ev-settings .fieldWrap label {
+  width: auto;
+}
+.ev-dialog .ev-settings .fieldWrap .size {
+  margin-left: 1em;
+}
+.ev-dialog .ev-settings .fieldWrap input[type=checkbox][disabled] {
+  cursor: not-allowed;
+}
+.ev-dialog .ev-settings .inline-option {
+  display: inline-block;
+  width: 200px;
+}
+.ev-dialog .ev-settings label {
+  color: #606060;
+  display: inline-block;
+  width: 40%;
+}
+.ev-dialog .ev-settings .form-actions {
+  clear: both;
+  float: left;
+  margin-top: 0.8em;
+}
+.ev-dialog .ui-dialog-titlebar {
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #f9d700), color-stop(100%, #ffffff));
   background: -moz-linear-gradient(#f9d700, #ffffff);
   background: -webkit-linear-gradient(#f9d700, #ffffff);
@@ -699,56 +827,56 @@ fieldset[disabled] .ev-field-wrap .ev-actions .action-record.active {
   border-top-right-radius: 4px;
   border-width: 0;
 }
-.ev-field-wrap .ev-dialog .upload-form fieldset {
+.ev-dialog .upload-form fieldset {
   border: none;
   padding: 0;
 }
-.ev-field-wrap .ev-dialog .upload-form .form-text,
-.ev-field-wrap .ev-dialog .upload-form .form-select,
-.ev-field-wrap .ev-dialog .upload-form .form-submit {
+.ev-dialog .upload-form .form-text,
+.ev-dialog .upload-form .form-select,
+.ev-dialog .upload-form .form-submit {
   padding: 0.2em;
 }
-.ev-field-wrap .ev-dialog .upload-form .form-select {
+.ev-dialog .upload-form .form-select {
   width: 100%;
   margin-bottom: 1em;
 }
-.ev-field-wrap .ev-dialog .upload-form .form-text {
+.ev-dialog .upload-form .form-text {
   width: 72%;
 }
-.ev-field-wrap .ev-dialog .upload-form .fieldWrap {
+.ev-dialog .upload-form .fieldWrap {
   margin-bottom: 1em;
 }
-.ev-field-wrap .ev-dialog .upload-form label {
+.ev-dialog .upload-form label {
   color: #606060;
   display: inline-block;
   width: 25%;
 }
-.ev-field-wrap .ev-dialog .upload-form .plupload_header {
+.ev-dialog .upload-form .plupload_header {
   display: none;
 }
-.ev-field-wrap .ev-dialog .upload-form .plupload_cancel {
+.ev-dialog .upload-form .plupload_cancel {
   margin-right: 3em;
   display: block;
   float: right;
 }
-.ev-field-wrap .ev-dialog .upload-form .plupload_container {
+.ev-dialog .upload-form .plupload_container {
   padding: 0;
 }
-.ev-field-wrap .ev-dialog .upload-form .plupload_filelist {
+.ev-dialog .upload-form .plupload_filelist {
   overflow-y: auto;
   height: auto;
 }
-.ev-field-wrap .ev-dialog .upload-form .plupload_droptext {
+.ev-dialog .upload-form .plupload_droptext {
   line-height: normal;
 }
-.ev-field-wrap .ev-dialog .upload-form .info {
+.ev-dialog .upload-form .info {
   margin-top: 1em;
   color: #606060;
   font-size: 0.9em;
 }
-.ev-field-wrap .ev-dialog .upload-form .policy-message {
+.ev-dialog .upload-form .policy-message {
   color: #e55e20;
 }
-.ev-field-wrap .ev-dialog .ev-preview {
+.ev-dialog .ev-preview {
   text-align: center;
 }

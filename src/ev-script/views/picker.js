@@ -25,16 +25,6 @@ define(function(require) {
                 field: this.field,
                 appId: this.appId
             });
-            var $loader = this.$('div.loader');
-            $(window.document).on('ajaxSend', _.bind(function(e, xhr, settings) {
-                if (this === settings.picker) {
-                    $loader.addClass('loading');
-                }
-            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
-                if (this === settings.picker) {
-                    $loader.removeClass('loading');
-                }
-            }, this));
             this.appEvents.on('hidePickers', function(fieldId) {
                 if (!fieldId || (this.field.id !== fieldId)) {
                     this.hidePicker();

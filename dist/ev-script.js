@@ -1,5 +1,5 @@
 /**
- * ev-script 1.4.0 2018-02-09
+ * ev-script 1.4.0 2018-02-12
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2018 Symphony Video, Inc.
@@ -23547,7 +23547,7 @@ define('ev-script/views/hider',['require','underscore','ev-script/views/base','t
 });
 
 
-define('text!ev-script/templates/picker.html',[],function () { return '<div id="<%= id %>-hider" class="ev-hider"></div>\n<div id="<%= id %>-filter-block" class="ev-filter-block">\n    <div class="loader"></div>\n</div>\n<div id="<%= id %>-results" class="ev-results"></div>\n<div id="anthemContainer"></div>\n';});
+define('text!ev-script/templates/picker.html',[],function () { return '<div id="<%= id %>-hider" class="ev-hider"></div>\n<div id="<%= id %>-filter" class="ev-filter-block"></div>\n<div id="<%= id %>-results" class="ev-results"></div>\n<div id="anthemContainer"></div>\n';});
 
 define('ev-script/views/picker',['require','jquery','underscore','ev-script/views/base','ev-script/views/hider','text!ev-script/templates/picker.html'],function(require) {
 
@@ -23576,16 +23576,6 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
                 field: this.field,
                 appId: this.appId
             });
-            var $loader = this.$('div.loader');
-            $(window.document).on('ajaxSend', _.bind(function(e, xhr, settings) {
-                if (this === settings.picker) {
-                    $loader.addClass('loading');
-                }
-            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
-                if (this === settings.picker) {
-                    $loader.removeClass('loading');
-                }
-            }, this));
             this.appEvents.on('hidePickers', function(fieldId) {
                 if (!fieldId || (this.field.id !== fieldId)) {
                     this.hidePicker();
@@ -23627,110 +23617,12 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
 });
 
 
-define('text!ev-script/templates/search.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Search:\') %></label>\n<input id="<%= id %>" type="search" class="form-text search" value="<%- searchVal %>" title="<%= i18n.formatMessage(\'Search Media\') %>" />\n<input type="submit" value="<%= i18n.formatMessage(\'Go\') %>" class="form-submit" />\n';});
-
-define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/search.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'searchHandler', 'doSearch', 'autoSearch');
-            this.picker = options.picker;
-            this.callback = options.callback || function() {};
-        },
-        events: {
-            'keydown .search': 'searchHandler',
-            'keyup .search': 'autoSearch'
-        },
-        render: function() {
-            this.$el.html(this.template({
-                i18n: this.i18n,
-                id: this.id + '-input',
-                searchVal: this.picker.model.get('search')
-            }));
-        },
-        doSearch: function() {
-            this.picker.model.set({
-                search: this.$('.search').val()
-            });
-            this.callback();
-        },
-        searchHandler: function(e) {
-            // Looking for enter key in which case we immediately search
-            var code = e.keyCode ? e.keyCode : e.which;
-            if (code === 13) {
-                if (this.submitTimeout) {
-                    clearTimeout(this.submitTimeout);
-                }
-                this.doSearch();
-                e.preventDefault();
-            }
-        },
-        autoSearch: function(e) {
-            var value = e.target.value;
-            if (value !== this.lastValue) {
-                this.lastValue = value;
-                if (this.submitTimeout) {
-                    clearTimeout(this.submitTimeout);
-                }
-                this.submitTimeout = setTimeout(_.bind(function() {
-                    this.doSearch();
-                }, this), 1000);
-            }
-        }
-    });
-
-});
-
-
-define('text!ev-script/templates/library-type-select.html',[],function () { return '<div>\n  <label for="<%= id %>"><%= i18n.formatMessage(\'Type:\') %></label>\n  <select id="<%= id %>" class="form-select source" title="<%= i18n.formatMessage(\'Select Library Type\') %>">\n    <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Media Library\') %></option>\n    <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Shared Library\') %></option>\n  </select>\n  <input type="submit" value="<%= i18n.formatMessage(\'Go\') %>" class="form-submit" />\n</div>\n';});
-
-define('ev-script/views/library-type-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/library-type-select.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'changeHandler');
-            this.picker = options.picker;
-            this.callback = options.callback || function() {};
-        },
-        events: {
-            'change .source': 'changeHandler'
-        },
-        render: function() {
-            this.$el.html(this.template({
-                i18n: this.i18n,
-                id: this.id + '-select',
-                sourceId: this.picker.model.get('sourceId')
-            }));
-        },
-        changeHandler: function(e) {
-            this.picker.model.set({
-                sourceId: this.$('.source').val()
-            });
-            this.callback();
-            e.preventDefault();
-        }
-    });
-
-});
+define('text!ev-script/templates/organization-select.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Organization:\') %></label>\n<select id="<%= id %>" class="form-select organizations" title="<%= i18n.formatMessage(\'Select Organization\') %>"></select>\n';});
 
 
 define('text!ev-script/templates/options.html',[],function () { return '<% collection.each(function(item) { %>\n    <option value="<%= item.id %>" <% if (selectedId === item.id) { print(\'selected="selected"\'); } %>><%- item.get(\'Name\') %></option>\n<% }); %>\n';});
 
-define('ev-script/views/organization-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
+define('ev-script/views/organization-select',['require','underscore','ev-script/views/base','text!ev-script/templates/organization-select.html','text!ev-script/templates/options.html'],function(require) {
 
     'use strict';
 
@@ -23738,21 +23630,27 @@ define('ev-script/views/organization-select',['require','underscore','ev-script/
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/options.html')),
+        template: _.template(require('text!ev-script/templates/organization-select.html')),
+        optionsTemplate: _.template(require('text!ev-script/templates/options.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render');
             this.picker = options.picker;
-            this.$el.html('<option value="-1">Loading...</option>');
+            this.$el.html(this.template({
+                id: this.id,
+                i18n: this.i18n
+            }));
+            this.$select = this.$('select');
+            this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
             this.collection.on('reset', this.render);
         },
         render: function() {
             var selectedId = this.picker.model.get('organizationId') || this.auth.getUser().get('OrganizationID');
-            this.$el.html(this.template({
+            this.$select.html(this.optionsTemplate({
                 selectedId: selectedId,
                 collection: this.collection
             }));
-            this.$el.trigger('change');
+            this.$select.trigger('change');
         }
     });
 
@@ -23868,7 +23766,10 @@ define('ev-script/collections/organizations',['require','ev-script/collections/b
 
 });
 
-define('ev-script/views/library-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
+
+define('text!ev-script/templates/library-select.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Library:\') %></label>\n<select id="<%= id %>" class="form-select libraries" title="<%= i18n.formatMessage(\'Select Library\') %>"></select>\n';});
+
+define('ev-script/views/library-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-select.html','text!ev-script/templates/options.html'],function(require) {
 
     'use strict';
 
@@ -23876,21 +23777,27 @@ define('ev-script/views/library-select',['require','underscore','ev-script/views
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/options.html')),
+        template: _.template(require('text!ev-script/templates/library-select.html')),
+        optionsTemplate: _.template(require('text!ev-script/templates/options.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render');
             this.picker = options.picker;
-            this.$el.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
+            this.$el.html(this.template({
+                id: this.id,
+                i18n: this.i18n
+            }));
+            this.$select = this.$('select');
+            this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
             this.collection.on('reset', this.render);
         },
         render: function() {
             var selectedId = this.picker.model.get('libraryId') || this.auth.getUser().get('LibraryID');
-            this.$el.html(this.template({
+            this.$select.html(this.optionsTemplate({
                 selectedId: selectedId,
                 collection: this.collection
             }));
-            this.$el.trigger('change');
+            this.$select.trigger('change');
         }
     });
 
@@ -23942,9 +23849,112 @@ define('ev-script/collections/libraries',['require','ev-script/collections/base'
 });
 
 
-define('text!ev-script/templates/unit-selects.html',[],function () { return '<div id="<%= formId %>" class="unit-selects">\n    <label for="<%= orgSelectId %>"><%= i18n.formatMessage(\'Organization:\') %></label><select id="<%= orgSelectId %>" class="form-select organizations" title="<%= i18n.formatMessage(\'Select Organization\') %>"></select><label for="<%= libSelectId %>"><%= i18n.formatMessage(\'Library:\') %></label><select id="<%= libSelectId %>" class="form-select libraries" title="<%= i18n.formatMessage(\'Select Library\') %>"></select><input type="submit" value="<%= i18n.formatMessage(\'Go\') %>" class="form-submit" />\n</div>\n';});
+define('text!ev-script/templates/library-type-select.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Type:\') %></label>\n<select id="<%= id %>" class="form-select source" title="<%= i18n.formatMessage(\'Select Library Type\') %>">\n  <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Media Library\') %></option>\n  <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Shared Library\') %></option>\n</select>\n';});
 
-define('ev-script/views/unit-selects',['require','jquery','underscore','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','text!ev-script/templates/unit-selects.html'],function(require) {
+define('ev-script/views/library-type-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/library-type-select.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'changeHandler');
+            this.picker = options.picker;
+            this.render();
+        },
+        events: {
+            'change .source': 'changeHandler'
+        },
+        render: function() {
+            this.$el.html(this.template({
+                id: this.id + '-select',
+                i18n: this.i18n,
+                sourceId: this.picker.model.get('sourceId')
+            }));
+        },
+        changeHandler: function(e) {
+            var sourceVal = this.$('.source').val();
+            this.picker.model.set({
+                sourceId: sourceVal
+            });
+            this.appEvents.trigger('typeSelectChange', sourceVal);
+            e.preventDefault();
+        }
+    });
+
+});
+
+
+define('text!ev-script/templates/search.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Search:\') %></label>\n<input id="<%= id %>" type="search" class="form-text search" value="<%- searchVal %>" title="<%= i18n.formatMessage(\'Search Media\') %>" />\n';});
+
+define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/search.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'searchHandler', 'doSearch', 'autoSearch');
+            this.picker = options.picker;
+            this.render();
+        },
+        events: {
+            'keydown .search': 'searchHandler',
+            'keyup .search': 'autoSearch'
+        },
+        render: function() {
+            this.$el.html(this.template({
+                id: this.id + '-input',
+                i18n: this.i18n,
+                searchVal: this.picker.model.get('search')
+            }));
+        },
+        doSearch: function() {
+            var searchVal = this.$('.search').val();
+            this.picker.model.set({
+                search: searchVal
+            });
+            this.appEvents.trigger('search', searchVal);
+        },
+        searchHandler: function(e) {
+            // Looking for enter key in which case we immediately search
+            var code = e.keyCode ? e.keyCode : e.which;
+            if (code === 13) {
+                if (this.submitTimeout) {
+                    clearTimeout(this.submitTimeout);
+                }
+                this.doSearch();
+                e.preventDefault();
+            }
+        },
+        autoSearch: function(e) {
+            var value = e.target.value;
+            if (value !== this.lastValue) {
+                this.lastValue = value;
+                if (this.submitTimeout) {
+                    clearTimeout(this.submitTimeout);
+                }
+                this.submitTimeout = setTimeout(_.bind(function() {
+                    this.doSearch();
+                }, this), 1000);
+            }
+        }
+    });
+
+});
+
+
+define('text!ev-script/templates/filter.html',[],function () { return '<div id="<%= id %>-org-select" class="ev-filter-item ev-org-select"></div>\n<div id="<%= id %>-lib-select" class="ev-filter-item ev-lib-select"></div>\n<div id="<%= id %>-type-select" class="ev-filter-item ev-type-select"></div>\n<div id="<%= id %>-search" class="ev-filter-item ev-search"></div>\n<div class="ev-filter-item ev-actions">\n  <button type="button" class="action-upload" style="display: none;" title="<%= i18n.formatMessage(\'Click to upload new media\') %>">\n    <i class="fa fa-upload fa-fw"></i><span><%= i18n.formatMessage(\'Upload\') %><span>\n  </button>\n  <button type="button" class="action-record" style="display: none;" title="<%= i18n.formatMessage(\'Click to record screen\') %>">\n    <i class="record-inactive fa fa-circle fa-fw"></i>\n    <i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i>\n    <span><%= i18n.formatMessage(\'Record\') %><span>\n  </button>\n</div>\n<div class="ev-filter-item loader"></div>\n';});
+
+define('ev-script/views/filter',['require','jquery','underscore','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','ev-script/views/library-type-select','ev-script/views/search','text!ev-script/templates/filter.html'],function(require) {
 
     'use strict';
 
@@ -23954,37 +23964,73 @@ define('ev-script/views/unit-selects',['require','jquery','underscore','ev-scrip
         OrganizationSelectView = require('ev-script/views/organization-select'),
         Organizations = require('ev-script/collections/organizations'),
         LibrarySelectView = require('ev-script/views/library-select'),
-        Libraries = require('ev-script/collections/libraries');
+        Libraries = require('ev-script/collections/libraries'),
+        TypeSelectView = require('ev-script/views/library-type-select'),
+        SearchView = require('ev-script/views/search');
 
     return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/unit-selects.html')),
+        template: _.template(require('text!ev-script/templates/filter.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization', 'changeLibrary');
+            _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization',
+                'changeLibrary', 'activateRecord', 'deactivateRecord',
+                'showUpload', 'hideUpload', 'showRecord', 'hideRecord',
+                'setFocus');
+
             this.picker = options.picker;
             this.id = options.id;
+
             this.$el.html(this.template({
-                i18n: this.i18n,
-                formId: this.id + '-unit-selects',
-                orgSelectId: this.id + '-org-select',
-                libSelectId: this.id + '-lib-select'
+                id: this.id,
+                i18n: this.i18n
             }));
+
             this.orgSelect = new OrganizationSelectView({
-                el: this.$('.organizations'),
+                id: this.id + '-org-select',
+                el: this.$('.ev-org-select'),
                 picker: this.picker,
                 appId: this.appId,
                 collection: new Organizations({}, {
                     appId: this.appId
                 })
             });
+
             this.libSelect = new LibrarySelectView({
-                el: this.$('.libraries'),
+                id: this.id + '-lib-select',
+                el: this.$('.ev-lib-select'),
                 picker: this.picker,
                 appId: this.appId,
                 collection: new Libraries({}, {
                     appId: this.appId
                 })
             });
+
+            if (options.showTypeSelect || _.isUndefined(options.showTypeSelect)) {
+                this.typeSelectView = new TypeSelectView({
+                    id: this.id + '-type-select',
+                    el: this.$('.ev-type-select'),
+                    picker: this.picker,
+                    appId: this.appId
+                });
+            }
+
+            this.searchView = new SearchView({
+                id: this.id + '-search',
+                el: this.$('.ev-search'),
+                picker: this.picker,
+                appId: this.appId
+            });
+
+            var $loader = this.$('div.loader');
+            $(window.document).on('ajaxSend', _.bind(function(e, xhr, settings) {
+                if (this.picker === settings.picker) {
+                    $loader.addClass('loading');
+                }
+            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
+                if (this.picker === settings.picker) {
+                    $loader.removeClass('loading');
+                }
+            }, this));
         },
         events: {
             'change select.organizations': 'changeOrganization',
@@ -24035,6 +24081,29 @@ define('ev-script/views/unit-selects',['require','jquery','underscore','ev-scrip
                     }, this));
                 }, this)
             });
+        },
+        activateRecord: function() {
+            this.$('.record-active').show();
+            this.$('.record-inactive').hide();
+        },
+        deactivateRecord: function() {
+            this.$('.record-active').hide();
+            this.$('.record-inactive').show();
+        },
+        showUpload: function() {
+            this.$('.action-upload').show();
+        },
+        hideUpload: function() {
+            this.$('.action-upload').hide();
+        },
+        showRecord: function() {
+            this.$('.action-record').show();
+        },
+        hideRecord: function() {
+            this.$('.action-record').hide();
+        },
+        setFocus: function() {
+            this.$('select').filter(':visible').first().focus();
         }
     });
 
@@ -27983,10 +28052,6 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/models
             }
             return dims;
         },
-        // getRatio: function() {
-        //     var dims = this.getDims();
-        //     return dims[0] / dims[1];
-        // },
         getWidth: function(original) {
             return this.getDims(original)[0];
         },
@@ -29107,7 +29172,7 @@ define("base64", function(){});
 
 define('text!ev-script/templates/anthem.html',[],function () { return '<iframe src="ensemble://<%= tokenDetailsApiUrl %>" style="display:none;"></iframe>\n';});
 
-define('ev-script/views/video-picker',['require','jquery','underscore','platform','ev-script/views/picker','ev-script/views/search','ev-script/views/library-type-select','ev-script/views/unit-selects','ev-script/views/video-results','ev-script/collections/videos','ev-script/collections/media-workflows','ev-script/views/upload','base64','text!ev-script/templates/anthem.html'],function(require) {
+define('ev-script/views/video-picker',['require','jquery','underscore','platform','ev-script/views/picker','ev-script/views/filter','ev-script/views/video-results','ev-script/collections/videos','ev-script/collections/media-workflows','ev-script/views/upload','base64','text!ev-script/templates/anthem.html'],function(require) {
 
     'use strict';
 
@@ -29115,9 +29180,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
         _ = require('underscore'),
         platform = require('platform'),
         PickerView = require('ev-script/views/picker'),
-        SearchView = require('ev-script/views/search'),
-        TypeSelectView = require('ev-script/views/library-type-select'),
-        UnitSelectsView = require('ev-script/views/unit-selects'),
+        FilterView = require('ev-script/views/filter'),
         VideoResultsView = require('ev-script/views/video-results'),
         Videos = require('ev-script/collections/videos'),
         MediaWorkflows = require('ev-script/collections/media-workflows'),
@@ -29130,57 +29193,35 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary', 'handleSubmit', 'uploadHandler', 'recordHandler');
-            var callback = _.bind(function() {
+
+            this.appEvents.on('typeSelectChange', _.bind(function() {
                 this.loadVideos();
-            }, this);
-            this.$filterBlock = this.$('div.ev-filter-block');
-            this.$actions = $('<div class="ev-actions"></div>');
-            this.$upload = $('<button type="button" class="action-upload" title="' + this.i18n.formatMessage('Click to upload new media') + '"><i class="fa fa-upload fa-fw"></i><span>' + this.i18n.formatMessage('Upload') + '<span></button>').css('display', 'none');
-            this.$actions.append(this.$upload);
-            this.$record = $('<button type="button" class="action-record" title="' + this.i18n.formatMessage('Click to record screen') + '"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>' + this.i18n.formatMessage('Record') + '<span></button>').css('display', 'none');
-            this.$actions.append(this.$record);
-            this.$filterBlock.prepend(this.$actions);
-            this.searchView = new SearchView({
-                id: this.id + '-search',
-                tagName: 'div',
-                className: 'ev-search',
-                picker: this,
-                appId: this.appId,
-                callback: callback
-            });
-            this.$filterBlock.prepend(this.searchView.$el);
-            this.searchView.render();
-            this.typeSelectView = new TypeSelectView({
-                id: this.id + '-type-select',
-                tagName: 'div',
-                className: 'ev-type-select',
-                picker: this,
-                appId: this.appId,
-                callback: callback
-            });
-            this.$filterBlock.prepend(this.typeSelectView.$el);
-            this.typeSelectView.render();
-            this.unitSelects = new UnitSelectsView({
-                id: this.id + '-unit-selects',
-                tagName: 'div',
-                className: 'ev-unit-selects',
+            }, this));
+            this.appEvents.on('search', _.bind(function() {
+                this.loadVideos();
+            }, this));
+
+            this.filter = new FilterView({
+                id: this.id + '-filter',
+                el: this.$('.ev-filter-block'),
                 picker: this,
                 appId: this.appId
             });
-            this.$filterBlock.prepend(this.unitSelects.$el);
+
             this.resultsView = new VideoResultsView({
-                el: this.$('div.ev-results'),
+                el: this.$('.ev-results'),
                 picker: this,
                 appId: this.appId
             });
+
             this.$el.append(this.resultsView.$el);
         },
         events: {
             'click .action-add': 'chooseItem',
             'click .action-upload': 'uploadHandler',
             'click .action-record': 'recordHandler',
-            'change .unit-selects select.libraries': 'changeLibrary',
-            'submit .unit-selects': 'handleSubmit'
+            'change .ev-filter-block select.libraries': 'changeLibrary',
+            'submit .ev-filter-block': 'handleSubmit'
         },
         changeLibrary: function(e) {
             this.loadVideos();
@@ -29199,19 +29240,15 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
             e.preventDefault();
         },
         recordHandler: function(e) {
-            var activeIcon = $('.record-active', this.$record),
-                inactiveIcon = $('.record-inactive', this.$record),
-                pollingId,
+            var pollingId,
                 timeoutId,
                 activate = _.bind(function() {
                     this.anthemLaunching = true;
-                    inactiveIcon.hide();
-                    activeIcon.show();
+                    this.filter.activateRecord();
                 }, this),
                 deactivate = _.bind(function() {
                     this.anthemLaunching = false;
-                    inactiveIcon.show();
-                    activeIcon.hide();
+                    this.filter.deactivateRecord();
                     if (pollingId) {
                         clearInterval(pollingId);
                     }
@@ -29276,8 +29313,8 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
         },
         showPicker: function() {
             PickerView.prototype.showPicker.call(this);
-            this.unitSelects.loadOrgs();
-            this.unitSelects.$('select').filter(':visible').first().focus();
+            this.filter.loadOrgs();
+            this.filter.setFocus();
         },
         loadVideos: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
@@ -29329,13 +29366,13 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
                 cacheKey: this.workflows.filterValue,
                 success: _.bind(function(collection, response, options) {
                     if (!collection.isEmpty()) {
-                        this.$upload.css('display', 'inline-block');
+                        this.filter.showUpload();
                         if (this.canRecord()) {
-                            this.$record.css('display', 'inline-block');
+                            this.filter.showRecord();
                         }
                     } else {
-                        this.$upload.css('display', 'none');
-                        this.$record.css('display', 'none');
+                        this.filter.hideUpload();
+                        this.filter.hideRecord();
                     }
                 }, this),
                 error: _.bind(function(collection, xhr, options) {
@@ -29748,15 +29785,14 @@ define('ev-script/collections/playlists',['require','ev-script/collections/base'
 
 });
 
-define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/unit-selects','ev-script/views/search','ev-script/views/playlist-results','ev-script/collections/playlists'],function(require) {
+define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/filter','ev-script/views/playlist-results','ev-script/collections/playlists'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         PickerView = require('ev-script/views/picker'),
-        UnitSelectsView = require('ev-script/views/unit-selects'),
-        SearchView = require('ev-script/views/search'),
+        FilterView = require('ev-script/views/filter'),
         PlaylistResultsView = require('ev-script/views/playlist-results'),
         Playlists = require('ev-script/collections/playlists');
 
@@ -29764,38 +29800,32 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit');
-            this.$filterBlock = this.$('div.ev-filter-block');
-            this.searchView = new SearchView({
-                id: this.id + '-search',
-                tagName: 'div',
-                className: 'ev-search',
+
+            this.appEvents.on('search', _.bind(function() {
+                this.loadPlaylists();
+            }, this));
+
+            // TODO - handle callback
+            this.filter = new FilterView({
+                id: this.id + '-filter',
+                el: this.$('.ev-filter-block'),
                 picker: this,
                 appId: this.appId,
-                callback: _.bind(function() {
-                    this.loadPlaylists();
-                }, this)
+                showTypeSelect: false
             });
-            this.$filterBlock.prepend(this.searchView.$el);
-            this.searchView.render();
-            this.unitSelects = new UnitSelectsView({
-                id: this.id + '-unit-selects',
-                tagName: 'div',
-                className: 'ev-unit-selects',
-                picker: this,
-                appId: this.appId
-            });
-            this.$filterBlock.prepend(this.unitSelects.$el);
+
             this.resultsView = new PlaylistResultsView({
                 el: this.$('div.ev-results'),
                 picker: this,
                 appId: this.appId
             });
+
             this.$el.append(this.resultsView.$el);
         },
         events: {
             'click a.action-add': 'chooseItem',
-            'change .unit-selects select.libraries': 'changeLibrary',
-            'submit .unit-selects': 'handleSubmit'
+            'change .ev-filter-block select.libraries': 'changeLibrary',
+            'submit .ev-filter-block': 'handleSubmit'
         },
         changeLibrary: function(e) {
             this.loadPlaylists();
@@ -29806,8 +29836,8 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
         },
         showPicker: function() {
             PickerView.prototype.showPicker.call(this);
-            this.unitSelects.loadOrgs();
-            this.unitSelects.$('select').filter(':visible').first().focus();
+            this.filter.loadOrgs();
+            this.filter.setFocus();
         },
         loadPlaylists: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),

@@ -1,8 +1,5 @@
-<div>
-  <label for="<%= id %>"><%= i18n.formatMessage('Type:') %></label>
-  <select id="<%= id %>" class="form-select source" title="<%= i18n.formatMessage('Select Library Type') %>">
-    <option value="content" <% if (sourceId === 'content') { print('selected="selected"'); } %>><%= i18n.formatMessage('Media Library') %></option>
-    <option value="shared" <% if (sourceId === 'shared') { print('selected="selected"'); } %>><%= i18n.formatMessage('Shared Library') %></option>
-  </select>
-  <input type="submit" value="<%= i18n.formatMessage('Go') %>" class="form-submit" />
-</div>
+<label for="<%= id %>"><%= i18n.formatMessage('Type:') %></label>
+<select id="<%= id %>" class="form-select source" title="<%= i18n.formatMessage('Select Library Type') %>">
+  <option value="content" <% if (sourceId === 'content') { print('selected="selected"'); } %>><%= i18n.formatMessage('Media Library') %></option>
+  <option value="shared" <% if (sourceId === 'shared') { print('selected="selected"'); } %>><%= i18n.formatMessage('Shared Library') %></option>
+</select>

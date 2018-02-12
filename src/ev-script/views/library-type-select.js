@@ -11,23 +11,24 @@ define(function(require) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'changeHandler');
             this.picker = options.picker;
-            this.callback = options.callback || function() {};
+            this.render();
         },
         events: {
             'change .source': 'changeHandler'
         },
         render: function() {
             this.$el.html(this.template({
-                i18n: this.i18n,
                 id: this.id + '-select',
+                i18n: this.i18n,
                 sourceId: this.picker.model.get('sourceId')
             }));
         },
         changeHandler: function(e) {
+            var sourceVal = this.$('.source').val();
             this.picker.model.set({
-                sourceId: this.$('.source').val()
+                sourceId: sourceVal
             });
-            this.callback();
+            this.appEvents.trigger('typeSelectChange', sourceVal);
             e.preventDefault();
         }
     });

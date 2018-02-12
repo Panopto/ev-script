@@ -6,9 +6,7 @@ define(function(require) {
         _ = require('underscore'),
         platform = require('platform'),
         PickerView = require('ev-script/views/picker'),
-        SearchView = require('ev-script/views/search'),
-        TypeSelectView = require('ev-script/views/library-type-select'),
-        UnitSelectsView = require('ev-script/views/unit-selects'),
+        FilterView = require('ev-script/views/filter'),
         VideoResultsView = require('ev-script/views/video-results'),
         Videos = require('ev-script/collections/videos'),
         MediaWorkflows = require('ev-script/collections/media-workflows'),
@@ -21,57 +19,35 @@ define(function(require) {
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary', 'handleSubmit', 'uploadHandler', 'recordHandler');
-            var callback = _.bind(function() {
+
+            this.appEvents.on('typeSelectChange', _.bind(function() {
                 this.loadVideos();
-            }, this);
-            this.$filterBlock = this.$('div.ev-filter-block');
-            this.$actions = $('<div class="ev-actions"></div>');
-            this.$upload = $('<button type="button" class="action-upload" title="' + this.i18n.formatMessage('Click to upload new media') + '"><i class="fa fa-upload fa-fw"></i><span>' + this.i18n.formatMessage('Upload') + '<span></button>').css('display', 'none');
-            this.$actions.append(this.$upload);
-            this.$record = $('<button type="button" class="action-record" title="' + this.i18n.formatMessage('Click to record screen') + '"><i class="record-inactive fa fa-circle fa-fw"></i><i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i><span>' + this.i18n.formatMessage('Record') + '<span></button>').css('display', 'none');
-            this.$actions.append(this.$record);
-            this.$filterBlock.prepend(this.$actions);
-            this.searchView = new SearchView({
-                id: this.id + '-search',
-                tagName: 'div',
-                className: 'ev-search',
-                picker: this,
-                appId: this.appId,
-                callback: callback
-            });
-            this.$filterBlock.prepend(this.searchView.$el);
-            this.searchView.render();
-            this.typeSelectView = new TypeSelectView({
-                id: this.id + '-type-select',
-                tagName: 'div',
-                className: 'ev-type-select',
-                picker: this,
-                appId: this.appId,
-                callback: callback
-            });
-            this.$filterBlock.prepend(this.typeSelectView.$el);
-            this.typeSelectView.render();
-            this.unitSelects = new UnitSelectsView({
-                id: this.id + '-unit-selects',
-                tagName: 'div',
-                className: 'ev-unit-selects',
+            }, this));
+            this.appEvents.on('search', _.bind(function() {
+                this.loadVideos();
+            }, this));
+
+            this.filter = new FilterView({
+                id: this.id + '-filter',
+                el: this.$('.ev-filter-block'),
                 picker: this,
                 appId: this.appId
             });
-            this.$filterBlock.prepend(this.unitSelects.$el);
+
             this.resultsView = new VideoResultsView({
-                el: this.$('div.ev-results'),
+                el: this.$('.ev-results'),
                 picker: this,
                 appId: this.appId
             });
+
             this.$el.append(this.resultsView.$el);
         },
         events: {
             'click .action-add': 'chooseItem',
             'click .action-upload': 'uploadHandler',
             'click .action-record': 'recordHandler',
-            'change .unit-selects select.libraries': 'changeLibrary',
-            'submit .unit-selects': 'handleSubmit'
+            'change .ev-filter-block select.libraries': 'changeLibrary',
+            'submit .ev-filter-block': 'handleSubmit'
         },
         changeLibrary: function(e) {
             this.loadVideos();
@@ -90,19 +66,15 @@ define(function(require) {
             e.preventDefault();
         },
         recordHandler: function(e) {
-            var activeIcon = $('.record-active', this.$record),
-                inactiveIcon = $('.record-inactive', this.$record),
-                pollingId,
+            var pollingId,
                 timeoutId,
                 activate = _.bind(function() {
                     this.anthemLaunching = true;
-                    inactiveIcon.hide();
-                    activeIcon.show();
+                    this.filter.activateRecord();
                 }, this),
                 deactivate = _.bind(function() {
                     this.anthemLaunching = false;
-                    inactiveIcon.show();
-                    activeIcon.hide();
+                    this.filter.deactivateRecord();
                     if (pollingId) {
                         clearInterval(pollingId);
                     }
@@ -167,8 +139,8 @@ define(function(require) {
         },
         showPicker: function() {
             PickerView.prototype.showPicker.call(this);
-            this.unitSelects.loadOrgs();
-            this.unitSelects.$('select').filter(':visible').first().focus();
+            this.filter.loadOrgs();
+            this.filter.setFocus();
         },
         loadVideos: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
@@ -220,13 +192,13 @@ define(function(require) {
                 cacheKey: this.workflows.filterValue,
                 success: _.bind(function(collection, response, options) {
                     if (!collection.isEmpty()) {
-                        this.$upload.css('display', 'inline-block');
+                        this.filter.showUpload();
                         if (this.canRecord()) {
-                            this.$record.css('display', 'inline-block');
+                            this.filter.showRecord();
                         }
                     } else {
-                        this.$upload.css('display', 'none');
-                        this.$record.css('display', 'none');
+                        this.filter.hideUpload();
+                        this.filter.hideRecord();
                     }
                 }, this),
                 error: _.bind(function(collection, xhr, options) {
