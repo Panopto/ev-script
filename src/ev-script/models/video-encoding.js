@@ -40,10 +40,6 @@ define(function(require) {
             }
             return dims;
         },
-        // getRatio: function() {
-        //     var dims = this.getDims();
-        //     return dims[0] / dims[1];
-        // },
         getWidth: function(original) {
             return this.getDims(original)[0];
         },

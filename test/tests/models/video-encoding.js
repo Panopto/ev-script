@@ -67,10 +67,6 @@ define(function(require) {
         q.strictEqual(dims[1], 360);
     });
 
-    q.test('test getRatio', 1, function() {
-        q.strictEqual(this.encoding.getRatio(), 640 / 360);
-    });
-
     q.test('test getWidth', 1, function() {
         q.strictEqual(this.encoding.getWidth(), 640);
     });
