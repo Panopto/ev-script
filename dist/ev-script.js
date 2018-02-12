@@ -1,5 +1,5 @@
 /**
- * ev-script 1.4.0 2018-02-09
+ * ev-script 1.4.0 2018-02-12
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2018 Symphony Video, Inc.
@@ -28008,10 +28008,6 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/models
             }
             return dims;
         },
-        // getRatio: function() {
-        //     var dims = this.getDims();
-        //     return dims[0] / dims[1];
-        // },
         getWidth: function(original) {
             return this.getDims(original)[0];
         },
