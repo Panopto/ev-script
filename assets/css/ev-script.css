@@ -241,12 +241,16 @@ fieldset[disabled] .ev-field-wrap .form-actions .action-cancel.active {
 }
 .ev-field-wrap .ev-field {
   display: flex;
-  flex: 0 50px;
+  flex-flow: row wrap;
+  align-items: center;
+  flex: 0 0 auto;
 }
-.ev-field-wrap .ev-field .ev-field-cell {
-  display: table-cell;
+.ev-field-wrap .ev-field h2,
+.ev-field-wrap .ev-field h3 {
+  margin: 0;
+}
+.ev-field-wrap .ev-field .ev-field-item {
   padding: 0.6em;
-  vertical-align: middle;
 }
 .ev-field-wrap .ev-field .thumbnail img {
   box-shadow: 0 0 10px 1px;
@@ -281,15 +285,7 @@ fieldset[disabled] .ev-field-wrap .form-actions .action-cancel.active {
 }
 @media only screen and (max-width: 560px) {
   .ev-field-wrap .ev-field {
-    display: block;
-  }
-  .ev-field-wrap .ev-field .ev-field-cell {
-    display: block;
-    margin: 0.6em auto;
-    width: 100%;
-    text-align: center;
-    max-width: none;
-    padding: 0;
+    flex-flow: column nowrap;
   }
 }
 .ev-field-wrap .ev-actions {

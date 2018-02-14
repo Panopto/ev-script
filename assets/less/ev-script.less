@@ -161,11 +161,15 @@
 
   .ev-field {
     display: flex;
-    flex: 0 50px;
-    .ev-field-cell {
-      display: table-cell;
+    flex-flow: row wrap;
+    align-items: center;
+    flex: 0 0 auto;
+    h2,
+    h3 {
+      margin: 0;
+    }
+    .ev-field-item {
       padding: 0.6em;
-      vertical-align: middle;
     }
     .thumbnail {
       img {
@@ -205,15 +209,7 @@
       }
     });
     .responsive(560px, {
-      display: block;
-      .ev-field-cell {
-        display: block;
-        margin: 0.6em auto;
-        width: 100%;
-        text-align: center;
-        max-width: none;
-        padding: 0;
-      }
+      flex-flow: column nowrap;
     });
   }
 
