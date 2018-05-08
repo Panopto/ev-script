@@ -220,12 +220,10 @@ fieldset[disabled] .ev-field-wrap .form-actions .action-cancel.active {
   text-align: center;
   flex: 0;
 }
-.ev-field-wrap .ev-hider .action-logout {
-  position: absolute;
-  right: 3em;
-  width: 4em;
+.ev-field-wrap .ev-hider .action-hide {
+  margin-right: 0.6em;
 }
-.ev-field-wrap .ev-hider a {
+.ev-field-wrap .ev-hider .action-wrap {
   background: #ffffff;
   background-color: #fbfbfb;
   border-left: 1px solid #999999;
@@ -235,9 +233,14 @@ fieldset[disabled] .ev-field-wrap .form-actions .action-cancel.active {
   border-top-right-radius: 4px;
   bottom: -2px;
   display: inline-block;
-  padding: 0.2em 1em;
+  padding: 0.4em 0.8em 0.4em;
   position: relative;
   text-decoration: none;
+  float: right;
+  margin-right: 1em;
+}
+.ev-field-wrap .ev-hider .action-wrap span {
+  display: none;
 }
 .ev-field-wrap .ev-field {
   display: flex;

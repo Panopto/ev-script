@@ -1,4 +1,6 @@
-<a class="action-hide" href="#" title="<%= i18n.formatMessage('Hide Picker') %>"><%= i18n.formatMessage('Hide') %></a>
-<% if (showLogout) { %>
-    <a class="action-logout" href="#" title="<%= i18n.formatMessage('Logout {0}', username) %>"><%= i18n.formatMessage('Logout') %></a>
-<% } %>
+<div class="action-wrap">
+  <a class="action-hide" href="#" title="<%= i18n.formatMessage('Hide Picker') %>"><i class="fa fa-lg fa-times"></i><span><%= i18n.formatMessage('Hide') %></span></a>
+  <% if (showLogout) { %>
+    <a class="action-logout" href="#" title="<%= i18n.formatMessage('Logout {0}', username) %>"><i class="fa fa-lg fa-power-off"></i><span><%= i18n.formatMessage('Logout') %></span></a>
+  <% } %>
+</div>
