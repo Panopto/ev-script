@@ -43,6 +43,8 @@ define(function(require) {
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {
                     embedView.render(true);
+                    // Add autofocus attribute to embed view iframe
+                    embedView.$('iframe').attr('autofocus', true);
                     $dialogWrap.html(embedView.$el);
                 }, this),
                 closeText: this.i18n.formatMessage('Close'),

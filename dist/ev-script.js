@@ -24951,6 +24951,8 @@ define('ev-script/views/preview',['require','jquery','underscore','ev-script/vie
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {
                     embedView.render(true);
+                    // Add autofocus attribute to embed view iframe
+                    embedView.$('iframe').attr('autofocus', true);
                     $dialogWrap.html(embedView.$el);
                 }, this),
                 closeText: this.i18n.formatMessage('Close'),
@@ -32505,7 +32507,7 @@ define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/a
 });
 
 
-define('text!ev-script/auth/ensemble/template.html',[],function () { return '<iframe src="<%= frameSrc %>" width="<%= frameWidth %>" height="<%= frameHeight %>" frameborder="0"><iframe>';});
+define('text!ev-script/auth/ensemble/template.html',[],function () { return '<iframe src="<%= frameSrc %>" width="<%= frameWidth %>" height="<%= frameHeight %>" frameborder="0" autofocus="true"><iframe>';});
 
 define('ev-script/auth/ensemble/view',['require','exports','module','jquery','underscore','urijs/URI','backbone','ev-script/util/cache','ev-script/util/events','jquery-ui/ui/widgets/dialog','text!ev-script/auth/ensemble/template.html'],function(require, template) {
 
