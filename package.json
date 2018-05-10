@@ -30,6 +30,7 @@
     "connect": "^3.6.6",
     "cookie-parser": "^1.4.3",
     "errorhandler": "^1.5.0",
+    "flex.less": "git://github.com/codio/Flex.less.git",
     "grunt": "^1.0.2",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-clean": "^1.1.0",

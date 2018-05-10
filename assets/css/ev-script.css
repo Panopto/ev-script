@@ -1,5 +1,13 @@
 .ev-field-wrap {
+  display: -moz-box;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
   display: flex;
+  -webkit-flex-flow: column nowrap;
+  -moz-flex-flow: column nowrap;
+  -ms-flex-flow: column nowrap;
   flex-flow: column nowrap;
   height: 100%;
 }
@@ -144,10 +152,25 @@ fieldset[disabled] .ev-field-wrap .form-actions .action-cancel.active {
 .ev-field-wrap .ev-video-picker {
   position: relative;
   padding: 0;
-  flex: 5;
+  -webkit-box-flex: 5;
+  -moz-box-flex: 5;
+  -webkit-flex: 5 1 auto;
+  -moz-flex: 5 1 auto;
+  -ms-flex: 5 1 auto;
+  flex: 5 1 auto;
+  -ms-flex-positive: 5;
+  -ms-flex-negative: 1;
+  -ms-flex-preferred-size: auto;
+  display: -moz-box;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
   display: flex;
+  -webkit-flex-flow: column nowrap;
+  -moz-flex-flow: column nowrap;
+  -ms-flex-flow: column nowrap;
   flex-flow: column nowrap;
-  /*margin-top: 1em;*/
 }
 .ev-field-wrap .ev-video-picker a {
   color: #0074bd;
@@ -173,10 +196,25 @@ fieldset[disabled] .ev-field-wrap .form-actions .action-cancel.active {
 .ev-field-wrap .ev-playlist-picker {
   position: relative;
   padding: 0;
-  flex: 5;
+  -webkit-box-flex: 5;
+  -moz-box-flex: 5;
+  -webkit-flex: 5 1 auto;
+  -moz-flex: 5 1 auto;
+  -ms-flex: 5 1 auto;
+  flex: 5 1 auto;
+  -ms-flex-positive: 5;
+  -ms-flex-negative: 1;
+  -ms-flex-preferred-size: auto;
+  display: -moz-box;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
   display: flex;
+  -webkit-flex-flow: column nowrap;
+  -moz-flex-flow: column nowrap;
+  -ms-flex-flow: column nowrap;
   flex-flow: column nowrap;
-  /*margin-top: 1em;*/
 }
 .ev-field-wrap .ev-playlist-picker a {
   color: #0074bd;
@@ -207,7 +245,15 @@ fieldset[disabled] .ev-field-wrap .form-actions .action-cancel.active {
   position: relative;
   border-bottom: 1px solid #999999;
   text-align: center;
-  flex: 0;
+  -webkit-box-flex: 0;
+  -moz-box-flex: 0;
+  -webkit-flex: 0 1 auto;
+  -moz-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
+  -ms-flex-positive: 0;
+  -ms-flex-negative: 1;
+  -ms-flex-preferred-size: auto;
 }
 .ev-field-wrap .ev-hider .action-hide {
   color: orange;
@@ -243,10 +289,32 @@ fieldset[disabled] .ev-field-wrap .form-actions .action-cancel.active {
   }
 }
 .ev-field-wrap .ev-field {
+  display: -moz-box;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
   display: flex;
+  -webkit-flex-flow: row wrap;
+  -moz-flex-flow: row wrap;
+  -ms-flex-flow: row wrap;
   flex-flow: row wrap;
+  -webkit-box-align: center;
+  -moz-box-align: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
   align-items: center;
-  flex: 0 0 auto;
+  -webkit-box-flex: 0;
+  -moz-box-flex: 0;
+  -webkit-flex: 0 1 auto;
+  -moz-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
+  -ms-flex-positive: 0;
+  -ms-flex-negative: 1;
+  -ms-flex-preferred-size: auto;
 }
 .ev-field-wrap .ev-field h2,
 .ev-field-wrap .ev-field h3 {
@@ -424,13 +492,43 @@ fieldset[disabled] .ev-field-wrap .ev-actions .action-record.active {
   background-color: #fbfbfb;
   position: relative;
   padding: 10px 5px 0 5px;
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+  -moz-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
   flex: 1 0 auto;
+  -ms-flex-positive: 1;
+  -ms-flex-negative: 0;
+  -ms-flex-preferred-size: auto;
+  display: -moz-box;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
   display: flex;
+  -webkit-flex-flow: row wrap;
+  -moz-flex-flow: row wrap;
+  -ms-flex-flow: row wrap;
   flex-flow: row wrap;
+  -webkit-box-align: center;
+  -moz-box-align: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
   align-items: center;
 }
 .ev-field-wrap .ev-filter-block .ev-filter-item {
-  flex: initial;
+  -webkit-box-flex: 0;
+  -moz-box-flex: 0;
+  -webkit-flex: 0 1 auto;
+  -moz-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
+  -ms-flex-positive: 0;
+  -ms-flex-negative: 1;
+  -ms-flex-preferred-size: auto;
 }
 .ev-field-wrap .ev-filter-block .loader {
   height: 16px;
@@ -443,12 +541,36 @@ fieldset[disabled] .ev-field-wrap .ev-actions .action-record.active {
   position: relative;
   background-color: #fbfbfb;
   padding: 0 5px;
+  -webkit-box-flex: 20;
+  -moz-box-flex: 20;
+  -webkit-flex: 20 0 auto;
+  -moz-flex: 20 0 auto;
+  -ms-flex: 20 0 auto;
   flex: 20 0 auto;
+  -ms-flex-positive: 20;
+  -ms-flex-negative: 0;
+  -ms-flex-preferred-size: auto;
+  display: -moz-box;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
   display: flex;
+  -webkit-flex-flow: column nowrap;
+  -moz-flex-flow: column nowrap;
+  -ms-flex-flow: column nowrap;
   flex-flow: column nowrap;
 }
 .ev-field-wrap .ev-results .total {
-  flex: 0;
+  -webkit-box-flex: 0;
+  -moz-box-flex: 0;
+  -webkit-flex: 0 1 auto;
+  -moz-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
+  -ms-flex-positive: 0;
+  -ms-flex-negative: 1;
+  -ms-flex-preferred-size: auto;
   padding: 0.6em 0;
 }
 .ev-field-wrap .ev-results .total .action-refresh {
@@ -463,8 +585,24 @@ fieldset[disabled] .ev-field-wrap .ev-actions .action-record.active {
   }
 }
 .ev-field-wrap .ev-results .results {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+  -moz-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
   flex: 1 0 auto;
+  -ms-flex-positive: 1;
+  -ms-flex-negative: 0;
+  -ms-flex-preferred-size: auto;
+  display: -moz-box;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
   display: flex;
+  -webkit-flex-flow: column nowrap;
+  -moz-flex-flow: column nowrap;
+  -ms-flex-flow: column nowrap;
   flex-flow: column nowrap;
   position: relative;
 }
@@ -599,10 +737,26 @@ fieldset[disabled] .ev-field-wrap .ev-actions .action-record.active {
   }
 }
 .ev-field-wrap .scrollWrap {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+  -moz-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
   flex: 1 0 auto;
+  -ms-flex-positive: 1;
+  -ms-flex-negative: 0;
+  -ms-flex-preferred-size: auto;
 }
 .ev-field-wrap .scrollWrap .loader {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+  -moz-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
   flex: 1 0 auto;
+  -ms-flex-positive: 1;
+  -ms-flex-negative: 0;
+  -ms-flex-preferred-size: auto;
   background: url('images/loader.gif') no-repeat scroll center center transparent;
   height: 60px;
   width: 100%;

@@ -1,6 +1,7 @@
 // Bootstrap less mixins
 @import (reference) '../../node_modules/bootstrap-less/bootstrap/variables.less';
 @import (reference) '../../node_modules/bootstrap-less/bootstrap/mixins.less';
+@import (reference) '../../node_modules/flex.less/flex.less';
 
 // Colors
 @border-color: #999999;
@@ -25,10 +26,9 @@
 .picker-base() {
   position: relative;
   padding: 0;
-  flex: 5;
-  display: flex;
-  flex-flow: column nowrap;
-  /*margin-top: 1em;*/
+  .flex(5, 1, auto);
+  .display(flex);
+  .flex-flow(column, nowrap);
   a {
     color: @link-color;
     text-decoration: none;
@@ -97,8 +97,8 @@
 }
 
 .ev-field-wrap {
-  display: flex;
-  flex-flow: column nowrap;
+  .display(flex);
+  .flex-flow(column, nowrap);
   height: 100%;
 
   .common();
@@ -123,7 +123,7 @@
     position: relative;
     border-bottom: 1px solid @border-color;
     text-align: center;
-    flex: 0;
+    .flex(0, 1, auto);
     .action-hide {
       color: orange;
       margin-right: 0.6em;
@@ -162,10 +162,10 @@
   }
 
   .ev-field {
-    display: flex;
-    flex-flow: row wrap;
-    align-items: center;
-    flex: 0 0 auto;
+    .display(flex);
+    .flex-flow(row, wrap);
+    .align-items(center);
+    .flex(0, 1, auto);
     h2,
     h3 {
       margin: 0;
@@ -259,12 +259,12 @@
     background-color: #fbfbfb;
     position: relative;
     padding: 10px 5px 0 5px;
-    flex: 1 0 auto;
-    display: flex;
-    flex-flow: row wrap;
-    align-items: center;
+    .flex(1, 0, auto);
+    .display(flex);
+    .flex-flow(row, wrap);
+    .align-items(center);
     .ev-filter-item {
-      flex: initial;
+      .flex(0, 1, auto);
     }
     .loader {
       height: 16px;
@@ -279,11 +279,11 @@
     position: relative;
     background-color: #fbfbfb;
     padding: 0 5px;
-    flex: 20 0 auto;
-    display: flex;
-    flex-flow: column nowrap;
+    .flex(20, 0, auto);
+    .display(flex);
+    .flex-flow(column, nowrap);
     .total {
-      flex: 0;
+      .flex(0, 1, auto);
       padding: 0.6em 0;
       .action-refresh {
         color: @form-color;
@@ -300,9 +300,9 @@
       });
     }
     .results {
-      flex: 1 0 auto;
-      display: flex;
-      flex-flow: column nowrap;
+      .flex(1, 0, auto);
+      .display(flex);
+      .flex-flow(column, nowrap);
       position: relative
     }
     .content-list {
@@ -442,9 +442,9 @@
   }
 
   .scrollWrap {
-    flex: 1 0 auto;
+    .flex(1, 0, auto);
     .loader {
-      flex: 1 0 auto;
+      .flex(1, 0, auto);
       background: url(@loader-image) no-repeat scroll center center transparent;
       height: 60px;
       width: 100%;
