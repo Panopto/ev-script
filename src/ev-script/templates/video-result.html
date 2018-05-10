@@ -1,5 +1,5 @@
-<tr class="<%= (index % 2 ? 'odd' : 'even') %> resultItem">
-    <td class="content-actions">
+<div class="<%= (index % 2 ? 'odd' : 'even') %> result-item">
+    <div class="content-actions">
         <div class="thumbnail-wrap">
             <img class="thumbnail" src="<%= item.get('ThumbnailUrl') %>" alt="<%= i18n.formatMessage('{0} preview thumbnail', item.get('Title')) %>"/>
             <% if (item.get('IsCaptioned')) { %>
@@ -10,29 +10,36 @@
             <a class="action-add" href="#" title="<%= i18n.formatMessage('Click to choose {0}', item.get('Title')) %>" rel="<%= item.get('ID') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage('Choose') %></span></a>
             <a class="action-preview" href="#" title="<%= i18n.formatMessage('Click to preview {0}', item.get('Title')) %>" rel="<%= item.get('ID') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage('Preview') %></span></a>
         </div>
-    </td>
-    <td class="content-meta">
-        <table class="content-item">
-            <tbody>
-                <tr class="title">
-                    <td colspan="2">
-                        <a class="action-preview" title="<%= i18n.formatMessage('Click to preview {0}', item.get('Title')) %>" href="#" rel="<%= item.get('ID') %>"><%= item.get('Title') %></a>
-                    </td>
-                </tr>
-                <tr class="trunc"><td class="label"><%= i18n.formatMessage('Description') %></td><td class="value"><%= item.get('Description') %></td></tr>
-                <tr>
-                    <td class="label"><%= i18n.formatMessage('Date Added') %></td>
-                    <td class="value">
-                        <%
-                            var dateAdded = new Date(item.get('AddedOn')),
-                                localDate = dateAdded.setMinutes(dateAdded.getMinutes() - dateAdded.getTimezoneOffset());
-                            print(moment(localDate).format(dateTimeFormat));
-                        %>
-                    </td>
-                </tr>
-                <tr class="trunc"><td class="label"><%= i18n.formatMessage('Keywords') %></td><td class="value"><%= item.get('Keywords') %></td></tr>
-                <tr><td class="label"><%= i18n.formatMessage('Library') %></td><td class="value"><%- item.get('LibraryName') %></td></tr>
-            </tbody>
-        </table>
-    </td>
-</tr>
+    </div>
+    <div class="content-meta">
+        <div class="title">
+            <a class="action-preview" title="<%= i18n.formatMessage('Click to preview {0}', item.get('Title')) %>" href="#" rel="<%= item.get('ID') %>"><%= item.get('Title') %></a>
+        </div>
+        <div class="content-info">
+            <div class="info-row trunc">
+                <div class="label"><%= i18n.formatMessage('Description') %></div>
+                <div class="value"><%= item.get('Description') %></div>
+            </div>
+            <div class="info-row">
+                <div class="label"><%= i18n.formatMessage('Date Added') %></div>
+                <div class="value">
+                    <%
+                        var dateAdded = new Date(item.get('AddedOn')),
+                            localDate = dateAdded.setMinutes(dateAdded.getMinutes() - dateAdded.getTimezoneOffset());
+                        print(moment(localDate).format(dateTimeFormat));
+                    %>
+                </div>
+            </div>
+            <div class="info-row trunc">
+                <div class="label"><%= i18n.formatMessage('Keywords') %></div>
+                <div class="value"><%= item.get('Keywords') %></div>
+            </div>
+            <!-- redundant
+            <div class="info-row">
+                <div class="label"><%= i18n.formatMessage('Library') %></div>
+                <div class="value"><%- item.get('LibraryName') %></div>
+            </div>
+            -->
+        </div>
+    </div>
+</div>

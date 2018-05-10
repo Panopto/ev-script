@@ -1,5 +1,5 @@
-<tr class="<%= (index % 2 ? 'odd' : 'even') %>">
-    <td class="content-actions">
+<div class="<%= (index % 2 ? 'odd' : 'even') %> result-item">
+    <div class="content-actions">
         <div class="action-links">
             <a class="action-add" href="#" title="<%= i18n.formatMessage('Click to choose {0}', item.get('Name')) %>" rel="<%= item.get('ID') %>">
                 <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage('Choose') %></span>
@@ -8,9 +8,9 @@
                 <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage('Preview') %></span>
             </a>
         </div>
-    </td>
-    <td class="content-meta">
+    </div>
+    <div class="content-meta">
         <% if (item.get('IsSecure')) { print('<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>'); } %>
         <span><%- item.get('Name') %></span>
-    </td>
-</tr>
+    </div>
+</div>

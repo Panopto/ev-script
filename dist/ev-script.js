@@ -1,5 +1,5 @@
 /**
- * ev-script 1.4.0 2018-05-08
+ * ev-script 1.4.0 2018-05-10
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2018 Symphony Video, Inc.
@@ -23981,7 +23981,7 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
 }.call(this));
 
 
-define('text!ev-script/templates/hider.html',[],function () { return '<div class="action-wrap">\n  <a class="action-hide" href="#" title="<%= i18n.formatMessage(\'Hide Picker\') %>"><i class="fa fa-lg fa-times"></i><span><%= i18n.formatMessage(\'Hide\') %></span></a>\n  <% if (showLogout) { %>\n    <a class="action-logout" href="#" title="<%= i18n.formatMessage(\'Logout {0}\', username) %>"><i class="fa fa-lg fa-power-off"></i><span><%= i18n.formatMessage(\'Logout\') %></span></a>\n  <% } %>\n</div>';});
+define('text!ev-script/templates/hider.html',[],function () { return '<div class="action-wrap">\n  <a class="action-hide" href="#" title="<%= i18n.formatMessage(\'Hide Picker\') %>"><i class="fa fa-lg fa-folder"></i><span><%= i18n.formatMessage(\'Hide\') %></span></a>\n  <% if (showLogout) { %>\n    <a class="action-logout" href="#" title="<%= i18n.formatMessage(\'Logout {0}\', username) %>"><i class="fa fa-lg fa-power-off"></i><span><%= i18n.formatMessage(\'Logout\') %></span></a>\n  <% } %>\n</div>';});
 
 define('ev-script/views/hider',['require','underscore','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
 
@@ -24374,7 +24374,7 @@ define('ev-script/views/library-type-select',['require','underscore','ev-script/
 });
 
 
-define('text!ev-script/templates/search.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Search:\') %></label>\n<input id="<%= id %>" type="search" class="form-text search" value="<%- searchVal %>" title="<%= i18n.formatMessage(\'Search Media\') %>" />\n';});
+define('text!ev-script/templates/search.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Search:\') %></label>\n<input id="<%= id %>" type="search" class="form-text search" placeholder="<%= i18n.formatMessage(\'Search Media\') %>" value="<%- searchVal %>" title="<%= i18n.formatMessage(\'Search Media\') %>" />\n';});
 
 define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
 
@@ -24670,10 +24670,10 @@ define('ev-script/views/filter',['require','jquery','underscore','ev-script/view
 });
 
 
-define('text!ev-script/templates/results.html',[],function () { return '<div class="total">\n    <%= i18n.formatMessage(\'Search returned {0} results.\', totalResults) %>\n    <a href="#" class="action-refresh" title="<%= i18n.formatMessage(\'Click to reload search results\') %>"><i class="fa fa-fw fa-lg fa-refresh"></i><span style="display:none;"><%= i18n.formatMessage(\'Reload\') %></span></a>\n</div>\n<div class="results">\n    <table class="content-list"></table>\n</div>\n';});
+define('text!ev-script/templates/results.html',[],function () { return '<div class="total">\n    <%= i18n.formatMessage(\'Search returned {0} results.\', totalResults) %>\n    <a href="#" class="action-refresh" title="<%= i18n.formatMessage(\'Click to reload search results\') %>"><i class="fa fa-fw fa-lg fa-refresh"></i><span><%= i18n.formatMessage(\'Reload\') %></span></a>\n</div>\n<div class="results">\n    <div class="content-list"></div>\n</div>\n';});
 
 
-define('text!ev-script/templates/no-results.html',[],function () { return '<tr class="odd"><td colspan="2"><%= i18n.formatMessage(\'No results available.\') %></td></tr>\n';});
+define('text!ev-script/templates/no-results.html',[],function () { return '<div class="odd result-item">\n    <div class="no-results">\n        <span><%= i18n.formatMessage(\'No results available.\') %></span>\n    </div>\n</div>\n';});
 
 define('ev-script/views/results',['require','jquery','underscore','moment','ev-script/views/base','ev-scroll-loader','text!ev-script/templates/results.html','text!ev-script/templates/no-results.html'],function(require) {
 
@@ -24894,6 +24894,8 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
                 height: scrollHeight,
                 onScrolled: this.loadMore
             });
+            // TODO - I don't think we need scroll loader to set max-height (ever?)
+            this.$scrollLoader.closest('.scrollWrap').css('max-height', '');
             if (!this.collection.hasMore) {
                 this.$scrollLoader.evScrollLoader('hideLoader');
             }
@@ -29177,7 +29179,7 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
 });
 
 
-define('text!ev-script/templates/video-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %> resultItem">\n    <td class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.get(\'ThumbnailUrl\') %>" alt="<%= i18n.formatMessage(\'{0} preview thumbnail\', item.get(\'Title\')) %>"/>\n            <% if (item.get(\'IsCaptioned\')) { %>\n            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage(\'CC\') %>" alt="CC"></i>\n            <% } %>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span></a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span></a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <table class="content-item">\n            <tbody>\n                <tr class="title">\n                    <td colspan="2">\n                        <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Title\')) %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label"><%= i18n.formatMessage(\'Description\') %></td><td class="value"><%= item.get(\'Description\') %></td></tr>\n                <tr>\n                    <td class="label"><%= i18n.formatMessage(\'Date Added\') %></td>\n                    <td class="value">\n                        <%\n                            var dateAdded = new Date(item.get(\'AddedOn\')),\n                                localDate = dateAdded.setMinutes(dateAdded.getMinutes() - dateAdded.getTimezoneOffset());\n                            print(moment(localDate).format(dateTimeFormat));\n                        %>\n                    </td>\n                </tr>\n                <tr class="trunc"><td class="label"><%= i18n.formatMessage(\'Keywords\') %></td><td class="value"><%= item.get(\'Keywords\') %></td></tr>\n                <tr><td class="label"><%= i18n.formatMessage(\'Library\') %></td><td class="value"><%- item.get(\'LibraryName\') %></td></tr>\n            </tbody>\n        </table>\n    </td>\n</tr>\n';});
+define('text!ev-script/templates/video-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.get(\'ThumbnailUrl\') %>" alt="<%= i18n.formatMessage(\'{0} preview thumbnail\', item.get(\'Title\')) %>"/>\n            <% if (item.get(\'IsCaptioned\')) { %>\n            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage(\'CC\') %>" alt="CC"></i>\n            <% } %>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span></a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span></a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <div class="title">\n            <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Title\')) %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n        </div>\n        <div class="content-info">\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Description\') %></div>\n                <div class="value"><%= item.get(\'Description\') %></div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Date Added\') %></div>\n                <div class="value">\n                    <%\n                        var dateAdded = new Date(item.get(\'AddedOn\')),\n                            localDate = dateAdded.setMinutes(dateAdded.getMinutes() - dateAdded.getTimezoneOffset());\n                        print(moment(localDate).format(dateTimeFormat));\n                    %>\n                </div>\n            </div>\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Keywords\') %></div>\n                <div class="value"><%= item.get(\'Keywords\') %></div>\n            </div>\n            <!-- redundant\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Library\') %></div>\n                <div class="value"><%- item.get(\'LibraryName\') %></div>\n            </div>\n            -->\n        </div>\n    </div>\n</div>\n';});
 
 define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-expander','text!ev-script/templates/video-result.html'],function(require) {
 
@@ -30188,7 +30190,7 @@ define('ev-script/views/playlist-preview',['require','ev-script/views/preview','
 });
 
 
-define('text!ev-script/templates/playlist-result.html',[],function () { return '<tr class="<%= (index % 2 ? \'odd\' : \'even\') %>">\n    <td class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </td>\n    <td class="content-meta">\n        <% if (item.get(\'IsSecure\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n        <span><%- item.get(\'Name\') %></span>\n    </td>\n</tr>\n';});
+define('text!ev-script/templates/playlist-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <% if (item.get(\'IsSecure\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n        <span><%- item.get(\'Name\') %></span>\n    </div>\n</div>\n';});
 
 define('ev-script/views/playlist-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/playlist-result.html'],function(require) {
 
