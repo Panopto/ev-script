@@ -13,7 +13,7 @@ define(function(require) {
             _.bindAll(this, 'render');
             this.picker = options.picker;
             this.$el.html(this.template({
-                id: this.id,
+                id: this.id + '-select',
                 i18n: this.i18n
             }));
             this.$select = this.$('select');
