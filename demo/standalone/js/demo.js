@@ -7,7 +7,7 @@
         hidePickers: false,
         scrollHeight: 200,
         fitToParent: true,
-        getLocaleCallback: function() { return 'en-US'; },
+        getLocaleCallback: function() { return 'es'; },
         getDateFormatCallback: function() { return 'DD/MM/YYYY'; },
         getTimeFormatCallback: function() { return 'hh:mm A'; },
         i18nPath: '../../src/ev-script/i18n'
@@ -34,7 +34,6 @@
             resize = function(event) {
                 $container.height($(window).height() * 0.8);
                 $tabs.tabs('refresh');
-                // app.appEvents.trigger('resize');
             };
         $(window).resize(resize);
         app.done(function() {
@@ -51,7 +50,6 @@
                         playlistSelected = true;
                         app.handleField($('#playlistWrap')[0], new EV.PlaylistSettings(), '#playlist');
                     }
-                    app.appEvents.trigger('resize');
                 }
             });
             resize();
