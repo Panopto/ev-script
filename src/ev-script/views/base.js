@@ -12,15 +12,18 @@ define(function(require) {
         initialize: function(options) {
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
+            this.root = cacheUtil.getAppRoot(this.appId);
             this.auth = cacheUtil.getAppAuth(this.appId);
             this.info = cacheUtil.getAppInfo(this.appId);
             this.appEvents = eventsUtil.getEvents(this.appId);
             this.globalEvents = eventsUtil.getEvents('global');
             this.i18n = cacheUtil.getAppI18n(this.appId);
         },
-        ajaxError: function(xhr, authCallback) {
+        ajaxError: function(collection, xhr, options) {
             if (xhr.status === 401) {
-                this.auth.handleUnauthorized(this.el, authCallback);
+                // TODO - add to messages
+                window.alert(this.i18n.formatMessage('You are unauthorized to perform this action.'));
+                // this.auth.handleUnauthorized(this.el, authCallback);
             } else if (xhr.status === 500) {
                 window.alert(this.i18n.formatMessage('It appears there is an issue with the Ensemble Video installation.'));
             } else if (xhr.status === 404) {

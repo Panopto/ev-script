@@ -47,7 +47,7 @@ define(function(require) {
             var extensions = '',
                 selected = this.workflowSelect.getSelected(),
                 maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10),
-                policyMessage = this.info.checkVersion('>=4.8.0') ? _.unescape(selected.get('PolicyMessage')) : '';
+                policyMessage = _.unescape(selected.get('PolicyMessage'));
 
             this.$('.policy-message').html(policyMessage);
 

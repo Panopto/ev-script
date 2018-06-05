@@ -72,12 +72,7 @@ define(function(require) {
                         }
                         this.loadLock = false;
                     }, this),
-                    error: _.bind(function(collection, xhr, options) {
-                        this.ajaxError(xhr, _.bind(function() {
-                            this.loadMore();
-                        }, this));
-                        this.loadLock = false;
-                    }, this)
+                    error: _.bind(this.ajaxError, this)
                 });
             }
         },

@@ -13,11 +13,7 @@ define(function(require) {
             this.libraryId = options.libraryId || '';
             this.filterOn = options.filterOn || '';
             this.filterValue = options.filterValue || '';
-            if (this.info.checkVersion('>=4.1.0')) {
-                this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedLibrary' : '/api/MediaLibrary';
-            } else {
-                this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedContent' : '/api/Content';
-            }
+            this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedLibrary' : '/api/MediaLibrary';
             this.pageIndex = 1;
         },
         _cache: function(key, resp) {

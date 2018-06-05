@@ -9,35 +9,38 @@ define(function(require) {
         BaseCollection = require('ev-script/collections/base');
 
     return Backbone.Model.extend({
+        constructor: function(attributes, options) {
+            // Parse a copy of the passed in attributes during construction.
+            Backbone.Model.call(this, this._parse(_.clone(attributes)), options);
+        },
         initialize: function(attributes, options) {
+            this.href = options.href;
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
         },
         getCached: function() {},
         setCached: function() {},
-        fetch: function(options) {
-            if (options && options.success) {
-                options.success = _.wrap(options.success, _.bind(function(success) {
-                    // We've successfully queried the API for something that
-                    // requires authentication but we're in an unauthenticated
-                    // state.  Double-check our authentication and proceed.
-                    var args = Array.prototype.slice.call(arguments, 1);
-                    if (this.requiresAuth && !this.auth.isAuthenticated()) {
-                        this.auth.fetchUser()
-                        .always(function() {
-                            success.apply(this, args);
-                        });
-                    } else {
-                        success.apply(this, args);
-                    }
-                }, this));
-                // TODO - maybe wrap error to handle 401?
-            }
-            return Backbone.Model.prototype.fetch.call(this, options);
+        _parse: function(attributes) {
+            // Borrowing from https://github.com/mikekelly/backbone.hal
+            attributes = attributes || {};
+            this.links = attributes._links || attributes.links || {};
+            delete attributes._links;
+            this.embedded = attributes._embedded || attributes.embedded || {};
+            delete attributes._embedded;
+            return attributes;
+        },
+        parse: function(response) {
+            return this._parse(response);
         },
         sync: function(method, collection, options) {
             _.defaults(options || (options = {}), {
-                xhrFields: { withCredentials: true }
+                xhrFields: {
+                    withCredentials: true
+                },
+                dataType: 'json',
+                accepts: {
+                    json: 'application/hal+json'
+                }
             });
             if (method === 'read') {
                 var cached = this.getCached(options.cacheKey);
@@ -59,6 +62,10 @@ define(function(require) {
             } else {
                 return Backbone.Model.prototype.sync.call(this, method, collection, options);
             }
+        },
+        url: function() {
+            var url = this.links['self'] ? this.links['self'].href : this.href;
+            return this.config.urlCallback ? this.config.urlCallback(url) : url;
         }
     });
 

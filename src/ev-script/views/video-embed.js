@@ -26,23 +26,7 @@ define(function(require) {
         getSrcUrl: function(width, height, isPreview) {
             var id = this.model.get('id'),
                 url = URI(this.config.ensembleUrl);
-            if (this.info.checkVersion('>=4.8.0')) {
                 url.path('/hapi/v1/contents/' + id + '/plugin');
-                url.addQuery({
-                    'displayViewersReport': this.model.get('viewersreport'),
-                    'embedAsThumbnail': this.model.get('embedthumbnail'),
-                    'startTime': 0,
-                    'displayCredits': this.model.get('metadata')
-                });
-            } else {
-                url.path('/app/plugin/embed.aspx');
-                url.addQuery({
-                    'ID': id,
-                    'displayDateProduced': this.model.get('dateproduced'),
-                    'isNewPluginEmbed': true
-                });
-            }
-            // Common
             url.addQuery({
                 'autoPlay': this.model.get('autoplay'),
                 'displayTitle': this.model.get('showtitle'),
@@ -55,6 +39,10 @@ define(function(require) {
                 'displayMetaData': this.model.get('metadata'),
                 'displayEmbedCode': this.model.get('embedcode'),
                 'displayDownloadIcon': this.model.get('download'),
+                'displayViewersReport': this.model.get('viewersreport'),
+                'embedAsThumbnail': this.model.get('embedthumbnail'),
+                'startTime': 0,
+                'displayCredits': this.model.get('metadata'),
                 'showCaptions': this.model.get('showcaptions'),
                 'hideControls': true,
                 'width': width,
@@ -90,14 +78,12 @@ define(function(require) {
             return height;
         },
         isMenuVisible: function() {
-            return (this.info.checkVersion('<4.8.0') && this.model.get('showtitle')) ||
-                   this.model.get('socialsharing') ||
+            return this.model.get('socialsharing') ||
                    this.model.get('annotations') ||
                    this.model.get('captionsearch') ||
                    this.model.get('attachments') ||
                    this.model.get('links') ||
                    this.model.get('metadata') ||
-                   (this.info.checkVersion('<4.8.0') && this.model.get('dateproduced')) ||
                    this.model.get('embedcode') ||
                    this.model.get('download') ||
                    this.model.get('viewersreport');

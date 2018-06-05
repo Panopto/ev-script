@@ -54,7 +54,7 @@ define(function(require, template) {
             });
             $(window).on('message', _.bind(function(e) {
                 if (e.originalEvent.data === this.config.ensembleAuthOptions.authCompleteMessage) {
-                    this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
+                    // this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
                     this.$dialog.dialog('destroy').remove();
                     this.submitCallback();
                 }

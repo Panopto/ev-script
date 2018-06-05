@@ -7,6 +7,7 @@ define(function(require) {
 
     return BaseCollection.extend({
         initialize: function(models, options) {
+            this.itemRel = 'organizations';
             BaseCollection.prototype.initialize.call(this, models, options);
         },
         _cache: function(key, resp) {
@@ -21,14 +22,14 @@ define(function(require) {
         setCached: function(key, resp) {
             return this._cache('orgs', resp);
         },
-        url: function() {
-            var api_url = this.config.ensembleUrl + '/api/Organizations';
-            // Make this arbitrarily large so we can retrieve ALL orgs in a single request
-            var sizeParam = 'PageSize=9999';
-            var indexParam = 'PageIndex=1';
-            var url = api_url + '?' + sizeParam + '&' + indexParam;
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        }
+        // url: function() {
+        //     var api_url = this.config.ensembleUrl + '/api/Organizations';
+        //     // Make this arbitrarily large so we can retrieve ALL orgs in a single request
+        //     var sizeParam = 'PageSize=9999';
+        //     var indexParam = 'PageIndex=1';
+        //     var url = api_url + '?' + sizeParam + '&' + indexParam;
+        //     return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        // }
     });
 
 });

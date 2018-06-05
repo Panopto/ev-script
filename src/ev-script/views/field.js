@@ -47,6 +47,11 @@ define(function(require) {
                     this.$field.val(JSON.stringify(json));
                     this.appEvents.trigger('fieldUpdated', this.$field, json);
                     this.renderActions();
+                }, this),
+                doAuthenticate = _.bind(function() {
+                    if (!this.auth.isAuthenticated()) {
+                        this.auth.handleUnauthorized(this.el);
+                    }
                 }, this);
             if (this.model instanceof VideoSettings) {
                 this.modelClass = VideoSettings;
@@ -152,6 +157,9 @@ define(function(require) {
                     this.showChoose = true;
                 }
             }, this);
+
+            // Authentication check
+            doAuthenticate();
         },
         events: {
             'click .action-choose': 'chooseHandler',

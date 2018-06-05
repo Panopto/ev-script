@@ -34,19 +34,12 @@ define(function(require) {
                 'showCaptions': this.model.get('showcaptions'),
                 'displayDateProduced': this.model.get('dateproduced'),
                 'audioPreviewImage': this.model.get('audiopreviewimage'),
-                'displayCaptionSearch': this.model.get('captionsearch')
+                'displayCaptionSearch': this.model.get('captionsearch'),
+                'displayViewersReport': this.model.get('viewersreport')
             });
-            if (this.info.checkVersion('<4.8.0')) {
-                src.addQuery({
-                    'displayStatistics': this.model.get('statistics')
-                });
-            }
             if (isPreview) {
                 // Hack to bypass restrictions for preview
                 src.addQuery('isPermalinkPreview', true);
-            }
-            if (this.info.checkVersion('>=4.8.0')) {
-                src.addQuery('displayViewersReport', this.model.get('viewersreport'));
             }
             if (this.model.get('layout') === 'showcase') {
                 var showcaseLayout = this.model.get('showcaseLayout');

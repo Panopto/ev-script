@@ -26,11 +26,11 @@ define(function(require) {
         render: function() {
             var username = '';
             if (this.auth.isAuthenticated()) {
-                username = this.auth.getUser().get('UserName');
+                username = this.auth.getUser().get('username');
             }
             this.$el.html(this.template({
                 i18n: this.i18n,
-                showLogout: this.auth.isAuthenticated() && this.config.authType !== 'none',
+                showLogout: this.auth.isAuthenticated(),
                 username: username
             }));
         },

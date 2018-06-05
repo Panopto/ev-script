@@ -15,13 +15,15 @@ define(function(require) {
         FieldView = require('ev-script/views/field'),
         VideoEmbedView = require('ev-script/views/video-embed'),
         PlaylistEmbedView = require('ev-script/views/playlist-embed'),
+        Root = require('ev-script/models/root'),
         AppInfo = require('ev-script/models/app-info'),
-        BasicAuth = require('ev-script/auth/basic/auth'),
-        FormsAuth = require('ev-script/auth/forms/auth'),
         EnsembleAuth = require('ev-script/auth/ensemble/auth'),
-        NoneAuth = require('ev-script/auth/none/auth'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
+
+    // Require jquery.cookie here so it is bundled. It is used in our factory
+    // for configuration of i18n.
+    require('jquery.cookie');
 
     // Load globalize deps
     require('cldr/supplemental');
@@ -30,6 +32,8 @@ define(function(require) {
 
     var EnsembleApp = function(appOptions) {
 
+        // TODO - Do I really need this anymore?  IIRC it was to deal w/
+        // multiple instances of this "app" on a page.
         // Lame unique id generator
         var appId = Math.floor(Math.random() * 10000000000000001).toString(16);
 
@@ -44,8 +48,8 @@ define(function(require) {
         var defaults = {
             // Application root of the EV installation.
             ensembleUrl: '',
-            // Cookie path.
-            authPath: '',
+            // Path to the api under the ensembleUrl.
+            apiPath: '/hapi',
             // Models/collections will typically fetch directly from the API,
             // but this method is called in case that needs to be overridden
             // (e.g. in cross-domain scenarios where we're using a proxy).
@@ -61,10 +65,6 @@ define(function(require) {
             hidePickers: true,
             // The difference between window dimensions and maximum dialog size.
             dialogMargin: 40,
-            // This can be 'forms', 'basic' (default), 'none' (in which case an
-            // access denied message is displayed and user is not prompted to
-            // authenticate), or 'ensemble' (loads a login widget in an iframe).
-            authType: 'basic',
             // Set this in order to select the default identity provider in the
             // forms auth identity provider dropdown.
             defaultProvider: '',
@@ -81,9 +81,14 @@ define(function(require) {
             },
             // Path to i18n folder
             i18nPath: 'i18n',
-            // Options used for 'ensemble' authType
+
+            // TODO - Given third-party cookie restrictions...modify
+            // ensembleAuth to immediately open first-party window for login?
+            // Do same w/ logout (rather than using api)?
+            // Options used for 'ensemble' authentication
             ensembleAuthOptions: {
-                // Path to ensemble login page when using 'ensemble' authType
+                // Path to ensemble login page when using 'ensemble'
+                // authentication
                 authPath: '/app/lti/login.aspx',
                 authCompleteMessage: 'ev_auth_complete'
             }
@@ -109,10 +114,6 @@ define(function(require) {
         // eventsUtil also provides us with a global event aggregator for events
         // that span app instances
         this.globalEvents = eventsUtil.getEvents();
-        var info = new AppInfo({}, {
-            appId: appId
-        });
-        cacheUtil.setAppInfo(appId, info);
 
         var finishLoading = _.bind(function() {
 
@@ -121,76 +122,83 @@ define(function(require) {
             Globalize.loadMessages(messages);
             cacheUtil.setAppI18n(appId, new Globalize(!messages[locale] ? 'en-US' : locale));
 
-            // Load application info from EV
-            info.fetch({})
-            .always(_.bind(function() {
-                if (!info.get('ApplicationVersion')) {
-                    loading.reject('Failed to retrieve application info.');
-                } else {
-                    // This will initialize and cache an auth object for our app
-                    var auth;
-                    switch (config.authType) {
-                        case 'forms':
-                            auth = new FormsAuth(appId);
-                            break;
-                        case 'none':
-                            auth = new NoneAuth(appId);
-                            break;
-                        case 'ensemble':
-                            auth = new EnsembleAuth(appId);
-                            break;
-                        default:
-                            auth = new BasicAuth(appId);
-                            break;
+            var root = new Root({}, {
+                href: config.ensembleUrl + config.apiPath,
+                appId: appId,
+            });
+            cacheUtil.setAppRoot(appId, root);
+
+            root.fetch({})
+            .done(_.bind(function() {
+                console.log(root);
+
+                var info = new AppInfo({}, {
+                    href: root.links['ev:Info'].href,
+                    appId: appId
+                });
+                cacheUtil.setAppInfo(appId, info);
+
+                // Load application info from EV
+                info.fetch({})
+                .always(_.bind(function() {
+                    if (!info.get('applicationVersion')) {
+                        loading.reject('Failed to retrieve application info.');
+                    } else {
+                        // This will initialize and cache an auth object for our app
+                        var auth = new EnsembleAuth(appId);
+                        cacheUtil.setAppAuth(appId, auth);
+
+                        // TODO - document and add some flexibility to params (e.g. in addition
+                        // to selector allow element or object).
+                        this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
+                            var $field = $(fieldSelector, fieldWrap);
+                            var fieldView = new FieldView({
+                                id: fieldWrap.id || appId,
+                                el: fieldWrap,
+                                model: settingsModel,
+                                $field: $field,
+                                appId: appId
+                            });
+                        };
+
+                        // TODO - document.  See handleField comment too.
+                        this.handleEmbed = function(embedWrap, settingsModel) {
+                            if (settingsModel instanceof VideoSettings) {
+                                var videoEmbed = new VideoEmbedView({
+                                    el: embedWrap,
+                                    model: settingsModel,
+                                    appId: appId
+                                });
+                                videoEmbed.render();
+                            } else {
+                                var playlistEmbed = new PlaylistEmbedView({
+                                    el: embedWrap,
+                                    model: settingsModel,
+                                    appId: appId
+                                });
+                                playlistEmbed.render();
+                            }
+                        };
+
+                        this.getEmbedCode = function(settings) {
+                            var $div = $('<div/>');
+                            if (settings.type === 'video') {
+                                this.handleEmbed($div[0], new VideoSettings(settings));
+                            } else {
+                                this.handleEmbed($div[0], new PlaylistSettings(settings));
+                            }
+                            return $div.html();
+                        };
+
+                        this.appEvents.trigger('appLoaded');
+                        loading.resolve();
                     }
-                    cacheUtil.setAppAuth(appId, auth);
-
-                    // TODO - document and add some flexibility to params (e.g. in addition
-                    // to selector allow element or object).
-                    this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
-                        var $field = $(fieldSelector, fieldWrap);
-                        var fieldView = new FieldView({
-                            id: fieldWrap.id || appId,
-                            el: fieldWrap,
-                            model: settingsModel,
-                            $field: $field,
-                            appId: appId
-                        });
-                    };
-
-                    // TODO - document.  See handleField comment too.
-                    this.handleEmbed = function(embedWrap, settingsModel) {
-                        if (settingsModel instanceof VideoSettings) {
-                            var videoEmbed = new VideoEmbedView({
-                                el: embedWrap,
-                                model: settingsModel,
-                                appId: appId
-                            });
-                            videoEmbed.render();
-                        } else {
-                            var playlistEmbed = new PlaylistEmbedView({
-                                el: embedWrap,
-                                model: settingsModel,
-                                appId: appId
-                            });
-                            playlistEmbed.render();
-                        }
-                    };
-
-                    this.getEmbedCode = function(settings) {
-                        var $div = $('<div/>');
-                        if (settings.type === 'video') {
-                            this.handleEmbed($div[0], new VideoSettings(settings));
-                        } else {
-                            this.handleEmbed($div[0], new PlaylistSettings(settings));
-                        }
-                        return $div.html();
-                    };
-
-                    this.appEvents.trigger('appLoaded');
-                    loading.resolve();
-                }
+                }, this));
+            }, this))
+            .fail(_.bind(function() {
+                loading.reject('An error occurred while connecting to the Ensemble Video API');
             }, this));
+
         }, this);
 
         // Load messages for locale

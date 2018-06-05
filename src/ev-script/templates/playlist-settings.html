@@ -87,12 +87,10 @@
                     <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get('embedcode')) { print('checked="checked"'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print('disabled') } %> />
                     <label for="embedcode"><%= i18n.formatMessage('Embed Code') %></label>
                 </div>
-                <% if (!appInfo.checkVersion('>=4.8.0')) { %>
                 <div class="fieldWrap inline-option">
                     <input id="statistics" class="form-checkbox" <% if (model.get('statistics')) { print('checked="checked"'); } %> name="statistics" type="checkbox"/>
                     <label for="statistics"><%= i18n.formatMessage('Statistics') %></label>
                 </div>
-                <% } %>
                 <div class="fieldWrap inline-option">
                     <input id="duration" class="form-checkbox" <% if (model.get('duration')) { print('checked="checked"'); } %> name="duration" type="checkbox"/>
                     <label for="duration"><%= i18n.formatMessage('Duration') %></label>
@@ -137,12 +135,10 @@
                     <input id="captionsearch" class="form-checkbox" <% if (model.get('captionsearch')) { print('checked="checked"'); } %> name="captionsearch" type="checkbox"/>
                     <label for="captionsearch"><%= i18n.formatMessage('Interactive Transcript') %></label>
                 </div>
-                <% if (appInfo.checkVersion('>=4.8.0')) { %>
-                    <div class="fieldWrap inline-option">
-                        <input id="viewersreport" class="form-checkbox" <% if (model.get('viewersreport')) { print('checked="checked"'); } %>  name="viewersreport" type="checkbox"/>
-                        <label for="viewersreport"><%= i18n.formatMessage('Viewers Report') %></label>
-                    </div>
-                <% } %>
+                <div class="fieldWrap inline-option">
+                    <input id="viewersreport" class="form-checkbox" <% if (model.get('viewersreport')) { print('checked="checked"'); } %>  name="viewersreport" type="checkbox"/>
+                    <label for="viewersreport"><%= i18n.formatMessage('Viewers Report') %></label>
+                </div>
             </div>
         </div>
         <div class="form-actions">

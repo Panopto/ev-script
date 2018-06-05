@@ -93,37 +93,31 @@ define(function(require) {
         },
         loadOrgs: function() {
             var orgs = new Organizations({}, {
+                href: this.root.links['ev:Organizations'].href,
                 appId: this.appId
             });
             orgs.fetch({
                 picker: this.picker,
                 success: _.bind(function(collection, response, options) {
-                    this.orgSelect.collection.reset(collection.models);
+                    this.orgSelect.collection.reset(collection);
                 }, this),
-                error: _.bind(function(collection, xhr, options) {
-                    this.ajaxError(xhr, _.bind(function() {
-                        this.loadOrgs();
-                    }, this));
-                }, this)
+                error: _.bind(this.ajaxError, this)
             });
         },
         loadLibraries: function() {
             var orgId = this.picker.model.get('organizationId');
+            var org = this.orgSelect.collection.findWhere({ 'id': orgId });
             var libs = new Libraries({}, {
-                organizationId: orgId,
+                href: org.links['ev:Libraries'].href,
                 appId: this.appId
             });
             libs.fetch({
                 picker: this.picker,
                 cacheKey: orgId,
                 success: _.bind(function(collection, response, options) {
-                    this.libSelect.collection.reset(collection.models);
+                    this.libSelect.collection.reset(collection);
                 }, this),
-                error: _.bind(function(collection, xhr, options) {
-                    this.ajaxError(xhr, _.bind(function() {
-                        this.loadLibraries();
-                    }, this));
-                }, this)
+                error: _.bind(this.ajaxError, this)
             });
         },
         activateRecord: function() {

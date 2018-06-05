@@ -9,21 +9,13 @@ define(function(require) {
     return BaseModel.extend({
         initialize: function(attributes, options) {
             BaseModel.prototype.initialize.call(this, attributes, options);
-            this.requiresAuth = false;
-        },
-        url: function() {
-            var url = this.config.ensembleUrl + '/api/Info';
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
         },
         parse: function(response) {
             return response;
         },
         checkVersion: function(condition) {
-            var version = this.get('ApplicationVersion');
+            var version = this.get('applicationVersion');
             return version && semver.satisfies(version, condition);
-        },
-        anthemEnabled: function() {
-            return this.checkVersion('>=4.2.0');
         }
     });
 

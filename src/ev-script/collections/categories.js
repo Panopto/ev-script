@@ -9,7 +9,6 @@ define(function(require) {
     return BaseCollection.extend({
         initialize: function(models, options) {
             BaseCollection.prototype.initialize.call(this, models, options);
-            this.requiresAuth = false;
             this.playlistId = options.playlistId || '';
         },
         url: function() {

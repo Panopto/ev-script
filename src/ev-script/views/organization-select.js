@@ -21,7 +21,8 @@ define(function(require) {
             this.collection.on('reset', this.render);
         },
         render: function() {
-            var selectedId = this.picker.model.get('organizationId') || this.auth.getUser().get('OrganizationID');
+            // TODO - there's a race condition here on login...this.auth.getUser() returning null (resulting in error below)
+            var selectedId = this.picker.model.get('organizationId') || this.auth.getUser().get('defaultOrganizationId');
             this.$select.html(this.optionsTemplate({
                 selectedId: selectedId,
                 collection: this.collection

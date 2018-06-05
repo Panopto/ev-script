@@ -79,11 +79,7 @@ define(function(require) {
                     this.resultsView.collection = collection;
                     this.resultsView.render();
                 }, this),
-                error: _.bind(function(collection, xhr, options) {
-                    this.ajaxError(xhr, _.bind(function() {
-                        this.loadPlaylists();
-                    }, this));
-                }, this)
+                error: _.bind(this.ajaxError, this)
             });
             this.appEvents.off('reloadPlaylists').on('reloadPlaylists', clearPlaylistsCache);
         }

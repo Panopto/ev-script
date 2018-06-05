@@ -173,11 +173,7 @@ define(function(require) {
                     this.resultsView.collection = collection;
                     this.resultsView.render();
                 }, this),
-                error: _.bind(function(collection, xhr, options) {
-                    this.ajaxError(xhr, _.bind(function() {
-                        this.loadVideos();
-                    }, this));
-                }, this)
+                error: _.bind(this.ajaxError, this)
             });
             this.appEvents.off('fileUploaded').on('fileUploaded', clearVideosCache);
             this.appEvents.off('reloadVideos').on('reloadVideos', clearVideosCache);
@@ -201,17 +197,13 @@ define(function(require) {
                         this.filter.hideRecord();
                     }
                 }, this),
-                error: _.bind(function(collection, xhr, options) {
-                    this.ajaxError(xhr, _.bind(function() {
-                        this.loadWorkflows();
-                    }, this));
-                }, this),
+                error: _.bind(this.ajaxError, this),
                 reset: true
             });
         },
         canRecord: function() {
             var currentUser = this.auth.getUser();
-            return this.info.anthemEnabled() && currentUser && currentUser.get('CanUseAnthem') && !this.isMobile() && platform.os.family !== 'Linux';
+            return currentUser && currentUser.get('CanUseAnthem') && !this.isMobile() && platform.os.family !== 'Linux';
         },
         isMobile: function() {
             var family = platform.os.family;

@@ -5,48 +5,71 @@ define(function(require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
+        BaseModel = require('ev-script/models/base'),
         cacheUtil = require('ev-script/util/cache');
 
     return Backbone.Collection.extend({
+        constructor: function(obj, options) {
+            if (!_.isArray(obj)) {
+                obj = this._parse(_.clone(obj));
+            }
+            // Parse a copy of the passed in attributes during construction.
+            Backbone.Collection.call(this, obj, options);
+        },
         initialize: function(collections, options) {
-            this.requiresAuth = true;
+            this.href = options.href;
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
             this.auth = cacheUtil.getAppAuth(this.appId);
             this.info = cacheUtil.getAppInfo(this.appId);
         },
         model: Backbone.Model.extend({
-            idAttribute: 'ID'
+            idAttribute: 'id'
         }),
         getCached: function(key) {},
         setCached: function(key, resp) {},
         clearCache: function(key) {},
-        parse: function(response) {
-            return response.Data;
-        },
-        fetch: function(options) {
-            if (options && options.success) {
-                options.success = _.wrap(options.success, _.bind(function(success) {
-                    // We've successfully queried the API for something that
-                    // requires authentication but we're in an unauthenticated
-                    // state.  Double-check our authentication and proceed.
-                    var args = Array.prototype.slice.call(arguments, 1);
-                    if (this.requiresAuth && !this.auth.isAuthenticated()) {
-                        this.auth.fetchUser()
-                        .always(function() {
-                            success.apply(this, args);
-                        });
-                    } else {
-                        success.apply(this, args);
-                    }
-                }, this));
-                // TODO - maybe wrap error to handle 401?
+        _parse: function(obj) {
+            // Borrowing from https://github.com/mikekelly/backbone.hal
+            var items;
+            obj = obj || {};
+            this.links = obj._links || obj.links || {};
+            delete obj._links;
+            this.embedded = obj._embedded || obj.embedded || {};
+            delete obj._embedded;
+            this.attributes = obj || {};
+            if (this.itemRel != null) {
+              items = this.embedded[this.itemRel];
+            } else {
+              items = this.embedded.items;
             }
-            return Backbone.Collection.prototype.fetch.call(this, options);
+            _.each(items, _.bind(function(item, index) {
+                if (!this._isModel(item)) {
+                    items[index] = new BaseModel(item, { appId: this.appId });
+                }
+            }, this));
+            return items;
+        },
+        parse: function(response) {
+            return this._parse(response);
+        },
+        reset: function(obj, options) {
+            options = options || {};
+            if (!_.isArray(obj)) {
+              obj = this.parse(_.clone(obj));
+            }
+            options.parse = false;
+            Backbone.Collection.prototype.reset.call(this, obj, options);
         },
         sync: function(method, collection, options) {
             _.defaults(options || (options = {}), {
-                xhrFields: { withCredentials: true }
+                xhrFields: {
+                    withCredentials: true
+                },
+                dataType: 'json',
+                accepts: {
+                    json: 'application/hal+json'
+                }
             });
             if (method === 'read') {
                 var cached = this.getCached(options.cacheKey);
@@ -68,6 +91,9 @@ define(function(require) {
             } else {
                 return Backbone.Collection.prototype.sync.call(this, method, collection, options);
             }
+        },
+        url: function() {
+            return this.links['self'] ? this.links['self'].href : this.href;
         }
     });
 
