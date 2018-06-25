@@ -20,7 +20,7 @@ define(function(require) {
             _.bindAll(this, 'render', 'decorate', 'loadMore', 'addHandler', 'previewItem', 'refreshHandler');
             this.picker = options.picker;
             this.appId = options.appId;
-            this.loadLock = false;
+            // this.loadLock = false;
         },
         events: {
             'click .action-preview': 'previewItem',
@@ -57,23 +57,23 @@ define(function(require) {
             e.preventDefault();
         },
         loadMore: function() {
-            if (this.collection.hasMore && !this.loadLock) {
-                this.loadLock = true;
-                this.collection.fetch({
-                    remove: false,
-                    picker: this.picker,
-                    success: _.bind(function(collection, response, options) {
-                        if (_.size(response.Data) < this.config.pageSize) {
-                            collection.hasMore = false;
-                            this.$scrollLoader.evScrollLoader('hideLoader');
-                        } else {
-                            collection.hasMore = true;
-                            collection.pageIndex += 1;
-                        }
-                        this.loadLock = false;
-                    }, this),
-                    error: _.bind(this.ajaxError, this)
-                });
+            var next = this.model.getLink('next');
+            if (next) {
+                // this.loadLock = true;
+                this.model.href = next.href;
+                this.model.promise.done(_.bind(function() {
+                    this.model.fetch({
+                        // remove: false,
+                        picker: this.picker,
+                        success: _.bind(function(model, response, options) {
+                            if (!model.getLink('next')) {
+                                this.$scrollLoader.evScrollLoader('hideLoader');
+                            }
+                            this.collection.add(model.getEmbedded('contents').models);
+                        }, this),
+                        error: _.bind(this.ajaxError, this)
+                    });
+                }, this));
             }
         },
         addHandler: function(item, collection, options) {
@@ -191,7 +191,7 @@ define(function(require) {
         render: function() {
             this.$el.html(this.resultsTemplate({
                 i18n: this.i18n,
-                totalResults: this.collection.totalResults
+                totalResults: this.model.get('totalItemsCount')
             }));
             this.$total = this.$('.total');
             this.$results = this.$('.results');
@@ -214,7 +214,7 @@ define(function(require) {
             });
             // TODO - I don't think we need scroll loader to set max-height (ever?)
             this.$scrollLoader.closest('.scrollWrap').css('max-height', '');
-            if (!this.collection.hasMore) {
+            if (!this.model.getLink('next')) {
                 this.$scrollLoader.evScrollLoader('hideLoader');
             }
             // Prevent multiple bindings if the collection hasn't changed between render calls

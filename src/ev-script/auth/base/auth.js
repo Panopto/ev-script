@@ -17,7 +17,7 @@ define(function(require) {
             this.globalEvents = eventsUtil.getEvents('global');
             this.appEvents = eventsUtil.getEvents(appId);
             this.user = null;
-            this.appEvents.on('appLoaded', this.authCallback, this);
+            this.appEvents.on('appLoaded', this.initCallback, this);
         };
 
     // Reusing Backbone's object model for extension
@@ -39,17 +39,20 @@ define(function(require) {
             return this.user;
         },
         handleUnauthorized: function(element, authCallback) {},
-        authCallback: function() {
-            if (!this.root.embedded.user) {
+        initCallback: function() {
+            var user = this.root.getEmbedded('ev:Users/Current');
+            if (!user) {
                 this.user = null;
                 this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
                 return;
             }
-            this.user = new CurrentUser(this.root.embedded.user, {
-                appId: this.appId
-            });
+            this.user = user;
+            // new CurrentUser(user, {
+            //     appId: this.appId
+            // });
             this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
-        }
+        },
+        authCallback: function() {}
     });
 
     return BaseAuth;

@@ -37,13 +37,13 @@ define(function(require) {
         // Lame unique id generator
         var appId = Math.floor(Math.random() * 10000000000000001).toString(16);
 
-        // Get or create a new cache to store objects specific to EV
-        // installation but common across 'app' instances (e.g. videos
-        // accessible by a given user).
-        var evCache = cacheUtil.caches.get(appOptions.ensembleUrl);
-        if (!evCache) {
-            evCache = cacheUtil.caches.set(appOptions.ensembleUrl, new cacheUtil.Cache());
-        }
+        // // Get or create a new cache to store objects specific to EV
+        // // installation but common across 'app' instances (e.g. videos
+        // // accessible by a given user).
+        // var evCache = cacheUtil.caches.get(appOptions.ensembleUrl);
+        // if (!evCache) {
+        //     evCache = cacheUtil.caches.set(appOptions.ensembleUrl, new cacheUtil.Cache());
+        // }
 
         var defaults = {
             // Application root of the EV installation.
@@ -130,10 +130,11 @@ define(function(require) {
 
             root.fetch({})
             .done(_.bind(function() {
+                // TODO - remove
                 console.log(root);
 
                 var info = new AppInfo({}, {
-                    href: root.links['ev:Info'].href,
+                    href: root.getLink('ev:Info/Get').href,
                     appId: appId
                 });
                 cacheUtil.setAppInfo(appId, info);

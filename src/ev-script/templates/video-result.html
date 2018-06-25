@@ -1,30 +1,31 @@
 <div class="<%= (index % 2 ? 'odd' : 'even') %> result-item">
     <div class="content-actions">
         <div class="thumbnail-wrap">
-            <img class="thumbnail" src="<%= item.get('ThumbnailUrl') %>" alt="<%= i18n.formatMessage('{0} preview thumbnail', item.get('Title')) %>"/>
-            <% if (item.get('IsCaptioned')) { %>
+            <img class="thumbnail" src="<%= item.getThumbnailUrl() %>" alt="<%= i18n.formatMessage('{0} preview thumbnail', item.get('title')) %>"/>
+            <% if (item.get('hasCaptions')) { %>
             <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage('CC') %>" alt="CC"></i>
             <% } %>
         </div>
         <div class="action-links">
-            <a class="action-add" href="#" title="<%= i18n.formatMessage('Click to choose {0}', item.get('Title')) %>" rel="<%= item.get('ID') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage('Choose') %></span></a>
-            <a class="action-preview" href="#" title="<%= i18n.formatMessage('Click to preview {0}', item.get('Title')) %>" rel="<%= item.get('ID') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage('Preview') %></span></a>
+            <a class="action-add" href="#" title="<%= i18n.formatMessage('Click to choose {0}', item.get('title')) %>" rel="<%= item.get('id') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage('Choose') %></span></a>
+            <a class="action-preview" href="#" title="<%= i18n.formatMessage('Click to preview {0}', item.get('title')) %>" rel="<%= item.get('id') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage('Preview') %></span></a>
         </div>
     </div>
     <div class="content-meta">
         <div class="title">
-            <a class="action-preview" title="<%= i18n.formatMessage('Click to preview {0}', item.get('Title')) %>" href="#" rel="<%= item.get('ID') %>"><%= item.get('Title') %></a>
+            <a class="action-preview" title="<%= i18n.formatMessage('Click to preview {0}', item.get('title')) %>" href="#" rel="<%= item.get('id') %>"><%= item.get('title') %></a>
         </div>
         <div class="content-info">
+            <!-- TODO - status (not really useful though...all are "ready"?), views count, average views count -->
             <div class="info-row trunc">
                 <div class="label"><%= i18n.formatMessage('Description') %></div>
-                <div class="value"><%= item.get('Description') %></div>
+                <div class="value"><%= item.getDescription() %></div>
             </div>
             <div class="info-row">
                 <div class="label"><%= i18n.formatMessage('Date Added') %></div>
                 <div class="value">
                     <%
-                        var dateAdded = new Date(item.get('AddedOn')),
+                        var dateAdded = new Date(item.get('dateAdded')),
                             localDate = dateAdded.setMinutes(dateAdded.getMinutes() - dateAdded.getTimezoneOffset());
                         print(moment(localDate).format(dateTimeFormat));
                     %>
@@ -32,14 +33,8 @@
             </div>
             <div class="info-row trunc">
                 <div class="label"><%= i18n.formatMessage('Keywords') %></div>
-                <div class="value"><%= item.get('Keywords') %></div>
+                <div class="value"><%= item.getKeywords() %></div>
             </div>
-            <!-- redundant
-            <div class="info-row">
-                <div class="label"><%= i18n.formatMessage('Library') %></div>
-                <div class="value"><%- item.get('LibraryName') %></div>
-            </div>
-            -->
         </div>
     </div>
 </div>

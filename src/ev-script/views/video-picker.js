@@ -5,10 +5,11 @@ define(function(require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         platform = require('platform'),
+        URITemplate = require('urijs/URITemplate'),
         PickerView = require('ev-script/views/picker'),
         FilterView = require('ev-script/views/filter'),
         VideoResultsView = require('ev-script/views/video-results'),
-        Videos = require('ev-script/collections/videos'),
+        Videos = require('ev-script/models/videos'),
         MediaWorkflows = require('ev-script/collections/media-workflows'),
         UploadView = require('ev-script/views/upload');
 
@@ -146,35 +147,49 @@ define(function(require) {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
                 sourceId = this.model.get('sourceId'),
                 libraryId = this.model.get('libraryId'),
-                cacheKey = sourceId + libraryId + searchVal,
+                library = this.filter.getLibrary(libraryId),
+                // TODO - the relation used below depends ultimately on sourceId value
+                searchTemplate = new URITemplate(library.getLink('ev:Contents/Search').href),
+                searchUrl = searchTemplate.expand({
+                    status: 'ready,file_ready',
+                    search: searchVal,
+                    sortBy: 'dateAdded',
+                    desc: true
+                }),
+                // cacheKey = sourceId + libraryId + searchVal,
                 videos = new Videos({}, {
-                    sourceId: sourceId,
-                    libraryId: libraryId,
-                    filterOn: '',
-                    filterValue: searchVal,
+                    // sourceId: sourceId,
+                    // libraryId: libraryId,
+                    // filterOn: '',
+                    // filterValue: searchVal,
+                    href: searchUrl,
                     appId: this.appId
                 }),
                 clearVideosCache = _.bind(function() {
                     videos.clearCache();
                     this.loadVideos();
                 }, this);
+
             videos.fetch({
                 picker: this,
-                cacheKey: cacheKey,
-                success: _.bind(function(collection, response, options) {
-                    var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
-                    var size = _.size(response.Data);
-                    if (size === totalRecords) {
-                        collection.hasMore = false;
-                    } else {
-                        collection.hasMore = true;
-                        collection.pageIndex += 1;
-                    }
-                    this.resultsView.collection = collection;
+                // cacheKey: cacheKey,
+                success: _.bind(function(model, response, options) {
+                    // var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
+                    // var size = _.size(response.Data);
+                    // if (size === totalRecords) {
+                    //     collection.hasMore = false;
+                    // } else {
+                    //     collection.hasMore = true;
+                    //     collection.pageIndex += 1;
+                    // }
+                    // this.resultsView.collection = collection;
+                    this.resultsView.model = model;
+                    this.resultsView.collection = model.getEmbedded('contents');
                     this.resultsView.render();
                 }, this),
                 error: _.bind(this.ajaxError, this)
             });
+
             this.appEvents.off('fileUploaded').on('fileUploaded', clearVideosCache);
             this.appEvents.off('reloadVideos').on('reloadVideos', clearVideosCache);
         },

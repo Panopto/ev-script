@@ -4,11 +4,14 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        URITemplate = require('urijs/URITemplate'),
         BaseView = require('ev-script/views/base'),
+        BaseCollection = require('ev-script/collections/base'),
+        BaseModel = require('ev-script/models/base'),
         OrganizationSelectView = require('ev-script/views/organization-select'),
-        Organizations = require('ev-script/collections/organizations'),
+        Organizations = require('ev-script/models/organizations'),
         LibrarySelectView = require('ev-script/views/library-select'),
-        Libraries = require('ev-script/collections/libraries'),
+        Libraries = require('ev-script/models/libraries'),
         TypeSelectView = require('ev-script/views/library-type-select'),
         SearchView = require('ev-script/views/search');
 
@@ -19,7 +22,7 @@ define(function(require) {
             _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization',
                 'changeLibrary', 'activateRecord', 'deactivateRecord',
                 'showUpload', 'hideUpload', 'showRecord', 'hideRecord',
-                'setFocus');
+                'setFocus', 'getLibrary');
 
             this.picker = options.picker;
             this.id = options.id;
@@ -34,7 +37,7 @@ define(function(require) {
                 el: this.$('.ev-org-select'),
                 picker: this.picker,
                 appId: this.appId,
-                collection: new Organizations({}, {
+                collection: new BaseCollection(null, {
                     appId: this.appId
                 })
             });
@@ -44,7 +47,7 @@ define(function(require) {
                 el: this.$('.ev-lib-select'),
                 picker: this.picker,
                 appId: this.appId,
-                collection: new Libraries({}, {
+                collection: new BaseCollection(null, {
                     appId: this.appId
                 })
             });
@@ -92,33 +95,74 @@ define(function(require) {
             });
         },
         loadOrgs: function() {
-            var orgs = new Organizations({}, {
-                href: this.root.links['ev:Organizations'].href,
-                appId: this.appId
-            });
-            orgs.fetch({
-                picker: this.picker,
-                success: _.bind(function(collection, response, options) {
-                    this.orgSelect.collection.reset(collection);
-                }, this),
-                error: _.bind(this.ajaxError, this)
-            });
+            // In case root is loading...wait for it to finish
+            this.root.promise.done(_.bind(function() {
+                var searchTemplate = new URITemplate(this.root.getLink('ev:Organizations/Search').href),
+                    searchUrl = searchTemplate.expand({}),
+                    // Recursively load pages until we have all orgs.
+                    fetchOrgs = _.bind(function(url) {
+                        var orgs = new Organizations({}, {
+                            href: url,
+                            appId: this.appId
+                        });
+                        orgs.fetch({
+                            picker: this.picker,
+                            success: _.bind(function(model, response, options) {
+                                var next = model.getLink('next'),
+                                    embeddedOrgs = model.getEmbedded('organizations');
+                                if (embeddedOrgs) {
+                                    this.orgSelect.collection.add(embeddedOrgs.models);
+                                }
+                                if (next) {
+                                    fetchOrgs(next.href);
+                                } else {
+                                    // TODO - use appEvents instead?
+                                    this.orgSelect.collection.trigger('reset');
+                                }
+                            }, this),
+                            error: _.bind(this.ajaxError, this)
+                        });
+                    }, this);
+                fetchOrgs(searchUrl);
+            }, this));
         },
         loadLibraries: function() {
-            var orgId = this.picker.model.get('organizationId');
-            var org = this.orgSelect.collection.findWhere({ 'id': orgId });
-            var libs = new Libraries({}, {
-                href: org.links['ev:Libraries'].href,
-                appId: this.appId
-            });
-            libs.fetch({
-                picker: this.picker,
-                cacheKey: orgId,
-                success: _.bind(function(collection, response, options) {
-                    this.libSelect.collection.reset(collection);
-                }, this),
-                error: _.bind(this.ajaxError, this)
-            });
+            var orgId = this.picker.model.get('organizationId'),
+                org = this.orgSelect.collection.findWhere({ 'id': orgId }),
+                searchTemplate = new URITemplate(org.getLink('ev:Libraries/Search').href),
+                searchUrl = searchTemplate.expand({
+                    // TODO - for testing...remove this
+                    // pageSize: 5
+                }),
+                // Recursively load pages until we have all libraries.
+                fetchLibs = _.bind(function(url) {
+                    var libs = new Libraries({}, {
+                        href: url,
+                        appId: this.appId
+                    });
+                    libs.fetch({
+                        picker: this.picker,
+                        cacheKey: orgId,
+                        success: _.bind(function(model, response, options) {
+                            var next = model.getLink('next'),
+                                embeddedLibs = model.getEmbedded('libraries');
+                            if (embeddedLibs) {
+                                this.libSelect.collection.add(embeddedLibs.models);
+                            }
+                            if (next) {
+                                fetchLibs(next.href);
+                            } else {
+                                // TODO - use appEvents instead?
+                                this.libSelect.collection.trigger('reset');
+                            }
+                        }, this),
+                        error: _.bind(this.ajaxError, this)
+                    });
+                }, this);
+            fetchLibs(searchUrl);
+        },
+        getLibrary: function(id) {
+            return this.libSelect.collection.findWhere({ 'id': id });
         },
         activateRecord: function() {
             this.$('.record-active').show();

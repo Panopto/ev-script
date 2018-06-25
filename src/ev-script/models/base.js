@@ -5,33 +5,55 @@ define(function(require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
+        BaseCollection = require('ev-script/collections/base'),
         cacheUtil = require('ev-script/util/cache'),
-        BaseCollection = require('ev-script/collections/base');
+        BaseModel;
 
-    return Backbone.Model.extend({
-        constructor: function(attributes, options) {
-            // Parse a copy of the passed in attributes during construction.
-            Backbone.Model.call(this, this._parse(_.clone(attributes)), options);
-        },
+    BaseModel = Backbone.Model.extend({
+        // constructor: function(attributes, options) {
+        //     // Parse a copy of the passed in attributes during construction.
+        //     Backbone.Model.call(this, this._parse(_.clone(attributes)), options);
+        // },
         initialize: function(attributes, options) {
+            options = options || {};
             this.href = options.href;
             this.appId = options.appId;
             this.config = cacheUtil.getAppConfig(this.appId);
+            this.promise = $.Deferred().resolve().promise();
         },
-        getCached: function() {},
-        setCached: function() {},
-        _parse: function(attributes) {
-            // Borrowing from https://github.com/mikekelly/backbone.hal
-            attributes = attributes || {};
-            this.links = attributes._links || attributes.links || {};
-            delete attributes._links;
-            this.embedded = attributes._embedded || attributes.embedded || {};
-            delete attributes._embedded;
-            return attributes;
+        getCached: function(key) {},
+        setCached: function(key, value) {},
+        getLink: function(rel) {
+            var links = this.get('_links');
+            return links ? links[rel] : null;
         },
-        parse: function(response) {
-            return this._parse(response);
+        getEmbedded: function(rel) {
+            var embedded = this.get('_embedded');
+            if (!embedded) {
+                return null;
+            }
+            var resource = embedded[rel];
+            if (!resource) {
+                return null;
+            }
+            return _.isArray(resource) ?
+                new BaseCollection(_.map(resource, _.bind(function(item) {
+                        return new BaseModel(item, { appId : this.appId });
+                    }, this)), { appId : this.appId }) :
+                new BaseModel(resource, { appId : this.appId });
         },
+        // _parse: function(attributes) {
+        //     // Borrowing from https://github.com/mikekelly/backbone.hal
+        //     attributes = attributes || {};
+        //     this.links = attributes._links || attributes.links || {};
+        //     delete attributes._links;
+        //     this.embedded = attributes._embedded || attributes.embedded || {};
+        //     delete attributes._embedded;
+        //     return attributes;
+        // },
+        // parse: function(response) {
+        //     return this._parse(response);
+        // },
         sync: function(method, collection, options) {
             _.defaults(options || (options = {}), {
                 xhrFields: {
@@ -57,16 +79,19 @@ define(function(require) {
                         this.setCached(options.cacheKey, arguments[1]);
                         success.apply(this, Array.prototype.slice.call(arguments, 1));
                     }, this));
-                    return Backbone.Model.prototype.sync.call(this, method, collection, options);
+                    this.promise = Backbone.Model.prototype.sync.call(this, method, collection, options);
+                    return this.promise;
                 }
             } else {
-                return Backbone.Model.prototype.sync.call(this, method, collection, options);
+                this.promise = Backbone.Model.prototype.sync.call(this, method, collection, options);
+                return this.promise;
             }
         },
         url: function() {
-            var url = this.links['self'] ? this.links['self'].href : this.href;
+            var url = this.href ? this.href : this.getLink('self').href;
             return this.config.urlCallback ? this.config.urlCallback(url) : url;
         }
     });
 
+    return BaseModel;
 });

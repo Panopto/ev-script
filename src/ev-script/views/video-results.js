@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        URITemplate = require('urijs/URITemplate'),
         ResultsView = require('ev-script/views/results'),
         VideoSettings = require('ev-script/models/video-settings'),
         VideoPreviewView = require('ev-script/views/video-preview');
@@ -16,6 +17,24 @@ define(function(require) {
         resultTemplate: _.template(require('text!ev-script/templates/video-result.html')),
         initialize: function(options) {
             ResultsView.prototype.initialize.call(this, options);
+        },
+        getItemHtml: function(item, index) {
+            var branding = this.root.getEmbedded('ev:Brandings/Current');
+            item.getThumbnailUrl = function() {
+                var thumbnailLink = item.getLink('ev:Images/Thumbnail'),
+                    thumbnailTemplate = thumbnailLink ? thumbnailLink.href : branding.get('thumbnailImageUrlTemplate');
+                return new URITemplate(thumbnailTemplate).expand({
+                    width: 200,
+                    height: 112
+                });
+            };
+            item.getDescription = function() {
+                return _.unescape(item.get('description'));
+            };
+            item.getKeywords = function() {
+                return _.unescape(item.get('keywords'));
+            };
+            return ResultsView.prototype.getItemHtml.call(this, item, index);
         },
         decorate: function($item) {
             // Handle truncation (more/less) of truncatable fields

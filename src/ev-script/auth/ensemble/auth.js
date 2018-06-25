@@ -28,8 +28,9 @@ define(function(require) {
                 authView.render();
             },
             authCallback: function() {
-                this.root.fetch();
-                BaseAuth.prototype.authCallback.call(this);
+                this.root.fetch().always(_.bind(function() {
+                    this.initCallback();
+                }, this));
             }
         });
 
