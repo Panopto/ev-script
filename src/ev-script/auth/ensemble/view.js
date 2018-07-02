@@ -14,11 +14,10 @@ define(function(require, template) {
     return Backbone.View.extend({
         template: _.template(require('text!ev-script/auth/ensemble/template.html')),
         initialize: function(options) {
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
-            this.appEvents = eventsUtil.getEvents(this.appId);
+            this.config = cacheUtil.getConfig();
+            this.appEvents = eventsUtil.getEvents();
             this.globalEvents = eventsUtil.getEvents('global');
-            this.i18n = cacheUtil.getAppI18n(this.appId);
+            this.i18n = cacheUtil.getI18n();
             this.submitCallback = options.submitCallback || function() {};
         },
         render: function() {

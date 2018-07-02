@@ -16,9 +16,7 @@ define(function(require) {
             FieldView.prototype.initialize.call(this, options);
         },
         initCallback: function() {
-            this.categories = new Categories([], {
-                appId: this.appId
-            });
+            this.categories = new Categories([], {});
 
             if (!this.model.isNew()) {
                 this.categories.playlistId = this.model.id;

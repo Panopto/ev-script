@@ -10,19 +10,28 @@ define(function(require) {
         BaseModel;
 
     BaseModel = Backbone.Model.extend({
-        // constructor: function(attributes, options) {
-        //     // Parse a copy of the passed in attributes during construction.
-        //     Backbone.Model.call(this, this._parse(_.clone(attributes)), options);
-        // },
         initialize: function(attributes, options) {
             options = options || {};
             this.href = options.href;
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
+            this.config = cacheUtil.getConfig();
             this.promise = $.Deferred().resolve().promise();
+
+            // While getCache will return a default cache if cacheName is not
+            // passed, we want to allow opt-out. So if cacheName is not set
+            // simply use a null cache.
+            this.cache = options.cacheName ? cacheUtil.getCache(options.cacheName) : null;
         },
-        getCached: function(key) {},
-        setCached: function(key, value) {},
+        getCached: function(key) {
+            return this.cache && this.cache.get(key);
+        },
+        setCached: function(key, resp) {
+            return this.cache && this.cache.set(key, resp);
+        },
+        clearCache: function() {
+            if (this.cache) {
+                this.cache.clear();
+            }
+        },
         getLink: function(rel) {
             var links = this.get('_links');
             return links ? links[rel] : null;
@@ -38,22 +47,10 @@ define(function(require) {
             }
             return _.isArray(resource) ?
                 new BaseCollection(_.map(resource, _.bind(function(item) {
-                        return new BaseModel(item, { appId : this.appId });
-                    }, this)), { appId : this.appId }) :
-                new BaseModel(resource, { appId : this.appId });
+                        return new BaseModel(item, {});
+                    }, this)), {}) :
+                new BaseModel(resource, {});
         },
-        // _parse: function(attributes) {
-        //     // Borrowing from https://github.com/mikekelly/backbone.hal
-        //     attributes = attributes || {};
-        //     this.links = attributes._links || attributes.links || {};
-        //     delete attributes._links;
-        //     this.embedded = attributes._embedded || attributes.embedded || {};
-        //     delete attributes._embedded;
-        //     return attributes;
-        // },
-        // parse: function(response) {
-        //     return this._parse(response);
-        // },
         sync: function(method, collection, options) {
             _.defaults(options || (options = {}), {
                 xhrFields: {
@@ -65,7 +62,8 @@ define(function(require) {
                 }
             });
             if (method === 'read') {
-                var cached = this.getCached(options.cacheKey);
+                var url = this.url(),
+                    cached = this.getCached(url);
                 if (cached) {
                     var deferred = $.Deferred();
                     if (options.success) {
@@ -76,7 +74,7 @@ define(function(require) {
                     // Grab the response and cache
                     options.success = options.success || function(collection, response, options) {};
                     options.success = _.wrap(options.success, _.bind(function(success) {
-                        this.setCached(options.cacheKey, arguments[1]);
+                        this.setCached(url, arguments[1]);
                         success.apply(this, Array.prototype.slice.call(arguments, 1));
                     }, this));
                     this.promise = Backbone.Model.prototype.sync.call(this, method, collection, options);

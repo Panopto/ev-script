@@ -23,14 +23,12 @@ define(function(require) {
                 id: this.id + '-filter',
                 el: this.$('.ev-filter-block'),
                 picker: this,
-                appId: this.appId,
                 showTypeSelect: false
             });
 
             this.resultsView = new PlaylistResultsView({
                 el: this.$('div.ev-results'),
-                picker: this,
-                appId: this.appId
+                picker: this
             });
 
             this.$el.append(this.resultsView.$el);
@@ -57,8 +55,7 @@ define(function(require) {
                 libraryId = this.model.get('libraryId'),
                 playlists = new Playlists({}, {
                     libraryId: libraryId,
-                    filterValue: searchVal,
-                    appId: this.appId
+                    filterValue: searchVal
                 }),
                 clearPlaylistsCache = _.bind(function() {
                     playlists.clearCache();

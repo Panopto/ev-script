@@ -28,15 +28,13 @@ define(function(require) {
                     id: this.id + '-picker',
                     tagName: 'div',
                     className: 'ev-' + this.model.get('type') + '-picker',
-                    field: this,
-                    appId: this.appId
+                    field: this
                 },
                 settingsOptions = {
                     id: this.id + '-settings',
                     tagName: 'div',
                     className: 'ev-settings',
-                    field: this,
-                    appId: this.appId
+                    field: this
                 },
                 doAuthenticate = _.bind(function() {
                     if (!this.auth.isAuthenticated()) {
@@ -113,8 +111,7 @@ define(function(require) {
                 el: element,
                 model: this.model,
                 selectedItem: this.chosenItem,
-                picker: this.picker,
-                appId: this.appId
+                picker: this.picker
             });
             e.preventDefault();
         },

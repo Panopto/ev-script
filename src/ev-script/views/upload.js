@@ -29,7 +29,6 @@ define(function(require) {
             this.$upload = this.$('.upload');
             this.workflows = options.workflows;
             this.workflowSelect = new WorkflowSelect({
-                appId: this.appId,
                 el: this.$('select')[0],
                 collection: this.workflows
             });

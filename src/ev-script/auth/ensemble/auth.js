@@ -8,8 +8,8 @@ define(function(require) {
         AuthView = require('ev-script/auth/ensemble/view'),
         // This auth type renders an EV login control in an iframe
         EnsembleAuth = BaseAuth.extend({
-            constructor: function(appId) {
-                BaseAuth.prototype.constructor.call(this, appId);
+            constructor: function() {
+                BaseAuth.prototype.constructor.call(this);
             },
             // TODO - logout is called by hider
             // logout: function() {
@@ -22,7 +22,6 @@ define(function(require) {
                 var authView = new AuthView({
                     el: element,
                     submitCallback: this.authCallback,
-                    appId: this.appId,
                     auth: this
                 });
                 authView.render();

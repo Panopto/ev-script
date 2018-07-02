@@ -22,7 +22,6 @@ define(function(require) {
             'previewItem', 'refreshHandler', 'getPreviewInstance');
 
             this.picker = options.picker;
-            this.appId = options.appId;
             // this.loadLock = false;
         },
         events: {
@@ -46,7 +45,6 @@ define(function(require) {
                 item = this.collection.get(id),
                 previewView = new this.getPreviewInstance({
                     el: element,
-                    appId: this.appId,
                     selectedItem: item,
                     picker: this.picker
                 });

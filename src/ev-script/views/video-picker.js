@@ -31,14 +31,12 @@ define(function(require) {
             this.filter = new FilterView({
                 id: this.id + '-filter',
                 el: this.$('.ev-filter-block'),
-                picker: this,
-                appId: this.appId
+                picker: this
             });
 
             this.resultsView = new VideoResultsView({
                 el: this.$('.ev-results'),
-                picker: this,
-                appId: this.appId
+                picker: this
             });
 
             this.$el.append(this.resultsView.$el);
@@ -60,7 +58,6 @@ define(function(require) {
         },
         uploadHandler: function(e) {
             var uploadView = new UploadView({
-                appId: this.appId,
                 field: this.field,
                 workflows: this.workflows
             });
@@ -148,7 +145,6 @@ define(function(require) {
                 sourceId = this.model.get('sourceId'),
                 libraryId = this.model.get('libraryId'),
                 library = this.filter.getLibrary(libraryId),
-                // TODO - the relation used below depends ultimately on sourceId value
                 searchTemplate = sourceId === 'shared' ?
                     new URITemplate(library.getLink('ev:SharedContents/Search').href) :
                     new URITemplate(library.getLink('ev:Contents/Search').href),
@@ -159,14 +155,9 @@ define(function(require) {
                     isPublished: true,
                     desc: true
                 }),
-                // cacheKey = sourceId + libraryId + searchVal,
                 videos = new Videos({}, {
-                    // sourceId: sourceId,
-                    // libraryId: libraryId,
-                    // filterOn: '',
-                    // filterValue: searchVal,
-                    href: searchUrl,
-                    appId: this.appId
+                    cacheName: 'videos',
+                    href: searchUrl
                 }),
                 clearVideosCache = _.bind(function() {
                     videos.clearCache();
@@ -175,17 +166,7 @@ define(function(require) {
 
             videos.fetch({
                 picker: this,
-                // cacheKey: cacheKey,
                 success: _.bind(function(model, response, options) {
-                    // var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
-                    // var size = _.size(response.Data);
-                    // if (size === totalRecords) {
-                    //     collection.hasMore = false;
-                    // } else {
-                    //     collection.hasMore = true;
-                    //     collection.pageIndex += 1;
-                    // }
-                    // this.resultsView.collection = collection;
                     this.resultsView.model = model;
                     this.resultsView.collection = model.getEmbedded(sourceId === 'shared' ? 'sharedContents' : 'contents');
                     this.resultsView.render();
@@ -197,9 +178,7 @@ define(function(require) {
             this.appEvents.off('reloadVideos').on('reloadVideos', clearVideosCache);
         },
         loadWorkflows: function() {
-            this.workflows = new MediaWorkflows({}, {
-                appId: this.appId
-            });
+            this.workflows = new MediaWorkflows({}, {});
             // FIXME - add libraryId (as with playlists)
             this.workflows.filterValue = this.model.get('libraryId');
             this.workflows.fetch({

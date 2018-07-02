@@ -22,10 +22,9 @@ define(function(require) {
         // },
         initialize: function(collections, options) {
             this.href = options.href;
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
-            this.auth = cacheUtil.getAppAuth(this.appId);
-            this.info = cacheUtil.getAppInfo(this.appId);
+            this.config = cacheUtil.getConfig();
+            this.auth = cacheUtil.getAuth();
+            this.info = cacheUtil.getInfo();
             this.promise = $.Deferred().resolve().promise();
         },
         // model: Backbone.Model.extend({
@@ -50,7 +49,7 @@ define(function(require) {
         //     }
         //     _.each(items, _.bind(function(item, index) {
         //         if (!this._isModel(item)) {
-        //             items[index] = new BaseModel(item, { appId: this.appId });
+        //             items[index] = new BaseModel(item, {});
         //         }
         //     }, this));
         //     return items;

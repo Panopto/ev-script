@@ -14,88 +14,81 @@ define(function(require) {
         this.set = function(index, value) {
             return index ? this.cache[index] = value : null;
         };
+        this.clear = function() {
+            this.cache = [];
+        };
         return this;
     };
 
     var caches = new Cache();
 
-    var _getAppCache = function(appId) {
-        var appCache = caches.get(appId);
+    var getCache = function(cacheName) {
+        var appCache;
+        cacheName = cacheName || 'app';
+        appCache = caches.get(cacheName);
         if (!appCache) {
-            appCache = caches.set(appId, new Cache());
+            appCache = caches.set(cacheName, new Cache());
         }
         return appCache;
     };
 
     // Convenience method to initialize a cache for app-specific configuration
-    var setAppConfig = function(appId, config) {
-        return _getAppCache(appId).set('config', config);
+    var setConfig = function(config) {
+        return getCache().set('config', config);
     };
 
-    var getAppConfig = function(appId) {
-        return _getAppCache(appId).get('config');
+    var getConfig = function() {
+        return getCache().get('config');
     };
 
     // Convenience method to initialize a cache for app-specific authentication
-    var setAppAuth = function(appId, auth) {
-        return _getAppCache(appId).set('auth', auth);
+    var setAuth = function(auth) {
+        return getCache().set('auth', auth);
     };
 
-    var getAppAuth = function(appId) {
-        return _getAppCache(appId).get('auth');
+    var getAuth = function() {
+        return getCache().get('auth');
     };
 
     // Convenience method to initialize a cache for upstream application info
-    var setAppInfo = function(appId, info) {
-        return _getAppCache(appId).set('info', info);
+    var setInfo = function(info) {
+        return getCache().set('info', info);
     };
 
-    var getAppInfo = function(appId) {
-        return _getAppCache(appId).get('info');
+    var getInfo = function() {
+        return getCache().get('info');
     };
 
-    var setAppI18n = function(appId, i18n) {
-        return _getAppCache(appId).set('i18n', i18n);
+    var setI18n = function(i18n) {
+        return getCache().set('i18n', i18n);
     };
 
-    var getAppI18n = function(appId) {
-        return _getAppCache(appId).get('i18n');
+    var getI18n = function() {
+        return getCache().get('i18n');
     };
 
-    var setAppRoot = function(appId, root) {
-        return _getAppCache(appId).set('root', root);
+    var setRoot = function(root) {
+        return getCache().set('root', root);
     };
 
-    var getAppRoot = function(appId) {
-        return _getAppCache(appId).get('root');
-    };
-
-    var getUserCache = function(ensembleUrl, user) {
-        var appCache = caches.get(ensembleUrl);
-        if (!appCache) {
-            appCache = caches.set(ensembleUrl, new Cache());
-        }
-        var userCache = appCache.get(user);
-        if (!userCache) {
-            userCache = appCache.set(user, new Cache());
-        }
-        return userCache;
+    var getRoot = function() {
+        return getCache().get('root');
     };
 
     return {
         Cache: Cache,
         caches: caches,
-        setAppConfig: setAppConfig,
-        getAppConfig: getAppConfig,
-        setAppAuth: setAppAuth,
-        getAppAuth: getAppAuth,
-        setAppInfo: setAppInfo,
-        getAppInfo: getAppInfo,
-        setAppI18n: setAppI18n,
-        getAppI18n: getAppI18n,
-        setAppRoot: setAppRoot,
-        getAppRoot: getAppRoot,
-        getUserCache: getUserCache
+        setConfig: setConfig,
+        getConfig: getConfig,
+        setAuth: setAuth,
+        getAuth: getAuth,
+        setInfo: setInfo,
+        getInfo: getInfo,
+        setI18n: setI18n,
+        getI18n: getI18n,
+        setRoot: setRoot,
+        getRoot: getRoot,
+        getCache: getCache
     };
 
 });

@@ -18,9 +18,7 @@ define(function(require) {
             FieldView.prototype.initialize.call(this, options);
         },
         initCallback: function() {
-            this.encoding = new VideoEncoding({}, {
-                appId: this.appId
-            });
+            this.encoding = new VideoEncoding({}, {});
 
             this.root.promise.done(_.bind(function() {
                 var encodingUrl = this.root.getLink('ev:Encodings/Default'),

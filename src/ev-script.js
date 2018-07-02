@@ -17,7 +17,7 @@ define(function(require) {
         VideoEmbedView = require('ev-script/views/video-embed'),
         PlaylistEmbedView = require('ev-script/views/playlist-embed'),
         Root = require('ev-script/models/root'),
-        AppInfo = require('ev-script/models/app-info'),
+        Info = require('ev-script/models/app-info'),
         EnsembleAuth = require('ev-script/auth/ensemble/auth'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
@@ -32,11 +32,6 @@ define(function(require) {
     require('globalize/message');
 
     var EnsembleApp = function(appOptions) {
-
-        // TODO - Do I really need this anymore?  IIRC it was to deal w/
-        // multiple instances of this "app" on a page.
-        // Lame unique id generator
-        var appId = Math.floor(Math.random() * 10000000000000001).toString(16);
 
         // // Get or create a new cache to store objects specific to EV
         // // installation but common across 'app' instances (e.g. videos
@@ -98,7 +93,7 @@ define(function(require) {
         // Add our configuration to the app cache...this is specific to this
         // 'app' instance.  There may be multiple instances on a single page w/
         // unique settings.
-        var config = cacheUtil.setAppConfig(appId, _.extend({}, defaults, appOptions));
+        var config = cacheUtil.setConfig(_.extend({}, defaults, appOptions));
 
         var locale = config.getLocaleCallback();
         // Set locale for moment
@@ -110,8 +105,8 @@ define(function(require) {
         _.extend(this, loading.promise());
 
         // Create an event aggregator specific to our app
-        eventsUtil.initEvents(appId);
-        this.appEvents = eventsUtil.getEvents(appId);
+        eventsUtil.initEvents();
+        this.appEvents = eventsUtil.getEvents();
         // eventsUtil also provides us with a global event aggregator for events
         // that span app instances
         this.globalEvents = eventsUtil.getEvents();
@@ -121,24 +116,22 @@ define(function(require) {
             // Setup globalize
             Globalize.load(likelySubtags);
             Globalize.loadMessages(messages);
-            cacheUtil.setAppI18n(appId, new Globalize(!messages[locale] ? 'en-US' : locale));
+            cacheUtil.setI18n(new Globalize(!messages[locale] ? 'en-US' : locale));
 
             var root = new Root({}, {
-                href: config.ensembleUrl + config.apiPath,
-                appId: appId,
+                href: config.ensembleUrl + config.apiPath
             });
-            cacheUtil.setAppRoot(appId, root);
+            cacheUtil.setRoot(root);
 
             root.fetch({})
             .done(_.bind(function() {
                 // TODO - remove
                 console.log(root);
 
-                var info = new AppInfo({}, {
-                    href: root.getLink('ev:Info/Get').href,
-                    appId: appId
+                var info = new Info({}, {
+                    href: root.getLink('ev:Info/Get').href
                 });
-                cacheUtil.setAppInfo(appId, info);
+                cacheUtil.setInfo(info);
 
                 // Load application info from EV
                 info.fetch({})
@@ -147,19 +140,18 @@ define(function(require) {
                         loading.reject('Failed to retrieve application info.');
                     } else {
                         // This will initialize and cache an auth object for our app
-                        var auth = new EnsembleAuth(appId);
-                        cacheUtil.setAppAuth(appId, auth);
+                        var auth = new EnsembleAuth();
+                        cacheUtil.setAuth(auth);
 
                         // TODO - document and add some flexibility to params (e.g. in addition
                         // to selector allow element or object).
                         this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
                             var $field = $(fieldSelector, fieldWrap),
                                 fieldOptions = {
-                                    id: fieldWrap.id || appId,
+                                    id: fieldWrap.id || 'ev-field',
                                     el: fieldWrap,
                                     model: settingsModel,
-                                    $field: $field,
-                                    appId: appId
+                                    $field: $field
                                 },
                                 fieldView;
                             if (settingsModel instanceof VideoSettings) {
@@ -176,15 +168,13 @@ define(function(require) {
                             if (settingsModel instanceof VideoSettings) {
                                 var videoEmbed = new VideoEmbedView({
                                     el: embedWrap,
-                                    model: settingsModel,
-                                    appId: appId
+                                    model: settingsModel
                                 });
                                 videoEmbed.render();
                             } else {
                                 var playlistEmbed = new PlaylistEmbedView({
                                     el: embedWrap,
-                                    model: settingsModel,
-                                    appId: appId
+                                    model: settingsModel
                                 });
                                 playlistEmbed.render();
                             }

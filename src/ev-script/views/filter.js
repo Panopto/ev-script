@@ -36,36 +36,28 @@ define(function(require) {
                 id: this.id + '-org-select',
                 el: this.$('.ev-org-select'),
                 picker: this.picker,
-                appId: this.appId,
-                collection: new BaseCollection(null, {
-                    appId: this.appId
-                })
+                collection: new BaseCollection(null, {})
             });
 
             this.libSelect = new LibrarySelectView({
                 id: this.id + '-lib-select',
                 el: this.$('.ev-lib-select'),
                 picker: this.picker,
-                appId: this.appId,
-                collection: new BaseCollection(null, {
-                    appId: this.appId
-                })
+                collection: new BaseCollection(null, {})
             });
 
             if (options.showTypeSelect || _.isUndefined(options.showTypeSelect)) {
                 this.typeSelectView = new TypeSelectView({
                     id: this.id + '-type-select',
                     el: this.$('.ev-type-select'),
-                    picker: this.picker,
-                    appId: this.appId
+                    picker: this.picker
                 });
             }
 
             this.searchView = new SearchView({
                 id: this.id + '-search',
                 el: this.$('.ev-search'),
-                picker: this.picker,
-                appId: this.appId
+                picker: this.picker
             });
 
             var $loader = this.$('div.loader');
@@ -102,8 +94,7 @@ define(function(require) {
                     // Recursively load pages until we have all orgs.
                     fetchOrgs = _.bind(function(url) {
                         var orgs = new Organizations({}, {
-                            href: url,
-                            appId: this.appId
+                            href: url
                         });
                         orgs.fetch({
                             picker: this.picker,
@@ -137,12 +128,11 @@ define(function(require) {
                 // Recursively load pages until we have all libraries.
                 fetchLibs = _.bind(function(url) {
                     var libs = new Libraries({}, {
-                        href: url,
-                        appId: this.appId
+                        cacheName: 'libraries',
+                        href: url
                     });
                     libs.fetch({
                         picker: this.picker,
-                        cacheKey: orgId,
                         success: _.bind(function(model, response, options) {
                             var next = model.getLink('next'),
                                 embeddedLibs = model.getEmbedded('libraries');
@@ -159,6 +149,7 @@ define(function(require) {
                         error: _.bind(this.ajaxError, this)
                     });
                 }, this);
+            this.libSelect.collection.reset(null, { silent: true });
             fetchLibs(searchUrl);
         },
         getLibrary: function(id) {

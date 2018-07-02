@@ -8,14 +8,13 @@ define(function(require) {
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache'),
         CurrentUser = require('ev-script/models/current-user'),
-        BaseAuth = function(appId) {
+        BaseAuth = function() {
             _.bindAll(this, 'getUser', /*'login', 'logout',*/ 'isAuthenticated', 'handleUnauthorized', 'authCallback');
-            this.appId = appId;
-            this.config = cacheUtil.getAppConfig(appId);
-            this.root = cacheUtil.getAppRoot(appId);
-            this.info = cacheUtil.getAppInfo(appId);
+            this.config = cacheUtil.getConfig();
+            this.root = cacheUtil.getRoot();
+            this.info = cacheUtil.getInfo();
             this.globalEvents = eventsUtil.getEvents('global');
-            this.appEvents = eventsUtil.getEvents(appId);
+            this.appEvents = eventsUtil.getEvents();
             this.user = null;
             this.appEvents.on('appLoaded', this.initCallback, this);
         };
@@ -47,9 +46,7 @@ define(function(require) {
                 return;
             }
             this.user = user;
-            // new CurrentUser(user, {
-            //     appId: this.appId
-            // });
+            // new CurrentUser(user, {});
             this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
         },
         authCallback: function() {}

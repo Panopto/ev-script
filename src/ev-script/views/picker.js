@@ -22,8 +22,7 @@ define(function(require) {
             this.field = options.field;
             this.hider = new HiderView({
                 el: this.$('div.ev-hider'),
-                field: this.field,
-                appId: this.appId
+                field: this.field
             });
             this.appEvents.on('hidePickers', function(fieldId) {
                 if (!fieldId || (this.field.id !== fieldId)) {

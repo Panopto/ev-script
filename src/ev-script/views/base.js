@@ -10,14 +10,13 @@ define(function(require) {
 
     return Backbone.View.extend({
         initialize: function(options) {
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
-            this.root = cacheUtil.getAppRoot(this.appId);
-            this.auth = cacheUtil.getAppAuth(this.appId);
-            this.info = cacheUtil.getAppInfo(this.appId);
-            this.appEvents = eventsUtil.getEvents(this.appId);
+            this.config = cacheUtil.getConfig();
+            this.root = cacheUtil.getRoot();
+            this.auth = cacheUtil.getAuth();
+            this.info = cacheUtil.getInfo();
+            this.appEvents = eventsUtil.getEvents();
             this.globalEvents = eventsUtil.getEvents('global');
-            this.i18n = cacheUtil.getAppI18n(this.appId);
+            this.i18n = cacheUtil.getI18n();
         },
         ajaxError: function(collection, xhr, options) {
             if (xhr.status === 401) {

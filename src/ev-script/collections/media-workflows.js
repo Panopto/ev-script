@@ -11,17 +11,7 @@ define(function(require) {
             this.filterValue = options.libraryId || '';
         },
         _cache: function(key, resp) {
-            var cachedValue = null,
-                user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                var workflowsCache = userCache.get('workflows');
-                if (!workflowsCache) {
-                    userCache.set('workflows', workflowsCache = new cacheUtil.Cache());
-                }
-                cachedValue = workflowsCache[resp ? 'set' : 'get'](key, resp);
-            }
-            return cachedValue;
+            return cacheUtil.getCache('workflows')[resp ? 'set' : 'get'](key, resp);
         },
         getCached: function(key) {
             return this._cache(key);

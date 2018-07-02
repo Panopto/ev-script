@@ -19,8 +19,7 @@ define(function(require) {
 
             var $dialogWrap = $('<div class="dialogWrap ev-preview"></div>'),
                 embedView = new this.embedClass({
-                    model: new this.model.constructor(this.model.toJSON()),
-                    appId: this.appId
+                    model: new this.model.constructor(this.model.toJSON())
                 }),
                 // Desired difference between media width and containing dialog width
                 widthOffset = 50,
