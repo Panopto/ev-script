@@ -44,12 +44,11 @@ define(function(require) {
         },
         chooseItem: function(e) {
             var id = $(e.currentTarget).attr('rel'),
-                content = this.resultsView.collection.get(id);
+                chosen = this.resultsView.collection.get(id);
             this.model.set({
-                id: id,
-                content: content.toJSON()
+                id: id
             });
-            this.field.model.set(this.model.attributes);
+            this.appEvents.trigger('itemChosen', this.model, chosen);
             this.appEvents.trigger('hidePicker', this.field.id);
             e.preventDefault();
         },

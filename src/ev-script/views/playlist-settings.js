@@ -27,7 +27,8 @@ define(function(require) {
             'change input[name="categoryList"]': 'changeCategoryList'
         },
         updateModel: function() {
-            var content = this.field.model.get('content'),
+            // TODO - content is now a proper model w/ attributes (rather than plain json)
+            var content = this.field.chosenItem,
                 attrs = {
                     'layout': this.$('input[name="layout"]:checked').val(),
                     'embedcode': content && content.IsSecure ? false : this.$('#embedcode').is(':checked'),

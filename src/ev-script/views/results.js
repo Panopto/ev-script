@@ -17,7 +17,10 @@ define(function(require) {
         emptyTemplate: _.template(require('text!ev-script/templates/no-results.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render', 'decorate', 'loadMore', 'addHandler', 'previewItem', 'refreshHandler');
+
+            _.bindAll(this, 'render', 'decorate', 'loadMore', 'addHandler',
+            'previewItem', 'refreshHandler', 'getPreviewInstance');
+
             this.picker = options.picker;
             this.appId = options.appId;
             // this.loadLock = false;
@@ -38,20 +41,15 @@ define(function(require) {
             }
         },
         previewItem: function(e) {
-            var element = e.currentTarget;
-            var id = $(element).attr('rel');
-            var item = this.collection.get(id);
-            var settings = {
-                id: id,
-                content: item.toJSON(),
-                appId: this.appId
-            };
-            var previewView = new this.previewClass({
-                el: element,
-                model: new this.modelClass(settings),
-                appId: this.appId,
-                picker: this.picker
-            });
+            var element = e.currentTarget,
+                id = $(element).attr('rel'),
+                item = this.collection.get(id),
+                previewView = new this.getPreviewInstance({
+                    el: element,
+                    appId: this.appId,
+                    selectedItem: item,
+                    picker: this.picker
+                });
             // Stop event propagation so we don't trigger preview of stored field item as well
             e.stopPropagation();
             e.preventDefault();
@@ -220,7 +218,9 @@ define(function(require) {
             // Prevent multiple bindings if the collection hasn't changed between render calls
             this.collection.off('add', this.addHandler).on('add', this.addHandler);
         },
-        refreshHandler: function(e) {}
+        // Subclasses must implement the following
+        refreshHandler: function(e) {},
+        getPreviewInstance: function(selectedItem, previewOptions) {}
     });
 
 });

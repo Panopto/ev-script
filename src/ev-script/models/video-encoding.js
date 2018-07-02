@@ -8,26 +8,24 @@ define(function(require) {
         cacheUtil = require('ev-script/util/cache');
 
     return BaseModel.extend({
-        idAttribute: 'videoID',
-        initialize: function(attributes, options) {
-            BaseModel.prototype.initialize.call(this, attributes, options);
-            this.requiresAuth = false;
-        },
+        // idAttribute: 'videoID',
+        // initialize: function(attributes, options) {
+        //     BaseModel.prototype.initialize.call(this, attributes, options);
+        //     // this.requiresAuth = false;
+        // },
         // TODO - cache responses
-        getCached: function(key) {},
-        setCached: function(key, resp) {},
-        url: function() {
-            // Note the response is actually JSONP.  We'll strip the padding
-            // below with our dataFilter.
-            var url = this.config.ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        },
+        // getCached: function(key) {},
+        // setCached: function(key, resp) {},
+        // url: function() {
+        //     // Note the response is actually JSONP.  We'll strip the padding
+        //     // below with our dataFilter.
+        //     var url = this.config.ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');
+        //     return this.config.urlCallback ? this.config.urlCallback(url) : url;
+        // },
         getDims: function(original) {
-            var dimsRaw = this.get('dimensions') || '848x480',
-                dimsStrs = dimsRaw.split('x'),
-                dims = [],
-                originalWidth = parseInt(dimsStrs[0], 10) || 848,
-                originalHeight = parseInt(dimsStrs[1], 10) || 480;
+            var dims = [],
+                originalWidth = parseInt(this.get('width'), 10) || 848,
+                originalHeight = parseInt(this.get('height'), 10) || 480;
             if (this.isAudio()) {
                 dims[0] = 400;
                 dims[1] = 26;
@@ -60,26 +58,26 @@ define(function(require) {
         isExternal: function() {
             return (/^external\//i).test(this.get('contentType') || '');
         },
-        parse: function(response) {
-            if (_.isArray(response.dataSet.encodings)) {
-                // This is a collection, so return the highest bitrate encoding
-                return _.max(response.dataSet.encodings, function(encoding, index, encodings) {
-                    return parseInt(encoding.bitRate, 10);
-                });
-            } else {
-                return response.dataSet.encodings;
-            }
-        },
-        sync: function(method, model, options) {
-            _.extend(options, {
-                dataFilter: function(data) {
-                    // Strip padding from JSONP response
-                    var match = data.match(/\{[\s\S]*\}/);
-                    return match ? match[0] : data;
-                }
-            });
-            return Backbone.sync.call(this, method, model, options);
-        },
+        // parse: function(response) {
+        //     if (_.isArray(response.dataSet.encodings)) {
+        //         // This is a collection, so return the highest bitrate encoding
+        //         return _.max(response.dataSet.encodings, function(encoding, index, encodings) {
+        //             return parseInt(encoding.bitRate, 10);
+        //         });
+        //     } else {
+        //         return response.dataSet.encodings;
+        //     }
+        // },
+        // sync: function(method, model, options) {
+        //     _.extend(options, {
+        //         dataFilter: function(data) {
+        //             // Strip padding from JSONP response
+        //             var match = data.match(/\{[\s\S]*\}/);
+        //             return match ? match[0] : data;
+        //         }
+        //     });
+        //     return Backbone.sync.call(this, method, model, options);
+        // },
         updateSettingsModel: function(settingsModel) {
             var attrs = {
                 width: this.getWidth(),

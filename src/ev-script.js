@@ -12,7 +12,8 @@ define(function(require) {
         messages = require('json!ev-script/i18n/root/messages.json'),
         VideoSettings = require('ev-script/models/video-settings'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
-        FieldView = require('ev-script/views/field'),
+        VideoFieldView = require('ev-script/views/video-field'),
+        PlaylistFieldView = require('ev-script/views/playlist-field'),
         VideoEmbedView = require('ev-script/views/video-embed'),
         PlaylistEmbedView = require('ev-script/views/playlist-embed'),
         Root = require('ev-script/models/root'),
@@ -152,14 +153,22 @@ define(function(require) {
                         // TODO - document and add some flexibility to params (e.g. in addition
                         // to selector allow element or object).
                         this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
-                            var $field = $(fieldSelector, fieldWrap);
-                            var fieldView = new FieldView({
-                                id: fieldWrap.id || appId,
-                                el: fieldWrap,
-                                model: settingsModel,
-                                $field: $field,
-                                appId: appId
-                            });
+                            var $field = $(fieldSelector, fieldWrap),
+                                fieldOptions = {
+                                    id: fieldWrap.id || appId,
+                                    el: fieldWrap,
+                                    model: settingsModel,
+                                    $field: $field,
+                                    appId: appId
+                                },
+                                fieldView;
+                            if (settingsModel instanceof VideoSettings) {
+                                fieldView = new VideoFieldView(fieldOptions);
+                            } else if (settingsModel instanceof PlaylistSettings) {
+                                fieldView = new PlaylistFieldView(fieldOptions);
+                            } else {
+                                throw new Error('Unrecognized settings model type');
+                            }
                         };
 
                         // TODO - document.  See handleField comment too.

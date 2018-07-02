@@ -149,11 +149,14 @@ define(function(require) {
                 libraryId = this.model.get('libraryId'),
                 library = this.filter.getLibrary(libraryId),
                 // TODO - the relation used below depends ultimately on sourceId value
-                searchTemplate = new URITemplate(library.getLink('ev:Contents/Search').href),
+                searchTemplate = sourceId === 'shared' ?
+                    new URITemplate(library.getLink('ev:SharedContents/Search').href) :
+                    new URITemplate(library.getLink('ev:Contents/Search').href),
                 searchUrl = searchTemplate.expand({
-                    status: 'ready,file_ready',
+                    status: 'unknown,ready,file_ready',
                     search: searchVal,
                     sortBy: 'dateAdded',
+                    isPublished: true,
                     desc: true
                 }),
                 // cacheKey = sourceId + libraryId + searchVal,
@@ -184,7 +187,7 @@ define(function(require) {
                     // }
                     // this.resultsView.collection = collection;
                     this.resultsView.model = model;
-                    this.resultsView.collection = model.getEmbedded('contents');
+                    this.resultsView.collection = model.getEmbedded(sourceId === 'shared' ? 'sharedContents' : 'contents');
                     this.resultsView.render();
                 }, this),
                 error: _.bind(this.ajaxError, this)

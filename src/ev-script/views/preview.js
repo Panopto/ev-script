@@ -12,6 +12,11 @@ define(function(require) {
     return BaseView.extend({
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
+
+            this.selectedItem = options.selectedItem;
+
+            _.bindAll(this, 'getTitle');
+
             var $dialogWrap = $('<div class="dialogWrap ev-preview"></div>'),
                 embedView = new this.embedClass({
                     model: new this.model.constructor(this.model.toJSON()),
@@ -54,10 +59,7 @@ define(function(require) {
             });
         },
         getTitle: function() {
-            var content = this.model.get('content') || {
-                Title: this.model.get('id')
-            };
-            return this.unencode(content.Title || content.Name);
+            return this.unencode(this.selectedItem.get('title'));
         }
     });
 

@@ -13,13 +13,12 @@ define(function(require) {
             // Although our super sets this...we don't call our super init until
             // later so we should set appId here
             this.appId = options.appId;
-            this.encoding = options.encoding || new VideoEncoding({
-                fetchId: this.model.id
-            }, {
+            this.encoding = options.encoding || new VideoEncoding({}, {
+                href: options.selectedItem.getLink('ev:Encodings/Default').href,
                 appId: this.appId
             });
             this.picker = options.picker;
-            var success = _.bind(function() {
+            var responseCallback = _.bind(function() {
                 this.encoding.updateSettingsModel(this.model);
                 // Picker model is a copy so need to update that as well
                 this.encoding.updateSettingsModel(this.picker.model);
@@ -27,13 +26,12 @@ define(function(require) {
             }, this);
             if (this.encoding.isNew()) {
                 this.encoding.fetch({
-                    success: success,
                     // The loader indicator will show if it detects an AJAX
                     // request on our picker
                     picker: this.picker
-                });
+                }).always(responseCallback);
             } else {
-                success();
+                responseCallback();
             }
         }
     });

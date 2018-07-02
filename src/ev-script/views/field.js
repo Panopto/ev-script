@@ -4,30 +4,26 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        BaseView = require('ev-script/views/base'),
-        VideoSettings = require('ev-script/models/video-settings'),
-        PlaylistSettings = require('ev-script/models/playlist-settings'),
-        VideoPickerView = require('ev-script/views/video-picker'),
-        VideoSettingsView = require('ev-script/views/video-settings'),
-        VideoPreviewView = require('ev-script/views/video-preview'),
-        VideoEncoding = require('ev-script/models/video-encoding'),
-        PlaylistPickerView = require('ev-script/views/playlist-picker'),
-        PlaylistSettingsView = require('ev-script/views/playlist-settings'),
-        PlaylistPreviewView = require('ev-script/views/playlist-preview'),
-        Categories = require('ev-script/collections/categories');
+        BaseView = require('ev-script/views/base');
 
     /*
-     * View for our field (element that we set with the selected content identifier)
-     * TODO - this needs to be broken up, and model event handling is messy/confusing
+     * Base view for our field (element that we set with the selected content metadata
      */
     return BaseView.extend({
         template: _.template(require('text!ev-script/templates/field.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler');
+
+            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler',
+            'previewHandler', 'getPickerInstance', 'getSettingsInstance',
+            'getPreviewInstance', 'updateField', 'getFieldType',
+            'getFieldLabel', 'itemChosenHandler', 'getActionsHtml',
+            'initCallback');
+
             this.$field = options.$field;
             this.$el.addClass('ev-field-wrap');
             this.showChoose = true;
+
             var pickerOptions = {
                     id: this.id + '-picker',
                     tagName: 'div',
@@ -42,96 +38,17 @@ define(function(require) {
                     field: this,
                     appId: this.appId
                 },
-                updateField = _.bind(function() {
-                    var json = this.model.toJSON();
-                    this.$field.val(JSON.stringify(json));
-                    this.appEvents.trigger('fieldUpdated', this.$field, json);
-                    this.renderActions();
-                }, this),
                 doAuthenticate = _.bind(function() {
                     if (!this.auth.isAuthenticated()) {
                         this.auth.handleUnauthorized(this.el);
                     }
                 }, this);
-            if (this.model instanceof VideoSettings) {
-                this.modelClass = VideoSettings;
-                this.pickerClass = VideoPickerView;
-                this.settingsClass = VideoSettingsView;
-                this.previewClass = VideoPreviewView;
-                this.encoding = new VideoEncoding({}, {
-                    appId: this.appId
-                });
-                if (!this.model.isNew()) {
-                    this.encoding.set({
-                        fetchId: this.model.id
-                    });
-                    this.encoding.fetch();
-                }
-                this.model.on('change', _.bind(function() {
-                    // If the id has changed, we need to fetch the relevant encoding
-                    if (this.model.changed.id) {
-                        this.encoding.clear();
-                        // Only fetch encoding if identifier is set
-                        if (!this.model.isNew()) {
-                            this.encoding.set({
-                                fetchId: this.model.id
-                            });
-                            this.encoding.fetch({
-                                success: _.bind(function(response) {
-                                    // Note this while trigger another change
-                                    this.encoding.updateSettingsModel(this.model);
-                                    // Picker model is a copy so need to update that as well
-                                    this.encoding.updateSettingsModel(this.picker.model);
-                                    updateField();
-                                }, this)
-                            });
-                        }
-                    } else {
-                        if (!this.model.isNew()) {
-                            updateField();
-                        }
-                    }
-                }, this));
-                _.extend(settingsOptions, {
-                    encoding: this.encoding
-                });
-            } else if (this.model instanceof PlaylistSettings) {
-                this.modelClass = PlaylistSettings;
-                this.pickerClass = PlaylistPickerView;
-                this.settingsClass = PlaylistSettingsView;
-                this.previewClass = PlaylistPreviewView;
-                this.categories = new Categories([], {
-                    appId: this.appId
-                });
-                if (!this.model.isNew()) {
-                    this.categories.playlistId = this.model.id;
-                    this.categories.fetch({ reset: true });
-                }
-                this.model.on('change', _.bind(function() {
-                    // If the id has changed, we need to fetch the relevant encoding
-                    if (this.model.changed.id) {
-                        // Only fetch categories if identifier is set
-                        if (!this.model.isNew()) {
-                            this.categories.playlistId = this.model.id;
-                            this.categories.fetch({ reset: true });
-                        } else {
-                            this.categories.reset([], { silent: true });
-                            this.categories.playlistId = '';
-                        }
-                    }
-                    if (!this.model.isNew()) {
-                        updateField();
-                    }
-                }, this));
-                _.extend(settingsOptions, {
-                    categories: this.categories
-                });
-            }
-            this.picker = new this.pickerClass(_.extend({}, pickerOptions, {
-                // We don't want to modify field model until we actually pick a new video...so use a copy as our current model
-                model: new this.modelClass(this.model.toJSON()),
-            }));
-            this.settings = new this.settingsClass(settingsOptions);
+
+            // Subclasses may need to prepare before we start instantiation of views
+            this.initCallback();
+
+            this.picker = this.getPickerInstance(pickerOptions);
+            this.settings = this.getSettingsInstance(settingsOptions);
             this.$field.after(this.picker.$el);
             this.renderActions();
             this.appEvents.on('showPicker', function(fieldId) {
@@ -157,10 +74,12 @@ define(function(require) {
                     this.showChoose = true;
                 }
             }, this);
+            this.appEvents.on('itemChosen', this.itemChosenHandler);
 
             // Authentication check
             doAuthenticate();
         },
+        // TODO - may need to move this to subclasses?
         events: {
             'click .action-choose': 'chooseHandler',
             'click .action-preview': 'previewHandler',
@@ -183,16 +102,17 @@ define(function(require) {
             this.model.set(this.model.defaults, {
                 silent: true
             });
+            this.chosenItem = null;
             this.appEvents.trigger('fieldUpdated', this.$field);
             this.renderActions();
             e.preventDefault();
         },
         previewHandler: function(e) {
             var element = e.currentTarget;
-            var previewView = new this.previewClass({
+            var previewView = this.getPreviewInstance({
                 el: element,
-                encoding: this.encoding,
                 model: this.model,
+                selectedItem: this.chosenItem,
                 picker: this.picker,
                 appId: this.appId
             });
@@ -200,40 +120,47 @@ define(function(require) {
         },
         renderActions: function() {
             var ensembleUrl = this.config.ensembleUrl,
-                name, label, type, thumbnailUrl;
-            if (this.model instanceof VideoSettings) {
-                label = this.i18n.formatMessage('Media');
-                type = 'video';
-            } else {
-                label = this.i18n.formatMessage('Playlist');
-                type = 'playlist';
-            }
-            if (this.model.id) {
+                label = this.getFieldLabel(),
+                type = this.getFieldType(),
                 name = this.model.id;
-                var content = this.model.get('content');
-                if (content) {
-                    name = content.Name || content.Title;
-                    thumbnailUrl = content.ThumbnailUrl;
-                }
-            }
             if (!this.$actions) {
                 this.$actions = $('<div class="ev-field"/>');
                 this.$field.after(this.$actions);
             }
-            this.$actions.html(this.template({
+            this.$actions.html(this.getActionsHtml({
                 i18n: this.i18n,
+                // TODO - how is this used?
                 ensembleUrl: ensembleUrl,
                 modelId: this.model.id,
                 label: label,
                 type: type,
-                name: name,
-                thumbnailUrl: thumbnailUrl
+                name: name
             }));
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {
                 this.$('.action-choose').hide();
             }
-        }
+        },
+        updateField: function() {
+            var json = this.model.toJSON();
+            this.$field.val(JSON.stringify(json));
+            this.appEvents.trigger('fieldUpdated', this.$field, json);
+            this.renderActions();
+        },
+        itemChosenHandler: function(settingsModel, chosenItem) {
+            this.model.set(settingsModel.attributes);
+            this.chosenItem = chosenItem;
+        },
+        getActionsHtml: function(templateOptions) {
+            return this.template(templateOptions);
+        },
+        // Subclasses must impl the following
+        initCallback: function() {},
+        getPickerInstance: function(pickerOptions) {},
+        getSettingsInstance: function(settingsOptions) {},
+        getPreviewInstance: function(previewOptions) {},
+        getFieldType: function() {},
+        getFieldLabel: function() {},
     });
 
 });
