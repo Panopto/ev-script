@@ -8,19 +8,9 @@ define(function(require) {
         cacheUtil = require('ev-script/util/cache');
 
     return BaseModel.extend({
-        // idAttribute: 'videoID',
+        cacheName: 'encodings',
         // initialize: function(attributes, options) {
         //     BaseModel.prototype.initialize.call(this, attributes, options);
-        //     // this.requiresAuth = false;
-        // },
-        // TODO - cache responses
-        // getCached: function(key) {},
-        // setCached: function(key, resp) {},
-        // url: function() {
-        //     // Note the response is actually JSONP.  We'll strip the padding
-        //     // below with our dataFilter.
-        //     var url = this.config.ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');
-        //     return this.config.urlCallback ? this.config.urlCallback(url) : url;
         // },
         getDims: function(original) {
             var dims = [],

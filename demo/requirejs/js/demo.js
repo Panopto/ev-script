@@ -49,7 +49,7 @@
             i18nPath: '../../src/ev-script/i18n'
         }));
 
-        app.appEvents.bind('fieldUpdated', function($field, value) {
+        app.events.bind('fieldUpdated', function($field, value) {
             var $videoEmbed = $('.video-embed');
             var $playlistEmbed = $('.playlist-embed');
             if ($field[0].id === 'video') {

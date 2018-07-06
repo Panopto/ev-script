@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        AuthView = require('ev-script/views/auth'),
         BaseView = require('ev-script/views/base');
 
     /*
@@ -18,7 +19,7 @@ define(function(require) {
             'previewHandler', 'getPickerInstance', 'getSettingsInstance',
             'getPreviewInstance', 'updateField', 'getFieldType',
             'getFieldLabel', 'itemChosenHandler', 'getActionsHtml',
-            'initCallback');
+            'initCallback', 'doAuthenticate');
 
             this.$field = options.$field;
             this.$el.addClass('ev-field-wrap');
@@ -35,57 +36,75 @@ define(function(require) {
                     tagName: 'div',
                     className: 'ev-settings',
                     field: this
-                },
-                doAuthenticate = _.bind(function() {
-                    if (!this.auth.isAuthenticated()) {
-                        this.auth.handleUnauthorized(this.el);
-                    }
-                }, this);
+                };
 
             // Subclasses may need to prepare before we start instantiation of views
             this.initCallback();
 
-            this.picker = this.getPickerInstance(pickerOptions);
-            this.settings = this.getSettingsInstance(settingsOptions);
-            this.$field.after(this.picker.$el);
-            this.renderActions();
-            this.appEvents.on('showPicker', function(fieldId) {
+            this.events.on('showPicker', function(fieldId) {
                 if (this.id === fieldId) {
                     this.$('.action-choose').hide();
                     this.showChoose = false;
                     // We only want one picker showing at a time so notify all fields to hide them (unless it's ours)
                     if (this.config.hidePickers) {
-                        this.appEvents.trigger('hidePickers', this.id);
+                        this.events.trigger('hidePickers', this.id);
                     }
                 }
             }, this);
-            this.appEvents.on('hidePicker', function(fieldId) {
+            this.events.on('hidePicker', function(fieldId) {
                 if (this.id === fieldId) {
                     this.$('.action-choose').show();
                     this.showChoose = true;
                 }
             }, this);
-            this.appEvents.on('hidePickers', function(fieldId) {
+            this.events.on('hidePickers', function(fieldId) {
                 // When the picker for our field is hidden we need need to show our 'Choose' button
                 if (!fieldId || (this.id !== fieldId)) {
                     this.$('.action-choose').show();
                     this.showChoose = true;
                 }
             }, this);
-            this.appEvents.on('itemChosen', this.itemChosenHandler);
+            this.events.on('itemChosen', this.itemChosenHandler);
+
+            this.picker = this.getPickerInstance(pickerOptions);
+            this.settings = this.getSettingsInstance(settingsOptions);
+            this.$field.after(this.picker.$el);
+            this.renderActions();
 
             // Authentication check
-            doAuthenticate();
+            this.doAuthenticate();
         },
-        // TODO - may need to move this to subclasses?
         events: {
             'click .action-choose': 'chooseHandler',
             'click .action-preview': 'previewHandler',
             'click .action-options': 'optionsHandler',
             'click .action-remove': 'removeHandler'
         },
+        doAuthenticate: function() {
+            var deferred = $.Deferred();
+            this.root.promise.always(_.bind(function() {
+                if (!this.root.getUser()) {
+                    var authView = new AuthView({
+                        el: this.el,
+                        submitCallback: _.bind(function() {
+                            this.root.fetch().always(_.bind(function() {
+                                this.events.trigger(!this.root.getUser() ? 'loggedOut' : 'loggedIn');
+                            }, this));
+                            deferred.resolve();
+                        }, this),
+                        auth: this
+                    });
+                    authView.render();
+                } else {
+                    deferred.resolve();
+                }
+            }, this));
+            return deferred;
+        },
         chooseHandler: function(e) {
-            this.appEvents.trigger('showPicker', this.id);
+            this.doAuthenticate().always(_.bind(function() {
+                this.events.trigger('showPicker', this.id);
+            }, this));
             e.preventDefault();
         },
         optionsHandler: function(e) {
@@ -101,7 +120,7 @@ define(function(require) {
                 silent: true
             });
             this.chosenItem = null;
-            this.appEvents.trigger('fieldUpdated', this.$field);
+            this.events.trigger('fieldUpdated', this.$field);
             this.renderActions();
             e.preventDefault();
         },
@@ -141,7 +160,7 @@ define(function(require) {
         updateField: function() {
             var json = this.model.toJSON();
             this.$field.val(JSON.stringify(json));
-            this.appEvents.trigger('fieldUpdated', this.$field, json);
+            this.events.trigger('fieldUpdated', this.$field, json);
             this.renderActions();
         },
         itemChosenHandler: function(settingsModel, chosenItem) {

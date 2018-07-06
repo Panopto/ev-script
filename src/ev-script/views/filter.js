@@ -87,6 +87,7 @@ define(function(require) {
             });
         },
         loadOrgs: function() {
+            this.orgSelect.collection.reset(null, { silent: true });
             // In case root is loading...wait for it to finish
             this.root.promise.done(_.bind(function() {
                 var searchTemplate = new URITemplate(this.root.getLink('ev:Organizations/Search').href),
@@ -107,7 +108,7 @@ define(function(require) {
                                 if (next) {
                                     fetchOrgs(next.href);
                                 } else {
-                                    // TODO - use appEvents instead?
+                                    // TODO - use events instead?
                                     this.orgSelect.collection.trigger('reset');
                                 }
                             }, this),
@@ -121,14 +122,10 @@ define(function(require) {
             var orgId = this.picker.model.get('organizationId'),
                 org = this.orgSelect.collection.findWhere({ 'id': orgId }),
                 searchTemplate = new URITemplate(org.getLink('ev:Libraries/Search').href),
-                searchUrl = searchTemplate.expand({
-                    // TODO - for testing...remove this
-                    // pageSize: 5
-                }),
+                searchUrl = searchTemplate.expand({}),
                 // Recursively load pages until we have all libraries.
                 fetchLibs = _.bind(function(url) {
                     var libs = new Libraries({}, {
-                        cacheName: 'libraries',
                         href: url
                     });
                     libs.fetch({
@@ -142,7 +139,7 @@ define(function(require) {
                             if (next) {
                                 fetchLibs(next.href);
                             } else {
-                                // TODO - use appEvents instead?
+                                // TODO - use events instead?
                                 this.libSelect.collection.trigger('reset');
                             }
                         }, this),

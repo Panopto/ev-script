@@ -12,19 +12,13 @@ define(function(require) {
             this.libraryId = options.libraryId || '';
             this.filterValue = options.filterValue || '';
             this.pageIndex = 1;
+
+            // This needs to go to base (but will already be once moved from collection to model as w/ hapi responses)
+            this.on('loggedOut', this.clearCache);
+            this.on('reloadPlaylists', this.clearCache);
         },
         _cache: function(key, resp) {
-            var cachedValue = null,
-                user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                var playlistsCache = userCache.get('playlists');
-                if (!playlistsCache) {
-                    userCache.set('playlists', playlistsCache = new cacheUtil.Cache());
-                }
-                cachedValue = playlistsCache[resp ? 'set' : 'get'](key, resp);
-            }
-            return cachedValue;
+            return cacheUtil.getCache('playlists')[resp ? 'set' : 'get'](key, resp);
         },
         getCached: function(key) {
             return this._cache(key);
@@ -33,11 +27,7 @@ define(function(require) {
             return this._cache(key, resp);
         },
         clearCache: function() {
-            var user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                userCache.set('playlists', null);
-            }
+            cacheUtil.getCache('playlists').clear();
         },
         url: function() {
             var api_url = URI(this.config.ensembleUrl + '/api/Playlists/');

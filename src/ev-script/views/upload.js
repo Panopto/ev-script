@@ -34,7 +34,7 @@ define(function(require) {
             });
             this.render();
             this.decorateUploader();
-            this.appEvents.on('hidePickers', this.closeDialog);
+            this.events.on('hidePickers', this.closeDialog);
         },
         getWidth: function() {
             return Math.min(600, $(window).width() - this.config.dialogMargin);
@@ -153,7 +153,7 @@ define(function(require) {
                         this.closeDialog();
                     }, this),
                     FileUploaded: _.bind(function(up, file, info) {
-                        this.appEvents.trigger('fileUploaded');
+                        this.events.trigger('fileUploaded');
                     }, this)
                 }
             });
@@ -192,7 +192,7 @@ define(function(require) {
                 close: _.bind(function(event, ui) {
                     this.$upload.pluploadQueue().destroy();
                     $dialogWrap.dialog('destroy').remove();
-                    this.appEvents.off('hidePickers', this.closeDialog);
+                    this.events.off('hidePickers', this.closeDialog);
                     this.$dialog = null;
                 }, this)
             });

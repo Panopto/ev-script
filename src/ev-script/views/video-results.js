@@ -55,7 +55,7 @@ define(function(require) {
         },
         refreshHandler: function(e) {
             e.preventDefault();
-            this.appEvents.trigger('reloadVideos');
+            this.events.trigger('reload', 'videos');
         },
         getPreviewInstance: function(previewOptions) {
             return new VideoPreviewView(_.extend(previewOptions, {

@@ -7,12 +7,9 @@ define(function(require) {
         BaseModel = require('ev-script/models/base');
 
     return BaseModel.extend({
-        initialize: function(attributes, options) {
-            BaseModel.prototype.initialize.call(this, attributes, options);
-        },
-        parse: function(response) {
-            return response;
-        },
+        // initialize: function(attributes, options) {
+        //     BaseModel.prototype.initialize.call(this, attributes, options);
+        // },
         checkVersion: function(condition) {
             var version = this.get('applicationVersion');
             return version && semver.satisfies(version, condition);

@@ -28,7 +28,7 @@ define(function(require) {
             this.picker.model.set({
                 sourceId: sourceVal
             });
-            this.appEvents.trigger('typeSelectChange', sourceVal);
+            this.events.trigger('typeSelectChange', sourceVal);
             e.preventDefault();
         }
     });

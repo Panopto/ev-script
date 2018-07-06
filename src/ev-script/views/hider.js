@@ -2,7 +2,8 @@ define(function(require) {
 
     'use strict';
 
-    var _ = require('underscore'),
+    var $ = require('jquery'),
+        _ = require('underscore'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -10,36 +11,44 @@ define(function(require) {
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'hideHandler', 'logoutHandler', 'authHandler', 'render');
-            this.globalEvents.on('loggedIn', this.authHandler);
-            this.globalEvents.on('loggedOut', this.authHandler);
+            this.events.on('loggedIn', this.authHandler);
+            this.events.on('loggedOut', this.authHandler);
             this.field = options.field;
         },
         events: {
             'click a.action-hide': 'hideHandler',
             'click a.action-logout': 'logoutHandler'
         },
-        authHandler: function(ensembleUrl) {
-            if (ensembleUrl === this.config.ensembleUrl) {
-                this.render();
-            }
+        authHandler: function() {
+            this.render();
         },
         render: function() {
-            var username = '';
-            if (this.auth.isAuthenticated()) {
-                username = this.auth.getUser().get('username');
-            }
-            this.$el.html(this.template({
-                i18n: this.i18n,
-                showLogout: this.auth.isAuthenticated(),
-                username: username
-            }));
+            this.root.promise.always(_.bind(function() {
+                var user = this.root.getUser(),
+                    username = user && user.get('username') || '';
+                this.$el.html(this.template({
+                    i18n: this.i18n,
+                    showLogout: user,
+                    username: username
+                }));
+            }, this));
         },
         hideHandler: function(e) {
-            this.appEvents.trigger('hidePicker', this.field.id);
+            this.events.trigger('hidePicker', this.field.id);
             e.preventDefault();
         },
         logoutHandler: function(e) {
-            this.auth.logout().always(this.appEvents.trigger('hidePickers'));
+            $.ajax({
+                url: this.config.ensembleUrl + this.config.authLogoutPath,
+                method: 'POST',
+                xhrFields: {
+                    withCredentials: true
+                }
+            })
+            .always(_.bind(function() {
+                this.events.trigger('hidePickers');
+                this.events.trigger('loggedOut');
+            },this));
             e.preventDefault();
         }
     });

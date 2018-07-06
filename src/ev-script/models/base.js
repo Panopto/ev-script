@@ -19,18 +19,13 @@ define(function(require) {
             // While getCache will return a default cache if cacheName is not
             // passed, we want to allow opt-out. So if cacheName is not set
             // simply use a null cache.
-            this.cache = options.cacheName ? cacheUtil.getCache(options.cacheName) : null;
+            this.cache = this.cacheName ? cacheUtil.getCache(this.cacheName) : null;
         },
         getCached: function(key) {
             return this.cache && this.cache.get(key);
         },
         setCached: function(key, resp) {
             return this.cache && this.cache.set(key, resp);
-        },
-        clearCache: function() {
-            if (this.cache) {
-                this.cache.clear();
-            }
         },
         getLink: function(rel) {
             var links = this.get('_links');

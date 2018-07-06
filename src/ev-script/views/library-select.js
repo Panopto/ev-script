@@ -21,7 +21,7 @@ define(function(require) {
             this.collection.on('reset', this.render);
         },
         render: function() {
-            var selectedId = this.picker.model.get('libraryId') || this.auth.getUser().get('defaultLibraryId');
+            var selectedId = this.picker.model.get('libraryId') || this.root.getUser().get('defaultLibraryId');
             this.$select.html(this.optionsTemplate({
                 selectedId: selectedId,
                 collection: this.collection

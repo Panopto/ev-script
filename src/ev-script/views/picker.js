@@ -24,17 +24,17 @@ define(function(require) {
                 el: this.$('div.ev-hider'),
                 field: this.field
             });
-            this.appEvents.on('hidePickers', function(fieldId) {
+            this.events.on('hidePickers', function(fieldId) {
                 if (!fieldId || (this.field.id !== fieldId)) {
                     this.hidePicker();
                 }
             }, this);
-            this.appEvents.on('showPicker', function(fieldId) {
+            this.events.on('showPicker', function(fieldId) {
                 if (this.field.id === fieldId && this.$el.is(':hidden')) {
                     this.showPicker();
                 }
             }, this);
-            this.appEvents.on('hidePicker', function(fieldId) {
+            this.events.on('hidePicker', function(fieldId) {
                 if (this.field.id === fieldId) {
                     this.hidePicker();
                 }
@@ -47,8 +47,8 @@ define(function(require) {
             this.model.set({
                 id: id
             });
-            this.appEvents.trigger('itemChosen', this.model, chosen);
-            this.appEvents.trigger('hidePicker', this.field.id);
+            this.events.trigger('itemChosen', this.model, chosen);
+            this.events.trigger('hidePicker', this.field.id);
             e.preventDefault();
         },
         hidePicker: function() {

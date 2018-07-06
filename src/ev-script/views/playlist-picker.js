@@ -14,9 +14,8 @@ define(function(require) {
             PickerView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit');
 
-            this.appEvents.on('search', _.bind(function() {
-                this.loadPlaylists();
-            }, this));
+            this.events.off('search').on('search', this.loadPlaylists);
+            this.events.off('reloadPlaylists').on('reloadPlaylists', this.loadPlaylists);
 
             // TODO - handle callback
             this.filter = new FilterView({
@@ -56,11 +55,7 @@ define(function(require) {
                 playlists = new Playlists({}, {
                     libraryId: libraryId,
                     filterValue: searchVal
-                }),
-                clearPlaylistsCache = _.bind(function() {
-                    playlists.clearCache();
-                    this.loadPlaylists();
-                }, this);
+                });
             playlists.fetch({
                 picker: this,
                 cacheKey: libraryId + searchVal,
@@ -78,7 +73,6 @@ define(function(require) {
                 }, this),
                 error: _.bind(this.ajaxError, this)
             });
-            this.appEvents.off('reloadPlaylists').on('reloadPlaylists', clearPlaylistsCache);
         }
     });
 

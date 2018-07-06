@@ -17,8 +17,7 @@ define(function(require) {
         VideoEmbedView = require('ev-script/views/video-embed'),
         PlaylistEmbedView = require('ev-script/views/playlist-embed'),
         Root = require('ev-script/models/root'),
-        Info = require('ev-script/models/app-info'),
-        EnsembleAuth = require('ev-script/auth/ensemble/auth'),
+        Info = require('ev-script/models/info'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
 
@@ -32,14 +31,6 @@ define(function(require) {
     require('globalize/message');
 
     var EnsembleApp = function(appOptions) {
-
-        // // Get or create a new cache to store objects specific to EV
-        // // installation but common across 'app' instances (e.g. videos
-        // // accessible by a given user).
-        // var evCache = cacheUtil.caches.get(appOptions.ensembleUrl);
-        // if (!evCache) {
-        //     evCache = cacheUtil.caches.set(appOptions.ensembleUrl, new cacheUtil.Cache());
-        // }
 
         var defaults = {
             // Application root of the EV installation.
@@ -77,23 +68,13 @@ define(function(require) {
             },
             // Path to i18n folder
             i18nPath: 'i18n',
-
-            // TODO - Given third-party cookie restrictions...modify
-            // ensembleAuth to immediately open first-party window for login?
-            // Do same w/ logout (rather than using api)?
-            // Options used for 'ensemble' authentication
-            ensembleAuthOptions: {
-                // Path to ensemble login page when using 'ensemble'
-                // authentication
-                authPath: '/app/lti/login.aspx',
-                authCompleteMessage: 'ev_auth_complete'
-            }
+            // Auth options
+            authLoginPath: '/app/lti/login.aspx',
+            authLogoutPath: '/api/logout',
+            authCompleteMessage: 'ev_auth_complete'
         };
 
-        // Add our configuration to the app cache...this is specific to this
-        // 'app' instance.  There may be multiple instances on a single page w/
-        // unique settings.
-        var config = cacheUtil.setConfig(_.extend({}, defaults, appOptions));
+        var config = _.extend({}, defaults, appOptions);
 
         var locale = config.getLocaleCallback();
         // Set locale for moment
@@ -105,17 +86,12 @@ define(function(require) {
         _.extend(this, loading.promise());
 
         // Create an event aggregator specific to our app
-        eventsUtil.initEvents();
-        this.appEvents = eventsUtil.getEvents();
-        // eventsUtil also provides us with a global event aggregator for events
-        // that span app instances
-        this.globalEvents = eventsUtil.getEvents();
+        this.events = eventsUtil.getEvents();
 
-        var finishLoading = _.bind(function() {
+        var loadApp = _.bind(function() {
 
-            // Setup globalize
-            Globalize.load(likelySubtags);
-            Globalize.loadMessages(messages);
+            cacheUtil.setConfig(config);
+
             cacheUtil.setI18n(new Globalize(!messages[locale] ? 'en-US' : locale));
 
             var root = new Root({}, {
@@ -125,9 +101,6 @@ define(function(require) {
 
             root.fetch({})
             .done(_.bind(function() {
-                // TODO - remove
-                console.log(root);
-
                 var info = new Info({}, {
                     href: root.getLink('ev:Info/Get').href
                 });
@@ -139,10 +112,6 @@ define(function(require) {
                     if (!info.get('applicationVersion')) {
                         loading.reject('Failed to retrieve application info.');
                     } else {
-                        // This will initialize and cache an auth object for our app
-                        var auth = new EnsembleAuth();
-                        cacheUtil.setAuth(auth);
-
                         // TODO - document and add some flexibility to params (e.g. in addition
                         // to selector allow element or object).
                         this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
@@ -190,7 +159,7 @@ define(function(require) {
                             return $div.html();
                         };
 
-                        this.appEvents.trigger('appLoaded');
+                        this.events.trigger('appLoaded');
                         loading.resolve();
                     }
                 }, this));
@@ -205,10 +174,15 @@ define(function(require) {
         $.getJSON(config.i18nPath + '/' + locale + '/messages.json')
         .done(function(data, status, xhr) {
             _.extend(messages, data);
-            finishLoading();
+
+            // Setup globalize
+            Globalize.load(likelySubtags);
+            Globalize.loadMessages(messages);
+
+            loadApp();
         })
         .fail(function(xhr, status, error) {
-            finishLoading();
+            loadApp();
         });
     };
 

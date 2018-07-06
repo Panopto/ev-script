@@ -21,11 +21,13 @@ define(function(require) {
             PickerView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary', 'handleSubmit', 'uploadHandler', 'recordHandler');
 
-            this.appEvents.on('typeSelectChange', _.bind(function() {
-                this.loadVideos();
-            }, this));
-            this.appEvents.on('search', _.bind(function() {
-                this.loadVideos();
+            this.events.on('typeSelectChange', this.loadVideos);
+            this.events.on('search', this.loadVideos);
+            this.events.on('fileUploaded', this.loadVideos);
+            this.events.on('reload', _.bind(function(target) {
+                if (target === 'videos') {
+                    this.loadVideos();
+                }
             }, this));
 
             this.filter = new FilterView({
@@ -156,13 +158,8 @@ define(function(require) {
                     desc: true
                 }),
                 videos = new Videos({}, {
-                    cacheName: 'videos',
                     href: searchUrl
-                }),
-                clearVideosCache = _.bind(function() {
-                    videos.clearCache();
-                    this.loadVideos();
-                }, this);
+                });
 
             videos.fetch({
                 picker: this,
@@ -173,9 +170,6 @@ define(function(require) {
                 }, this),
                 error: _.bind(this.ajaxError, this)
             });
-
-            this.appEvents.off('fileUploaded').on('fileUploaded', clearVideosCache);
-            this.appEvents.off('reloadVideos').on('reloadVideos', clearVideosCache);
         },
         loadWorkflows: function() {
             this.workflows = new MediaWorkflows({}, {});
@@ -199,7 +193,7 @@ define(function(require) {
             });
         },
         canRecord: function() {
-            var currentUser = this.auth.getUser();
+            var currentUser = this.root.getUser();
             return currentUser && currentUser.get('CanUseAnthem') && !this.isMobile() && platform.os.family !== 'Linux';
         },
         isMobile: function() {

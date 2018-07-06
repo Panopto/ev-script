@@ -12,11 +12,10 @@ define(function(require, template) {
     require('jquery-ui/ui/widgets/dialog');
 
     return Backbone.View.extend({
-        template: _.template(require('text!ev-script/auth/ensemble/template.html')),
+        template: _.template(require('text!ev-script/templates/auth.html')),
         initialize: function(options) {
             this.config = cacheUtil.getConfig();
-            this.appEvents = eventsUtil.getEvents();
-            this.globalEvents = eventsUtil.getEvents('global');
+            this.events = eventsUtil.getEvents();
             this.i18n = cacheUtil.getI18n();
             this.submitCallback = options.submitCallback || function() {};
         },
@@ -24,7 +23,7 @@ define(function(require, template) {
             var dialogWidth = Math.min(540, $(window).width() - this.config.dialogMargin),
                 dialogHeight = Math.min(250, $(window).height() - this.config.dialogMargin),
                 frameSrc = URI(this.config.ensembleUrl)
-                    .path(this.config.ensembleAuthOptions.authPath)
+                    .path(this.config.authLoginPath)
                     .addQuery('idp', this.config.defaultProvider),
                 $html = $(this.template({
                     i18n: this.i18n,
@@ -39,22 +38,27 @@ define(function(require, template) {
                 modal: true,
                 draggable: false,
                 resizable: false,
+                closeOnEscape: false,
                 width: dialogWidth,
                 height: dialogHeight,
                 dialogClass: 'ev-dialog',
                 create: _.bind(function(event, ui) {
                     this.$dialog.html($html);
+                    $('.ui-dialog-titlebar-close', ui.dialog | ui).hide();
                 }, this),
-                closeText: this.i18n.formatMessage('Close'),
-                close: _.bind(function(event, ui) {
-                    this.$dialog.dialog('destroy').remove();
-                    this.appEvents.trigger('hidePickers');
-                }, this)
             });
             $(window).on('message', _.bind(function(e) {
-                if (e.originalEvent.data === this.config.ensembleAuthOptions.authCompleteMessage) {
-                    // this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
-                    this.$dialog.dialog('destroy').remove();
+                if (e.originalEvent.data === this.config.authCompleteMessage) {
+                    if (this.$dialog) {
+                        try {
+                            this.$dialog.dialog('destroy');
+                        } catch (e) {
+                            // All good?
+                        }
+                        finally {
+                            this.$dialog.remove();
+                        }
+                    }
                     this.submitCallback();
                 }
             }, this));
