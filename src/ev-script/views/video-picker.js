@@ -19,16 +19,30 @@ define(function(require) {
         anthemTemplate: _.template(require('text!ev-script/templates/anthem.html')),
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary', 'handleSubmit', 'uploadHandler', 'recordHandler');
 
-            this.events.on('typeSelectChange', this.loadVideos);
-            this.events.on('search', this.loadVideos);
-            this.events.on('fileUploaded', this.loadVideos);
-            this.events.on('reload', _.bind(function(target) {
+            _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary',
+            'handleSubmit', 'uploadHandler', 'recordHandler', 'handleSearch');
+
+            this.events
+            .off('typeSelectChange', this.loadVideos)
+            .on('typeSelectChange', this.loadVideos);
+
+            this.events
+            .off('search', this.handleSearch)
+            .on('search', this.handleSearch);
+
+            this.events
+            .off('fileUploaded', this.loadVideos)
+            .on('fileUploaded', this.loadVideos);
+
+            var reload = _.bind(function(target) {
                 if (target === 'videos') {
                     this.loadVideos();
                 }
-            }, this));
+            }, this);
+            this.events
+            .off('reload', reload)
+            .on('reload', reload);
 
             this.filter = new FilterView({
                 id: this.id + '-filter',
@@ -57,6 +71,11 @@ define(function(require) {
         handleSubmit: function(e) {
             this.loadVideos();
             e.preventDefault();
+        },
+        handleSearch: function(model) {
+            if (model === this.model) {
+                this.loadVideos();
+            }
         },
         uploadHandler: function(e) {
             var uploadView = new UploadView({
@@ -155,7 +174,8 @@ define(function(require) {
                     search: searchVal,
                     sortBy: 'dateAdded',
                     isPublished: true,
-                    desc: true
+                    desc: true,
+                    pageSize: 20
                 }),
                 videos = new Videos({}, {
                     href: searchUrl
@@ -164,8 +184,9 @@ define(function(require) {
             videos.fetch({
                 picker: this,
                 success: _.bind(function(model, response, options) {
+                    model.collectionKey = sourceId === 'shared' ? 'sharedContents' : 'contents';
                     this.resultsView.model = model;
-                    this.resultsView.collection = model.getEmbedded(sourceId === 'shared' ? 'sharedContents' : 'contents');
+                    this.resultsView.collection = model.getEmbedded(model.collectionKey);
                     this.resultsView.render();
                 }, this),
                 error: _.bind(this.ajaxError, this)

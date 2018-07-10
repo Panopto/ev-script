@@ -147,6 +147,7 @@ define(function(require) {
                 i18n: this.i18n,
                 // TODO - how is this used?
                 ensembleUrl: ensembleUrl,
+                thumbnailUrl: false,
                 modelId: this.model.id,
                 label: label,
                 type: type,
@@ -164,8 +165,10 @@ define(function(require) {
             this.renderActions();
         },
         itemChosenHandler: function(settingsModel, chosenItem) {
-            this.model.set(settingsModel.attributes);
-            this.chosenItem = chosenItem;
+            if (settingsModel.get('type') === this.model.get('type')) {
+                this.chosenItem = chosenItem;
+                this.model.set(settingsModel.attributes);
+            }
         },
         getActionsHtml: function(templateOptions) {
             return this.template(templateOptions);

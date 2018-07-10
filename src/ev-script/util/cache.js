@@ -84,7 +84,7 @@ define(function(require) {
     events.on('reload', function(target) {
         var caches = [];
         // TODO - handle other caches as appropriate
-        // When we reload videos or playlists, we also need to reload encodings
+        // When we reload videos we also need to reload encodings
         if (target === 'videos') {
             caches.push(getCache('encodings', true));
         }

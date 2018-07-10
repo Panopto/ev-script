@@ -29,7 +29,7 @@ define(function(require) {
             this.picker.model.set({
                 search: searchVal
             });
-            this.events.trigger('search', searchVal);
+            this.events.trigger('search', this.picker.model);
         },
         searchHandler: function(e) {
             // Looking for enter key in which case we immediately search

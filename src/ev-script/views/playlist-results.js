@@ -17,17 +17,11 @@ define(function(require) {
             e.preventDefault();
             this.events.trigger('reloadPlaylists');
         },
-        getPreviewInstance: function(selectedItem, previewOptions) {
+        getPreviewInstance: function(previewOptions) {
             return new PlaylistPreviewView(_.extend(previewOptions, {
-
-                // TODO - this is copied from videos impl...obviously not
-                // correct here
-
-                // href: selectedItem.getLink('ev:Encodings/Default').href,
-                // model: new PlaylistSettings({
-                //     id: selectedItem.get('id'),
-                //     content: selectedItem.toJSON()
-                // })
+                model: new PlaylistSettings({
+                    id: previewOptions.selectedItem.get('id')
+                })
             }));
         }
     });

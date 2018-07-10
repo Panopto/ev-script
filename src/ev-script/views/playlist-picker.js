@@ -4,18 +4,26 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        URITemplate = require('urijs/URITemplate'),
         PickerView = require('ev-script/views/picker'),
         FilterView = require('ev-script/views/filter'),
         PlaylistResultsView = require('ev-script/views/playlist-results'),
-        Playlists = require('ev-script/collections/playlists');
+        Playlists = require('ev-script/models/playlists');
 
     return PickerView.extend({
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit');
 
-            this.events.off('search').on('search', this.loadPlaylists);
-            this.events.off('reloadPlaylists').on('reloadPlaylists', this.loadPlaylists);
+            _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit',
+            'handleSearch');
+
+            this.events
+            .off('search', this.handleSearch)
+            .on('search', this.handleSearch);
+
+            this.events
+            .off('reloadPlaylists', this.loadPlaylists)
+            .on('reloadPlaylists', this.loadPlaylists);
 
             // TODO - handle callback
             this.filter = new FilterView({
@@ -44,6 +52,11 @@ define(function(require) {
             this.loadPlaylists();
             e.preventDefault();
         },
+        handleSearch: function(model) {
+            if (model === this.model) {
+                this.loadPlaylists();
+            }
+        },
         showPicker: function() {
             PickerView.prototype.showPicker.call(this);
             this.filter.loadOrgs();
@@ -52,23 +65,21 @@ define(function(require) {
         loadPlaylists: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
                 libraryId = this.model.get('libraryId'),
+                library = this.filter.getLibrary(libraryId),
+                searchTemplate = new URITemplate(library.getLink('ev:Playlists/Search').href),
+                searchUrl = searchTemplate.expand({
+                    search: searchVal,
+                    sortBy: 'title',
+                    pageSize: 20
+                }),
                 playlists = new Playlists({}, {
-                    libraryId: libraryId,
-                    filterValue: searchVal
+                    href: searchUrl
                 });
             playlists.fetch({
                 picker: this,
-                cacheKey: libraryId + searchVal,
-                success: _.bind(function(collection, response, options) {
-                    var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
-                    var size = _.size(response.Data);
-                    if (size === totalRecords) {
-                        collection.hasMore = false;
-                    } else {
-                        collection.hasMore = true;
-                        collection.pageIndex += 1;
-                    }
-                    this.resultsView.collection = collection;
+                success: _.bind(function(model, response, options) {
+                    this.resultsView.model = model;
+                    this.resultsView.collection = model.getEmbedded('playlists');
                     this.resultsView.render();
                 }, this),
                 error: _.bind(this.ajaxError, this)

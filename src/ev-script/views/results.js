@@ -55,17 +55,15 @@ define(function(require) {
         loadMore: function() {
             var next = this.model.getLink('next');
             if (next) {
-                // this.loadLock = true;
                 this.model.href = next.href;
                 this.model.promise.done(_.bind(function() {
                     this.model.fetch({
-                        // remove: false,
                         picker: this.picker,
                         success: _.bind(function(model, response, options) {
                             if (!model.getLink('next')) {
                                 this.$scrollLoader.evScrollLoader('hideLoader');
                             }
-                            this.collection.add(model.getEmbedded('contents').models);
+                            this.collection.add(model.getEmbedded(model.collectionKey).models);
                         }, this),
                         error: _.bind(this.ajaxError, this)
                     });
@@ -187,7 +185,7 @@ define(function(require) {
         render: function() {
             this.$el.html(this.resultsTemplate({
                 i18n: this.i18n,
-                totalResults: this.model.get('totalItemsCount')
+                totalResults: parseInt(this.model.get('totalItemsCount'), 10)
             }));
             this.$total = this.$('.total');
             this.$results = this.$('.results');
@@ -209,12 +207,14 @@ define(function(require) {
                 onScrolled: this.loadMore
             });
             // TODO - I don't think we need scroll loader to set max-height (ever?)
-            this.$scrollLoader.closest('.scrollWrap').css('max-height', '');
+            // this.$scrollLoader.closest('.scrollWrap').css('max-height', '');
             if (!this.model.getLink('next')) {
                 this.$scrollLoader.evScrollLoader('hideLoader');
             }
             // Prevent multiple bindings if the collection hasn't changed between render calls
-            this.collection.off('add', this.addHandler).on('add', this.addHandler);
+            this.collection
+            .off('add', this.addHandler)
+            .on('add', this.addHandler);
         },
         // Subclasses must implement the following
         refreshHandler: function(e) {},
