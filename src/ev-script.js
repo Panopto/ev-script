@@ -185,8 +185,14 @@ define(function(require) {
                             var $div = $('<div/>');
                             if (settings.type === 'video') {
                                 this.handleEmbed($div[0], new VideoSettings(settings));
-                            } else {
+                            } else if (settings.type === 'playlist') {
                                 this.handleEmbed($div[0], new PlaylistSettings(settings));
+                            } else if (settings.type === 'dropbox') {
+                                this.handleEmbed($div[0], new DropboxSettings(settings));
+                            // } else if (settings.type === 'quiz') {
+                            //     this.handleEmbed($div[0], new QuizSettings(settings));
+                            } else {
+                                throw new Error('Unrecognized settings model type');
                             }
                             return $div.html();
                         };

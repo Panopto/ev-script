@@ -15,7 +15,7 @@ define(function(require) {
             PickerView.prototype.initialize.call(this, options);
 
             _.bindAll(this, 'loadDropboxes', 'changeLibrary', 'handleSubmit',
-            'handleSearch', 'updateModel');
+            'handleSearch');
 
             this.events
             .off('search', this.handleSearch)
@@ -66,13 +66,6 @@ define(function(require) {
             PickerView.prototype.showPicker.call(this);
             this.filter.loadOrgs();
             this.filter.setFocus();
-        },
-        updateModel: function(chosenItem) {
-            this.model.set({
-                id: chosenItem.get('id'),
-                shortName: chosenItem.get('shortName'),
-                title: chosenItem.get('title')
-            });
         },
         loadDropboxes: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),

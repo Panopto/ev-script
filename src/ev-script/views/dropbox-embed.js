@@ -18,7 +18,7 @@ define(function(require) {
         // getFrameHeight: function() {},
         getUrl: function() {
             return URI(this.config.ensembleUrl + '/hapi/v1/Dropboxes/' +
-                this.model.get('shortName') + '/Show');
+                this.model.get('content').shortName + '/Show');
         },
         render: function(isPreview) {
             var src = this.getUrl();
@@ -28,7 +28,7 @@ define(function(require) {
 
             this.$el.html(this.template({
                 'href': src,
-                'title': this.model.get('title')
+                'title': this.model.get('content').title
             }));
         }
     });
