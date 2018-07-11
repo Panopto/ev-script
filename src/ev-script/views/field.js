@@ -108,7 +108,9 @@ define(function(require) {
             e.preventDefault();
         },
         optionsHandler: function(e) {
-            this.settings.show();
+            if (this.settings) {
+                this.settings.show();
+            }
             e.preventDefault();
         },
         removeHandler: function(e) {
@@ -149,6 +151,7 @@ define(function(require) {
                 ensembleUrl: ensembleUrl,
                 thumbnailUrl: false,
                 modelId: this.model.id,
+                displaySettings: this.settings,
                 label: label,
                 type: type,
                 name: name

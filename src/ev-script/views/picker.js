@@ -14,7 +14,10 @@ define(function(require) {
         template: _.template(require('text!ev-script/templates/picker.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker');
+
+            _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker',
+            'updateModel');
+
             this.$el.hide();
             this.$el.html(this.template({
                 id: this.id
@@ -41,13 +44,16 @@ define(function(require) {
             }, this);
             this.hider.render();
         },
+        updateModel: function(chosenItem) {
+            this.model.set({
+                id: chosenItem.get('id')
+            });
+        },
         chooseItem: function(e) {
             var id = $(e.currentTarget).attr('rel'),
-                chosen = this.resultsView.collection.get(id);
-            this.model.set({
-                id: id
-            });
-            this.events.trigger('itemChosen', this.model, chosen);
+                chosenItem = this.resultsView.collection.get(id);
+            this.updateModel(chosenItem);
+            this.events.trigger('itemChosen', this.model, chosenItem);
             this.events.trigger('hidePicker', this.field.id);
             e.preventDefault();
         },

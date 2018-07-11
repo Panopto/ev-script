@@ -7,23 +7,23 @@ define(function(require) {
         URITemplate = require('urijs/URITemplate'),
         PickerView = require('ev-script/views/picker'),
         FilterView = require('ev-script/views/filter'),
-        PlaylistResultsView = require('ev-script/views/playlist-results'),
-        Playlists = require('ev-script/models/playlists');
+        DropboxResultsView = require('ev-script/views/dropbox-results'),
+        Dropboxes = require('ev-script/models/dropboxes');
 
     return PickerView.extend({
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
 
-            _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit',
-            'handleSearch');
+            _.bindAll(this, 'loadDropboxes', 'changeLibrary', 'handleSubmit',
+            'handleSearch', 'updateModel');
 
             this.events
             .off('search', this.handleSearch)
             .on('search', this.handleSearch);
 
             var reload = _.bind(function(target) {
-                if (target === 'playlists') {
-                    this.loadPlaylists();
+                if (target === 'dropboxes') {
+                    this.loadDropboxes();
                 }
             }, this);
             this.events
@@ -38,7 +38,7 @@ define(function(require) {
                 showTypeSelect: false
             });
 
-            this.resultsView = new PlaylistResultsView({
+            this.resultsView = new DropboxResultsView({
                 el: this.$('div.ev-results'),
                 picker: this
             });
@@ -51,15 +51,15 @@ define(function(require) {
             'submit .ev-filter-block': 'handleSubmit'
         },
         changeLibrary: function(e) {
-            this.loadPlaylists();
+            this.loadDropboxes();
         },
         handleSubmit: function(e) {
-            this.loadPlaylists();
+            this.loadDropboxes();
             e.preventDefault();
         },
         handleSearch: function(model) {
             if (model === this.model) {
-                this.loadPlaylists();
+                this.loadDropboxes();
             }
         },
         showPicker: function() {
@@ -67,24 +67,31 @@ define(function(require) {
             this.filter.loadOrgs();
             this.filter.setFocus();
         },
-        loadPlaylists: function() {
+        updateModel: function(chosenItem) {
+            this.model.set({
+                id: chosenItem.get('id'),
+                shortName: chosenItem.get('shortName'),
+                title: chosenItem.get('title')
+            });
+        },
+        loadDropboxes: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
                 libraryId = this.model.get('libraryId'),
                 library = this.filter.getLibrary(libraryId),
-                searchTemplate = new URITemplate(library.getLink('ev:Playlists/Search').href),
+                searchTemplate = new URITemplate(library.getLink('ev:Dropboxes/Search').href),
                 searchUrl = searchTemplate.expand({
                     search: searchVal,
                     sortBy: 'title',
                     pageSize: 20
                 }),
-                playlists = new Playlists({}, {
+                dropboxes = new Dropboxes({}, {
                     href: searchUrl
                 });
-            playlists.fetch({
+            dropboxes.fetch({
                 picker: this,
                 success: _.bind(function(model, response, options) {
                     this.resultsView.model = model;
-                    this.resultsView.collection = model.getEmbedded('playlists');
+                    this.resultsView.collection = model.getEmbedded('dropboxes');
                     this.resultsView.render();
                 }, this),
                 error: _.bind(this.ajaxError, this)

@@ -10,12 +10,26 @@ define(function(require) {
         moment = require('moment'),
         likelySubtags = require('json!cldr-data/supplemental/likelySubtags.json'),
         messages = require('json!ev-script/i18n/root/messages.json'),
+
+        // Settings models
         VideoSettings = require('ev-script/models/video-settings'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
+        DropboxSettings = require('ev-script/models/dropbox-settings'),
+        // QuizSettings = require('ev-script/models/quiz-settings'),
+
+        // Field views
         VideoFieldView = require('ev-script/views/video-field'),
         PlaylistFieldView = require('ev-script/views/playlist-field'),
+        DropboxFieldView = require('ev-script/views/dropbox-field'),
+        // QuizFieldView = require('ev-script/views/quiz-field'),
+
+        // Embed views
         VideoEmbedView = require('ev-script/views/video-embed'),
         PlaylistEmbedView = require('ev-script/views/playlist-embed'),
+        DropboxEmbedView = require('ev-script/views/dropbox-embed'),
+        // QuizEmbedView = require('ev-script/views/quiz-embed'),
+
+        // API response
         Root = require('ev-script/models/root'),
         Info = require('ev-script/models/info'),
         eventsUtil = require('ev-script/util/events'),
@@ -127,6 +141,10 @@ define(function(require) {
                                 fieldView = new VideoFieldView(fieldOptions);
                             } else if (settingsModel instanceof PlaylistSettings) {
                                 fieldView = new PlaylistFieldView(fieldOptions);
+                            } else if (settingsModel instanceof DropboxSettings) {
+                                fieldView = new DropboxFieldView(fieldOptions);
+                            // } else if (settingsModel instanceof QuizSettings) {
+                            //     fieldView = new QuizFieldView(fieldOptions);
                             } else {
                                 throw new Error('Unrecognized settings model type');
                             }
@@ -140,12 +158,26 @@ define(function(require) {
                                     model: settingsModel
                                 });
                                 videoEmbed.render();
-                            } else {
+                            } else if (settingsModel instanceof PlaylistSettings) {
                                 var playlistEmbed = new PlaylistEmbedView({
                                     el: embedWrap,
                                     model: settingsModel
                                 });
                                 playlistEmbed.render();
+                            } else if (settingsModel instanceof DropboxSettings) {
+                                var dropboxEmbed = new DropboxEmbedView({
+                                    el: embedWrap,
+                                    model: settingsModel
+                                });
+                                dropboxEmbed.render();
+                            // } else if (settingsModel instanceof QuizSettings) {
+                            //     var quizEmbed = new QuizEmbedView({
+                            //         el: embedWrap,
+                            //         model: settingsModel
+                            //     });
+                            //     quizEmbed.render();
+                            } else {
+                                throw new Error('Unrecognized settings model type');
                             }
                         };
 
@@ -189,6 +221,8 @@ define(function(require) {
     return {
         VideoSettings: VideoSettings,
         PlaylistSettings: PlaylistSettings,
+        DropboxSettings: DropboxSettings,
+        // QuizSettings: QuizSettings,
         EnsembleApp: EnsembleApp
     };
 

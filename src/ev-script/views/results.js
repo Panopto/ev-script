@@ -22,7 +22,6 @@ define(function(require) {
             'previewItem', 'refreshHandler', 'getPreviewInstance');
 
             this.picker = options.picker;
-            // this.loadLock = false;
         },
         events: {
             'click .action-preview': 'previewItem',

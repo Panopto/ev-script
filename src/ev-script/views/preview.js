@@ -15,8 +15,11 @@ define(function(require) {
 
             this.selectedItem = options.selectedItem;
 
-            _.bindAll(this, 'getTitle');
+            _.bindAll(this, 'render', 'getTitle');
 
+            this.render();
+        },
+        render: function() {
             var $dialogWrap = $('<div class="dialogWrap ev-preview"></div>'),
                 embedView = new this.embedClass({
                     model: new this.model.constructor(this.model.toJSON())

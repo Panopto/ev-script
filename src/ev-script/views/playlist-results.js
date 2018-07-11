@@ -15,7 +15,7 @@ define(function(require) {
         },
         refreshHandler: function(e) {
             e.preventDefault();
-            this.events.trigger('reloadPlaylists');
+            this.events.trigger('reload', 'playlists');
         },
         getPreviewInstance: function(previewOptions) {
             return new PlaylistPreviewView(_.extend(previewOptions, {

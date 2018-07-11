@@ -27,18 +27,17 @@ define(function(require) {
             'change input[name="categoryList"]': 'changeCategoryList'
         },
         updateModel: function() {
-            // TODO - content is now a proper model w/ attributes (rather than plain json)
             var content = this.field.chosenItem,
                 attrs = {
                     'layout': this.$('input[name="layout"]:checked').val(),
-                    'embedcode': content && content.IsSecure ? false : this.$('#embedcode').is(':checked'),
+                    'embedcode': content && content.get('isRestricted') ? false : this.$('#embedcode').is(':checked'),
                     'statistics': this.$('#statistics').is(':checked'),
                     'duration': this.$('#duration').is(':checked'),
                     'attachments': this.$('#attachments').is(':checked'),
                     'annotations': this.$('#annotations').is(':checked'),
                     'links': this.$('#links').is(':checked'),
                     'credits': this.$('#credits').is(':checked'),
-                    'socialsharing': content && content.IsSecure ? false : this.$('#socialsharing').is(':checked'),
+                    'socialsharing': content && content.get('isRestricted') ? false : this.$('#socialsharing').is(':checked'),
                     'autoplay': this.$('#autoplay').is(':checked'),
                     'showcaptions': this.$('#showcaptions').is(':checked'),
                     'dateproduced': this.$('#dateproduced').is(':checked'),
@@ -64,12 +63,12 @@ define(function(require) {
             this.field.model.set(attrs);
         },
         render: function() {
-            var content = this.field.model.get('content');
+            var content = this.field.chosenItem;
             this.$el.html(this.template({
                 appInfo: this.info,
                 i18n: this.i18n,
                 model: this.field.model,
-                isSecure: content && content.IsSecure,
+                isSecure: content && content.get('isRestricted'),
                 categories: this.categories || new Categories([], {})
             }));
             this.$('.accordion').accordion({
@@ -78,7 +77,7 @@ define(function(require) {
                 collapsible: true
             });
             this.$el.dialog({
-                title: this.unencode(content ? content.Name : this.field.model.get('id')),
+                title: this.unencode(content ? content.get('title') : this.field.model.get('id')),
                 modal: true,
                 autoOpen: false,
                 draggable: false,
