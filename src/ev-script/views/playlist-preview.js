@@ -6,9 +6,9 @@ define(function(require) {
         PlaylistEmbedView = require('ev-script/views/playlist-embed');
 
     return PreviewView.extend({
-        initialize: function(options) {
-            PreviewView.prototype.initialize.call(this, options);
-        },
+        // initialize: function(options) {
+        //     PreviewView.prototype.initialize.call(this, options);
+        // },
         embedClass: PlaylistEmbedView
     });
 
