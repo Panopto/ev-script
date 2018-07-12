@@ -57,12 +57,6 @@ define(function(require) {
         },
         getFieldLabel: function() {
             return this.i18n.formatMessage('Playlist');
-        },
-        getActionsHtml: function(templateOptions) {
-            _.extend(templateOptions, {
-                name: this.chosenItem ? this.chosenItem.get('title') : templateOptions.name
-            });
-            return FieldView.prototype.getActionsHtml.call(this, templateOptions);
         }
     });
 

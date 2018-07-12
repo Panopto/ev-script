@@ -75,10 +75,10 @@ define(function(require) {
             this.doAuthenticate();
         },
         events: {
-            'click .action-choose': 'chooseHandler',
-            'click .action-preview': 'previewHandler',
-            'click .action-options': 'optionsHandler',
-            'click .action-remove': 'removeHandler'
+            'click .ev-field .action-choose': 'chooseHandler',
+            'click .ev-field .action-preview': 'previewHandler',
+            'click .ev-field .action-options': 'optionsHandler',
+            'click .ev-field .action-remove': 'removeHandler'
         },
         doAuthenticate: function() {
             var deferred = $.Deferred();
@@ -121,7 +121,6 @@ define(function(require) {
             this.model.set(this.model.defaults, {
                 silent: true
             });
-            this.chosenItem = null;
             this.events.trigger('fieldUpdated', this.$field);
             this.renderActions();
             e.preventDefault();
@@ -131,7 +130,6 @@ define(function(require) {
             var previewView = this.getPreviewInstance({
                 el: element,
                 model: this.model,
-                selectedItem: this.chosenItem,
                 picker: this.picker
             });
             e.preventDefault();
@@ -139,8 +137,7 @@ define(function(require) {
         renderActions: function() {
             var ensembleUrl = this.config.ensembleUrl,
                 label = this.getFieldLabel(),
-                type = this.getFieldType(),
-                name = this.model.id;
+                type = this.getFieldType();
             if (!this.$actions) {
                 this.$actions = $('<div class="ev-field"/>');
                 this.$field.after(this.$actions);
@@ -154,7 +151,7 @@ define(function(require) {
                 displaySettings: this.settings,
                 label: label,
                 type: type,
-                name: name
+                name: this.model.get('content') && this.model.get('content').title || ''
             }));
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {
@@ -167,9 +164,8 @@ define(function(require) {
             this.events.trigger('fieldUpdated', this.$field, json);
             this.renderActions();
         },
-        itemChosenHandler: function(settingsModel, chosenItem) {
+        itemChosenHandler: function(settingsModel) {
             if (settingsModel.get('type') === this.model.get('type')) {
-                this.chosenItem = chosenItem;
                 this.model.set(settingsModel.attributes);
             }
         },

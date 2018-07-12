@@ -83,9 +83,9 @@ define(function(require) {
             return this.i18n.formatMessage('Media');
         },
         getActionsHtml: function(templateOptions) {
-            var name = this.chosenItem ? this.chosenItem.get('title') : templateOptions.name,
-                branding = this.root.getEmbedded('ev:Brandings/Current'),
-                thumbnailLink = this.chosenItem && this.chosenItem.getLink('ev:Images/Thumbnail'),
+            var branding = this.root.getEmbedded('ev:Brandings/Current'),
+                contentModel = this.model.get('content') && new BaseModel(this.model.get('content')),
+                thumbnailLink = contentModel && contentModel.getLink('ev:Images/Thumbnail'),
                 thumbnailTemplate = thumbnailLink ? thumbnailLink.href : branding.get('thumbnailImageUrlTemplate'),
                 thumbnailUrl = new URITemplate(thumbnailTemplate).expand({
                     width: 200,
@@ -93,7 +93,6 @@ define(function(require) {
                 });
 
             _.extend(templateOptions, {
-                name: name,
                 thumbnailUrl: thumbnailUrl
             });
             return FieldView.prototype.getActionsHtml.call(this, templateOptions);

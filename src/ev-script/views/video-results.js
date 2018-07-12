@@ -58,11 +58,7 @@ define(function(require) {
             this.events.trigger('reload', 'videos');
         },
         getPreviewInstance: function(previewOptions) {
-            return new VideoPreviewView(_.extend(previewOptions, {
-                model: new VideoSettings({
-                    id: previewOptions.selectedItem.get('id')
-                })
-            }));
+            return new VideoPreviewView(previewOptions);
         }
     });
 

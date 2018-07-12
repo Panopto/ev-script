@@ -18,11 +18,7 @@ define(function(require) {
             this.events.trigger('reload', 'playlists');
         },
         getPreviewInstance: function(previewOptions) {
-            return new PlaylistPreviewView(_.extend(previewOptions, {
-                model: new PlaylistSettings({
-                    id: previewOptions.selectedItem.get('id')
-                })
-            }));
+            return new PlaylistPreviewView(previewOptions);
         }
     });
 

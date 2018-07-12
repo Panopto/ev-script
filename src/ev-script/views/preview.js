@@ -13,8 +13,6 @@ define(function(require) {
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
 
-            this.selectedItem = options.selectedItem;
-
             _.bindAll(this, 'render', 'getTitle');
 
             this.render();
@@ -61,7 +59,7 @@ define(function(require) {
             });
         },
         getTitle: function() {
-            return this.unencode(this.selectedItem.get('title'));
+            return this.unencode(this.model.get('content').title);
         }
     });
 

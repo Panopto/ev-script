@@ -23,33 +23,21 @@ define(function(require) {
         },
         getPickerInstance: function(pickerOptions) {
             return new DropboxPickerView(_.extend({}, pickerOptions, {
+                // Picker uses a copy of the supplied settings model
                 model: new DropboxSettings(this.model.toJSON()),
             }));
         },
         getSettingsInstance: function(settingsOptions) {
             return false;
-            // return new DropboxSettingsView(settingsOptions);
         },
         getPreviewInstance: function(previewOptions) {
-            return new DropboxPreviewView(_.extend(previewOptions, {
-                model: new DropboxSettings({
-                    id: previewOptions.selectedItem.get('id'),
-                    shortName: previewOptions.selectedItem.get('shortName'),
-                    title: previewOptions.selectedItem.get('title')
-                })
-            }));
+            return new DropboxPreviewView(previewOptions);
         },
         getFieldType: function() {
             return 'dropbox';
         },
         getFieldLabel: function() {
             return this.i18n.formatMessage('Dropbox');
-        },
-        getActionsHtml: function(templateOptions) {
-            _.extend(templateOptions, {
-                name: this.chosenItem ? this.chosenItem.get('title') : templateOptions.name
-            });
-            return FieldView.prototype.getActionsHtml.call(this, templateOptions);
         }
     });
 

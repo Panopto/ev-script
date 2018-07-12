@@ -18,13 +18,7 @@ define(function(require) {
             this.events.trigger('reload', 'dropboxes');
         },
         getPreviewInstance: function(previewOptions) {
-            return new DropboxPreviewView(_.extend(previewOptions, {
-                model: new DropboxSettings({
-                    id: previewOptions.selectedItem.get('id'),
-                    shortName: previewOptions.selectedItem.get('shortName'),
-                    title: previewOptions.selectedItem.get('title')
-                })
-            }));
+            return new DropboxPreviewView(previewOptions);
         }
     });
 

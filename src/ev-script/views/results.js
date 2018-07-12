@@ -42,9 +42,13 @@ define(function(require) {
             var element = e.currentTarget,
                 id = $(element).attr('rel'),
                 item = this.collection.get(id),
+                settingsModel = this.picker.field.model,
                 previewView = new this.getPreviewInstance({
                     el: element,
-                    selectedItem: item,
+                    model: new settingsModel.constructor(_.extend({}, settingsModel.toJSON(), {
+                        id: item.get('id'),
+                        content: item.toJSON()
+                    })),
                     picker: this.picker
                 });
             // Stop event propagation so we don't trigger preview of stored field item as well
@@ -217,7 +221,7 @@ define(function(require) {
         },
         // Subclasses must implement the following
         refreshHandler: function(e) {},
-        getPreviewInstance: function(selectedItem, previewOptions) {}
+        getPreviewInstance: function(previewOptions) {}
     });
 
 });

@@ -50,7 +50,7 @@ define(function(require) {
                 id: chosenItem.get('id'),
                 content: chosenItem.toJSON()
             });
-            this.events.trigger('itemChosen', this.model, chosenItem);
+            this.events.trigger('itemChosen', this.model);
             this.events.trigger('hidePicker', this.field.id);
             e.preventDefault();
         },

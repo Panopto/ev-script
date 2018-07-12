@@ -103,9 +103,9 @@ define(function(require) {
             if (this.encoding) {
                 this.renderSize();
             }
-            var content = this.field.chosenItem;
+            var content = this.field.model.get('content');
             this.$el.dialog({
-                title: this.unencode(content ? content.get('title') : this.field.model.get('id')),
+                title: this.unencode(content ? content.title : this.field.model.get('id')),
                 modal: true,
                 autoOpen: false,
                 draggable: false,
