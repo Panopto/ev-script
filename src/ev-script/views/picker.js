@@ -15,7 +15,8 @@ define(function(require) {
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
 
-            _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker');
+            _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker',
+            'getSettingsModelAttributes');
 
             this.$el.hide();
             this.$el.html(this.template({
@@ -43,13 +44,16 @@ define(function(require) {
             }, this);
             this.hider.render();
         },
+        getSettingsModelAttributes: function(chosenItem) {
+            return {
+                id: chosenItem.get('id'),
+                content: chosenItem.toJSON()
+            };
+        },
         chooseItem: function(e) {
             var id = $(e.currentTarget).attr('rel'),
                 chosenItem = this.resultsView.collection.get(id);
-            this.model.set({
-                id: chosenItem.get('id'),
-                content: chosenItem.toJSON()
-            });
+            this.model.set(this.getSettingsModelAttributes(chosenItem));
             this.events.trigger('itemChosen', this.model);
             this.events.trigger('hidePicker', this.field.id);
             e.preventDefault();

@@ -1,0 +1,32 @@
+<div class="<%= (index % 2 ? 'odd' : 'even') %> result-item">
+    <div class="content-actions">
+        <div class="thumbnail-wrap">
+            <img class="thumbnail" src="<%= item.getThumbnailUrl() %>" alt="<%= i18n.formatMessage('{0} preview thumbnail', item.get('title')) %>"/>
+        </div>
+        <div class="action-links">
+            <a class="action-add" href="#" title="<%= i18n.formatMessage('Click to choose {0}', item.get('title')) %>" rel="<%= item.get('id') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage('Choose') %></span></a>
+            <a class="action-preview" href="#" title="<%= i18n.formatMessage('Click to preview {0}', item.get('title')) %>" rel="<%= item.get('id') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage('Preview') %></span></a>
+        </div>
+    </div>
+    <div class="content-meta">
+        <div class="title">
+            <a class="action-preview" title="<%= i18n.formatMessage('Click to preview {0}', item.get('title')) %>" href="#" rel="<%= item.get('id') %>"><%= item.get('title') %></a>
+        </div>
+        <div class="content-info">
+            <div class="info-row trunc">
+                <div class="label"><%= i18n.formatMessage('Comments') %></div>
+                <div class="value"><%= item.getComments() %></div>
+            </div>
+            <div class="info-row">
+                <div class="label"><%= i18n.formatMessage('Created On') %></div>
+                <div class="value">
+                    <%
+                        var createdOn = new Date(item.get('createdOn')),
+                            localDate = createdOn.setMinutes(createdOn.getMinutes() - createdOn.getTimezoneOffset());
+                        print(moment(localDate).format(dateTimeFormat));
+                    %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

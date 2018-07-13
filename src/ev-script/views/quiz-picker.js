@@ -7,23 +7,23 @@ define(function(require) {
         URITemplate = require('urijs/URITemplate'),
         PickerView = require('ev-script/views/picker'),
         FilterView = require('ev-script/views/filter'),
-        DropboxResultsView = require('ev-script/views/dropbox-results'),
-        Dropboxes = require('ev-script/models/dropboxes');
+        QuizResultsView = require('ev-script/views/quiz-results'),
+        Quizzes = require('ev-script/models/quizzes');
 
     return PickerView.extend({
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
 
-            _.bindAll(this, 'loadDropboxes', 'changeLibrary', 'handleSubmit',
-            'handleSearch');
+            _.bindAll(this, 'loadQuizzes', 'changeLibrary', 'handleSubmit',
+            'handleSearch', 'getSettingsModelAttributes');
 
             this.events
             .off('search', this.handleSearch)
             .on('search', this.handleSearch);
 
             var reload = _.bind(function(target) {
-                if (target === 'dropboxes') {
-                    this.loadDropboxes();
+                if (target === 'quizzes') {
+                    this.loadQuizzes();
                 }
             }, this);
             this.events
@@ -37,7 +37,7 @@ define(function(require) {
                 showTypeSelect: false
             });
 
-            this.resultsView = new DropboxResultsView({
+            this.resultsView = new QuizResultsView({
                 el: this.$('div.ev-results'),
                 picker: this
             });
@@ -50,15 +50,15 @@ define(function(require) {
             'submit .ev-filter-block': 'handleSubmit'
         },
         changeLibrary: function(e) {
-            this.loadDropboxes();
+            this.loadQuizzes();
         },
         handleSubmit: function(e) {
-            this.loadDropboxes();
+            this.loadQuizzes();
             e.preventDefault();
         },
         handleSearch: function(model) {
             if (model === this.model) {
-                this.loadDropboxes();
+                this.loadQuizzes();
             }
         },
         showPicker: function() {
@@ -66,27 +66,34 @@ define(function(require) {
             this.filter.loadOrgs();
             this.filter.setFocus();
         },
-        loadDropboxes: function() {
+        loadQuizzes: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
                 libraryId = this.model.get('libraryId'),
                 library = this.filter.getLibrary(libraryId),
-                searchTemplate = new URITemplate(library.getLink('ev:Dropboxes/Search').href),
+                searchTemplate = new URITemplate(library.getLink('ev:Quizzes/Search').href),
                 searchUrl = searchTemplate.expand({
                     search: searchVal,
-                    sortBy: 'title',
+                    isArchived: false,
+                    sortBy: 'createdOn',
+                    desc: true,
                     pageSize: 20
                 }),
-                dropboxes = new Dropboxes({}, {
+                quizzes = new Quizzes({}, {
                     href: searchUrl
                 });
-            dropboxes.fetch({
+            quizzes.fetch({
                 picker: this,
                 success: _.bind(function(model, response, options) {
                     this.resultsView.model = model;
-                    this.resultsView.collection = model.getEmbedded('dropboxes');
+                    this.resultsView.collection = model.getEmbedded('quizzes');
                     this.resultsView.render();
                 }, this),
                 error: _.bind(this.ajaxError, this)
+            });
+        },
+        getSettingsModelAttributes: function(chosenItem) {
+            return _.extend(PickerView.prototype.getSettingsModelAttributes.call(this, chosenItem), {
+                contentId: chosenItem.get('referenceId')
             });
         }
     });

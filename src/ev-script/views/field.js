@@ -144,8 +144,7 @@ define(function(require) {
             }
             this.$actions.html(this.getActionsHtml({
                 i18n: this.i18n,
-                // TODO - how is this used?
-                ensembleUrl: ensembleUrl,
+                ensembleUrl: ensembleUrl, // TODO - how is this used?
                 thumbnailUrl: false,
                 modelId: this.model.id,
                 displaySettings: this.settings,

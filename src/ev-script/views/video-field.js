@@ -14,9 +14,9 @@ define(function(require) {
         VideoEncoding = require('ev-script/models/video-encoding');
 
     return FieldView.extend({
-        initialize: function(options) {
-            FieldView.prototype.initialize.call(this, options);
-        },
+        // initialize: function(options) {
+        //     FieldView.prototype.initialize.call(this, options);
+        // },
         initCallback: function() {
             this.encoding = new VideoEncoding({}, {});
 

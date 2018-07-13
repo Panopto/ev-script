@@ -1,0 +1,37 @@
+<form>
+    <div role="group" aria-labelledby="quizSettingsTitle">
+        <div id="quizSettingsTitle" style="display:none;"><%= i18n.formatMessage('Quiz Embed Options') %></div>
+        <div class="fieldWrap">
+            <label for="size"><%= i18n.formatMessage('Size') %></label>
+            <select class="form-select size" id="size" name="size">
+                <option value="original"><%= i18n.formatMessage('Original') %></option>
+            </select>
+        </div>
+        <div>
+            <div class="fieldWrap inline-option">
+                <input id="showtitle" class="form-checkbox" <% if (model.get('showtitle')) { print('checked="checked"'); } %> name="showtitle" type="checkbox"/>
+                <label for="showtitle"><%= i18n.formatMessage('Title') %></label>
+            </div>
+            <div class="fieldWrap inline-option">
+                <input id="attachments" class="form-checkbox" <% if (model.get('attachments')) { print('checked="checked"'); } %> name="attachments" type="checkbox"/>
+                <label for="attachments"><%= i18n.formatMessage('Attachments') %></label>
+            </div>
+            <div class="fieldWrap inline-option">
+                <input id="links" class="form-checkbox" <% if (model.get('links')) { print('checked="checked"'); } %> name="links" type="checkbox"/>
+                <label for="links"><%= i18n.formatMessage('Links') %></label>
+            </div>
+            <div class="fieldWrap inline-option">
+                <input id="metadata" class="form-checkbox" <% if (model.get('metadata')) { print('checked="checked"'); } %> name="metadata" type="checkbox"/>
+                <label for="metadata"><%= i18n.formatMessage('Meta Data') %></label>
+            </div>
+            <div class="fieldWrap inline-option">
+                <input id="showcaptions" class="form-checkbox" <% if (model.get('showcaptions')) { print('checked="checked"'); } %>  name="showcaptions" type="checkbox"/>
+                <label for="showcaptions"><%= i18n.formatMessage('Captions "On" By Default') %></label>
+            </div>
+         </div>
+        <div class="form-actions">
+            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage('Save') %></span></button>
+            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage('Cancel') %></span></button>
+        </div>
+    </div>
+</form>

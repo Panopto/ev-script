@@ -23,7 +23,7 @@
             } else if ($field[0].id === 'dropbox') {
                 app.handleEmbed($embed, new EV.DropboxSettings(value));
             } else if ($field[0].id === 'quiz') {
-                // app.handleEmbed($embed, new EV.QuizSettings(value));
+                app.handleEmbed($embed, new EV.QuizSettings(value));
             }
             console.log('Embed code: ' + app.getEmbedCode(value));
         } else {
@@ -62,7 +62,7 @@
                     }
                     if (!quizSelected && ui.newTab.index() === 3) {
                         quizSelected = true;
-                        // app.handleField($('#quizWrap')[0], new EV.QuizSettings(), '#quiz');
+                        app.handleField($('#quizWrap')[0], new EV.QuizSettings(), '#quiz');
                     }
                 }
             });

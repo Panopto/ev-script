@@ -15,19 +15,19 @@ define(function(require) {
         VideoSettings = require('ev-script/models/video-settings'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
         DropboxSettings = require('ev-script/models/dropbox-settings'),
-        // QuizSettings = require('ev-script/models/quiz-settings'),
+        QuizSettings = require('ev-script/models/quiz-settings'),
 
         // Field views
         VideoFieldView = require('ev-script/views/video-field'),
         PlaylistFieldView = require('ev-script/views/playlist-field'),
         DropboxFieldView = require('ev-script/views/dropbox-field'),
-        // QuizFieldView = require('ev-script/views/quiz-field'),
+        QuizFieldView = require('ev-script/views/quiz-field'),
 
         // Embed views
         VideoEmbedView = require('ev-script/views/video-embed'),
         PlaylistEmbedView = require('ev-script/views/playlist-embed'),
         DropboxEmbedView = require('ev-script/views/dropbox-embed'),
-        // QuizEmbedView = require('ev-script/views/quiz-embed'),
+        QuizEmbedView = require('ev-script/views/quiz-embed'),
 
         // API response
         Root = require('ev-script/models/root'),
@@ -143,8 +143,8 @@ define(function(require) {
                                 fieldView = new PlaylistFieldView(fieldOptions);
                             } else if (settingsModel instanceof DropboxSettings) {
                                 fieldView = new DropboxFieldView(fieldOptions);
-                            // } else if (settingsModel instanceof QuizSettings) {
-                            //     fieldView = new QuizFieldView(fieldOptions);
+                            } else if (settingsModel instanceof QuizSettings) {
+                                fieldView = new QuizFieldView(fieldOptions);
                             } else {
                                 throw new Error('Unrecognized settings model type');
                             }
@@ -170,12 +170,12 @@ define(function(require) {
                                     model: settingsModel
                                 });
                                 dropboxEmbed.render();
-                            // } else if (settingsModel instanceof QuizSettings) {
-                            //     var quizEmbed = new QuizEmbedView({
-                            //         el: embedWrap,
-                            //         model: settingsModel
-                            //     });
-                            //     quizEmbed.render();
+                            } else if (settingsModel instanceof QuizSettings) {
+                                var quizEmbed = new QuizEmbedView({
+                                    el: embedWrap,
+                                    model: settingsModel
+                                });
+                                quizEmbed.render();
                             } else {
                                 throw new Error('Unrecognized settings model type');
                             }
@@ -189,8 +189,8 @@ define(function(require) {
                                 this.handleEmbed($div[0], new PlaylistSettings(settings));
                             } else if (settings.type === 'dropbox') {
                                 this.handleEmbed($div[0], new DropboxSettings(settings));
-                            // } else if (settings.type === 'quiz') {
-                            //     this.handleEmbed($div[0], new QuizSettings(settings));
+                            } else if (settings.type === 'quiz') {
+                                this.handleEmbed($div[0], new QuizSettings(settings));
                             } else {
                                 throw new Error('Unrecognized settings model type');
                             }
@@ -228,7 +228,7 @@ define(function(require) {
         VideoSettings: VideoSettings,
         PlaylistSettings: PlaylistSettings,
         DropboxSettings: DropboxSettings,
-        // QuizSettings: QuizSettings,
+        QuizSettings: QuizSettings,
         EnsembleApp: EnsembleApp
     };
 

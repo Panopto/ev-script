@@ -8,9 +8,6 @@ define(function(require) {
 
     return EmbedView.extend({
         template: _.template(require('text!ev-script/templates/video-embed.html')),
-        initialize: function(options) {
-            EmbedView.prototype.initialize.call(this, options);
-        },
         render: function(isPreview) {
             // Width and height really should be set by now...but use a reasonable default if not
             var width = this.getMediaWidth(),
