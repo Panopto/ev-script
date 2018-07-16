@@ -26,8 +26,7 @@ define(function(require) {
             var indexParam = 'PageIndex=1';
             var onParam = 'FilterOn=LibraryId';
             var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
-            var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+            return api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
         },
         // Override base parse in order to grab settings
         parse: function(response) {

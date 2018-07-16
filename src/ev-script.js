@@ -51,10 +51,6 @@ define(function(require) {
             ensembleUrl: '',
             // Path to the api under the ensembleUrl.
             apiPath: '/hapi',
-            // Models/collections will typically fetch directly from the API,
-            // but this method is called in case that needs to be overridden
-            // (e.g. in cross-domain scenarios where we're using a proxy).
-            urlCallback: function(url) { return url; },
             // Number of results to fetch at a time from the server (page size).
             pageSize: 100,
             // The height of our scroll loader. This can be an integer (number

@@ -66,30 +66,16 @@ module.exports = function(grunt) {
     // Task configuration.
     clean: ['dist'],
     jshint: {
-      all: ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js'],
+      all: ['Gruntfile.js', 'src/**/*.js'],
       gruntfile: {
         src: 'Gruntfile.js'
       },
       src: {
         src: ['src/**/*.js']
       },
-      test: {
-        src: ['test/**/*.js']
-      },
       options: {
         jshintrc: '.jshintrc',
         reporter: require('jshint-stylish')
-      }
-    },
-    qunit: {
-      all: {
-        options: {
-          urls: ['https://localhost:8000/test'],
-          '--ignore-ssl-errors': true,
-          '--cookies-file': 'cookie-jar.txt',
-          '--web-security': false,
-          timeout: 60000
-        }
       }
     },
     watch: {
@@ -99,11 +85,7 @@ module.exports = function(grunt) {
       },
       src: {
         files: ['<%= jshint.src.src %>', 'src/**/*.html', 'src/**/*.json', 'wrap/*'],
-        tasks: ['jshint:src', /*'qunit',*/ 'requirejs:development']
-      },
-      test: {
-        files: ['<%= jshint.test.src %>'],
-        tasks: ['jshint:test']
+        tasks: ['jshint:src', 'requirejs:development']
       },
       assets: {
         files: ['assets/less/*.less'],
@@ -140,8 +122,6 @@ module.exports = function(grunt) {
   });
 
   var connect = require('connect'),
-    bodyParser = require('body-parser'),
-    cookieParser = require('cookie-parser'),
     serveStatic = require('serve-static'),
     serveIndex = require('serve-index'),
     logger = require('morgan'),
@@ -153,74 +133,13 @@ module.exports = function(grunt) {
     request = require('request'),
     settings = require('./ev-config.js').evSettings;
 
-  /*
-   * Browsers don't handle cross-domain basic auth and hacks like JSONP don't
-   * provide access to response headers (like status code), so we're proxying
-   * and using cookies to pass basic auth credentials in our API request url.
-   * This also helps in that the basic auth form can confuse users if I try to
-   * use a proper reverse proxy. In that case, the user will see a basic auth
-   * prompt to authenticate against the current domain, when they're really being
-   * asked to provide EV creds.
-   *
-   * The EV script needs to know the EV url...but I can't directly call the url
-   * via AJAX due to browser restrictions (same origin policy).  So I have a callback
-   * that rewrites the url to point to a local "proxy" endpoint passing the original
-   * request url as a parameter.  Leveraging cookies from the auth form along w/
-   * the url parameter the proxy handles the API request (and strips any basic auth
-   * header from the response in the event of auth failure so as not to prompt
-   * for basic auth).
-   */
-
-  // TODO - move to external file?
-  grunt.registerTask('server', 'Demo server w/ Ensemble Video "proxying".', function() {
+  grunt.registerTask('server', 'Demo server', function() {
     var port = 8000,
       base = path.resolve('.');
     grunt.log.writeln('Starting ssl web server in "' + base + '" on port ' + port + '.');
     var app = connect()
-      // .use(logger('combined'))
-      .use(bodyParser.urlencoded({
-        extended: true
-      }))
-      .use(cookieParser())
       .use(serveStatic(base))
       .use(serveIndex(base))
-      .use(function(req, res) {
-        var parsed = url.parse(req.url, true);
-        // Proxy for EV API requests
-        if (parsed.pathname === settings.proxyPath) {
-          var ensembleUrl = parsed.query.ensembleUrl,
-            apiUrl = parsed.query.request,
-            username = req.cookies[encodeURIComponent(ensembleUrl) + '-user'],
-            password = req.cookies[encodeURIComponent(ensembleUrl) + '-pass'];
-          // console.log('ensembleUrl: ' + ensembleUrl);
-          // console.log('apiUrl: ' + apiUrl);
-          // console.log('cookies: ' + JSON.stringify(req.cookies));
-          // console.log('username: ' + username);
-          // console.log('password: ' + password);
-          if (apiUrl) {
-            var opts = {
-              url: apiUrl,
-              strictSSL: false
-            };
-            if (username && password) {
-              _.extend(opts, {
-                auth: {
-                  username: username,
-                  password: password
-                }
-              });
-            }
-            var r = request.get(opts);
-            r.pipefilter = function(response, dest) {
-              dest.removeHeader('www-authenticate');
-            };
-            r.pipe(res);
-          } else {
-            res.statusCode = 400;
-            res.end('Missing request parameter.');
-          }
-        }
-      })
       .use(errorhandler());
     https.createServer({
       key: fs.readFileSync('assets/ssl/certs/ev-script-key.pem'),
@@ -229,12 +148,9 @@ module.exports = function(grunt) {
   });
 
   // Default task.
-  grunt.registerTask('test', ['server', 'qunit']);
-  grunt.registerTask('default', ['clean', 'jshint', 'less', 'test', 'requirejs', 'copy:i18n']);
-  grunt.registerTask('all', ['clean', 'jshint', 'less', 'test', 'requirejs', 'copy:i18n']);
-  grunt.registerTask('all-skip-tests', ['clean', 'jshint', 'less', 'requirejs', 'copy:i18n']);
-  grunt.registerTask('dev', ['clean', 'jshint', 'less', 'test', 'requirejs:development', 'copy:i18n']);
-  grunt.registerTask('prod', ['clean', 'jshint', 'less', 'test', 'requirejs:production', 'copy:i18n']);
+  grunt.registerTask('default', ['clean', 'jshint', 'less', 'requirejs', 'copy:i18n']);
+  grunt.registerTask('dev', ['clean', 'jshint', 'less', 'requirejs:development', 'copy:i18n']);
+  grunt.registerTask('prod', ['clean', 'jshint', 'less', 'requirejs:production', 'copy:i18n']);
   grunt.registerTask('demo', ['server', 'watch']);
 
 };

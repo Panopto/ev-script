@@ -12,8 +12,7 @@ define(function(require) {
             this.playlistId = options.playlistId || '';
         },
         url: function() {
-            var url = this.config.ensembleUrl + '/app/api/category/list.json/' + this.playlistId;
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+            return this.config.ensembleUrl + '/app/api/category/list.json/' + this.playlistId;
         },
         parse: function(response) {
             return response.dataSet ? (response.dataSet.category || []) : [];

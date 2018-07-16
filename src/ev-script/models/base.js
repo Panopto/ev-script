@@ -81,8 +81,7 @@ define(function(require) {
             }
         },
         url: function() {
-            var url = this.href ? this.href : this.getLink('self').href;
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+            return this.href ? this.href : this.getLink('self').href;
         }
     });
 

@@ -4,24 +4,13 @@
     'use strict';
 
     // var ensembleUrl = 'https://cloud.ensemblevideo.com',
-    var ensembleUrl = 'https://jmpease-pc:8082',
-        proxyPath = '/ensemble';
+    var ensembleUrl = 'https://test01.ensemblevideo.com';
 
     var evSettings = {
         ensembleUrl: ensembleUrl,
-        authPath: '/',
         pageSize: 10,
-        proxyPath: proxyPath,
-        // urlCallback: function(url) {
-        //     return proxyPath + '?ensembleUrl=' + encodeURIComponent(ensembleUrl) + '&request=' + encodeURIComponent(url);
-        // },
         pluploadFlashPath: '/node_modules/plupload/js/Moxie.swf',
-        // Used during testing
-        // testUser: 'hasp',
-        // testPass: 'hasp'
-        testUser: 'admin',
-        testPass: '4rfv%TGB',
-        authType: 'forms'
+        defaultProvider: 'fd2ea5b3-ba4c-424c-b9d4-b179c1fe46f7' //'737357F1-93E0-4BA6-9868-3D9CA0703E4B'
     };
 
     if (typeof define === 'function' && define.amd) {
