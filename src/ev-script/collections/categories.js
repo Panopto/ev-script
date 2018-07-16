@@ -3,7 +3,7 @@ define(function(require) {
     'use strict';
 
     var Backbone = require('backbone'),
-        BaseCollection = require('ev-script/collections/base'),
+        BaseCollection = require('ev-script/collections/legacy-base'),
         _ = require('underscore');
 
     return BaseCollection.extend({

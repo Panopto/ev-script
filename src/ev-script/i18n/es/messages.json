@@ -43,6 +43,7 @@
         "Download Link": "Enlace de descarga",
         "Drag file here.": "Arrastre aquí el archivo.",
         "Dropbox": "VideoBuzón",
+        "Dropbox Embed Options": "Opciones de VideoBuzónes Incrustados",
         "Duration": "Duración",
         "Embed As Thumbnail": "Insertar como Miniatura",
         "Embed Code": "Incrustar Código",
@@ -50,6 +51,7 @@
         "Ensemble Logo": "Logotipo de Ensemble",
         "Ensemble Video Login": "Inicio de Sesión de Ensemble Video",
         "Go": "Go",
+        "Height": "Altura",
         "Hide Controls": "Ocultar Controles",
         "Hide": "Ocultar",
         "Hide Picker": "Ocultar Selector",
@@ -113,6 +115,7 @@
         "Username": "Nombre de Usuario",
         "Vertical": "Vertical",
         "Viewers Report": "Reporte de Audiencia",
+        "Width": "Ancho",
         "You are unauthorized to access this content.": "No estás autorizado a accede a este contenido."
     }
 }

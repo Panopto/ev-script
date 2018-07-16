@@ -48,26 +48,6 @@ define(function(require) {
         isExternal: function() {
             return (/^external\//i).test(this.get('contentType') || '');
         },
-        // parse: function(response) {
-        //     if (_.isArray(response.dataSet.encodings)) {
-        //         // This is a collection, so return the highest bitrate encoding
-        //         return _.max(response.dataSet.encodings, function(encoding, index, encodings) {
-        //             return parseInt(encoding.bitRate, 10);
-        //         });
-        //     } else {
-        //         return response.dataSet.encodings;
-        //     }
-        // },
-        // sync: function(method, model, options) {
-        //     _.extend(options, {
-        //         dataFilter: function(data) {
-        //             // Strip padding from JSONP response
-        //             var match = data.match(/\{[\s\S]*\}/);
-        //             return match ? match[0] : data;
-        //         }
-        //     });
-        //     return Backbone.sync.call(this, method, model, options);
-        // },
         updateSettingsModel: function(settingsModel) {
             var attrs = {
                 width: this.getWidth(),
@@ -75,20 +55,6 @@ define(function(require) {
                 isaudio: this.isAudio(),
                 contenttype: this.get('contentType')
             };
-            // TODO - this needs to be handled better
-            // If the settings model hasn't been updated yet with default audio settings
-            // if (this.isAudio() && !settingsModel.get('isaudio')) {
-            //     _.extend(attrs, {
-            //         showtitle: false,
-            //         annotations: false,
-            //         captionsearch: false,
-            //         attachments: false,
-            //         links: false,
-            //         metadata: false,
-            //         dateproduced: false,
-            //         isaudio: true
-            //     });
-            // }
             settingsModel.set(attrs, { silent: true });
         }
     });

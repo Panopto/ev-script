@@ -210,7 +210,7 @@ define(function(require) {
                 onScrolled: this.loadMore
             });
             // TODO - I don't think we need scroll loader to set max-height (ever?)
-            // this.$scrollLoader.closest('.scrollWrap').css('max-height', '');
+            this.$scrollLoader.closest('.scrollWrap').css('max-height', '');
             if (!this.model.getLink('next')) {
                 this.$scrollLoader.evScrollLoader('hideLoader');
             }

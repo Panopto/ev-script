@@ -10,21 +10,13 @@ define(function(require) {
         template: _.template(require('text!ev-script/templates/dropbox-embed.html')),
         initialize: function(options) {
 
-            _.bindAll(this, /*'getUrl',*/ 'render');
+            _.bindAll(this, 'render');
 
             EmbedView.prototype.initialize.call(this, options);
         },
-        // getUrl: function(isPreview) {
-        //     return URI(this.config.ensembleUrl + '/hapi/v1/Dropboxes/' +
-        //         this.model.get('id') + (isPreview ? '/Show' : '/Embed/Show'));
-        // },
         render: function(isPreview) {
-            // var src = this.getUrl(isPreview);
             var src = URI(this.config.ensembleUrl + '/hapi/v1/Dropboxes/' +
                 this.model.get('id') + '/Embed/Show');
-
-            // TODO
-            console.error('FIXME - using incorrect fixed url: ' + src.toString());
 
             this.$el.html(this.template({
                 'src': src,

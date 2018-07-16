@@ -43,6 +43,7 @@
         "Download Link": "Download Link",
         "Drag file here.": "Drag file here.",
         "Dropbox": "Dropbox",
+        "Dropbox Embed Options": "Dropbox Embed Options",
         "Duration": "Duration",
         "Embed As Thumbnail": "Embed As Thumbnail",
         "Embed Code": "Embed Code",
@@ -50,6 +51,7 @@
         "Ensemble Logo": "Ensemble Logo",
         "Ensemble Video Login": "Ensemble Video Login",
         "Go": "Go",
+        "Height": "Height",
         "Hide Controls": "Hide Controls",
         "Hide": "Hide",
         "Hide Picker": "Hide Picker",
@@ -113,6 +115,7 @@
         "Username": "Username",
         "Vertical": "Vertical",
         "Viewers Report": "Viewers Report",
+        "Width": "Width",
         "You are unauthorized to access this content.": "You are unauthorized to access this content."
     }
 }

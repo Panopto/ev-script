@@ -2,7 +2,7 @@ define(function(require) {
 
     'use strict';
 
-    var BaseCollection = require('ev-script/collections/base'),
+    var BaseCollection = require('ev-script/collections/legacy-base'),
         cacheUtil = require('ev-script/util/cache');
 
     return BaseCollection.extend({

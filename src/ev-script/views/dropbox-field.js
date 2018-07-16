@@ -7,7 +7,7 @@ define(function(require) {
         FieldView = require('ev-script/views/field'),
         DropboxSettings = require('ev-script/models/dropbox-settings'),
         DropboxPickerView = require('ev-script/views/dropbox-picker'),
-        // DropboxSettingsView = require('ev-script/views/dropbox-settings'),
+        DropboxSettingsView = require('ev-script/views/dropbox-settings'),
         DropboxPreviewView = require('ev-script/views/dropbox-preview');
 
     return FieldView.extend({
@@ -28,7 +28,7 @@ define(function(require) {
             }));
         },
         getSettingsInstance: function(settingsOptions) {
-            return false;
+            return new DropboxSettingsView(settingsOptions);
         },
         getPreviewInstance: function(previewOptions) {
             return new DropboxPreviewView(previewOptions);

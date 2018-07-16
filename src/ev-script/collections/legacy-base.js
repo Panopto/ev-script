@@ -9,24 +9,23 @@ define(function(require) {
 
     return Backbone.Collection.extend({
         initialize: function(collections, options) {
-            this.href = options.href;
             this.config = cacheUtil.getConfig();
             this.info = cacheUtil.getInfo();
             this.root = cacheUtil.getRoot();
             this.promise = $.Deferred().resolve().promise();
         },
+        model: Backbone.Model.extend({
+            idAttribute: 'ID'
+        }),
         getCached: function(key) {},
         setCached: function(key, resp) {},
         clearCache: function(key) {},
+        parse: function(response) {
+            return response.Data;
+        },
         sync: function(method, collection, options) {
             _.defaults(options || (options = {}), {
-                xhrFields: {
-                    withCredentials: true
-                },
-                dataType: 'json',
-                accepts: {
-                    json: 'application/hal+json'
-                }
+                xhrFields: { withCredentials: true }
             });
             if (method === 'read') {
                 var cached = this.getCached(options.cacheKey);
@@ -43,16 +42,11 @@ define(function(require) {
                         this.setCached(options.cacheKey, arguments[1]);
                         success.apply(this, Array.prototype.slice.call(arguments, 1));
                     }, this));
-                    this.promise = Backbone.Collection.prototype.sync.call(this, method, collection, options);
-                    return this.promise;
+                    return Backbone.Collection.prototype.sync.call(this, method, collection, options);
                 }
             } else {
-                this.promise = Backbone.Collection.prototype.sync.call(this, method, collection, options);
-                return this.promise;
+                return Backbone.Collection.prototype.sync.call(this, method, collection, options);
             }
-        },
-        url: function() {
-            return this.href ? this.href : this.links['self'].href;
         }
     });
 
