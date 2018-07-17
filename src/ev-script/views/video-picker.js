@@ -214,7 +214,7 @@ define(function(require) {
         },
         canRecord: function() {
             var currentUser = this.root.getUser();
-            return currentUser && currentUser.get('CanUseAnthem') && !this.isMobile() && platform.os.family !== 'Linux';
+            return currentUser && currentUser.get('canUseAnthem') && !this.isMobile() && platform.os.family !== 'Linux';
         },
         isMobile: function() {
             var family = platform.os.family;
