@@ -16,7 +16,6 @@
             <a class="action-preview" title="<%= i18n.formatMessage('Click to preview {0}', item.get('title')) %>" href="#" rel="<%= item.get('id') %>"><%= item.get('title') %></a>
         </div>
         <div class="content-info">
-            <!-- TODO - status (not really useful though...all are "ready"?), views count, average views count -->
             <div class="info-row trunc">
                 <div class="label"><%= i18n.formatMessage('Description') %></div>
                 <div class="value"><%= item.getDescription() %></div>
@@ -35,6 +34,12 @@
                 <div class="label"><%= i18n.formatMessage('Keywords') %></div>
                 <div class="value"><%= item.getKeywords() %></div>
             </div>
+            <% if (item.getStatus()) { %>
+            <div class="info-row">
+                <div class="label"><%= i18n.formatMessage('Status') %></div>
+                <div class="value"><%= item.getStatus() %></div>
+            </div>
+            <% } %>
         </div>
     </div>
 </div>

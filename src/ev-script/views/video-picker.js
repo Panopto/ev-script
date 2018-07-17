@@ -170,7 +170,6 @@ define(function(require) {
                     new URITemplate(library.getLink('ev:SharedContents/Search').href) :
                     new URITemplate(library.getLink('ev:Contents/Search').href),
                 searchUrl = searchTemplate.expand({
-                    status: 'unknown,ready,file_ready',
                     search: searchVal,
                     sortBy: 'dateAdded',
                     isPublished: true,

@@ -32,6 +32,30 @@ define(function(require) {
             item.getKeywords = function() {
                 return _.unescape(item.get('keywords'));
             };
+            item.getStatus = _.bind(function() {
+                var status = item.get('status') || '',
+                    formattedStatus = '';
+                // Try/catch in case we don't have a translation
+                try {
+                    switch(status) {
+                        case '':
+                        case 'unknown':
+                            break;
+                        case 'ready':
+                        case 'file_ready':
+                            formattedStatus = '<span style="color:green;">' + this.i18n.formatMessage(status) + '</span>';
+                            break;
+                        case 'failed':
+                            formattedStatus = '<span style="color:red;">' + this.i18n.formatMessage(status) + '</span>';
+                            break;
+                        default:
+                            formattedStatus = '<span style="color:#ff6600;">' + this.i18n.formatMessage(status) + '</span>';
+                    }
+                } catch(ex) {
+                    console.error(ex);
+                }
+                return formattedStatus;
+            }, this);
             return ResultsView.prototype.getItemHtml.call(this, item, index);
         },
         decorate: function($item) {
