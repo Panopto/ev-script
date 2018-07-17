@@ -1,5 +1,5 @@
 /**
- * ev-script 1.4.0 2018-05-11
+ * ev-script 2.0.0 2018-07-17
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2018 Symphony Video, Inc.
@@ -458,7 +458,7 @@ var requirejs, require, define;
 
 define("node_modules/almond/almond", function(){});
 
-//     Underscore.js 1.9.0
+//     Underscore.js 1.9.1
 //     http://underscorejs.org
 //     (c) 2009-2018 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 //     Underscore may be freely distributed under the MIT license.
@@ -520,7 +520,7 @@ define("node_modules/almond/almond", function(){});
   }
 
   // Current version.
-  _.VERSION = '1.9.0';
+  _.VERSION = '1.9.1';
 
   // Internal function that returns an efficient (for current engines) version
   // of the passed-in callback, to be repeatedly applied in other Underscore
@@ -607,6 +607,10 @@ define("node_modules/almond/almond", function(){});
       return obj == null ? void 0 : obj[key];
     };
   };
+
+  var has = function(obj, path) {
+    return obj != null && hasOwnProperty.call(obj, path);
+  }
 
   var deepGet = function(obj, path) {
     var length = path.length;
@@ -905,7 +909,7 @@ define("node_modules/almond/almond", function(){});
   // Groups the object's values by a criterion. Pass either a string attribute
   // to group by, or a function that returns the criterion.
   _.groupBy = group(function(result, value, key) {
-    if (_.has(result, key)) result[key].push(value); else result[key] = [value];
+    if (has(result, key)) result[key].push(value); else result[key] = [value];
   });
 
   // Indexes the object's values by a criterion, similar to `groupBy`, but for
@@ -918,7 +922,7 @@ define("node_modules/almond/almond", function(){});
   // either a string attribute to count by, or a function that returns the
   // criterion.
   _.countBy = group(function(result, value, key) {
-    if (_.has(result, key)) result[key]++; else result[key] = 1;
+    if (has(result, key)) result[key]++; else result[key] = 1;
   });
 
   var reStrSymbol = /[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
@@ -953,7 +957,7 @@ define("node_modules/almond/almond", function(){});
   // values in the array. Aliased as `head` and `take`. The **guard** check
   // allows it to work with `_.map`.
   _.first = _.head = _.take = function(array, n, guard) {
-    if (array == null || array.length < 1) return void 0;
+    if (array == null || array.length < 1) return n == null ? void 0 : [];
     if (n == null || guard) return array[0];
     return _.initial(array, array.length - n);
   };
@@ -968,7 +972,7 @@ define("node_modules/almond/almond", function(){});
   // Get the last element of an array. Passing **n** will return the last N
   // values in the array.
   _.last = function(array, n, guard) {
-    if (array == null || array.length < 1) return void 0;
+    if (array == null || array.length < 1) return n == null ? void 0 : [];
     if (n == null || guard) return array[array.length - 1];
     return _.rest(array, Math.max(0, array.length - n));
   };
@@ -1271,7 +1275,7 @@ define("node_modules/almond/almond", function(){});
     var memoize = function(key) {
       var cache = memoize.cache;
       var address = '' + (hasher ? hasher.apply(this, arguments) : key);
-      if (!_.has(cache, address)) cache[address] = func.apply(this, arguments);
+      if (!has(cache, address)) cache[address] = func.apply(this, arguments);
       return cache[address];
     };
     memoize.cache = {};
@@ -1438,7 +1442,7 @@ define("node_modules/almond/almond", function(){});
 
     // Constructor is a special case.
     var prop = 'constructor';
-    if (_.has(obj, prop) && !_.contains(keys, prop)) keys.push(prop);
+    if (has(obj, prop) && !_.contains(keys, prop)) keys.push(prop);
 
     while (nonEnumIdx--) {
       prop = nonEnumerableProps[nonEnumIdx];
@@ -1454,7 +1458,7 @@ define("node_modules/almond/almond", function(){});
     if (!_.isObject(obj)) return [];
     if (nativeKeys) return nativeKeys(obj);
     var keys = [];
-    for (var key in obj) if (_.has(obj, key)) keys.push(key);
+    for (var key in obj) if (has(obj, key)) keys.push(key);
     // Ahem, IE < 9.
     if (hasEnumBug) collectNonEnumProps(obj, keys);
     return keys;
@@ -1739,7 +1743,7 @@ define("node_modules/almond/almond", function(){});
       while (length--) {
         // Deep compare each member
         key = keys[length];
-        if (!(_.has(b, key) && eq(a[key], b[key], aStack, bStack))) return false;
+        if (!(has(b, key) && eq(a[key], b[key], aStack, bStack))) return false;
       }
     }
     // Remove the first object from the stack of traversed objects.
@@ -1789,7 +1793,7 @@ define("node_modules/almond/almond", function(){});
   // there isn't any inspectable "Arguments" type.
   if (!_.isArguments(arguments)) {
     _.isArguments = function(obj) {
-      return _.has(obj, 'callee');
+      return has(obj, 'callee');
     };
   }
 
@@ -1831,7 +1835,7 @@ define("node_modules/almond/almond", function(){});
   // on itself (in other words, not on a prototype).
   _.has = function(obj, path) {
     if (!_.isArray(path)) {
-      return obj != null && hasOwnProperty.call(obj, path);
+      return has(obj, path);
     }
     var length = path.length;
     for (var i = 0; i < length; i++) {
@@ -7231,9 +7235,9 @@ return Globalize;
 
             mom = createUTC([2000, 1]).day(i);
             if (strict && !this._fullWeekdaysParse[i]) {
-                this._fullWeekdaysParse[i] = new RegExp('^' + this.weekdays(mom, '').replace('.', '\.?') + '$', 'i');
-                this._shortWeekdaysParse[i] = new RegExp('^' + this.weekdaysShort(mom, '').replace('.', '\.?') + '$', 'i');
-                this._minWeekdaysParse[i] = new RegExp('^' + this.weekdaysMin(mom, '').replace('.', '\.?') + '$', 'i');
+                this._fullWeekdaysParse[i] = new RegExp('^' + this.weekdays(mom, '').replace('.', '\\.?') + '$', 'i');
+                this._shortWeekdaysParse[i] = new RegExp('^' + this.weekdaysShort(mom, '').replace('.', '\\.?') + '$', 'i');
+                this._minWeekdaysParse[i] = new RegExp('^' + this.weekdaysMin(mom, '').replace('.', '\\.?') + '$', 'i');
             }
             if (!this._weekdaysParse[i]) {
                 regex = '^' + this.weekdays(mom, '') + '|^' + this.weekdaysShort(mom, '') + '|^' + this.weekdaysMin(mom, '');
@@ -8036,7 +8040,7 @@ return Globalize;
 
     function preprocessRFC2822(s) {
         // Remove comments and folding whitespace and replace multiple-spaces with a single space
-        return s.replace(/\([^)]*\)|[\n\t]/g, ' ').replace(/(\s\s+)/g, ' ').trim();
+        return s.replace(/\([^)]*\)|[\n\t]/g, ' ').replace(/(\s\s+)/g, ' ').replace(/^\s\s*/, '').replace(/\s\s*$/, '');
     }
 
     function checkWeekday(weekdayStr, parsedInput, config) {
@@ -10216,7 +10220,7 @@ return Globalize;
 
     //! moment.js
 
-    hooks.version = '2.22.1';
+    hooks.version = '2.22.2';
 
     setHookCallback(createLocal);
 
@@ -10884,7 +10888,7 @@ return Globalize;
         relativeTime : {
             future : '%s sonra',
             past : '%s əvvəl',
-            s : 'birneçə saniyyə',
+            s : 'birneçə saniyə',
             ss : '%d saniyə',
             m : 'bir dəqiqə',
             mm : '%d dəqiqə',
@@ -10963,7 +10967,7 @@ return Globalize;
         weekdays : {
             format: 'нядзелю_панядзелак_аўторак_сераду_чацвер_пятніцу_суботу'.split('_'),
             standalone: 'нядзеля_панядзелак_аўторак_серада_чацвер_пятніца_субота'.split('_'),
-            isFormat: /\[ ?[Вв] ?(?:мінулую|наступную)? ?\] ?dddd/
+            isFormat: /\[ ?[Ууў] ?(?:мінулую|наступную)? ?\] ?dddd/
         },
         weekdaysShort : 'нд_пн_ат_ср_чц_пт_сб'.split('_'),
         weekdaysMin : 'нд_пн_ат_ср_чц_пт_сб'.split('_'),
@@ -16171,7 +16175,7 @@ return Globalize;
 
     //! moment.js locale configuration
 
-    var symbolMap$10 = {
+    var symbolMap$a = {
         '1': '१',
         '2': '२',
         '3': '३',
@@ -16280,7 +16284,7 @@ return Globalize;
         },
         postformat: function (string) {
             return string.replace(/\d/g, function (match) {
-                return symbolMap$10[match];
+                return symbolMap$a[match];
             });
         },
         meridiemParse: /रात्री|सकाळी|दुपारी|सायंकाळी/,
@@ -16507,7 +16511,7 @@ return Globalize;
 
     //! moment.js locale configuration
 
-    var symbolMap$11 = {
+    var symbolMap$b = {
         '1': '၁',
         '2': '၂',
         '3': '၃',
@@ -16518,7 +16522,7 @@ return Globalize;
         '8': '၈',
         '9': '၉',
         '0': '၀'
-    }, numberMap$10 = {
+    }, numberMap$a = {
         '၁': '1',
         '၂': '2',
         '၃': '3',
@@ -16572,12 +16576,12 @@ return Globalize;
         },
         preparse: function (string) {
             return string.replace(/[၁၂၃၄၅၆၇၈၉၀]/g, function (match) {
-                return numberMap$10[match];
+                return numberMap$a[match];
             });
         },
         postformat: function (string) {
             return string.replace(/\d/g, function (match) {
-                return symbolMap$11[match];
+                return symbolMap$b[match];
             });
         },
         week: {
@@ -16638,7 +16642,7 @@ return Globalize;
 
     //! moment.js locale configuration
 
-    var symbolMap$12 = {
+    var symbolMap$c = {
         '1': '१',
         '2': '२',
         '3': '३',
@@ -16650,7 +16654,7 @@ return Globalize;
         '9': '९',
         '0': '०'
     },
-    numberMap$11 = {
+    numberMap$b = {
         '१': '1',
         '२': '2',
         '३': '3',
@@ -16681,12 +16685,12 @@ return Globalize;
         },
         preparse: function (string) {
             return string.replace(/[१२३४५६७८९०]/g, function (match) {
-                return numberMap$11[match];
+                return numberMap$b[match];
             });
         },
         postformat: function (string) {
             return string.replace(/\d/g, function (match) {
-                return symbolMap$12[match];
+                return symbolMap$c[match];
             });
         },
         meridiemParse: /राति|बिहान|दिउँसो|साँझ/,
@@ -16947,7 +16951,7 @@ return Globalize;
 
     //! moment.js locale configuration
 
-    var symbolMap$13 = {
+    var symbolMap$d = {
         '1': '੧',
         '2': '੨',
         '3': '੩',
@@ -16959,7 +16963,7 @@ return Globalize;
         '9': '੯',
         '0': '੦'
     },
-    numberMap$12 = {
+    numberMap$c = {
         '੧': '1',
         '੨': '2',
         '੩': '3',
@@ -16990,7 +16994,7 @@ return Globalize;
         calendar : {
             sameDay : '[ਅਜ] LT',
             nextDay : '[ਕਲ] LT',
-            nextWeek : 'dddd, LT',
+            nextWeek : '[ਅਗਲਾ] dddd, LT',
             lastDay : '[ਕਲ] LT',
             lastWeek : '[ਪਿਛਲੇ] dddd, LT',
             sameElse : 'L'
@@ -17013,12 +17017,12 @@ return Globalize;
         },
         preparse: function (string) {
             return string.replace(/[੧੨੩੪੫੬੭੮੯੦]/g, function (match) {
-                return numberMap$12[match];
+                return numberMap$c[match];
             });
         },
         postformat: function (string) {
             return string.replace(/\d/g, function (match) {
-                return symbolMap$13[match];
+                return symbolMap$d[match];
             });
         },
         // Punjabi notation for meridiems are quite fuzzy in practice. While there exists
@@ -18440,7 +18444,7 @@ return Globalize;
 
     //! moment.js locale configuration
 
-    var symbolMap$14 = {
+    var symbolMap$e = {
         '1': '௧',
         '2': '௨',
         '3': '௩',
@@ -18451,7 +18455,7 @@ return Globalize;
         '8': '௮',
         '9': '௯',
         '0': '௦'
-    }, numberMap$13 = {
+    }, numberMap$d = {
         '௧': '1',
         '௨': '2',
         '௩': '3',
@@ -18508,12 +18512,12 @@ return Globalize;
         },
         preparse: function (string) {
             return string.replace(/[௧௨௩௪௫௬௭௮௯௦]/g, function (match) {
-                return numberMap$13[match];
+                return numberMap$d[match];
             });
         },
         postformat: function (string) {
             return string.replace(/\d/g, function (match) {
-                return symbolMap$14[match];
+                return symbolMap$e[match];
             });
         },
         // refer http://ta.wikipedia.org/s/1er1
@@ -18924,7 +18928,7 @@ return Globalize;
         return time;
     }
 
-    function translate$10(number, withoutSuffix, string, isFuture) {
+    function translate$a(number, withoutSuffix, string, isFuture) {
         var numberNoun = numberAsNoun(number);
         switch (string) {
             case 'ss':
@@ -18986,17 +18990,17 @@ return Globalize;
             future : translateFuture,
             past : translatePast,
             s : 'puS lup',
-            ss : translate$10,
+            ss : translate$a,
             m : 'wa’ tup',
-            mm : translate$10,
+            mm : translate$a,
             h : 'wa’ rep',
-            hh : translate$10,
+            hh : translate$a,
             d : 'wa’ jaj',
-            dd : translate$10,
+            dd : translate$a,
             M : 'wa’ jar',
-            MM : translate$10,
+            MM : translate$a,
             y : 'wa’ DIS',
-            yy : translate$10
+            yy : translate$a
         },
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal : '%d.',
@@ -22450,8 +22454,10 @@ return {
         "Click to remove {0}": "Click to remove {0}",
         "Click to upload new media": "Click to upload new media",
         "Close": "Close",
+        "Comments": "Comments",
         "Content Details": "Content Details",
         "Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.": "Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.",
+        "Created On": "Created On",
         "Credits": "Credits",
         "Date Added": "Date Added",
         "Date Produced": "Date Produced",
@@ -22459,12 +22465,16 @@ return {
         "Description": "Description",
         "Download Link": "Download Link",
         "Drag file here.": "Drag file here.",
+        "Dropbox": "Dropbox",
+        "Dropbox Embed Options": "Dropbox Embed Options",
         "Duration": "Duration",
         "Embed As Thumbnail": "Embed As Thumbnail",
         "Embed Code": "Embed Code",
+        "Enabled": "Enabled",
         "Ensemble Logo": "Ensemble Logo",
         "Ensemble Video Login": "Ensemble Video Login",
         "Go": "Go",
+        "Height": "Height",
         "Hide Controls": "Hide Controls",
         "Hide": "Hide",
         "Hide Picker": "Hide Picker",
@@ -22497,6 +22507,9 @@ return {
         "Playlist": "Playlist",
         "Playlist Embed Options": "Playlist Embed Options",
         "Preview": "Preview",
+        "Public": "Public",
+        "Quiz": "Quiz",
+        "Quiz Embed Options": "Quiz Embed Options",
         "Record": "Record",
         "Reload": "Reload",
         "Remember Me": "Remember Me",
@@ -22517,6 +22530,7 @@ return {
         "Social Tools": "Social Tools",
         "Sort By": "Sort By",
         "Statistics": "Statistics",
+        "Status": "Status",
         "Submit": "Submit",
         "Title": "Title",
         "Type:": "Type:",
@@ -22525,7 +22539,31 @@ return {
         "Username": "Username",
         "Vertical": "Vertical",
         "Viewers Report": "Viewers Report",
-        "You are unauthorized to access this content.": "You are unauthorized to access this content."
+        "Width": "Width",
+        "You are unauthorized to access this content.": "You are unauthorized to access this content.",
+        "unknown": "Unknown",
+        "uploaded": "Uploaded",
+        "renamed": "Renamed",
+        "pending_processing": "Pending Processing",
+        "waiting_for_conversion": "Waiting For Conversion",
+        "pending_conversion": "Pending Conversion",
+        "queued_for_conversion": "Queued For Conversion",
+        "starting_conversion": "Starting Conversion",
+        "started_conversion": "Started Conversion",
+        "converting": "Converting",
+        "converted_successfully": "Converted Successfully",
+        "stopped_conversion": "Stopped Conversion",
+        "extracting_information": "Extracting Information",
+        "generating_thumbnails": "Generating Thumbnails",
+        "copying": "Copying",
+        "moving": "Moving",
+        "file_ready": "Ready",
+        "ready": "Ready",
+        "processing": "Processing",
+        "processed": "Processed",
+        "complete": "Complete",
+        "skipped": "Skipped",
+        "failed": "Failed"
     }
 }
 ;
@@ -22605,2370 +22643,39 @@ define('ev-script/models/playlist-settings',['backbone'], function(Backbone) {
     });
 });
 
-define('ev-script/util/events',['require','underscore','backbone'],function(require) {
+define('ev-script/models/dropbox-settings',['backbone'], function(Backbone) {
 
     'use strict';
 
-    var events = [],
-        _ = require('underscore'),
-        Backbone = require('backbone');
-
-    events['global'] = _.extend({}, Backbone.Events);
-
-    return {
-        initEvents: function(index) {
-            return events[index] = _.extend({}, Backbone.Events);
-        },
-        getEvents: function(index) {
-            var es;
-            if (!index) {
-                es = events['global'];
-            } else {
-                es = events[index];
-            }
-            return es;
+    return Backbone.Model.extend({
+        defaults: {
+            type: 'dropbox',
+            width: 600,
+            height: 800,
+            search: ''
         }
-    };
-
+    });
 });
 
-define('ev-script/util/cache',['require','jquery','underscore','backbone'],function(require) {
+define('ev-script/models/quiz-settings',['backbone'], function(Backbone) {
 
     'use strict';
 
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone');
-
-    var Cache = function() {
-        this.cache = [];
-        this.get = function(index) {
-            return index ? this.cache[index] : null;
-        };
-        this.set = function(index, value) {
-            return index ? this.cache[index] = value : null;
-        };
-        return this;
-    };
-
-    var caches = new Cache();
-
-    var _getAppCache = function(appId) {
-        var appCache = caches.get(appId);
-        if (!appCache) {
-            appCache = caches.set(appId, new Cache());
-        }
-        return appCache;
-    };
-
-    // Convenience method to initialize a cache for app-specific configuration
-    var setAppConfig = function(appId, config) {
-        return _getAppCache(appId).set('config', config);
-    };
-
-    var getAppConfig = function(appId) {
-        return _getAppCache(appId).get('config');
-    };
-
-    // Convenience method to initialize a cache for app-specific authentication
-    var setAppAuth = function(appId, auth) {
-        return _getAppCache(appId).set('auth', auth);
-    };
-
-    var getAppAuth = function(appId) {
-        return _getAppCache(appId).get('auth');
-    };
-
-    // Convenience method to initialize a cache for upstream application info
-    var setAppInfo = function(appId, info) {
-        return _getAppCache(appId).set('info', info);
-    };
-
-    var getAppInfo = function(appId) {
-        return _getAppCache(appId).get('info');
-    };
-
-    var setAppI18n = function(appId, i18n) {
-        return _getAppCache(appId).set('i18n', i18n);
-    };
-
-    var getAppI18n = function(appId) {
-        return _getAppCache(appId).get('i18n');
-    };
-
-    var getUserCache = function(ensembleUrl, user) {
-        var appCache = caches.get(ensembleUrl);
-        if (!appCache) {
-            appCache = caches.set(ensembleUrl, new Cache());
-        }
-        var userCache = appCache.get(user);
-        if (!userCache) {
-            userCache = appCache.set(user, new Cache());
-        }
-        return userCache;
-    };
-
-    return {
-        Cache: Cache,
-        caches: caches,
-        setAppConfig: setAppConfig,
-        getAppConfig: getAppConfig,
-        setAppAuth: setAppAuth,
-        getAppAuth: getAppAuth,
-        setAppInfo: setAppInfo,
-        getAppInfo: getAppInfo,
-        setAppI18n: setAppI18n,
-        getAppI18n: getAppI18n,
-        getUserCache: getUserCache
-    };
-
-});
-
-define('ev-script/views/base',['require','jquery','underscore','backbone','ev-script/util/events','ev-script/util/cache'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        eventsUtil = require('ev-script/util/events'),
-        cacheUtil = require('ev-script/util/cache');
-
-    return Backbone.View.extend({
-        initialize: function(options) {
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
-            this.auth = cacheUtil.getAppAuth(this.appId);
-            this.info = cacheUtil.getAppInfo(this.appId);
-            this.appEvents = eventsUtil.getEvents(this.appId);
-            this.globalEvents = eventsUtil.getEvents('global');
-            this.i18n = cacheUtil.getAppI18n(this.appId);
-        },
-        ajaxError: function(xhr, authCallback) {
-            if (xhr.status === 401) {
-                this.auth.handleUnauthorized(this.el, authCallback);
-            } else if (xhr.status === 500) {
-                window.alert(this.i18n.formatMessage('It appears there is an issue with the Ensemble Video installation.'));
-            } else if (xhr.status === 404) {
-                window.alert(this.i18n.formatMessage('Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.'));
-            } else if (xhr.status !== 0) {
-                window.alert(this.i18n.formatMessage('An unexpected error occurred.  Check the server log for more details.'));
-            }
-        },
-        unencode: function(encoded) {
-            return $('<span/>').html(encoded).text();
+    return Backbone.Model.extend({
+        defaults: {
+            type: 'quiz',
+            width: '848',
+            height: '480',
+            showtitle: false,
+            showcaptions: false,
+            attachments: false,
+            links: false,
+            metadata: false,
+            // isaudio: false,
+            // contenttype: ''
+            search: ''
         }
     });
-
-});
-
-/*!
- * Platform.js <https://mths.be/platform>
- * Copyright 2014-2018 Benjamin Tan <https://bnjmnt4n.now.sh/>
- * Copyright 2011-2013 John-David Dalton <http://allyoucanleet.com/>
- * Available under MIT license <https://mths.be/mit>
- */
-;(function() {
-  'use strict';
-
-  /** Used to determine if values are of the language type `Object`. */
-  var objectTypes = {
-    'function': true,
-    'object': true
-  };
-
-  /** Used as a reference to the global object. */
-  var root = (objectTypes[typeof window] && window) || this;
-
-  /** Backup possible global object. */
-  var oldRoot = root;
-
-  /** Detect free variable `exports`. */
-  var freeExports = objectTypes[typeof exports] && exports;
-
-  /** Detect free variable `module`. */
-  var freeModule = objectTypes[typeof module] && module && !module.nodeType && module;
-
-  /** Detect free variable `global` from Node.js or Browserified code and use it as `root`. */
-  var freeGlobal = freeExports && freeModule && typeof global == 'object' && global;
-  if (freeGlobal && (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal || freeGlobal.self === freeGlobal)) {
-    root = freeGlobal;
-  }
-
-  /**
-   * Used as the maximum length of an array-like object.
-   * See the [ES6 spec](http://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength)
-   * for more details.
-   */
-  var maxSafeInteger = Math.pow(2, 53) - 1;
-
-  /** Regular expression to detect Opera. */
-  var reOpera = /\bOpera/;
-
-  /** Possible global object. */
-  var thisBinding = this;
-
-  /** Used for native method references. */
-  var objectProto = Object.prototype;
-
-  /** Used to check for own properties of an object. */
-  var hasOwnProperty = objectProto.hasOwnProperty;
-
-  /** Used to resolve the internal `[[Class]]` of values. */
-  var toString = objectProto.toString;
-
-  /*--------------------------------------------------------------------------*/
-
-  /**
-   * Capitalizes a string value.
-   *
-   * @private
-   * @param {string} string The string to capitalize.
-   * @returns {string} The capitalized string.
-   */
-  function capitalize(string) {
-    string = String(string);
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  }
-
-  /**
-   * A utility function to clean up the OS name.
-   *
-   * @private
-   * @param {string} os The OS name to clean up.
-   * @param {string} [pattern] A `RegExp` pattern matching the OS name.
-   * @param {string} [label] A label for the OS.
-   */
-  function cleanupOS(os, pattern, label) {
-    // Platform tokens are defined at:
-    // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
-    // http://web.archive.org/web/20081122053950/http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
-    var data = {
-      '10.0': '10',
-      '6.4':  '10 Technical Preview',
-      '6.3':  '8.1',
-      '6.2':  '8',
-      '6.1':  'Server 2008 R2 / 7',
-      '6.0':  'Server 2008 / Vista',
-      '5.2':  'Server 2003 / XP 64-bit',
-      '5.1':  'XP',
-      '5.01': '2000 SP1',
-      '5.0':  '2000',
-      '4.0':  'NT',
-      '4.90': 'ME'
-    };
-    // Detect Windows version from platform tokens.
-    if (pattern && label && /^Win/i.test(os) && !/^Windows Phone /i.test(os) &&
-        (data = data[/[\d.]+$/.exec(os)])) {
-      os = 'Windows ' + data;
-    }
-    // Correct character case and cleanup string.
-    os = String(os);
-
-    if (pattern && label) {
-      os = os.replace(RegExp(pattern, 'i'), label);
-    }
-
-    os = format(
-      os.replace(/ ce$/i, ' CE')
-        .replace(/\bhpw/i, 'web')
-        .replace(/\bMacintosh\b/, 'Mac OS')
-        .replace(/_PowerPC\b/i, ' OS')
-        .replace(/\b(OS X) [^ \d]+/i, '$1')
-        .replace(/\bMac (OS X)\b/, '$1')
-        .replace(/\/(\d)/, ' $1')
-        .replace(/_/g, '.')
-        .replace(/(?: BePC|[ .]*fc[ \d.]+)$/i, '')
-        .replace(/\bx86\.64\b/gi, 'x86_64')
-        .replace(/\b(Windows Phone) OS\b/, '$1')
-        .replace(/\b(Chrome OS \w+) [\d.]+\b/, '$1')
-        .split(' on ')[0]
-    );
-
-    return os;
-  }
-
-  /**
-   * An iteration utility for arrays and objects.
-   *
-   * @private
-   * @param {Array|Object} object The object to iterate over.
-   * @param {Function} callback The function called per iteration.
-   */
-  function each(object, callback) {
-    var index = -1,
-        length = object ? object.length : 0;
-
-    if (typeof length == 'number' && length > -1 && length <= maxSafeInteger) {
-      while (++index < length) {
-        callback(object[index], index, object);
-      }
-    } else {
-      forOwn(object, callback);
-    }
-  }
-
-  /**
-   * Trim and conditionally capitalize string values.
-   *
-   * @private
-   * @param {string} string The string to format.
-   * @returns {string} The formatted string.
-   */
-  function format(string) {
-    string = trim(string);
-    return /^(?:webOS|i(?:OS|P))/.test(string)
-      ? string
-      : capitalize(string);
-  }
-
-  /**
-   * Iterates over an object's own properties, executing the `callback` for each.
-   *
-   * @private
-   * @param {Object} object The object to iterate over.
-   * @param {Function} callback The function executed per own property.
-   */
-  function forOwn(object, callback) {
-    for (var key in object) {
-      if (hasOwnProperty.call(object, key)) {
-        callback(object[key], key, object);
-      }
-    }
-  }
-
-  /**
-   * Gets the internal `[[Class]]` of a value.
-   *
-   * @private
-   * @param {*} value The value.
-   * @returns {string} The `[[Class]]`.
-   */
-  function getClassOf(value) {
-    return value == null
-      ? capitalize(value)
-      : toString.call(value).slice(8, -1);
-  }
-
-  /**
-   * Host objects can return type values that are different from their actual
-   * data type. The objects we are concerned with usually return non-primitive
-   * types of "object", "function", or "unknown".
-   *
-   * @private
-   * @param {*} object The owner of the property.
-   * @param {string} property The property to check.
-   * @returns {boolean} Returns `true` if the property value is a non-primitive, else `false`.
-   */
-  function isHostType(object, property) {
-    var type = object != null ? typeof object[property] : 'number';
-    return !/^(?:boolean|number|string|undefined)$/.test(type) &&
-      (type == 'object' ? !!object[property] : true);
-  }
-
-  /**
-   * Prepares a string for use in a `RegExp` by making hyphens and spaces optional.
-   *
-   * @private
-   * @param {string} string The string to qualify.
-   * @returns {string} The qualified string.
-   */
-  function qualify(string) {
-    return String(string).replace(/([ -])(?!$)/g, '$1?');
-  }
-
-  /**
-   * A bare-bones `Array#reduce` like utility function.
-   *
-   * @private
-   * @param {Array} array The array to iterate over.
-   * @param {Function} callback The function called per iteration.
-   * @returns {*} The accumulated result.
-   */
-  function reduce(array, callback) {
-    var accumulator = null;
-    each(array, function(value, index) {
-      accumulator = callback(accumulator, value, index, array);
-    });
-    return accumulator;
-  }
-
-  /**
-   * Removes leading and trailing whitespace from a string.
-   *
-   * @private
-   * @param {string} string The string to trim.
-   * @returns {string} The trimmed string.
-   */
-  function trim(string) {
-    return String(string).replace(/^ +| +$/g, '');
-  }
-
-  /*--------------------------------------------------------------------------*/
-
-  /**
-   * Creates a new platform object.
-   *
-   * @memberOf platform
-   * @param {Object|string} [ua=navigator.userAgent] The user agent string or
-   *  context object.
-   * @returns {Object} A platform object.
-   */
-  function parse(ua) {
-
-    /** The environment context object. */
-    var context = root;
-
-    /** Used to flag when a custom context is provided. */
-    var isCustomContext = ua && typeof ua == 'object' && getClassOf(ua) != 'String';
-
-    // Juggle arguments.
-    if (isCustomContext) {
-      context = ua;
-      ua = null;
-    }
-
-    /** Browser navigator object. */
-    var nav = context.navigator || {};
-
-    /** Browser user agent string. */
-    var userAgent = nav.userAgent || '';
-
-    ua || (ua = userAgent);
-
-    /** Used to flag when `thisBinding` is the [ModuleScope]. */
-    var isModuleScope = isCustomContext || thisBinding == oldRoot;
-
-    /** Used to detect if browser is like Chrome. */
-    var likeChrome = isCustomContext
-      ? !!nav.likeChrome
-      : /\bChrome\b/.test(ua) && !/internal|\n/i.test(toString.toString());
-
-    /** Internal `[[Class]]` value shortcuts. */
-    var objectClass = 'Object',
-        airRuntimeClass = isCustomContext ? objectClass : 'ScriptBridgingProxyObject',
-        enviroClass = isCustomContext ? objectClass : 'Environment',
-        javaClass = (isCustomContext && context.java) ? 'JavaPackage' : getClassOf(context.java),
-        phantomClass = isCustomContext ? objectClass : 'RuntimeObject';
-
-    /** Detect Java environments. */
-    var java = /\bJava/.test(javaClass) && context.java;
-
-    /** Detect Rhino. */
-    var rhino = java && getClassOf(context.environment) == enviroClass;
-
-    /** A character to represent alpha. */
-    var alpha = java ? 'a' : '\u03b1';
-
-    /** A character to represent beta. */
-    var beta = java ? 'b' : '\u03b2';
-
-    /** Browser document object. */
-    var doc = context.document || {};
-
-    /**
-     * Detect Opera browser (Presto-based).
-     * http://www.howtocreate.co.uk/operaStuff/operaObject.html
-     * http://dev.opera.com/articles/view/opera-mini-web-content-authoring-guidelines/#operamini
-     */
-    var opera = context.operamini || context.opera;
-
-    /** Opera `[[Class]]`. */
-    var operaClass = reOpera.test(operaClass = (isCustomContext && opera) ? opera['[[Class]]'] : getClassOf(opera))
-      ? operaClass
-      : (opera = null);
-
-    /*------------------------------------------------------------------------*/
-
-    /** Temporary variable used over the script's lifetime. */
-    var data;
-
-    /** The CPU architecture. */
-    var arch = ua;
-
-    /** Platform description array. */
-    var description = [];
-
-    /** Platform alpha/beta indicator. */
-    var prerelease = null;
-
-    /** A flag to indicate that environment features should be used to resolve the platform. */
-    var useFeatures = ua == userAgent;
-
-    /** The browser/environment version. */
-    var version = useFeatures && opera && typeof opera.version == 'function' && opera.version();
-
-    /** A flag to indicate if the OS ends with "/ Version" */
-    var isSpecialCasedOS;
-
-    /* Detectable layout engines (order is important). */
-    var layout = getLayout([
-      { 'label': 'EdgeHTML', 'pattern': 'Edge' },
-      'Trident',
-      { 'label': 'WebKit', 'pattern': 'AppleWebKit' },
-      'iCab',
-      'Presto',
-      'NetFront',
-      'Tasman',
-      'KHTML',
-      'Gecko'
-    ]);
-
-    /* Detectable browser names (order is important). */
-    var name = getName([
-      'Adobe AIR',
-      'Arora',
-      'Avant Browser',
-      'Breach',
-      'Camino',
-      'Electron',
-      'Epiphany',
-      'Fennec',
-      'Flock',
-      'Galeon',
-      'GreenBrowser',
-      'iCab',
-      'Iceweasel',
-      'K-Meleon',
-      'Konqueror',
-      'Lunascape',
-      'Maxthon',
-      { 'label': 'Microsoft Edge', 'pattern': 'Edge' },
-      'Midori',
-      'Nook Browser',
-      'PaleMoon',
-      'PhantomJS',
-      'Raven',
-      'Rekonq',
-      'RockMelt',
-      { 'label': 'Samsung Internet', 'pattern': 'SamsungBrowser' },
-      'SeaMonkey',
-      { 'label': 'Silk', 'pattern': '(?:Cloud9|Silk-Accelerated)' },
-      'Sleipnir',
-      'SlimBrowser',
-      { 'label': 'SRWare Iron', 'pattern': 'Iron' },
-      'Sunrise',
-      'Swiftfox',
-      'Waterfox',
-      'WebPositive',
-      'Opera Mini',
-      { 'label': 'Opera Mini', 'pattern': 'OPiOS' },
-      'Opera',
-      { 'label': 'Opera', 'pattern': 'OPR' },
-      'Chrome',
-      { 'label': 'Chrome Mobile', 'pattern': '(?:CriOS|CrMo)' },
-      { 'label': 'Firefox', 'pattern': '(?:Firefox|Minefield)' },
-      { 'label': 'Firefox for iOS', 'pattern': 'FxiOS' },
-      { 'label': 'IE', 'pattern': 'IEMobile' },
-      { 'label': 'IE', 'pattern': 'MSIE' },
-      'Safari'
-    ]);
-
-    /* Detectable products (order is important). */
-    var product = getProduct([
-      { 'label': 'BlackBerry', 'pattern': 'BB10' },
-      'BlackBerry',
-      { 'label': 'Galaxy S', 'pattern': 'GT-I9000' },
-      { 'label': 'Galaxy S2', 'pattern': 'GT-I9100' },
-      { 'label': 'Galaxy S3', 'pattern': 'GT-I9300' },
-      { 'label': 'Galaxy S4', 'pattern': 'GT-I9500' },
-      { 'label': 'Galaxy S5', 'pattern': 'SM-G900' },
-      { 'label': 'Galaxy S6', 'pattern': 'SM-G920' },
-      { 'label': 'Galaxy S6 Edge', 'pattern': 'SM-G925' },
-      { 'label': 'Galaxy S7', 'pattern': 'SM-G930' },
-      { 'label': 'Galaxy S7 Edge', 'pattern': 'SM-G935' },
-      'Google TV',
-      'Lumia',
-      'iPad',
-      'iPod',
-      'iPhone',
-      'Kindle',
-      { 'label': 'Kindle Fire', 'pattern': '(?:Cloud9|Silk-Accelerated)' },
-      'Nexus',
-      'Nook',
-      'PlayBook',
-      'PlayStation Vita',
-      'PlayStation',
-      'TouchPad',
-      'Transformer',
-      { 'label': 'Wii U', 'pattern': 'WiiU' },
-      'Wii',
-      'Xbox One',
-      { 'label': 'Xbox 360', 'pattern': 'Xbox' },
-      'Xoom'
-    ]);
-
-    /* Detectable manufacturers. */
-    var manufacturer = getManufacturer({
-      'Apple': { 'iPad': 1, 'iPhone': 1, 'iPod': 1 },
-      'Archos': {},
-      'Amazon': { 'Kindle': 1, 'Kindle Fire': 1 },
-      'Asus': { 'Transformer': 1 },
-      'Barnes & Noble': { 'Nook': 1 },
-      'BlackBerry': { 'PlayBook': 1 },
-      'Google': { 'Google TV': 1, 'Nexus': 1 },
-      'HP': { 'TouchPad': 1 },
-      'HTC': {},
-      'LG': {},
-      'Microsoft': { 'Xbox': 1, 'Xbox One': 1 },
-      'Motorola': { 'Xoom': 1 },
-      'Nintendo': { 'Wii U': 1,  'Wii': 1 },
-      'Nokia': { 'Lumia': 1 },
-      'Samsung': { 'Galaxy S': 1, 'Galaxy S2': 1, 'Galaxy S3': 1, 'Galaxy S4': 1 },
-      'Sony': { 'PlayStation': 1, 'PlayStation Vita': 1 }
-    });
-
-    /* Detectable operating systems (order is important). */
-    var os = getOS([
-      'Windows Phone',
-      'Android',
-      'CentOS',
-      { 'label': 'Chrome OS', 'pattern': 'CrOS' },
-      'Debian',
-      'Fedora',
-      'FreeBSD',
-      'Gentoo',
-      'Haiku',
-      'Kubuntu',
-      'Linux Mint',
-      'OpenBSD',
-      'Red Hat',
-      'SuSE',
-      'Ubuntu',
-      'Xubuntu',
-      'Cygwin',
-      'Symbian OS',
-      'hpwOS',
-      'webOS ',
-      'webOS',
-      'Tablet OS',
-      'Tizen',
-      'Linux',
-      'Mac OS X',
-      'Macintosh',
-      'Mac',
-      'Windows 98;',
-      'Windows '
-    ]);
-
-    /*------------------------------------------------------------------------*/
-
-    /**
-     * Picks the layout engine from an array of guesses.
-     *
-     * @private
-     * @param {Array} guesses An array of guesses.
-     * @returns {null|string} The detected layout engine.
-     */
-    function getLayout(guesses) {
-      return reduce(guesses, function(result, guess) {
-        return result || RegExp('\\b' + (
-          guess.pattern || qualify(guess)
-        ) + '\\b', 'i').exec(ua) && (guess.label || guess);
-      });
-    }
-
-    /**
-     * Picks the manufacturer from an array of guesses.
-     *
-     * @private
-     * @param {Array} guesses An object of guesses.
-     * @returns {null|string} The detected manufacturer.
-     */
-    function getManufacturer(guesses) {
-      return reduce(guesses, function(result, value, key) {
-        // Lookup the manufacturer by product or scan the UA for the manufacturer.
-        return result || (
-          value[product] ||
-          value[/^[a-z]+(?: +[a-z]+\b)*/i.exec(product)] ||
-          RegExp('\\b' + qualify(key) + '(?:\\b|\\w*\\d)', 'i').exec(ua)
-        ) && key;
-      });
-    }
-
-    /**
-     * Picks the browser name from an array of guesses.
-     *
-     * @private
-     * @param {Array} guesses An array of guesses.
-     * @returns {null|string} The detected browser name.
-     */
-    function getName(guesses) {
-      return reduce(guesses, function(result, guess) {
-        return result || RegExp('\\b' + (
-          guess.pattern || qualify(guess)
-        ) + '\\b', 'i').exec(ua) && (guess.label || guess);
-      });
-    }
-
-    /**
-     * Picks the OS name from an array of guesses.
-     *
-     * @private
-     * @param {Array} guesses An array of guesses.
-     * @returns {null|string} The detected OS name.
-     */
-    function getOS(guesses) {
-      return reduce(guesses, function(result, guess) {
-        var pattern = guess.pattern || qualify(guess);
-        if (!result && (result =
-              RegExp('\\b' + pattern + '(?:/[\\d.]+|[ \\w.]*)', 'i').exec(ua)
-            )) {
-          result = cleanupOS(result, pattern, guess.label || guess);
-        }
-        return result;
-      });
-    }
-
-    /**
-     * Picks the product name from an array of guesses.
-     *
-     * @private
-     * @param {Array} guesses An array of guesses.
-     * @returns {null|string} The detected product name.
-     */
-    function getProduct(guesses) {
-      return reduce(guesses, function(result, guess) {
-        var pattern = guess.pattern || qualify(guess);
-        if (!result && (result =
-              RegExp('\\b' + pattern + ' *\\d+[.\\w_]*', 'i').exec(ua) ||
-              RegExp('\\b' + pattern + ' *\\w+-[\\w]*', 'i').exec(ua) ||
-              RegExp('\\b' + pattern + '(?:; *(?:[a-z]+[_-])?[a-z]+\\d+|[^ ();-]*)', 'i').exec(ua)
-            )) {
-          // Split by forward slash and append product version if needed.
-          if ((result = String((guess.label && !RegExp(pattern, 'i').test(guess.label)) ? guess.label : result).split('/'))[1] && !/[\d.]+/.test(result[0])) {
-            result[0] += ' ' + result[1];
-          }
-          // Correct character case and cleanup string.
-          guess = guess.label || guess;
-          result = format(result[0]
-            .replace(RegExp(pattern, 'i'), guess)
-            .replace(RegExp('; *(?:' + guess + '[_-])?', 'i'), ' ')
-            .replace(RegExp('(' + guess + ')[-_.]?(\\w)', 'i'), '$1 $2'));
-        }
-        return result;
-      });
-    }
-
-    /**
-     * Resolves the version using an array of UA patterns.
-     *
-     * @private
-     * @param {Array} patterns An array of UA patterns.
-     * @returns {null|string} The detected version.
-     */
-    function getVersion(patterns) {
-      return reduce(patterns, function(result, pattern) {
-        return result || (RegExp(pattern +
-          '(?:-[\\d.]+/|(?: for [\\w-]+)?[ /-])([\\d.]+[^ ();/_-]*)', 'i').exec(ua) || 0)[1] || null;
-      });
-    }
-
-    /**
-     * Returns `platform.description` when the platform object is coerced to a string.
-     *
-     * @name toString
-     * @memberOf platform
-     * @returns {string} Returns `platform.description` if available, else an empty string.
-     */
-    function toStringPlatform() {
-      return this.description || '';
-    }
-
-    /*------------------------------------------------------------------------*/
-
-    // Convert layout to an array so we can add extra details.
-    layout && (layout = [layout]);
-
-    // Detect product names that contain their manufacturer's name.
-    if (manufacturer && !product) {
-      product = getProduct([manufacturer]);
-    }
-    // Clean up Google TV.
-    if ((data = /\bGoogle TV\b/.exec(product))) {
-      product = data[0];
-    }
-    // Detect simulators.
-    if (/\bSimulator\b/i.test(ua)) {
-      product = (product ? product + ' ' : '') + 'Simulator';
-    }
-    // Detect Opera Mini 8+ running in Turbo/Uncompressed mode on iOS.
-    if (name == 'Opera Mini' && /\bOPiOS\b/.test(ua)) {
-      description.push('running in Turbo/Uncompressed mode');
-    }
-    // Detect IE Mobile 11.
-    if (name == 'IE' && /\blike iPhone OS\b/.test(ua)) {
-      data = parse(ua.replace(/like iPhone OS/, ''));
-      manufacturer = data.manufacturer;
-      product = data.product;
-    }
-    // Detect iOS.
-    else if (/^iP/.test(product)) {
-      name || (name = 'Safari');
-      os = 'iOS' + ((data = / OS ([\d_]+)/i.exec(ua))
-        ? ' ' + data[1].replace(/_/g, '.')
-        : '');
-    }
-    // Detect Kubuntu.
-    else if (name == 'Konqueror' && !/buntu/i.test(os)) {
-      os = 'Kubuntu';
-    }
-    // Detect Android browsers.
-    else if ((manufacturer && manufacturer != 'Google' &&
-        ((/Chrome/.test(name) && !/\bMobile Safari\b/i.test(ua)) || /\bVita\b/.test(product))) ||
-        (/\bAndroid\b/.test(os) && /^Chrome/.test(name) && /\bVersion\//i.test(ua))) {
-      name = 'Android Browser';
-      os = /\bAndroid\b/.test(os) ? os : 'Android';
-    }
-    // Detect Silk desktop/accelerated modes.
-    else if (name == 'Silk') {
-      if (!/\bMobi/i.test(ua)) {
-        os = 'Android';
-        description.unshift('desktop mode');
-      }
-      if (/Accelerated *= *true/i.test(ua)) {
-        description.unshift('accelerated');
-      }
-    }
-    // Detect PaleMoon identifying as Firefox.
-    else if (name == 'PaleMoon' && (data = /\bFirefox\/([\d.]+)\b/.exec(ua))) {
-      description.push('identifying as Firefox ' + data[1]);
-    }
-    // Detect Firefox OS and products running Firefox.
-    else if (name == 'Firefox' && (data = /\b(Mobile|Tablet|TV)\b/i.exec(ua))) {
-      os || (os = 'Firefox OS');
-      product || (product = data[1]);
-    }
-    // Detect false positives for Firefox/Safari.
-    else if (!name || (data = !/\bMinefield\b/i.test(ua) && /\b(?:Firefox|Safari)\b/.exec(name))) {
-      // Escape the `/` for Firefox 1.
-      if (name && !product && /[\/,]|^[^(]+?\)/.test(ua.slice(ua.indexOf(data + '/') + 8))) {
-        // Clear name of false positives.
-        name = null;
-      }
-      // Reassign a generic name.
-      if ((data = product || manufacturer || os) &&
-          (product || manufacturer || /\b(?:Android|Symbian OS|Tablet OS|webOS)\b/.test(os))) {
-        name = /[a-z]+(?: Hat)?/i.exec(/\bAndroid\b/.test(os) ? os : data) + ' Browser';
-      }
-    }
-    // Add Chrome version to description for Electron.
-    else if (name == 'Electron' && (data = (/\bChrome\/([\d.]+)\b/.exec(ua) || 0)[1])) {
-      description.push('Chromium ' + data);
-    }
-    // Detect non-Opera (Presto-based) versions (order is important).
-    if (!version) {
-      version = getVersion([
-        '(?:Cloud9|CriOS|CrMo|Edge|FxiOS|IEMobile|Iron|Opera ?Mini|OPiOS|OPR|Raven|SamsungBrowser|Silk(?!/[\\d.]+$))',
-        'Version',
-        qualify(name),
-        '(?:Firefox|Minefield|NetFront)'
-      ]);
-    }
-    // Detect stubborn layout engines.
-    if ((data =
-          layout == 'iCab' && parseFloat(version) > 3 && 'WebKit' ||
-          /\bOpera\b/.test(name) && (/\bOPR\b/.test(ua) ? 'Blink' : 'Presto') ||
-          /\b(?:Midori|Nook|Safari)\b/i.test(ua) && !/^(?:Trident|EdgeHTML)$/.test(layout) && 'WebKit' ||
-          !layout && /\bMSIE\b/i.test(ua) && (os == 'Mac OS' ? 'Tasman' : 'Trident') ||
-          layout == 'WebKit' && /\bPlayStation\b(?! Vita\b)/i.test(name) && 'NetFront'
-        )) {
-      layout = [data];
-    }
-    // Detect Windows Phone 7 desktop mode.
-    if (name == 'IE' && (data = (/; *(?:XBLWP|ZuneWP)(\d+)/i.exec(ua) || 0)[1])) {
-      name += ' Mobile';
-      os = 'Windows Phone ' + (/\+$/.test(data) ? data : data + '.x');
-      description.unshift('desktop mode');
-    }
-    // Detect Windows Phone 8.x desktop mode.
-    else if (/\bWPDesktop\b/i.test(ua)) {
-      name = 'IE Mobile';
-      os = 'Windows Phone 8.x';
-      description.unshift('desktop mode');
-      version || (version = (/\brv:([\d.]+)/.exec(ua) || 0)[1]);
-    }
-    // Detect IE 11 identifying as other browsers.
-    else if (name != 'IE' && layout == 'Trident' && (data = /\brv:([\d.]+)/.exec(ua))) {
-      if (name) {
-        description.push('identifying as ' + name + (version ? ' ' + version : ''));
-      }
-      name = 'IE';
-      version = data[1];
-    }
-    // Leverage environment features.
-    if (useFeatures) {
-      // Detect server-side environments.
-      // Rhino has a global function while others have a global object.
-      if (isHostType(context, 'global')) {
-        if (java) {
-          data = java.lang.System;
-          arch = data.getProperty('os.arch');
-          os = os || data.getProperty('os.name') + ' ' + data.getProperty('os.version');
-        }
-        if (rhino) {
-          try {
-            version = context.require('ringo/engine').version.join('.');
-            name = 'RingoJS';
-          } catch(e) {
-            if ((data = context.system) && data.global.system == context.system) {
-              name = 'Narwhal';
-              os || (os = data[0].os || null);
-            }
-          }
-          if (!name) {
-            name = 'Rhino';
-          }
-        }
-        else if (
-          typeof context.process == 'object' && !context.process.browser &&
-          (data = context.process)
-        ) {
-          if (typeof data.versions == 'object') {
-            if (typeof data.versions.electron == 'string') {
-              description.push('Node ' + data.versions.node);
-              name = 'Electron';
-              version = data.versions.electron;
-            } else if (typeof data.versions.nw == 'string') {
-              description.push('Chromium ' + version, 'Node ' + data.versions.node);
-              name = 'NW.js';
-              version = data.versions.nw;
-            }
-          }
-          if (!name) {
-            name = 'Node.js';
-            arch = data.arch;
-            os = data.platform;
-            version = /[\d.]+/.exec(data.version);
-            version = version ? version[0] : null;
-          }
-        }
-      }
-      // Detect Adobe AIR.
-      else if (getClassOf((data = context.runtime)) == airRuntimeClass) {
-        name = 'Adobe AIR';
-        os = data.flash.system.Capabilities.os;
-      }
-      // Detect PhantomJS.
-      else if (getClassOf((data = context.phantom)) == phantomClass) {
-        name = 'PhantomJS';
-        version = (data = data.version || null) && (data.major + '.' + data.minor + '.' + data.patch);
-      }
-      // Detect IE compatibility modes.
-      else if (typeof doc.documentMode == 'number' && (data = /\bTrident\/(\d+)/i.exec(ua))) {
-        // We're in compatibility mode when the Trident version + 4 doesn't
-        // equal the document mode.
-        version = [version, doc.documentMode];
-        if ((data = +data[1] + 4) != version[1]) {
-          description.push('IE ' + version[1] + ' mode');
-          layout && (layout[1] = '');
-          version[1] = data;
-        }
-        version = name == 'IE' ? String(version[1].toFixed(1)) : version[0];
-      }
-      // Detect IE 11 masking as other browsers.
-      else if (typeof doc.documentMode == 'number' && /^(?:Chrome|Firefox)\b/.test(name)) {
-        description.push('masking as ' + name + ' ' + version);
-        name = 'IE';
-        version = '11.0';
-        layout = ['Trident'];
-        os = 'Windows';
-      }
-      os = os && format(os);
-    }
-    // Detect prerelease phases.
-    if (version && (data =
-          /(?:[ab]|dp|pre|[ab]\d+pre)(?:\d+\+?)?$/i.exec(version) ||
-          /(?:alpha|beta)(?: ?\d)?/i.exec(ua + ';' + (useFeatures && nav.appMinorVersion)) ||
-          /\bMinefield\b/i.test(ua) && 'a'
-        )) {
-      prerelease = /b/i.test(data) ? 'beta' : 'alpha';
-      version = version.replace(RegExp(data + '\\+?$'), '') +
-        (prerelease == 'beta' ? beta : alpha) + (/\d+\+?/.exec(data) || '');
-    }
-    // Detect Firefox Mobile.
-    if (name == 'Fennec' || name == 'Firefox' && /\b(?:Android|Firefox OS)\b/.test(os)) {
-      name = 'Firefox Mobile';
-    }
-    // Obscure Maxthon's unreliable version.
-    else if (name == 'Maxthon' && version) {
-      version = version.replace(/\.[\d.]+/, '.x');
-    }
-    // Detect Xbox 360 and Xbox One.
-    else if (/\bXbox\b/i.test(product)) {
-      if (product == 'Xbox 360') {
-        os = null;
-      }
-      if (product == 'Xbox 360' && /\bIEMobile\b/.test(ua)) {
-        description.unshift('mobile mode');
-      }
-    }
-    // Add mobile postfix.
-    else if ((/^(?:Chrome|IE|Opera)$/.test(name) || name && !product && !/Browser|Mobi/.test(name)) &&
-        (os == 'Windows CE' || /Mobi/i.test(ua))) {
-      name += ' Mobile';
-    }
-    // Detect IE platform preview.
-    else if (name == 'IE' && useFeatures) {
-      try {
-        if (context.external === null) {
-          description.unshift('platform preview');
-        }
-      } catch(e) {
-        description.unshift('embedded');
-      }
-    }
-    // Detect BlackBerry OS version.
-    // http://docs.blackberry.com/en/developers/deliverables/18169/HTTP_headers_sent_by_BB_Browser_1234911_11.jsp
-    else if ((/\bBlackBerry\b/.test(product) || /\bBB10\b/.test(ua)) && (data =
-          (RegExp(product.replace(/ +/g, ' *') + '/([.\\d]+)', 'i').exec(ua) || 0)[1] ||
-          version
-        )) {
-      data = [data, /BB10/.test(ua)];
-      os = (data[1] ? (product = null, manufacturer = 'BlackBerry') : 'Device Software') + ' ' + data[0];
-      version = null;
-    }
-    // Detect Opera identifying/masking itself as another browser.
-    // http://www.opera.com/support/kb/view/843/
-    else if (this != forOwn && product != 'Wii' && (
-          (useFeatures && opera) ||
-          (/Opera/.test(name) && /\b(?:MSIE|Firefox)\b/i.test(ua)) ||
-          (name == 'Firefox' && /\bOS X (?:\d+\.){2,}/.test(os)) ||
-          (name == 'IE' && (
-            (os && !/^Win/.test(os) && version > 5.5) ||
-            /\bWindows XP\b/.test(os) && version > 8 ||
-            version == 8 && !/\bTrident\b/.test(ua)
-          ))
-        ) && !reOpera.test((data = parse.call(forOwn, ua.replace(reOpera, '') + ';'))) && data.name) {
-      // When "identifying", the UA contains both Opera and the other browser's name.
-      data = 'ing as ' + data.name + ((data = data.version) ? ' ' + data : '');
-      if (reOpera.test(name)) {
-        if (/\bIE\b/.test(data) && os == 'Mac OS') {
-          os = null;
-        }
-        data = 'identify' + data;
-      }
-      // When "masking", the UA contains only the other browser's name.
-      else {
-        data = 'mask' + data;
-        if (operaClass) {
-          name = format(operaClass.replace(/([a-z])([A-Z])/g, '$1 $2'));
-        } else {
-          name = 'Opera';
-        }
-        if (/\bIE\b/.test(data)) {
-          os = null;
-        }
-        if (!useFeatures) {
-          version = null;
-        }
-      }
-      layout = ['Presto'];
-      description.push(data);
-    }
-    // Detect WebKit Nightly and approximate Chrome/Safari versions.
-    if ((data = (/\bAppleWebKit\/([\d.]+\+?)/i.exec(ua) || 0)[1])) {
-      // Correct build number for numeric comparison.
-      // (e.g. "532.5" becomes "532.05")
-      data = [parseFloat(data.replace(/\.(\d)$/, '.0$1')), data];
-      // Nightly builds are postfixed with a "+".
-      if (name == 'Safari' && data[1].slice(-1) == '+') {
-        name = 'WebKit Nightly';
-        prerelease = 'alpha';
-        version = data[1].slice(0, -1);
-      }
-      // Clear incorrect browser versions.
-      else if (version == data[1] ||
-          version == (data[2] = (/\bSafari\/([\d.]+\+?)/i.exec(ua) || 0)[1])) {
-        version = null;
-      }
-      // Use the full Chrome version when available.
-      data[1] = (/\bChrome\/([\d.]+)/i.exec(ua) || 0)[1];
-      // Detect Blink layout engine.
-      if (data[0] == 537.36 && data[2] == 537.36 && parseFloat(data[1]) >= 28 && layout == 'WebKit') {
-        layout = ['Blink'];
-      }
-      // Detect JavaScriptCore.
-      // http://stackoverflow.com/questions/6768474/how-can-i-detect-which-javascript-engine-v8-or-jsc-is-used-at-runtime-in-androi
-      if (!useFeatures || (!likeChrome && !data[1])) {
-        layout && (layout[1] = 'like Safari');
-        data = (data = data[0], data < 400 ? 1 : data < 500 ? 2 : data < 526 ? 3 : data < 533 ? 4 : data < 534 ? '4+' : data < 535 ? 5 : data < 537 ? 6 : data < 538 ? 7 : data < 601 ? 8 : '8');
-      } else {
-        layout && (layout[1] = 'like Chrome');
-        data = data[1] || (data = data[0], data < 530 ? 1 : data < 532 ? 2 : data < 532.05 ? 3 : data < 533 ? 4 : data < 534.03 ? 5 : data < 534.07 ? 6 : data < 534.10 ? 7 : data < 534.13 ? 8 : data < 534.16 ? 9 : data < 534.24 ? 10 : data < 534.30 ? 11 : data < 535.01 ? 12 : data < 535.02 ? '13+' : data < 535.07 ? 15 : data < 535.11 ? 16 : data < 535.19 ? 17 : data < 536.05 ? 18 : data < 536.10 ? 19 : data < 537.01 ? 20 : data < 537.11 ? '21+' : data < 537.13 ? 23 : data < 537.18 ? 24 : data < 537.24 ? 25 : data < 537.36 ? 26 : layout != 'Blink' ? '27' : '28');
-      }
-      // Add the postfix of ".x" or "+" for approximate versions.
-      layout && (layout[1] += ' ' + (data += typeof data == 'number' ? '.x' : /[.+]/.test(data) ? '' : '+'));
-      // Obscure version for some Safari 1-2 releases.
-      if (name == 'Safari' && (!version || parseInt(version) > 45)) {
-        version = data;
-      }
-    }
-    // Detect Opera desktop modes.
-    if (name == 'Opera' &&  (data = /\bzbov|zvav$/.exec(os))) {
-      name += ' ';
-      description.unshift('desktop mode');
-      if (data == 'zvav') {
-        name += 'Mini';
-        version = null;
-      } else {
-        name += 'Mobile';
-      }
-      os = os.replace(RegExp(' *' + data + '$'), '');
-    }
-    // Detect Chrome desktop mode.
-    else if (name == 'Safari' && /\bChrome\b/.exec(layout && layout[1])) {
-      description.unshift('desktop mode');
-      name = 'Chrome Mobile';
-      version = null;
-
-      if (/\bOS X\b/.test(os)) {
-        manufacturer = 'Apple';
-        os = 'iOS 4.3+';
-      } else {
-        os = null;
-      }
-    }
-    // Strip incorrect OS versions.
-    if (version && version.indexOf((data = /[\d.]+$/.exec(os))) == 0 &&
-        ua.indexOf('/' + data + '-') > -1) {
-      os = trim(os.replace(data, ''));
-    }
-    // Add layout engine.
-    if (layout && !/\b(?:Avant|Nook)\b/.test(name) && (
-        /Browser|Lunascape|Maxthon/.test(name) ||
-        name != 'Safari' && /^iOS/.test(os) && /\bSafari\b/.test(layout[1]) ||
-        /^(?:Adobe|Arora|Breach|Midori|Opera|Phantom|Rekonq|Rock|Samsung Internet|Sleipnir|Web)/.test(name) && layout[1])) {
-      // Don't add layout details to description if they are falsey.
-      (data = layout[layout.length - 1]) && description.push(data);
-    }
-    // Combine contextual information.
-    if (description.length) {
-      description = ['(' + description.join('; ') + ')'];
-    }
-    // Append manufacturer to description.
-    if (manufacturer && product && product.indexOf(manufacturer) < 0) {
-      description.push('on ' + manufacturer);
-    }
-    // Append product to description.
-    if (product) {
-      description.push((/^on /.test(description[description.length - 1]) ? '' : 'on ') + product);
-    }
-    // Parse the OS into an object.
-    if (os) {
-      data = / ([\d.+]+)$/.exec(os);
-      isSpecialCasedOS = data && os.charAt(os.length - data[0].length - 1) == '/';
-      os = {
-        'architecture': 32,
-        'family': (data && !isSpecialCasedOS) ? os.replace(data[0], '') : os,
-        'version': data ? data[1] : null,
-        'toString': function() {
-          var version = this.version;
-          return this.family + ((version && !isSpecialCasedOS) ? ' ' + version : '') + (this.architecture == 64 ? ' 64-bit' : '');
-        }
-      };
-    }
-    // Add browser/OS architecture.
-    if ((data = /\b(?:AMD|IA|Win|WOW|x86_|x)64\b/i.exec(arch)) && !/\bi686\b/i.test(arch)) {
-      if (os) {
-        os.architecture = 64;
-        os.family = os.family.replace(RegExp(' *' + data), '');
-      }
-      if (
-          name && (/\bWOW64\b/i.test(ua) ||
-          (useFeatures && /\w(?:86|32)$/.test(nav.cpuClass || nav.platform) && !/\bWin64; x64\b/i.test(ua)))
-      ) {
-        description.unshift('32-bit');
-      }
-    }
-    // Chrome 39 and above on OS X is always 64-bit.
-    else if (
-        os && /^OS X/.test(os.family) &&
-        name == 'Chrome' && parseFloat(version) >= 39
-    ) {
-      os.architecture = 64;
-    }
-
-    ua || (ua = null);
-
-    /*------------------------------------------------------------------------*/
-
-    /**
-     * The platform object.
-     *
-     * @name platform
-     * @type Object
-     */
-    var platform = {};
-
-    /**
-     * The platform description.
-     *
-     * @memberOf platform
-     * @type string|null
-     */
-    platform.description = ua;
-
-    /**
-     * The name of the browser's layout engine.
-     *
-     * The list of common layout engines include:
-     * "Blink", "EdgeHTML", "Gecko", "Trident" and "WebKit"
-     *
-     * @memberOf platform
-     * @type string|null
-     */
-    platform.layout = layout && layout[0];
-
-    /**
-     * The name of the product's manufacturer.
-     *
-     * The list of manufacturers include:
-     * "Apple", "Archos", "Amazon", "Asus", "Barnes & Noble", "BlackBerry",
-     * "Google", "HP", "HTC", "LG", "Microsoft", "Motorola", "Nintendo",
-     * "Nokia", "Samsung" and "Sony"
-     *
-     * @memberOf platform
-     * @type string|null
-     */
-    platform.manufacturer = manufacturer;
-
-    /**
-     * The name of the browser/environment.
-     *
-     * The list of common browser names include:
-     * "Chrome", "Electron", "Firefox", "Firefox for iOS", "IE",
-     * "Microsoft Edge", "PhantomJS", "Safari", "SeaMonkey", "Silk",
-     * "Opera Mini" and "Opera"
-     *
-     * Mobile versions of some browsers have "Mobile" appended to their name:
-     * eg. "Chrome Mobile", "Firefox Mobile", "IE Mobile" and "Opera Mobile"
-     *
-     * @memberOf platform
-     * @type string|null
-     */
-    platform.name = name;
-
-    /**
-     * The alpha/beta release indicator.
-     *
-     * @memberOf platform
-     * @type string|null
-     */
-    platform.prerelease = prerelease;
-
-    /**
-     * The name of the product hosting the browser.
-     *
-     * The list of common products include:
-     *
-     * "BlackBerry", "Galaxy S4", "Lumia", "iPad", "iPod", "iPhone", "Kindle",
-     * "Kindle Fire", "Nexus", "Nook", "PlayBook", "TouchPad" and "Transformer"
-     *
-     * @memberOf platform
-     * @type string|null
-     */
-    platform.product = product;
-
-    /**
-     * The browser's user agent string.
-     *
-     * @memberOf platform
-     * @type string|null
-     */
-    platform.ua = ua;
-
-    /**
-     * The browser/environment version.
-     *
-     * @memberOf platform
-     * @type string|null
-     */
-    platform.version = name && version;
-
-    /**
-     * The name of the operating system.
-     *
-     * @memberOf platform
-     * @type Object
-     */
-    platform.os = os || {
-
-      /**
-       * The CPU architecture the OS is built for.
-       *
-       * @memberOf platform.os
-       * @type number|null
-       */
-      'architecture': null,
-
-      /**
-       * The family of the OS.
-       *
-       * Common values include:
-       * "Windows", "Windows Server 2008 R2 / 7", "Windows Server 2008 / Vista",
-       * "Windows XP", "OS X", "Ubuntu", "Debian", "Fedora", "Red Hat", "SuSE",
-       * "Android", "iOS" and "Windows Phone"
-       *
-       * @memberOf platform.os
-       * @type string|null
-       */
-      'family': null,
-
-      /**
-       * The version of the OS.
-       *
-       * @memberOf platform.os
-       * @type string|null
-       */
-      'version': null,
-
-      /**
-       * Returns the OS string.
-       *
-       * @memberOf platform.os
-       * @returns {string} The OS string.
-       */
-      'toString': function() { return 'null'; }
-    };
-
-    platform.parse = parse;
-    platform.toString = toStringPlatform;
-
-    if (platform.version) {
-      description.unshift(version);
-    }
-    if (platform.name) {
-      description.unshift(name);
-    }
-    if (os && name && !(os == String(os).split(' ')[0] && (os == name.split(' ')[0] || product))) {
-      description.push(product ? '(' + os + ')' : 'on ' + os);
-    }
-    if (description.length) {
-      platform.description = description.join(' ');
-    }
-    return platform;
-  }
-
-  /*--------------------------------------------------------------------------*/
-
-  // Export platform.
-  var platform = parse();
-
-  // Some AMD build optimizers, like r.js, check for condition patterns like the following:
-  if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
-    // Expose platform on the global object to prevent errors when platform is
-    // loaded by a script tag in the presence of an AMD loader.
-    // See http://requirejs.org/docs/errors.html#mismatch for more details.
-    root.platform = platform;
-
-    // Define as an anonymous module so platform can be aliased through path mapping.
-    define('platform',[],function() {
-      return platform;
-    });
-  }
-  // Check for `exports` after `define` in case a build optimizer adds an `exports` object.
-  else if (freeExports && freeModule) {
-    // Export for CommonJS support.
-    forOwn(platform, function(value, key) {
-      freeExports[key] = value;
-    });
-  }
-  else {
-    // Export to the global object.
-    root.platform = platform;
-  }
-}.call(this));
-
-
-define('text!ev-script/templates/hider.html',[],function () { return '<div class="action-wrap">\n  <a class="action-hide" href="#" title="<%= i18n.formatMessage(\'Hide Picker\') %>"><i class="fa fa-lg fa-folder"></i><span><%= i18n.formatMessage(\'Hide\') %></span></a>\n  <% if (showLogout) { %>\n    <a class="action-logout" href="#" title="<%= i18n.formatMessage(\'Logout {0}\', username) %>"><i class="fa fa-lg fa-power-off"></i><span><%= i18n.formatMessage(\'Logout\') %></span></a>\n  <% } %>\n</div>';});
-
-define('ev-script/views/hider',['require','underscore','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/hider.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'hideHandler', 'logoutHandler', 'authHandler', 'render');
-            this.globalEvents.on('loggedIn', this.authHandler);
-            this.globalEvents.on('loggedOut', this.authHandler);
-            this.field = options.field;
-        },
-        events: {
-            'click a.action-hide': 'hideHandler',
-            'click a.action-logout': 'logoutHandler'
-        },
-        authHandler: function(ensembleUrl) {
-            if (ensembleUrl === this.config.ensembleUrl) {
-                this.render();
-            }
-        },
-        render: function() {
-            var username = '';
-            if (this.auth.isAuthenticated()) {
-                username = this.auth.getUser().get('UserName');
-            }
-            this.$el.html(this.template({
-                i18n: this.i18n,
-                showLogout: this.auth.isAuthenticated() && this.config.authType !== 'none',
-                username: username
-            }));
-        },
-        hideHandler: function(e) {
-            this.appEvents.trigger('hidePicker', this.field.id);
-            e.preventDefault();
-        },
-        logoutHandler: function(e) {
-            this.auth.logout().always(this.appEvents.trigger('hidePickers'));
-            e.preventDefault();
-        }
-    });
-
-});
-
-
-define('text!ev-script/templates/picker.html',[],function () { return '<div id="<%= id %>-hider" class="ev-hider"></div>\n<div id="<%= id %>-filter" class="ev-filter-block"></div>\n<div id="<%= id %>-results" class="ev-results"></div>\n<div id="anthemContainer"></div>\n';});
-
-define('ev-script/views/picker',['require','jquery','underscore','ev-script/views/base','ev-script/views/hider','text!ev-script/templates/picker.html'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        BaseView = require('ev-script/views/base'),
-        HiderView = require('ev-script/views/hider');
-
-    /*
-     * Encapsulates views to manage search, display and selection of Ensemble videos and playlists.
-     */
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/picker.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker');
-            this.$el.hide();
-            this.$el.html(this.template({
-                id: this.id
-            }));
-            this.field = options.field;
-            this.hider = new HiderView({
-                el: this.$('div.ev-hider'),
-                field: this.field,
-                appId: this.appId
-            });
-            this.appEvents.on('hidePickers', function(fieldId) {
-                if (!fieldId || (this.field.id !== fieldId)) {
-                    this.hidePicker();
-                }
-            }, this);
-            this.appEvents.on('showPicker', function(fieldId) {
-                if (this.field.id === fieldId && this.$el.is(':hidden')) {
-                    this.showPicker();
-                }
-            }, this);
-            this.appEvents.on('hidePicker', function(fieldId) {
-                if (this.field.id === fieldId) {
-                    this.hidePicker();
-                }
-            }, this);
-            this.hider.render();
-        },
-        chooseItem: function(e) {
-            var id = $(e.currentTarget).attr('rel'),
-                content = this.resultsView.collection.get(id);
-            this.model.set({
-                id: id,
-                content: content.toJSON()
-            });
-            this.field.model.set(this.model.attributes);
-            this.appEvents.trigger('hidePicker', this.field.id);
-            e.preventDefault();
-        },
-        hidePicker: function() {
-            this.$el.hide();
-        },
-        showPicker: function() {
-            // In case our authentication status has changed...re-render our hider
-            this.hider.render();
-            this.$el.show();
-        }
-    });
-
-});
-
-
-define('text!ev-script/templates/organization-select.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Organization:\') %></label>\n<select id="<%= id %>" class="form-select organizations" title="<%= i18n.formatMessage(\'Select Organization\') %>"></select>\n';});
-
-
-define('text!ev-script/templates/options.html',[],function () { return '<% collection.each(function(item) { %>\n    <option value="<%= item.id %>" <% if (selectedId === item.id) { print(\'selected="selected"\'); } %>><%- item.get(\'Name\') %></option>\n<% }); %>\n';});
-
-define('ev-script/views/organization-select',['require','underscore','ev-script/views/base','text!ev-script/templates/organization-select.html','text!ev-script/templates/options.html'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/organization-select.html')),
-        optionsTemplate: _.template(require('text!ev-script/templates/options.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render');
-            this.picker = options.picker;
-            this.$el.html(this.template({
-                id: this.id + '-select',
-                i18n: this.i18n
-            }));
-            this.$select = this.$('select');
-            this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
-            this.collection.on('reset', this.render);
-        },
-        render: function() {
-            var selectedId = this.picker.model.get('organizationId') || this.auth.getUser().get('OrganizationID');
-            this.$select.html(this.optionsTemplate({
-                selectedId: selectedId,
-                collection: this.collection
-            }));
-            this.$select.trigger('change');
-        }
-    });
-
-});
-
-define('ev-script/collections/base',['require','jquery','underscore','backbone','ev-script/util/cache'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        cacheUtil = require('ev-script/util/cache');
-
-    return Backbone.Collection.extend({
-        initialize: function(collections, options) {
-            this.requiresAuth = true;
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
-            this.auth = cacheUtil.getAppAuth(this.appId);
-            this.info = cacheUtil.getAppInfo(this.appId);
-        },
-        model: Backbone.Model.extend({
-            idAttribute: 'ID'
-        }),
-        getCached: function(key) {},
-        setCached: function(key, resp) {},
-        clearCache: function(key) {},
-        parse: function(response) {
-            return response.Data;
-        },
-        fetch: function(options) {
-            if (options && options.success) {
-                options.success = _.wrap(options.success, _.bind(function(success) {
-                    // We've successfully queried the API for something that
-                    // requires authentication but we're in an unauthenticated
-                    // state.  Double-check our authentication and proceed.
-                    var args = Array.prototype.slice.call(arguments, 1);
-                    if (this.requiresAuth && !this.auth.isAuthenticated()) {
-                        this.auth.fetchUser()
-                        .always(function() {
-                            success.apply(this, args);
-                        });
-                    } else {
-                        success.apply(this, args);
-                    }
-                }, this));
-                // TODO - maybe wrap error to handle 401?
-            }
-            return Backbone.Collection.prototype.fetch.call(this, options);
-        },
-        sync: function(method, collection, options) {
-            _.defaults(options || (options = {}), {
-                xhrFields: { withCredentials: true }
-            });
-            if (method === 'read') {
-                var cached = this.getCached(options.cacheKey);
-                if (cached) {
-                    var deferred = $.Deferred();
-                    if (options.success) {
-                        deferred.done(options.success);
-                    }
-                    return deferred.resolve(cached).promise();
-                } else {
-                    // Grab the response and cache
-                    options.success = options.success || function(collection, response, options) {};
-                    options.success = _.wrap(options.success, _.bind(function(success) {
-                        this.setCached(options.cacheKey, arguments[1]);
-                        success.apply(this, Array.prototype.slice.call(arguments, 1));
-                    }, this));
-                    return Backbone.Collection.prototype.sync.call(this, method, collection, options);
-                }
-            } else {
-                return Backbone.Collection.prototype.sync.call(this, method, collection, options);
-            }
-        }
-    });
-
-});
-
-define('ev-script/collections/organizations',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
-
-    'use strict';
-
-    var BaseCollection = require('ev-script/collections/base'),
-        cacheUtil = require('ev-script/util/cache');
-
-    return BaseCollection.extend({
-        initialize: function(models, options) {
-            BaseCollection.prototype.initialize.call(this, models, options);
-        },
-        _cache: function(key, resp) {
-            var cachedValue = null,
-                user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            return userCache ? userCache[resp ? 'set' : 'get'](key, resp) : null;
-        },
-        getCached: function(key) {
-            return this._cache('orgs');
-        },
-        setCached: function(key, resp) {
-            return this._cache('orgs', resp);
-        },
-        url: function() {
-            var api_url = this.config.ensembleUrl + '/api/Organizations';
-            // Make this arbitrarily large so we can retrieve ALL orgs in a single request
-            var sizeParam = 'PageSize=9999';
-            var indexParam = 'PageIndex=1';
-            var url = api_url + '?' + sizeParam + '&' + indexParam;
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        }
-    });
-
-});
-
-
-define('text!ev-script/templates/library-select.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Library:\') %></label>\n<select id="<%= id %>" class="form-select libraries" title="<%= i18n.formatMessage(\'Select Library\') %>"></select>\n';});
-
-define('ev-script/views/library-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-select.html','text!ev-script/templates/options.html'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/library-select.html')),
-        optionsTemplate: _.template(require('text!ev-script/templates/options.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render');
-            this.picker = options.picker;
-            this.$el.html(this.template({
-                id: this.id + '-select',
-                i18n: this.i18n
-            }));
-            this.$select = this.$('select');
-            this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
-            this.collection.on('reset', this.render);
-        },
-        render: function() {
-            var selectedId = this.picker.model.get('libraryId') || this.auth.getUser().get('LibraryID');
-            this.$select.html(this.optionsTemplate({
-                selectedId: selectedId,
-                collection: this.collection
-            }));
-            this.$select.trigger('change');
-        }
-    });
-
-});
-
-define('ev-script/collections/libraries',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
-
-    'use strict';
-
-    var BaseCollection = require('ev-script/collections/base'),
-        cacheUtil = require('ev-script/util/cache');
-
-    return BaseCollection.extend({
-        initialize: function(models, options) {
-            BaseCollection.prototype.initialize.call(this, models, options);
-            this.filterValue = options.organizationId || '';
-        },
-        _cache: function(key, resp) {
-            var cachedValue = null,
-                user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                var libsCache = userCache.get('libs');
-                if (!libsCache) {
-                    userCache.set('libs', libsCache = new cacheUtil.Cache());
-                }
-                cachedValue = libsCache[resp ? 'set' : 'get'](key, resp);
-            }
-            return cachedValue;
-        },
-        getCached: function(key) {
-            return this._cache(key);
-        },
-        setCached: function(key, resp) {
-            return this._cache(key, resp);
-        },
-        url: function() {
-            var api_url = this.config.ensembleUrl + '/api/Libraries';
-            // Make this arbitrarily large so we can retrieve ALL libraries under an org in a single request
-            var sizeParam = 'PageSize=9999';
-            var indexParam = 'PageIndex=1';
-            var onParam = 'FilterOn=OrganizationId';
-            var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
-            var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        }
-    });
-
-});
-
-
-define('text!ev-script/templates/library-type-select.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Type:\') %></label>\n<select id="<%= id %>" class="form-select source" title="<%= i18n.formatMessage(\'Select Library Type\') %>">\n  <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Media Library\') %></option>\n  <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Shared Library\') %></option>\n</select>\n';});
-
-define('ev-script/views/library-type-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/library-type-select.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'changeHandler');
-            this.picker = options.picker;
-            this.render();
-        },
-        events: {
-            'change .source': 'changeHandler'
-        },
-        render: function() {
-            this.$el.html(this.template({
-                id: this.id + '-select',
-                i18n: this.i18n,
-                sourceId: this.picker.model.get('sourceId')
-            }));
-        },
-        changeHandler: function(e) {
-            var sourceVal = this.$('.source').val();
-            this.picker.model.set({
-                sourceId: sourceVal
-            });
-            this.appEvents.trigger('typeSelectChange', sourceVal);
-            e.preventDefault();
-        }
-    });
-
-});
-
-
-define('text!ev-script/templates/search.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Search:\') %></label>\n<input id="<%= id %>" type="search" class="form-text search" placeholder="<%= i18n.formatMessage(\'Search Media\') %>" value="<%- searchVal %>" title="<%= i18n.formatMessage(\'Search Media\') %>" />\n';});
-
-define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/search.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'searchHandler', 'doSearch', 'autoSearch');
-            this.picker = options.picker;
-            this.render();
-        },
-        events: {
-            'keydown .search': 'searchHandler',
-            'keyup .search': 'autoSearch'
-        },
-        render: function() {
-            this.$el.html(this.template({
-                id: this.id + '-input',
-                i18n: this.i18n,
-                searchVal: this.picker.model.get('search')
-            }));
-        },
-        doSearch: function() {
-            var searchVal = this.$('.search').val();
-            this.picker.model.set({
-                search: searchVal
-            });
-            this.appEvents.trigger('search', searchVal);
-        },
-        searchHandler: function(e) {
-            // Looking for enter key in which case we immediately search
-            var code = e.keyCode ? e.keyCode : e.which;
-            if (code === 13) {
-                if (this.submitTimeout) {
-                    clearTimeout(this.submitTimeout);
-                }
-                this.doSearch();
-                e.preventDefault();
-            }
-        },
-        autoSearch: function(e) {
-            var value = e.target.value;
-            if (value !== this.lastValue) {
-                this.lastValue = value;
-                if (this.submitTimeout) {
-                    clearTimeout(this.submitTimeout);
-                }
-                this.submitTimeout = setTimeout(_.bind(function() {
-                    this.doSearch();
-                }, this), 1000);
-            }
-        }
-    });
-
-});
-
-
-define('text!ev-script/templates/filter.html',[],function () { return '<div id="<%= id %>-org-select" class="ev-filter-item ev-org-select"></div>\n<div id="<%= id %>-lib-select" class="ev-filter-item ev-lib-select"></div>\n<div id="<%= id %>-type-select" class="ev-filter-item ev-type-select"></div>\n<div id="<%= id %>-search" class="ev-filter-item ev-search"></div>\n<div class="ev-filter-item ev-actions">\n  <button type="button" class="action-upload" style="display: none;" title="<%= i18n.formatMessage(\'Click to upload new media\') %>">\n    <i class="fa fa-upload fa-fw"></i><span><%= i18n.formatMessage(\'Upload\') %><span>\n  </button>\n  <button type="button" class="action-record" style="display: none;" title="<%= i18n.formatMessage(\'Click to record screen\') %>">\n    <i class="record-inactive fa fa-circle fa-fw"></i>\n    <i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i>\n    <span><%= i18n.formatMessage(\'Record\') %><span>\n  </button>\n</div>\n<div class="ev-filter-item loader"></div>\n';});
-
-define('ev-script/views/filter',['require','jquery','underscore','ev-script/views/base','ev-script/views/organization-select','ev-script/collections/organizations','ev-script/views/library-select','ev-script/collections/libraries','ev-script/views/library-type-select','ev-script/views/search','text!ev-script/templates/filter.html'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        BaseView = require('ev-script/views/base'),
-        OrganizationSelectView = require('ev-script/views/organization-select'),
-        Organizations = require('ev-script/collections/organizations'),
-        LibrarySelectView = require('ev-script/views/library-select'),
-        Libraries = require('ev-script/collections/libraries'),
-        TypeSelectView = require('ev-script/views/library-type-select'),
-        SearchView = require('ev-script/views/search');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/filter.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization',
-                'changeLibrary', 'activateRecord', 'deactivateRecord',
-                'showUpload', 'hideUpload', 'showRecord', 'hideRecord',
-                'setFocus');
-
-            this.picker = options.picker;
-            this.id = options.id;
-
-            this.$el.html(this.template({
-                id: this.id,
-                i18n: this.i18n
-            }));
-
-            this.orgSelect = new OrganizationSelectView({
-                id: this.id + '-org-select',
-                el: this.$('.ev-org-select'),
-                picker: this.picker,
-                appId: this.appId,
-                collection: new Organizations({}, {
-                    appId: this.appId
-                })
-            });
-
-            this.libSelect = new LibrarySelectView({
-                id: this.id + '-lib-select',
-                el: this.$('.ev-lib-select'),
-                picker: this.picker,
-                appId: this.appId,
-                collection: new Libraries({}, {
-                    appId: this.appId
-                })
-            });
-
-            if (options.showTypeSelect || _.isUndefined(options.showTypeSelect)) {
-                this.typeSelectView = new TypeSelectView({
-                    id: this.id + '-type-select',
-                    el: this.$('.ev-type-select'),
-                    picker: this.picker,
-                    appId: this.appId
-                });
-            }
-
-            this.searchView = new SearchView({
-                id: this.id + '-search',
-                el: this.$('.ev-search'),
-                picker: this.picker,
-                appId: this.appId
-            });
-
-            var $loader = this.$('div.loader');
-            $(window.document).on('ajaxSend', _.bind(function(e, xhr, settings) {
-                if (this.picker === settings.picker) {
-                    $loader.addClass('loading');
-                }
-            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
-                if (this.picker === settings.picker) {
-                    $loader.removeClass('loading');
-                }
-            }, this));
-        },
-        events: {
-            'change select.organizations': 'changeOrganization',
-            'change select.libraries': 'changeLibrary'
-        },
-        changeOrganization: function(e) {
-            this.picker.model.set({
-                organizationId: e.target.value
-            });
-            this.loadLibraries();
-        },
-        changeLibrary: function(e) {
-            this.picker.model.set({
-                libraryId: e.target.value
-            });
-        },
-        loadOrgs: function() {
-            var orgs = new Organizations({}, {
-                appId: this.appId
-            });
-            orgs.fetch({
-                picker: this.picker,
-                success: _.bind(function(collection, response, options) {
-                    this.orgSelect.collection.reset(collection.models);
-                }, this),
-                error: _.bind(function(collection, xhr, options) {
-                    this.ajaxError(xhr, _.bind(function() {
-                        this.loadOrgs();
-                    }, this));
-                }, this)
-            });
-        },
-        loadLibraries: function() {
-            var orgId = this.picker.model.get('organizationId');
-            var libs = new Libraries({}, {
-                organizationId: orgId,
-                appId: this.appId
-            });
-            libs.fetch({
-                picker: this.picker,
-                cacheKey: orgId,
-                success: _.bind(function(collection, response, options) {
-                    this.libSelect.collection.reset(collection.models);
-                }, this),
-                error: _.bind(function(collection, xhr, options) {
-                    this.ajaxError(xhr, _.bind(function() {
-                        this.loadLibraries();
-                    }, this));
-                }, this)
-            });
-        },
-        activateRecord: function() {
-            this.$('.record-active').show();
-            this.$('.record-inactive').hide();
-        },
-        deactivateRecord: function() {
-            this.$('.record-active').hide();
-            this.$('.record-inactive').show();
-        },
-        showUpload: function() {
-            this.$('.action-upload').show();
-        },
-        hideUpload: function() {
-            this.$('.action-upload').hide();
-        },
-        showRecord: function() {
-            this.$('.action-record').show();
-        },
-        hideRecord: function() {
-            this.$('.action-record').hide();
-        },
-        setFocus: function() {
-            this.$('select').filter(':visible').first().focus();
-        }
-    });
-
-});
-
-/**
- * ev-scroll-loader 1.2.0 2018-01-24
- * Ensemble Video jQuery Scroll Loader Plugin
- * https://github.com/ensembleVideo/ev-scroll-loader
- * Copyright (c) 2018 Symphony Video, Inc.
- * Licensed (MIT AND GPL-2.0)
- */
-(function(factory) {
-    'use strict';
-
-    if (typeof define === 'function' && define.amd) {
-        define('ev-scroll-loader',['jquery'], factory);
-    } else if (typeof module === 'object' && typeof module.exports === 'object') {
-        factory(require('jquery'));
-    } else {
-        factory(jQuery);
-    }
-})(function($) {
-
-    'use strict';
-
-    var defaults = {
-        scrollStyle: 'scroll',
-        onScrolled: function() {}
-    };
-
-    var methods = {
-        init: function(options) {
-            var settings = $.extend({}, defaults, options);
-            return this.each(function() {
-                var $this = $(this),
-                    $wrap = $this.wrap('<div class=\"scrollWrap\"/>').closest('.scrollWrap');
-                $this.addClass('scroll-content');
-                $wrap.append('<div class="loader"></div>');
-                $wrap.css({
-                    'position': 'relative',
-                    'height': settings.height ? (typeof settings.height === 'number' ? settings.height + 'px' : settings.height) : '100%',
-                    'max-height': $this[0].scrollHeight + 'px',
-                    'overflow-y': settings.scrollStyle
-                });
-                $wrap.scroll(function() {
-                    // When we have scrolled to the bottom of our content, call the onScrolled handler.  We subtract a pixel below to account for rounding.
-                    if ($wrap.scrollTop() >= $wrap[0].scrollHeight - $wrap.height() - 1) {
-                        settings.onScrolled.call($this);
-                    }
-                });
-            });
-        },
-        showLoader: function() {
-            var $wrap = $(this).closest('.scrollWrap');
-            $('.loader', $wrap).show();
-            return this;
-        },
-        hideLoader: function() {
-            var $wrap = $(this).closest('.scrollWrap');
-            $('.loader', $wrap).hide();
-            return this;
-        },
-        scrollTo: function(offset) {
-            var $wrap = $(this).closest('.scrollWrap');
-            $wrap.scrollTop(offset - $wrap.offset().top + $wrap.scrollTop());
-            return this;
-        }
-    };
-
-    $.fn.evScrollLoader = function(method) {
-        if (methods[method]) {
-            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-        } else if (typeof method === 'object' || !method) {
-            return methods.init.apply(this, arguments);
-        }
-    };
-
-});
-
-
-define('text!ev-script/templates/results.html',[],function () { return '<div class="total">\n    <%= i18n.formatMessage(\'Search returned {0} results.\', totalResults) %>\n    <a href="#" class="action-refresh" title="<%= i18n.formatMessage(\'Click to reload search results\') %>"><i class="fa fa-fw fa-lg fa-refresh"></i><span><%= i18n.formatMessage(\'Reload\') %></span></a>\n</div>\n<div class="results">\n    <div class="content-list"></div>\n</div>\n';});
-
-
-define('text!ev-script/templates/no-results.html',[],function () { return '<div class="odd result-item">\n    <div class="no-results">\n        <span><%= i18n.formatMessage(\'No results available.\') %></span>\n    </div>\n</div>\n';});
-
-define('ev-script/views/results',['require','jquery','underscore','moment','ev-script/views/base','ev-scroll-loader','text!ev-script/templates/results.html','text!ev-script/templates/no-results.html'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        moment = require('moment'),
-        BaseView = require('ev-script/views/base');
-
-    require('ev-scroll-loader');
-
-    /*
-     * Base object for result views since video and playlist results are rendered differently
-     */
-    return BaseView.extend({
-        resultsTemplate: _.template(require('text!ev-script/templates/results.html')),
-        emptyTemplate: _.template(require('text!ev-script/templates/no-results.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render', 'decorate', 'loadMore', 'addHandler', 'previewItem', 'refreshHandler');
-            this.picker = options.picker;
-            this.appId = options.appId;
-            this.loadLock = false;
-        },
-        events: {
-            'click .action-preview': 'previewItem',
-            'click .action-refresh': 'refreshHandler'
-        },
-        getItemHtml: function(item, index) {
-            if (this.resultTemplate) {
-                return this.resultTemplate({
-                    i18n: this.i18n,
-                    dateTimeFormat: this.config.getDateTimeFormat(),
-                    moment: moment,
-                    item: item,
-                    index: index
-                });
-            }
-        },
-        previewItem: function(e) {
-            var element = e.currentTarget;
-            var id = $(element).attr('rel');
-            var item = this.collection.get(id);
-            var settings = {
-                id: id,
-                content: item.toJSON(),
-                appId: this.appId
-            };
-            var previewView = new this.previewClass({
-                el: element,
-                model: new this.modelClass(settings),
-                appId: this.appId,
-                picker: this.picker
-            });
-            // Stop event propagation so we don't trigger preview of stored field item as well
-            e.stopPropagation();
-            e.preventDefault();
-        },
-        loadMore: function() {
-            if (this.collection.hasMore && !this.loadLock) {
-                this.loadLock = true;
-                this.collection.fetch({
-                    remove: false,
-                    picker: this.picker,
-                    success: _.bind(function(collection, response, options) {
-                        if (_.size(response.Data) < this.config.pageSize) {
-                            collection.hasMore = false;
-                            this.$scrollLoader.evScrollLoader('hideLoader');
-                        } else {
-                            collection.hasMore = true;
-                            collection.pageIndex += 1;
-                        }
-                        this.loadLock = false;
-                    }, this),
-                    error: _.bind(function(collection, xhr, options) {
-                        this.ajaxError(xhr, _.bind(function() {
-                            this.loadMore();
-                        }, this));
-                        this.loadLock = false;
-                    }, this)
-                });
-            }
-        },
-        addHandler: function(item, collection, options) {
-            var $item = $(this.getItemHtml(item, collection.indexOf(item)));
-            this.decorate($item);
-            this.$('.content-list').append($item);
-        },
-        decorate: function($item) {
-            // For keyboard accessibility, add result item to tab flow
-            $item.attr('tabindex', '0');
-            // ...and programmatically focus on interactive elements
-            var focusedIndex;
-            // when item receives focus reset item action index and scroll to top
-            $item.focus(_.bind(function() {
-                var $interEls = $('a', $item);
-                $interEls.attr('tabindex', '-1');
-                focusedIndex = -1;
-                this.$scrollLoader.evScrollLoader('scrollTo', $item.offset().top - 2);
-            }, this));
-            $item.keydown(_.bind(function(e) {
-                var $interEls,
-                    $prevAll,
-                    $nextAll,
-                    $wrap = this.$scrollLoader.closest('.scrollWrap'),
-                    lastIndex,
-                    index,
-                    isItemScrolled = _.bind(function(reverse) {
-                        var itemHeight = $item.height(),
-                            scrollHeight = $wrap.height(),
-                            clearReq = itemHeight - scrollHeight,
-                            itemOffset = $item.offset().top,
-                            scrollOffset = $wrap.offset().top,
-                            clearAct = itemOffset - scrollOffset;
-                        return reverse ? clearAct >= 0 : Math.abs(clearAct) >= clearReq;
-                    }, this);
-                if (e.which === 33 || e.keyCode === 33) {
-                    e.preventDefault();
-                    // page up
-                    $prevAll = $item.prevAll();
-                    if (!$prevAll.length) {
-                        return;
-                    }
-                    // Note: items are searched up in order
-                    index = 10;
-                    lastIndex = $prevAll.length - 1;
-                    index = index > lastIndex ? lastIndex : index;
-                    $prevAll.eq(index).focus();
-                } else if (e.which === 34 || e.keyCode === 34) {
-                    // page down
-                    $nextAll = $item.nextAll();
-                    if (!$nextAll.length) {
-                        return;
-                    }
-                    e.preventDefault();
-                    index = 10;
-                    lastIndex = $nextAll.length - 1;
-                    index = index > lastIndex ? lastIndex : index;
-                    $nextAll.eq(index).focus();
-                } else if (e.which === 35 || e.keyCode === 35) {
-                    e.preventDefault();
-                    // end key should jump to bottom
-                    $nextAll = $item.nextAll();
-                    if (!$nextAll.length) {
-                        return;
-                    }
-                    $nextAll.last().focus();
-                } else if (e.which === 36 || e.keyCode === 36) {
-                    e.preventDefault();
-                    // home key should jump to top
-                    // Note: as w/ page up above, the last previous item is the
-                    // first in our list of results
-                    $prevAll = $item.prevAll();
-                    if (!$prevAll.length) {
-                        return;
-                    }
-                    $prevAll.last().focus();
-                } else if (e.which === 37 || e.keyCode === 37) {
-                    e.preventDefault();
-                    // left arrow move to previous item action
-                    $interEls = $('a:visible', $item);
-                    if (!$interEls.length) {
-                        return;
-                    }
-                    lastIndex = $interEls.length - 1;
-                    focusedIndex = --focusedIndex < 0 ? lastIndex : focusedIndex;
-                    focusedIndex = focusedIndex > lastIndex ? lastIndex : focusedIndex;
-                    $interEls.eq(focusedIndex).focus();
-                } else if ((e.which === 38 || e.keyCode === 38) && isItemScrolled(true)) {
-                    e.preventDefault();
-                    // up arrow move to previous item
-                    var $previous = $item.prev();
-                    if ($previous && $previous.length) {
-                        $previous.focus();
-                    }
-                } else if (e.which === 39 || e.keyCode === 39) {
-                    e.preventDefault();
-                    // right arrow move to next item action
-                    $interEls = $('a:visible', $item);
-                    if (!$interEls.length) {
-                        return;
-                    }
-                    lastIndex = $interEls.length - 1;
-                    focusedIndex = ++focusedIndex > lastIndex ? 0 : focusedIndex;
-                    $interEls.eq(focusedIndex).focus();
-                } else if ((e.which === 40 || e.keyCode === 40) && isItemScrolled()) {
-                    // down arrow move to next item
-                    var $next = $item.next();
-                    if ($next && $next.length) {
-                        $next.focus();
-                        e.preventDefault();
-                    }
-                }
-            }, this));
-        },
-        render: function() {
-            this.$el.html(this.resultsTemplate({
-                i18n: this.i18n,
-                totalResults: this.collection.totalResults
-            }));
-            this.$total = this.$('.total');
-            this.$results = this.$('.results');
-            var $contentList = this.$('.content-list');
-            if (!this.collection.isEmpty()) {
-                this.collection.each(function(item, index) {
-                    var $item = $(this.getItemHtml(item, index));
-                    this.decorate($item);
-                    $contentList.append($item);
-                }, this);
-            } else {
-                $contentList.append(this.emptyTemplate({
-                    i18n: this.i18n
-                }));
-            }
-            var scrollHeight = this.config.scrollHeight;
-            this.$scrollLoader = $contentList.evScrollLoader({
-                height: scrollHeight,
-                onScrolled: this.loadMore
-            });
-            // TODO - I don't think we need scroll loader to set max-height (ever?)
-            this.$scrollLoader.closest('.scrollWrap').css('max-height', '');
-            if (!this.collection.hasMore) {
-                this.$scrollLoader.evScrollLoader('hideLoader');
-            }
-            // Prevent multiple bindings if the collection hasn't changed between render calls
-            this.collection.off('add', this.addHandler).on('add', this.addHandler);
-        },
-        refreshHandler: function(e) {}
-    });
-
-});
-define('ev-script/views/preview',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','jquery-ui/ui/widgets/dialog'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        BaseView = require('ev-script/views/base'),
-        VideoSettings = require('ev-script/models/video-settings');
-
-    require('jquery-ui/ui/widgets/dialog');
-
-    return BaseView.extend({
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            var $dialogWrap = $('<div class="dialogWrap ev-preview"></div>'),
-                embedView = new this.embedClass({
-                    model: new this.model.constructor(this.model.toJSON()),
-                    appId: this.appId
-                }),
-                // Desired difference between media width and containing dialog width
-                widthOffset = 50,
-                // Desired difference between media height and containing dialog height
-                heightOffset = 70,
-                // Actual dialog width taking into account available room
-                dialogWidth = Math.min(parseInt(embedView.getFrameWidth(), 10) + widthOffset, $(window).width() - this.config.dialogMargin),
-                // Actual dialog height taking into account available room
-                dialogHeight = Math.min(parseInt(embedView.getFrameHeight(), 10) + heightOffset, $(window).height() - this.config.dialogMargin),
-                // Our dialog
-                $dialog;
-
-            this.$el.after($dialogWrap);
-
-            // Try to scale our content to fit within available dialog dimensions
-            embedView.scale(dialogWidth - widthOffset, dialogHeight - heightOffset);
-
-            $dialog = $dialogWrap.dialog({
-                title: this.getTitle(),
-                modal: true,
-                width: dialogWidth,
-                height: dialogHeight,
-                draggable: false,
-                resizable: false,
-                dialogClass: 'ev-dialog',
-                create: _.bind(function(event, ui) {
-                    embedView.render(true);
-                    // Add autofocus attribute to embed view iframe
-                    embedView.$('iframe').attr('autofocus', true);
-                    $dialogWrap.html(embedView.$el);
-                }, this),
-                closeText: this.i18n.formatMessage('Close'),
-                close: function(event, ui) {
-                    $dialogWrap.dialog('destroy').remove();
-                }
-            });
-        },
-        getTitle: function() {
-            var content = this.model.get('content') || {
-                Title: this.model.get('id')
-            };
-            return this.unencode(content.Title || content.Name);
-        }
-    });
-
 });
 
 /*! https://mths.be/punycode v1.4.0 by @mathias */
@@ -28278,6 +25985,3226 @@ define("urijs/punycode", function(){});
   return URI;
 }));
 
+/*!
+ * URI.js - Mutating URLs
+ * URI Template Support - http://tools.ietf.org/html/rfc6570
+ *
+ * Version: 1.19.1
+ *
+ * Author: Rodney Rehm
+ * Web: http://medialize.github.io/URI.js/
+ *
+ * Licensed under
+ *   MIT License http://www.opensource.org/licenses/mit-license
+ *
+ */
+(function (root, factory) {
+  'use strict';
+  // https://github.com/umdjs/umd/blob/master/returnExports.js
+  if (typeof module === 'object' && module.exports) {
+    // Node
+    module.exports = factory(require('./URI'));
+  } else if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module.
+    define('urijs/URITemplate',['./URI'], factory);
+  } else {
+    // Browser globals (root is window)
+    root.URITemplate = factory(root.URI, root);
+  }
+}(this, function (URI, root) {
+  'use strict';
+  // FIXME: v2.0.0 renamce non-camelCase properties to uppercase
+  /*jshint camelcase: false */
+
+  // save current URITemplate variable, if any
+  var _URITemplate = root && root.URITemplate;
+
+  var hasOwn = Object.prototype.hasOwnProperty;
+  function URITemplate(expression) {
+    // serve from cache where possible
+    if (URITemplate._cache[expression]) {
+      return URITemplate._cache[expression];
+    }
+
+    // Allow instantiation without the 'new' keyword
+    if (!(this instanceof URITemplate)) {
+      return new URITemplate(expression);
+    }
+
+    this.expression = expression;
+    URITemplate._cache[expression] = this;
+    return this;
+  }
+
+  function Data(data) {
+    this.data = data;
+    this.cache = {};
+  }
+
+  var p = URITemplate.prototype;
+  // list of operators and their defined options
+  var operators = {
+    // Simple string expansion
+    '' : {
+      prefix: '',
+      separator: ',',
+      named: false,
+      empty_name_separator: false,
+      encode : 'encode'
+    },
+    // Reserved character strings
+    '+' : {
+      prefix: '',
+      separator: ',',
+      named: false,
+      empty_name_separator: false,
+      encode : 'encodeReserved'
+    },
+    // Fragment identifiers prefixed by '#'
+    '#' : {
+      prefix: '#',
+      separator: ',',
+      named: false,
+      empty_name_separator: false,
+      encode : 'encodeReserved'
+    },
+    // Name labels or extensions prefixed by '.'
+    '.' : {
+      prefix: '.',
+      separator: '.',
+      named: false,
+      empty_name_separator: false,
+      encode : 'encode'
+    },
+    // Path segments prefixed by '/'
+    '/' : {
+      prefix: '/',
+      separator: '/',
+      named: false,
+      empty_name_separator: false,
+      encode : 'encode'
+    },
+    // Path parameter name or name=value pairs prefixed by ';'
+    ';' : {
+      prefix: ';',
+      separator: ';',
+      named: true,
+      empty_name_separator: false,
+      encode : 'encode'
+    },
+    // Query component beginning with '?' and consisting
+    // of name=value pairs separated by '&'; an
+    '?' : {
+      prefix: '?',
+      separator: '&',
+      named: true,
+      empty_name_separator: true,
+      encode : 'encode'
+    },
+    // Continuation of query-style &name=value pairs
+    // within a literal query component.
+    '&' : {
+      prefix: '&',
+      separator: '&',
+      named: true,
+      empty_name_separator: true,
+      encode : 'encode'
+    }
+
+    // The operator characters equals ("="), comma (","), exclamation ("!"),
+    // at sign ("@"), and pipe ("|") are reserved for future extensions.
+  };
+
+  // storage for already parsed templates
+  URITemplate._cache = {};
+  // pattern to identify expressions [operator, variable-list] in template
+  URITemplate.EXPRESSION_PATTERN = /\{([^a-zA-Z0-9%_]?)([^\}]+)(\}|$)/g;
+  // pattern to identify variables [name, explode, maxlength] in variable-list
+  URITemplate.VARIABLE_PATTERN = /^([^*:.](?:\.?[^*:.])*)((\*)|:(\d+))?$/;
+  // pattern to verify variable name integrity
+  URITemplate.VARIABLE_NAME_PATTERN = /[^a-zA-Z0-9%_.]/;
+  // pattern to verify literal integrity
+  URITemplate.LITERAL_PATTERN = /[<>{}"`^| \\]/;
+
+  // expand parsed expression (expression, not template!)
+  URITemplate.expand = function(expression, data, opts) {
+    // container for defined options for the given operator
+    var options = operators[expression.operator];
+    // expansion type (include keys or not)
+    var type = options.named ? 'Named' : 'Unnamed';
+    // list of variables within the expression
+    var variables = expression.variables;
+    // result buffer for evaluating the expression
+    var buffer = [];
+    var d, variable, i;
+
+    for (i = 0; (variable = variables[i]); i++) {
+      // fetch simplified data source
+      d = data.get(variable.name);
+      if (d.type === 0 && opts && opts.strict) {
+          throw new Error('Missing expansion value for variable "' + variable.name + '"');
+      }
+      if (!d.val.length) {
+        if (d.type) {
+          // empty variables (empty string)
+          // still lead to a separator being appended!
+          buffer.push('');
+        }
+        // no data, no action
+        continue;
+      }
+
+      if (d.type > 1 && variable.maxlength) {
+        // composite variable cannot specify maxlength
+        throw new Error('Invalid expression: Prefix modifier not applicable to variable "' + variable.name + '"');
+      }
+
+      // expand the given variable
+      buffer.push(URITemplate['expand' + type](
+        d,
+        options,
+        variable.explode,
+        variable.explode && options.separator || ',',
+        variable.maxlength,
+        variable.name
+      ));
+    }
+
+    if (buffer.length) {
+      return options.prefix + buffer.join(options.separator);
+    } else {
+      // prefix is not prepended for empty expressions
+      return '';
+    }
+  };
+  // expand a named variable
+  URITemplate.expandNamed = function(d, options, explode, separator, length, name) {
+    // variable result buffer
+    var result = '';
+    // peformance crap
+    var encode = options.encode;
+    var empty_name_separator = options.empty_name_separator;
+    // flag noting if values are already encoded
+    var _encode = !d[encode].length;
+    // key for named expansion
+    var _name = d.type === 2 ? '': URI[encode](name);
+    var _value, i, l;
+
+    // for each found value
+    for (i = 0, l = d.val.length; i < l; i++) {
+      if (length) {
+        // maxlength must be determined before encoding can happen
+        _value = URI[encode](d.val[i][1].substring(0, length));
+        if (d.type === 2) {
+          // apply maxlength to keys of objects as well
+          _name = URI[encode](d.val[i][0].substring(0, length));
+        }
+      } else if (_encode) {
+        // encode value
+        _value = URI[encode](d.val[i][1]);
+        if (d.type === 2) {
+          // encode name and cache encoded value
+          _name = URI[encode](d.val[i][0]);
+          d[encode].push([_name, _value]);
+        } else {
+          // cache encoded value
+          d[encode].push([undefined, _value]);
+        }
+      } else {
+        // values are already encoded and can be pulled from cache
+        _value = d[encode][i][1];
+        if (d.type === 2) {
+          _name = d[encode][i][0];
+        }
+      }
+
+      if (result) {
+        // unless we're the first value, prepend the separator
+        result += separator;
+      }
+
+      if (!explode) {
+        if (!i) {
+          // first element, so prepend variable name
+          result += URI[encode](name) + (empty_name_separator || _value ? '=' : '');
+        }
+
+        if (d.type === 2) {
+          // without explode-modifier, keys of objects are returned comma-separated
+          result += _name + ',';
+        }
+
+        result += _value;
+      } else {
+        // only add the = if it is either default (?&) or there actually is a value (;)
+        result += _name + (empty_name_separator || _value ? '=' : '') + _value;
+      }
+    }
+
+    return result;
+  };
+  // expand an unnamed variable
+  URITemplate.expandUnnamed = function(d, options, explode, separator, length) {
+    // variable result buffer
+    var result = '';
+    // performance crap
+    var encode = options.encode;
+    var empty_name_separator = options.empty_name_separator;
+    // flag noting if values are already encoded
+    var _encode = !d[encode].length;
+    var _name, _value, i, l;
+
+    // for each found value
+    for (i = 0, l = d.val.length; i < l; i++) {
+      if (length) {
+        // maxlength must be determined before encoding can happen
+        _value = URI[encode](d.val[i][1].substring(0, length));
+      } else if (_encode) {
+        // encode and cache value
+        _value = URI[encode](d.val[i][1]);
+        d[encode].push([
+          d.type === 2 ? URI[encode](d.val[i][0]) : undefined,
+          _value
+        ]);
+      } else {
+        // value already encoded, pull from cache
+        _value = d[encode][i][1];
+      }
+
+      if (result) {
+        // unless we're the first value, prepend the separator
+        result += separator;
+      }
+
+      if (d.type === 2) {
+        if (length) {
+          // maxlength also applies to keys of objects
+          _name = URI[encode](d.val[i][0].substring(0, length));
+        } else {
+          // at this point the name must already be encoded
+          _name = d[encode][i][0];
+        }
+
+        result += _name;
+        if (explode) {
+          // explode-modifier separates name and value by "="
+          result += (empty_name_separator || _value ? '=' : '');
+        } else {
+          // no explode-modifier separates name and value by ","
+          result += ',';
+        }
+      }
+
+      result += _value;
+    }
+
+    return result;
+  };
+
+  URITemplate.noConflict = function() {
+    if (root.URITemplate === URITemplate) {
+      root.URITemplate = _URITemplate;
+    }
+
+    return URITemplate;
+  };
+
+  // expand template through given data map
+  p.expand = function(data, opts) {
+    var result = '';
+
+    if (!this.parts || !this.parts.length) {
+      // lazilyy parse the template
+      this.parse();
+    }
+
+    if (!(data instanceof Data)) {
+      // make given data available through the
+      // optimized data handling thingie
+      data = new Data(data);
+    }
+
+    for (var i = 0, l = this.parts.length; i < l; i++) {
+      /*jshint laxbreak: true */
+      result += typeof this.parts[i] === 'string'
+        // literal string
+        ? this.parts[i]
+        // expression
+        : URITemplate.expand(this.parts[i], data, opts);
+      /*jshint laxbreak: false */
+    }
+
+    return result;
+  };
+  // parse template into action tokens
+  p.parse = function() {
+    // performance crap
+    var expression = this.expression;
+    var ePattern = URITemplate.EXPRESSION_PATTERN;
+    var vPattern = URITemplate.VARIABLE_PATTERN;
+    var nPattern = URITemplate.VARIABLE_NAME_PATTERN;
+    var lPattern = URITemplate.LITERAL_PATTERN;
+    // token result buffer
+    var parts = [];
+      // position within source template
+    var pos = 0;
+    var variables, eMatch, vMatch;
+
+    var checkLiteral = function(literal) {
+      if (literal.match(lPattern)) {
+        throw new Error('Invalid Literal "' + literal + '"');
+      }
+      return literal;
+    };
+
+    // RegExp is shared accross all templates,
+    // which requires a manual reset
+    ePattern.lastIndex = 0;
+    // I don't like while(foo = bar()) loops,
+    // to make things simpler I go while(true) and break when required
+    while (true) {
+      eMatch = ePattern.exec(expression);
+      if (eMatch === null) {
+        // push trailing literal
+        parts.push(checkLiteral(expression.substring(pos)));
+        break;
+      } else {
+        // push leading literal
+        parts.push(checkLiteral(expression.substring(pos, eMatch.index)));
+        pos = eMatch.index + eMatch[0].length;
+      }
+
+      if (!operators[eMatch[1]]) {
+        throw new Error('Unknown Operator "' + eMatch[1]  + '" in "' + eMatch[0] + '"');
+      } else if (!eMatch[3]) {
+        throw new Error('Unclosed Expression "' + eMatch[0]  + '"');
+      }
+
+      // parse variable-list
+      variables = eMatch[2].split(',');
+      for (var i = 0, l = variables.length; i < l; i++) {
+        vMatch = variables[i].match(vPattern);
+        if (vMatch === null) {
+          throw new Error('Invalid Variable "' + variables[i] + '" in "' + eMatch[0] + '"');
+        } else if (vMatch[1].match(nPattern)) {
+          throw new Error('Invalid Variable Name "' + vMatch[1] + '" in "' + eMatch[0] + '"');
+        }
+
+        variables[i] = {
+          name: vMatch[1],
+          explode: !!vMatch[3],
+          maxlength: vMatch[4] && parseInt(vMatch[4], 10)
+        };
+      }
+
+      if (!variables.length) {
+        throw new Error('Expression Missing Variable(s) "' + eMatch[0] + '"');
+      }
+
+      parts.push({
+        expression: eMatch[0],
+        operator: eMatch[1],
+        variables: variables
+      });
+    }
+
+    if (!parts.length) {
+      // template doesn't contain any expressions
+      // so it is a simple literal string
+      // this probably should fire a warning or something?
+      parts.push(checkLiteral(expression));
+    }
+
+    this.parts = parts;
+    return this;
+  };
+
+  // simplify data structures
+  Data.prototype.get = function(key) {
+    // performance crap
+    var data = this.data;
+    // cache for processed data-point
+    var d = {
+      // type of data 0: undefined/null, 1: string, 2: object, 3: array
+      type: 0,
+      // original values (except undefined/null)
+      val: [],
+      // cache for encoded values (only for non-maxlength expansion)
+      encode: [],
+      encodeReserved: []
+    };
+    var i, l, value;
+
+    if (this.cache[key] !== undefined) {
+      // we've already processed this key
+      return this.cache[key];
+    }
+
+    this.cache[key] = d;
+
+    if (String(Object.prototype.toString.call(data)) === '[object Function]') {
+      // data itself is a callback (global callback)
+      value = data(key);
+    } else if (String(Object.prototype.toString.call(data[key])) === '[object Function]') {
+      // data is a map of callbacks (local callback)
+      value = data[key](key);
+    } else {
+      // data is a map of data
+      value = data[key];
+    }
+
+    // generalize input into [ [name1, value1], [name2, value2], … ]
+    // so expansion has to deal with a single data structure only
+    if (value === undefined || value === null) {
+      // undefined and null values are to be ignored completely
+      return d;
+    } else if (String(Object.prototype.toString.call(value)) === '[object Array]') {
+      for (i = 0, l = value.length; i < l; i++) {
+        if (value[i] !== undefined && value[i] !== null) {
+          // arrays don't have names
+          d.val.push([undefined, String(value[i])]);
+        }
+      }
+
+      if (d.val.length) {
+        // only treat non-empty arrays as arrays
+        d.type = 3; // array
+      }
+    } else if (String(Object.prototype.toString.call(value)) === '[object Object]') {
+      for (i in value) {
+        if (hasOwn.call(value, i) && value[i] !== undefined && value[i] !== null) {
+          // objects have keys, remember them for named expansion
+          d.val.push([i, String(value[i])]);
+        }
+      }
+
+      if (d.val.length) {
+        // only treat non-empty objects as objects
+        d.type = 2; // object
+      }
+    } else {
+      d.type = 1; // primitive string (could've been string, number, boolean and objects with a toString())
+      // arrays don't have names
+      d.val.push([undefined, String(value)]);
+    }
+
+    return d;
+  };
+
+  // hook into URI for fluid access
+  URI.expand = function(expression, data) {
+    var template = new URITemplate(expression);
+    var expansion = template.expand(data);
+
+    return new URI(expansion);
+  };
+
+  return URITemplate;
+}));
+
+define('ev-script/util/events',['require','underscore','backbone'],function(require) {
+
+    'use strict';
+
+    var events = {},
+        _ = require('underscore'),
+        Backbone = require('backbone');
+
+    return {
+        getEvents: function(index) {
+            index = index || 'default';
+            if (!events[index]) {
+                events[index] = _.extend({}, Backbone.Events);
+            }
+            return events[index];
+        }
+    };
+
+});
+
+define('ev-script/util/cache',['require','jquery','underscore','backbone','ev-script/util/events'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        eventsUtil = require('ev-script/util/events');
+
+    var Cache = function() {
+        this.cache = {};
+        this.get = function(index) {
+            return index ? this.cache[index] : null;
+        };
+        this.set = function(index, value) {
+            return index ? this.cache[index] = value : null;
+        };
+        this.clear = function() {
+            this.cache = {};
+        };
+        return this;
+    };
+
+    var caches = new Cache();
+
+    var getCache = function(cacheName, skipInit) {
+        var appCache;
+        cacheName = cacheName || 'app';
+        appCache = caches.get(cacheName);
+        if (!appCache && !skipInit) {
+            appCache = caches.set(cacheName, new Cache());
+        }
+        return appCache;
+    };
+
+    // Convenience method to initialize a cache for app-specific configuration
+    var setConfig = function(config) {
+        return getCache().set('config', config);
+    };
+
+    var getConfig = function() {
+        return getCache().get('config');
+    };
+
+    // Convenience method to initialize a cache for upstream application info
+    var setInfo = function(info) {
+        return getCache().set('info', info);
+    };
+
+    var getInfo = function() {
+        return getCache().get('info');
+    };
+
+    var setI18n = function(i18n) {
+        return getCache().set('i18n', i18n);
+    };
+
+    var getI18n = function() {
+        return getCache().get('i18n');
+    };
+
+    var setRoot = function(root) {
+        return getCache().set('root', root);
+    };
+
+    var getRoot = function() {
+        return getCache().get('root');
+    };
+
+    var events = eventsUtil.getEvents();
+    events.on('loggedOut', function() {
+        // Clear all caches except the default 'app' cache on logout
+        var appCache = getCache(),
+            root = getRoot();
+        _.each(caches.cache, function(cache) {
+            if (cache !== appCache) {
+                cache.clear();
+            }
+        });
+        root.clear();
+        root.fetch({});
+    });
+
+    events.on('reload', function(target) {
+        var caches = [];
+        // TODO - handle other caches as appropriate
+        // When we reload videos we also need to reload encodings
+        if (target === 'videos') {
+            caches.push(getCache('encodings', true));
+        }
+        caches.push(getCache(target, true));
+        _.each(caches, function(cache) {
+            if (cache) {
+                cache.clear();
+            }
+        });
+    });
+
+    return {
+        Cache: Cache,
+        caches: caches,
+        setConfig: setConfig,
+        getConfig: getConfig,
+        setInfo: setInfo,
+        getInfo: getInfo,
+        setI18n: setI18n,
+        getI18n: getI18n,
+        setRoot: setRoot,
+        getRoot: getRoot,
+        getCache: getCache
+    };
+
+});
+
+define('ev-script/collections/base',['require','jquery','underscore','backbone','ev-script/util/cache'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        cacheUtil = require('ev-script/util/cache');
+
+    return Backbone.Collection.extend({
+        initialize: function(collections, options) {
+            this.href = options.href;
+            this.config = cacheUtil.getConfig();
+            this.info = cacheUtil.getInfo();
+            this.root = cacheUtil.getRoot();
+            this.promise = $.Deferred().resolve().promise();
+        },
+        getCached: function(key) {},
+        setCached: function(key, resp) {},
+        clearCache: function(key) {},
+        sync: function(method, collection, options) {
+            _.defaults(options || (options = {}), {
+                xhrFields: {
+                    withCredentials: true
+                },
+                dataType: 'json',
+                accepts: {
+                    json: 'application/hal+json'
+                }
+            });
+            if (method === 'read') {
+                var cached = this.getCached(options.cacheKey);
+                if (cached) {
+                    var deferred = $.Deferred();
+                    if (options.success) {
+                        deferred.done(options.success);
+                    }
+                    return deferred.resolve(cached).promise();
+                } else {
+                    // Grab the response and cache
+                    options.success = options.success || function(collection, response, options) {};
+                    options.success = _.wrap(options.success, _.bind(function(success) {
+                        this.setCached(options.cacheKey, arguments[1]);
+                        success.apply(this, Array.prototype.slice.call(arguments, 1));
+                    }, this));
+                    this.promise = Backbone.Collection.prototype.sync.call(this, method, collection, options);
+                    return this.promise;
+                }
+            } else {
+                this.promise = Backbone.Collection.prototype.sync.call(this, method, collection, options);
+                return this.promise;
+            }
+        },
+        url: function() {
+            return this.href ? this.href : this.links['self'].href;
+        }
+    });
+
+});
+
+define('ev-script/models/base',['require','jquery','underscore','backbone','ev-script/collections/base','ev-script/util/cache'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        BaseCollection = require('ev-script/collections/base'),
+        cacheUtil = require('ev-script/util/cache'),
+        BaseModel;
+
+    BaseModel = Backbone.Model.extend({
+        initialize: function(attributes, options) {
+            options = options || {};
+            this.href = options.href;
+            this.config = cacheUtil.getConfig();
+            this.promise = $.Deferred().resolve().promise();
+
+            // While getCache will return a default cache if cacheName is not
+            // passed, we want to allow opt-out. So if cacheName is not set
+            // simply use a null cache.
+            this.cache = this.cacheName ? cacheUtil.getCache(this.cacheName) : null;
+        },
+        getCached: function(key) {
+            return this.cache && this.cache.get(key);
+        },
+        setCached: function(key, resp) {
+            return this.cache && this.cache.set(key, resp);
+        },
+        getLink: function(rel) {
+            var links = this.get('_links');
+            return links ? links[rel] : null;
+        },
+        getEmbedded: function(rel) {
+            var embedded = this.get('_embedded');
+            if (!embedded) {
+                return null;
+            }
+            var resource = embedded[rel];
+            if (!resource) {
+                return null;
+            }
+            return _.isArray(resource) ?
+                new BaseCollection(_.map(resource, _.bind(function(item) {
+                        return new BaseModel(item, {});
+                    }, this)), {}) :
+                new BaseModel(resource, {});
+        },
+        sync: function(method, collection, options) {
+            _.defaults(options || (options = {}), {
+                xhrFields: {
+                    withCredentials: true
+                },
+                dataType: 'json',
+                accepts: {
+                    json: 'application/hal+json'
+                }
+            });
+            if (method === 'read') {
+                var url = this.url(),
+                    cached = this.getCached(url);
+                if (cached) {
+                    var deferred = $.Deferred();
+                    if (options.success) {
+                        deferred.done(options.success);
+                    }
+                    return deferred.resolve(cached).promise();
+                } else {
+                    // Grab the response and cache
+                    options.success = options.success || function(collection, response, options) {};
+                    options.success = _.wrap(options.success, _.bind(function(success) {
+                        this.setCached(url, arguments[1]);
+                        success.apply(this, Array.prototype.slice.call(arguments, 1));
+                    }, this));
+                    this.promise = Backbone.Model.prototype.sync.call(this, method, collection, options);
+                    return this.promise;
+                }
+            } else {
+                this.promise = Backbone.Model.prototype.sync.call(this, method, collection, options);
+                return this.promise;
+            }
+        },
+        url: function() {
+            return this.href ? this.href : this.getLink('self').href;
+        }
+    });
+
+    return BaseModel;
+});
+
+
+define('text!ev-script/templates/auth.html',[],function () { return '<iframe src="<%= frameSrc %>" width="<%= frameWidth %>" height="<%= frameHeight %>" frameborder="0" autofocus="true"><iframe>';});
+
+define('ev-script/views/auth',['require','exports','module','jquery','underscore','urijs/URI','backbone','ev-script/util/cache','ev-script/util/events','jquery-ui/ui/widgets/dialog','text!ev-script/templates/auth.html'],function(require, template) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        URI = require('urijs/URI'),
+        Backbone = require('backbone'),
+        cacheUtil = require('ev-script/util/cache'),
+        eventsUtil = require('ev-script/util/events');
+
+    require('jquery-ui/ui/widgets/dialog');
+
+    return Backbone.View.extend({
+        template: _.template(require('text!ev-script/templates/auth.html')),
+        initialize: function(options) {
+            this.config = cacheUtil.getConfig();
+            this.events = eventsUtil.getEvents();
+            this.i18n = cacheUtil.getI18n();
+            this.submitCallback = options.submitCallback || function() {};
+        },
+        render: function() {
+            var dialogWidth = Math.min(540, $(window).width() - this.config.dialogMargin),
+                dialogHeight = Math.min(250, $(window).height() - this.config.dialogMargin),
+                frameSrc = URI(this.config.ensembleUrl)
+                    .path(this.config.authLoginPath)
+                    .addQuery('idp', this.config.defaultProvider),
+                $html = $(this.template({
+                    i18n: this.i18n,
+                    frameSrc: frameSrc,
+                    frameWidth: dialogWidth - 50,
+                    frameHeight: dialogHeight - 60
+                }));
+            this.$dialog = $('<div class="ev-auth"></div>');
+            this.$el.after(this.$dialog);
+            this.$dialog.dialog({
+                title: this.i18n.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
+                modal: true,
+                draggable: false,
+                resizable: false,
+                closeOnEscape: false,
+                width: dialogWidth,
+                height: dialogHeight,
+                dialogClass: 'ev-dialog',
+                create: _.bind(function(event, ui) {
+                    this.$dialog.html($html);
+                    $('.ui-dialog-titlebar-close', ui.dialog | ui).hide();
+                }, this),
+            });
+            $(window).on('message', _.bind(function(e) {
+                if (e.originalEvent.data === this.config.authCompleteMessage) {
+                    if (this.$dialog) {
+                        try {
+                            this.$dialog.dialog('destroy');
+                        } catch (e) {
+                            // All good?
+                        }
+                        finally {
+                            this.$dialog.remove();
+                        }
+                    }
+                    this.submitCallback();
+                }
+            }, this));
+        }
+    });
+
+});
+
+define('ev-script/views/base',['require','jquery','underscore','backbone','ev-script/util/events','ev-script/util/cache'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        eventsUtil = require('ev-script/util/events'),
+        cacheUtil = require('ev-script/util/cache');
+
+    return Backbone.View.extend({
+        initialize: function(options) {
+            this.config = cacheUtil.getConfig();
+            this.root = cacheUtil.getRoot();
+            this.info = cacheUtil.getInfo();
+            this.events = eventsUtil.getEvents();
+            this.i18n = cacheUtil.getI18n();
+        },
+        ajaxError: function(collection, xhr, options) {
+            if (xhr.status === 401) {
+                this.events.trigger('hidePickers');
+                this.events.trigger('loggedOut');
+            } else if (xhr.status === 500) {
+                window.alert(this.i18n.formatMessage('It appears there is an issue with the Ensemble Video installation.'));
+            } else if (xhr.status === 404) {
+                window.alert(this.i18n.formatMessage('Could not find requested resource.  This is likely a problem with the configured Ensemble Video base url.'));
+            } else if (xhr.status !== 0) {
+                window.alert(this.i18n.formatMessage('An unexpected error occurred.  Check the server log for more details.'));
+            }
+        },
+        unencode: function(encoded) {
+            return $('<span/>').html(encoded).text();
+        }
+    });
+
+});
+
+
+define('text!ev-script/templates/field.html',[],function () { return '<!--\n<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span><%= i18n.formatMessage(\'Ensemble Logo\') %></span></a>\n</div>\n-->\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="ev-field-item thumbnail">\n            <img alt="<%= i18n.formatMessage(\'Media thumbnail\') %>" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <h2 class="ev-field-item title"><%= name %></h2>\n    <div class="ev-field-item ev-actions">\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Click to change {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Change {0}\', label) %><span></a>\n        <a href="#" class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', name) %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %><span></a>\n        <% if (displaySettings) { %>\n            <a href="#" class="action-options" title="<%= i18n.formatMessage(\'Click to manage {0} embed options\', label) %>"><i class="fa fa-cog fa-lg"></i><span><%= i18n.formatMessage(\'{0} Embed Options\', label) %><span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="<%= i18n.formatMessage(\'Click to remove {0}\', label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Remove {0}\', label) %><span></a>\n    </div>\n<% } else { %>\n    <h3 class="ev-field-item title"><em><%= i18n.formatMessage(\'Add {0}\', label) %></em></h3>\n    <div class="ev-field-item ev-actions">\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Click to Choose {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Choose {0}\', label) %><span></a>\n    </div>\n<% } %>\n';});
+
+define('ev-script/views/field',['require','jquery','underscore','ev-script/views/auth','ev-script/views/base','text!ev-script/templates/field.html'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        AuthView = require('ev-script/views/auth'),
+        BaseView = require('ev-script/views/base');
+
+    /*
+     * Base view for our field (element that we set with the selected content metadata
+     */
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/field.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+
+            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler',
+            'previewHandler', 'getPickerInstance', 'getSettingsInstance',
+            'getPreviewInstance', 'updateField', 'getFieldType',
+            'getFieldLabel', 'itemChosenHandler', 'getActionsHtml',
+            'initCallback', 'doAuthenticate');
+
+            this.$field = options.$field;
+            this.$el.addClass('ev-field-wrap');
+            this.showChoose = true;
+
+            var pickerOptions = {
+                    id: this.id + '-picker',
+                    tagName: 'div',
+                    className: 'ev-' + this.model.get('type') + '-picker',
+                    field: this
+                },
+                settingsOptions = {
+                    id: this.id + '-settings',
+                    tagName: 'div',
+                    className: 'ev-settings',
+                    field: this
+                };
+
+            // Subclasses may need to prepare before we start instantiation of views
+            this.initCallback();
+
+            this.events.on('showPicker', function(fieldId) {
+                if (this.id === fieldId) {
+                    this.$('.action-choose').hide();
+                    this.showChoose = false;
+                    // We only want one picker showing at a time so notify all fields to hide them (unless it's ours)
+                    if (this.config.hidePickers) {
+                        this.events.trigger('hidePickers', this.id);
+                    }
+                }
+            }, this);
+            this.events.on('hidePicker', function(fieldId) {
+                if (this.id === fieldId) {
+                    this.$('.action-choose').show();
+                    this.showChoose = true;
+                }
+            }, this);
+            this.events.on('hidePickers', function(fieldId) {
+                // When the picker for our field is hidden we need need to show our 'Choose' button
+                if (!fieldId || (this.id !== fieldId)) {
+                    this.$('.action-choose').show();
+                    this.showChoose = true;
+                }
+            }, this);
+            this.events.on('itemChosen', this.itemChosenHandler);
+
+            this.picker = this.getPickerInstance(pickerOptions);
+            this.settings = this.getSettingsInstance(settingsOptions);
+            this.$field.after(this.picker.$el);
+            this.renderActions();
+
+            // Authentication check
+            this.doAuthenticate();
+        },
+        events: {
+            'click .ev-field .action-choose': 'chooseHandler',
+            'click .ev-field .action-preview': 'previewHandler',
+            'click .ev-field .action-options': 'optionsHandler',
+            'click .ev-field .action-remove': 'removeHandler'
+        },
+        doAuthenticate: function() {
+            var deferred = $.Deferred();
+            this.root.promise.always(_.bind(function() {
+                if (!this.root.getUser()) {
+                    var authView = new AuthView({
+                        el: this.el,
+                        submitCallback: _.bind(function() {
+                            this.root.fetch().always(_.bind(function() {
+                                this.events.trigger(!this.root.getUser() ? 'loggedOut' : 'loggedIn');
+                            }, this));
+                            deferred.resolve();
+                        }, this),
+                        auth: this
+                    });
+                    authView.render();
+                } else {
+                    deferred.resolve();
+                }
+            }, this));
+            return deferred;
+        },
+        chooseHandler: function(e) {
+            this.doAuthenticate().always(_.bind(function() {
+                this.events.trigger('showPicker', this.id);
+            }, this));
+            e.preventDefault();
+        },
+        optionsHandler: function(e) {
+            if (this.settings) {
+                this.settings.show();
+            }
+            e.preventDefault();
+        },
+        removeHandler: function(e) {
+            this.model.clear();
+            this.$field.val('');
+            // Silent here because we don't want to trigger our change handler above
+            // (which would set the field value to our model defaults)
+            this.model.set(this.model.defaults, {
+                silent: true
+            });
+            this.events.trigger('fieldUpdated', this.$field);
+            this.renderActions();
+            e.preventDefault();
+        },
+        previewHandler: function(e) {
+            var element = e.currentTarget;
+            var previewView = this.getPreviewInstance({
+                el: element,
+                model: this.model,
+                picker: this.picker
+            });
+            e.preventDefault();
+        },
+        renderActions: function() {
+            var ensembleUrl = this.config.ensembleUrl,
+                label = this.getFieldLabel(),
+                type = this.getFieldType();
+            if (!this.$actions) {
+                this.$actions = $('<div class="ev-field"/>');
+                this.$field.after(this.$actions);
+            }
+            this.$actions.html(this.getActionsHtml({
+                i18n: this.i18n,
+                ensembleUrl: ensembleUrl, // TODO - how is this used?
+                thumbnailUrl: false,
+                modelId: this.model.id,
+                displaySettings: this.settings,
+                label: label,
+                type: type,
+                name: this.model.get('content') && this.model.get('content').title || ''
+            }));
+            // If our picker is shown, hide our 'Choose' button
+            if (!this.showChoose) {
+                this.$('.action-choose').hide();
+            }
+        },
+        updateField: function() {
+            var json = this.model.toJSON();
+            this.$field.val(JSON.stringify(json));
+            this.events.trigger('fieldUpdated', this.$field, json);
+            this.renderActions();
+        },
+        itemChosenHandler: function(settingsModel) {
+            if (settingsModel.get('type') === this.model.get('type')) {
+                this.model.set(settingsModel.attributes);
+            }
+        },
+        getActionsHtml: function(templateOptions) {
+            return this.template(templateOptions);
+        },
+        // Subclasses must impl the following
+        initCallback: function() {},
+        getPickerInstance: function(pickerOptions) {},
+        getSettingsInstance: function(settingsOptions) {},
+        getPreviewInstance: function(previewOptions) {},
+        getFieldType: function() {},
+        getFieldLabel: function() {},
+    });
+
+});
+
+/*!
+ * Platform.js <https://mths.be/platform>
+ * Copyright 2014-2018 Benjamin Tan <https://bnjmnt4n.now.sh/>
+ * Copyright 2011-2013 John-David Dalton <http://allyoucanleet.com/>
+ * Available under MIT license <https://mths.be/mit>
+ */
+;(function() {
+  'use strict';
+
+  /** Used to determine if values are of the language type `Object`. */
+  var objectTypes = {
+    'function': true,
+    'object': true
+  };
+
+  /** Used as a reference to the global object. */
+  var root = (objectTypes[typeof window] && window) || this;
+
+  /** Backup possible global object. */
+  var oldRoot = root;
+
+  /** Detect free variable `exports`. */
+  var freeExports = objectTypes[typeof exports] && exports;
+
+  /** Detect free variable `module`. */
+  var freeModule = objectTypes[typeof module] && module && !module.nodeType && module;
+
+  /** Detect free variable `global` from Node.js or Browserified code and use it as `root`. */
+  var freeGlobal = freeExports && freeModule && typeof global == 'object' && global;
+  if (freeGlobal && (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal || freeGlobal.self === freeGlobal)) {
+    root = freeGlobal;
+  }
+
+  /**
+   * Used as the maximum length of an array-like object.
+   * See the [ES6 spec](http://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength)
+   * for more details.
+   */
+  var maxSafeInteger = Math.pow(2, 53) - 1;
+
+  /** Regular expression to detect Opera. */
+  var reOpera = /\bOpera/;
+
+  /** Possible global object. */
+  var thisBinding = this;
+
+  /** Used for native method references. */
+  var objectProto = Object.prototype;
+
+  /** Used to check for own properties of an object. */
+  var hasOwnProperty = objectProto.hasOwnProperty;
+
+  /** Used to resolve the internal `[[Class]]` of values. */
+  var toString = objectProto.toString;
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Capitalizes a string value.
+   *
+   * @private
+   * @param {string} string The string to capitalize.
+   * @returns {string} The capitalized string.
+   */
+  function capitalize(string) {
+    string = String(string);
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
+  /**
+   * A utility function to clean up the OS name.
+   *
+   * @private
+   * @param {string} os The OS name to clean up.
+   * @param {string} [pattern] A `RegExp` pattern matching the OS name.
+   * @param {string} [label] A label for the OS.
+   */
+  function cleanupOS(os, pattern, label) {
+    // Platform tokens are defined at:
+    // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
+    // http://web.archive.org/web/20081122053950/http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
+    var data = {
+      '10.0': '10',
+      '6.4':  '10 Technical Preview',
+      '6.3':  '8.1',
+      '6.2':  '8',
+      '6.1':  'Server 2008 R2 / 7',
+      '6.0':  'Server 2008 / Vista',
+      '5.2':  'Server 2003 / XP 64-bit',
+      '5.1':  'XP',
+      '5.01': '2000 SP1',
+      '5.0':  '2000',
+      '4.0':  'NT',
+      '4.90': 'ME'
+    };
+    // Detect Windows version from platform tokens.
+    if (pattern && label && /^Win/i.test(os) && !/^Windows Phone /i.test(os) &&
+        (data = data[/[\d.]+$/.exec(os)])) {
+      os = 'Windows ' + data;
+    }
+    // Correct character case and cleanup string.
+    os = String(os);
+
+    if (pattern && label) {
+      os = os.replace(RegExp(pattern, 'i'), label);
+    }
+
+    os = format(
+      os.replace(/ ce$/i, ' CE')
+        .replace(/\bhpw/i, 'web')
+        .replace(/\bMacintosh\b/, 'Mac OS')
+        .replace(/_PowerPC\b/i, ' OS')
+        .replace(/\b(OS X) [^ \d]+/i, '$1')
+        .replace(/\bMac (OS X)\b/, '$1')
+        .replace(/\/(\d)/, ' $1')
+        .replace(/_/g, '.')
+        .replace(/(?: BePC|[ .]*fc[ \d.]+)$/i, '')
+        .replace(/\bx86\.64\b/gi, 'x86_64')
+        .replace(/\b(Windows Phone) OS\b/, '$1')
+        .replace(/\b(Chrome OS \w+) [\d.]+\b/, '$1')
+        .split(' on ')[0]
+    );
+
+    return os;
+  }
+
+  /**
+   * An iteration utility for arrays and objects.
+   *
+   * @private
+   * @param {Array|Object} object The object to iterate over.
+   * @param {Function} callback The function called per iteration.
+   */
+  function each(object, callback) {
+    var index = -1,
+        length = object ? object.length : 0;
+
+    if (typeof length == 'number' && length > -1 && length <= maxSafeInteger) {
+      while (++index < length) {
+        callback(object[index], index, object);
+      }
+    } else {
+      forOwn(object, callback);
+    }
+  }
+
+  /**
+   * Trim and conditionally capitalize string values.
+   *
+   * @private
+   * @param {string} string The string to format.
+   * @returns {string} The formatted string.
+   */
+  function format(string) {
+    string = trim(string);
+    return /^(?:webOS|i(?:OS|P))/.test(string)
+      ? string
+      : capitalize(string);
+  }
+
+  /**
+   * Iterates over an object's own properties, executing the `callback` for each.
+   *
+   * @private
+   * @param {Object} object The object to iterate over.
+   * @param {Function} callback The function executed per own property.
+   */
+  function forOwn(object, callback) {
+    for (var key in object) {
+      if (hasOwnProperty.call(object, key)) {
+        callback(object[key], key, object);
+      }
+    }
+  }
+
+  /**
+   * Gets the internal `[[Class]]` of a value.
+   *
+   * @private
+   * @param {*} value The value.
+   * @returns {string} The `[[Class]]`.
+   */
+  function getClassOf(value) {
+    return value == null
+      ? capitalize(value)
+      : toString.call(value).slice(8, -1);
+  }
+
+  /**
+   * Host objects can return type values that are different from their actual
+   * data type. The objects we are concerned with usually return non-primitive
+   * types of "object", "function", or "unknown".
+   *
+   * @private
+   * @param {*} object The owner of the property.
+   * @param {string} property The property to check.
+   * @returns {boolean} Returns `true` if the property value is a non-primitive, else `false`.
+   */
+  function isHostType(object, property) {
+    var type = object != null ? typeof object[property] : 'number';
+    return !/^(?:boolean|number|string|undefined)$/.test(type) &&
+      (type == 'object' ? !!object[property] : true);
+  }
+
+  /**
+   * Prepares a string for use in a `RegExp` by making hyphens and spaces optional.
+   *
+   * @private
+   * @param {string} string The string to qualify.
+   * @returns {string} The qualified string.
+   */
+  function qualify(string) {
+    return String(string).replace(/([ -])(?!$)/g, '$1?');
+  }
+
+  /**
+   * A bare-bones `Array#reduce` like utility function.
+   *
+   * @private
+   * @param {Array} array The array to iterate over.
+   * @param {Function} callback The function called per iteration.
+   * @returns {*} The accumulated result.
+   */
+  function reduce(array, callback) {
+    var accumulator = null;
+    each(array, function(value, index) {
+      accumulator = callback(accumulator, value, index, array);
+    });
+    return accumulator;
+  }
+
+  /**
+   * Removes leading and trailing whitespace from a string.
+   *
+   * @private
+   * @param {string} string The string to trim.
+   * @returns {string} The trimmed string.
+   */
+  function trim(string) {
+    return String(string).replace(/^ +| +$/g, '');
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Creates a new platform object.
+   *
+   * @memberOf platform
+   * @param {Object|string} [ua=navigator.userAgent] The user agent string or
+   *  context object.
+   * @returns {Object} A platform object.
+   */
+  function parse(ua) {
+
+    /** The environment context object. */
+    var context = root;
+
+    /** Used to flag when a custom context is provided. */
+    var isCustomContext = ua && typeof ua == 'object' && getClassOf(ua) != 'String';
+
+    // Juggle arguments.
+    if (isCustomContext) {
+      context = ua;
+      ua = null;
+    }
+
+    /** Browser navigator object. */
+    var nav = context.navigator || {};
+
+    /** Browser user agent string. */
+    var userAgent = nav.userAgent || '';
+
+    ua || (ua = userAgent);
+
+    /** Used to flag when `thisBinding` is the [ModuleScope]. */
+    var isModuleScope = isCustomContext || thisBinding == oldRoot;
+
+    /** Used to detect if browser is like Chrome. */
+    var likeChrome = isCustomContext
+      ? !!nav.likeChrome
+      : /\bChrome\b/.test(ua) && !/internal|\n/i.test(toString.toString());
+
+    /** Internal `[[Class]]` value shortcuts. */
+    var objectClass = 'Object',
+        airRuntimeClass = isCustomContext ? objectClass : 'ScriptBridgingProxyObject',
+        enviroClass = isCustomContext ? objectClass : 'Environment',
+        javaClass = (isCustomContext && context.java) ? 'JavaPackage' : getClassOf(context.java),
+        phantomClass = isCustomContext ? objectClass : 'RuntimeObject';
+
+    /** Detect Java environments. */
+    var java = /\bJava/.test(javaClass) && context.java;
+
+    /** Detect Rhino. */
+    var rhino = java && getClassOf(context.environment) == enviroClass;
+
+    /** A character to represent alpha. */
+    var alpha = java ? 'a' : '\u03b1';
+
+    /** A character to represent beta. */
+    var beta = java ? 'b' : '\u03b2';
+
+    /** Browser document object. */
+    var doc = context.document || {};
+
+    /**
+     * Detect Opera browser (Presto-based).
+     * http://www.howtocreate.co.uk/operaStuff/operaObject.html
+     * http://dev.opera.com/articles/view/opera-mini-web-content-authoring-guidelines/#operamini
+     */
+    var opera = context.operamini || context.opera;
+
+    /** Opera `[[Class]]`. */
+    var operaClass = reOpera.test(operaClass = (isCustomContext && opera) ? opera['[[Class]]'] : getClassOf(opera))
+      ? operaClass
+      : (opera = null);
+
+    /*------------------------------------------------------------------------*/
+
+    /** Temporary variable used over the script's lifetime. */
+    var data;
+
+    /** The CPU architecture. */
+    var arch = ua;
+
+    /** Platform description array. */
+    var description = [];
+
+    /** Platform alpha/beta indicator. */
+    var prerelease = null;
+
+    /** A flag to indicate that environment features should be used to resolve the platform. */
+    var useFeatures = ua == userAgent;
+
+    /** The browser/environment version. */
+    var version = useFeatures && opera && typeof opera.version == 'function' && opera.version();
+
+    /** A flag to indicate if the OS ends with "/ Version" */
+    var isSpecialCasedOS;
+
+    /* Detectable layout engines (order is important). */
+    var layout = getLayout([
+      { 'label': 'EdgeHTML', 'pattern': 'Edge' },
+      'Trident',
+      { 'label': 'WebKit', 'pattern': 'AppleWebKit' },
+      'iCab',
+      'Presto',
+      'NetFront',
+      'Tasman',
+      'KHTML',
+      'Gecko'
+    ]);
+
+    /* Detectable browser names (order is important). */
+    var name = getName([
+      'Adobe AIR',
+      'Arora',
+      'Avant Browser',
+      'Breach',
+      'Camino',
+      'Electron',
+      'Epiphany',
+      'Fennec',
+      'Flock',
+      'Galeon',
+      'GreenBrowser',
+      'iCab',
+      'Iceweasel',
+      'K-Meleon',
+      'Konqueror',
+      'Lunascape',
+      'Maxthon',
+      { 'label': 'Microsoft Edge', 'pattern': 'Edge' },
+      'Midori',
+      'Nook Browser',
+      'PaleMoon',
+      'PhantomJS',
+      'Raven',
+      'Rekonq',
+      'RockMelt',
+      { 'label': 'Samsung Internet', 'pattern': 'SamsungBrowser' },
+      'SeaMonkey',
+      { 'label': 'Silk', 'pattern': '(?:Cloud9|Silk-Accelerated)' },
+      'Sleipnir',
+      'SlimBrowser',
+      { 'label': 'SRWare Iron', 'pattern': 'Iron' },
+      'Sunrise',
+      'Swiftfox',
+      'Waterfox',
+      'WebPositive',
+      'Opera Mini',
+      { 'label': 'Opera Mini', 'pattern': 'OPiOS' },
+      'Opera',
+      { 'label': 'Opera', 'pattern': 'OPR' },
+      'Chrome',
+      { 'label': 'Chrome Mobile', 'pattern': '(?:CriOS|CrMo)' },
+      { 'label': 'Firefox', 'pattern': '(?:Firefox|Minefield)' },
+      { 'label': 'Firefox for iOS', 'pattern': 'FxiOS' },
+      { 'label': 'IE', 'pattern': 'IEMobile' },
+      { 'label': 'IE', 'pattern': 'MSIE' },
+      'Safari'
+    ]);
+
+    /* Detectable products (order is important). */
+    var product = getProduct([
+      { 'label': 'BlackBerry', 'pattern': 'BB10' },
+      'BlackBerry',
+      { 'label': 'Galaxy S', 'pattern': 'GT-I9000' },
+      { 'label': 'Galaxy S2', 'pattern': 'GT-I9100' },
+      { 'label': 'Galaxy S3', 'pattern': 'GT-I9300' },
+      { 'label': 'Galaxy S4', 'pattern': 'GT-I9500' },
+      { 'label': 'Galaxy S5', 'pattern': 'SM-G900' },
+      { 'label': 'Galaxy S6', 'pattern': 'SM-G920' },
+      { 'label': 'Galaxy S6 Edge', 'pattern': 'SM-G925' },
+      { 'label': 'Galaxy S7', 'pattern': 'SM-G930' },
+      { 'label': 'Galaxy S7 Edge', 'pattern': 'SM-G935' },
+      'Google TV',
+      'Lumia',
+      'iPad',
+      'iPod',
+      'iPhone',
+      'Kindle',
+      { 'label': 'Kindle Fire', 'pattern': '(?:Cloud9|Silk-Accelerated)' },
+      'Nexus',
+      'Nook',
+      'PlayBook',
+      'PlayStation Vita',
+      'PlayStation',
+      'TouchPad',
+      'Transformer',
+      { 'label': 'Wii U', 'pattern': 'WiiU' },
+      'Wii',
+      'Xbox One',
+      { 'label': 'Xbox 360', 'pattern': 'Xbox' },
+      'Xoom'
+    ]);
+
+    /* Detectable manufacturers. */
+    var manufacturer = getManufacturer({
+      'Apple': { 'iPad': 1, 'iPhone': 1, 'iPod': 1 },
+      'Archos': {},
+      'Amazon': { 'Kindle': 1, 'Kindle Fire': 1 },
+      'Asus': { 'Transformer': 1 },
+      'Barnes & Noble': { 'Nook': 1 },
+      'BlackBerry': { 'PlayBook': 1 },
+      'Google': { 'Google TV': 1, 'Nexus': 1 },
+      'HP': { 'TouchPad': 1 },
+      'HTC': {},
+      'LG': {},
+      'Microsoft': { 'Xbox': 1, 'Xbox One': 1 },
+      'Motorola': { 'Xoom': 1 },
+      'Nintendo': { 'Wii U': 1,  'Wii': 1 },
+      'Nokia': { 'Lumia': 1 },
+      'Samsung': { 'Galaxy S': 1, 'Galaxy S2': 1, 'Galaxy S3': 1, 'Galaxy S4': 1 },
+      'Sony': { 'PlayStation': 1, 'PlayStation Vita': 1 }
+    });
+
+    /* Detectable operating systems (order is important). */
+    var os = getOS([
+      'Windows Phone',
+      'Android',
+      'CentOS',
+      { 'label': 'Chrome OS', 'pattern': 'CrOS' },
+      'Debian',
+      'Fedora',
+      'FreeBSD',
+      'Gentoo',
+      'Haiku',
+      'Kubuntu',
+      'Linux Mint',
+      'OpenBSD',
+      'Red Hat',
+      'SuSE',
+      'Ubuntu',
+      'Xubuntu',
+      'Cygwin',
+      'Symbian OS',
+      'hpwOS',
+      'webOS ',
+      'webOS',
+      'Tablet OS',
+      'Tizen',
+      'Linux',
+      'Mac OS X',
+      'Macintosh',
+      'Mac',
+      'Windows 98;',
+      'Windows '
+    ]);
+
+    /*------------------------------------------------------------------------*/
+
+    /**
+     * Picks the layout engine from an array of guesses.
+     *
+     * @private
+     * @param {Array} guesses An array of guesses.
+     * @returns {null|string} The detected layout engine.
+     */
+    function getLayout(guesses) {
+      return reduce(guesses, function(result, guess) {
+        return result || RegExp('\\b' + (
+          guess.pattern || qualify(guess)
+        ) + '\\b', 'i').exec(ua) && (guess.label || guess);
+      });
+    }
+
+    /**
+     * Picks the manufacturer from an array of guesses.
+     *
+     * @private
+     * @param {Array} guesses An object of guesses.
+     * @returns {null|string} The detected manufacturer.
+     */
+    function getManufacturer(guesses) {
+      return reduce(guesses, function(result, value, key) {
+        // Lookup the manufacturer by product or scan the UA for the manufacturer.
+        return result || (
+          value[product] ||
+          value[/^[a-z]+(?: +[a-z]+\b)*/i.exec(product)] ||
+          RegExp('\\b' + qualify(key) + '(?:\\b|\\w*\\d)', 'i').exec(ua)
+        ) && key;
+      });
+    }
+
+    /**
+     * Picks the browser name from an array of guesses.
+     *
+     * @private
+     * @param {Array} guesses An array of guesses.
+     * @returns {null|string} The detected browser name.
+     */
+    function getName(guesses) {
+      return reduce(guesses, function(result, guess) {
+        return result || RegExp('\\b' + (
+          guess.pattern || qualify(guess)
+        ) + '\\b', 'i').exec(ua) && (guess.label || guess);
+      });
+    }
+
+    /**
+     * Picks the OS name from an array of guesses.
+     *
+     * @private
+     * @param {Array} guesses An array of guesses.
+     * @returns {null|string} The detected OS name.
+     */
+    function getOS(guesses) {
+      return reduce(guesses, function(result, guess) {
+        var pattern = guess.pattern || qualify(guess);
+        if (!result && (result =
+              RegExp('\\b' + pattern + '(?:/[\\d.]+|[ \\w.]*)', 'i').exec(ua)
+            )) {
+          result = cleanupOS(result, pattern, guess.label || guess);
+        }
+        return result;
+      });
+    }
+
+    /**
+     * Picks the product name from an array of guesses.
+     *
+     * @private
+     * @param {Array} guesses An array of guesses.
+     * @returns {null|string} The detected product name.
+     */
+    function getProduct(guesses) {
+      return reduce(guesses, function(result, guess) {
+        var pattern = guess.pattern || qualify(guess);
+        if (!result && (result =
+              RegExp('\\b' + pattern + ' *\\d+[.\\w_]*', 'i').exec(ua) ||
+              RegExp('\\b' + pattern + ' *\\w+-[\\w]*', 'i').exec(ua) ||
+              RegExp('\\b' + pattern + '(?:; *(?:[a-z]+[_-])?[a-z]+\\d+|[^ ();-]*)', 'i').exec(ua)
+            )) {
+          // Split by forward slash and append product version if needed.
+          if ((result = String((guess.label && !RegExp(pattern, 'i').test(guess.label)) ? guess.label : result).split('/'))[1] && !/[\d.]+/.test(result[0])) {
+            result[0] += ' ' + result[1];
+          }
+          // Correct character case and cleanup string.
+          guess = guess.label || guess;
+          result = format(result[0]
+            .replace(RegExp(pattern, 'i'), guess)
+            .replace(RegExp('; *(?:' + guess + '[_-])?', 'i'), ' ')
+            .replace(RegExp('(' + guess + ')[-_.]?(\\w)', 'i'), '$1 $2'));
+        }
+        return result;
+      });
+    }
+
+    /**
+     * Resolves the version using an array of UA patterns.
+     *
+     * @private
+     * @param {Array} patterns An array of UA patterns.
+     * @returns {null|string} The detected version.
+     */
+    function getVersion(patterns) {
+      return reduce(patterns, function(result, pattern) {
+        return result || (RegExp(pattern +
+          '(?:-[\\d.]+/|(?: for [\\w-]+)?[ /-])([\\d.]+[^ ();/_-]*)', 'i').exec(ua) || 0)[1] || null;
+      });
+    }
+
+    /**
+     * Returns `platform.description` when the platform object is coerced to a string.
+     *
+     * @name toString
+     * @memberOf platform
+     * @returns {string} Returns `platform.description` if available, else an empty string.
+     */
+    function toStringPlatform() {
+      return this.description || '';
+    }
+
+    /*------------------------------------------------------------------------*/
+
+    // Convert layout to an array so we can add extra details.
+    layout && (layout = [layout]);
+
+    // Detect product names that contain their manufacturer's name.
+    if (manufacturer && !product) {
+      product = getProduct([manufacturer]);
+    }
+    // Clean up Google TV.
+    if ((data = /\bGoogle TV\b/.exec(product))) {
+      product = data[0];
+    }
+    // Detect simulators.
+    if (/\bSimulator\b/i.test(ua)) {
+      product = (product ? product + ' ' : '') + 'Simulator';
+    }
+    // Detect Opera Mini 8+ running in Turbo/Uncompressed mode on iOS.
+    if (name == 'Opera Mini' && /\bOPiOS\b/.test(ua)) {
+      description.push('running in Turbo/Uncompressed mode');
+    }
+    // Detect IE Mobile 11.
+    if (name == 'IE' && /\blike iPhone OS\b/.test(ua)) {
+      data = parse(ua.replace(/like iPhone OS/, ''));
+      manufacturer = data.manufacturer;
+      product = data.product;
+    }
+    // Detect iOS.
+    else if (/^iP/.test(product)) {
+      name || (name = 'Safari');
+      os = 'iOS' + ((data = / OS ([\d_]+)/i.exec(ua))
+        ? ' ' + data[1].replace(/_/g, '.')
+        : '');
+    }
+    // Detect Kubuntu.
+    else if (name == 'Konqueror' && !/buntu/i.test(os)) {
+      os = 'Kubuntu';
+    }
+    // Detect Android browsers.
+    else if ((manufacturer && manufacturer != 'Google' &&
+        ((/Chrome/.test(name) && !/\bMobile Safari\b/i.test(ua)) || /\bVita\b/.test(product))) ||
+        (/\bAndroid\b/.test(os) && /^Chrome/.test(name) && /\bVersion\//i.test(ua))) {
+      name = 'Android Browser';
+      os = /\bAndroid\b/.test(os) ? os : 'Android';
+    }
+    // Detect Silk desktop/accelerated modes.
+    else if (name == 'Silk') {
+      if (!/\bMobi/i.test(ua)) {
+        os = 'Android';
+        description.unshift('desktop mode');
+      }
+      if (/Accelerated *= *true/i.test(ua)) {
+        description.unshift('accelerated');
+      }
+    }
+    // Detect PaleMoon identifying as Firefox.
+    else if (name == 'PaleMoon' && (data = /\bFirefox\/([\d.]+)\b/.exec(ua))) {
+      description.push('identifying as Firefox ' + data[1]);
+    }
+    // Detect Firefox OS and products running Firefox.
+    else if (name == 'Firefox' && (data = /\b(Mobile|Tablet|TV)\b/i.exec(ua))) {
+      os || (os = 'Firefox OS');
+      product || (product = data[1]);
+    }
+    // Detect false positives for Firefox/Safari.
+    else if (!name || (data = !/\bMinefield\b/i.test(ua) && /\b(?:Firefox|Safari)\b/.exec(name))) {
+      // Escape the `/` for Firefox 1.
+      if (name && !product && /[\/,]|^[^(]+?\)/.test(ua.slice(ua.indexOf(data + '/') + 8))) {
+        // Clear name of false positives.
+        name = null;
+      }
+      // Reassign a generic name.
+      if ((data = product || manufacturer || os) &&
+          (product || manufacturer || /\b(?:Android|Symbian OS|Tablet OS|webOS)\b/.test(os))) {
+        name = /[a-z]+(?: Hat)?/i.exec(/\bAndroid\b/.test(os) ? os : data) + ' Browser';
+      }
+    }
+    // Add Chrome version to description for Electron.
+    else if (name == 'Electron' && (data = (/\bChrome\/([\d.]+)\b/.exec(ua) || 0)[1])) {
+      description.push('Chromium ' + data);
+    }
+    // Detect non-Opera (Presto-based) versions (order is important).
+    if (!version) {
+      version = getVersion([
+        '(?:Cloud9|CriOS|CrMo|Edge|FxiOS|IEMobile|Iron|Opera ?Mini|OPiOS|OPR|Raven|SamsungBrowser|Silk(?!/[\\d.]+$))',
+        'Version',
+        qualify(name),
+        '(?:Firefox|Minefield|NetFront)'
+      ]);
+    }
+    // Detect stubborn layout engines.
+    if ((data =
+          layout == 'iCab' && parseFloat(version) > 3 && 'WebKit' ||
+          /\bOpera\b/.test(name) && (/\bOPR\b/.test(ua) ? 'Blink' : 'Presto') ||
+          /\b(?:Midori|Nook|Safari)\b/i.test(ua) && !/^(?:Trident|EdgeHTML)$/.test(layout) && 'WebKit' ||
+          !layout && /\bMSIE\b/i.test(ua) && (os == 'Mac OS' ? 'Tasman' : 'Trident') ||
+          layout == 'WebKit' && /\bPlayStation\b(?! Vita\b)/i.test(name) && 'NetFront'
+        )) {
+      layout = [data];
+    }
+    // Detect Windows Phone 7 desktop mode.
+    if (name == 'IE' && (data = (/; *(?:XBLWP|ZuneWP)(\d+)/i.exec(ua) || 0)[1])) {
+      name += ' Mobile';
+      os = 'Windows Phone ' + (/\+$/.test(data) ? data : data + '.x');
+      description.unshift('desktop mode');
+    }
+    // Detect Windows Phone 8.x desktop mode.
+    else if (/\bWPDesktop\b/i.test(ua)) {
+      name = 'IE Mobile';
+      os = 'Windows Phone 8.x';
+      description.unshift('desktop mode');
+      version || (version = (/\brv:([\d.]+)/.exec(ua) || 0)[1]);
+    }
+    // Detect IE 11 identifying as other browsers.
+    else if (name != 'IE' && layout == 'Trident' && (data = /\brv:([\d.]+)/.exec(ua))) {
+      if (name) {
+        description.push('identifying as ' + name + (version ? ' ' + version : ''));
+      }
+      name = 'IE';
+      version = data[1];
+    }
+    // Leverage environment features.
+    if (useFeatures) {
+      // Detect server-side environments.
+      // Rhino has a global function while others have a global object.
+      if (isHostType(context, 'global')) {
+        if (java) {
+          data = java.lang.System;
+          arch = data.getProperty('os.arch');
+          os = os || data.getProperty('os.name') + ' ' + data.getProperty('os.version');
+        }
+        if (rhino) {
+          try {
+            version = context.require('ringo/engine').version.join('.');
+            name = 'RingoJS';
+          } catch(e) {
+            if ((data = context.system) && data.global.system == context.system) {
+              name = 'Narwhal';
+              os || (os = data[0].os || null);
+            }
+          }
+          if (!name) {
+            name = 'Rhino';
+          }
+        }
+        else if (
+          typeof context.process == 'object' && !context.process.browser &&
+          (data = context.process)
+        ) {
+          if (typeof data.versions == 'object') {
+            if (typeof data.versions.electron == 'string') {
+              description.push('Node ' + data.versions.node);
+              name = 'Electron';
+              version = data.versions.electron;
+            } else if (typeof data.versions.nw == 'string') {
+              description.push('Chromium ' + version, 'Node ' + data.versions.node);
+              name = 'NW.js';
+              version = data.versions.nw;
+            }
+          }
+          if (!name) {
+            name = 'Node.js';
+            arch = data.arch;
+            os = data.platform;
+            version = /[\d.]+/.exec(data.version);
+            version = version ? version[0] : null;
+          }
+        }
+      }
+      // Detect Adobe AIR.
+      else if (getClassOf((data = context.runtime)) == airRuntimeClass) {
+        name = 'Adobe AIR';
+        os = data.flash.system.Capabilities.os;
+      }
+      // Detect PhantomJS.
+      else if (getClassOf((data = context.phantom)) == phantomClass) {
+        name = 'PhantomJS';
+        version = (data = data.version || null) && (data.major + '.' + data.minor + '.' + data.patch);
+      }
+      // Detect IE compatibility modes.
+      else if (typeof doc.documentMode == 'number' && (data = /\bTrident\/(\d+)/i.exec(ua))) {
+        // We're in compatibility mode when the Trident version + 4 doesn't
+        // equal the document mode.
+        version = [version, doc.documentMode];
+        if ((data = +data[1] + 4) != version[1]) {
+          description.push('IE ' + version[1] + ' mode');
+          layout && (layout[1] = '');
+          version[1] = data;
+        }
+        version = name == 'IE' ? String(version[1].toFixed(1)) : version[0];
+      }
+      // Detect IE 11 masking as other browsers.
+      else if (typeof doc.documentMode == 'number' && /^(?:Chrome|Firefox)\b/.test(name)) {
+        description.push('masking as ' + name + ' ' + version);
+        name = 'IE';
+        version = '11.0';
+        layout = ['Trident'];
+        os = 'Windows';
+      }
+      os = os && format(os);
+    }
+    // Detect prerelease phases.
+    if (version && (data =
+          /(?:[ab]|dp|pre|[ab]\d+pre)(?:\d+\+?)?$/i.exec(version) ||
+          /(?:alpha|beta)(?: ?\d)?/i.exec(ua + ';' + (useFeatures && nav.appMinorVersion)) ||
+          /\bMinefield\b/i.test(ua) && 'a'
+        )) {
+      prerelease = /b/i.test(data) ? 'beta' : 'alpha';
+      version = version.replace(RegExp(data + '\\+?$'), '') +
+        (prerelease == 'beta' ? beta : alpha) + (/\d+\+?/.exec(data) || '');
+    }
+    // Detect Firefox Mobile.
+    if (name == 'Fennec' || name == 'Firefox' && /\b(?:Android|Firefox OS)\b/.test(os)) {
+      name = 'Firefox Mobile';
+    }
+    // Obscure Maxthon's unreliable version.
+    else if (name == 'Maxthon' && version) {
+      version = version.replace(/\.[\d.]+/, '.x');
+    }
+    // Detect Xbox 360 and Xbox One.
+    else if (/\bXbox\b/i.test(product)) {
+      if (product == 'Xbox 360') {
+        os = null;
+      }
+      if (product == 'Xbox 360' && /\bIEMobile\b/.test(ua)) {
+        description.unshift('mobile mode');
+      }
+    }
+    // Add mobile postfix.
+    else if ((/^(?:Chrome|IE|Opera)$/.test(name) || name && !product && !/Browser|Mobi/.test(name)) &&
+        (os == 'Windows CE' || /Mobi/i.test(ua))) {
+      name += ' Mobile';
+    }
+    // Detect IE platform preview.
+    else if (name == 'IE' && useFeatures) {
+      try {
+        if (context.external === null) {
+          description.unshift('platform preview');
+        }
+      } catch(e) {
+        description.unshift('embedded');
+      }
+    }
+    // Detect BlackBerry OS version.
+    // http://docs.blackberry.com/en/developers/deliverables/18169/HTTP_headers_sent_by_BB_Browser_1234911_11.jsp
+    else if ((/\bBlackBerry\b/.test(product) || /\bBB10\b/.test(ua)) && (data =
+          (RegExp(product.replace(/ +/g, ' *') + '/([.\\d]+)', 'i').exec(ua) || 0)[1] ||
+          version
+        )) {
+      data = [data, /BB10/.test(ua)];
+      os = (data[1] ? (product = null, manufacturer = 'BlackBerry') : 'Device Software') + ' ' + data[0];
+      version = null;
+    }
+    // Detect Opera identifying/masking itself as another browser.
+    // http://www.opera.com/support/kb/view/843/
+    else if (this != forOwn && product != 'Wii' && (
+          (useFeatures && opera) ||
+          (/Opera/.test(name) && /\b(?:MSIE|Firefox)\b/i.test(ua)) ||
+          (name == 'Firefox' && /\bOS X (?:\d+\.){2,}/.test(os)) ||
+          (name == 'IE' && (
+            (os && !/^Win/.test(os) && version > 5.5) ||
+            /\bWindows XP\b/.test(os) && version > 8 ||
+            version == 8 && !/\bTrident\b/.test(ua)
+          ))
+        ) && !reOpera.test((data = parse.call(forOwn, ua.replace(reOpera, '') + ';'))) && data.name) {
+      // When "identifying", the UA contains both Opera and the other browser's name.
+      data = 'ing as ' + data.name + ((data = data.version) ? ' ' + data : '');
+      if (reOpera.test(name)) {
+        if (/\bIE\b/.test(data) && os == 'Mac OS') {
+          os = null;
+        }
+        data = 'identify' + data;
+      }
+      // When "masking", the UA contains only the other browser's name.
+      else {
+        data = 'mask' + data;
+        if (operaClass) {
+          name = format(operaClass.replace(/([a-z])([A-Z])/g, '$1 $2'));
+        } else {
+          name = 'Opera';
+        }
+        if (/\bIE\b/.test(data)) {
+          os = null;
+        }
+        if (!useFeatures) {
+          version = null;
+        }
+      }
+      layout = ['Presto'];
+      description.push(data);
+    }
+    // Detect WebKit Nightly and approximate Chrome/Safari versions.
+    if ((data = (/\bAppleWebKit\/([\d.]+\+?)/i.exec(ua) || 0)[1])) {
+      // Correct build number for numeric comparison.
+      // (e.g. "532.5" becomes "532.05")
+      data = [parseFloat(data.replace(/\.(\d)$/, '.0$1')), data];
+      // Nightly builds are postfixed with a "+".
+      if (name == 'Safari' && data[1].slice(-1) == '+') {
+        name = 'WebKit Nightly';
+        prerelease = 'alpha';
+        version = data[1].slice(0, -1);
+      }
+      // Clear incorrect browser versions.
+      else if (version == data[1] ||
+          version == (data[2] = (/\bSafari\/([\d.]+\+?)/i.exec(ua) || 0)[1])) {
+        version = null;
+      }
+      // Use the full Chrome version when available.
+      data[1] = (/\bChrome\/([\d.]+)/i.exec(ua) || 0)[1];
+      // Detect Blink layout engine.
+      if (data[0] == 537.36 && data[2] == 537.36 && parseFloat(data[1]) >= 28 && layout == 'WebKit') {
+        layout = ['Blink'];
+      }
+      // Detect JavaScriptCore.
+      // http://stackoverflow.com/questions/6768474/how-can-i-detect-which-javascript-engine-v8-or-jsc-is-used-at-runtime-in-androi
+      if (!useFeatures || (!likeChrome && !data[1])) {
+        layout && (layout[1] = 'like Safari');
+        data = (data = data[0], data < 400 ? 1 : data < 500 ? 2 : data < 526 ? 3 : data < 533 ? 4 : data < 534 ? '4+' : data < 535 ? 5 : data < 537 ? 6 : data < 538 ? 7 : data < 601 ? 8 : '8');
+      } else {
+        layout && (layout[1] = 'like Chrome');
+        data = data[1] || (data = data[0], data < 530 ? 1 : data < 532 ? 2 : data < 532.05 ? 3 : data < 533 ? 4 : data < 534.03 ? 5 : data < 534.07 ? 6 : data < 534.10 ? 7 : data < 534.13 ? 8 : data < 534.16 ? 9 : data < 534.24 ? 10 : data < 534.30 ? 11 : data < 535.01 ? 12 : data < 535.02 ? '13+' : data < 535.07 ? 15 : data < 535.11 ? 16 : data < 535.19 ? 17 : data < 536.05 ? 18 : data < 536.10 ? 19 : data < 537.01 ? 20 : data < 537.11 ? '21+' : data < 537.13 ? 23 : data < 537.18 ? 24 : data < 537.24 ? 25 : data < 537.36 ? 26 : layout != 'Blink' ? '27' : '28');
+      }
+      // Add the postfix of ".x" or "+" for approximate versions.
+      layout && (layout[1] += ' ' + (data += typeof data == 'number' ? '.x' : /[.+]/.test(data) ? '' : '+'));
+      // Obscure version for some Safari 1-2 releases.
+      if (name == 'Safari' && (!version || parseInt(version) > 45)) {
+        version = data;
+      }
+    }
+    // Detect Opera desktop modes.
+    if (name == 'Opera' &&  (data = /\bzbov|zvav$/.exec(os))) {
+      name += ' ';
+      description.unshift('desktop mode');
+      if (data == 'zvav') {
+        name += 'Mini';
+        version = null;
+      } else {
+        name += 'Mobile';
+      }
+      os = os.replace(RegExp(' *' + data + '$'), '');
+    }
+    // Detect Chrome desktop mode.
+    else if (name == 'Safari' && /\bChrome\b/.exec(layout && layout[1])) {
+      description.unshift('desktop mode');
+      name = 'Chrome Mobile';
+      version = null;
+
+      if (/\bOS X\b/.test(os)) {
+        manufacturer = 'Apple';
+        os = 'iOS 4.3+';
+      } else {
+        os = null;
+      }
+    }
+    // Strip incorrect OS versions.
+    if (version && version.indexOf((data = /[\d.]+$/.exec(os))) == 0 &&
+        ua.indexOf('/' + data + '-') > -1) {
+      os = trim(os.replace(data, ''));
+    }
+    // Add layout engine.
+    if (layout && !/\b(?:Avant|Nook)\b/.test(name) && (
+        /Browser|Lunascape|Maxthon/.test(name) ||
+        name != 'Safari' && /^iOS/.test(os) && /\bSafari\b/.test(layout[1]) ||
+        /^(?:Adobe|Arora|Breach|Midori|Opera|Phantom|Rekonq|Rock|Samsung Internet|Sleipnir|Web)/.test(name) && layout[1])) {
+      // Don't add layout details to description if they are falsey.
+      (data = layout[layout.length - 1]) && description.push(data);
+    }
+    // Combine contextual information.
+    if (description.length) {
+      description = ['(' + description.join('; ') + ')'];
+    }
+    // Append manufacturer to description.
+    if (manufacturer && product && product.indexOf(manufacturer) < 0) {
+      description.push('on ' + manufacturer);
+    }
+    // Append product to description.
+    if (product) {
+      description.push((/^on /.test(description[description.length - 1]) ? '' : 'on ') + product);
+    }
+    // Parse the OS into an object.
+    if (os) {
+      data = / ([\d.+]+)$/.exec(os);
+      isSpecialCasedOS = data && os.charAt(os.length - data[0].length - 1) == '/';
+      os = {
+        'architecture': 32,
+        'family': (data && !isSpecialCasedOS) ? os.replace(data[0], '') : os,
+        'version': data ? data[1] : null,
+        'toString': function() {
+          var version = this.version;
+          return this.family + ((version && !isSpecialCasedOS) ? ' ' + version : '') + (this.architecture == 64 ? ' 64-bit' : '');
+        }
+      };
+    }
+    // Add browser/OS architecture.
+    if ((data = /\b(?:AMD|IA|Win|WOW|x86_|x)64\b/i.exec(arch)) && !/\bi686\b/i.test(arch)) {
+      if (os) {
+        os.architecture = 64;
+        os.family = os.family.replace(RegExp(' *' + data), '');
+      }
+      if (
+          name && (/\bWOW64\b/i.test(ua) ||
+          (useFeatures && /\w(?:86|32)$/.test(nav.cpuClass || nav.platform) && !/\bWin64; x64\b/i.test(ua)))
+      ) {
+        description.unshift('32-bit');
+      }
+    }
+    // Chrome 39 and above on OS X is always 64-bit.
+    else if (
+        os && /^OS X/.test(os.family) &&
+        name == 'Chrome' && parseFloat(version) >= 39
+    ) {
+      os.architecture = 64;
+    }
+
+    ua || (ua = null);
+
+    /*------------------------------------------------------------------------*/
+
+    /**
+     * The platform object.
+     *
+     * @name platform
+     * @type Object
+     */
+    var platform = {};
+
+    /**
+     * The platform description.
+     *
+     * @memberOf platform
+     * @type string|null
+     */
+    platform.description = ua;
+
+    /**
+     * The name of the browser's layout engine.
+     *
+     * The list of common layout engines include:
+     * "Blink", "EdgeHTML", "Gecko", "Trident" and "WebKit"
+     *
+     * @memberOf platform
+     * @type string|null
+     */
+    platform.layout = layout && layout[0];
+
+    /**
+     * The name of the product's manufacturer.
+     *
+     * The list of manufacturers include:
+     * "Apple", "Archos", "Amazon", "Asus", "Barnes & Noble", "BlackBerry",
+     * "Google", "HP", "HTC", "LG", "Microsoft", "Motorola", "Nintendo",
+     * "Nokia", "Samsung" and "Sony"
+     *
+     * @memberOf platform
+     * @type string|null
+     */
+    platform.manufacturer = manufacturer;
+
+    /**
+     * The name of the browser/environment.
+     *
+     * The list of common browser names include:
+     * "Chrome", "Electron", "Firefox", "Firefox for iOS", "IE",
+     * "Microsoft Edge", "PhantomJS", "Safari", "SeaMonkey", "Silk",
+     * "Opera Mini" and "Opera"
+     *
+     * Mobile versions of some browsers have "Mobile" appended to their name:
+     * eg. "Chrome Mobile", "Firefox Mobile", "IE Mobile" and "Opera Mobile"
+     *
+     * @memberOf platform
+     * @type string|null
+     */
+    platform.name = name;
+
+    /**
+     * The alpha/beta release indicator.
+     *
+     * @memberOf platform
+     * @type string|null
+     */
+    platform.prerelease = prerelease;
+
+    /**
+     * The name of the product hosting the browser.
+     *
+     * The list of common products include:
+     *
+     * "BlackBerry", "Galaxy S4", "Lumia", "iPad", "iPod", "iPhone", "Kindle",
+     * "Kindle Fire", "Nexus", "Nook", "PlayBook", "TouchPad" and "Transformer"
+     *
+     * @memberOf platform
+     * @type string|null
+     */
+    platform.product = product;
+
+    /**
+     * The browser's user agent string.
+     *
+     * @memberOf platform
+     * @type string|null
+     */
+    platform.ua = ua;
+
+    /**
+     * The browser/environment version.
+     *
+     * @memberOf platform
+     * @type string|null
+     */
+    platform.version = name && version;
+
+    /**
+     * The name of the operating system.
+     *
+     * @memberOf platform
+     * @type Object
+     */
+    platform.os = os || {
+
+      /**
+       * The CPU architecture the OS is built for.
+       *
+       * @memberOf platform.os
+       * @type number|null
+       */
+      'architecture': null,
+
+      /**
+       * The family of the OS.
+       *
+       * Common values include:
+       * "Windows", "Windows Server 2008 R2 / 7", "Windows Server 2008 / Vista",
+       * "Windows XP", "OS X", "Ubuntu", "Debian", "Fedora", "Red Hat", "SuSE",
+       * "Android", "iOS" and "Windows Phone"
+       *
+       * @memberOf platform.os
+       * @type string|null
+       */
+      'family': null,
+
+      /**
+       * The version of the OS.
+       *
+       * @memberOf platform.os
+       * @type string|null
+       */
+      'version': null,
+
+      /**
+       * Returns the OS string.
+       *
+       * @memberOf platform.os
+       * @returns {string} The OS string.
+       */
+      'toString': function() { return 'null'; }
+    };
+
+    platform.parse = parse;
+    platform.toString = toStringPlatform;
+
+    if (platform.version) {
+      description.unshift(version);
+    }
+    if (platform.name) {
+      description.unshift(name);
+    }
+    if (os && name && !(os == String(os).split(' ')[0] && (os == name.split(' ')[0] || product))) {
+      description.push(product ? '(' + os + ')' : 'on ' + os);
+    }
+    if (description.length) {
+      platform.description = description.join(' ');
+    }
+    return platform;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  // Export platform.
+  var platform = parse();
+
+  // Some AMD build optimizers, like r.js, check for condition patterns like the following:
+  if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+    // Expose platform on the global object to prevent errors when platform is
+    // loaded by a script tag in the presence of an AMD loader.
+    // See http://requirejs.org/docs/errors.html#mismatch for more details.
+    root.platform = platform;
+
+    // Define as an anonymous module so platform can be aliased through path mapping.
+    define('platform',[],function() {
+      return platform;
+    });
+  }
+  // Check for `exports` after `define` in case a build optimizer adds an `exports` object.
+  else if (freeExports && freeModule) {
+    // Export for CommonJS support.
+    forOwn(platform, function(value, key) {
+      freeExports[key] = value;
+    });
+  }
+  else {
+    // Export to the global object.
+    root.platform = platform;
+  }
+}.call(this));
+
+
+define('text!ev-script/templates/hider.html',[],function () { return '<div class="action-wrap">\n  <a class="action-hide" href="#" title="<%= i18n.formatMessage(\'Hide Picker\') %>"><i class="fa fa-lg fa-folder"></i><span><%= i18n.formatMessage(\'Hide\') %></span></a>\n  <% if (showLogout) { %>\n    <a class="action-logout" href="#" title="<%= i18n.formatMessage(\'Logout {0}\', username) %>"><i class="fa fa-lg fa-power-off"></i><span><%= i18n.formatMessage(\'Logout\') %></span></a>\n  <% } %>\n</div>';});
+
+define('ev-script/views/hider',['require','jquery','underscore','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/hider.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'hideHandler', 'logoutHandler', 'authHandler', 'render');
+            this.events.on('loggedIn', this.authHandler);
+            this.events.on('loggedOut', this.authHandler);
+            this.field = options.field;
+        },
+        events: {
+            'click a.action-hide': 'hideHandler',
+            'click a.action-logout': 'logoutHandler'
+        },
+        authHandler: function() {
+            this.render();
+        },
+        render: function() {
+            this.root.promise.always(_.bind(function() {
+                var user = this.root.getUser(),
+                    username = user && user.get('username') || '';
+                this.$el.html(this.template({
+                    i18n: this.i18n,
+                    showLogout: user,
+                    username: username
+                }));
+            }, this));
+        },
+        hideHandler: function(e) {
+            this.events.trigger('hidePicker', this.field.id);
+            e.preventDefault();
+        },
+        logoutHandler: function(e) {
+            $.ajax({
+                url: this.config.ensembleUrl + this.config.authLogoutPath,
+                method: 'POST',
+                xhrFields: {
+                    withCredentials: true
+                }
+            })
+            .always(_.bind(function() {
+                this.events.trigger('hidePickers');
+                this.events.trigger('loggedOut');
+            },this));
+            e.preventDefault();
+        }
+    });
+
+});
+
+
+define('text!ev-script/templates/picker.html',[],function () { return '<div id="<%= id %>-hider" class="ev-hider"></div>\n<div id="<%= id %>-filter" class="ev-filter-block"></div>\n<div id="<%= id %>-results" class="ev-results"></div>\n<div id="anthemContainer"></div>\n';});
+
+define('ev-script/views/picker',['require','jquery','underscore','ev-script/views/base','ev-script/views/hider','text!ev-script/templates/picker.html'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        BaseView = require('ev-script/views/base'),
+        HiderView = require('ev-script/views/hider');
+
+    /*
+     * Encapsulates views to manage search, display and selection of Ensemble videos and playlists.
+     */
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/picker.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+
+            _.bindAll(this, 'chooseItem', 'hidePicker', 'showPicker',
+            'getSettingsModelAttributes');
+
+            this.$el.hide();
+            this.$el.html(this.template({
+                id: this.id
+            }));
+            this.field = options.field;
+            this.hider = new HiderView({
+                el: this.$('div.ev-hider'),
+                field: this.field
+            });
+            this.events.on('hidePickers', function(fieldId) {
+                if (!fieldId || (this.field.id !== fieldId)) {
+                    this.hidePicker();
+                }
+            }, this);
+            this.events.on('showPicker', function(fieldId) {
+                if (this.field.id === fieldId && this.$el.is(':hidden')) {
+                    this.showPicker();
+                }
+            }, this);
+            this.events.on('hidePicker', function(fieldId) {
+                if (this.field.id === fieldId) {
+                    this.hidePicker();
+                }
+            }, this);
+            this.hider.render();
+        },
+        getSettingsModelAttributes: function(chosenItem) {
+            return {
+                id: chosenItem.get('id'),
+                content: chosenItem.toJSON()
+            };
+        },
+        chooseItem: function(e) {
+            var id = $(e.currentTarget).attr('rel'),
+                chosenItem = this.resultsView.collection.get(id);
+            this.model.set(this.getSettingsModelAttributes(chosenItem));
+            this.events.trigger('itemChosen', this.model);
+            this.events.trigger('hidePicker', this.field.id);
+            e.preventDefault();
+        },
+        hidePicker: function() {
+            this.$el.hide();
+        },
+        showPicker: function() {
+            // In case our authentication status has changed...re-render our hider
+            this.hider.render();
+            this.$el.show();
+        }
+    });
+
+});
+
+
+define('text!ev-script/templates/organization-select.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Organization:\') %></label>\n<select id="<%= id %>" class="form-select organizations" title="<%= i18n.formatMessage(\'Select Organization\') %>"></select>\n';});
+
+
+define('text!ev-script/templates/options.html',[],function () { return '<% collection.each(function(item) { %>\n    <option value="<%= item.id %>" <% if (selectedId === item.id) { print(\'selected="selected"\'); } %>><%- item.get(\'title\') || item.get(\'Name\') %></option>\n<% }); %>\n';});
+
+define('ev-script/views/organization-select',['require','underscore','ev-script/views/base','text!ev-script/templates/organization-select.html','text!ev-script/templates/options.html'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/organization-select.html')),
+        optionsTemplate: _.template(require('text!ev-script/templates/options.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'render');
+            this.picker = options.picker;
+            this.$el.html(this.template({
+                id: this.id + '-select',
+                i18n: this.i18n
+            }));
+            this.$select = this.$('select');
+            this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
+            this.collection.on('reset', this.render);
+        },
+        render: function() {
+            var selectedId = this.picker.model.get('organizationId') || this.root.getUser().get('defaultOrganizationId');
+            this.$select.html(this.optionsTemplate({
+                selectedId: selectedId,
+                collection: this.collection
+            }));
+            this.$select.trigger('change');
+        }
+    });
+
+});
+
+define('ev-script/models/organizations',['require','ev-script/models/base','ev-script/util/cache'],function(require) {
+
+    'use strict';
+
+    var BaseModel = require('ev-script/models/base'),
+        cacheUtil = require('ev-script/util/cache');
+
+    return BaseModel.extend({
+        // initialize: function(models, options) {
+        //     BaseModel.prototype.initialize.call(this, models, options);
+        // },
+    });
+
+});
+
+
+define('text!ev-script/templates/library-select.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Library:\') %></label>\n<select id="<%= id %>" class="form-select libraries" title="<%= i18n.formatMessage(\'Select Library\') %>"></select>\n';});
+
+define('ev-script/views/library-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-select.html','text!ev-script/templates/options.html'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/library-select.html')),
+        optionsTemplate: _.template(require('text!ev-script/templates/options.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'render');
+            this.picker = options.picker;
+            this.$el.html(this.template({
+                id: this.id + '-select',
+                i18n: this.i18n
+            }));
+            this.$select = this.$('select');
+            this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
+            this.collection.on('reset', this.render);
+        },
+        render: function() {
+            var selectedId = this.picker.model.get('libraryId') || this.root.getUser().get('defaultLibraryId');
+            this.$select.html(this.optionsTemplate({
+                selectedId: selectedId,
+                collection: this.collection
+            }));
+            this.$select.trigger('change');
+        }
+    });
+
+});
+
+define('ev-script/models/libraries',['require','ev-script/models/base','ev-script/util/cache'],function(require) {
+
+    'use strict';
+
+    var BaseModel = require('ev-script/models/base'),
+        cacheUtil = require('ev-script/util/cache');
+
+    return BaseModel.extend({
+        cacheName: 'libraries'
+        // initialize: function(models, options) {
+        //     BaseModel.prototype.initialize.call(this, models, options);
+        // },
+    });
+
+});
+
+
+define('text!ev-script/templates/library-type-select.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Type:\') %></label>\n<select id="<%= id %>" class="form-select source" title="<%= i18n.formatMessage(\'Select Library Type\') %>">\n  <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Media Library\') %></option>\n  <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Shared Library\') %></option>\n</select>\n';});
+
+define('ev-script/views/library-type-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/library-type-select.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'changeHandler');
+            this.picker = options.picker;
+            this.render();
+        },
+        events: {
+            'change .source': 'changeHandler'
+        },
+        render: function() {
+            this.$el.html(this.template({
+                id: this.id + '-select',
+                i18n: this.i18n,
+                sourceId: this.picker.model.get('sourceId')
+            }));
+        },
+        changeHandler: function(e) {
+            var sourceVal = this.$('.source').val();
+            this.picker.model.set({
+                sourceId: sourceVal
+            });
+            this.events.trigger('typeSelectChange', sourceVal);
+            e.preventDefault();
+        }
+    });
+
+});
+
+
+define('text!ev-script/templates/search.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Search:\') %></label>\n<input id="<%= id %>" type="search" class="form-text search" placeholder="<%= i18n.formatMessage(\'Search Media\') %>" value="<%- searchVal %>" title="<%= i18n.formatMessage(\'Search Media\') %>" />\n';});
+
+define('ev-script/views/search',['require','underscore','ev-script/views/base','text!ev-script/templates/search.html'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        BaseView = require('ev-script/views/base');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/search.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'searchHandler', 'doSearch', 'autoSearch');
+            this.picker = options.picker;
+            this.render();
+        },
+        events: {
+            'keydown .search': 'searchHandler',
+            'keyup .search': 'autoSearch'
+        },
+        render: function() {
+            this.$el.html(this.template({
+                id: this.id + '-input',
+                i18n: this.i18n,
+                searchVal: this.picker.model.get('search')
+            }));
+        },
+        doSearch: function() {
+            var searchVal = this.$('.search').val();
+            this.picker.model.set({
+                search: searchVal
+            });
+            this.events.trigger('search', this.picker.model);
+        },
+        searchHandler: function(e) {
+            // Looking for enter key in which case we immediately search
+            var code = e.keyCode ? e.keyCode : e.which;
+            if (code === 13) {
+                if (this.submitTimeout) {
+                    clearTimeout(this.submitTimeout);
+                }
+                this.doSearch();
+                e.preventDefault();
+            }
+        },
+        autoSearch: function(e) {
+            var value = e.target.value;
+            if (value !== this.lastValue) {
+                this.lastValue = value;
+                if (this.submitTimeout) {
+                    clearTimeout(this.submitTimeout);
+                }
+                this.submitTimeout = setTimeout(_.bind(function() {
+                    this.doSearch();
+                }, this), 1000);
+            }
+        }
+    });
+
+});
+
+
+define('text!ev-script/templates/filter.html',[],function () { return '<div id="<%= id %>-org-select" class="ev-filter-item ev-org-select"></div>\n<div id="<%= id %>-lib-select" class="ev-filter-item ev-lib-select"></div>\n<div id="<%= id %>-type-select" class="ev-filter-item ev-type-select"></div>\n<div id="<%= id %>-search" class="ev-filter-item ev-search"></div>\n<div class="ev-filter-item ev-actions">\n  <button type="button" class="action-upload" style="display: none;" title="<%= i18n.formatMessage(\'Click to upload new media\') %>">\n    <i class="fa fa-upload fa-fw"></i><span><%= i18n.formatMessage(\'Upload\') %><span>\n  </button>\n  <button type="button" class="action-record" style="display: none;" title="<%= i18n.formatMessage(\'Click to record screen\') %>">\n    <i class="record-inactive fa fa-circle fa-fw"></i>\n    <i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i>\n    <span><%= i18n.formatMessage(\'Record\') %><span>\n  </button>\n</div>\n<div class="ev-filter-item loader"></div>\n';});
+
+define('ev-script/views/filter',['require','jquery','underscore','urijs/URITemplate','ev-script/views/base','ev-script/collections/base','ev-script/models/base','ev-script/views/organization-select','ev-script/models/organizations','ev-script/views/library-select','ev-script/models/libraries','ev-script/views/library-type-select','ev-script/views/search','text!ev-script/templates/filter.html'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        URITemplate = require('urijs/URITemplate'),
+        BaseView = require('ev-script/views/base'),
+        BaseCollection = require('ev-script/collections/base'),
+        BaseModel = require('ev-script/models/base'),
+        OrganizationSelectView = require('ev-script/views/organization-select'),
+        Organizations = require('ev-script/models/organizations'),
+        LibrarySelectView = require('ev-script/views/library-select'),
+        Libraries = require('ev-script/models/libraries'),
+        TypeSelectView = require('ev-script/views/library-type-select'),
+        SearchView = require('ev-script/views/search');
+
+    return BaseView.extend({
+        template: _.template(require('text!ev-script/templates/filter.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+            _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization',
+                'changeLibrary', 'activateRecord', 'deactivateRecord',
+                'showUpload', 'hideUpload', 'showRecord', 'hideRecord',
+                'setFocus', 'getLibrary');
+
+            this.picker = options.picker;
+            this.id = options.id;
+
+            this.$el.html(this.template({
+                id: this.id,
+                i18n: this.i18n
+            }));
+
+            this.orgSelect = new OrganizationSelectView({
+                id: this.id + '-org-select',
+                el: this.$('.ev-org-select'),
+                picker: this.picker,
+                collection: new BaseCollection(null, {})
+            });
+
+            this.libSelect = new LibrarySelectView({
+                id: this.id + '-lib-select',
+                el: this.$('.ev-lib-select'),
+                picker: this.picker,
+                collection: new BaseCollection(null, {})
+            });
+
+            if (options.showTypeSelect || _.isUndefined(options.showTypeSelect)) {
+                this.typeSelectView = new TypeSelectView({
+                    id: this.id + '-type-select',
+                    el: this.$('.ev-type-select'),
+                    picker: this.picker
+                });
+            }
+
+            this.searchView = new SearchView({
+                id: this.id + '-search',
+                el: this.$('.ev-search'),
+                picker: this.picker
+            });
+
+            var $loader = this.$('div.loader');
+            $(window.document).on('ajaxSend', _.bind(function(e, xhr, settings) {
+                if (this.picker === settings.picker) {
+                    $loader.addClass('loading');
+                }
+            }, this)).on('ajaxComplete', _.bind(function(e, xhr, settings) {
+                if (this.picker === settings.picker) {
+                    $loader.removeClass('loading');
+                }
+            }, this));
+        },
+        events: {
+            'change select.organizations': 'changeOrganization',
+            'change select.libraries': 'changeLibrary'
+        },
+        changeOrganization: function(e) {
+            this.picker.model.set({
+                organizationId: e.target.value
+            });
+            this.loadLibraries();
+        },
+        changeLibrary: function(e) {
+            this.picker.model.set({
+                libraryId: e.target.value
+            });
+        },
+        loadOrgs: function() {
+            this.orgSelect.collection.reset(null, { silent: true });
+            // In case root is loading...wait for it to finish
+            this.root.promise.done(_.bind(function() {
+                var searchTemplate = new URITemplate(this.root.getLink('ev:Organizations/Search').href),
+                    searchUrl = searchTemplate.expand({}),
+                    // Recursively load pages until we have all orgs.
+                    fetchOrgs = _.bind(function(url) {
+                        var orgs = new Organizations({}, {
+                            href: url
+                        });
+                        orgs.fetch({
+                            picker: this.picker,
+                            success: _.bind(function(model, response, options) {
+                                var next = model.getLink('next'),
+                                    embeddedOrgs = model.getEmbedded('organizations');
+                                if (embeddedOrgs) {
+                                    this.orgSelect.collection.add(embeddedOrgs.models);
+                                }
+                                if (next) {
+                                    fetchOrgs(next.href);
+                                } else {
+                                    // TODO - use events instead?
+                                    this.orgSelect.collection.trigger('reset');
+                                }
+                            }, this),
+                            error: _.bind(this.ajaxError, this)
+                        });
+                    }, this);
+                fetchOrgs(searchUrl);
+            }, this));
+        },
+        loadLibraries: function() {
+            var orgId = this.picker.model.get('organizationId'),
+                org = this.orgSelect.collection.findWhere({ 'id': orgId }),
+                searchTemplate = new URITemplate(org.getLink('ev:Libraries/Search').href),
+                searchUrl = searchTemplate.expand({}),
+                // Recursively load pages until we have all libraries.
+                fetchLibs = _.bind(function(url) {
+                    var libs = new Libraries({}, {
+                        href: url
+                    });
+                    libs.fetch({
+                        picker: this.picker,
+                        success: _.bind(function(model, response, options) {
+                            var next = model.getLink('next'),
+                                embeddedLibs = model.getEmbedded('libraries');
+                            if (embeddedLibs) {
+                                this.libSelect.collection.add(embeddedLibs.models);
+                            }
+                            if (next) {
+                                fetchLibs(next.href);
+                            } else {
+                                // TODO - use events instead?
+                                this.libSelect.collection.trigger('reset');
+                            }
+                        }, this),
+                        error: _.bind(this.ajaxError, this)
+                    });
+                }, this);
+            this.libSelect.collection.reset(null, { silent: true });
+            fetchLibs(searchUrl);
+        },
+        getLibrary: function(id) {
+            return this.libSelect.collection.findWhere({ 'id': id });
+        },
+        activateRecord: function() {
+            this.$('.record-active').show();
+            this.$('.record-inactive').hide();
+        },
+        deactivateRecord: function() {
+            this.$('.record-active').hide();
+            this.$('.record-inactive').show();
+        },
+        showUpload: function() {
+            this.$('.action-upload').show();
+        },
+        hideUpload: function() {
+            this.$('.action-upload').hide();
+        },
+        showRecord: function() {
+            this.$('.action-record').show();
+        },
+        hideRecord: function() {
+            this.$('.action-record').hide();
+        },
+        setFocus: function() {
+            this.$('select').filter(':visible').first().focus();
+        }
+    });
+
+});
+
+/**
+ * ev-scroll-loader 1.2.0 2018-01-24
+ * Ensemble Video jQuery Scroll Loader Plugin
+ * https://github.com/ensembleVideo/ev-scroll-loader
+ * Copyright (c) 2018 Symphony Video, Inc.
+ * Licensed (MIT AND GPL-2.0)
+ */
+(function(factory) {
+    'use strict';
+
+    if (typeof define === 'function' && define.amd) {
+        define('ev-scroll-loader',['jquery'], factory);
+    } else if (typeof module === 'object' && typeof module.exports === 'object') {
+        factory(require('jquery'));
+    } else {
+        factory(jQuery);
+    }
+})(function($) {
+
+    'use strict';
+
+    var defaults = {
+        scrollStyle: 'scroll',
+        onScrolled: function() {}
+    };
+
+    var methods = {
+        init: function(options) {
+            var settings = $.extend({}, defaults, options);
+            return this.each(function() {
+                var $this = $(this),
+                    $wrap = $this.wrap('<div class=\"scrollWrap\"/>').closest('.scrollWrap');
+                $this.addClass('scroll-content');
+                $wrap.append('<div class="loader"></div>');
+                $wrap.css({
+                    'position': 'relative',
+                    'height': settings.height ? (typeof settings.height === 'number' ? settings.height + 'px' : settings.height) : '100%',
+                    'max-height': $this[0].scrollHeight + 'px',
+                    'overflow-y': settings.scrollStyle
+                });
+                $wrap.scroll(function() {
+                    // When we have scrolled to the bottom of our content, call the onScrolled handler.  We subtract a pixel below to account for rounding.
+                    if ($wrap.scrollTop() >= $wrap[0].scrollHeight - $wrap.height() - 1) {
+                        settings.onScrolled.call($this);
+                    }
+                });
+            });
+        },
+        showLoader: function() {
+            var $wrap = $(this).closest('.scrollWrap');
+            $('.loader', $wrap).show();
+            return this;
+        },
+        hideLoader: function() {
+            var $wrap = $(this).closest('.scrollWrap');
+            $('.loader', $wrap).hide();
+            return this;
+        },
+        scrollTo: function(offset) {
+            var $wrap = $(this).closest('.scrollWrap');
+            $wrap.scrollTop(offset - $wrap.offset().top + $wrap.scrollTop());
+            return this;
+        }
+    };
+
+    $.fn.evScrollLoader = function(method) {
+        if (methods[method]) {
+            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+        } else if (typeof method === 'object' || !method) {
+            return methods.init.apply(this, arguments);
+        }
+    };
+
+});
+
+
+define('text!ev-script/templates/results.html',[],function () { return '<div class="total">\n    <%= i18n.formatMessage(\'Search returned {0} results.\', totalResults) %>\n    <a href="#" class="action-refresh" title="<%= i18n.formatMessage(\'Click to reload search results\') %>"><i class="fa fa-fw fa-lg fa-refresh"></i><span><%= i18n.formatMessage(\'Reload\') %></span></a>\n</div>\n<div class="results">\n    <div class="content-list"></div>\n</div>\n';});
+
+
+define('text!ev-script/templates/no-results.html',[],function () { return '<div class="odd result-item">\n    <div class="no-results">\n        <span><%= i18n.formatMessage(\'No results available.\') %></span>\n    </div>\n</div>\n';});
+
+define('ev-script/views/results',['require','jquery','underscore','moment','ev-script/views/base','ev-scroll-loader','text!ev-script/templates/results.html','text!ev-script/templates/no-results.html'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        moment = require('moment'),
+        BaseView = require('ev-script/views/base');
+
+    require('ev-scroll-loader');
+
+    /*
+     * Base object for result views since video and playlist results are rendered differently
+     */
+    return BaseView.extend({
+        resultsTemplate: _.template(require('text!ev-script/templates/results.html')),
+        emptyTemplate: _.template(require('text!ev-script/templates/no-results.html')),
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+
+            _.bindAll(this, 'render', 'decorate', 'loadMore', 'addHandler',
+            'previewItem', 'refreshHandler', 'getPreviewInstance');
+
+            this.picker = options.picker;
+        },
+        events: {
+            'click .action-preview': 'previewItem',
+            'click .action-refresh': 'refreshHandler'
+        },
+        getItemHtml: function(item, index) {
+            if (this.resultTemplate) {
+                return this.resultTemplate({
+                    i18n: this.i18n,
+                    dateTimeFormat: this.config.getDateTimeFormat(),
+                    moment: moment,
+                    item: item,
+                    index: index
+                });
+            }
+        },
+        previewItem: function(e) {
+            var element = e.currentTarget,
+                id = $(element).attr('rel'),
+                item = this.collection.get(id),
+                settingsModel = this.picker.field.model,
+                previewView = new this.getPreviewInstance({
+                    el: element,
+                    model: new settingsModel.constructor(_.extend({}, settingsModel.toJSON(), {
+                        id: item.get('id'),
+                        content: item.toJSON()
+                    })),
+                    picker: this.picker
+                });
+            // Stop event propagation so we don't trigger preview of stored field item as well
+            e.stopPropagation();
+            e.preventDefault();
+        },
+        loadMore: function() {
+            var next = this.model.getLink('next');
+            if (next) {
+                this.model.href = next.href;
+                this.model.promise.done(_.bind(function() {
+                    this.model.fetch({
+                        picker: this.picker,
+                        success: _.bind(function(model, response, options) {
+                            if (!model.getLink('next')) {
+                                this.$scrollLoader.evScrollLoader('hideLoader');
+                            }
+                            this.collection.add(model.getEmbedded(model.collectionKey).models);
+                        }, this),
+                        error: _.bind(this.ajaxError, this)
+                    });
+                }, this));
+            }
+        },
+        addHandler: function(item, collection, options) {
+            var $item = $(this.getItemHtml(item, collection.indexOf(item)));
+            this.decorate($item);
+            this.$('.content-list').append($item);
+        },
+        decorate: function($item) {
+            // For keyboard accessibility, add result item to tab flow
+            $item.attr('tabindex', '0');
+            // ...and programmatically focus on interactive elements
+            var focusedIndex;
+            // when item receives focus reset item action index and scroll to top
+            $item.focus(_.bind(function() {
+                var $interEls = $('a', $item);
+                $interEls.attr('tabindex', '-1');
+                focusedIndex = -1;
+                this.$scrollLoader.evScrollLoader('scrollTo', $item.offset().top - 2);
+            }, this));
+            $item.keydown(_.bind(function(e) {
+                var $interEls,
+                    $prevAll,
+                    $nextAll,
+                    $wrap = this.$scrollLoader.closest('.scrollWrap'),
+                    lastIndex,
+                    index,
+                    isItemScrolled = _.bind(function(reverse) {
+                        var itemHeight = $item.height(),
+                            scrollHeight = $wrap.height(),
+                            clearReq = itemHeight - scrollHeight,
+                            itemOffset = $item.offset().top,
+                            scrollOffset = $wrap.offset().top,
+                            clearAct = itemOffset - scrollOffset;
+                        return reverse ? clearAct >= 0 : Math.abs(clearAct) >= clearReq;
+                    }, this);
+                if (e.which === 33 || e.keyCode === 33) {
+                    e.preventDefault();
+                    // page up
+                    $prevAll = $item.prevAll();
+                    if (!$prevAll.length) {
+                        return;
+                    }
+                    // Note: items are searched up in order
+                    index = 10;
+                    lastIndex = $prevAll.length - 1;
+                    index = index > lastIndex ? lastIndex : index;
+                    $prevAll.eq(index).focus();
+                } else if (e.which === 34 || e.keyCode === 34) {
+                    // page down
+                    $nextAll = $item.nextAll();
+                    if (!$nextAll.length) {
+                        return;
+                    }
+                    e.preventDefault();
+                    index = 10;
+                    lastIndex = $nextAll.length - 1;
+                    index = index > lastIndex ? lastIndex : index;
+                    $nextAll.eq(index).focus();
+                } else if (e.which === 35 || e.keyCode === 35) {
+                    e.preventDefault();
+                    // end key should jump to bottom
+                    $nextAll = $item.nextAll();
+                    if (!$nextAll.length) {
+                        return;
+                    }
+                    $nextAll.last().focus();
+                } else if (e.which === 36 || e.keyCode === 36) {
+                    e.preventDefault();
+                    // home key should jump to top
+                    // Note: as w/ page up above, the last previous item is the
+                    // first in our list of results
+                    $prevAll = $item.prevAll();
+                    if (!$prevAll.length) {
+                        return;
+                    }
+                    $prevAll.last().focus();
+                } else if (e.which === 37 || e.keyCode === 37) {
+                    e.preventDefault();
+                    // left arrow move to previous item action
+                    $interEls = $('a:visible', $item);
+                    if (!$interEls.length) {
+                        return;
+                    }
+                    lastIndex = $interEls.length - 1;
+                    focusedIndex = --focusedIndex < 0 ? lastIndex : focusedIndex;
+                    focusedIndex = focusedIndex > lastIndex ? lastIndex : focusedIndex;
+                    $interEls.eq(focusedIndex).focus();
+                } else if ((e.which === 38 || e.keyCode === 38) && isItemScrolled(true)) {
+                    e.preventDefault();
+                    // up arrow move to previous item
+                    var $previous = $item.prev();
+                    if ($previous && $previous.length) {
+                        $previous.focus();
+                    }
+                } else if (e.which === 39 || e.keyCode === 39) {
+                    e.preventDefault();
+                    // right arrow move to next item action
+                    $interEls = $('a:visible', $item);
+                    if (!$interEls.length) {
+                        return;
+                    }
+                    lastIndex = $interEls.length - 1;
+                    focusedIndex = ++focusedIndex > lastIndex ? 0 : focusedIndex;
+                    $interEls.eq(focusedIndex).focus();
+                } else if ((e.which === 40 || e.keyCode === 40) && isItemScrolled()) {
+                    // down arrow move to next item
+                    var $next = $item.next();
+                    if ($next && $next.length) {
+                        $next.focus();
+                        e.preventDefault();
+                    }
+                }
+            }, this));
+        },
+        render: function() {
+            this.$el.html(this.resultsTemplate({
+                i18n: this.i18n,
+                totalResults: parseInt(this.model.get('totalItemsCount'), 10)
+            }));
+            this.$total = this.$('.total');
+            this.$results = this.$('.results');
+            var $contentList = this.$('.content-list');
+            if (!this.collection.isEmpty()) {
+                this.collection.each(function(item, index) {
+                    var $item = $(this.getItemHtml(item, index));
+                    this.decorate($item);
+                    $contentList.append($item);
+                }, this);
+            } else {
+                $contentList.append(this.emptyTemplate({
+                    i18n: this.i18n
+                }));
+            }
+            var scrollHeight = this.config.scrollHeight;
+            this.$scrollLoader = $contentList.evScrollLoader({
+                height: scrollHeight,
+                onScrolled: this.loadMore
+            });
+            // TODO - I don't think we need scroll loader to set max-height (ever?)
+            this.$scrollLoader.closest('.scrollWrap').css('max-height', '');
+            if (!this.model.getLink('next')) {
+                this.$scrollLoader.evScrollLoader('hideLoader');
+            }
+            // Prevent multiple bindings if the collection hasn't changed between render calls
+            this.collection
+            .off('add', this.addHandler)
+            .on('add', this.addHandler);
+        },
+        // Subclasses must implement the following
+        refreshHandler: function(e) {},
+        getPreviewInstance: function(previewOptions) {}
+    });
+
+});
+define('ev-script/views/preview',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','jquery-ui/ui/widgets/dialog'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        BaseView = require('ev-script/views/base'),
+        VideoSettings = require('ev-script/models/video-settings');
+
+    require('jquery-ui/ui/widgets/dialog');
+
+    return BaseView.extend({
+        initialize: function(options) {
+            BaseView.prototype.initialize.call(this, options);
+
+            _.bindAll(this, 'render', 'getTitle');
+
+            this.render();
+        },
+        render: function() {
+            var $dialogWrap = $('<div class="dialogWrap ev-preview"></div>'),
+                embedView = new this.embedClass({
+                    model: new this.model.constructor(this.model.toJSON())
+                }),
+                // Desired difference between media width and containing dialog width
+                widthOffset = 50,
+                // Desired difference between media height and containing dialog height
+                heightOffset = 70,
+                // Actual dialog width taking into account available room
+                dialogWidth = Math.min(parseInt(embedView.getFrameWidth(), 10) + widthOffset, $(window).width() - this.config.dialogMargin),
+                // Actual dialog height taking into account available room
+                dialogHeight = Math.min(parseInt(embedView.getFrameHeight(), 10) + heightOffset, $(window).height() - this.config.dialogMargin),
+                // Our dialog
+                $dialog;
+
+            this.$el.after($dialogWrap);
+
+            // Try to scale our content to fit within available dialog dimensions
+            embedView.scale(dialogWidth - widthOffset, dialogHeight - heightOffset);
+
+            $dialog = $dialogWrap.dialog({
+                title: this.getTitle(),
+                modal: true,
+                width: dialogWidth,
+                height: dialogHeight,
+                draggable: false,
+                resizable: false,
+                dialogClass: 'ev-dialog',
+                create: _.bind(function(event, ui) {
+                    embedView.render(true);
+                    // Add autofocus attribute to embed view iframe
+                    embedView.$('iframe').attr('autofocus', true);
+                    $dialogWrap.html(embedView.$el);
+                }, this),
+                closeText: this.i18n.formatMessage('Close'),
+                close: function(event, ui) {
+                    $dialogWrap.dialog('destroy').remove();
+                }
+            });
+        },
+        getTitle: function() {
+            return this.unencode(this.model.get('content').title);
+        }
+    });
+
+});
+
 define('ev-script/views/embed',['require','underscore','ev-script/views/base'],function(require) {
 
     'use strict';
@@ -28320,9 +29247,6 @@ define('ev-script/views/video-embed',['require','underscore','urijs/URI','ev-scr
 
     return EmbedView.extend({
         template: _.template(require('text!ev-script/templates/video-embed.html')),
-        initialize: function(options) {
-            EmbedView.prototype.initialize.call(this, options);
-        },
         render: function(isPreview) {
             // Width and height really should be set by now...but use a reasonable default if not
             var width = this.getMediaWidth(),
@@ -28338,23 +29262,7 @@ define('ev-script/views/video-embed',['require','underscore','urijs/URI','ev-scr
         getSrcUrl: function(width, height, isPreview) {
             var id = this.model.get('id'),
                 url = URI(this.config.ensembleUrl);
-            if (this.info.checkVersion('>=4.8.0')) {
                 url.path('/hapi/v1/contents/' + id + '/plugin');
-                url.addQuery({
-                    'displayViewersReport': this.model.get('viewersreport'),
-                    'embedAsThumbnail': this.model.get('embedthumbnail'),
-                    'startTime': 0,
-                    'displayCredits': this.model.get('metadata')
-                });
-            } else {
-                url.path('/app/plugin/embed.aspx');
-                url.addQuery({
-                    'ID': id,
-                    'displayDateProduced': this.model.get('dateproduced'),
-                    'isNewPluginEmbed': true
-                });
-            }
-            // Common
             url.addQuery({
                 'autoPlay': this.model.get('autoplay'),
                 'displayTitle': this.model.get('showtitle'),
@@ -28367,6 +29275,10 @@ define('ev-script/views/video-embed',['require','underscore','urijs/URI','ev-scr
                 'displayMetaData': this.model.get('metadata'),
                 'displayEmbedCode': this.model.get('embedcode'),
                 'displayDownloadIcon': this.model.get('download'),
+                'displayViewersReport': this.model.get('viewersreport'),
+                'embedAsThumbnail': this.model.get('embedthumbnail'),
+                'startTime': 0,
+                'displayCredits': this.model.get('metadata'),
                 'showCaptions': this.model.get('showcaptions'),
                 'hideControls': true,
                 'width': width,
@@ -28402,14 +29314,12 @@ define('ev-script/views/video-embed',['require','underscore','urijs/URI','ev-scr
             return height;
         },
         isMenuVisible: function() {
-            return (this.info.checkVersion('<4.8.0') && this.model.get('showtitle')) ||
-                   this.model.get('socialsharing') ||
+            return this.model.get('socialsharing') ||
                    this.model.get('annotations') ||
                    this.model.get('captionsearch') ||
                    this.model.get('attachments') ||
                    this.model.get('links') ||
                    this.model.get('metadata') ||
-                   (this.info.checkVersion('<4.8.0') && this.model.get('dateproduced')) ||
                    this.model.get('embedcode') ||
                    this.model.get('download') ||
                    this.model.get('viewersreport');
@@ -28438,72 +29348,6 @@ define('ev-script/views/video-embed',['require','underscore','urijs/URI','ev-scr
 
 });
 
-define('ev-script/models/base',['require','jquery','underscore','backbone','ev-script/util/cache','ev-script/collections/base'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        cacheUtil = require('ev-script/util/cache'),
-        BaseCollection = require('ev-script/collections/base');
-
-    return Backbone.Model.extend({
-        initialize: function(attributes, options) {
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
-        },
-        getCached: function() {},
-        setCached: function() {},
-        fetch: function(options) {
-            if (options && options.success) {
-                options.success = _.wrap(options.success, _.bind(function(success) {
-                    // We've successfully queried the API for something that
-                    // requires authentication but we're in an unauthenticated
-                    // state.  Double-check our authentication and proceed.
-                    var args = Array.prototype.slice.call(arguments, 1);
-                    if (this.requiresAuth && !this.auth.isAuthenticated()) {
-                        this.auth.fetchUser()
-                        .always(function() {
-                            success.apply(this, args);
-                        });
-                    } else {
-                        success.apply(this, args);
-                    }
-                }, this));
-                // TODO - maybe wrap error to handle 401?
-            }
-            return Backbone.Model.prototype.fetch.call(this, options);
-        },
-        sync: function(method, collection, options) {
-            _.defaults(options || (options = {}), {
-                xhrFields: { withCredentials: true }
-            });
-            if (method === 'read') {
-                var cached = this.getCached(options.cacheKey);
-                if (cached) {
-                    var deferred = $.Deferred();
-                    if (options.success) {
-                        deferred.done(options.success);
-                    }
-                    return deferred.resolve(cached).promise();
-                } else {
-                    // Grab the response and cache
-                    options.success = options.success || function(collection, response, options) {};
-                    options.success = _.wrap(options.success, _.bind(function(success) {
-                        this.setCached(options.cacheKey, arguments[1]);
-                        success.apply(this, Array.prototype.slice.call(arguments, 1));
-                    }, this));
-                    return Backbone.Model.prototype.sync.call(this, method, collection, options);
-                }
-            } else {
-                return Backbone.Model.prototype.sync.call(this, method, collection, options);
-            }
-        }
-    });
-
-});
-
 define('ev-script/models/video-encoding',['require','backbone','ev-script/models/base','underscore','ev-script/util/cache'],function(require) {
 
     'use strict';
@@ -28514,26 +29358,14 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/models
         cacheUtil = require('ev-script/util/cache');
 
     return BaseModel.extend({
-        idAttribute: 'videoID',
-        initialize: function(attributes, options) {
-            BaseModel.prototype.initialize.call(this, attributes, options);
-            this.requiresAuth = false;
-        },
-        // TODO - cache responses
-        getCached: function(key) {},
-        setCached: function(key, resp) {},
-        url: function() {
-            // Note the response is actually JSONP.  We'll strip the padding
-            // below with our dataFilter.
-            var url = this.config.ensembleUrl + '/app/api/content/show.json/' + this.get('fetchId');
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        },
+        cacheName: 'encodings',
+        // initialize: function(attributes, options) {
+        //     BaseModel.prototype.initialize.call(this, attributes, options);
+        // },
         getDims: function(original) {
-            var dimsRaw = this.get('dimensions') || '848x480',
-                dimsStrs = dimsRaw.split('x'),
-                dims = [],
-                originalWidth = parseInt(dimsStrs[0], 10) || 848,
-                originalHeight = parseInt(dimsStrs[1], 10) || 480;
+            var dims = [],
+                originalWidth = parseInt(this.get('width'), 10) || 848,
+                originalHeight = parseInt(this.get('height'), 10) || 480;
             if (this.isAudio()) {
                 dims[0] = 400;
                 dims[1] = 26;
@@ -28566,26 +29398,6 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/models
         isExternal: function() {
             return (/^external\//i).test(this.get('contentType') || '');
         },
-        parse: function(response) {
-            if (_.isArray(response.dataSet.encodings)) {
-                // This is a collection, so return the highest bitrate encoding
-                return _.max(response.dataSet.encodings, function(encoding, index, encodings) {
-                    return parseInt(encoding.bitRate, 10);
-                });
-            } else {
-                return response.dataSet.encodings;
-            }
-        },
-        sync: function(method, model, options) {
-            _.extend(options, {
-                dataFilter: function(data) {
-                    // Strip padding from JSONP response
-                    var match = data.match(/\{[\s\S]*\}/);
-                    return match ? match[0] : data;
-                }
-            });
-            return Backbone.sync.call(this, method, model, options);
-        },
         updateSettingsModel: function(settingsModel) {
             var attrs = {
                 width: this.getWidth(),
@@ -28593,31 +29405,18 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/models
                 isaudio: this.isAudio(),
                 contenttype: this.get('contentType')
             };
-            // TODO - this needs to be handled better
-            // If the settings model hasn't been updated yet with default audio settings
-            // if (this.isAudio() && !settingsModel.get('isaudio')) {
-            //     _.extend(attrs, {
-            //         showtitle: false,
-            //         annotations: false,
-            //         captionsearch: false,
-            //         attachments: false,
-            //         links: false,
-            //         metadata: false,
-            //         dateproduced: false,
-            //         isaudio: true
-            //     });
-            // }
             settingsModel.set(attrs, { silent: true });
         }
     });
 
 });
 
-define('ev-script/views/video-preview',['require','underscore','ev-script/views/preview','ev-script/views/video-embed','ev-script/models/video-encoding'],function(require) {
+define('ev-script/views/video-preview',['require','underscore','ev-script/models/base','ev-script/views/preview','ev-script/views/video-embed','ev-script/models/video-encoding'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
+        BaseModel = require('ev-script/models/base'),
         PreviewView = require('ev-script/views/preview'),
         VideoEmbedView = require('ev-script/views/video-embed'),
         VideoEncoding = require('ev-script/models/video-encoding');
@@ -28625,30 +29424,34 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
     return PreviewView.extend({
         embedClass: VideoEmbedView,
         initialize: function(options) {
-            // Although our super sets this...we don't call our super init until
-            // later so we should set appId here
-            this.appId = options.appId;
-            this.encoding = options.encoding || new VideoEncoding({
-                fetchId: this.model.id
-            }, {
-                appId: this.appId
-            });
+            var contentModel,
+                responseCallback;
+
+            this.encoding = options.encoding;
+            if (!this.encoding) {
+                contentModel = new BaseModel(options.model.get('content'));
+                this.encoding = new VideoEncoding({}, {
+                    href: contentModel.getLink('ev:Encodings/Default').href
+                });
+            }
+
             this.picker = options.picker;
-            var success = _.bind(function() {
+
+            responseCallback = _.bind(function() {
                 this.encoding.updateSettingsModel(this.model);
                 // Picker model is a copy so need to update that as well
                 this.encoding.updateSettingsModel(this.picker.model);
                 PreviewView.prototype.initialize.call(this, options);
             }, this);
+
             if (this.encoding.isNew()) {
                 this.encoding.fetch({
-                    success: success,
                     // The loader indicator will show if it detects an AJAX
                     // request on our picker
                     picker: this.picker
-                });
+                }).always(responseCallback);
             } else {
-                success();
+                responseCallback();
             }
         }
     });
@@ -29181,14 +29984,15 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/views/
 });
 
 
-define('text!ev-script/templates/video-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.get(\'ThumbnailUrl\') %>" alt="<%= i18n.formatMessage(\'{0} preview thumbnail\', item.get(\'Title\')) %>"/>\n            <% if (item.get(\'IsCaptioned\')) { %>\n            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage(\'CC\') %>" alt="CC"></i>\n            <% } %>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span></a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Title\')) %>" rel="<%= item.get(\'ID\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span></a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <div class="title">\n            <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Title\')) %>" href="#" rel="<%= item.get(\'ID\') %>"><%= item.get(\'Title\') %></a>\n        </div>\n        <div class="content-info">\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Description\') %></div>\n                <div class="value"><%= item.get(\'Description\') %></div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Date Added\') %></div>\n                <div class="value">\n                    <%\n                        var dateAdded = new Date(item.get(\'AddedOn\')),\n                            localDate = dateAdded.setMinutes(dateAdded.getMinutes() - dateAdded.getTimezoneOffset());\n                        print(moment(localDate).format(dateTimeFormat));\n                    %>\n                </div>\n            </div>\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Keywords\') %></div>\n                <div class="value"><%= item.get(\'Keywords\') %></div>\n            </div>\n            <!-- redundant\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Library\') %></div>\n                <div class="value"><%- item.get(\'LibraryName\') %></div>\n            </div>\n            -->\n        </div>\n    </div>\n</div>\n';});
+define('text!ev-script/templates/video-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.getThumbnailUrl() %>" alt="<%= i18n.formatMessage(\'{0} preview thumbnail\', item.get(\'title\')) %>"/>\n            <% if (item.get(\'hasCaptions\')) { %>\n            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage(\'CC\') %>" alt="CC"></i>\n            <% } %>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span></a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span></a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <div class="title">\n            <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" href="#" rel="<%= item.get(\'id\') %>"><%= item.get(\'title\') %></a>\n        </div>\n        <div class="content-info">\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Description\') %></div>\n                <div class="value"><%= item.getDescription() %></div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Date Added\') %></div>\n                <div class="value">\n                    <%\n                        var dateAdded = new Date(item.get(\'dateAdded\')),\n                            localDate = dateAdded.setMinutes(dateAdded.getMinutes() - dateAdded.getTimezoneOffset());\n                        print(moment(localDate).format(dateTimeFormat));\n                    %>\n                </div>\n            </div>\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Keywords\') %></div>\n                <div class="value"><%= item.getKeywords() %></div>\n            </div>\n            <% if (item.getStatus()) { %>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Status\') %></div>\n                <div class="value"><%= item.getStatus() %></div>\n            </div>\n            <% } %>\n        </div>\n    </div>\n</div>\n';});
 
-define('ev-script/views/video-results',['require','jquery','underscore','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-expander','text!ev-script/templates/video-result.html'],function(require) {
+define('ev-script/views/video-results',['require','jquery','underscore','urijs/URITemplate','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-expander','text!ev-script/templates/video-result.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        URITemplate = require('urijs/URITemplate'),
         ResultsView = require('ev-script/views/results'),
         VideoSettings = require('ev-script/models/video-settings'),
         VideoPreviewView = require('ev-script/views/video-preview');
@@ -29196,11 +30000,51 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
     require('jquery-expander');
 
     return ResultsView.extend({
-        modelClass: VideoSettings,
-        previewClass: VideoPreviewView,
         resultTemplate: _.template(require('text!ev-script/templates/video-result.html')),
         initialize: function(options) {
             ResultsView.prototype.initialize.call(this, options);
+        },
+        getItemHtml: function(item, index) {
+            var branding = this.root.getEmbedded('ev:Brandings/Current');
+            item.getThumbnailUrl = function() {
+                var thumbnailLink = item.getLink('ev:Images/Thumbnail'),
+                    thumbnailTemplate = thumbnailLink ? thumbnailLink.href : branding.get('thumbnailImageUrlTemplate');
+                return new URITemplate(thumbnailTemplate).expand({
+                    width: 200,
+                    height: 112
+                });
+            };
+            item.getDescription = function() {
+                return _.unescape(item.get('description'));
+            };
+            item.getKeywords = function() {
+                return _.unescape(item.get('keywords'));
+            };
+            item.getStatus = _.bind(function() {
+                var status = item.get('status') || '',
+                    formattedStatus = '';
+                // Try/catch in case we don't have a translation
+                try {
+                    switch(status) {
+                        case '':
+                        case 'unknown':
+                            break;
+                        case 'ready':
+                        case 'file_ready':
+                            formattedStatus = '<span style="color:green;">' + this.i18n.formatMessage(status) + '</span>';
+                            break;
+                        case 'failed':
+                            formattedStatus = '<span style="color:red;">' + this.i18n.formatMessage(status) + '</span>';
+                            break;
+                        default:
+                            formattedStatus = '<span style="color:#ff6600;">' + this.i18n.formatMessage(status) + '</span>';
+                    }
+                } catch(ex) {
+                    console.error(ex);
+                }
+                return formattedStatus;
+            }, this);
+            return ResultsView.prototype.getItemHtml.call(this, item, index);
         },
         decorate: function($item) {
             // Handle truncation (more/less) of truncatable fields
@@ -29223,94 +30067,93 @@ define('ev-script/views/video-results',['require','jquery','underscore','ev-scri
         },
         refreshHandler: function(e) {
             e.preventDefault();
-            this.appEvents.trigger('reloadVideos');
+            this.events.trigger('reload', 'videos');
+        },
+        getPreviewInstance: function(previewOptions) {
+            return new VideoPreviewView(previewOptions);
         }
     });
 
 });
 
-define('ev-script/collections/videos',['require','ev-script/collections/base','ev-script/util/cache','urijs/URI','underscore'],function(require) {
+define('ev-script/models/videos',['require','ev-script/models/base','ev-script/util/cache','urijs/URI','underscore'],function(require) {
 
     'use strict';
 
-    var BaseCollection = require('ev-script/collections/base'),
+    var BaseModel = require('ev-script/models/base'),
         cacheUtil = require('ev-script/util/cache'),
         URI = require('urijs/URI'),
         _ = require('underscore');
 
-    return BaseCollection.extend({
-        initialize: function(models, options) {
-            BaseCollection.prototype.initialize.call(this, models, options);
-            this.libraryId = options.libraryId || '';
-            this.filterOn = options.filterOn || '';
-            this.filterValue = options.filterValue || '';
-            if (this.info.checkVersion('>=4.1.0')) {
-                this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedLibrary' : '/api/MediaLibrary';
-            } else {
-                this.sourceUrl = options.sourceId === 'shared' ? '/api/SharedContent' : '/api/Content';
-            }
-            this.pageIndex = 1;
+    return BaseModel.extend({
+        cacheName: 'videos',
+        collectionKey: 'videos'
+        // initialize: function(attributes, options) {
+        //     BaseModel.prototype.initialize.call(this, attributes, options);
+        // },
+    });
+
+});
+
+define('ev-script/collections/legacy-base',['require','jquery','underscore','backbone','ev-script/util/cache'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        cacheUtil = require('ev-script/util/cache');
+
+    return Backbone.Collection.extend({
+        initialize: function(collections, options) {
+            this.config = cacheUtil.getConfig();
+            this.info = cacheUtil.getInfo();
+            this.root = cacheUtil.getRoot();
+            this.promise = $.Deferred().resolve().promise();
         },
-        _cache: function(key, resp) {
-            var cachedValue = null,
-                user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                var videosCache = userCache.get('videos');
-                if (!videosCache) {
-                    userCache.set('videos', videosCache = new cacheUtil.Cache());
-                }
-                cachedValue = videosCache[resp ? 'set' : 'get'](key, resp);
-            }
-            return cachedValue;
-        },
-        getCached: function(key) {
-            return this._cache(key);
-        },
-        setCached: function(key, resp) {
-            return this._cache(key, resp);
-        },
-        clearCache: function() {
-            var user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                userCache.set('videos', null);
-            }
-        },
-        url: function() {
-            var url = URI(this.config.ensembleUrl + this.sourceUrl + '/' + this.libraryId);
-            url.addQuery({
-                'PageSize': this.config.pageSize,
-                'PageIndex': this.pageIndex,
-                'FilterOn': this.filterOn,
-                'FilterValue': this.filterValue
-            });
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        },
+        model: Backbone.Model.extend({
+            idAttribute: 'ID'
+        }),
+        getCached: function(key) {},
+        setCached: function(key, resp) {},
+        clearCache: function(key) {},
         parse: function(response) {
-            var videos = response.Data,
-                ensembleUrl = this.config.ensembleUrl;
-            _.each(videos, function(video) {
-                video.Description = _.unescape(video.Description);
-                video.Keywords = _.unescape(video.Keywords);
-                if (new RegExp('^' + ensembleUrl, 'i').test(video.ThumbnailUrl)) {
-                    video.ThumbnailUrl = URI(video.ThumbnailUrl).setQuery({
-                        Width: 200,
-                        Height: 112
-                    }).toString();
-                }
+            return response.Data;
+        },
+        sync: function(method, collection, options) {
+            _.defaults(options || (options = {}), {
+                xhrFields: { withCredentials: true }
             });
-            return videos;
+            if (method === 'read') {
+                var cached = this.getCached(options.cacheKey);
+                if (cached) {
+                    var deferred = $.Deferred();
+                    if (options.success) {
+                        deferred.done(options.success);
+                    }
+                    return deferred.resolve(cached).promise();
+                } else {
+                    // Grab the response and cache
+                    options.success = options.success || function(collection, response, options) {};
+                    options.success = _.wrap(options.success, _.bind(function(success) {
+                        this.setCached(options.cacheKey, arguments[1]);
+                        success.apply(this, Array.prototype.slice.call(arguments, 1));
+                    }, this));
+                    return Backbone.Collection.prototype.sync.call(this, method, collection, options);
+                }
+            } else {
+                return Backbone.Collection.prototype.sync.call(this, method, collection, options);
+            }
         }
     });
 
 });
 
-define('ev-script/collections/media-workflows',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
+define('ev-script/collections/media-workflows',['require','ev-script/collections/legacy-base','ev-script/util/cache'],function(require) {
 
     'use strict';
 
-    var BaseCollection = require('ev-script/collections/base'),
+    var BaseCollection = require('ev-script/collections/legacy-base'),
         cacheUtil = require('ev-script/util/cache');
 
     return BaseCollection.extend({
@@ -29319,17 +30162,7 @@ define('ev-script/collections/media-workflows',['require','ev-script/collections
             this.filterValue = options.libraryId || '';
         },
         _cache: function(key, resp) {
-            var cachedValue = null,
-                user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                var workflowsCache = userCache.get('workflows');
-                if (!workflowsCache) {
-                    userCache.set('workflows', workflowsCache = new cacheUtil.Cache());
-                }
-                cachedValue = workflowsCache[resp ? 'set' : 'get'](key, resp);
-            }
-            return cachedValue;
+            return cacheUtil.getCache('workflows')[resp ? 'set' : 'get'](key, resp);
         },
         getCached: function(key) {
             return this._cache(key);
@@ -29344,8 +30177,7 @@ define('ev-script/collections/media-workflows',['require','ev-script/collections
             var indexParam = 'PageIndex=1';
             var onParam = 'FilterOn=LibraryId';
             var valueParam = 'FilterValue=' + encodeURIComponent(this.filterValue);
-            var url = api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+            return api_url + '?' + sizeParam + '&' + indexParam + '&' + onParam + '&' + valueParam;
         },
         // Override base parse in order to grab settings
         parse: function(response) {
@@ -29422,13 +30254,12 @@ define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-
             this.$upload = this.$('.upload');
             this.workflows = options.workflows;
             this.workflowSelect = new WorkflowSelect({
-                appId: this.appId,
                 el: this.$('select')[0],
                 collection: this.workflows
             });
             this.render();
             this.decorateUploader();
-            this.appEvents.on('hidePickers', this.closeDialog);
+            this.events.on('hidePickers', this.closeDialog);
         },
         getWidth: function() {
             return Math.min(600, $(window).width() - this.config.dialogMargin);
@@ -29440,7 +30271,7 @@ define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-
             var extensions = '',
                 selected = this.workflowSelect.getSelected(),
                 maxUploadSize = parseInt(selected.get('MaxUploadSize'), 10),
-                policyMessage = this.info.checkVersion('>=4.8.0') ? _.unescape(selected.get('PolicyMessage')) : '';
+                policyMessage = _.unescape(selected.get('PolicyMessage'));
 
             this.$('.policy-message').html(policyMessage);
 
@@ -29547,7 +30378,7 @@ define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-
                         this.closeDialog();
                     }, this),
                     FileUploaded: _.bind(function(up, file, info) {
-                        this.appEvents.trigger('fileUploaded');
+                        this.events.trigger('fileUploaded');
                     }, this)
                 }
             });
@@ -29586,7 +30417,7 @@ define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-
                 close: _.bind(function(event, ui) {
                     this.$upload.pluploadQueue().destroy();
                     $dialogWrap.dialog('destroy').remove();
-                    this.appEvents.off('hidePickers', this.closeDialog);
+                    this.events.off('hidePickers', this.closeDialog);
                     this.$dialog = null;
                 }, this)
             });
@@ -29666,17 +30497,18 @@ define("base64", function(){});
 
 define('text!ev-script/templates/anthem.html',[],function () { return '<iframe src="ensemble://<%= tokenDetailsApiUrl %>" style="display:none;"></iframe>\n';});
 
-define('ev-script/views/video-picker',['require','jquery','underscore','platform','ev-script/views/picker','ev-script/views/filter','ev-script/views/video-results','ev-script/collections/videos','ev-script/collections/media-workflows','ev-script/views/upload','base64','text!ev-script/templates/anthem.html'],function(require) {
+define('ev-script/views/video-picker',['require','jquery','underscore','platform','urijs/URITemplate','ev-script/views/picker','ev-script/views/filter','ev-script/views/video-results','ev-script/models/videos','ev-script/collections/media-workflows','ev-script/views/upload','base64','text!ev-script/templates/anthem.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         platform = require('platform'),
+        URITemplate = require('urijs/URITemplate'),
         PickerView = require('ev-script/views/picker'),
         FilterView = require('ev-script/views/filter'),
         VideoResultsView = require('ev-script/views/video-results'),
-        Videos = require('ev-script/collections/videos'),
+        Videos = require('ev-script/models/videos'),
         MediaWorkflows = require('ev-script/collections/media-workflows'),
         UploadView = require('ev-script/views/upload');
 
@@ -29686,26 +30518,40 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
         anthemTemplate: _.template(require('text!ev-script/templates/anthem.html')),
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary', 'handleSubmit', 'uploadHandler', 'recordHandler');
 
-            this.appEvents.on('typeSelectChange', _.bind(function() {
-                this.loadVideos();
-            }, this));
-            this.appEvents.on('search', _.bind(function() {
-                this.loadVideos();
-            }, this));
+            _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary',
+            'handleSubmit', 'uploadHandler', 'recordHandler', 'handleSearch');
+
+            this.events
+            .off('typeSelectChange', this.loadVideos)
+            .on('typeSelectChange', this.loadVideos);
+
+            this.events
+            .off('search', this.handleSearch)
+            .on('search', this.handleSearch);
+
+            this.events
+            .off('fileUploaded', this.loadVideos)
+            .on('fileUploaded', this.loadVideos);
+
+            var reload = _.bind(function(target) {
+                if (target === 'videos') {
+                    this.loadVideos();
+                }
+            }, this);
+            this.events
+            .off('reload', reload)
+            .on('reload', reload);
 
             this.filter = new FilterView({
                 id: this.id + '-filter',
                 el: this.$('.ev-filter-block'),
-                picker: this,
-                appId: this.appId
+                picker: this
             });
 
             this.resultsView = new VideoResultsView({
                 el: this.$('.ev-results'),
-                picker: this,
-                appId: this.appId
+                picker: this
             });
 
             this.$el.append(this.resultsView.$el);
@@ -29725,9 +30571,13 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
             this.loadVideos();
             e.preventDefault();
         },
+        handleSearch: function(model) {
+            if (model === this.model) {
+                this.loadVideos();
+            }
+        },
         uploadHandler: function(e) {
             var uploadView = new UploadView({
-                appId: this.appId,
                 field: this.field,
                 workflows: this.workflows
             });
@@ -29814,46 +30664,34 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
                 sourceId = this.model.get('sourceId'),
                 libraryId = this.model.get('libraryId'),
-                cacheKey = sourceId + libraryId + searchVal,
-                videos = new Videos({}, {
-                    sourceId: sourceId,
-                    libraryId: libraryId,
-                    filterOn: '',
-                    filterValue: searchVal,
-                    appId: this.appId
+                library = this.filter.getLibrary(libraryId),
+                searchTemplate = sourceId === 'shared' ?
+                    new URITemplate(library.getLink('ev:SharedContents/Search').href) :
+                    new URITemplate(library.getLink('ev:Contents/Search').href),
+                searchUrl = searchTemplate.expand({
+                    search: searchVal,
+                    sortBy: 'dateAdded',
+                    isPublished: true,
+                    desc: true,
+                    pageSize: 20
                 }),
-                clearVideosCache = _.bind(function() {
-                    videos.clearCache();
-                    this.loadVideos();
-                }, this);
+                videos = new Videos({}, {
+                    href: searchUrl
+                });
+
             videos.fetch({
                 picker: this,
-                cacheKey: cacheKey,
-                success: _.bind(function(collection, response, options) {
-                    var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
-                    var size = _.size(response.Data);
-                    if (size === totalRecords) {
-                        collection.hasMore = false;
-                    } else {
-                        collection.hasMore = true;
-                        collection.pageIndex += 1;
-                    }
-                    this.resultsView.collection = collection;
+                success: _.bind(function(model, response, options) {
+                    model.collectionKey = sourceId === 'shared' ? 'sharedContents' : 'contents';
+                    this.resultsView.model = model;
+                    this.resultsView.collection = model.getEmbedded(model.collectionKey);
                     this.resultsView.render();
                 }, this),
-                error: _.bind(function(collection, xhr, options) {
-                    this.ajaxError(xhr, _.bind(function() {
-                        this.loadVideos();
-                    }, this));
-                }, this)
+                error: _.bind(this.ajaxError, this)
             });
-            this.appEvents.off('fileUploaded').on('fileUploaded', clearVideosCache);
-            this.appEvents.off('reloadVideos').on('reloadVideos', clearVideosCache);
         },
         loadWorkflows: function() {
-            this.workflows = new MediaWorkflows({}, {
-                appId: this.appId
-            });
+            this.workflows = new MediaWorkflows({}, {});
             // FIXME - add libraryId (as with playlists)
             this.workflows.filterValue = this.model.get('libraryId');
             this.workflows.fetch({
@@ -29869,17 +30707,13 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
                         this.filter.hideRecord();
                     }
                 }, this),
-                error: _.bind(function(collection, xhr, options) {
-                    this.ajaxError(xhr, _.bind(function() {
-                        this.loadWorkflows();
-                    }, this));
-                }, this),
+                error: _.bind(this.ajaxError, this),
                 reset: true
             });
         },
         canRecord: function() {
-            var currentUser = this.auth.getUser();
-            return this.info.anthemEnabled() && currentUser && currentUser.get('CanUseAnthem') && !this.isMobile() && platform.os.family !== 'Linux';
+            var currentUser = this.root.getUser();
+            return currentUser && currentUser.get('CanUseAnthem') && !this.isMobile() && platform.os.family !== 'Linux';
         },
         isMobile: function() {
             var family = platform.os.family;
@@ -29960,7 +30794,7 @@ define('ev-script/util/size',['require','underscore'],function(require) {
 });
 
 
-define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <div role="group" aria-labelledby="videoSettingsTitle">\n        <div id="videoSettingsTitle" style="display:none;"><%= i18n.formatMessage(\'Media Embed Options\') %></div>\n        <div class="fieldWrap">\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div>\n            <div class="fieldWrap inline-option">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle"><%= i18n.formatMessage(\'Title\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="socialsharing" class="form-checkbox" <% if (model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox"/>\n                <label for="socialsharing"><%= i18n.formatMessage(\'Social Tools\') %></label>\n            </div>\n            <% if (!isGallery && !isYouTube) { %>\n            <div class="fieldWrap inline-option">\n                <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\n            </div>\n            <% } %>\n            <% if (!isGallery && !isYouTube) { %>\n            <div class="fieldWrap inline-option">\n                <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                <label for="captionsearch"><%= i18n.formatMessage(\'Interactive Transcript\') %></label>\n            </div>\n            <% } %>\n            <% if (appInfo.checkVersion(\'>=4.8.0\') && !isGallery) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="embedthumbnail" class="form-checkbox" <% if (model.get(\'embedthumbnail\')) { print(\'checked="checked"\'); } %> name="embedthumbnail" type="checkbox"/>\n                    <label for="embedthumbnail"><%= i18n.formatMessage(\'Embed As Thumbnail\') %></label>\n                </div>\n            <% } %>\n            <% if (!isExternal) { %>\n            <div class="fieldWrap inline-option">\n                <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\n            </div>\n            <% } %>\n            <% if (!isYouTube) { %>\n            <div class="fieldWrap inline-option">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n            </div>\n            <% } %>\n            <% if (!isYouTube) { %>\n            <div class="fieldWrap inline-option">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n            </div>\n            <% } %>\n            <div class="fieldWrap inline-option">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata"><%= i18n.formatMessage(\'Meta Data\') %></label>\n            </div>\n            <% if (appInfo.checkVersion(\'<4.8.0\')) { %>\n            <div class="fieldWrap inline-option">\n                <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                <label for="dateproduced"><%= i18n.formatMessage(\'Date Produced\') %></label>\n            </div>\n            <% } %>\n            <div class="fieldWrap inline-option">\n                <input id="embedcode" class="form-checkbox" <% if (model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox"/>\n                <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\n            </div>\n            <% if (!isYouTube) { %>\n            <div class="fieldWrap inline-option">\n                <input id="download" class="form-checkbox" <% if (model.get(\'download\')) { print(\'checked="checked"\'); } %> name="download" type="checkbox"/>\n                <label for="download"><%= i18n.formatMessage(\'Download Link\') %></label>\n            </div>\n            <% } %>\n            <% if (!isGallery && !isExternal) { %>\n            <div class="fieldWrap inline-option">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n            </div>\n            <% } %>\n            <% if (isAudio) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %>  name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n            <% } %>\n            <% if (appInfo.checkVersion(\'>=4.8.0\') && !isGallery && !isExternal) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="viewersreport" class="form-checkbox" <% if (model.get(\'viewersreport\')) { print(\'checked="checked"\'); } %>  name="viewersreport" type="checkbox"/>\n                    <label for="viewersreport"><%= i18n.formatMessage(\'Viewers Report\') %></label>\n                </div>\n            <% } %>\n         </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </div>\n</form>\n';});
+define('text!ev-script/templates/video-settings.html',[],function () { return '<form>\n    <div role="group" aria-labelledby="videoSettingsTitle">\n        <div id="videoSettingsTitle" style="display:none;"><%= i18n.formatMessage(\'Media Embed Options\') %></div>\n        <div class="fieldWrap">\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div>\n            <div class="fieldWrap inline-option">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle"><%= i18n.formatMessage(\'Title\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="socialsharing" class="form-checkbox" <% if (model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox"/>\n                <label for="socialsharing"><%= i18n.formatMessage(\'Social Tools\') %></label>\n            </div>\n            <% if (!isGallery && !isYouTube) { %>\n            <div class="fieldWrap inline-option">\n                <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\n            </div>\n            <% } %>\n            <% if (!isGallery && !isYouTube) { %>\n            <div class="fieldWrap inline-option">\n                <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                <label for="captionsearch"><%= i18n.formatMessage(\'Interactive Transcript\') %></label>\n            </div>\n            <% } %>\n            <% if (!isGallery) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="embedthumbnail" class="form-checkbox" <% if (model.get(\'embedthumbnail\')) { print(\'checked="checked"\'); } %> name="embedthumbnail" type="checkbox"/>\n                    <label for="embedthumbnail"><%= i18n.formatMessage(\'Embed As Thumbnail\') %></label>\n                </div>\n            <% } %>\n            <% if (!isExternal) { %>\n            <div class="fieldWrap inline-option">\n                <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\n            </div>\n            <% } %>\n            <% if (!isYouTube) { %>\n            <div class="fieldWrap inline-option">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n            </div>\n            <% } %>\n            <% if (!isYouTube) { %>\n            <div class="fieldWrap inline-option">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n            </div>\n            <% } %>\n            <div class="fieldWrap inline-option">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata"><%= i18n.formatMessage(\'Meta Data\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="embedcode" class="form-checkbox" <% if (model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox"/>\n                <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\n            </div>\n            <% if (!isYouTube) { %>\n            <div class="fieldWrap inline-option">\n                <input id="download" class="form-checkbox" <% if (model.get(\'download\')) { print(\'checked="checked"\'); } %> name="download" type="checkbox"/>\n                <label for="download"><%= i18n.formatMessage(\'Download Link\') %></label>\n            </div>\n            <% } %>\n            <% if (!isGallery && !isExternal) { %>\n            <div class="fieldWrap inline-option">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n            </div>\n            <% } %>\n            <% if (isAudio) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %>  name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n            <% } %>\n            <% if (!isGallery && !isExternal) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="viewersreport" class="form-checkbox" <% if (model.get(\'viewersreport\')) { print(\'checked="checked"\'); } %>  name="viewersreport" type="checkbox"/>\n                    <label for="viewersreport"><%= i18n.formatMessage(\'Viewers Report\') %></label>\n                </div>\n            <% } %>\n         </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </div>\n</form>\n';});
 
 
 define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(sizes, function(size) { %>\n    <option value="<%= size %>" <% if (size === target) { print(\'selected="selected"\'); } %>><%= size %></option>\n<% }); %>\n';});
@@ -30072,7 +30906,7 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
             }
             var content = this.field.model.get('content');
             this.$el.dialog({
-                title: this.unencode(content ? content.Title : this.field.model.get('id')),
+                title: this.unencode(content ? content.title : this.field.model.get('id')),
                 modal: true,
                 autoOpen: false,
                 draggable: false,
@@ -30082,6 +30916,109 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
                 height: Math.min(300, $(window).height() - this.config.dialogMargin),
                 closeText: this.i18n.formatMessage('Close')
             });
+        }
+    });
+
+});
+
+define('ev-script/views/video-field',['require','jquery','underscore','urijs/URITemplate','ev-script/models/base','ev-script/views/field','ev-script/models/video-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        URITemplate = require('urijs/URITemplate'),
+        BaseModel = require('ev-script/models/base'),
+        FieldView = require('ev-script/views/field'),
+        VideoSettings = require('ev-script/models/video-settings'),
+        VideoPickerView = require('ev-script/views/video-picker'),
+        VideoSettingsView = require('ev-script/views/video-settings'),
+        VideoPreviewView = require('ev-script/views/video-preview'),
+        VideoEncoding = require('ev-script/models/video-encoding');
+
+    return FieldView.extend({
+        // initialize: function(options) {
+        //     FieldView.prototype.initialize.call(this, options);
+        // },
+        initCallback: function() {
+            this.encoding = new VideoEncoding({}, {});
+
+            this.root.promise.done(_.bind(function() {
+                var encodingUrl = this.root.getLink('ev:Encodings/Default'),
+                    encodingUrlTemplate = encodingUrl && new URITemplate(encodingUrl.href);
+                if (!this.model.isNew() && encodingUrlTemplate) {
+                    this.encoding.href = encodingUrlTemplate.expand({
+                        contentId: this.model.id
+                    });
+                    this.encoding.fetch();
+                }
+            }, this));
+
+            this.model.on('change', _.bind(function() {
+                this.root.promise.done(_.bind(function() {
+                    var encodingUrl = this.root.getLink('ev:Encodings/Default'),
+                        encodingUrlTemplate = encodingUrl && new URITemplate(encodingUrl.href);
+                    // If the id has changed, we need to fetch the relevant encoding
+                    if (this.model.changed.id) {
+                        this.encoding.clear();
+                        // Only fetch encoding if identifier is set
+                        if (!this.model.isNew() && encodingUrlTemplate) {
+                            this.encoding.href = encodingUrlTemplate.expand({
+                                contentId: this.model.id
+                            });
+                            this.encoding.fetch()
+                            .always(_.bind(function(response) {
+                                // Note this will trigger another change
+                                this.encoding.updateSettingsModel(this.model);
+                                // Picker model is a copy so need to update that as well
+                                this.encoding.updateSettingsModel(this.picker.model);
+                                this.updateField();
+                            }, this));
+                        }
+                    } else {
+                        if (!this.model.isNew()) {
+                            this.updateField();
+                        }
+                    }
+                }, this));
+            }, this));
+        },
+        getPickerInstance: function(pickerOptions) {
+            return new VideoPickerView(_.extend({}, pickerOptions, {
+                // We don't want to modify field model until we actually pick a new video...so use a copy as our current model
+                model: new VideoSettings(this.model.toJSON()),
+            }));
+        },
+        getSettingsInstance: function(settingsOptions) {
+            return new VideoSettingsView(_.extend(settingsOptions, {
+                encoding: this.encoding
+            }));
+        },
+        getPreviewInstance: function(previewOptions) {
+            return new VideoPreviewView(_.extend(previewOptions, {
+                encoding: this.encoding
+            }));
+        },
+        getFieldType: function() {
+            return 'video';
+        },
+        getFieldLabel: function() {
+            return this.i18n.formatMessage('Media');
+        },
+        getActionsHtml: function(templateOptions) {
+            var branding = this.root.getEmbedded('ev:Brandings/Current'),
+                contentModel = this.model.get('content') && new BaseModel(this.model.get('content')),
+                thumbnailLink = contentModel && contentModel.getLink('ev:Images/Thumbnail'),
+                thumbnailTemplate = thumbnailLink ? thumbnailLink.href : branding.get('thumbnailImageUrlTemplate'),
+                thumbnailUrl = new URITemplate(thumbnailTemplate).expand({
+                    width: 200,
+                    height: 112
+                });
+
+            _.extend(templateOptions, {
+                thumbnailUrl: thumbnailUrl
+            });
+            return FieldView.prototype.getActionsHtml.call(this, templateOptions);
         }
     });
 
@@ -30126,19 +31063,12 @@ define('ev-script/views/playlist-embed',['require','underscore','urijs/URI','ev-
                 'showCaptions': this.model.get('showcaptions'),
                 'displayDateProduced': this.model.get('dateproduced'),
                 'audioPreviewImage': this.model.get('audiopreviewimage'),
-                'displayCaptionSearch': this.model.get('captionsearch')
+                'displayCaptionSearch': this.model.get('captionsearch'),
+                'displayViewersReport': this.model.get('viewersreport')
             });
-            if (this.info.checkVersion('<4.8.0')) {
-                src.addQuery({
-                    'displayStatistics': this.model.get('statistics')
-                });
-            }
             if (isPreview) {
                 // Hack to bypass restrictions for preview
                 src.addQuery('isPermalinkPreview', true);
-            }
-            if (this.info.checkVersion('>=4.8.0')) {
-                src.addQuery('displayViewersReport', this.model.get('viewersreport'));
             }
             if (this.model.get('layout') === 'showcase') {
                 var showcaseLayout = this.model.get('showcaseLayout');
@@ -30183,16 +31113,16 @@ define('ev-script/views/playlist-preview',['require','ev-script/views/preview','
         PlaylistEmbedView = require('ev-script/views/playlist-embed');
 
     return PreviewView.extend({
-        initialize: function(options) {
-            PreviewView.prototype.initialize.call(this, options);
-        },
+        // initialize: function(options) {
+        //     PreviewView.prototype.initialize.call(this, options);
+        // },
         embedClass: PlaylistEmbedView
     });
 
 });
 
 
-define('text!ev-script/templates/playlist-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'Name\')) %>" rel="<%= item.get(\'ID\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <% if (item.get(\'IsSecure\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n        <span><%- item.get(\'Name\') %></span>\n    </div>\n</div>\n';});
+define('text!ev-script/templates/playlist-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <% if (item.get(\'isRestricted\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n        <span><%- item.get(\'title\') %></span>\n    </div>\n</div>\n';});
 
 define('ev-script/views/playlist-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/playlist-result.html'],function(require) {
 
@@ -30205,113 +31135,82 @@ define('ev-script/views/playlist-results',['require','underscore','jquery','ev-s
         PlaylistPreviewView = require('ev-script/views/playlist-preview');
 
     return ResultsView.extend({
-        modelClass: PlaylistSettings,
-        previewClass: PlaylistPreviewView,
         resultTemplate: _.template(require('text!ev-script/templates/playlist-result.html')),
         initialize: function(options) {
             ResultsView.prototype.initialize.call(this, options);
         },
         refreshHandler: function(e) {
             e.preventDefault();
-            this.appEvents.trigger('reloadPlaylists');
+            this.events.trigger('reload', 'playlists');
+        },
+        getPreviewInstance: function(previewOptions) {
+            return new PlaylistPreviewView(previewOptions);
         }
     });
 
 });
 
-define('ev-script/collections/playlists',['require','ev-script/collections/base','urijs/URI','ev-script/util/cache'],function(require) {
+define('ev-script/models/playlists',['require','ev-script/models/base','urijs/URI','ev-script/util/cache'],function(require) {
 
     'use strict';
 
-    var BaseCollection = require('ev-script/collections/base'),
+    var BaseModel = require('ev-script/models/base'),
         URI = require('urijs/URI'),
         cacheUtil = require('ev-script/util/cache');
 
-    return BaseCollection.extend({
-        initialize: function(models, options) {
-            BaseCollection.prototype.initialize.call(this, models, options);
-            this.libraryId = options.libraryId || '';
-            this.filterValue = options.filterValue || '';
-            this.pageIndex = 1;
-        },
-        _cache: function(key, resp) {
-            var cachedValue = null,
-                user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                var playlistsCache = userCache.get('playlists');
-                if (!playlistsCache) {
-                    userCache.set('playlists', playlistsCache = new cacheUtil.Cache());
-                }
-                cachedValue = playlistsCache[resp ? 'set' : 'get'](key, resp);
-            }
-            return cachedValue;
-        },
-        getCached: function(key) {
-            return this._cache(key);
-        },
-        setCached: function(key, resp) {
-            return this._cache(key, resp);
-        },
-        clearCache: function() {
-            var user = this.auth.getUser(),
-                userCache = user ? cacheUtil.getUserCache(this.config.ensembleUrl, user.id) : null;
-            if (userCache) {
-                userCache.set('playlists', null);
-            }
-        },
-        url: function() {
-            var api_url = URI(this.config.ensembleUrl + '/api/Playlists/');
-            api_url.filename(this.libraryId);
-            api_url.addQuery({
-                'PageSize': this.config.pageSize,
-                'PageIndex': this.pageIndex
-            });
-            if (this.filterValue) {
-                api_url.addQuery({
-                    'FilterOn': 'Name',
-                    'FilterValue': this.filterValue
-                });
-            }
-            return this.config.urlCallback ? this.config.urlCallback(api_url) : api_url;
-        }
+    return BaseModel.extend({
+        cacheName: 'playlists',
+        collectionKey: 'playlists',
+        // initialize: function(attributes, options) {
+        //     BaseModel.prototype.initialize.call(this, attributes, options);
+        // },
     });
 
 });
 
-define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-script/views/picker','ev-script/views/filter','ev-script/views/playlist-results','ev-script/collections/playlists'],function(require) {
+define('ev-script/views/playlist-picker',['require','jquery','underscore','urijs/URITemplate','ev-script/views/picker','ev-script/views/filter','ev-script/views/playlist-results','ev-script/models/playlists'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        URITemplate = require('urijs/URITemplate'),
         PickerView = require('ev-script/views/picker'),
         FilterView = require('ev-script/views/filter'),
         PlaylistResultsView = require('ev-script/views/playlist-results'),
-        Playlists = require('ev-script/collections/playlists');
+        Playlists = require('ev-script/models/playlists');
 
     return PickerView.extend({
         initialize: function(options) {
             PickerView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit');
 
-            this.appEvents.on('search', _.bind(function() {
-                this.loadPlaylists();
-            }, this));
+            _.bindAll(this, 'loadPlaylists', 'changeLibrary', 'handleSubmit',
+            'handleSearch');
+
+            this.events
+            .off('search', this.handleSearch)
+            .on('search', this.handleSearch);
+
+            var reload = _.bind(function(target) {
+                if (target === 'playlists') {
+                    this.loadPlaylists();
+                }
+            }, this);
+            this.events
+            .off('reload', reload)
+            .on('reload', reload);
 
             // TODO - handle callback
             this.filter = new FilterView({
                 id: this.id + '-filter',
                 el: this.$('.ev-filter-block'),
                 picker: this,
-                appId: this.appId,
                 showTypeSelect: false
             });
 
             this.resultsView = new PlaylistResultsView({
                 el: this.$('div.ev-results'),
-                picker: this,
-                appId: this.appId
+                picker: this
             });
 
             this.$el.append(this.resultsView.$el);
@@ -30328,6 +31227,11 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
             this.loadPlaylists();
             e.preventDefault();
         },
+        handleSearch: function(model) {
+            if (model === this.model) {
+                this.loadPlaylists();
+            }
+        },
         showPicker: function() {
             PickerView.prototype.showPicker.call(this);
             this.filter.loadOrgs();
@@ -30336,59 +31240,45 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','ev-sc
         loadPlaylists: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
                 libraryId = this.model.get('libraryId'),
-                playlists = new Playlists({}, {
-                    libraryId: libraryId,
-                    filterValue: searchVal,
-                    appId: this.appId
+                library = this.filter.getLibrary(libraryId),
+                searchTemplate = new URITemplate(library.getLink('ev:Playlists/Search').href),
+                searchUrl = searchTemplate.expand({
+                    search: searchVal,
+                    sortBy: 'title',
+                    pageSize: 20
                 }),
-                clearPlaylistsCache = _.bind(function() {
-                    playlists.clearCache();
-                    this.loadPlaylists();
-                }, this);
+                playlists = new Playlists({}, {
+                    href: searchUrl
+                });
             playlists.fetch({
                 picker: this,
-                cacheKey: libraryId + searchVal,
-                success: _.bind(function(collection, response, options) {
-                    var totalRecords = collection.totalResults = parseInt(response.Pager.TotalRecords, 10);
-                    var size = _.size(response.Data);
-                    if (size === totalRecords) {
-                        collection.hasMore = false;
-                    } else {
-                        collection.hasMore = true;
-                        collection.pageIndex += 1;
-                    }
-                    this.resultsView.collection = collection;
+                success: _.bind(function(model, response, options) {
+                    this.resultsView.model = model;
+                    this.resultsView.collection = model.getEmbedded('playlists');
                     this.resultsView.render();
                 }, this),
-                error: _.bind(function(collection, xhr, options) {
-                    this.ajaxError(xhr, _.bind(function() {
-                        this.loadPlaylists();
-                    }, this));
-                }, this)
+                error: _.bind(this.ajaxError, this)
             });
-            this.appEvents.off('reloadPlaylists').on('reloadPlaylists', clearPlaylistsCache);
         }
     });
 
 });
 
-define('ev-script/collections/categories',['require','backbone','ev-script/collections/base','underscore'],function(require) {
+define('ev-script/collections/categories',['require','backbone','ev-script/collections/legacy-base','underscore'],function(require) {
 
     'use strict';
 
     var Backbone = require('backbone'),
-        BaseCollection = require('ev-script/collections/base'),
+        BaseCollection = require('ev-script/collections/legacy-base'),
         _ = require('underscore');
 
     return BaseCollection.extend({
         initialize: function(models, options) {
             BaseCollection.prototype.initialize.call(this, models, options);
-            this.requiresAuth = false;
             this.playlistId = options.playlistId || '';
         },
         url: function() {
-            var url = this.config.ensembleUrl + '/app/api/category/list.json/' + this.playlistId;
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
+            return this.config.ensembleUrl + '/app/api/category/list.json/' + this.playlistId;
         },
         parse: function(response) {
             return response.dataSet ? (response.dataSet.category || []) : [];
@@ -30408,7 +31298,7 @@ define('ev-script/collections/categories',['require','backbone','ev-script/colle
 });
 
 
-define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <div role="group" aria-labelledby="playlistSettingsTitle">\n        <div id="playlistSettingsTitle" style="display:none;"><%= i18n.formatMessage(\'Playlist Embed Options\') %></div>\n        <div class="accordion">\n            <h3><%= i18n.formatMessage(\'Choose Layout\') %></h3>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="playlist" class="form-radio" <% if (model.get(\'layout\') === \'playlist\') { print(\'checked="checked"\'); } %> name="layout" value="playlist" type="radio"/>\n                    <label for="playlist"><%= i18n.formatMessage(\'Playlist\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcase" class="form-radio" <% if (model.get(\'layout\') === \'showcase\') { print(\'checked="checked"\'); } %> name="layout" value="showcase" type="radio"/>\n                    <label for="showcase"><%= i18n.formatMessage(\'Showcase\') %></label>\n                </div>\n            </div>\n            <h3><%= i18n.formatMessage(\'Layout Options\') %></h3>\n            <div>\n                <div class="playlistOptions" <% if (model.get(\'layout\') === \'showcase\') { print(\'style="display:none;"\'); } %>>\n                    <div class="fieldWrap">\n                        <label for="playlistSortBy"><%= i18n.formatMessage(\'Sort By\') %></label>\n                        <select id="playlistSortBy" class="form-select">\n                            <option value="videoDate" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDate\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Added\') %></option>\n                            <option value="videoDateProduced" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDateProduced\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Produced\') %></option>\n                            <option value="videoDescription" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDescription\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Description\') %></option>\n                            <option value="videoTitle" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoTitle\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Title\') %></option>\n                            <option value="videoDuration" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDuration\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Duration\') %></option>\n                            <option value="videoKeywords" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoKeywords\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Keywords\') %></option>\n                            <!-- <option value="videoCustomPosition">Custom Order</option> -->\n                        </select>\n                    </div>\n                    <div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'asc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="asc" type="radio"/>\n                            <label for="playlistSortDirectionAsc"><%= i18n.formatMessage(\'Ascending\') %></label>\n                        </div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'desc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="desc" type="radio"/>\n                            <label for="playlistSortDirectionDesc"><%= i18n.formatMessage(\'Descending\') %></label>\n                        </div>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <label for="playlistSearchString"><%= i18n.formatMessage(\'Search String\') %></label>\n                            <input id="playlistSearchString" class="form-text" name="playlistSearchString" value="<%- model.get(\'playlistLayout\').playlistSearchString %>" type="text"/>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistCategory"><%= i18n.formatMessage(\'Category\') %></label>\n                            <select id="playlistCategory" class="form-select" name="playlistCategory">\n                                <option value="" <% if (!model.get(\'playlistLayout\').playlistCategory) { print(\'selected="selected"\'); } %>>-- <%= i18n.formatMessage(\'None\') %> --</option>\n                                <% categories.each(function(category) { %>\n                                    <option value="<%= category.id %>" <% if (model.get(\'playlistLayout\').playlistCategory === category.id) { print(\'selected="selected"\'); } %>><%- category.get(\'categoryName\') %></option>\n                                <% }); %>\n                            </select>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistNumberOfResults"><%= i18n.formatMessage(\'Number of Results\') %></label>\n                            <input id="playlistNumberOfResults" class="form-text" name="playlistNumberOfResults" value="<%- model.get(\'playlistLayout\').playlistNumberOfResults %>" type="text"/>\n                        </div>\n                    </div>\n                </div>\n                <div class="showcaseOptions" <% if (model.get(\'layout\') === \'playlist\') { print(\'style="display:none;"\'); } %>>\n<!--\n                    <div class="fieldWrap">\n                        <input id="featuredContent" class="form-checkbox" type="checkbox" name="featuredContent" <% if (model.get(\'showcaseLayout\').featuredContent) { print(\'checked="checked"\'); } %>/>\n                        <label for="featuredContent">Featured Content</label>\n                    </div>\n -->\n                    <div class="fieldWrap">\n                        <input id="categoryList" class="form-checkbox" type="checkbox" name="categoryList" <% if (model.get(\'showcaseLayout\').categoryList) { print(\'checked="checked"\'); } %>/>\n                        <label for="categoryList"><%= i18n.formatMessage(\'Category List\') %></label>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationHorizontal" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'horizontal\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="horizontal" type="radio"/>\n                            <label for="categoryOrientationHorizontal"><%= i18n.formatMessage(\'Horizontal\') %></label>\n                        </div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationVertical" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'vertical\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="vertical" type="radio"/>\n                            <label for="categoryOrientationVertical"><%= i18n.formatMessage(\'Vertical\') %></label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <h3><%= i18n.formatMessage(\'Content Details\') %></h3>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\n                </div>\n                <% if (!appInfo.checkVersion(\'>=4.8.0\')) { %>\n                <div class="fieldWrap inline-option">\n                    <input id="statistics" class="form-checkbox" <% if (model.get(\'statistics\')) { print(\'checked="checked"\'); } %> name="statistics" type="checkbox"/>\n                    <label for="statistics"><%= i18n.formatMessage(\'Statistics\') %></label>\n                </div>\n                <% } %>\n                <div class="fieldWrap inline-option">\n                    <input id="duration" class="form-checkbox" <% if (model.get(\'duration\')) { print(\'checked="checked"\'); } %> name="duration" type="checkbox"/>\n                    <label for="duration"><%= i18n.formatMessage(\'Duration\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                    <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                    <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                    <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="credits" class="form-checkbox" <% if (model.get(\'credits\')) { print(\'checked="checked"\'); } %> name="credits" type="checkbox"/>\n                    <label for="credits"><%= i18n.formatMessage(\'Credits\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="socialsharing"><%= i18n.formatMessage(\'Social Tools\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                    <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                    <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                    <label for="dateproduced"><%= i18n.formatMessage(\'Date Produced\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                    <label for="captionsearch"><%= i18n.formatMessage(\'Interactive Transcript\') %></label>\n                </div>\n                <% if (appInfo.checkVersion(\'>=4.8.0\')) { %>\n                    <div class="fieldWrap inline-option">\n                        <input id="viewersreport" class="form-checkbox" <% if (model.get(\'viewersreport\')) { print(\'checked="checked"\'); } %>  name="viewersreport" type="checkbox"/>\n                        <label for="viewersreport"><%= i18n.formatMessage(\'Viewers Report\') %></label>\n                    </div>\n                <% } %>\n            </div>\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </div>\n</form>\n';});
+define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <div role="group" aria-labelledby="playlistSettingsTitle">\n        <div id="playlistSettingsTitle" style="display:none;"><%= i18n.formatMessage(\'Playlist Embed Options\') %></div>\n        <div class="accordion">\n            <h3><%= i18n.formatMessage(\'Choose Layout\') %></h3>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="playlist" class="form-radio" <% if (model.get(\'layout\') === \'playlist\') { print(\'checked="checked"\'); } %> name="layout" value="playlist" type="radio"/>\n                    <label for="playlist"><%= i18n.formatMessage(\'Playlist\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcase" class="form-radio" <% if (model.get(\'layout\') === \'showcase\') { print(\'checked="checked"\'); } %> name="layout" value="showcase" type="radio"/>\n                    <label for="showcase"><%= i18n.formatMessage(\'Showcase\') %></label>\n                </div>\n            </div>\n            <h3><%= i18n.formatMessage(\'Layout Options\') %></h3>\n            <div>\n                <div class="playlistOptions" <% if (model.get(\'layout\') === \'showcase\') { print(\'style="display:none;"\'); } %>>\n                    <div class="fieldWrap">\n                        <label for="playlistSortBy"><%= i18n.formatMessage(\'Sort By\') %></label>\n                        <select id="playlistSortBy" class="form-select">\n                            <option value="videoDate" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDate\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Added\') %></option>\n                            <option value="videoDateProduced" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDateProduced\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Produced\') %></option>\n                            <option value="videoDescription" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDescription\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Description\') %></option>\n                            <option value="videoTitle" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoTitle\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Title\') %></option>\n                            <option value="videoDuration" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoDuration\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Duration\') %></option>\n                            <option value="videoKeywords" <% if (model.get(\'playlistLayout\').playlistSortBy === \'videoKeywords\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Keywords\') %></option>\n                            <!-- <option value="videoCustomPosition">Custom Order</option> -->\n                        </select>\n                    </div>\n                    <div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionAsc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'asc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="asc" type="radio"/>\n                            <label for="playlistSortDirectionAsc"><%= i18n.formatMessage(\'Ascending\') %></label>\n                        </div>\n                        <div class="fieldWrap inline-option">\n                            <input id="playlistSortDirectionDesc" class="form-radio" <% if (model.get(\'playlistLayout\').playlistSortDirection === \'desc\') { print(\'checked="checked"\'); } %> name="playlistSortDirection" value="desc" type="radio"/>\n                            <label for="playlistSortDirectionDesc"><%= i18n.formatMessage(\'Descending\') %></label>\n                        </div>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <label for="playlistSearchString"><%= i18n.formatMessage(\'Search String\') %></label>\n                            <input id="playlistSearchString" class="form-text" name="playlistSearchString" value="<%- model.get(\'playlistLayout\').playlistSearchString %>" type="text"/>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistCategory"><%= i18n.formatMessage(\'Category\') %></label>\n                            <select id="playlistCategory" class="form-select" name="playlistCategory">\n                                <option value="" <% if (!model.get(\'playlistLayout\').playlistCategory) { print(\'selected="selected"\'); } %>>-- <%= i18n.formatMessage(\'None\') %> --</option>\n                                <% categories.each(function(category) { %>\n                                    <option value="<%= category.id %>" <% if (model.get(\'playlistLayout\').playlistCategory === category.id) { print(\'selected="selected"\'); } %>><%- category.get(\'categoryName\') %></option>\n                                <% }); %>\n                            </select>\n                        </div>\n                        <div class="fieldWrap">\n                            <label for="playlistNumberOfResults"><%= i18n.formatMessage(\'Number of Results\') %></label>\n                            <input id="playlistNumberOfResults" class="form-text" name="playlistNumberOfResults" value="<%- model.get(\'playlistLayout\').playlistNumberOfResults %>" type="text"/>\n                        </div>\n                    </div>\n                </div>\n                <div class="showcaseOptions" <% if (model.get(\'layout\') === \'playlist\') { print(\'style="display:none;"\'); } %>>\n<!--\n                    <div class="fieldWrap">\n                        <input id="featuredContent" class="form-checkbox" type="checkbox" name="featuredContent" <% if (model.get(\'showcaseLayout\').featuredContent) { print(\'checked="checked"\'); } %>/>\n                        <label for="featuredContent">Featured Content</label>\n                    </div>\n -->\n                    <div class="fieldWrap">\n                        <input id="categoryList" class="form-checkbox" type="checkbox" name="categoryList" <% if (model.get(\'showcaseLayout\').categoryList) { print(\'checked="checked"\'); } %>/>\n                        <label for="categoryList"><%= i18n.formatMessage(\'Category List\') %></label>\n                    </div>\n                    <div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationHorizontal" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'horizontal\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="horizontal" type="radio"/>\n                            <label for="categoryOrientationHorizontal"><%= i18n.formatMessage(\'Horizontal\') %></label>\n                        </div>\n                        <div class="fieldWrap">\n                            <input id="categoryOrientationVertical" class="form-radio" <% if (model.get(\'showcaseLayout\').categoryOrientation === \'vertical\') { print(\'checked="checked"\'); } %> <% if (!model.get(\'showcaseLayout\').categoryList) { print(\'disabled\'); } %> name="categoryOrientation" value="vertical" type="radio"/>\n                            <label for="categoryOrientationVertical"><%= i18n.formatMessage(\'Vertical\') %></label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <h3><%= i18n.formatMessage(\'Content Details\') %></h3>\n            <div>\n                <div class="fieldWrap inline-option">\n                    <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="statistics" class="form-checkbox" <% if (model.get(\'statistics\')) { print(\'checked="checked"\'); } %> name="statistics" type="checkbox"/>\n                    <label for="statistics"><%= i18n.formatMessage(\'Statistics\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="duration" class="form-checkbox" <% if (model.get(\'duration\')) { print(\'checked="checked"\'); } %> name="duration" type="checkbox"/>\n                    <label for="duration"><%= i18n.formatMessage(\'Duration\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                    <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                    <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                    <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="credits" class="form-checkbox" <% if (model.get(\'credits\')) { print(\'checked="checked"\'); } %> name="credits" type="checkbox"/>\n                    <label for="credits"><%= i18n.formatMessage(\'Credits\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="socialsharing"><%= i18n.formatMessage(\'Social Tools\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                    <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                    <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="dateproduced" class="form-checkbox" <% if (model.get(\'dateproduced\')) { print(\'checked="checked"\'); } %> name="dateproduced" type="checkbox"/>\n                    <label for="dateproduced"><%= i18n.formatMessage(\'Date Produced\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                    <label for="captionsearch"><%= i18n.formatMessage(\'Interactive Transcript\') %></label>\n                </div>\n                <div class="fieldWrap inline-option">\n                    <input id="viewersreport" class="form-checkbox" <% if (model.get(\'viewersreport\')) { print(\'checked="checked"\'); } %>  name="viewersreport" type="checkbox"/>\n                    <label for="viewersreport"><%= i18n.formatMessage(\'Viewers Report\') %></label>\n                </div>\n            </div>\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </div>\n</form>\n';});
 
 define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/collections/categories','jquery-ui/ui/widgets/dialog','jquery-ui/ui/widgets/accordion','text!ev-script/templates/playlist-settings.html'],function(require) {
 
@@ -30442,14 +31332,14 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-
             var content = this.field.model.get('content'),
                 attrs = {
                     'layout': this.$('input[name="layout"]:checked').val(),
-                    'embedcode': content && content.IsSecure ? false : this.$('#embedcode').is(':checked'),
+                    'embedcode': content && content.isRestricted ? false : this.$('#embedcode').is(':checked'),
                     'statistics': this.$('#statistics').is(':checked'),
                     'duration': this.$('#duration').is(':checked'),
                     'attachments': this.$('#attachments').is(':checked'),
                     'annotations': this.$('#annotations').is(':checked'),
                     'links': this.$('#links').is(':checked'),
                     'credits': this.$('#credits').is(':checked'),
-                    'socialsharing': content && content.IsSecure ? false : this.$('#socialsharing').is(':checked'),
+                    'socialsharing': content && content.isRestricted ? false : this.$('#socialsharing').is(':checked'),
                     'autoplay': this.$('#autoplay').is(':checked'),
                     'showcaptions': this.$('#showcaptions').is(':checked'),
                     'dateproduced': this.$('#dateproduced').is(':checked'),
@@ -30480,7 +31370,7 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-
                 appInfo: this.info,
                 i18n: this.i18n,
                 model: this.field.model,
-                isSecure: content && content.IsSecure,
+                isSecure: content && content.isRestricted,
                 categories: this.categories || new Categories([], {})
             }));
             this.$('.accordion').accordion({
@@ -30489,7 +31379,7 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-
                 collapsible: true
             });
             this.$el.dialog({
-                title: this.unencode(content ? content.Name : this.field.model.get('id')),
+                title: this.unencode(content ? content.title : this.field.model.get('id')),
                 modal: true,
                 autoOpen: false,
                 draggable: false,
@@ -30522,236 +31412,827 @@ define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-
 
 });
 
-
-define('text!ev-script/templates/field.html',[],function () { return '<!--\n<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span><%= i18n.formatMessage(\'Ensemble Logo\') %></span></a>\n</div>\n-->\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="ev-field-item thumbnail">\n            <img alt="<%= i18n.formatMessage(\'Media thumbnail\') %>" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <h2 class="ev-field-item title"><%= name %></h2>\n    <div class="ev-field-item ev-actions">\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Click to change {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Change {0}\', label) %><span></a>\n        <a href="#" class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', name) %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %><span></a>\n        <a href="#" class="action-options" title="<%= i18n.formatMessage(\'Click to manage {0} embed options\', label) %>"><i class="fa fa-cog fa-lg"></i><span><%= i18n.formatMessage(\'{0} Embed Options\', label) %><span></a>\n        <a href="#" class="action-remove" title="<%= i18n.formatMessage(\'Click to remove {0}\', label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Remove {0}\', label) %><span></a>\n    </div>\n<% } else { %>\n    <h3 class="ev-field-item title"><em><%= i18n.formatMessage(\'Add {0}\', label) %></em></h3>\n    <div class="ev-field-item ev-actions">\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Click to Choose {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Choose {0}\', label) %><span></a>\n    </div>\n<% } %>\n';});
-
-define('ev-script/views/field',['require','jquery','underscore','ev-script/views/base','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','ev-script/collections/categories','text!ev-script/templates/field.html'],function(require) {
+define('ev-script/views/playlist-field',['require','jquery','underscore','ev-script/views/field','ev-script/models/playlist-settings','ev-script/views/playlist-picker','ev-script/views/playlist-settings','ev-script/views/playlist-preview','ev-script/collections/categories'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
-        BaseView = require('ev-script/views/base'),
-        VideoSettings = require('ev-script/models/video-settings'),
+        FieldView = require('ev-script/views/field'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
-        VideoPickerView = require('ev-script/views/video-picker'),
-        VideoSettingsView = require('ev-script/views/video-settings'),
-        VideoPreviewView = require('ev-script/views/video-preview'),
-        VideoEncoding = require('ev-script/models/video-encoding'),
         PlaylistPickerView = require('ev-script/views/playlist-picker'),
         PlaylistSettingsView = require('ev-script/views/playlist-settings'),
         PlaylistPreviewView = require('ev-script/views/playlist-preview'),
         Categories = require('ev-script/collections/categories');
 
-    /*
-     * View for our field (element that we set with the selected content identifier)
-     * TODO - this needs to be broken up, and model event handling is messy/confusing
-     */
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/field.html')),
+    return FieldView.extend({
         initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'chooseHandler', 'optionsHandler', 'removeHandler', 'previewHandler');
-            this.$field = options.$field;
-            this.$el.addClass('ev-field-wrap');
-            this.showChoose = true;
-            var pickerOptions = {
-                    id: this.id + '-picker',
-                    tagName: 'div',
-                    className: 'ev-' + this.model.get('type') + '-picker',
-                    field: this,
-                    appId: this.appId
-                },
-                settingsOptions = {
-                    id: this.id + '-settings',
-                    tagName: 'div',
-                    className: 'ev-settings',
-                    field: this,
-                    appId: this.appId
-                },
-                updateField = _.bind(function() {
-                    var json = this.model.toJSON();
-                    this.$field.val(JSON.stringify(json));
-                    this.appEvents.trigger('fieldUpdated', this.$field, json);
-                    this.renderActions();
-                }, this);
-            if (this.model instanceof VideoSettings) {
-                this.modelClass = VideoSettings;
-                this.pickerClass = VideoPickerView;
-                this.settingsClass = VideoSettingsView;
-                this.previewClass = VideoPreviewView;
-                this.encoding = new VideoEncoding({}, {
-                    appId: this.appId
-                });
-                if (!this.model.isNew()) {
-                    this.encoding.set({
-                        fetchId: this.model.id
-                    });
-                    this.encoding.fetch();
+            FieldView.prototype.initialize.call(this, options);
+        },
+        initCallback: function() {
+            this.categories = new Categories([], {});
+
+            if (!this.model.isNew()) {
+                this.categories.playlistId = this.model.id;
+                this.categories.fetch({ reset: true });
+            }
+            this.model.on('change', _.bind(function() {
+                // If the id has changed, we need to fetch the relevant encoding
+                if (this.model.changed.id) {
+                    // Only fetch categories if identifier is set
+                    if (!this.model.isNew()) {
+                        this.categories.playlistId = this.model.id;
+                        this.categories.fetch({ reset: true });
+                    } else {
+                        this.categories.reset([], { silent: true });
+                        this.categories.playlistId = '';
+                    }
                 }
-                this.model.on('change', _.bind(function() {
-                    // If the id has changed, we need to fetch the relevant encoding
-                    if (this.model.changed.id) {
+                if (!this.model.isNew()) {
+                    this.updateField();
+                }
+            }, this));
+        },
+        getPickerInstance: function(pickerOptions) {
+            return new PlaylistPickerView(_.extend({}, pickerOptions, {
+                model: new PlaylistSettings(this.model.toJSON()),
+            }));
+        },
+        getSettingsInstance: function(settingsOptions) {
+            return new PlaylistSettingsView(_.extend(settingsOptions, {
+                categories: this.categories
+            }));
+        },
+        getPreviewInstance: function(previewOptions) {
+            return new PlaylistPreviewView(previewOptions);
+        },
+        getFieldType: function() {
+            return 'playlist';
+        },
+        getFieldLabel: function() {
+            return this.i18n.formatMessage('Playlist');
+        }
+    });
+
+});
+
+
+define('text!ev-script/templates/dropbox-embed.html',[],function () { return '<iframe src="<%- src %>" frameborder="0" style="width:<%- width %>px;height:<%- height %>px;" width="<%- width %>" height="<%- height %>" allowfullscreen></iframe>';});
+
+define('ev-script/views/dropbox-embed',['require','underscore','urijs/URI','ev-script/views/embed','text!ev-script/templates/dropbox-embed.html'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        URI = require('urijs/URI'),
+        EmbedView = require('ev-script/views/embed');
+
+    return EmbedView.extend({
+        template: _.template(require('text!ev-script/templates/dropbox-embed.html')),
+        initialize: function(options) {
+
+            _.bindAll(this, 'render');
+
+            EmbedView.prototype.initialize.call(this, options);
+        },
+        render: function(isPreview) {
+            var src = URI(this.config.ensembleUrl + '/hapi/v1/Dropboxes/' +
+                this.model.get('id') + '/Embed/Show');
+
+            this.$el.html(this.template({
+                'src': src,
+                'width': this.getFrameWidth(),
+                'height': this.getFrameHeight(),
+                'title': this.model.get('content').title
+            }));
+        }
+    });
+
+});
+
+define('ev-script/views/dropbox-preview',['require','ev-script/views/preview','ev-script/views/dropbox-embed'],function(require) {
+
+    'use strict';
+
+    var PreviewView = require('ev-script/views/preview'),
+        DropboxEmbedView = require('ev-script/views/dropbox-embed');
+
+    return PreviewView.extend({
+        embedClass: DropboxEmbedView
+        // render: function() {
+        //     var embedView = new DropboxEmbedView({
+        //             model: new this.model.constructor(this.model.toJSON())
+        //         }),
+        //         targetUrl = embedView.getUrl(true);
+        //     window.open(targetUrl);
+        // }
+    });
+
+});
+
+
+define('text!ev-script/templates/dropbox-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <div class="title">\n            <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" href="#" rel="<%= item.get(\'id\') %>"><%= item.get(\'title\') %></a>\n        </div>\n        <div class="content-info">\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Description\') %></div>\n                <div class="value"><%= item.get(\'description\') %></div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Date Produced\') %></div>\n                <div class="value">\n                    <%\n                        var dateCreated = new Date(item.get(\'createdOn\')),\n                            localDate = dateCreated.setMinutes(dateCreated.getMinutes() - dateCreated.getTimezoneOffset());\n                        print(moment(localDate).format(dateTimeFormat));\n                    %>\n                </div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Enabled\') %></div>\n                <div class="value">\n                    <% if (item.get(\'isEnabled\')) { %>\n                        <i class="fa fa-check" style="color: green"></i>\n                    <% } else { %>\n                        <i class="fa fa-times" style="color: red"></i>\n                    <% } %>\n                </div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Public\') %></div>\n                <div class="value">\n                    <% if (item.get(\'isPublic\')) { %>\n                        <i class="fa fa-check" style="color: green"></i>\n                    <% } else { %>\n                        <i class="fa fa-times" style="color: red"></i>\n                    <% } %>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n';});
+
+define('ev-script/views/dropbox-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/dropbox-settings','ev-script/views/dropbox-preview','text!ev-script/templates/dropbox-result.html'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        $ = require('jquery'),
+        ResultsView = require('ev-script/views/results'),
+        DropboxSettings = require('ev-script/models/dropbox-settings'),
+        DropboxPreviewView = require('ev-script/views/dropbox-preview');
+
+    return ResultsView.extend({
+        resultTemplate: _.template(require('text!ev-script/templates/dropbox-result.html')),
+        initialize: function(options) {
+            ResultsView.prototype.initialize.call(this, options);
+        },
+        refreshHandler: function(e) {
+            e.preventDefault();
+            this.events.trigger('reload', 'dropboxes');
+        },
+        getPreviewInstance: function(previewOptions) {
+            return new DropboxPreviewView(previewOptions);
+        }
+    });
+
+});
+
+define('ev-script/models/dropboxes',['require','ev-script/models/base','urijs/URI','ev-script/util/cache'],function(require) {
+
+    'use strict';
+
+    var BaseModel = require('ev-script/models/base'),
+        URI = require('urijs/URI'),
+        cacheUtil = require('ev-script/util/cache');
+
+    return BaseModel.extend({
+        cacheName: 'dropboxes',
+        collectionKey: 'dropboxes',
+        // initialize: function(attributes, options) {
+        //     BaseModel.prototype.initialize.call(this, attributes, options);
+        // },
+    });
+
+});
+
+define('ev-script/views/dropbox-picker',['require','jquery','underscore','urijs/URITemplate','ev-script/views/picker','ev-script/views/filter','ev-script/views/dropbox-results','ev-script/models/dropboxes'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        URITemplate = require('urijs/URITemplate'),
+        PickerView = require('ev-script/views/picker'),
+        FilterView = require('ev-script/views/filter'),
+        DropboxResultsView = require('ev-script/views/dropbox-results'),
+        Dropboxes = require('ev-script/models/dropboxes');
+
+    return PickerView.extend({
+        initialize: function(options) {
+            PickerView.prototype.initialize.call(this, options);
+
+            _.bindAll(this, 'loadDropboxes', 'changeLibrary', 'handleSubmit',
+            'handleSearch');
+
+            this.events
+            .off('search', this.handleSearch)
+            .on('search', this.handleSearch);
+
+            var reload = _.bind(function(target) {
+                if (target === 'dropboxes') {
+                    this.loadDropboxes();
+                }
+            }, this);
+            this.events
+            .off('reload', reload)
+            .on('reload', reload);
+
+            this.filter = new FilterView({
+                id: this.id + '-filter',
+                el: this.$('.ev-filter-block'),
+                picker: this,
+                showTypeSelect: false
+            });
+
+            this.resultsView = new DropboxResultsView({
+                el: this.$('div.ev-results'),
+                picker: this
+            });
+
+            this.$el.append(this.resultsView.$el);
+        },
+        events: {
+            'click a.action-add': 'chooseItem',
+            'change .ev-filter-block select.libraries': 'changeLibrary',
+            'submit .ev-filter-block': 'handleSubmit'
+        },
+        changeLibrary: function(e) {
+            this.loadDropboxes();
+        },
+        handleSubmit: function(e) {
+            this.loadDropboxes();
+            e.preventDefault();
+        },
+        handleSearch: function(model) {
+            if (model === this.model) {
+                this.loadDropboxes();
+            }
+        },
+        showPicker: function() {
+            PickerView.prototype.showPicker.call(this);
+            this.filter.loadOrgs();
+            this.filter.setFocus();
+        },
+        loadDropboxes: function() {
+            var searchVal = $.trim(this.model.get('search').toLowerCase()),
+                libraryId = this.model.get('libraryId'),
+                library = this.filter.getLibrary(libraryId),
+                searchTemplate = new URITemplate(library.getLink('ev:Dropboxes/Search').href),
+                searchUrl = searchTemplate.expand({
+                    search: searchVal,
+                    sortBy: 'title',
+                    pageSize: 20
+                }),
+                dropboxes = new Dropboxes({}, {
+                    href: searchUrl
+                });
+            dropboxes.fetch({
+                picker: this,
+                success: _.bind(function(model, response, options) {
+                    this.resultsView.model = model;
+                    this.resultsView.collection = model.getEmbedded('dropboxes');
+                    this.resultsView.render();
+                }, this),
+                error: _.bind(this.ajaxError, this)
+            });
+        }
+    });
+
+});
+
+
+define('text!ev-script/templates/dropbox-settings.html',[],function () { return '<form class="dropbox-settings">\n    <div role="group" aria-labelledby="dropboxSettingsTitle">\n        <div id="dropboxSettingsTitle" style="display:none;"><%= i18n.formatMessage(\'Dropbox Embed Options\') %></div>\n        <div class="fieldWrap">\n            <label for="width"><%= i18n.formatMessage(\'Width\') %></label>\n            <input id="width" class="form-text" name="width" type="text" value="<%= model.get(\'width\') %>" />\n        </div>\n        <div class="fieldWrap">\n            <label for="height"><%= i18n.formatMessage(\'Height\') %></label>\n            <input id="height" class="form-text" name="height" type="text" value="<%= model.get(\'height\') %>" />\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </div>\n</form>\n';});
+
+define('ev-script/views/dropbox-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','jquery-ui/ui/widgets/dialog','text!ev-script/templates/dropbox-settings.html'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        SettingsView = require('ev-script/views/settings'),
+        sizeUtil = require('ev-script/util/size');
+
+    require('jquery-ui/ui/widgets/dialog');
+
+    return SettingsView.extend({
+        template: _.template(require('text!ev-script/templates/dropbox-settings.html')),
+        updateModel: function() {
+            var attrs = {
+                'width': parseInt(this.$('#width').val(), 10) || this.field.model.get('width'),
+                'height': parseInt(this.$('#height').val(), 10) || this.field.model.get('height')
+            };
+
+            this.field.model.set(attrs);
+        },
+        render: function() {
+            this.$el.html(this.template({
+                appInfo: this.info,
+                i18n: this.i18n,
+                model: this.field.model
+            }));
+
+            var content = this.field.model.get('content');
+            this.$el.dialog({
+                title: this.unencode(content ? content.title : this.field.model.get('id')),
+                modal: true,
+                autoOpen: false,
+                draggable: false,
+                resizable: false,
+                dialogClass: 'ev-dialog',
+                width: Math.min(680, $(window).width() - this.config.dialogMargin),
+                height: Math.min(300, $(window).height() - this.config.dialogMargin),
+                closeText: this.i18n.formatMessage('Close')
+            });
+        }
+    });
+
+});
+
+define('ev-script/views/dropbox-field',['require','jquery','underscore','ev-script/views/field','ev-script/models/dropbox-settings','ev-script/views/dropbox-picker','ev-script/views/dropbox-settings','ev-script/views/dropbox-preview'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        FieldView = require('ev-script/views/field'),
+        DropboxSettings = require('ev-script/models/dropbox-settings'),
+        DropboxPickerView = require('ev-script/views/dropbox-picker'),
+        DropboxSettingsView = require('ev-script/views/dropbox-settings'),
+        DropboxPreviewView = require('ev-script/views/dropbox-preview');
+
+    return FieldView.extend({
+        initialize: function(options) {
+            FieldView.prototype.initialize.call(this, options);
+        },
+        initCallback: function() {
+            this.model.on('change', _.bind(function() {
+                if (!this.model.isNew()) {
+                    this.updateField();
+                }
+            }, this));
+        },
+        getPickerInstance: function(pickerOptions) {
+            return new DropboxPickerView(_.extend({}, pickerOptions, {
+                // Picker uses a copy of the supplied settings model
+                model: new DropboxSettings(this.model.toJSON()),
+            }));
+        },
+        getSettingsInstance: function(settingsOptions) {
+            return new DropboxSettingsView(settingsOptions);
+        },
+        getPreviewInstance: function(previewOptions) {
+            return new DropboxPreviewView(previewOptions);
+        },
+        getFieldType: function() {
+            return 'dropbox';
+        },
+        getFieldLabel: function() {
+            return this.i18n.formatMessage('Dropbox');
+        }
+    });
+
+});
+
+define('ev-script/models/video',['require','ev-script/models/base','ev-script/util/cache','urijs/URI','underscore'],function(require) {
+
+    'use strict';
+
+    var BaseModel = require('ev-script/models/base'),
+        cacheUtil = require('ev-script/util/cache'),
+        URI = require('urijs/URI'),
+        _ = require('underscore');
+
+    return BaseModel.extend({
+        cacheName: 'videos',
+        // initialize: function(attributes, options) {
+        //     BaseModel.prototype.initialize.call(this, attributes, options);
+        // },
+    });
+
+});
+
+
+define('text!ev-script/templates/quiz-embed.html',[],function () { return '<iframe src="<%- src %>" frameborder="0" style="width:<%- width %>px;height:<%- height %>px;" width="<%- width %>" height="<%- height %>" allowfullscreen></iframe>';});
+
+define('ev-script/views/quiz-embed',['require','underscore','urijs/URI','ev-script/views/embed','ev-script/views/video-embed','text!ev-script/templates/quiz-embed.html'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        URI = require('urijs/URI'),
+        EmbedView = require('ev-script/views/embed'),
+        // We borrow portions of video-embed impl
+        VideoEmbedView = require('ev-script/views/video-embed');
+
+    return EmbedView.extend({
+        template: _.template(require('text!ev-script/templates/quiz-embed.html')),
+        render: function(isPreview) {
+            return VideoEmbedView.prototype.render.call(this, isPreview);
+        },
+        getSrcUrl: function(width, height, isPreview) {
+            var key = this.model.get('content').key,
+                url = URI(this.config.ensembleUrl);
+
+            url.path('/hapi/v1/Quiz/' + key + (isPreview ? '/Preview' : '/Plugin'));
+            url.addQuery({
+                'displayTitle': this.model.get('showtitle'),
+                'displayAttachments': this.model.get('attachments'),
+                'displayLinks': this.model.get('links'),
+                'displayMetaData': this.model.get('metadata'),
+                'displayCredits': this.model.get('metadata'),
+                'showCaptions': this.model.get('showcaptions')
+            });
+            return url;
+        },
+        getMediaWidth: function() {
+            return parseInt(this.model.get('width'), 10) || 848;
+        },
+        getMediaHeight: function() {
+            return parseInt(this.model.get('height'), 10) || 480;
+        },
+        getFrameWidth: function() {
+            return this.getMediaWidth();
+        },
+        getFrameHeight: function() {
+            return this.getMediaHeight();
+        },
+        scale: function(maxWidth, maxHeight) {
+            return VideoEmbedView.prototype.scale.call(this, maxWidth, maxHeight);
+        }
+    });
+
+});
+
+define('ev-script/views/quiz-preview',['require','ev-script/views/preview','ev-script/views/quiz-embed'],function(require) {
+
+    'use strict';
+
+    var PreviewView = require('ev-script/views/preview'),
+        QuizEmbedView = require('ev-script/views/quiz-embed');
+
+    return PreviewView.extend({
+        embedClass: QuizEmbedView
+    });
+
+});
+
+
+define('text!ev-script/templates/quiz-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.getThumbnailUrl() %>" alt="<%= i18n.formatMessage(\'{0} preview thumbnail\', item.get(\'title\')) %>"/>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span></a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span></a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <div class="title">\n            <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" href="#" rel="<%= item.get(\'id\') %>"><%= item.get(\'title\') %></a>\n        </div>\n        <div class="content-info">\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Comments\') %></div>\n                <div class="value"><%= item.getComments() %></div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Created On\') %></div>\n                <div class="value">\n                    <%\n                        var createdOn = new Date(item.get(\'createdOn\')),\n                            localDate = createdOn.setMinutes(createdOn.getMinutes() - createdOn.getTimezoneOffset());\n                        print(moment(localDate).format(dateTimeFormat));\n                    %>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n';});
+
+define('ev-script/views/quiz-results',['require','underscore','jquery','urijs/URITemplate','ev-script/views/results','ev-script/models/quiz-settings','ev-script/views/quiz-preview','text!ev-script/templates/quiz-result.html'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        $ = require('jquery'),
+        URITemplate = require('urijs/URITemplate'),
+        ResultsView = require('ev-script/views/results'),
+        QuizSettings = require('ev-script/models/quiz-settings'),
+        QuizPreviewView = require('ev-script/views/quiz-preview');
+
+    return ResultsView.extend({
+        resultTemplate: _.template(require('text!ev-script/templates/quiz-result.html')),
+        initialize: function(options) {
+            ResultsView.prototype.initialize.call(this, options);
+        },
+        getItemHtml: function(item, index) {
+            var branding = this.root.getEmbedded('ev:Brandings/Current');
+            item.getThumbnailUrl = function() {
+                var thumbnailLink = item.getLink('ev:Images/Thumbnail'),
+                    thumbnailTemplate = thumbnailLink ? thumbnailLink.href : branding.get('thumbnailImageUrlTemplate');
+                return new URITemplate(thumbnailTemplate).expand({
+                    width: 200,
+                    height: 112
+                });
+            };
+            item.getComments = function() {
+                return _.unescape(item.get('comments'));
+            };
+            return ResultsView.prototype.getItemHtml.call(this, item, index);
+        },
+        refreshHandler: function(e) {
+            e.preventDefault();
+            this.events.trigger('reload', 'quizzes');
+        },
+        getPreviewInstance: function(previewOptions) {
+            return new QuizPreviewView(previewOptions);
+        }
+    });
+
+});
+
+define('ev-script/models/quizzes',['require','ev-script/models/base','urijs/URI','ev-script/util/cache'],function(require) {
+
+    'use strict';
+
+    var BaseModel = require('ev-script/models/base'),
+        URI = require('urijs/URI'),
+        cacheUtil = require('ev-script/util/cache');
+
+    return BaseModel.extend({
+        cacheName: 'quizzes',
+        collectionKey: 'quizzes',
+        // initialize: function(attributes, options) {
+        //     BaseModel.prototype.initialize.call(this, attributes, options);
+        // },
+    });
+
+});
+
+define('ev-script/views/quiz-picker',['require','jquery','underscore','urijs/URITemplate','ev-script/views/picker','ev-script/views/filter','ev-script/views/quiz-results','ev-script/models/quizzes'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        URITemplate = require('urijs/URITemplate'),
+        PickerView = require('ev-script/views/picker'),
+        FilterView = require('ev-script/views/filter'),
+        QuizResultsView = require('ev-script/views/quiz-results'),
+        Quizzes = require('ev-script/models/quizzes');
+
+    return PickerView.extend({
+        initialize: function(options) {
+            PickerView.prototype.initialize.call(this, options);
+
+            _.bindAll(this, 'loadQuizzes', 'changeLibrary', 'handleSubmit',
+            'handleSearch', 'getSettingsModelAttributes');
+
+            this.events
+            .off('search', this.handleSearch)
+            .on('search', this.handleSearch);
+
+            var reload = _.bind(function(target) {
+                if (target === 'quizzes') {
+                    this.loadQuizzes();
+                }
+            }, this);
+            this.events
+            .off('reload', reload)
+            .on('reload', reload);
+
+            this.filter = new FilterView({
+                id: this.id + '-filter',
+                el: this.$('.ev-filter-block'),
+                picker: this,
+                showTypeSelect: false
+            });
+
+            this.resultsView = new QuizResultsView({
+                el: this.$('div.ev-results'),
+                picker: this
+            });
+
+            this.$el.append(this.resultsView.$el);
+        },
+        events: {
+            'click a.action-add': 'chooseItem',
+            'change .ev-filter-block select.libraries': 'changeLibrary',
+            'submit .ev-filter-block': 'handleSubmit'
+        },
+        changeLibrary: function(e) {
+            this.loadQuizzes();
+        },
+        handleSubmit: function(e) {
+            this.loadQuizzes();
+            e.preventDefault();
+        },
+        handleSearch: function(model) {
+            if (model === this.model) {
+                this.loadQuizzes();
+            }
+        },
+        showPicker: function() {
+            PickerView.prototype.showPicker.call(this);
+            this.filter.loadOrgs();
+            this.filter.setFocus();
+        },
+        loadQuizzes: function() {
+            var searchVal = $.trim(this.model.get('search').toLowerCase()),
+                libraryId = this.model.get('libraryId'),
+                library = this.filter.getLibrary(libraryId),
+                searchTemplate = new URITemplate(library.getLink('ev:Quizzes/Search').href),
+                searchUrl = searchTemplate.expand({
+                    search: searchVal,
+                    isArchived: false,
+                    sortBy: 'createdOn',
+                    desc: true,
+                    pageSize: 20
+                }),
+                quizzes = new Quizzes({}, {
+                    href: searchUrl
+                });
+            quizzes.fetch({
+                picker: this,
+                success: _.bind(function(model, response, options) {
+                    this.resultsView.model = model;
+                    this.resultsView.collection = model.getEmbedded('quizzes');
+                    this.resultsView.render();
+                }, this),
+                error: _.bind(this.ajaxError, this)
+            });
+        },
+        getSettingsModelAttributes: function(chosenItem) {
+            return _.extend(PickerView.prototype.getSettingsModelAttributes.call(this, chosenItem), {
+                contentId: chosenItem.get('referenceId')
+            });
+        }
+    });
+
+});
+
+
+define('text!ev-script/templates/quiz-settings.html',[],function () { return '<form>\n    <div role="group" aria-labelledby="quizSettingsTitle">\n        <div id="quizSettingsTitle" style="display:none;"><%= i18n.formatMessage(\'Quiz Embed Options\') %></div>\n        <div class="fieldWrap">\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div>\n            <div class="fieldWrap inline-option">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle"><%= i18n.formatMessage(\'Title\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata"><%= i18n.formatMessage(\'Meta Data\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n            </div>\n         </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </div>\n</form>\n';});
+
+define('ev-script/views/quiz-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','jquery-ui/ui/widgets/dialog','text!ev-script/templates/quiz-settings.html','text!ev-script/templates/sizes.html'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        SettingsView = require('ev-script/views/settings'),
+        sizeUtil = require('ev-script/util/size');
+
+    require('jquery-ui/ui/widgets/dialog');
+
+    return SettingsView.extend({
+        template: _.template(require('text!ev-script/templates/quiz-settings.html')),
+        sizesTemplate: _.template(require('text!ev-script/templates/sizes.html')),
+        initialize: function(options) {
+            SettingsView.prototype.initialize.call(this, options);
+            this.encoding = options.encoding;
+            this.encoding.on('change:id', _.bind(function() {
+                this.render();
+            }, this));
+        },
+        updateModel: function() {
+            var attrs = {
+                    'showtitle': this.$('#showtitle').is(':checked'),
+                    'showcaptions': this.$('#showcaptions').is(':checked'),
+                    'attachments': this.$('#attachments').is(':checked'),
+                    'links': this.$('#links').is(':checked'),
+                    'metadata': this.$('#metadata').is(':checked')
+                },
+                sizeVal = this.$('#size').val(),
+                original = sizeVal === 'original';
+
+            if (!sizeVal || original) {
+                // isNew signifies that the encoding hasn't been fetched yet
+                if (this.encoding && !this.encoding.isNew()) {
+                    _.extend(attrs, {
+                        width: this.encoding.getWidth(original),
+                        height: this.encoding.getHeight(original)
+                    });
+                }
+            } else {
+                var dims = sizeVal.split('x');
+                _.extend(attrs, {
+                    width: parseInt(dims[0], 10),
+                    height: parseInt(dims[1], 10)
+                });
+            }
+
+            this.field.model.set(attrs);
+        },
+        renderSize: function() {
+            var width = this.field.model.get('width'),
+                height = this.field.model.get('height'),
+                options = [],
+                targetWidth;
+            if ((!width || !height) && this.encoding.id) {
+                width = this.encoding.getWidth();
+                height = this.encoding.getHeight();
+            }
+            // Use default IF encoding can handle it
+            if (this.config.defaultVideoWidth && this.config.defaultVideoWidth <= width) {
+                targetWidth =  this.config.defaultVideoWidth;
+            } else {
+                targetWidth = width;
+            }
+            options = sizeUtil.getAvailableDimensions();
+            this.$('.size').append(this.sizesTemplate({
+                sizes: options,
+                // Select the override or current width
+                target: sizeUtil.findClosestDimension(targetWidth)
+            }));
+        },
+        render: function() {
+            this.$el.html(this.template({
+                appInfo: this.info,
+                i18n: this.i18n,
+                model: this.field.model
+            }));
+            if (this.encoding) {
+                this.renderSize();
+            }
+            var content = this.field.model.get('content');
+            this.$el.dialog({
+                title: this.unencode(content && content.title || this.field.model.get('id')),
+                modal: true,
+                autoOpen: false,
+                draggable: false,
+                resizable: false,
+                dialogClass: 'ev-dialog',
+                width: Math.min(680, $(window).width() - this.config.dialogMargin),
+                height: Math.min(300, $(window).height() - this.config.dialogMargin),
+                closeText: this.i18n.formatMessage('Close')
+            });
+        }
+    });
+
+});
+
+define('ev-script/views/quiz-field',['require','jquery','underscore','urijs/URITemplate','ev-script/views/field','ev-script/models/video','ev-script/models/video-encoding','ev-script/views/video-field','ev-script/models/quiz-settings','ev-script/views/quiz-picker','ev-script/views/quiz-settings','ev-script/views/quiz-preview'],function(require) {
+
+    'use strict';
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        URITemplate = require('urijs/URITemplate'),
+        FieldView = require('ev-script/views/field'),
+        Video = require('ev-script/models/video'),
+        VideoEncoding = require('ev-script/models/video-encoding'),
+        // We borrow from video field impl
+        VideoFieldView = require('ev-script/views/video-field'),
+        QuizSettings = require('ev-script/models/quiz-settings'),
+        QuizPickerView = require('ev-script/views/quiz-picker'),
+        QuizSettingsView = require('ev-script/views/quiz-settings'),
+        QuizPreviewView = require('ev-script/views/quiz-preview');
+
+    return FieldView.extend({
+        initialize: function(options) {
+            FieldView.prototype.initialize.call(this, options);
+        },
+        initCallback: function() {
+
+            this.encoding = new VideoEncoding({}, {});
+
+            // TODO - This is the pattern from video-field...but don't think it is necessary/used.
+            this.root.promise.done(_.bind(function() {
+                var contentUrl = this.root.getLink('ev:Contents/Get'),
+                    contentUrlTemplate = contentUrl && new URITemplate(contentUrl.href),
+                    video, encoding;
+                if (!this.model.isNew() && contentUrlTemplate && this.model.get('contentId')) {
+                    video = new Video({}, {
+                        href: contentUrlTemplate.expand({
+                            id: this.model.get('contentId')
+                        })
+                    });
+                    video.fetch()
+                    .done(_.bind(function(response) {
+                        encoding = video.getEmbedded('ev:Encodings/Default');
+                        this.encoding.set(encoding.attributes);
+                    }, this));
+                }
+            }, this));
+
+            this.model.on('change', _.bind(function() {
+                this.root.promise.done(_.bind(function() {
+                    var contentUrl = this.root.getLink('ev:Contents/Get'),
+                        contentUrlTemplate = contentUrl && new URITemplate(contentUrl.href),
+                        video, encoding;
+                    // If the contentId has changed, we need to fetch the
+                    // relevant content for it's default encoding
+                    if (this.model.changed.contentId) {
                         this.encoding.clear();
-                        // Only fetch encoding if identifier is set
-                        if (!this.model.isNew()) {
-                            this.encoding.set({
-                                fetchId: this.model.id
+                        // Only fetch is model is not new, i.e. wasn't cleared
+                        if (!this.model.isNew() && contentUrlTemplate) {
+                            video = new Video({}, {
+                                href: contentUrlTemplate.expand({
+                                    id: this.model.get('contentId')
+                                })
                             });
-                            this.encoding.fetch({
-                                success: _.bind(function(response) {
-                                    // Note this while trigger another change
-                                    this.encoding.updateSettingsModel(this.model);
-                                    // Picker model is a copy so need to update that as well
-                                    this.encoding.updateSettingsModel(this.picker.model);
-                                    updateField();
-                                }, this)
-                            });
+                            video.fetch()
+                            .always(_.bind(function(response) {
+                                encoding = video.getEmbedded('ev:Encodings/Default');
+                                this.encoding.set(encoding && encoding.attributes || {});
+                                // Note this will trigger another change
+                                this.encoding.updateSettingsModel(this.model);
+                                // Picker model is a copy so need to update that as well
+                                this.encoding.updateSettingsModel(this.picker.model);
+                                this.updateField();
+                            }, this));
                         }
                     } else {
                         if (!this.model.isNew()) {
-                            updateField();
+                            this.updateField();
                         }
                     }
                 }, this));
-                _.extend(settingsOptions, {
-                    encoding: this.encoding
-                });
-            } else if (this.model instanceof PlaylistSettings) {
-                this.modelClass = PlaylistSettings;
-                this.pickerClass = PlaylistPickerView;
-                this.settingsClass = PlaylistSettingsView;
-                this.previewClass = PlaylistPreviewView;
-                this.categories = new Categories([], {
-                    appId: this.appId
-                });
-                if (!this.model.isNew()) {
-                    this.categories.playlistId = this.model.id;
-                    this.categories.fetch({ reset: true });
-                }
-                this.model.on('change', _.bind(function() {
-                    // If the id has changed, we need to fetch the relevant encoding
-                    if (this.model.changed.id) {
-                        // Only fetch categories if identifier is set
-                        if (!this.model.isNew()) {
-                            this.categories.playlistId = this.model.id;
-                            this.categories.fetch({ reset: true });
-                        } else {
-                            this.categories.reset([], { silent: true });
-                            this.categories.playlistId = '';
-                        }
-                    }
-                    if (!this.model.isNew()) {
-                        updateField();
-                    }
-                }, this));
-                _.extend(settingsOptions, {
-                    categories: this.categories
-                });
-            }
-            this.picker = new this.pickerClass(_.extend({}, pickerOptions, {
-                // We don't want to modify field model until we actually pick a new video...so use a copy as our current model
-                model: new this.modelClass(this.model.toJSON()),
+            }, this));
+        },
+        getPickerInstance: function(pickerOptions) {
+            return new QuizPickerView(_.extend({}, pickerOptions, {
+                // Picker uses a copy of the supplied settings model
+                model: new QuizSettings(this.model.toJSON()),
             }));
-            this.settings = new this.settingsClass(settingsOptions);
-            this.$field.after(this.picker.$el);
-            this.renderActions();
-            this.appEvents.on('showPicker', function(fieldId) {
-                if (this.id === fieldId) {
-                    this.$('.action-choose').hide();
-                    this.showChoose = false;
-                    // We only want one picker showing at a time so notify all fields to hide them (unless it's ours)
-                    if (this.config.hidePickers) {
-                        this.appEvents.trigger('hidePickers', this.id);
-                    }
-                }
-            }, this);
-            this.appEvents.on('hidePicker', function(fieldId) {
-                if (this.id === fieldId) {
-                    this.$('.action-choose').show();
-                    this.showChoose = true;
-                }
-            }, this);
-            this.appEvents.on('hidePickers', function(fieldId) {
-                // When the picker for our field is hidden we need need to show our 'Choose' button
-                if (!fieldId || (this.id !== fieldId)) {
-                    this.$('.action-choose').show();
-                    this.showChoose = true;
-                }
-            }, this);
         },
-        events: {
-            'click .action-choose': 'chooseHandler',
-            'click .action-preview': 'previewHandler',
-            'click .action-options': 'optionsHandler',
-            'click .action-remove': 'removeHandler'
-        },
-        chooseHandler: function(e) {
-            this.appEvents.trigger('showPicker', this.id);
-            e.preventDefault();
-        },
-        optionsHandler: function(e) {
-            this.settings.show();
-            e.preventDefault();
-        },
-        removeHandler: function(e) {
-            this.model.clear();
-            this.$field.val('');
-            // Silent here because we don't want to trigger our change handler above
-            // (which would set the field value to our model defaults)
-            this.model.set(this.model.defaults, {
-                silent: true
-            });
-            this.appEvents.trigger('fieldUpdated', this.$field);
-            this.renderActions();
-            e.preventDefault();
-        },
-        previewHandler: function(e) {
-            var element = e.currentTarget;
-            var previewView = new this.previewClass({
-                el: element,
-                encoding: this.encoding,
-                model: this.model,
-                picker: this.picker,
-                appId: this.appId
-            });
-            e.preventDefault();
-        },
-        renderActions: function() {
-            var ensembleUrl = this.config.ensembleUrl,
-                name, label, type, thumbnailUrl;
-            if (this.model instanceof VideoSettings) {
-                label = this.i18n.formatMessage('Media');
-                type = 'video';
-            } else {
-                label = this.i18n.formatMessage('Playlist');
-                type = 'playlist';
-            }
-            if (this.model.id) {
-                name = this.model.id;
-                var content = this.model.get('content');
-                if (content) {
-                    name = content.Name || content.Title;
-                    thumbnailUrl = content.ThumbnailUrl;
-                }
-            }
-            if (!this.$actions) {
-                this.$actions = $('<div class="ev-field"/>');
-                this.$field.after(this.$actions);
-            }
-            this.$actions.html(this.template({
-                i18n: this.i18n,
-                ensembleUrl: ensembleUrl,
-                modelId: this.model.id,
-                label: label,
-                type: type,
-                name: name,
-                thumbnailUrl: thumbnailUrl
+        getSettingsInstance: function(settingsOptions) {
+            return new QuizSettingsView(_.extend(settingsOptions, {
+                encoding: this.encoding
             }));
-            // If our picker is shown, hide our 'Choose' button
-            if (!this.showChoose) {
-                this.$('.action-choose').hide();
-            }
+        },
+        getPreviewInstance: function(previewOptions) {
+            return new QuizPreviewView(previewOptions);
+        },
+        getFieldType: function() {
+            return 'quiz';
+        },
+        getFieldLabel: function() {
+            return this.i18n.formatMessage('Quiz');
+        },
+        getActionsHtml: function(templateOptions) {
+            return VideoFieldView.prototype.getActionsHtml.call(this, templateOptions);
+        }
+    });
+
+});
+
+define('ev-script/models/root',['require','underscore','ev-script/models/base'],function(require) {
+
+    'use strict';
+
+    var _ = require('underscore'),
+        BaseModel = require('ev-script/models/base');
+
+    return BaseModel.extend({
+        // initialize: function(attributes, options) {
+        //     BaseModel.prototype.initialize.call(this, attributes, options);
+        // }
+        getUser: function() {
+            return this.getEmbedded('ev:Users/Current');
         }
     });
 
@@ -31959,7 +33440,7 @@ if (typeof define === 'function' && define.amd)
   semver = {}
 );
 
-define('ev-script/models/app-info',['require','underscore','semver','ev-script/models/base'],function(require) {
+define('ev-script/models/info',['require','underscore','semver','ev-script/models/base'],function(require) {
 
     'use strict';
 
@@ -31968,114 +33449,14 @@ define('ev-script/models/app-info',['require','underscore','semver','ev-script/m
         BaseModel = require('ev-script/models/base');
 
     return BaseModel.extend({
-        initialize: function(attributes, options) {
-            BaseModel.prototype.initialize.call(this, attributes, options);
-            this.requiresAuth = false;
-        },
-        url: function() {
-            var url = this.config.ensembleUrl + '/api/Info';
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        },
-        parse: function(response) {
-            return response;
-        },
+        // initialize: function(attributes, options) {
+        //     BaseModel.prototype.initialize.call(this, attributes, options);
+        // },
         checkVersion: function(condition) {
-            var version = this.get('ApplicationVersion');
+            var version = this.get('applicationVersion');
             return version && semver.satisfies(version, condition);
-        },
-        anthemEnabled: function() {
-            return this.checkVersion('>=4.2.0');
         }
     });
-
-});
-
-define('ev-script/models/current-user',['require','underscore','ev-script/models/base'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        BaseModel = require('ev-script/models/base');
-
-    return BaseModel.extend({
-        idAttribute: 'ID',
-        initialize: function(attributes, options) {
-            BaseModel.prototype.initialize.call(this, attributes, options);
-            // The API actually does require authentication...but we don't want
-            // special handling
-            this.requiresAuth = false;
-        },
-        url: function() {
-            var url = this.config.ensembleUrl + '/api/CurrentUser';
-            return this.config.urlCallback ? this.config.urlCallback(url) : url;
-        },
-        parse: function(response) {
-            return response.Data[0];
-        }
-    });
-
-});
-
-define('ev-script/auth/base/auth',['require','jquery','underscore','backbone','ev-script/util/events','ev-script/util/cache','ev-script/models/current-user'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        eventsUtil = require('ev-script/util/events'),
-        cacheUtil = require('ev-script/util/cache'),
-        CurrentUser = require('ev-script/models/current-user'),
-        BaseAuth = function(appId) {
-            _.bindAll(this, 'getUser', 'login', 'logout', 'isAuthenticated', 'handleUnauthorized');
-            this.appId = appId;
-            this.config = cacheUtil.getAppConfig(appId);
-            this.info = cacheUtil.getAppInfo(appId);
-            this.globalEvents = eventsUtil.getEvents('global');
-            this.appEvents = eventsUtil.getEvents(appId);
-            this.user = null;
-            this.appEvents.on('appLoaded', function() {
-                this.fetchUser();
-            }, this);
-        };
-
-    // Reusing Backbone's object model for extension
-    BaseAuth.extend = Backbone.Model.extend;
-
-    _.extend(BaseAuth.prototype, {
-        fetchUser: function() {
-            var currentUser = new CurrentUser({}, {
-                appId: this.appId
-            });
-            return currentUser.fetch({
-                success: _.bind(function(model, response, options) {
-                    this.user = model;
-                    this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
-                }, this),
-                error: _.bind(function(model, response, options) {
-                    this.user = null;
-                    this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                }, this)
-            }).promise();
-        },
-        getUser: function() {
-            return this.user;
-        },
-        // Return failed promise...subclasses should override
-        login: function(loginInfo) {
-            return $.Deferred().reject().promise();
-        },
-        // Return failed promise...subclasses should override
-        logout: function() {
-            return $.Deferred().reject().promise();
-        },
-        isAuthenticated: function() {
-            return this.user != null;
-        },
-        handleUnauthorized: function(element, authCallback) {}
-    });
-
-    return BaseAuth;
 
 });
 
@@ -32196,501 +33577,6 @@ define('ev-script/auth/base/auth',['require','jquery','underscore','backbone','e
 	};
 
 }));
-
-
-define('text!ev-script/auth/basic/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <div role="group">\n        <div class="fieldWrap">\n            <label for="username"><%= i18n.formatMessage(\'Username\') %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= i18n.formatMessage(\'Password\') %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\n        </div>\n    </div>\n</form>\n';});
-
-define('ev-script/auth/basic/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui/ui/widgets/dialog','text!ev-script/auth/basic/template.html'],function(require, template) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events');
-
-    require('jquery.cookie');
-    require('jquery-ui/ui/widgets/dialog');
-
-    return Backbone.View.extend({
-        template: _.template(require('text!ev-script/auth/basic/template.html')),
-        initialize: function(options) {
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
-            this.appEvents = eventsUtil.getEvents(this.appId);
-            this.i18n = cacheUtil.getAppI18n(this.appId);
-            this.submitCallback = options.submitCallback || function() {};
-            this.auth = options.auth;
-        },
-        render: function() {
-            var html = this.template({
-                i18n: this.i18n
-            });
-            this.$dialog = $('<div class="ev-auth"></div>');
-            this.$el.after(this.$dialog);
-            this.$dialog.dialog({
-                title: this.i18n.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
-                modal: true,
-                draggable: false,
-                resizable: false,
-                width: Math.min(540, $(window).width() - this.config.dialogMargin),
-                height: Math.min(250, $(window).height() - this.config.dialogMargin),
-                dialogClass: 'ev-dialog',
-                create: _.bind(function(event, ui) {
-                    this.$dialog.html(html);
-                }, this),
-                closeText: this.i18n.formatMessage('Close'),
-                close: _.bind(function(event, ui) {
-                    this.$dialog.dialog('destroy').remove();
-                    this.appEvents.trigger('hidePickers');
-                }, this)
-            });
-            $('form', this.$dialog).submit(_.bind(function(e) {
-                var $form = $(e.target);
-                var username = $('#username', $form).val();
-                var password = $('#password', $form).val();
-                if (username && password) {
-                    this.auth.login({
-                        username: username,
-                        password: password
-                    })
-                    .always(this.submitCallback);
-                    this.$dialog.dialog('destroy').remove();
-                }
-                e.preventDefault();
-            }, this));
-        }
-    });
-
-});
-
-define('ev-script/auth/basic/auth',['require','jquery','underscore','backbone','ev-script/auth/base/auth','ev-script/auth/basic/view','ev-script/collections/organizations'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        BaseAuth = require('ev-script/auth/base/auth'),
-        AuthView = require('ev-script/auth/basic/view'),
-        Organizations = require('ev-script/collections/organizations'),
-        // Note: This isn't really basic authentication at all...we just set
-        // cookies containing credentials to be handled by a proxy.  The proxy
-        // uses these to forward our request with a basic auth header.
-        BasicAuth = BaseAuth.extend({
-            constructor: function(appId) {
-                BasicAuth.__super__.constructor.call(this, appId);
-            },
-            fetchUser: function() {
-                return BasicAuth.__super__.fetchUser.call(this);
-            },
-            login: function(loginInfo) {
-                var cookieOptions = { path: this.config.authPath };
-                $.cookie(this.config.ensembleUrl + '-user', loginInfo.username, _.extend({}, cookieOptions));
-                $.cookie(this.config.ensembleUrl + '-pass', loginInfo.password, _.extend({}, cookieOptions));
-                return this.fetchUser();
-            },
-            logout: function() {
-                var deferred = $.Deferred();
-                var cookieOptions = { path: this.config.authPath };
-                $.removeCookie(this.config.ensembleUrl + '-user', _.extend({}, cookieOptions));
-                $.removeCookie(this.config.ensembleUrl + '-pass', _.extend({}, cookieOptions));
-                this.user = null;
-                this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                deferred.resolve();
-                return deferred.promise();
-            },
-            handleUnauthorized: function(element, authCallback) {
-                this.logout();
-                var authView = new AuthView({
-                    el: element,
-                    submitCallback: authCallback,
-                    appId: this.appId,
-                    auth: this
-                });
-                authView.render();
-            }
-        });
-
-    return BasicAuth;
-});
-
-
-define('text!ev-script/auth/forms/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <div role="group">\n        <div class="fieldWrap">\n            <label for="username"><%= i18n.formatMessage(\'Username\') %></label>\n            <input id="username" name="username" class="form-text" type="text"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="password"><%= i18n.formatMessage(\'Password\') %></label>\n            <input id="password" name="password" class="form-text" type="password"/>\n        </div>\n        <div class="fieldWrap">\n            <label for="provider"><%= i18n.formatMessage(\'Identity Provider\') %></label>\n            <select id="provider" name="provider" class="form-select"></select>\n        </div>\n        <div class="fieldWrap">\n            <label for="remember"><%= i18n.formatMessage(\'Remember Me\') %></label>\n            <input id="remember" name="remember" type="checkbox"></input>\n        </div>\n        <div class="form-actions">\n            <label></label>\n            <input type="submit" class="form-submit action-submit" value="<%= i18n.formatMessage(\'Submit\') %>"/>\n            <div class="loader"></div>\n        </div>\n    </div role="group">\n</form>\n';});
-
-define('ev-script/auth/forms/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery.cookie','jquery-ui/ui/widgets/dialog','text!ev-script/auth/forms/template.html','text!ev-script/templates/options.html'],function(require, template) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events');
-
-    require('jquery.cookie');
-    require('jquery-ui/ui/widgets/dialog');
-
-    return Backbone.View.extend({
-        template: _.template(require('text!ev-script/auth/forms/template.html')),
-        optionsTemplate: _.template(require('text!ev-script/templates/options.html')),
-        initialize: function(options) {
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
-            this.appEvents = eventsUtil.getEvents(this.appId);
-            this.i18n = cacheUtil.getAppI18n(this.appId);
-            this.submitCallback = options.submitCallback || function() {};
-            this.auth = options.auth;
-        },
-        render: function() {
-            var $html = $(this.template({
-                    i18n: this.i18n
-                })),
-                $select = $('#provider', $html).append(this.optionsTemplate({
-                    collection: this.collection,
-                    selectedId: this.config.defaultProvider
-                }));
-            this.$dialog = $('<div class="ev-auth"></div>');
-            this.$el.after(this.$dialog);
-
-            // Handle loading indicator in form
-            var $loader = $('div.loader', $html),
-                loadingOn = _.bind(function(e, xhr, settings) {
-                    $loader.addClass('loading');
-                }, this),
-                loadingOff = _.bind(function(e, xhr, settings) {
-                    $loader.removeClass('loading');
-                }, this);
-            $(window.document).on('ajaxSend', loadingOn).on('ajaxComplete', loadingOff);
-
-            this.$dialog.dialog({
-                title: this.i18n.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
-                modal: true,
-                draggable: false,
-                resizable: false,
-                width: Math.min(540, $(window).width() - this.config.dialogMargin),
-                height: Math.min(250, $(window).height() - this.config.dialogMargin),
-                dialogClass: 'ev-dialog',
-                create: _.bind(function(event, ui) {
-                    this.$dialog.html($html);
-                }, this),
-                closeText: this.i18n.formatMessage('Close'),
-                close: _.bind(function(event, ui) {
-                    $(window.document).off('ajaxSend', loadingOn).off('ajaxComplete', loadingOff);
-                    this.$dialog.dialog('destroy').remove();
-                    this.appEvents.trigger('hidePickers');
-                }, this)
-            });
-            $('form', this.$dialog).submit(_.bind(function(e) {
-                var $form = $(e.target);
-                var username = $('#username', $form).val();
-                var password = $('#password', $form).val();
-                if (username && password) {
-                    this.auth.login({
-                        username: username,
-                        password: password,
-                        authSourceId: $('#provider :selected', $form).val(),
-                        persist: $('#remember', $form).is(':checked')
-                    }).then(_.bind(function() {
-                        this.$dialog.dialog('destroy').remove();
-                        this.submitCallback();
-                    }, this));
-                }
-                e.preventDefault();
-            }, this));
-        }
-    });
-
-});
-
-define('ev-script/collections/identity-providers',['require','ev-script/collections/base','ev-script/util/cache'],function(require) {
-
-    'use strict';
-
-    var BaseCollection = require('ev-script/collections/base'),
-        cacheUtil = require('ev-script/util/cache'),
-        cached = new cacheUtil.Cache();
-
-    return BaseCollection.extend({
-        initialize: function(models, options) {
-            BaseCollection.prototype.initialize.call(this, models, options);
-            this.requiresAuth = false;
-        },
-        getCached: function(key) {
-            return cached.get(this.config.ensembleUrl);
-        },
-        setCached: function(key, resp) {
-            return cached.set(this.config.ensembleUrl, resp);
-        },
-        url: function() {
-            var api_url = this.config.ensembleUrl + '/api/IdentityProviders';
-            return this.config.urlCallback ? this.config.urlCallback(api_url) : api_url;
-        }
-    });
-
-});
-
-define('ev-script/auth/forms/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/models/current-user','ev-script/auth/forms/view','ev-script/collections/identity-providers'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        BaseAuth = require('ev-script/auth/base/auth'),
-        CurrentUser = require('ev-script/models/current-user'),
-        AuthView = require('ev-script/auth/forms/view'),
-        IdentityProviders = require('ev-script/collections/identity-providers'),
-        FormsAuth = BaseAuth.extend({
-            constructor: function(appId) {
-                BaseAuth.prototype.constructor.call(this, appId);
-                this.identityProviders = new IdentityProviders({}, {
-                    appId: appId
-                });
-                this.asPromise = this.identityProviders.fetch();
-            },
-            login: function(loginInfo) {
-                var url = this.config.ensembleUrl + '/api/Login';
-                return $.ajax({
-                    url: this.config.urlCallback ? this.config.urlCallback(url) : url,
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        user: loginInfo.username,
-                        password: loginInfo.password,
-                        identityProviderId: loginInfo.authSourceId,
-                        persist: loginInfo.persist
-                    },
-                    xhrFields: {
-                        withCredentials: true
-                    },
-                    success: _.bind(function(data, status, xhr) {
-                        this.user = new CurrentUser(data.Data[0], {
-                            appId: this.appId
-                        });
-                        this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
-                    }, this)
-                }).promise();
-            },
-            logout: function() {
-                var url = this.config.ensembleUrl + '/api/Logout';
-                return $.ajax({
-                    url: this.config.urlCallback ? this.config.urlCallback(url) : url,
-                    type: 'POST',
-                    xhrFields: {
-                        withCredentials: true
-                    },
-                    success: _.bind(function(data, status, xhr) {
-                        this.user = null;
-                        this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                    }, this)
-                }).promise();
-            },
-            handleUnauthorized: function(element, authCallback) {
-                this.user = null;
-                this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                this.asPromise.done(_.bind(function() {
-                    var authView = new AuthView({
-                        el: element,
-                        submitCallback: authCallback,
-                        appId: this.appId,
-                        auth: this,
-                        collection: this.identityProviders
-                    });
-                    authView.render();
-                }, this));
-            }
-        });
-
-    return FormsAuth;
-
-});
-
-
-define('text!ev-script/auth/ensemble/template.html',[],function () { return '<iframe src="<%= frameSrc %>" width="<%= frameWidth %>" height="<%= frameHeight %>" frameborder="0" autofocus="true"><iframe>';});
-
-define('ev-script/auth/ensemble/view',['require','exports','module','jquery','underscore','urijs/URI','backbone','ev-script/util/cache','ev-script/util/events','jquery-ui/ui/widgets/dialog','text!ev-script/auth/ensemble/template.html'],function(require, template) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        URI = require('urijs/URI'),
-        Backbone = require('backbone'),
-        cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events');
-
-    require('jquery-ui/ui/widgets/dialog');
-
-    return Backbone.View.extend({
-        template: _.template(require('text!ev-script/auth/ensemble/template.html')),
-        initialize: function(options) {
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
-            this.appEvents = eventsUtil.getEvents(this.appId);
-            this.globalEvents = eventsUtil.getEvents('global');
-            this.i18n = cacheUtil.getAppI18n(this.appId);
-            this.submitCallback = options.submitCallback || function() {};
-        },
-        render: function() {
-            var dialogWidth = Math.min(540, $(window).width() - this.config.dialogMargin),
-                dialogHeight = Math.min(250, $(window).height() - this.config.dialogMargin),
-                frameSrc = URI(this.config.ensembleUrl)
-                    .path(this.config.ensembleAuthOptions.authPath)
-                    .addQuery('idp', this.config.defaultProvider),
-                $html = $(this.template({
-                    i18n: this.i18n,
-                    frameSrc: frameSrc,
-                    frameWidth: dialogWidth - 50,
-                    frameHeight: dialogHeight - 60
-                }));
-            this.$dialog = $('<div class="ev-auth"></div>');
-            this.$el.after(this.$dialog);
-            this.$dialog.dialog({
-                title: this.i18n.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
-                modal: true,
-                draggable: false,
-                resizable: false,
-                width: dialogWidth,
-                height: dialogHeight,
-                dialogClass: 'ev-dialog',
-                create: _.bind(function(event, ui) {
-                    this.$dialog.html($html);
-                }, this),
-                closeText: this.i18n.formatMessage('Close'),
-                close: _.bind(function(event, ui) {
-                    this.$dialog.dialog('destroy').remove();
-                    this.appEvents.trigger('hidePickers');
-                }, this)
-            });
-            $(window).on('message', _.bind(function(e) {
-                if (e.originalEvent.data === this.config.ensembleAuthOptions.authCompleteMessage) {
-                    this.globalEvents.trigger('loggedIn', this.config.ensembleUrl);
-                    this.$dialog.dialog('destroy').remove();
-                    this.submitCallback();
-                }
-            }, this));
-        }
-    });
-
-});
-
-define('ev-script/auth/ensemble/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/auth/forms/auth','ev-script/auth/ensemble/view'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        BaseAuth = require('ev-script/auth/base/auth'),
-        FormsAuth = require('ev-script/auth/forms/auth'),
-        AuthView = require('ev-script/auth/ensemble/view'),
-        // This auth type renders an EV login control in an iframe
-        EnsembleAuth = BaseAuth.extend({
-            constructor: function(appId) {
-                BaseAuth.prototype.constructor.call(this, appId);
-            },
-            logout: function() {
-                return FormsAuth.prototype.logout.call(this);
-            },
-            handleUnauthorized: function(element, authCallback) {
-                this.user = null;
-                this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                var authView = new AuthView({
-                    el: element,
-                    submitCallback: authCallback,
-                    appId: this.appId,
-                    auth: this
-                });
-                authView.render();
-            }
-        });
-
-    return EnsembleAuth;
-
-});
-
-
-define('text!ev-script/auth/none/template.html',[],function () { return '<div class="logo"></div>\n<form>\n    <h3><%= i18n.formatMessage(\'You are unauthorized to access this content.\') %></h3>\n</form>\n';});
-
-define('ev-script/auth/none/view',['require','exports','module','jquery','underscore','backbone','ev-script/util/cache','ev-script/util/events','jquery-ui/ui/widgets/dialog','text!ev-script/auth/none/template.html'],function(require, template) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        cacheUtil = require('ev-script/util/cache'),
-        eventsUtil = require('ev-script/util/events');
-
-    require('jquery-ui/ui/widgets/dialog');
-
-    return Backbone.View.extend({
-        template: _.template(require('text!ev-script/auth/none/template.html')),
-        initialize: function(options) {
-            this.appId = options.appId;
-            this.config = cacheUtil.getAppConfig(this.appId);
-            this.appEvents = eventsUtil.getEvents(this.appId);
-            this.i18n = cacheUtil.getAppI18n(this.appId);
-        },
-        render: function() {
-            var $html = $(this.template({
-                i18n: this.i18n
-            }));
-            this.$dialog = $('<div class="ev-auth"></div>');
-            this.$el.after(this.$dialog);
-            this.$dialog.dialog({
-                title: this.i18n.formatMessage('Ensemble Video Login') + ' - ' + this.config.ensembleUrl,
-                modal: true,
-                draggable: false,
-                resizable: false,
-                width: Math.min(540, $(window).width() - this.config.dialogMargin),
-                height: Math.min(250, $(window).height() - this.config.dialogMargin),
-                dialogClass: 'ev-dialog',
-                create: _.bind(function(event, ui) {
-                    this.$dialog.html($html);
-                }, this),
-                closeText: this.i18n.formatMessage('Close'),
-                close: _.bind(function(event, ui) {
-                    this.$dialog.dialog('destroy').remove();
-                    this.appEvents.trigger('hidePickers');
-                }, this)
-            });
-        }
-    });
-
-});
-
-define('ev-script/auth/none/auth',['require','jquery','underscore','ev-script/auth/base/auth','ev-script/auth/none/view'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        BaseAuth = require('ev-script/auth/base/auth'),
-        AuthView = require('ev-script/auth/none/view'),
-        // This auth type doesn't actually prompt to authenticate.  Rather, it
-        // displays an authentication warning.
-        NoneAuth = BaseAuth.extend({
-            constructor: function(appId) {
-                BaseAuth.prototype.constructor.call(this, appId);
-            },
-            handleUnauthorized: function(element, authCallback) {
-                this.user = null;
-                this.globalEvents.trigger('loggedOut', this.config.ensembleUrl);
-                var authView = new AuthView({
-                    el: element,
-                    submitCallback: authCallback,
-                    appId: this.appId,
-                    auth: this,
-                    collection: this.identityProviders
-                });
-                authView.render();
-            }
-        });
-
-    return NoneAuth;
-
-});
 
 /**
  * CLDR JavaScript Library v0.4.8
@@ -35037,7 +35923,7 @@ return Globalize;
 }));
 
 /*global requirejs*/
-define('ev-script',['require','backbone','underscore','jquery','globalize','moment','json!cldr-data/supplemental/likelySubtags.json','json!ev-script/i18n/root/messages.json','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/views/field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/models/app-info','ev-script/auth/basic/auth','ev-script/auth/forms/auth','ev-script/auth/ensemble/auth','ev-script/auth/none/auth','ev-script/util/events','ev-script/util/cache','cldr/supplemental','cldr/unresolved','globalize/message'],function(require) {
+define('ev-script',['require','backbone','underscore','jquery','globalize','moment','json!cldr-data/supplemental/likelySubtags.json','json!ev-script/i18n/root/messages.json','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/models/dropbox-settings','ev-script/models/quiz-settings','ev-script/views/video-field','ev-script/views/playlist-field','ev-script/views/dropbox-field','ev-script/views/quiz-field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/views/dropbox-embed','ev-script/views/quiz-embed','ev-script/models/root','ev-script/models/info','ev-script/util/events','ev-script/util/cache','jquery.cookie','cldr/supplemental','cldr/unresolved','globalize/message'],function(require) {
 
     'use strict';
 
@@ -35048,18 +35934,34 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
         moment = require('moment'),
         likelySubtags = require('json!cldr-data/supplemental/likelySubtags.json'),
         messages = require('json!ev-script/i18n/root/messages.json'),
+
+        // Settings models
         VideoSettings = require('ev-script/models/video-settings'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
-        FieldView = require('ev-script/views/field'),
+        DropboxSettings = require('ev-script/models/dropbox-settings'),
+        QuizSettings = require('ev-script/models/quiz-settings'),
+
+        // Field views
+        VideoFieldView = require('ev-script/views/video-field'),
+        PlaylistFieldView = require('ev-script/views/playlist-field'),
+        DropboxFieldView = require('ev-script/views/dropbox-field'),
+        QuizFieldView = require('ev-script/views/quiz-field'),
+
+        // Embed views
         VideoEmbedView = require('ev-script/views/video-embed'),
         PlaylistEmbedView = require('ev-script/views/playlist-embed'),
-        AppInfo = require('ev-script/models/app-info'),
-        BasicAuth = require('ev-script/auth/basic/auth'),
-        FormsAuth = require('ev-script/auth/forms/auth'),
-        EnsembleAuth = require('ev-script/auth/ensemble/auth'),
-        NoneAuth = require('ev-script/auth/none/auth'),
+        DropboxEmbedView = require('ev-script/views/dropbox-embed'),
+        QuizEmbedView = require('ev-script/views/quiz-embed'),
+
+        // API response
+        Root = require('ev-script/models/root'),
+        Info = require('ev-script/models/info'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
+
+    // Require jquery.cookie here so it is bundled. It is used in our factory
+    // for configuration of i18n.
+    require('jquery.cookie');
 
     // Load globalize deps
     require('cldr/supplemental');
@@ -35068,26 +35970,11 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
 
     var EnsembleApp = function(appOptions) {
 
-        // Lame unique id generator
-        var appId = Math.floor(Math.random() * 10000000000000001).toString(16);
-
-        // Get or create a new cache to store objects specific to EV
-        // installation but common across 'app' instances (e.g. videos
-        // accessible by a given user).
-        var evCache = cacheUtil.caches.get(appOptions.ensembleUrl);
-        if (!evCache) {
-            evCache = cacheUtil.caches.set(appOptions.ensembleUrl, new cacheUtil.Cache());
-        }
-
         var defaults = {
             // Application root of the EV installation.
             ensembleUrl: '',
-            // Cookie path.
-            authPath: '',
-            // Models/collections will typically fetch directly from the API,
-            // but this method is called in case that needs to be overridden
-            // (e.g. in cross-domain scenarios where we're using a proxy).
-            urlCallback: function(url) { return url; },
+            // Path to the api under the ensembleUrl.
+            apiPath: '/hapi',
             // Number of results to fetch at a time from the server (page size).
             pageSize: 100,
             // The height of our scroll loader. This can be an integer (number
@@ -35099,10 +35986,6 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
             hidePickers: true,
             // The difference between window dimensions and maximum dialog size.
             dialogMargin: 40,
-            // This can be 'forms', 'basic' (default), 'none' (in which case an
-            // access denied message is displayed and user is not prompted to
-            // authenticate), or 'ensemble' (loads a login widget in an iframe).
-            authType: 'basic',
             // Set this in order to select the default identity provider in the
             // forms auth identity provider dropdown.
             defaultProvider: '',
@@ -35119,18 +36002,13 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
             },
             // Path to i18n folder
             i18nPath: 'i18n',
-            // Options used for 'ensemble' authType
-            ensembleAuthOptions: {
-                // Path to ensemble login page when using 'ensemble' authType
-                authPath: '/app/lti/login.aspx',
-                authCompleteMessage: 'ev_auth_complete'
-            }
+            // Auth options
+            authLoginPath: '/app/lti/login.aspx',
+            authLogoutPath: '/api/logout',
+            authCompleteMessage: 'ev_auth_complete'
         };
 
-        // Add our configuration to the app cache...this is specific to this
-        // 'app' instance.  There may be multiple instances on a single page w/
-        // unique settings.
-        var config = cacheUtil.setAppConfig(appId, _.extend({}, defaults, appOptions));
+        var config = _.extend({}, defaults, appOptions);
 
         var locale = config.getLocaleCallback();
         // Set locale for moment
@@ -35142,109 +36020,135 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
         _.extend(this, loading.promise());
 
         // Create an event aggregator specific to our app
-        eventsUtil.initEvents(appId);
-        this.appEvents = eventsUtil.getEvents(appId);
-        // eventsUtil also provides us with a global event aggregator for events
-        // that span app instances
-        this.globalEvents = eventsUtil.getEvents();
-        var info = new AppInfo({}, {
-            appId: appId
-        });
-        cacheUtil.setAppInfo(appId, info);
+        this.events = eventsUtil.getEvents();
 
-        var finishLoading = _.bind(function() {
+        var loadApp = _.bind(function() {
 
-            // Setup globalize
-            Globalize.load(likelySubtags);
-            Globalize.loadMessages(messages);
-            cacheUtil.setAppI18n(appId, new Globalize(!messages[locale] ? 'en-US' : locale));
+            cacheUtil.setConfig(config);
 
-            // Load application info from EV
-            info.fetch({})
-            .always(_.bind(function() {
-                if (!info.get('ApplicationVersion')) {
-                    loading.reject('Failed to retrieve application info.');
-                } else {
-                    // This will initialize and cache an auth object for our app
-                    var auth;
-                    switch (config.authType) {
-                        case 'forms':
-                            auth = new FormsAuth(appId);
-                            break;
-                        case 'none':
-                            auth = new NoneAuth(appId);
-                            break;
-                        case 'ensemble':
-                            auth = new EnsembleAuth(appId);
-                            break;
-                        default:
-                            auth = new BasicAuth(appId);
-                            break;
+            cacheUtil.setI18n(new Globalize(!messages[locale] ? 'en-US' : locale));
+
+            var root = new Root({}, {
+                href: config.ensembleUrl + config.apiPath
+            });
+            cacheUtil.setRoot(root);
+
+            root.fetch({})
+            .done(_.bind(function() {
+                var info = new Info({}, {
+                    href: root.getLink('ev:Info/Get').href
+                });
+                cacheUtil.setInfo(info);
+
+                // Load application info from EV
+                info.fetch({})
+                .always(_.bind(function() {
+                    if (!info.get('applicationVersion')) {
+                        loading.reject('Failed to retrieve application info.');
+                    } else {
+                        // TODO - document and add some flexibility to params (e.g. in addition
+                        // to selector allow element or object).
+                        this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
+                            var $field = $(fieldSelector, fieldWrap),
+                                fieldOptions = {
+                                    id: fieldWrap.id || 'ev-field',
+                                    el: fieldWrap,
+                                    model: settingsModel,
+                                    $field: $field
+                                },
+                                fieldView;
+                            if (settingsModel instanceof VideoSettings) {
+                                fieldView = new VideoFieldView(fieldOptions);
+                            } else if (settingsModel instanceof PlaylistSettings) {
+                                fieldView = new PlaylistFieldView(fieldOptions);
+                            } else if (settingsModel instanceof DropboxSettings) {
+                                fieldView = new DropboxFieldView(fieldOptions);
+                            } else if (settingsModel instanceof QuizSettings) {
+                                fieldView = new QuizFieldView(fieldOptions);
+                            } else {
+                                throw new Error('Unrecognized settings model type');
+                            }
+                        };
+
+                        // TODO - document.  See handleField comment too.
+                        this.handleEmbed = function(embedWrap, settingsModel) {
+                            if (settingsModel instanceof VideoSettings) {
+                                var videoEmbed = new VideoEmbedView({
+                                    el: embedWrap,
+                                    model: settingsModel
+                                });
+                                videoEmbed.render();
+                            } else if (settingsModel instanceof PlaylistSettings) {
+                                var playlistEmbed = new PlaylistEmbedView({
+                                    el: embedWrap,
+                                    model: settingsModel
+                                });
+                                playlistEmbed.render();
+                            } else if (settingsModel instanceof DropboxSettings) {
+                                var dropboxEmbed = new DropboxEmbedView({
+                                    el: embedWrap,
+                                    model: settingsModel
+                                });
+                                dropboxEmbed.render();
+                            } else if (settingsModel instanceof QuizSettings) {
+                                var quizEmbed = new QuizEmbedView({
+                                    el: embedWrap,
+                                    model: settingsModel
+                                });
+                                quizEmbed.render();
+                            } else {
+                                throw new Error('Unrecognized settings model type');
+                            }
+                        };
+
+                        this.getEmbedCode = function(settings) {
+                            var $div = $('<div/>');
+                            if (settings.type === 'video') {
+                                this.handleEmbed($div[0], new VideoSettings(settings));
+                            } else if (settings.type === 'playlist') {
+                                this.handleEmbed($div[0], new PlaylistSettings(settings));
+                            } else if (settings.type === 'dropbox') {
+                                this.handleEmbed($div[0], new DropboxSettings(settings));
+                            } else if (settings.type === 'quiz') {
+                                this.handleEmbed($div[0], new QuizSettings(settings));
+                            } else {
+                                throw new Error('Unrecognized settings model type');
+                            }
+                            return $div.html();
+                        };
+
+                        this.events.trigger('appLoaded');
+                        loading.resolve();
                     }
-                    cacheUtil.setAppAuth(appId, auth);
-
-                    // TODO - document and add some flexibility to params (e.g. in addition
-                    // to selector allow element or object).
-                    this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
-                        var $field = $(fieldSelector, fieldWrap);
-                        var fieldView = new FieldView({
-                            id: fieldWrap.id || appId,
-                            el: fieldWrap,
-                            model: settingsModel,
-                            $field: $field,
-                            appId: appId
-                        });
-                    };
-
-                    // TODO - document.  See handleField comment too.
-                    this.handleEmbed = function(embedWrap, settingsModel) {
-                        if (settingsModel instanceof VideoSettings) {
-                            var videoEmbed = new VideoEmbedView({
-                                el: embedWrap,
-                                model: settingsModel,
-                                appId: appId
-                            });
-                            videoEmbed.render();
-                        } else {
-                            var playlistEmbed = new PlaylistEmbedView({
-                                el: embedWrap,
-                                model: settingsModel,
-                                appId: appId
-                            });
-                            playlistEmbed.render();
-                        }
-                    };
-
-                    this.getEmbedCode = function(settings) {
-                        var $div = $('<div/>');
-                        if (settings.type === 'video') {
-                            this.handleEmbed($div[0], new VideoSettings(settings));
-                        } else {
-                            this.handleEmbed($div[0], new PlaylistSettings(settings));
-                        }
-                        return $div.html();
-                    };
-
-                    this.appEvents.trigger('appLoaded');
-                    loading.resolve();
-                }
+                }, this));
+            }, this))
+            .fail(_.bind(function() {
+                loading.reject('An error occurred while connecting to the Ensemble Video API');
             }, this));
+
         }, this);
 
         // Load messages for locale
         $.getJSON(config.i18nPath + '/' + locale + '/messages.json')
         .done(function(data, status, xhr) {
             _.extend(messages, data);
-            finishLoading();
+
+            // Setup globalize
+            Globalize.load(likelySubtags);
+            Globalize.loadMessages(messages);
+
+            loadApp();
         })
         .fail(function(xhr, status, error) {
-            finishLoading();
+            loadApp();
         });
     };
 
     return {
         VideoSettings: VideoSettings,
         PlaylistSettings: PlaylistSettings,
+        DropboxSettings: DropboxSettings,
+        QuizSettings: QuizSettings,
         EnsembleApp: EnsembleApp
     };
 
