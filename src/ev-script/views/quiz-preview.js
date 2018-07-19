@@ -6,7 +6,14 @@ define(function(require) {
         QuizEmbedView = require('ev-script/views/quiz-embed');
 
     return PreviewView.extend({
-        embedClass: QuizEmbedView
+        embedClass: QuizEmbedView,
+        render: function() {
+            var embedView = new QuizEmbedView({
+                    model: new this.model.constructor(this.model.toJSON())
+                }),
+                targetUrl = embedView.getUrl(true);
+            window.open(targetUrl);
+        }
     });
 
 });

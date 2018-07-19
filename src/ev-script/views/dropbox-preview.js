@@ -6,14 +6,14 @@ define(function(require) {
         DropboxEmbedView = require('ev-script/views/dropbox-embed');
 
     return PreviewView.extend({
-        embedClass: DropboxEmbedView
-        // render: function() {
-        //     var embedView = new DropboxEmbedView({
-        //             model: new this.model.constructor(this.model.toJSON())
-        //         }),
-        //         targetUrl = embedView.getUrl(true);
-        //     window.open(targetUrl);
-        // }
+        embedClass: DropboxEmbedView,
+        render: function() {
+            var embedView = new DropboxEmbedView({
+                    model: new this.model.constructor(this.model.toJSON())
+                }),
+                targetUrl = embedView.getUrl(true);
+            window.open(targetUrl);
+        }
     });
 
 });

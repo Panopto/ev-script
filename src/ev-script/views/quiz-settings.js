@@ -11,7 +11,7 @@ define(function(require) {
 
     return SettingsView.extend({
         template: _.template(require('text!ev-script/templates/quiz-settings.html')),
-        sizesTemplate: _.template(require('text!ev-script/templates/sizes.html')),
+        // sizesTemplate: _.template(require('text!ev-script/templates/sizes.html')),
         initialize: function(options) {
             SettingsView.prototype.initialize.call(this, options);
             this.encoding = options.encoding;
@@ -49,26 +49,26 @@ define(function(require) {
             this.field.model.set(attrs);
         },
         renderSize: function() {
-            var width = this.field.model.get('width'),
-                height = this.field.model.get('height'),
-                options = [],
-                targetWidth;
-            if ((!width || !height) && this.encoding.id) {
-                width = this.encoding.getWidth();
-                height = this.encoding.getHeight();
-            }
-            // Use default IF encoding can handle it
-            if (this.config.defaultVideoWidth && this.config.defaultVideoWidth <= width) {
-                targetWidth =  this.config.defaultVideoWidth;
-            } else {
-                targetWidth = width;
-            }
-            options = sizeUtil.getAvailableDimensions();
-            this.$('.size').append(this.sizesTemplate({
-                sizes: options,
-                // Select the override or current width
-                target: sizeUtil.findClosestDimension(targetWidth)
-            }));
+            // var width = this.field.model.get('width'),
+            //     height = this.field.model.get('height'),
+            //     options = [],
+            //     targetWidth;
+            // if ((!width || !height) && this.encoding.id) {
+            //     width = this.encoding.getWidth();
+            //     height = this.encoding.getHeight();
+            // }
+            // // Use default IF encoding can handle it
+            // if (this.config.defaultVideoWidth && this.config.defaultVideoWidth <= width) {
+            //     targetWidth =  this.config.defaultVideoWidth;
+            // } else {
+            //     targetWidth = width;
+            // }
+            // options = sizeUtil.getAvailableDimensions();
+            // this.$('.size').append(this.sizesTemplate({
+            //     sizes: options,
+            //     // Select the override or current width
+            //     target: sizeUtil.findClosestDimension(targetWidth)
+            // }));
         },
         render: function() {
             this.$el.html(this.template({
@@ -76,9 +76,9 @@ define(function(require) {
                 i18n: this.i18n,
                 model: this.field.model
             }));
-            if (this.encoding) {
-                this.renderSize();
-            }
+            // if (this.encoding) {
+            //     this.renderSize();
+            // }
             var content = this.field.model.get('content');
             this.$el.dialog({
                 title: this.unencode(content && content.title || this.field.model.get('id')),

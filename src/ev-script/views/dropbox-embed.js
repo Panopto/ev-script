@@ -10,18 +10,17 @@ define(function(require) {
         template: _.template(require('text!ev-script/templates/dropbox-embed.html')),
         initialize: function(options) {
 
-            _.bindAll(this, 'render');
+            _.bindAll(this, 'render', 'getUrl');
 
             EmbedView.prototype.initialize.call(this, options);
         },
+        getUrl: function(isPreview) {
+            return URI(this.config.ensembleUrl + '/hapi/v1/Dropboxes/' +
+                this.model.get('id') + '/Show');
+        },
         render: function(isPreview) {
-            var src = URI(this.config.ensembleUrl + '/hapi/v1/Dropboxes/' +
-                this.model.get('id') + '/Embed/Show');
-
             this.$el.html(this.template({
-                'src': src,
-                'width': this.getFrameWidth(),
-                'height': this.getFrameHeight(),
+                'src': this.getUrl(isPreview),
                 'title': this.model.get('content').title
             }));
         }
