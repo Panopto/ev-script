@@ -1,5 +1,5 @@
 /**
- * ev-script 2.0.0 2018-07-19
+ * ev-script 2.0.0 2018-07-20
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2018 Symphony Video, Inc.
@@ -4073,17 +4073,17 @@ define("node_modules/almond/almond", function(){});
 });
 
 /**
- * CLDR JavaScript Library v0.4.8
+ * CLDR JavaScript Library v0.5.0
  * http://jquery.com/
  *
  * Copyright 2013 Rafael Xavier de Souza
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2016-11-26T15:03Z
+ * Date: 2017-08-11T11:52Z
  */
 /*!
- * CLDR JavaScript Library v0.4.8 2016-11-26T15:03Z MIT license © Rafael Xavier
+ * CLDR JavaScript Library v0.5.0 2017-08-11T11:52Z MIT license © Rafael Xavier
  * http://git.io/h4lmVg
  */
 (function( root, factory ) {
@@ -4756,17 +4756,17 @@ define("node_modules/almond/almond", function(){});
 }));
 
 /**
- * CLDR JavaScript Library v0.4.8
+ * CLDR JavaScript Library v0.5.0
  * http://jquery.com/
  *
  * Copyright 2013 Rafael Xavier de Souza
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2016-11-26T15:03Z
+ * Date: 2017-08-11T11:52Z
  */
 /*!
- * CLDR JavaScript Library v0.4.8 2016-11-26T15:03Z MIT license © Rafael Xavier
+ * CLDR JavaScript Library v0.5.0 2017-08-11T11:52Z MIT license © Rafael Xavier
  * http://git.io/h4lmVg
  */
 (function( factory ) {
@@ -4811,8 +4811,8 @@ EventEmitter = (function () {
 
 	// Shortcuts to improve speed and size
 	var proto = EventEmitter.prototype;
-	var exports = this;
-	var originalGlobalValue = exports.EventEmitter;
+	var exports = {};
+	
 
 	/**
 	 * Finds the index of the listener for the event in it's storage array.
@@ -5342,7 +5342,7 @@ EventEmitter = (function () {
 }));
 
 /**
- * Globalize v1.3.0
+ * Globalize v1.4.0
  *
  * http://github.com/jquery/globalize
  *
@@ -5350,10 +5350,10 @@ EventEmitter = (function () {
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2017-07-03T21:37Z
+ * Date: 2018-07-17T20:38Z
  */
 /*!
- * Globalize v1.3.0 2017-07-03T21:37Z Released under the MIT license
+ * Globalize v1.4.0 2018-07-17T20:38Z Released under the MIT license
  * http://git.io/TrdQbw
  */
 (function( root, factory ) {
@@ -5456,6 +5456,18 @@ var createError = function( code, message, attributes ) {
 
 
 
+var runtimeStringify = function( args ) {
+	return JSON.stringify( args, function( key, value ) {
+		if ( value && value.runtimeKey ) {
+			return value.runtimeKey;
+		}
+		return value;
+	} );
+};
+
+
+
+
 // Based on http://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript-jquery
 var stringHash = function( str ) {
 	return [].reduce.call( str, function( hash, i ) {
@@ -5470,7 +5482,7 @@ var stringHash = function( str ) {
 
 var runtimeKey = function( fnName, locale, args, argsStr ) {
 	var hash;
-	argsStr = argsStr || JSON.stringify( args );
+	argsStr = argsStr || runtimeStringify( args );
 	hash = stringHash( fnName + locale + argsStr );
 	return hash > 0 ? "a" + hash : "b" + Math.abs( hash );
 };
@@ -5496,7 +5508,7 @@ var functionName = function( fn ) {
 
 var runtimeBind = function( args, cldr, fn, runtimeArgs ) {
 
-	var argsStr = JSON.stringify( args ),
+	var argsStr = runtimeStringify( args ),
 		fnName = functionName( fn ),
 		locale = cldr.locale;
 
@@ -33579,17 +33591,17 @@ define('ev-script/models/info',['require','underscore','semver','ev-script/model
 }));
 
 /**
- * CLDR JavaScript Library v0.4.8
+ * CLDR JavaScript Library v0.5.0
  * http://jquery.com/
  *
  * Copyright 2013 Rafael Xavier de Souza
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2016-11-26T15:03Z
+ * Date: 2017-08-11T11:52Z
  */
 /*!
- * CLDR JavaScript Library v0.4.8 2016-11-26T15:03Z MIT license © Rafael Xavier
+ * CLDR JavaScript Library v0.5.0 2017-08-11T11:52Z MIT license © Rafael Xavier
  * http://git.io/h4lmVg
  */
 (function( factory ) {
@@ -33681,17 +33693,17 @@ define('ev-script/models/info',['require','underscore','semver','ev-script/model
 }));
 
 /**
- * CLDR JavaScript Library v0.4.8
+ * CLDR JavaScript Library v0.5.0
  * http://jquery.com/
  *
  * Copyright 2013 Rafael Xavier de Souza
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2016-11-26T15:03Z
+ * Date: 2017-08-11T11:52Z
  */
 /*!
- * CLDR JavaScript Library v0.4.8 2016-11-26T15:03Z MIT license © Rafael Xavier
+ * CLDR JavaScript Library v0.5.0 2017-08-11T11:52Z MIT license © Rafael Xavier
  * http://git.io/h4lmVg
  */
 (function( factory ) {
@@ -33781,20 +33793,20 @@ define('ev-script/models/info',['require','underscore','semver','ev-script/model
 		// 1: Due to #16, never use the cached resolved non-leaf nodes. It may not
 		//    represent its leafs in its entirety.
 		value = resourceGet( Cldr._resolved, normalizedPath );
-		if ( value && typeof value !== "object" /* 1 */ ) {
+		if ( value !== undefined && typeof value !== "object" /* 1 */ ) {
 			return value;
 		}
 
 		// Check raw data
 		value = resourceGet( Cldr._raw, normalizedPath );
 
-		if ( !value ) {
+		if ( value === undefined ) {
 			// Or, lookup at parent locale
 			parent = bundleParentLookup( Cldr, locale );
 			value = lookup( Cldr, parent, path, jsonMerge( attributes, { bundle: parent }), locale );
 		}
 
-		if ( value ) {
+		if ( value !== undefined ) {
 			// Set resolved (cached)
 			resourceSet( Cldr._resolved, normalizedPath, value );
 		}
@@ -33846,7 +33858,7 @@ define('ev-script/models/info',['require','underscore','semver','ev-script/model
 }));
 
 /**
- * Globalize v1.3.0
+ * Globalize v1.4.0
  *
  * http://github.com/jquery/globalize
  *
@@ -33854,10 +33866,10 @@ define('ev-script/models/info',['require','underscore','semver','ev-script/model
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2017-07-03T21:37Z
+ * Date: 2018-07-17T20:38Z
  */
 /*!
- * Globalize v1.3.0 2017-07-03T21:37Z Released under the MIT license
+ * Globalize v1.4.0 2018-07-17T20:38Z Released under the MIT license
  * http://git.io/TrdQbw
  */
 (function( root, factory ) {
