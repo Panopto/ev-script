@@ -1,5 +1,5 @@
 /**
- * ev-script 2.0.0 2018-07-20
+ * ev-script 2.0.0 2018-07-24
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2018 Symphony Video, Inc.
@@ -31508,8 +31508,9 @@ define('ev-script/views/dropbox-embed',['require','underscore','urijs/URI','ev-s
             EmbedView.prototype.initialize.call(this, options);
         },
         getUrl: function(isPreview) {
-            return URI(this.config.ensembleUrl + '/hapi/v1/Dropboxes/' +
-                this.model.get('id') + '/Show');
+            return this.model.get('content').url;
+            // return URI(this.config.ensembleUrl + '/hapi/v1/Dropboxes/' +
+            //     this.model.get('id') + '/Show');
         },
         render: function(isPreview) {
             this.$el.html(this.template({

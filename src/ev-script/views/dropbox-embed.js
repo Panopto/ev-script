@@ -15,8 +15,9 @@ define(function(require) {
             EmbedView.prototype.initialize.call(this, options);
         },
         getUrl: function(isPreview) {
-            return URI(this.config.ensembleUrl + '/hapi/v1/Dropboxes/' +
-                this.model.get('id') + '/Show');
+            return this.model.get('content').url;
+            // return URI(this.config.ensembleUrl + '/hapi/v1/Dropboxes/' +
+            //     this.model.get('id') + '/Show');
         },
         render: function(isPreview) {
             this.$el.html(this.template({
