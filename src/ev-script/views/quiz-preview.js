@@ -11,7 +11,7 @@ define(function(require) {
             var embedView = new QuizEmbedView({
                     model: new this.model.constructor(this.model.toJSON())
                 }),
-                targetUrl = embedView.getUrl(true);
+                targetUrl = embedView.getSrcUrl(this.model.get('width'), this.model.get('height'), true);
             window.open(targetUrl);
         }
     });

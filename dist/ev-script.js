@@ -1,5 +1,5 @@
 /**
- * ev-script 2.0.0 2018-07-24
+ * ev-script 2.0.0 2018-07-27
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2018 Symphony Video, Inc.
@@ -31798,29 +31798,31 @@ define('ev-script/models/video',['require','ev-script/models/base','ev-script/ut
 });
 
 
-define('text!ev-script/templates/quiz-embed.html',[],function () { return '<a href="<%- src %>" target="_blank"><%- title %></a>';});
+define('text!ev-script/templates/quiz-embed.html',[],function () { return '<iframe src="<%- src %>" frameborder="0" style="width:<%- width %>px;height:<%- height %>px;" width="<%- width %>" height="<%- height %>" allowfullscreen></iframe>';});
 
-define('ev-script/views/quiz-embed',['require','underscore','urijs/URI','ev-script/views/embed','text!ev-script/templates/quiz-embed.html'],function(require) {
+define('ev-script/views/quiz-embed',['require','underscore','urijs/URI','ev-script/views/embed','ev-script/views/video-embed','text!ev-script/templates/quiz-embed.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
         URI = require('urijs/URI'),
-        EmbedView = require('ev-script/views/embed');
+        EmbedView = require('ev-script/views/embed'),
+        // We borrow portions of video-embed impl
+        VideoEmbedView = require('ev-script/views/video-embed');
 
     return EmbedView.extend({
         template: _.template(require('text!ev-script/templates/quiz-embed.html')),
         initialize: function(options) {
 
-            _.bindAll(this, 'render', 'getUrl');
+            _.bindAll(this, 'render', 'getSrcUrl');
 
             EmbedView.prototype.initialize.call(this, options);
         },
-        getUrl: function(isPreview) {
+        getSrcUrl: function(width, height, isPreview) {
             var key = this.model.get('content').key,
                 url = URI(this.config.ensembleUrl);
 
-            url.path('/hapi/v1/quiz/' + key + (isPreview ? '/preview' : '/launch'));
+            url.path('/hapi/v1/quiz/' + key + (isPreview ? '/preview' : '/plugin'));
             url.addQuery({
                 'displayTitle': this.model.get('showtitle'),
                 'displayAttachments': this.model.get('attachments'),
@@ -31831,11 +31833,23 @@ define('ev-script/views/quiz-embed',['require','underscore','urijs/URI','ev-scri
             });
             return url;
         },
+        getMediaWidth: function() {
+            return parseInt(this.model.get('width'), 10) || 848;
+        },
+        getMediaHeight: function() {
+            return parseInt(this.model.get('height'), 10) || 480;
+        },
+        getFrameWidth: function() {
+            return this.getMediaWidth();
+        },
+        getFrameHeight: function() {
+            return this.getMediaHeight();
+        },
+        scale: function(maxWidth, maxHeight) {
+            return VideoEmbedView.prototype.scale.call(this, maxWidth, maxHeight);
+        },
         render: function(isPreview) {
-            this.$el.html(this.template({
-                'src': this.getUrl(isPreview),
-                'title': this.model.get('content').title
-            }));
+            return VideoEmbedView.prototype.render.call(this, isPreview);
         }
     });
 
@@ -31854,7 +31868,7 @@ define('ev-script/views/quiz-preview',['require','ev-script/views/preview','ev-s
             var embedView = new QuizEmbedView({
                     model: new this.model.constructor(this.model.toJSON())
                 }),
-                targetUrl = embedView.getUrl(true);
+                targetUrl = embedView.getSrcUrl(this.model.get('width'), this.model.get('height'), true);
             window.open(targetUrl);
         }
     });
@@ -32027,9 +32041,9 @@ define('ev-script/views/quiz-picker',['require','jquery','underscore','urijs/URI
 });
 
 
-define('text!ev-script/templates/quiz-settings.html',[],function () { return '<form>\n    <div role="group" aria-labelledby="quizSettingsTitle">\n        <div id="quizSettingsTitle" style="display:none;"><%= i18n.formatMessage(\'Quiz Embed Options\') %></div>\n        <!--\n        <div class="fieldWrap">\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        -->\n        <div>\n            <div class="fieldWrap inline-option">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle"><%= i18n.formatMessage(\'Title\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata"><%= i18n.formatMessage(\'Meta Data\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n            </div>\n         </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </div>\n</form>\n';});
+define('text!ev-script/templates/quiz-settings.html',[],function () { return '<form>\n    <div role="group" aria-labelledby="quizSettingsTitle">\n        <div id="quizSettingsTitle" style="display:none;"><%= i18n.formatMessage(\'Quiz Embed Options\') %></div>\n        <div class="fieldWrap">\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div>\n            <div class="fieldWrap inline-option">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle"><%= i18n.formatMessage(\'Title\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata"><%= i18n.formatMessage(\'Meta Data\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n            </div>\n         </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </div>\n</form>\n';});
 
-define('ev-script/views/quiz-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','jquery-ui/ui/widgets/dialog','text!ev-script/templates/quiz-settings.html'],function(require) {
+define('ev-script/views/quiz-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','jquery-ui/ui/widgets/dialog','text!ev-script/templates/quiz-settings.html','text!ev-script/templates/sizes.html'],function(require) {
 
     'use strict';
 
@@ -32042,7 +32056,7 @@ define('ev-script/views/quiz-settings',['require','jquery','underscore','ev-scri
 
     return SettingsView.extend({
         template: _.template(require('text!ev-script/templates/quiz-settings.html')),
-        // sizesTemplate: _.template(require('text!ev-script/templates/sizes.html')),
+        sizesTemplate: _.template(require('text!ev-script/templates/sizes.html')),
         initialize: function(options) {
             SettingsView.prototype.initialize.call(this, options);
             this.encoding = options.encoding;
@@ -32080,26 +32094,26 @@ define('ev-script/views/quiz-settings',['require','jquery','underscore','ev-scri
             this.field.model.set(attrs);
         },
         renderSize: function() {
-            // var width = this.field.model.get('width'),
-            //     height = this.field.model.get('height'),
-            //     options = [],
-            //     targetWidth;
-            // if ((!width || !height) && this.encoding.id) {
-            //     width = this.encoding.getWidth();
-            //     height = this.encoding.getHeight();
-            // }
-            // // Use default IF encoding can handle it
-            // if (this.config.defaultVideoWidth && this.config.defaultVideoWidth <= width) {
-            //     targetWidth =  this.config.defaultVideoWidth;
-            // } else {
-            //     targetWidth = width;
-            // }
-            // options = sizeUtil.getAvailableDimensions();
-            // this.$('.size').append(this.sizesTemplate({
-            //     sizes: options,
-            //     // Select the override or current width
-            //     target: sizeUtil.findClosestDimension(targetWidth)
-            // }));
+            var width = this.field.model.get('width'),
+                height = this.field.model.get('height'),
+                options = [],
+                targetWidth;
+            if ((!width || !height) && this.encoding.id) {
+                width = this.encoding.getWidth();
+                height = this.encoding.getHeight();
+            }
+            // Use default IF encoding can handle it
+            if (this.config.defaultVideoWidth && this.config.defaultVideoWidth <= width) {
+                targetWidth =  this.config.defaultVideoWidth;
+            } else {
+                targetWidth = width;
+            }
+            options = sizeUtil.getAvailableDimensions();
+            this.$('.size').append(this.sizesTemplate({
+                sizes: options,
+                // Select the override or current width
+                target: sizeUtil.findClosestDimension(targetWidth)
+            }));
         },
         render: function() {
             this.$el.html(this.template({
@@ -32107,9 +32121,9 @@ define('ev-script/views/quiz-settings',['require','jquery','underscore','ev-scri
                 i18n: this.i18n,
                 model: this.field.model
             }));
-            // if (this.encoding) {
-            //     this.renderSize();
-            // }
+            if (this.encoding) {
+                this.renderSize();
+            }
             var content = this.field.model.get('content');
             this.$el.dialog({
                 title: this.unencode(content && content.title || this.field.model.get('id')),
