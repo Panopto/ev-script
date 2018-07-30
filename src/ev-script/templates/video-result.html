@@ -3,7 +3,7 @@
         <div class="thumbnail-wrap">
             <img class="thumbnail" src="<%= item.getThumbnailUrl() %>" alt="<%= i18n.formatMessage('{0} preview thumbnail', item.get('title')) %>"/>
             <% if (item.get('hasCaptions')) { %>
-            <i class="ccbadge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage('CC') %>" alt="CC"></i>
+            <i class="badge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage('CC') %>"></i>
             <% } %>
         </div>
         <div class="action-links">
