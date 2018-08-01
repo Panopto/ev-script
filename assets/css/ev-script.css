@@ -728,6 +728,7 @@ fieldset[disabled] .ev-field-wrap .ev-actions .action-record.active {
 .ev-field-wrap .ev-results .content-list .result-item .content-actions .thumbnail-wrap .thumbnail {
   box-shadow: 0 0 10px 1px;
   max-width: 200px;
+  background-color: #000;
 }
 .ev-field-wrap .ev-results .content-list .result-item .content-actions .thumbnail-wrap .badge {
   position: absolute;
