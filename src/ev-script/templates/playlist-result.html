@@ -10,7 +10,25 @@
         </div>
     </div>
     <div class="content-meta">
-        <% if (item.get('isRestricted')) { print('<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>'); } %>
-        <span><%- item.get('title') %></span>
+        <div class="title">
+            <a class="action-preview" title="<%= i18n.formatMessage('Click to preview {0}', item.get('title')) %>" href="#" rel="<%= item.get('id') %>">
+                <% if (item.get('isRestricted')) { print('<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>'); } %>
+                <%= item.get('title') %>
+            </a>
+        </div>
+        <div class="content-info">
+            <% if (showOrgName) { %>
+                <div class="info-row">
+                    <div class="label"><%= i18n.formatMessage('Organization') %></div>
+                    <div class="value"><%= item.get('organizationName') %></div>
+                </div>
+            <% } %>
+            <% if (showLibName) { %>
+                <div class="info-row">
+                    <div class="label"><%= i18n.formatMessage('Library') %></div>
+                    <div class="value"><%= item.get('libraryName') %></div>
+                </div>
+            <% } %>
+        </div>
     </div>
 </div>

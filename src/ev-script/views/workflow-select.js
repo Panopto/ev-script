@@ -20,7 +20,8 @@ define(function(require) {
             }) || this.collection.at(0);
             this.$el.html(this.template({
                 selectedId: selected.id,
-                collection: this.collection
+                collection: this.collection,
+                noneOption: null
             }));
         },
         getSelected: function() {

@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        log = require('loglevel'),
         Backbone = require('backbone'),
         BaseCollection = require('ev-script/collections/base'),
         cacheUtil = require('ev-script/util/cache'),
@@ -82,6 +83,22 @@ define(function(require) {
         },
         url: function() {
             return this.href ? this.href : this.getLink('self').href;
+        },
+        trigger: function(name) {
+            log.trace('[models/base] Event triggered: ' + name);
+            log.trace({
+                this: this,
+                arguments: arguments
+            });
+            return Backbone.Model.prototype.trigger.apply(this, arguments);
+        },
+        fetch: function() {
+            log.debug('[models/base] fetch');
+            log.debug({
+                this: this,
+                arguments: arguments
+            });
+            return Backbone.Model.prototype.fetch.apply(this, arguments);
         }
     });
 

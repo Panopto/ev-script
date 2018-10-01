@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        log = require('loglevel'),
         AuthView = require('ev-script/views/auth'),
         BaseView = require('ev-script/views/base');
 
@@ -73,6 +74,9 @@ define(function(require) {
 
             // Authentication check
             this.doAuthenticate();
+
+            log.debug('[views/field] Field initialized');
+            log.debug(this);
         },
         events: {
             'click .ev-field .action-choose': 'chooseHandler',

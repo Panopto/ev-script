@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        log = require('loglevel'),
         URITemplate = require('urijs/URITemplate'),
         BaseView = require('ev-script/views/base'),
         BaseCollection = require('ev-script/collections/base'),
@@ -21,8 +22,9 @@ define(function(require) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization',
                 'changeLibrary', 'activateRecord', 'deactivateRecord',
-                'showUpload', 'hideUpload', 'showRecord', 'hideRecord',
-                'setFocus', 'getLibrary');
+                'showHome', 'hideHome',     'showUpload', 'hideUpload',
+                'showRecord', 'hideRecord',     'setFocus', 'getLibrary',
+                'goHome');
 
             this.picker = options.picker;
             this.id = options.id;
@@ -32,19 +34,41 @@ define(function(require) {
                 i18n: this.i18n
             }));
 
-            this.orgSelect = new OrganizationSelectView({
+            var orgSelectOptions = {
                 id: this.id + '-org-select',
                 el: this.$('.ev-org-select'),
-                picker: this.picker,
-                collection: new BaseCollection(null, {})
-            });
+                collection: new BaseCollection(null, {}),
+                selectedId: '',
+                noneOption: {
+                    name: '-- ' + this.i18n.formatMessage('All Organizations') + ' --',
+                    value: ''
+                }
+            };
+            if (options.requireLibrarySelection) {
+                _.extend(orgSelectOptions, {
+                    selectedId: this.picker.model.get('organizationId') || this.root.getUser().get('defaultOrganizationId'),
+                    noneOption: null
+                });
+            }
+            this.orgSelect = new OrganizationSelectView(orgSelectOptions);
 
-            this.libSelect = new LibrarySelectView({
+            var libSelectOptions = {
                 id: this.id + '-lib-select',
                 el: this.$('.ev-lib-select'),
-                picker: this.picker,
-                collection: new BaseCollection(null, {})
-            });
+                collection: new BaseCollection(null, {}),
+                selectedId: '',
+                noneOption: {
+                    name: '-- ' + this.i18n.formatMessage('All Libraries') + ' --',
+                    value: ''
+                }
+            };
+            if (options.requireLibrarySelection) {
+                _.extend(libSelectOptions, {
+                    selectedId: this.picker.model.get('libraryId') || this.root.getUser().get('defaultLibraryId'),
+                    noneOption: null
+                });
+            }
+            this.libSelect = new LibrarySelectView(libSelectOptions);
 
             if (options.showTypeSelect || _.isUndefined(options.showTypeSelect)) {
                 this.typeSelectView = new TypeSelectView({
@@ -70,23 +94,47 @@ define(function(require) {
                     $loader.removeClass('loading');
                 }
             }, this));
+
+            log.debug('[views/filter] Filter initialized');
+            log.debug(this);
         },
         events: {
+            'click a.action-home': 'goHome',
             'change select.organizations': 'changeOrganization',
             'change select.libraries': 'changeLibrary'
         },
+        goHome: function(e) {
+            // Once the libraries are loaded, we can proceed to select the appropriate one
+            this.$('select.libraries').one('change', _.bind(function() {
+                this.libSelect.select(this.root.getUser().get('defaultLibraryId'));
+            }, this));
+            this.orgSelect.select(this.root.getUser().get('defaultOrganizationId'));
+            e.preventDefault();
+        },
         changeOrganization: function(e) {
+            log.debug('[views/filter] changeOrganization');
+            log.debug(arguments);
             this.picker.model.set({
                 organizationId: e.target.value
             });
             this.loadLibraries();
         },
         changeLibrary: function(e) {
+            log.debug('[views/filter] changeLibrary');
+            log.debug(arguments);
             this.picker.model.set({
                 libraryId: e.target.value
             });
+            // If we're already in the user's "home" library, hide the home link
+            if (this.picker.model.get('organizationId') === this.root.getUser().get('defaultOrganizationId') &&
+                this.picker.model.get('libraryId') === this.root.getUser().get('defaultLibraryId')) {
+                this.hideHome();
+            } else {
+                this.showHome();
+            }
         },
         loadOrgs: function() {
+            log.debug('[views/filter] loadOrgs');
             this.orgSelect.collection.reset(null, { silent: true });
             // In case root is loading...wait for it to finish
             this.root.promise.done(_.bind(function() {
@@ -119,10 +167,11 @@ define(function(require) {
             }, this));
         },
         loadLibraries: function() {
+            log.debug('[views/filter] loadLibraries');
             var orgId = this.picker.model.get('organizationId'),
                 org = this.orgSelect.collection.findWhere({ 'id': orgId }),
-                searchTemplate = new URITemplate(org.getLink('ev:Libraries/Search').href),
-                searchUrl = searchTemplate.expand({}),
+                searchTemplate = org && new URITemplate(org.getLink('ev:Libraries/Search').href),
+                searchUrl = searchTemplate && searchTemplate.expand({}),
                 // Recursively load pages until we have all libraries.
                 fetchLibs = _.bind(function(url) {
                     var libs = new Libraries({}, {
@@ -146,8 +195,12 @@ define(function(require) {
                         error: _.bind(this.ajaxError, this)
                     });
                 }, this);
-            this.libSelect.collection.reset(null, { silent: true });
-            fetchLibs(searchUrl);
+            if (org) {
+                this.libSelect.collection.reset(null, { silent: true });
+                fetchLibs(searchUrl);
+            } else {
+                this.libSelect.collection.reset(null);
+            }
         },
         getLibrary: function(id) {
             return this.libSelect.collection.findWhere({ 'id': id });
@@ -159,6 +212,12 @@ define(function(require) {
         deactivateRecord: function() {
             this.$('.record-active').hide();
             this.$('.record-inactive').show();
+        },
+        showHome: function() {
+            this.$('.action-home').show();
+        },
+        hideHome: function() {
+            this.$('.action-home').hide();
         },
         showUpload: function() {
             this.$('.action-upload').show();

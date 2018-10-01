@@ -69,10 +69,10 @@ define(function(require) {
         },
         loadPlaylists: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
-                libraryId = this.model.get('libraryId'),
-                library = this.filter.getLibrary(libraryId),
-                searchTemplate = new URITemplate(library.getLink('ev:Playlists/Search').href),
+                searchTemplate = new URITemplate(this.root.getLink('ev:Playlists/Search').href),
                 searchUrl = searchTemplate.expand({
+                    organizationId: this.model.get('organizationId'),
+                    libraryId: this.model.get('libraryId'),
                     search: searchVal,
                     sortBy: 'title',
                     pageSize: 20

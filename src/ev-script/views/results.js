@@ -34,7 +34,9 @@ define(function(require) {
                     dateTimeFormat: this.config.getDateTimeFormat(),
                     moment: moment,
                     item: item,
-                    index: index
+                    index: index,
+                    showOrgName: !this.model.get('organizationId'),
+                    showLibName: !this.model.get('libraryId')
                 });
             }
         },

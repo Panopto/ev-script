@@ -35,7 +35,8 @@ module.exports = function(grunt) {
         'cldr-data': 'node_modules/cldr-data',
         'globalize': 'node_modules/globalize/dist/globalize',
         'moment': 'node_modules/moment/min/moment-with-locales',
-        'urijs': 'node_modules/urijs/src'
+        'urijs': 'node_modules/urijs/src',
+        'loglevel': 'node_modules/loglevel/dist/loglevel'
       },
       name: 'node_modules/almond/almond',
       out: 'dist/ev-script.js',

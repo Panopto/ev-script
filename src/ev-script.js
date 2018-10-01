@@ -1,4 +1,4 @@
-/*global requirejs*/
+/*global log*/
 define(function(require) {
 
     'use strict';
@@ -6,6 +6,7 @@ define(function(require) {
     var Backbone = require('backbone'),
         _ = require('underscore'),
         $ = require('jquery'),
+        log = require('loglevel'),
         Globalize = require('globalize'),
         moment = require('moment'),
         likelySubtags = require('json!cldr-data/supplemental/likelySubtags.json'),
@@ -81,12 +82,22 @@ define(function(require) {
             // Auth options
             authLoginPath: '/app/lti/login.aspx',
             authLogoutPath: '/api/logout',
-            authCompleteMessage: 'ev_auth_complete'
+            authCompleteMessage: 'ev_auth_complete',
+            // Logging
+            logLevel: 'info'
         };
 
         var config = _.extend({}, defaults, appOptions);
 
+        // Set logging
+        log.setDefaultLevel(config.logLevel);
+
+        log.info('[ev-script] Initializing app');
+        log.debug('[ev-script] Config:');
+        log.debug(config);
+
         var locale = config.getLocaleCallback();
+        log.debug('[ev-script] Locale: ' + locale);
         // Set locale for moment
         moment.locale(locale);
 
@@ -99,6 +110,8 @@ define(function(require) {
         this.events = eventsUtil.getEvents();
 
         var loadApp = _.bind(function() {
+
+            log.info('[ev-script] Loading app');
 
             cacheUtil.setConfig(config);
 
@@ -125,6 +138,8 @@ define(function(require) {
                         // TODO - document and add some flexibility to params (e.g. in addition
                         // to selector allow element or object).
                         this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
+                            log.debug('[ev-script] handleField');
+                            log.debug(arguments);
                             var $field = $(fieldSelector, fieldWrap),
                                 fieldOptions = {
                                     id: fieldWrap.id || 'ev-field',
@@ -148,6 +163,8 @@ define(function(require) {
 
                         // TODO - document.  See handleField comment too.
                         this.handleEmbed = function(embedWrap, settingsModel) {
+                            log.debug('[ev-script] handleEmbed');
+                            log.debug(arguments);
                             if (settingsModel instanceof VideoSettings) {
                                 var videoEmbed = new VideoEmbedView({
                                     el: embedWrap,
@@ -178,6 +195,8 @@ define(function(require) {
                         };
 
                         this.getEmbedCode = function(settings) {
+                            log.debug('[ev-script] getEmbedCode');
+                            log.debug(arguments);
                             var $div = $('<div/>');
                             if (settings.type === 'video') {
                                 this.handleEmbed($div[0], new VideoSettings(settings));
@@ -193,6 +212,7 @@ define(function(require) {
                             return $div.html();
                         };
 
+                        log.info('[ev-script] App loaded');
                         this.events.trigger('appLoaded');
                         loading.resolve();
                     }
@@ -205,6 +225,7 @@ define(function(require) {
         }, this);
 
         // Load messages for locale
+        log.info('[ev-script] Retreiving localized messages');
         $.getJSON(config.i18nPath + '/' + locale + '/messages.json')
         .done(function(data, status, xhr) {
             _.extend(messages, data);

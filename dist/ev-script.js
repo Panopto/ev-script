@@ -1,5 +1,5 @@
 /**
- * ev-script 2.0.0 2018-08-10
+ * ev-script 2.1.0 2018-10-01
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2018 Symphony Video, Inc.
@@ -4071,6 +4071,252 @@ define("node_modules/almond/almond", function(){});
 
   return Backbone;
 });
+
+/*! loglevel - v1.6.1 - https://github.com/pimterry/loglevel - (c) 2018 Tim Perry - licensed MIT */
+(function (root, definition) {
+    "use strict";
+    if (typeof define === 'function' && define.amd) {
+        define('loglevel',definition);
+    } else if (typeof module === 'object' && module.exports) {
+        module.exports = definition();
+    } else {
+        root.log = definition();
+    }
+}(this, function () {
+    "use strict";
+
+    // Slightly dubious tricks to cut down minimized file size
+    var noop = function() {};
+    var undefinedType = "undefined";
+
+    var logMethods = [
+        "trace",
+        "debug",
+        "info",
+        "warn",
+        "error"
+    ];
+
+    // Cross-browser bind equivalent that works at least back to IE6
+    function bindMethod(obj, methodName) {
+        var method = obj[methodName];
+        if (typeof method.bind === 'function') {
+            return method.bind(obj);
+        } else {
+            try {
+                return Function.prototype.bind.call(method, obj);
+            } catch (e) {
+                // Missing bind shim or IE8 + Modernizr, fallback to wrapping
+                return function() {
+                    return Function.prototype.apply.apply(method, [obj, arguments]);
+                };
+            }
+        }
+    }
+
+    // Build the best logging method possible for this env
+    // Wherever possible we want to bind, not wrap, to preserve stack traces
+    function realMethod(methodName) {
+        if (methodName === 'debug') {
+            methodName = 'log';
+        }
+
+        if (typeof console === undefinedType) {
+            return false; // No method possible, for now - fixed later by enableLoggingWhenConsoleArrives
+        } else if (console[methodName] !== undefined) {
+            return bindMethod(console, methodName);
+        } else if (console.log !== undefined) {
+            return bindMethod(console, 'log');
+        } else {
+            return noop;
+        }
+    }
+
+    // These private functions always need `this` to be set properly
+
+    function replaceLoggingMethods(level, loggerName) {
+        /*jshint validthis:true */
+        for (var i = 0; i < logMethods.length; i++) {
+            var methodName = logMethods[i];
+            this[methodName] = (i < level) ?
+                noop :
+                this.methodFactory(methodName, level, loggerName);
+        }
+
+        // Define log.log as an alias for log.debug
+        this.log = this.debug;
+    }
+
+    // In old IE versions, the console isn't present until you first open it.
+    // We build realMethod() replacements here that regenerate logging methods
+    function enableLoggingWhenConsoleArrives(methodName, level, loggerName) {
+        return function () {
+            if (typeof console !== undefinedType) {
+                replaceLoggingMethods.call(this, level, loggerName);
+                this[methodName].apply(this, arguments);
+            }
+        };
+    }
+
+    // By default, we use closely bound real methods wherever possible, and
+    // otherwise we wait for a console to appear, and then try again.
+    function defaultMethodFactory(methodName, level, loggerName) {
+        /*jshint validthis:true */
+        return realMethod(methodName) ||
+               enableLoggingWhenConsoleArrives.apply(this, arguments);
+    }
+
+    function Logger(name, defaultLevel, factory) {
+      var self = this;
+      var currentLevel;
+      var storageKey = "loglevel";
+      if (name) {
+        storageKey += ":" + name;
+      }
+
+      function persistLevelIfPossible(levelNum) {
+          var levelName = (logMethods[levelNum] || 'silent').toUpperCase();
+
+          if (typeof window === undefinedType) return;
+
+          // Use localStorage if available
+          try {
+              window.localStorage[storageKey] = levelName;
+              return;
+          } catch (ignore) {}
+
+          // Use session cookie as fallback
+          try {
+              window.document.cookie =
+                encodeURIComponent(storageKey) + "=" + levelName + ";";
+          } catch (ignore) {}
+      }
+
+      function getPersistedLevel() {
+          var storedLevel;
+
+          if (typeof window === undefinedType) return;
+
+          try {
+              storedLevel = window.localStorage[storageKey];
+          } catch (ignore) {}
+
+          // Fallback to cookies if local storage gives us nothing
+          if (typeof storedLevel === undefinedType) {
+              try {
+                  var cookie = window.document.cookie;
+                  var location = cookie.indexOf(
+                      encodeURIComponent(storageKey) + "=");
+                  if (location !== -1) {
+                      storedLevel = /^([^;]+)/.exec(cookie.slice(location))[1];
+                  }
+              } catch (ignore) {}
+          }
+
+          // If the stored level is not valid, treat it as if nothing was stored.
+          if (self.levels[storedLevel] === undefined) {
+              storedLevel = undefined;
+          }
+
+          return storedLevel;
+      }
+
+      /*
+       *
+       * Public logger API - see https://github.com/pimterry/loglevel for details
+       *
+       */
+
+      self.name = name;
+
+      self.levels = { "TRACE": 0, "DEBUG": 1, "INFO": 2, "WARN": 3,
+          "ERROR": 4, "SILENT": 5};
+
+      self.methodFactory = factory || defaultMethodFactory;
+
+      self.getLevel = function () {
+          return currentLevel;
+      };
+
+      self.setLevel = function (level, persist) {
+          if (typeof level === "string" && self.levels[level.toUpperCase()] !== undefined) {
+              level = self.levels[level.toUpperCase()];
+          }
+          if (typeof level === "number" && level >= 0 && level <= self.levels.SILENT) {
+              currentLevel = level;
+              if (persist !== false) {  // defaults to true
+                  persistLevelIfPossible(level);
+              }
+              replaceLoggingMethods.call(self, level, name);
+              if (typeof console === undefinedType && level < self.levels.SILENT) {
+                  return "No console available for logging";
+              }
+          } else {
+              throw "log.setLevel() called with invalid level: " + level;
+          }
+      };
+
+      self.setDefaultLevel = function (level) {
+          if (!getPersistedLevel()) {
+              self.setLevel(level, false);
+          }
+      };
+
+      self.enableAll = function(persist) {
+          self.setLevel(self.levels.TRACE, persist);
+      };
+
+      self.disableAll = function(persist) {
+          self.setLevel(self.levels.SILENT, persist);
+      };
+
+      // Initialize with the right level
+      var initialLevel = getPersistedLevel();
+      if (initialLevel == null) {
+          initialLevel = defaultLevel == null ? "WARN" : defaultLevel;
+      }
+      self.setLevel(initialLevel, false);
+    }
+
+    /*
+     *
+     * Top-level API
+     *
+     */
+
+    var defaultLogger = new Logger();
+
+    var _loggersByName = {};
+    defaultLogger.getLogger = function getLogger(name) {
+        if (typeof name !== "string" || name === "") {
+          throw new TypeError("You must supply a name when creating a logger.");
+        }
+
+        var logger = _loggersByName[name];
+        if (!logger) {
+          logger = _loggersByName[name] = new Logger(
+            name, defaultLogger.getLevel(), defaultLogger.methodFactory);
+        }
+        return logger;
+    };
+
+    // Grab the current global log variable in case of overwrite
+    var _log = (typeof window !== undefinedType) ? window.log : undefined;
+    defaultLogger.noConflict = function() {
+        if (typeof window !== undefinedType &&
+               window.log === defaultLogger) {
+            window.log = _log;
+        }
+
+        return defaultLogger;
+    };
+
+    defaultLogger.getLoggers = function getLoggers() {
+        return _loggersByName;
+    };
+
+    return defaultLogger;
+}));
 
 /**
  * CLDR JavaScript Library v0.5.0
@@ -22439,6 +22685,8 @@ return {
         "{0} preview thumbnail": "{0} preview thumbnail",
         "Add {0}": "Add {0}",
         "Add file": "Add file",
+        "All Libraries": "All Libraries",
+        "All Organizations": "All Organizations",
         "Annotations": "Annotations",
         "An unexpected error occurred.  Check the server log for more details.": "An unexpected error occurred.  Check the server log for more details.",
         "Ascending": "Ascending",
@@ -22460,6 +22708,7 @@ return {
         "Click to Choose {0}": "Click to Choose {0}",
         "Click to choose {0}": "Click to choose {0}",
         "Click to manage {0} embed options": "Click to manage {0} embed options",
+        "Click to navigate to default library": "Click to navigate to default library",
         "Click to preview {0}": "Click to preview {0}",
         "Click to record screen": "Click to record screen",
         "Click to reload search results": "Click to reload search results",
@@ -22490,6 +22739,7 @@ return {
         "Hide Controls": "Hide Controls",
         "Hide": "Hide",
         "Hide Picker": "Hide Picker",
+        "Home": "Home",
         "Horizontal": "Horizontal",
         "Identity Provider": "Identity Provider",
         "Interactive Transcript": "Interactive Transcript",
@@ -22514,6 +22764,7 @@ return {
         "No results available.": "No results available.",
         "Number of Results": "Number of Results",
         "Organization:": "Organization:",
+        "Organization": "Organization",
         "Original": "Original",
         "Password": "Password",
         "Playlist": "Playlist",
@@ -26514,19 +26765,26 @@ define("urijs/punycode", function(){});
   return URITemplate;
 }));
 
-define('ev-script/util/events',['require','underscore','backbone'],function(require) {
+define('ev-script/util/events',['require','underscore','loglevel','backbone'],function(require) {
 
     'use strict';
 
     var events = {},
         _ = require('underscore'),
+        log = require('loglevel'),
         Backbone = require('backbone');
 
     return {
         getEvents: function(index) {
             index = index || 'default';
             if (!events[index]) {
-                events[index] = _.extend({}, Backbone.Events);
+                var newEvents = _.extend({}, Backbone.Events);
+                newEvents.trigger = _.wrap(newEvents.trigger, function(trigger) {
+                    log.debug('[util/events] Event triggered: ' + arguments[1]);
+                    log.debug(arguments);
+                    return trigger.apply(this, Array.prototype.slice.call(arguments, 1));
+                });
+                events[index] = newEvents;
             }
             return events[index];
         }
@@ -26648,12 +26906,13 @@ define('ev-script/util/cache',['require','jquery','underscore','backbone','ev-sc
 
 });
 
-define('ev-script/collections/base',['require','jquery','underscore','backbone','ev-script/util/cache'],function(require) {
+define('ev-script/collections/base',['require','jquery','underscore','loglevel','backbone','ev-script/util/cache'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        log = require('loglevel'),
         Backbone = require('backbone'),
         cacheUtil = require('ev-script/util/cache');
 
@@ -26703,17 +26962,23 @@ define('ev-script/collections/base',['require','jquery','underscore','backbone',
         },
         url: function() {
             return this.href ? this.href : this.links['self'].href;
+        },
+        trigger: function(name) {
+            log.trace('[collections/base] Event triggered: ' + name);
+            log.trace(arguments);
+            return Backbone.Collection.prototype.trigger.apply(this, arguments);
         }
     });
 
 });
 
-define('ev-script/models/base',['require','jquery','underscore','backbone','ev-script/collections/base','ev-script/util/cache'],function(require) {
+define('ev-script/models/base',['require','jquery','underscore','loglevel','backbone','ev-script/collections/base','ev-script/util/cache'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        log = require('loglevel'),
         Backbone = require('backbone'),
         BaseCollection = require('ev-script/collections/base'),
         cacheUtil = require('ev-script/util/cache'),
@@ -26792,6 +27057,22 @@ define('ev-script/models/base',['require','jquery','underscore','backbone','ev-s
         },
         url: function() {
             return this.href ? this.href : this.getLink('self').href;
+        },
+        trigger: function(name) {
+            log.trace('[models/base] Event triggered: ' + name);
+            log.trace({
+                this: this,
+                arguments: arguments
+            });
+            return Backbone.Model.prototype.trigger.apply(this, arguments);
+        },
+        fetch: function() {
+            log.debug('[models/base] fetch');
+            log.debug({
+                this: this,
+                arguments: arguments
+            });
+            return Backbone.Model.prototype.fetch.apply(this, arguments);
         }
     });
 
@@ -26870,12 +27151,13 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
 
 });
 
-define('ev-script/views/base',['require','jquery','underscore','backbone','ev-script/util/events','ev-script/util/cache'],function(require) {
+define('ev-script/views/base',['require','jquery','underscore','loglevel','backbone','ev-script/util/events','ev-script/util/cache'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        log = require('loglevel'),
         Backbone = require('backbone'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
@@ -26902,6 +27184,14 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
         },
         unencode: function(encoded) {
             return $('<span/>').html(encoded).text();
+        },
+        trigger: function(name) {
+            log.debug('[views/base] Event triggered: ' + name);
+            log.debug({
+                this: this,
+                arguments: arguments
+            });
+            return Backbone.View.prototype.trigger.apply(this, arguments);
         }
     });
 
@@ -26910,12 +27200,13 @@ define('ev-script/views/base',['require','jquery','underscore','backbone','ev-sc
 
 define('text!ev-script/templates/field.html',[],function () { return '<!--\n<div class="logo">\n    <a target="_blank" href="<%= ensembleUrl %>"><span><%= i18n.formatMessage(\'Ensemble Logo\') %></span></a>\n</div>\n-->\n<% if (modelId) { %>\n    <% if (thumbnailUrl) { %>\n        <div class="ev-field-item thumbnail">\n            <img alt="<%= i18n.formatMessage(\'Media thumbnail\') %>" src="<%= thumbnailUrl %>"/>\n        </div>\n    <% } %>\n    <h2 class="ev-field-item title"><%= name %></h2>\n    <div class="ev-field-item ev-actions">\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Click to change {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Change {0}\', label) %><span></a>\n        <a href="#" class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', name) %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %><span></a>\n        <% if (displaySettings) { %>\n            <a href="#" class="action-options" title="<%= i18n.formatMessage(\'Click to manage {0} embed options\', label) %>"><i class="fa fa-cog fa-lg"></i><span><%= i18n.formatMessage(\'{0} Embed Options\', label) %><span></a>\n        <% } %>\n        <a href="#" class="action-remove" title="<%= i18n.formatMessage(\'Click to remove {0}\', label) %>"><i class="fa fa-minus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Remove {0}\', label) %><span></a>\n    </div>\n<% } else { %>\n    <h3 class="ev-field-item title"><em><%= i18n.formatMessage(\'Add {0}\', label) %></em></h3>\n    <div class="ev-field-item ev-actions">\n        <a href="#" class="action-choose" title="<%= i18n.formatMessage(\'Click to Choose {0}\', label) %>"><i class="fa fa-folder-open fa-lg"></i><span><%= i18n.formatMessage(\'Choose {0}\', label) %><span></a>\n    </div>\n<% } %>\n';});
 
-define('ev-script/views/field',['require','jquery','underscore','ev-script/views/auth','ev-script/views/base','text!ev-script/templates/field.html'],function(require) {
+define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-script/views/auth','ev-script/views/base','text!ev-script/templates/field.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        log = require('loglevel'),
         AuthView = require('ev-script/views/auth'),
         BaseView = require('ev-script/views/base');
 
@@ -26985,6 +27276,9 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
 
             // Authentication check
             this.doAuthenticate();
+
+            log.debug('[views/field] Field initialized');
+            log.debug(this);
         },
         events: {
             'click .ev-field .action-choose': 'chooseHandler',
@@ -28451,13 +28745,14 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
 define('text!ev-script/templates/organization-select.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Organization:\') %></label>\n<select id="<%= id %>" class="form-select organizations" title="<%= i18n.formatMessage(\'Select Organization\') %>"></select>\n';});
 
 
-define('text!ev-script/templates/options.html',[],function () { return '<% collection.each(function(item) { %>\n    <option value="<%= item.id %>" <% if (selectedId === item.id) { print(\'selected="selected"\'); } %>><%- item.get(\'title\') || item.get(\'Name\') %></option>\n<% }); %>\n';});
+define('text!ev-script/templates/options.html',[],function () { return '<% if (noneOption) { %>\n    <option value="<%= noneOption.value %>" <% if (selectedId === noneOption.value ) { print(\'selected="selected"\'); } %>><%- noneOption.name %></option>\n<% } %>\n<% collection.each(function(item) { %>\n    <option value="<%= item.id %>" <% if (selectedId === item.id) { print(\'selected="selected"\'); } %>><%- item.get(\'title\') || item.get(\'Name\') %></option>\n<% }); %>\n';});
 
-define('ev-script/views/organization-select',['require','underscore','ev-script/views/base','text!ev-script/templates/organization-select.html','text!ev-script/templates/options.html'],function(require) {
+define('ev-script/views/organization-select',['require','jquery','underscore','ev-script/views/base','text!ev-script/templates/organization-select.html','text!ev-script/templates/options.html'],function(require) {
 
     'use strict';
 
-    var _ = require('underscore'),
+    var $ = require('jquery'),
+        _ = require('underscore'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -28465,22 +28760,28 @@ define('ev-script/views/organization-select',['require','underscore','ev-script/
         optionsTemplate: _.template(require('text!ev-script/templates/options.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render');
-            this.picker = options.picker;
+            _.bindAll(this, 'render', 'select');
             this.$el.html(this.template({
                 id: this.id + '-select',
                 i18n: this.i18n
             }));
+            this.selectedId = options.selectedId;
+            this.noneOption = options.noneOption;
             this.$select = this.$('select');
             this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
             this.collection.on('reset', this.render);
         },
         render: function() {
-            var selectedId = this.picker.model.get('organizationId') || this.root.getUser().get('defaultOrganizationId');
+            var singleItem = this.collection.length === 1;
             this.$select.html(this.optionsTemplate({
-                selectedId: selectedId,
+                noneOption: singleItem ? null : this.noneOption,
+                selectedId: singleItem ? this.collection.at(0).get('id') : this.selectedId,
                 collection: this.collection
             }));
+            this.$select.trigger('change');
+        },
+        select: function(selectedId) {
+            $('option[value="' + selectedId + '"]', this.$select).prop('selected', true);
             this.$select.trigger('change');
         }
     });
@@ -28505,11 +28806,12 @@ define('ev-script/models/organizations',['require','ev-script/models/base','ev-s
 
 define('text!ev-script/templates/library-select.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Library:\') %></label>\n<select id="<%= id %>" class="form-select libraries" title="<%= i18n.formatMessage(\'Select Library\') %>"></select>\n';});
 
-define('ev-script/views/library-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-select.html','text!ev-script/templates/options.html'],function(require) {
+define('ev-script/views/library-select',['require','jquery','underscore','ev-script/views/base','text!ev-script/templates/library-select.html','text!ev-script/templates/options.html'],function(require) {
 
     'use strict';
 
-    var _ = require('underscore'),
+    var $ = require('jquery'),
+        _ = require('underscore'),
         BaseView = require('ev-script/views/base');
 
     return BaseView.extend({
@@ -28517,22 +28819,28 @@ define('ev-script/views/library-select',['require','underscore','ev-script/views
         optionsTemplate: _.template(require('text!ev-script/templates/options.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render');
-            this.picker = options.picker;
+            _.bindAll(this, 'render', 'select');
             this.$el.html(this.template({
                 id: this.id + '-select',
                 i18n: this.i18n
             }));
+            this.selectedId = options.selectedId;
+            this.noneOption = options.noneOption;
             this.$select = this.$('select');
             this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
             this.collection.on('reset', this.render);
         },
         render: function() {
-            var selectedId = this.picker.model.get('libraryId') || this.root.getUser().get('defaultLibraryId');
+            var singleItem = this.collection.length === 1;
             this.$select.html(this.optionsTemplate({
-                selectedId: selectedId,
+                noneOption: singleItem ? null : this.noneOption,
+                selectedId: singleItem ? this.collection.at(0).get('id') : this.selectedId,
                 collection: this.collection
             }));
+            this.$select.trigger('change');
+        },
+        select: function(selectedId) {
+            $('option[value="' + selectedId + '"]', this.$select).prop('selected', true);
             this.$select.trigger('change');
         }
     });
@@ -28659,14 +28967,15 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base','
 });
 
 
-define('text!ev-script/templates/filter.html',[],function () { return '<div id="<%= id %>-org-select" class="ev-filter-item ev-org-select"></div>\n<div id="<%= id %>-lib-select" class="ev-filter-item ev-lib-select"></div>\n<div id="<%= id %>-type-select" class="ev-filter-item ev-type-select"></div>\n<div id="<%= id %>-search" class="ev-filter-item ev-search"></div>\n<div class="ev-filter-item ev-actions">\n  <button type="button" class="action-upload" style="display: none;" title="<%= i18n.formatMessage(\'Click to upload new media\') %>">\n    <i class="fa fa-upload fa-fw"></i><span><%= i18n.formatMessage(\'Upload\') %><span>\n  </button>\n  <button type="button" class="action-record" style="display: none;" title="<%= i18n.formatMessage(\'Click to record screen\') %>">\n    <i class="record-inactive fa fa-circle fa-fw"></i>\n    <i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i>\n    <span><%= i18n.formatMessage(\'Record\') %><span>\n  </button>\n</div>\n<div class="ev-filter-item loader"></div>\n';});
+define('text!ev-script/templates/filter.html',[],function () { return '<div id="<%= id %>-org-select" class="ev-filter-item ev-org-select"></div>\n<div id="<%= id %>-lib-select" class="ev-filter-item ev-lib-select"></div>\n<div id="<%= id %>-type-select" class="ev-filter-item ev-type-select"></div>\n<div id="<%= id %>-search" class="ev-filter-item ev-search"></div>\n<div class="ev-filter-item ev-actions">\n  <a href="#" class="action-home" style="display: none;" title="<%= i18n.formatMessage(\'Click to navigate to default library\') %>">\n    <i class="fa fa-home fa-fw fa-lg"></i>\n  </a>\n  <button type="button" class="action-upload" style="display: none;" title="<%= i18n.formatMessage(\'Click to upload new media\') %>">\n    <i class="fa fa-upload fa-fw"></i><span><%= i18n.formatMessage(\'Upload\') %><span>\n  </button>\n  <button type="button" class="action-record" style="display: none;" title="<%= i18n.formatMessage(\'Click to record screen\') %>">\n    <i class="record-inactive fa fa-circle fa-fw"></i>\n    <i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i>\n    <span><%= i18n.formatMessage(\'Record\') %><span>\n  </button>\n</div>\n<div class="ev-filter-item loader"></div>\n';});
 
-define('ev-script/views/filter',['require','jquery','underscore','urijs/URITemplate','ev-script/views/base','ev-script/collections/base','ev-script/models/base','ev-script/views/organization-select','ev-script/models/organizations','ev-script/views/library-select','ev-script/models/libraries','ev-script/views/library-type-select','ev-script/views/search','text!ev-script/templates/filter.html'],function(require) {
+define('ev-script/views/filter',['require','jquery','underscore','loglevel','urijs/URITemplate','ev-script/views/base','ev-script/collections/base','ev-script/models/base','ev-script/views/organization-select','ev-script/models/organizations','ev-script/views/library-select','ev-script/models/libraries','ev-script/views/library-type-select','ev-script/views/search','text!ev-script/templates/filter.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        log = require('loglevel'),
         URITemplate = require('urijs/URITemplate'),
         BaseView = require('ev-script/views/base'),
         BaseCollection = require('ev-script/collections/base'),
@@ -28684,8 +28993,9 @@ define('ev-script/views/filter',['require','jquery','underscore','urijs/URITempl
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization',
                 'changeLibrary', 'activateRecord', 'deactivateRecord',
-                'showUpload', 'hideUpload', 'showRecord', 'hideRecord',
-                'setFocus', 'getLibrary');
+                'showHome', 'hideHome',     'showUpload', 'hideUpload',
+                'showRecord', 'hideRecord',     'setFocus', 'getLibrary',
+                'goHome');
 
             this.picker = options.picker;
             this.id = options.id;
@@ -28695,19 +29005,41 @@ define('ev-script/views/filter',['require','jquery','underscore','urijs/URITempl
                 i18n: this.i18n
             }));
 
-            this.orgSelect = new OrganizationSelectView({
+            var orgSelectOptions = {
                 id: this.id + '-org-select',
                 el: this.$('.ev-org-select'),
-                picker: this.picker,
-                collection: new BaseCollection(null, {})
-            });
+                collection: new BaseCollection(null, {}),
+                selectedId: '',
+                noneOption: {
+                    name: '-- ' + this.i18n.formatMessage('All Organizations') + ' --',
+                    value: ''
+                }
+            };
+            if (options.requireLibrarySelection) {
+                _.extend(orgSelectOptions, {
+                    selectedId: this.picker.model.get('organizationId') || this.root.getUser().get('defaultOrganizationId'),
+                    noneOption: null
+                });
+            }
+            this.orgSelect = new OrganizationSelectView(orgSelectOptions);
 
-            this.libSelect = new LibrarySelectView({
+            var libSelectOptions = {
                 id: this.id + '-lib-select',
                 el: this.$('.ev-lib-select'),
-                picker: this.picker,
-                collection: new BaseCollection(null, {})
-            });
+                collection: new BaseCollection(null, {}),
+                selectedId: '',
+                noneOption: {
+                    name: '-- ' + this.i18n.formatMessage('All Libraries') + ' --',
+                    value: ''
+                }
+            };
+            if (options.requireLibrarySelection) {
+                _.extend(libSelectOptions, {
+                    selectedId: this.picker.model.get('libraryId') || this.root.getUser().get('defaultLibraryId'),
+                    noneOption: null
+                });
+            }
+            this.libSelect = new LibrarySelectView(libSelectOptions);
 
             if (options.showTypeSelect || _.isUndefined(options.showTypeSelect)) {
                 this.typeSelectView = new TypeSelectView({
@@ -28733,23 +29065,47 @@ define('ev-script/views/filter',['require','jquery','underscore','urijs/URITempl
                     $loader.removeClass('loading');
                 }
             }, this));
+
+            log.debug('[views/filter] Filter initialized');
+            log.debug(this);
         },
         events: {
+            'click a.action-home': 'goHome',
             'change select.organizations': 'changeOrganization',
             'change select.libraries': 'changeLibrary'
         },
+        goHome: function(e) {
+            // Once the libraries are loaded, we can proceed to select the appropriate one
+            this.$('select.libraries').one('change', _.bind(function() {
+                this.libSelect.select(this.root.getUser().get('defaultLibraryId'));
+            }, this));
+            this.orgSelect.select(this.root.getUser().get('defaultOrganizationId'));
+            e.preventDefault();
+        },
         changeOrganization: function(e) {
+            log.debug('[views/filter] changeOrganization');
+            log.debug(arguments);
             this.picker.model.set({
                 organizationId: e.target.value
             });
             this.loadLibraries();
         },
         changeLibrary: function(e) {
+            log.debug('[views/filter] changeLibrary');
+            log.debug(arguments);
             this.picker.model.set({
                 libraryId: e.target.value
             });
+            // If we're already in the user's "home" library, hide the home link
+            if (this.picker.model.get('organizationId') === this.root.getUser().get('defaultOrganizationId') &&
+                this.picker.model.get('libraryId') === this.root.getUser().get('defaultLibraryId')) {
+                this.hideHome();
+            } else {
+                this.showHome();
+            }
         },
         loadOrgs: function() {
+            log.debug('[views/filter] loadOrgs');
             this.orgSelect.collection.reset(null, { silent: true });
             // In case root is loading...wait for it to finish
             this.root.promise.done(_.bind(function() {
@@ -28782,10 +29138,11 @@ define('ev-script/views/filter',['require','jquery','underscore','urijs/URITempl
             }, this));
         },
         loadLibraries: function() {
+            log.debug('[views/filter] loadLibraries');
             var orgId = this.picker.model.get('organizationId'),
                 org = this.orgSelect.collection.findWhere({ 'id': orgId }),
-                searchTemplate = new URITemplate(org.getLink('ev:Libraries/Search').href),
-                searchUrl = searchTemplate.expand({}),
+                searchTemplate = org && new URITemplate(org.getLink('ev:Libraries/Search').href),
+                searchUrl = searchTemplate && searchTemplate.expand({}),
                 // Recursively load pages until we have all libraries.
                 fetchLibs = _.bind(function(url) {
                     var libs = new Libraries({}, {
@@ -28809,8 +29166,12 @@ define('ev-script/views/filter',['require','jquery','underscore','urijs/URITempl
                         error: _.bind(this.ajaxError, this)
                     });
                 }, this);
-            this.libSelect.collection.reset(null, { silent: true });
-            fetchLibs(searchUrl);
+            if (org) {
+                this.libSelect.collection.reset(null, { silent: true });
+                fetchLibs(searchUrl);
+            } else {
+                this.libSelect.collection.reset(null);
+            }
         },
         getLibrary: function(id) {
             return this.libSelect.collection.findWhere({ 'id': id });
@@ -28822,6 +29183,12 @@ define('ev-script/views/filter',['require','jquery','underscore','urijs/URITempl
         deactivateRecord: function() {
             this.$('.record-active').hide();
             this.$('.record-inactive').show();
+        },
+        showHome: function() {
+            this.$('.action-home').show();
+        },
+        hideHome: function() {
+            this.$('.action-home').hide();
         },
         showUpload: function() {
             this.$('.action-upload').show();
@@ -28959,7 +29326,9 @@ define('ev-script/views/results',['require','jquery','underscore','moment','ev-s
                     dateTimeFormat: this.config.getDateTimeFormat(),
                     moment: moment,
                     item: item,
-                    index: index
+                    index: index,
+                    showOrgName: !this.model.get('organizationId'),
+                    showLibName: !this.model.get('libraryId')
                 });
             }
         },
@@ -29996,7 +30365,7 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/models
 });
 
 
-define('text!ev-script/templates/video-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.getThumbnailUrl() %>" alt="<%= i18n.formatMessage(\'{0} preview thumbnail\', item.get(\'title\')) %>"/>\n            <% if (item.get(\'hasCaptions\')) { %>\n            <i class="badge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage(\'CC\') %>"></i>\n            <% } %>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span></a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span></a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <div class="title">\n            <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" href="#" rel="<%= item.get(\'id\') %>"><%= item.get(\'title\') %></a>\n        </div>\n        <div class="content-info">\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Description\') %></div>\n                <div class="value"><%= item.getDescription() %></div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Date Added\') %></div>\n                <div class="value">\n                    <%\n                        var dateAdded = new Date(item.get(\'dateAdded\')),\n                            localDate = dateAdded.setMinutes(dateAdded.getMinutes() - dateAdded.getTimezoneOffset());\n                        print(moment(localDate).format(dateTimeFormat));\n                    %>\n                </div>\n            </div>\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Keywords\') %></div>\n                <div class="value"><%= item.getKeywords() %></div>\n            </div>\n            <% if (item.getStatus()) { %>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Status\') %></div>\n                <div class="value"><%= item.getStatus() %></div>\n            </div>\n            <% } %>\n        </div>\n    </div>\n</div>\n';});
+define('text!ev-script/templates/video-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="thumbnail-wrap">\n            <img class="thumbnail" src="<%= item.getThumbnailUrl() %>" alt="<%= i18n.formatMessage(\'{0} preview thumbnail\', item.get(\'title\')) %>"/>\n            <% if (item.get(\'hasCaptions\')) { %>\n            <i class="badge fa fa-cc fa-lg text-dark5" title="<%= i18n.formatMessage(\'CC\') %>"></i>\n            <% } %>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>"><i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span></a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>"><i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span></a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <div class="title">\n            <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" href="#" rel="<%= item.get(\'id\') %>"><%= item.get(\'title\') %></a>\n        </div>\n        <div class="content-info">\n            <% if (showOrgName) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Organization\') %></div>\n                    <div class="value"><%= item.get(\'organizationName\') %></div>\n                </div>\n            <% } %>\n            <% if (showLibName) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Library\') %></div>\n                    <div class="value"><%= item.get(\'libraryName\') %></div>\n                </div>\n            <% } %>\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Description\') %></div>\n                <div class="value"><%= item.getDescription() %></div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Date Added\') %></div>\n                <div class="value">\n                    <%\n                        var dateAdded = new Date(item.get(\'dateAdded\')),\n                            localDate = dateAdded.setMinutes(dateAdded.getMinutes() - dateAdded.getTimezoneOffset());\n                        print(moment(localDate).format(dateTimeFormat));\n                    %>\n                </div>\n            </div>\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Keywords\') %></div>\n                <div class="value"><%= item.getKeywords() %></div>\n            </div>\n            <% if (item.getStatus()) { %>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Status\') %></div>\n                <div class="value"><%= item.getStatus() %></div>\n            </div>\n            <% } %>\n        </div>\n    </div>\n</div>\n';});
 
 define('ev-script/views/video-results',['require','jquery','underscore','urijs/URITemplate','ev-script/views/results','ev-script/models/video-settings','ev-script/views/video-preview','jquery-expander','text!ev-script/templates/video-result.html'],function(require) {
 
@@ -30222,7 +30591,8 @@ define('ev-script/views/workflow-select',['require','underscore','ev-script/view
             }) || this.collection.at(0);
             this.$el.html(this.template({
                 selectedId: selected.id,
-                collection: this.collection
+                collection: this.collection,
+                noneOption: null
             }));
         },
         getSelected: function() {
@@ -30675,12 +31045,12 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
         loadVideos: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
                 sourceId = this.model.get('sourceId'),
-                libraryId = this.model.get('libraryId'),
-                library = this.filter.getLibrary(libraryId),
                 searchTemplate = sourceId === 'shared' ?
-                    new URITemplate(library.getLink('ev:SharedContents/Search').href) :
-                    new URITemplate(library.getLink('ev:Contents/Search').href),
+                    new URITemplate(this.root.getLink('ev:SharedContents/Search').href) :
+                    new URITemplate(this.root.getLink('ev:Contents/Search').href),
                 searchUrl = searchTemplate.expand({
+                    organizationId: this.model.get('organizationId'),
+                    libraryId: this.model.get('libraryId'),
                     search: searchVal,
                     sortBy: 'dateAdded',
                     isPublished: true,
@@ -30703,9 +31073,15 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
             });
         },
         loadWorkflows: function() {
+            var libraryId = this.model.get('libraryId');
             this.workflows = new MediaWorkflows({}, {});
-            // FIXME - add libraryId (as with playlists)
-            this.workflows.filterValue = this.model.get('libraryId');
+            if (!libraryId) {
+                this.workflows.trigger('reset');
+                this.filter.hideUpload();
+                this.filter.hideRecord();
+                return;
+            }
+            this.workflows.filterValue = libraryId;
             this.workflows.fetch({
                 cacheKey: this.workflows.filterValue,
                 success: _.bind(function(collection, response, options) {
@@ -30933,12 +31309,13 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
 
 });
 
-define('ev-script/views/video-field',['require','jquery','underscore','urijs/URITemplate','ev-script/models/base','ev-script/views/field','ev-script/models/video-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding'],function(require) {
+define('ev-script/views/video-field',['require','jquery','underscore','loglevel','urijs/URITemplate','ev-script/models/base','ev-script/views/field','ev-script/models/video-settings','ev-script/views/video-picker','ev-script/views/video-settings','ev-script/views/video-preview','ev-script/models/video-encoding'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        log = require('loglevel'),
         URITemplate = require('urijs/URITemplate'),
         BaseModel = require('ev-script/models/base'),
         FieldView = require('ev-script/views/field'),
@@ -31134,7 +31511,7 @@ define('ev-script/views/playlist-preview',['require','ev-script/views/preview','
 });
 
 
-define('text!ev-script/templates/playlist-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <% if (item.get(\'isRestricted\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n        <span><%- item.get(\'title\') %></span>\n    </div>\n</div>\n';});
+define('text!ev-script/templates/playlist-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <div class="title">\n            <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" href="#" rel="<%= item.get(\'id\') %>">\n                <% if (item.get(\'isRestricted\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n                <%= item.get(\'title\') %>\n            </a>\n        </div>\n        <div class="content-info">\n            <% if (showOrgName) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Organization\') %></div>\n                    <div class="value"><%= item.get(\'organizationName\') %></div>\n                </div>\n            <% } %>\n            <% if (showLibName) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Library\') %></div>\n                    <div class="value"><%= item.get(\'libraryName\') %></div>\n                </div>\n            <% } %>\n        </div>\n    </div>\n</div>\n';});
 
 define('ev-script/views/playlist-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/playlist-result.html'],function(require) {
 
@@ -31251,10 +31628,10 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','urijs
         },
         loadPlaylists: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
-                libraryId = this.model.get('libraryId'),
-                library = this.filter.getLibrary(libraryId),
-                searchTemplate = new URITemplate(library.getLink('ev:Playlists/Search').href),
+                searchTemplate = new URITemplate(this.root.getLink('ev:Playlists/Search').href),
                 searchUrl = searchTemplate.expand({
+                    organizationId: this.model.get('organizationId'),
+                    libraryId: this.model.get('libraryId'),
                     search: searchVal,
                     sortBy: 'title',
                     pageSize: 20
@@ -31625,7 +32002,8 @@ define('ev-script/views/dropbox-picker',['require','jquery','underscore','urijs/
                 id: this.id + '-filter',
                 el: this.$('.ev-filter-block'),
                 picker: this,
-                showTypeSelect: false
+                showTypeSelect: false,
+                requireLibrarySelection: true
             });
 
             this.resultsView = new DropboxResultsView({
@@ -31974,7 +32352,8 @@ define('ev-script/views/quiz-picker',['require','jquery','underscore','urijs/URI
                 id: this.id + '-filter',
                 el: this.$('.ev-filter-block'),
                 picker: this,
-                showTypeSelect: false
+                showTypeSelect: false,
+                requireLibrarySelection: true
             });
 
             this.resultsView = new QuizResultsView({
@@ -35949,14 +36328,15 @@ return Globalize;
 
 }));
 
-/*global requirejs*/
-define('ev-script',['require','backbone','underscore','jquery','globalize','moment','json!cldr-data/supplemental/likelySubtags.json','json!ev-script/i18n/root/messages.json','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/models/dropbox-settings','ev-script/models/quiz-settings','ev-script/views/video-field','ev-script/views/playlist-field','ev-script/views/dropbox-field','ev-script/views/quiz-field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/views/dropbox-embed','ev-script/views/quiz-embed','ev-script/models/root','ev-script/models/info','ev-script/util/events','ev-script/util/cache','jquery.cookie','cldr/supplemental','cldr/unresolved','globalize/message'],function(require) {
+/*global log*/
+define('ev-script',['require','backbone','underscore','jquery','loglevel','globalize','moment','json!cldr-data/supplemental/likelySubtags.json','json!ev-script/i18n/root/messages.json','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/models/dropbox-settings','ev-script/models/quiz-settings','ev-script/views/video-field','ev-script/views/playlist-field','ev-script/views/dropbox-field','ev-script/views/quiz-field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/views/dropbox-embed','ev-script/views/quiz-embed','ev-script/models/root','ev-script/models/info','ev-script/util/events','ev-script/util/cache','jquery.cookie','cldr/supplemental','cldr/unresolved','globalize/message'],function(require) {
 
     'use strict';
 
     var Backbone = require('backbone'),
         _ = require('underscore'),
         $ = require('jquery'),
+        log = require('loglevel'),
         Globalize = require('globalize'),
         moment = require('moment'),
         likelySubtags = require('json!cldr-data/supplemental/likelySubtags.json'),
@@ -36032,12 +36412,22 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
             // Auth options
             authLoginPath: '/app/lti/login.aspx',
             authLogoutPath: '/api/logout',
-            authCompleteMessage: 'ev_auth_complete'
+            authCompleteMessage: 'ev_auth_complete',
+            // Logging
+            logLevel: 'info'
         };
 
         var config = _.extend({}, defaults, appOptions);
 
+        // Set logging
+        log.setDefaultLevel(config.logLevel);
+
+        log.info('[ev-script] Initializing app');
+        log.debug('[ev-script] Config:');
+        log.debug(config);
+
         var locale = config.getLocaleCallback();
+        log.debug('[ev-script] Locale: ' + locale);
         // Set locale for moment
         moment.locale(locale);
 
@@ -36050,6 +36440,8 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
         this.events = eventsUtil.getEvents();
 
         var loadApp = _.bind(function() {
+
+            log.info('[ev-script] Loading app');
 
             cacheUtil.setConfig(config);
 
@@ -36076,6 +36468,8 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
                         // TODO - document and add some flexibility to params (e.g. in addition
                         // to selector allow element or object).
                         this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
+                            log.debug('[ev-script] handleField');
+                            log.debug(arguments);
                             var $field = $(fieldSelector, fieldWrap),
                                 fieldOptions = {
                                     id: fieldWrap.id || 'ev-field',
@@ -36099,6 +36493,8 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
 
                         // TODO - document.  See handleField comment too.
                         this.handleEmbed = function(embedWrap, settingsModel) {
+                            log.debug('[ev-script] handleEmbed');
+                            log.debug(arguments);
                             if (settingsModel instanceof VideoSettings) {
                                 var videoEmbed = new VideoEmbedView({
                                     el: embedWrap,
@@ -36129,6 +36525,8 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
                         };
 
                         this.getEmbedCode = function(settings) {
+                            log.debug('[ev-script] getEmbedCode');
+                            log.debug(arguments);
                             var $div = $('<div/>');
                             if (settings.type === 'video') {
                                 this.handleEmbed($div[0], new VideoSettings(settings));
@@ -36144,6 +36542,7 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
                             return $div.html();
                         };
 
+                        log.info('[ev-script] App loaded');
                         this.events.trigger('appLoaded');
                         loading.resolve();
                     }
@@ -36156,6 +36555,7 @@ define('ev-script',['require','backbone','underscore','jquery','globalize','mome
         }, this);
 
         // Load messages for locale
+        log.info('[ev-script] Retreiving localized messages');
         $.getJSON(config.i18nPath + '/' + locale + '/messages.json')
         .done(function(data, status, xhr) {
             _.extend(messages, data);

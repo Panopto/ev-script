@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        log = require('loglevel'),
         Backbone = require('backbone'),
         cacheUtil = require('ev-script/util/cache');
 
@@ -53,6 +54,11 @@ define(function(require) {
         },
         url: function() {
             return this.href ? this.href : this.links['self'].href;
+        },
+        trigger: function(name) {
+            log.trace('[collections/base] Event triggered: ' + name);
+            log.trace(arguments);
+            return Backbone.Collection.prototype.trigger.apply(this, arguments);
         }
     });
 

@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        log = require('loglevel'),
         Backbone = require('backbone'),
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache');
@@ -30,6 +31,14 @@ define(function(require) {
         },
         unencode: function(encoded) {
             return $('<span/>').html(encoded).text();
+        },
+        trigger: function(name) {
+            log.debug('[views/base] Event triggered: ' + name);
+            log.debug({
+                this: this,
+                arguments: arguments
+            });
+            return Backbone.View.prototype.trigger.apply(this, arguments);
         }
     });
 

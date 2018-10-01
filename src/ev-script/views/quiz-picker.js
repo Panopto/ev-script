@@ -34,7 +34,8 @@ define(function(require) {
                 id: this.id + '-filter',
                 el: this.$('.ev-filter-block'),
                 picker: this,
-                showTypeSelect: false
+                showTypeSelect: false,
+                requireLibrarySelection: true
             });
 
             this.resultsView = new QuizResultsView({

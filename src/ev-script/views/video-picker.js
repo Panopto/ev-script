@@ -164,12 +164,12 @@ define(function(require) {
         loadVideos: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
                 sourceId = this.model.get('sourceId'),
-                libraryId = this.model.get('libraryId'),
-                library = this.filter.getLibrary(libraryId),
                 searchTemplate = sourceId === 'shared' ?
-                    new URITemplate(library.getLink('ev:SharedContents/Search').href) :
-                    new URITemplate(library.getLink('ev:Contents/Search').href),
+                    new URITemplate(this.root.getLink('ev:SharedContents/Search').href) :
+                    new URITemplate(this.root.getLink('ev:Contents/Search').href),
                 searchUrl = searchTemplate.expand({
+                    organizationId: this.model.get('organizationId'),
+                    libraryId: this.model.get('libraryId'),
                     search: searchVal,
                     sortBy: 'dateAdded',
                     isPublished: true,
@@ -192,9 +192,15 @@ define(function(require) {
             });
         },
         loadWorkflows: function() {
+            var libraryId = this.model.get('libraryId');
             this.workflows = new MediaWorkflows({}, {});
-            // FIXME - add libraryId (as with playlists)
-            this.workflows.filterValue = this.model.get('libraryId');
+            if (!libraryId) {
+                this.workflows.trigger('reset');
+                this.filter.hideUpload();
+                this.filter.hideRecord();
+                return;
+            }
+            this.workflows.filterValue = libraryId;
             this.workflows.fetch({
                 cacheKey: this.workflows.filterValue,
                 success: _.bind(function(collection, response, options) {

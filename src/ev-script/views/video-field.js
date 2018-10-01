@@ -4,6 +4,7 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        log = require('loglevel'),
         URITemplate = require('urijs/URITemplate'),
         BaseModel = require('ev-script/models/base'),
         FieldView = require('ev-script/views/field'),
