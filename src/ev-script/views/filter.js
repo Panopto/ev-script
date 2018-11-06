@@ -38,36 +38,22 @@ define(function(require) {
                 id: this.id + '-org-select',
                 el: this.$('.ev-org-select'),
                 collection: new BaseCollection(null, {}),
-                selectedId: '',
-                noneOption: {
+                noneOption: options.requireLibrarySelection ? null : {
                     name: '-- ' + this.i18n.formatMessage('All Organizations') + ' --',
                     value: ''
                 }
             };
-            if (options.requireLibrarySelection) {
-                _.extend(orgSelectOptions, {
-                    selectedId: this.picker.model.get('organizationId') || this.root.getUser().get('defaultOrganizationId'),
-                    noneOption: null
-                });
-            }
             this.orgSelect = new OrganizationSelectView(orgSelectOptions);
 
             var libSelectOptions = {
                 id: this.id + '-lib-select',
                 el: this.$('.ev-lib-select'),
                 collection: new BaseCollection(null, {}),
-                selectedId: '',
-                noneOption: {
+                noneOption: options.requireLibrarySelection ? null : {
                     name: '-- ' + this.i18n.formatMessage('All Libraries') + ' --',
                     value: ''
                 }
             };
-            if (options.requireLibrarySelection) {
-                _.extend(libSelectOptions, {
-                    selectedId: this.picker.model.get('libraryId') || this.root.getUser().get('defaultLibraryId'),
-                    noneOption: null
-                });
-            }
             this.libSelect = new LibrarySelectView(libSelectOptions);
 
             if (options.showTypeSelect || _.isUndefined(options.showTypeSelect)) {

@@ -1,5 +1,5 @@
 /**
- * ev-script 2.1.0 2018-10-01
+ * ev-script 2.1.0 2018-11-05
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2018 Symphony Video, Inc.
@@ -28765,17 +28765,18 @@ define('ev-script/views/organization-select',['require','jquery','underscore','e
                 id: this.id + '-select',
                 i18n: this.i18n
             }));
-            this.selectedId = options.selectedId;
+
             this.noneOption = options.noneOption;
             this.$select = this.$('select');
             this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
             this.collection.on('reset', this.render);
         },
         render: function() {
-            var singleItem = this.collection.length === 1;
+            var singleItem = this.collection.length === 1,
+                user = this.root && this.root.getUser();
             this.$select.html(this.optionsTemplate({
                 noneOption: singleItem ? null : this.noneOption,
-                selectedId: singleItem ? this.collection.at(0).get('id') : this.selectedId,
+                selectedId: singleItem ? this.collection.at(0).get('id') : (user && user.get('defaultOrganizationId')) || '',
                 collection: this.collection
             }));
             this.$select.trigger('change');
@@ -28824,7 +28825,13 @@ define('ev-script/views/library-select',['require','jquery','underscore','ev-scr
                 id: this.id + '-select',
                 i18n: this.i18n
             }));
-            this.selectedId = options.selectedId;
+
+            // We use this to start at home/default library
+            this.initialLoad = true;
+            this.events.on('loggedIn', _.bind(function() {
+                this.initialLoad = true;
+            }, this));
+
             this.noneOption = options.noneOption;
             this.$select = this.$('select');
             this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
@@ -28834,9 +28841,10 @@ define('ev-script/views/library-select',['require','jquery','underscore','ev-scr
             var singleItem = this.collection.length === 1;
             this.$select.html(this.optionsTemplate({
                 noneOption: singleItem ? null : this.noneOption,
-                selectedId: singleItem ? this.collection.at(0).get('id') : this.selectedId,
+                selectedId: this.initialLoad ? this.root.getUser().get('defaultLibraryId') : '',
                 collection: this.collection
             }));
+            this.initialLoad = false;
             this.$select.trigger('change');
         },
         select: function(selectedId) {
@@ -29009,36 +29017,22 @@ define('ev-script/views/filter',['require','jquery','underscore','loglevel','uri
                 id: this.id + '-org-select',
                 el: this.$('.ev-org-select'),
                 collection: new BaseCollection(null, {}),
-                selectedId: '',
-                noneOption: {
+                noneOption: options.requireLibrarySelection ? null : {
                     name: '-- ' + this.i18n.formatMessage('All Organizations') + ' --',
                     value: ''
                 }
             };
-            if (options.requireLibrarySelection) {
-                _.extend(orgSelectOptions, {
-                    selectedId: this.picker.model.get('organizationId') || this.root.getUser().get('defaultOrganizationId'),
-                    noneOption: null
-                });
-            }
             this.orgSelect = new OrganizationSelectView(orgSelectOptions);
 
             var libSelectOptions = {
                 id: this.id + '-lib-select',
                 el: this.$('.ev-lib-select'),
                 collection: new BaseCollection(null, {}),
-                selectedId: '',
-                noneOption: {
+                noneOption: options.requireLibrarySelection ? null : {
                     name: '-- ' + this.i18n.formatMessage('All Libraries') + ' --',
                     value: ''
                 }
             };
-            if (options.requireLibrarySelection) {
-                _.extend(libSelectOptions, {
-                    selectedId: this.picker.model.get('libraryId') || this.root.getUser().get('defaultLibraryId'),
-                    noneOption: null
-                });
-            }
             this.libSelect = new LibrarySelectView(libSelectOptions);
 
             if (options.showTypeSelect || _.isUndefined(options.showTypeSelect)) {

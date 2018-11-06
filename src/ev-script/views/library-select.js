@@ -16,7 +16,13 @@ define(function(require) {
                 id: this.id + '-select',
                 i18n: this.i18n
             }));
-            this.selectedId = options.selectedId;
+
+            // We use this to start at home/default library
+            this.initialLoad = true;
+            this.events.on('loggedIn', _.bind(function() {
+                this.initialLoad = true;
+            }, this));
+
             this.noneOption = options.noneOption;
             this.$select = this.$('select');
             this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
@@ -26,9 +32,10 @@ define(function(require) {
             var singleItem = this.collection.length === 1;
             this.$select.html(this.optionsTemplate({
                 noneOption: singleItem ? null : this.noneOption,
-                selectedId: singleItem ? this.collection.at(0).get('id') : this.selectedId,
+                selectedId: this.initialLoad ? this.root.getUser().get('defaultLibraryId') : '',
                 collection: this.collection
             }));
+            this.initialLoad = false;
             this.$select.trigger('change');
         },
         select: function(selectedId) {

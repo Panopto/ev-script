@@ -16,17 +16,18 @@ define(function(require) {
                 id: this.id + '-select',
                 i18n: this.i18n
             }));
-            this.selectedId = options.selectedId;
+
             this.noneOption = options.noneOption;
             this.$select = this.$('select');
             this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
             this.collection.on('reset', this.render);
         },
         render: function() {
-            var singleItem = this.collection.length === 1;
+            var singleItem = this.collection.length === 1,
+                user = this.root && this.root.getUser();
             this.$select.html(this.optionsTemplate({
                 noneOption: singleItem ? null : this.noneOption,
-                selectedId: singleItem ? this.collection.at(0).get('id') : this.selectedId,
+                selectedId: singleItem ? this.collection.at(0).get('id') : (user && user.get('defaultOrganizationId')) || '',
                 collection: this.collection
             }));
             this.$select.trigger('change');
