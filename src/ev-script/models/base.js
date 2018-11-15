@@ -55,7 +55,8 @@ define(function(require) {
                 dataType: 'json',
                 accepts: {
                     json: 'application/hal+json'
-                }
+                },
+                cache: false
             });
             if (method === 'read') {
                 var url = this.url(),
