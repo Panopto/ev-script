@@ -1,5 +1,5 @@
 /**
- * ev-script 2.0.0 2018-08-10
+ * ev-script 2.0.1 2018-11-15
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2018 Symphony Video, Inc.
@@ -26764,7 +26764,8 @@ define('ev-script/models/base',['require','jquery','underscore','backbone','ev-s
                 dataType: 'json',
                 accepts: {
                     json: 'application/hal+json'
-                }
+                },
+                cache: false
             });
             if (method === 'read') {
                 var url = this.url(),
@@ -27000,9 +27001,15 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
                         el: this.el,
                         submitCallback: _.bind(function() {
                             this.root.fetch().always(_.bind(function() {
-                                this.events.trigger(!this.root.getUser() ? 'loggedOut' : 'loggedIn');
+                                // if (this.root.getUser()) {
+                                if (this.root.getUser()) {
+                                    this.events.trigger('loggedIn');
+                                    deferred.resolve();
+                                } else {
+                                    this.events.trigger('loggedOut');
+                                    deferred.reject();
+                                }
                             }, this));
-                            deferred.resolve();
                         }, this),
                         auth: this
                     });
@@ -27014,7 +27021,7 @@ define('ev-script/views/field',['require','jquery','underscore','ev-script/views
             return deferred;
         },
         chooseHandler: function(e) {
-            this.doAuthenticate().always(_.bind(function() {
+            this.doAuthenticate().done(_.bind(function() {
                 this.events.trigger('showPicker', this.id);
             }, this));
             e.preventDefault();
