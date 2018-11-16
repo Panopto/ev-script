@@ -88,9 +88,15 @@ define(function(require) {
                         el: this.el,
                         submitCallback: _.bind(function() {
                             this.root.fetch().always(_.bind(function() {
-                                this.events.trigger(!this.root.getUser() ? 'loggedOut' : 'loggedIn');
+                                // if (this.root.getUser()) {
+                                if (this.root.getUser()) {
+                                    this.events.trigger('loggedIn');
+                                    deferred.resolve();
+                                } else {
+                                    this.events.trigger('loggedOut');
+                                    deferred.reject();
+                                }
                             }, this));
-                            deferred.resolve();
                         }, this),
                         auth: this
                     });
@@ -102,7 +108,7 @@ define(function(require) {
             return deferred;
         },
         chooseHandler: function(e) {
-            this.doAuthenticate().always(_.bind(function() {
+            this.doAuthenticate().done(_.bind(function() {
                 this.events.trigger('showPicker', this.id);
             }, this));
             e.preventDefault();
