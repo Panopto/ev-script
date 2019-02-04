@@ -237,10 +237,6 @@ fieldset[disabled] .ev-field-wrap .form-actions .action-cancel.active {
 .ev-field-wrap .ev-playlist-picker .ev-results .results {
   border: 1px solid #bebfb9;
 }
-.ev-field-wrap .ev-playlist-picker .ev-results .content-meta .item-security {
-  margin-right: 0.4em;
-  color: goldenrod;
-}
 .ev-field-wrap .ev-dropbox-picker {
   position: relative;
   padding: 0;
@@ -784,6 +780,10 @@ fieldset[disabled] .ev-field-wrap .ev-actions .action-record.active {
   display: table-cell;
   padding: 1em;
   vertical-align: top;
+}
+.ev-field-wrap .ev-results .content-list .result-item .content-meta .item-security {
+  margin-right: 0.4em;
+  color: goldenrod;
 }
 .ev-field-wrap .ev-results .content-list .even {
   background-color: #f3f4ee;

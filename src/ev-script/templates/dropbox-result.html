@@ -11,7 +11,10 @@
     </div>
     <div class="content-meta">
         <div class="title">
-            <a class="action-preview" title="<%= i18n.formatMessage('Click to preview {0}', item.get('title')) %>" href="#" rel="<%= item.get('id') %>"><%= item.get('title') %></a>
+            <a class="action-preview" title="<%= i18n.formatMessage('Click to preview {0}', item.get('title')) %>" href="#" rel="<%= item.get('id') %>">
+                <% if (item.get('isRestricted')) { print('<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>'); } %>
+                <%= item.get('title') %>
+            </a>
         </div>
         <div class="content-info">
             <div class="info-row trunc">
@@ -48,6 +51,30 @@
                     <% } %>
                 </div>
             </div>
+            <% if (item.get('availableAfter')) { %>
+                <div class="info-row">
+                    <div class="label"><%= i18n.formatMessage('Available After') %></div>
+                    <div class="value" style="color: <%= item.get('currentAvailability').after ? 'green' : 'red' %>">
+                        <%
+                            var availableAfter = new Date(item.get('availableAfter')),
+                                localDate = availableAfter.setMinutes(availableAfter.getMinutes() - availableAfter.getTimezoneOffset());
+                            print(moment(localDate).format(dateTimeFormat));
+                        %>
+                    </div>
+                </div>
+            <% } %>
+            <% if (item.get('availableUntil')) { %>
+                <div class="info-row">
+                    <div class="label"><%= i18n.formatMessage('Available Until') %></div>
+                    <div class="value" style="color: <%= item.get('currentAvailability').until ? 'green' : 'red' %>">
+                        <%
+                            var availableUntil = new Date(item.get('availableUntil')),
+                                localDate = availableUntil.setMinutes(availableUntil.getMinutes() - availableUntil.getTimezoneOffset());
+                            print(moment(localDate).format(dateTimeFormat));
+                        %>
+                    </div>
+                </div>
+            <% } %>
         </div>
     </div>
 </div>
