@@ -1,5 +1,5 @@
 /**
- * ev-script 2.1.4 2019-02-04
+ * ev-script 2.1.5 2019-08-06
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2019 Symphony Video, Inc.
@@ -29619,7 +29619,7 @@ define('ev-script/views/embed',['require','underscore','ev-script/views/base'],f
 });
 
 
-define('text!ev-script/templates/video-embed.html',[],function () { return '<iframe src="<%- src %>" frameborder="0" width="<%- width %>" height="<%- frameHeight %>" allowfullscreen></iframe>';});
+define('text!ev-script/templates/video-embed.html',[],function () { return '<iframe src="<%- src %>" frameborder="0" width="<%- width %>" height="<%- frameHeight %>" scrolling="no" allowfullscreen></iframe>';});
 
 define('ev-script/views/video-embed',['require','underscore','urijs/URI','ev-script/views/embed','text!ev-script/templates/video-embed.html'],function(require) {
 
