@@ -1,5 +1,5 @@
 /**
- * ev-script 2.1.5 2019-08-06
+ * ev-script 2.1.6 2019-08-09
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2019 Symphony Video, Inc.
@@ -29635,10 +29635,12 @@ define('ev-script/views/video-embed',['require','underscore','urijs/URI','ev-scr
             // Width and height really should be set by now...but use a reasonable default if not
             var width = this.getMediaWidth(),
                 height = this.getMediaHeight(),
+                frameHeight = this.getFrameHeight(),
+                isAudio = this.model.get('isaudio'),
                 embed = this.template({
                     src: this.getSrcUrl(width, height, isPreview),
                     width: width,
-                    height: height,
+                    height: isAudio ? frameHeight : height,
                     frameHeight: this.getFrameHeight()
                 });
             this.$el.html(embed);
@@ -29752,7 +29754,7 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/models
                 originalHeight = parseInt(this.get('height'), 10) || 480;
             if (this.isAudio()) {
                 dims[0] = 400;
-                dims[1] = 26;
+                dims[1] = 225;
             } else if (!original && this.config.defaultVideoWidth && this.config.defaultVideoWidth <= originalWidth) {
                 dims[0] = parseInt(this.config.defaultVideoWidth, 10) || 848;
                 dims[1] = Math.ceil(dims[0] / (originalWidth / originalHeight));
