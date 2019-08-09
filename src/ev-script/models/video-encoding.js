@@ -18,7 +18,7 @@ define(function(require) {
                 originalHeight = parseInt(this.get('height'), 10) || 480;
             if (this.isAudio()) {
                 dims[0] = 400;
-                dims[1] = 26;
+                dims[1] = 225;
             } else if (!original && this.config.defaultVideoWidth && this.config.defaultVideoWidth <= originalWidth) {
                 dims[0] = parseInt(this.config.defaultVideoWidth, 10) || 848;
                 dims[1] = Math.ceil(dims[0] / (originalWidth / originalHeight));

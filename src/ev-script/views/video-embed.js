@@ -12,10 +12,12 @@ define(function(require) {
             // Width and height really should be set by now...but use a reasonable default if not
             var width = this.getMediaWidth(),
                 height = this.getMediaHeight(),
+                frameHeight = this.getFrameHeight(),
+                isAudio = this.model.get('isaudio'),
                 embed = this.template({
                     src: this.getSrcUrl(width, height, isPreview),
                     width: width,
-                    height: height,
+                    height: isAudio ? frameHeight : height,
                     frameHeight: this.getFrameHeight()
                 });
             this.$el.html(embed);
