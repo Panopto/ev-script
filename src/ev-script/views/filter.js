@@ -37,6 +37,7 @@ define(function(require) {
             var orgSelectOptions = {
                 id: this.id + '-org-select',
                 el: this.$('.ev-org-select'),
+                picker: this.picker,
                 collection: new BaseCollection(null, {}),
                 noneOption: options.requireLibrarySelection ? null : {
                     name: '-- ' + this.i18n.formatMessage('All Organizations') + ' --',
@@ -48,6 +49,7 @@ define(function(require) {
             var libSelectOptions = {
                 id: this.id + '-lib-select',
                 el: this.$('.ev-lib-select'),
+                picker: this.picker,
                 collection: new BaseCollection(null, {}),
                 noneOption: options.requireLibrarySelection ? null : {
                     name: '-- ' + this.i18n.formatMessage('All Libraries') + ' --',

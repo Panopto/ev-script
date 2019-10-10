@@ -28,9 +28,7 @@ define(function(require) {
             }));
         },
         getSettingsInstance: function(settingsOptions) {
-            return false;
-            // TODO - disabling settings until we have proper embed handling
-            // return new DropboxSettingsView(settingsOptions);
+            return new DropboxSettingsView(settingsOptions);
         },
         getPreviewInstance: function(previewOptions) {
             return new DropboxPreviewView(previewOptions);

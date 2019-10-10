@@ -8,11 +8,17 @@ define(function(require) {
     return PreviewView.extend({
         embedClass: DropboxEmbedView,
         render: function() {
-            var embedView = new DropboxEmbedView({
+            var embedView,
+                targetUrl;
+            if (this.info.checkVersion('<5.3.0')) {
+                embedView = new DropboxEmbedView({
                     model: new this.model.constructor(this.model.toJSON())
-                }),
+                });
                 targetUrl = embedView.getUrl(true);
-            window.open(targetUrl);
+                window.open(targetUrl);
+            } else {
+                PreviewView.prototype.render.call(this);
+            }
         }
     });
 

@@ -34,8 +34,7 @@ define(function(require) {
                 id: this.id + '-filter',
                 el: this.$('.ev-filter-block'),
                 picker: this,
-                showTypeSelect: false,
-                requireLibrarySelection: true
+                showTypeSelect: false
             });
 
             this.resultsView = new DropboxResultsView({

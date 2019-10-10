@@ -15,6 +15,9 @@
                 <% if (item.get('isRestricted')) { print('<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>'); } %>
                 <%= item.get('title') %>
             </a>
+            <% if (item.get('url')) { %>
+                <a class="url" href="<%= item.get('url') %>" target="_blank"><%= item.get('url') %></a>
+            <% } %>
         </div>
         <div class="content-info">
             <div class="info-row trunc">

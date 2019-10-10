@@ -17,6 +17,7 @@ define(function(require) {
                 i18n: this.i18n
             }));
 
+            this.picker = options.picker;
             this.noneOption = options.noneOption;
             this.$select = this.$('select');
             this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
@@ -24,10 +25,16 @@ define(function(require) {
         },
         render: function() {
             var singleItem = this.collection.length === 1,
-                user = this.root && this.root.getUser();
+                user = this.root && this.root.getUser(),
+                selectedId = singleItem ?
+                    this.collection.at(0).get('id') :
+                    this.picker.model.get('organizationId');
+            if (!selectedId || !this.collection.get(selectedId)) {
+                selectedId = (user && user.get('defaultOrganizationId')) || '';
+            }
             this.$select.html(this.optionsTemplate({
                 noneOption: singleItem ? null : this.noneOption,
-                selectedId: singleItem ? this.collection.at(0).get('id') : (user && user.get('defaultOrganizationId')) || '',
+                selectedId: selectedId,
                 collection: this.collection
             }));
             this.$select.trigger('change');

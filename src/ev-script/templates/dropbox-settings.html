@@ -2,12 +2,10 @@
     <div role="group" aria-labelledby="dropboxSettingsTitle">
         <div id="dropboxSettingsTitle" style="display:none;"><%= i18n.formatMessage('Dropbox Embed Options') %></div>
         <div class="fieldWrap">
-            <label for="width"><%= i18n.formatMessage('Width') %></label>
-            <input id="width" class="form-text" name="width" type="text" value="<%= model.get('width') %>" />
-        </div>
-        <div class="fieldWrap">
-            <label for="height"><%= i18n.formatMessage('Height') %></label>
-            <input id="height" class="form-text" name="height" type="text" value="<%= model.get('height') %>" />
+            <label for="size"><%= i18n.formatMessage('Size') %></label>
+            <select class="form-select size" id="size" name="size">
+                <option value="original"><%= i18n.formatMessage('Original') %></option>
+            </select>
         </div>
         <div class="form-actions">
             <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage('Save') %></span></button>
