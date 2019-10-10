@@ -1,5 +1,5 @@
 /**
- * ev-script 2.1.6 2019-08-09
+ * ev-script 2.1.7 2019-10-10
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2019 Symphony Video, Inc.
@@ -22915,8 +22915,8 @@ define('ev-script/models/dropbox-settings',['backbone'], function(Backbone) {
     return Backbone.Model.extend({
         defaults: {
             type: 'dropbox',
-            width: 600,
-            height: 800,
+            width: 848,
+            height: 495,
             search: ''
         }
     });
@@ -28775,6 +28775,7 @@ define('ev-script/views/organization-select',['require','jquery','underscore','e
                 i18n: this.i18n
             }));
 
+            this.picker = options.picker;
             this.noneOption = options.noneOption;
             this.$select = this.$('select');
             this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
@@ -28782,10 +28783,16 @@ define('ev-script/views/organization-select',['require','jquery','underscore','e
         },
         render: function() {
             var singleItem = this.collection.length === 1,
-                user = this.root && this.root.getUser();
+                user = this.root && this.root.getUser(),
+                selectedId = singleItem ?
+                    this.collection.at(0).get('id') :
+                    this.picker.model.get('organizationId');
+            if (!selectedId || !this.collection.get(selectedId)) {
+                selectedId = (user && user.get('defaultOrganizationId')) || '';
+            }
             this.$select.html(this.optionsTemplate({
                 noneOption: singleItem ? null : this.noneOption,
-                selectedId: singleItem ? this.collection.at(0).get('id') : (user && user.get('defaultOrganizationId')) || '',
+                selectedId: selectedId,
                 collection: this.collection
             }));
             this.$select.trigger('change');
@@ -28830,30 +28837,32 @@ define('ev-script/views/library-select',['require','jquery','underscore','ev-scr
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'render', 'select');
+
             this.$el.html(this.template({
                 id: this.id + '-select',
                 i18n: this.i18n
             }));
 
-            // We use this to start at home/default library
-            this.initialLoad = true;
-            this.events.on('loggedIn', _.bind(function() {
-                this.initialLoad = true;
-            }, this));
-
+            this.picker = options.picker;
             this.noneOption = options.noneOption;
             this.$select = this.$('select');
             this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
             this.collection.on('reset', this.render);
         },
         render: function() {
-            var singleItem = this.collection.length === 1;
+            var singleItem = this.collection.length === 1,
+                user = this.root && this.root.getUser(),
+                selectedId = singleItem ?
+                    this.collection.at(0).get('id') :
+                    this.picker.model.get('libraryId');
+            if (!selectedId || !this.collection.get(selectedId)) {
+                selectedId = (user && user.get('defaultLibraryId')) || '';
+            }
             this.$select.html(this.optionsTemplate({
                 noneOption: singleItem ? null : this.noneOption,
-                selectedId: this.initialLoad ? this.root.getUser().get('defaultLibraryId') : '',
+                selectedId: selectedId,
                 collection: this.collection
             }));
-            this.initialLoad = false;
             this.$select.trigger('change');
         },
         select: function(selectedId) {
@@ -29025,6 +29034,7 @@ define('ev-script/views/filter',['require','jquery','underscore','loglevel','uri
             var orgSelectOptions = {
                 id: this.id + '-org-select',
                 el: this.$('.ev-org-select'),
+                picker: this.picker,
                 collection: new BaseCollection(null, {}),
                 noneOption: options.requireLibrarySelection ? null : {
                     name: '-- ' + this.i18n.formatMessage('All Organizations') + ' --',
@@ -29036,6 +29046,7 @@ define('ev-script/views/filter',['require','jquery','underscore','loglevel','uri
             var libSelectOptions = {
                 id: this.id + '-lib-select',
                 el: this.$('.ev-lib-select'),
+                picker: this.picker,
                 collection: new BaseCollection(null, {}),
                 noneOption: options.requireLibrarySelection ? null : {
                     name: '-- ' + this.i18n.formatMessage('All Libraries') + ' --',
@@ -31164,14 +31175,17 @@ define('ev-script/util/size',['require','underscore'],function(require) {
 
     return {
         optionsSixteenByNine: ['1280x720', '1024x576', '848x480', '720x405', '640x360', '610x344', '560x315', '480x270', '400x225', '320x180', '240x135', '160x90'],
-        getAvailableDimensions: function() {
-            return this.optionsSixteenByNine;
+        optionsDropbox: ['1280x750', '1024x600', '848x495', '720x420', '640x374', '610x356', '560x330', '480x280', '400x234', '320x190', '240x140', '160x94'],
+        getAvailableDimensions: function(type) {
+            return type && type === 'dropbox' ?
+                this.optionsDropbox :
+                this.optionsSixteenByNine;
         },
-        findClosestDimension: function(desiredWidth) {
+        findClosestDimension: function(desiredWidth, type) {
             var offset = Number.MAX_VALUE,
                 closest;
             // Find the first available or closest dimension that matches our desired width
-            var match = _.find(this.optionsSixteenByNine, _.bind(function(dimension) {
+            var match = _.find(this.getAvailableDimensions(type), _.bind(function(dimension) {
                 var width = parseInt(dimension.split('x')[0], 10),
                     currentOffset = Math.abs(width - desiredWidth);
                 if (currentOffset < offset) {
@@ -31871,34 +31885,69 @@ define('ev-script/views/playlist-field',['require','jquery','underscore','ev-scr
 });
 
 
-define('text!ev-script/templates/dropbox-embed.html',[],function () { return '<a href="<%- src %>" target="_blank"><%- title %></a>';});
+define('text!ev-script/templates/dropbox-embed.html',[],function () { return '<iframe src="<%- src %>" title="<%- title %>" frameborder="0" width="<%- width %>" height="<%- height %>" allowfullscreen></iframe>';});
 
-define('ev-script/views/dropbox-embed',['require','underscore','urijs/URI','ev-script/views/embed','text!ev-script/templates/dropbox-embed.html'],function(require) {
+
+define('text!ev-script/templates/dropbox-embed-legacy.html',[],function () { return '<a href="<%- src %>" target="_blank"><%- title %></a>';});
+
+define('ev-script/views/dropbox-embed',['require','underscore','urijs/URI','ev-script/views/embed','ev-script/views/video-embed','text!ev-script/templates/dropbox-embed.html','text!ev-script/templates/dropbox-embed-legacy.html'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
         URI = require('urijs/URI'),
-        EmbedView = require('ev-script/views/embed');
+        EmbedView = require('ev-script/views/embed'),
+        // We borrow portions of video-embed impl
+        VideoEmbedView = require('ev-script/views/video-embed');
 
     return EmbedView.extend({
         template: _.template(require('text!ev-script/templates/dropbox-embed.html')),
+        legacytemplate: _.template(require('text!ev-script/templates/dropbox-embed-legacy.html')),
         initialize: function(options) {
 
-            _.bindAll(this, 'render', 'getUrl');
+            _.bindAll(this, 'render', 'getUrl', 'isEmbedSupported');
 
             EmbedView.prototype.initialize.call(this, options);
         },
+        isEmbedSupported: function() {
+            return this.info.checkVersion('>=5.3.0');
+        },
+        getMediaWidth: function() {
+            return parseInt(this.model.get('width'), 10) || 848;
+        },
+        getMediaHeight: function() {
+            return parseInt(this.model.get('height'), 10) || 495;
+        },
+        getFrameWidth: function() {
+            return this.getMediaWidth();
+        },
+        getFrameHeight: function() {
+            return this.getMediaHeight();
+        },
         getUrl: function(isPreview) {
-            return this.model.get('content').url;
-            // return URI(this.config.ensembleUrl + '/hapi/v1/Dropboxes/' +
-            //     this.model.get('id') + '/Show');
+            return this.isEmbedSupported() ?
+                URI(this.config.ensembleUrl + '/hapi/v1/ui/dropboxes/' + this.model.get('id') + '/embed') :
+                this.model.get('content').url;
+        },
+        scale: function(maxWidth, maxHeight) {
+            return VideoEmbedView.prototype.scale.call(this, maxWidth, maxHeight);
         },
         render: function(isPreview) {
-            this.$el.html(this.template({
-                'src': this.getUrl(isPreview),
-                'title': this.model.get('content').title
-            }));
+            var html;
+            if (this.isEmbedSupported()) {
+                html = this.template({
+                    'src': this.getUrl(),
+                    'title': this.model.get('content').title,
+                    'width': this.model.get('width'),
+                    'height': this.model.get('height')
+                });
+            } else {
+                html = this.legacyTemplate({
+                    'src': this.getUrl(),
+                    'title': this.model.get('content').title
+                });
+            }
+            this.$el.html(html);
         }
     });
 
@@ -31914,18 +31963,24 @@ define('ev-script/views/dropbox-preview',['require','ev-script/views/preview','e
     return PreviewView.extend({
         embedClass: DropboxEmbedView,
         render: function() {
-            var embedView = new DropboxEmbedView({
+            var embedView,
+                targetUrl;
+            if (this.info.checkVersion('<5.3.0')) {
+                embedView = new DropboxEmbedView({
                     model: new this.model.constructor(this.model.toJSON())
-                }),
+                });
                 targetUrl = embedView.getUrl(true);
-            window.open(targetUrl);
+                window.open(targetUrl);
+            } else {
+                PreviewView.prototype.render.call(this);
+            }
         }
     });
 
 });
 
 
-define('text!ev-script/templates/dropbox-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <div class="title">\n            <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" href="#" rel="<%= item.get(\'id\') %>">\n                <% if (item.get(\'isRestricted\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n                <%= item.get(\'title\') %>\n            </a>\n        </div>\n        <div class="content-info">\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Description\') %></div>\n                <div class="value"><%= item.get(\'description\') %></div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Date Produced\') %></div>\n                <div class="value">\n                    <%\n                        var dateCreated = new Date(item.get(\'createdOn\')),\n                            localDate = dateCreated.setMinutes(dateCreated.getMinutes() - dateCreated.getTimezoneOffset());\n                        print(moment(localDate).format(dateTimeFormat));\n                    %>\n                </div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Enabled\') %></div>\n                <div class="value">\n                    <% if (item.get(\'isEnabled\')) { %>\n                        <i class="fa fa-check" style="color: green"></i>\n                    <% } else { %>\n                        <i class="fa fa-times" style="color: red"></i>\n                    <% } %>\n                </div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Public\') %></div>\n                <div class="value">\n                    <% if (item.get(\'isPublic\')) { %>\n                        <i class="fa fa-check" style="color: green"></i>\n                    <% } else { %>\n                        <i class="fa fa-times" style="color: red"></i>\n                    <% } %>\n                </div>\n            </div>\n            <% if (item.get(\'availableAfter\')) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Available After\') %></div>\n                    <div class="value" style="color: <%= item.get(\'currentAvailability\').after ? \'green\' : \'red\' %>">\n                        <%\n                            var availableAfter = new Date(item.get(\'availableAfter\')),\n                                localDate = availableAfter.setMinutes(availableAfter.getMinutes() - availableAfter.getTimezoneOffset());\n                            print(moment(localDate).format(dateTimeFormat));\n                        %>\n                    </div>\n                </div>\n            <% } %>\n            <% if (item.get(\'availableUntil\')) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Available Until\') %></div>\n                    <div class="value" style="color: <%= item.get(\'currentAvailability\').until ? \'green\' : \'red\' %>">\n                        <%\n                            var availableUntil = new Date(item.get(\'availableUntil\')),\n                                localDate = availableUntil.setMinutes(availableUntil.getMinutes() - availableUntil.getTimezoneOffset());\n                            print(moment(localDate).format(dateTimeFormat));\n                        %>\n                    </div>\n                </div>\n            <% } %>\n        </div>\n    </div>\n</div>\n';});
+define('text!ev-script/templates/dropbox-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <div class="title">\n            <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" href="#" rel="<%= item.get(\'id\') %>">\n                <% if (item.get(\'isRestricted\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n                <%= item.get(\'title\') %>\n            </a>\n            <% if (item.get(\'url\')) { %>\n                <a class="url" href="<%= item.get(\'url\') %>" target="_blank"><%= item.get(\'url\') %></a>\n            <% } %>\n        </div>\n        <div class="content-info">\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Description\') %></div>\n                <div class="value"><%= item.get(\'description\') %></div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Date Produced\') %></div>\n                <div class="value">\n                    <%\n                        var dateCreated = new Date(item.get(\'createdOn\')),\n                            localDate = dateCreated.setMinutes(dateCreated.getMinutes() - dateCreated.getTimezoneOffset());\n                        print(moment(localDate).format(dateTimeFormat));\n                    %>\n                </div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Enabled\') %></div>\n                <div class="value">\n                    <% if (item.get(\'isEnabled\')) { %>\n                        <i class="fa fa-check" style="color: green"></i>\n                    <% } else { %>\n                        <i class="fa fa-times" style="color: red"></i>\n                    <% } %>\n                </div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Public\') %></div>\n                <div class="value">\n                    <% if (item.get(\'isPublic\')) { %>\n                        <i class="fa fa-check" style="color: green"></i>\n                    <% } else { %>\n                        <i class="fa fa-times" style="color: red"></i>\n                    <% } %>\n                </div>\n            </div>\n            <% if (item.get(\'availableAfter\')) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Available After\') %></div>\n                    <div class="value" style="color: <%= item.get(\'currentAvailability\').after ? \'green\' : \'red\' %>">\n                        <%\n                            var availableAfter = new Date(item.get(\'availableAfter\')),\n                                localDate = availableAfter.setMinutes(availableAfter.getMinutes() - availableAfter.getTimezoneOffset());\n                            print(moment(localDate).format(dateTimeFormat));\n                        %>\n                    </div>\n                </div>\n            <% } %>\n            <% if (item.get(\'availableUntil\')) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Available Until\') %></div>\n                    <div class="value" style="color: <%= item.get(\'currentAvailability\').until ? \'green\' : \'red\' %>">\n                        <%\n                            var availableUntil = new Date(item.get(\'availableUntil\')),\n                                localDate = availableUntil.setMinutes(availableUntil.getMinutes() - availableUntil.getTimezoneOffset());\n                            print(moment(localDate).format(dateTimeFormat));\n                        %>\n                    </div>\n                </div>\n            <% } %>\n        </div>\n    </div>\n</div>\n';});
 
 define('ev-script/views/dropbox-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/dropbox-settings','ev-script/views/dropbox-preview','text!ev-script/templates/dropbox-result.html'],function(require) {
 
@@ -32007,8 +32062,7 @@ define('ev-script/views/dropbox-picker',['require','jquery','underscore','urijs/
                 id: this.id + '-filter',
                 el: this.$('.ev-filter-block'),
                 picker: this,
-                showTypeSelect: false,
-                requireLibrarySelection: true
+                showTypeSelect: false
             });
 
             this.resultsView = new DropboxResultsView({
@@ -32068,34 +32122,58 @@ define('ev-script/views/dropbox-picker',['require','jquery','underscore','urijs/
 });
 
 
-define('text!ev-script/templates/dropbox-settings.html',[],function () { return '<form class="dropbox-settings">\n    <div role="group" aria-labelledby="dropboxSettingsTitle">\n        <div id="dropboxSettingsTitle" style="display:none;"><%= i18n.formatMessage(\'Dropbox Embed Options\') %></div>\n        <div class="fieldWrap">\n            <label for="width"><%= i18n.formatMessage(\'Width\') %></label>\n            <input id="width" class="form-text" name="width" type="text" value="<%= model.get(\'width\') %>" />\n        </div>\n        <div class="fieldWrap">\n            <label for="height"><%= i18n.formatMessage(\'Height\') %></label>\n            <input id="height" class="form-text" name="height" type="text" value="<%= model.get(\'height\') %>" />\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </div>\n</form>\n';});
+define('text!ev-script/templates/dropbox-settings.html',[],function () { return '<form class="dropbox-settings">\n    <div role="group" aria-labelledby="dropboxSettingsTitle">\n        <div id="dropboxSettingsTitle" style="display:none;"><%= i18n.formatMessage(\'Dropbox Embed Options\') %></div>\n        <div class="fieldWrap">\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </div>\n</form>\n';});
 
-define('ev-script/views/dropbox-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','jquery-ui/ui/widgets/dialog','text!ev-script/templates/dropbox-settings.html'],function(require) {
+define('ev-script/views/dropbox-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','ev-script/models/dropbox-settings','jquery-ui/ui/widgets/dialog','text!ev-script/templates/dropbox-settings.html','text!ev-script/templates/sizes.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         SettingsView = require('ev-script/views/settings'),
-        sizeUtil = require('ev-script/util/size');
+        sizeUtil = require('ev-script/util/size'),
+        DropboxSettings = require('ev-script/models/dropbox-settings');
 
     require('jquery-ui/ui/widgets/dialog');
 
     return SettingsView.extend({
         template: _.template(require('text!ev-script/templates/dropbox-settings.html')),
+        sizesTemplate: _.template(require('text!ev-script/templates/sizes.html')),
         updateModel: function() {
-            var attrs = {
-                'width': parseInt(this.$('#width').val(), 10) || this.field.model.get('width'),
-                'height': parseInt(this.$('#height').val(), 10) || this.field.model.get('height')
-            };
+            var attrs = {},
+                sizeVal = this.$('#size').val(),
+                original = sizeVal === 'original',
+                defaultSettings = new DropboxSettings();
+
+            if (!sizeVal || original) {
+                _.extend(attrs, {
+                    width: defaultSettings.get('width'),
+                    height: defaultSettings.get('height')
+                });
+            } else {
+                var dims = sizeVal.split('x');
+                _.extend(attrs, {
+                    width: parseInt(dims[0], 10),
+                    height: parseInt(dims[1], 10)
+                });
+            }
 
             this.field.model.set(attrs);
         },
         render: function() {
+            var sizes = [],
+                type = this.field.model.get('type');
             this.$el.html(this.template({
                 appInfo: this.info,
                 i18n: this.i18n,
                 model: this.field.model
+            }));
+
+            sizes = sizeUtil.getAvailableDimensions(type);
+            this.$('.size').append(this.sizesTemplate({
+                sizes: sizes,
+                // Select the override or current width
+                target: sizeUtil.findClosestDimension(this.field.model.get('width'), type)
             }));
 
             var content = this.field.model.get('content');
@@ -32145,9 +32223,7 @@ define('ev-script/views/dropbox-field',['require','jquery','underscore','ev-scri
             }));
         },
         getSettingsInstance: function(settingsOptions) {
-            return false;
-            // TODO - disabling settings until we have proper embed handling
-            // return new DropboxSettingsView(settingsOptions);
+            return new DropboxSettingsView(settingsOptions);
         },
         getPreviewInstance: function(previewOptions) {
             return new DropboxPreviewView(previewOptions);
