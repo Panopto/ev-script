@@ -5,7 +5,8 @@ define(function(require) {
     var Backbone = require('backbone'),
         BaseModel = require('ev-script/models/base'),
         _ = require('underscore'),
-        cacheUtil = require('ev-script/util/cache');
+        cacheUtil = require('ev-script/util/cache'),
+        VideoSettings = require('ev-script/models/video-settings');
 
     return BaseModel.extend({
         cacheName: 'encodings',
@@ -15,12 +16,13 @@ define(function(require) {
         getDims: function(original) {
             var dims = [],
                 originalWidth = parseInt(this.get('width'), 10) || 848,
-                originalHeight = parseInt(this.get('height'), 10) || 480;
+                originalHeight = parseInt(this.get('height'), 10) || 480,
+                defaultVideoWidth = (new VideoSettings()).get('width');
             if (this.isAudio()) {
                 dims[0] = 400;
                 dims[1] = 225;
-            } else if (!original && this.config.defaultVideoWidth && this.config.defaultVideoWidth <= originalWidth) {
-                dims[0] = parseInt(this.config.defaultVideoWidth, 10) || 848;
+            } else if (!original && defaultVideoWidth <= originalWidth) {
+                dims[0] = parseInt(defaultVideoWidth, 10) || 848;
                 dims[1] = Math.ceil(dims[0] / (originalWidth / originalHeight));
             } else {
                 dims[0] = originalWidth;

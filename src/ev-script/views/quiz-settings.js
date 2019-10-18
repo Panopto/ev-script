@@ -5,7 +5,8 @@ define(function(require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         SettingsView = require('ev-script/views/settings'),
-        sizeUtil = require('ev-script/util/size');
+        sizeUtil = require('ev-script/util/size'),
+        QuizSettings = require('ev-script/models/quiz-settings');
 
     require('jquery-ui/ui/widgets/dialog');
 
@@ -52,14 +53,15 @@ define(function(require) {
             var width = this.field.model.get('width'),
                 height = this.field.model.get('height'),
                 options = [],
+                defaultQuizWidth = (new QuizSettings()).get('width'),
                 targetWidth;
             if ((!width || !height) && this.encoding.id) {
                 width = this.encoding.getWidth();
                 height = this.encoding.getHeight();
             }
             // Use default IF encoding can handle it
-            if (this.config.defaultVideoWidth && this.config.defaultVideoWidth <= width) {
-                targetWidth =  this.config.defaultVideoWidth;
+            if (defaultQuizWidth <= width) {
+                targetWidth =  defaultQuizWidth;
             } else {
                 targetWidth = width;
             }

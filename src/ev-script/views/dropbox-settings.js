@@ -17,25 +17,25 @@ define(function(require) {
             var attrs = {},
                 sizeVal = this.$('#size').val(),
                 original = sizeVal === 'original',
-                defaultSettings = new DropboxSettings();
+                type = this.field.model.get('type'),
+                defaultWidth = (new DropboxSettings()).get('width'),
+                dims;
 
             if (!sizeVal || original) {
-                _.extend(attrs, {
-                    width: defaultSettings.get('width'),
-                    height: defaultSettings.get('height')
-                });
-            } else {
-                var dims = sizeVal.split('x');
-                _.extend(attrs, {
-                    width: parseInt(dims[0], 10),
-                    height: parseInt(dims[1], 10)
-                });
+                sizeVal = sizeUtil.findClosestDimension(defaultWidth, type);
             }
+
+            dims = sizeVal.split('x');
+            _.extend(attrs, {
+                width: parseInt(dims[0], 10),
+                height: parseInt(dims[1], 10)
+            });
 
             this.field.model.set(attrs);
         },
         render: function() {
-            var sizes = [],
+            var width = this.field.model.get('width'),
+                sizes = [],
                 type = this.field.model.get('type');
             this.$el.html(this.template({
                 appInfo: this.info,
@@ -47,7 +47,7 @@ define(function(require) {
             this.$('.size').append(this.sizesTemplate({
                 sizes: sizes,
                 // Select the override or current width
-                target: sizeUtil.findClosestDimension(this.field.model.get('width'), type)
+                target: sizeUtil.findClosestDimension(width, type)
             }));
 
             var content = this.field.model.get('content');

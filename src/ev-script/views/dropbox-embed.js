@@ -6,7 +6,8 @@ define(function(require) {
         URI = require('urijs/URI'),
         EmbedView = require('ev-script/views/embed'),
         // We borrow portions of video-embed impl
-        VideoEmbedView = require('ev-script/views/video-embed');
+        VideoEmbedView = require('ev-script/views/video-embed'),
+        sizeUtil = require('ev-script/util/size');
 
     return EmbedView.extend({
         template: _.template(require('text!ev-script/templates/dropbox-embed.html')),
@@ -21,10 +22,22 @@ define(function(require) {
             return this.info.checkVersion('>=5.3.0');
         },
         getMediaWidth: function() {
-            return parseInt(this.model.get('width'), 10) || 848;
+            return parseInt(this.model.get('width'), 10);
         },
         getMediaHeight: function() {
-            return parseInt(this.model.get('height'), 10) || 495;
+            var dropbox = this.model.get('content') || {},
+                width = parseInt(this.model.get('width'), 10),
+                height = parseInt(this.model.get('height'), 10);
+            if (width < 768) {
+                if (dropbox.showDescription && dropbox.showKeywords) {
+                    height += 450;
+                } else if (dropbox.showDescription || dropbox.showKeywords) {
+                    height += 150;
+                }
+            } else if (dropbox.showDescription && dropbox.showKeywords) {
+                height += 100;
+            }
+            return height;
         },
         getFrameWidth: function() {
             return this.getMediaWidth();
@@ -46,8 +59,8 @@ define(function(require) {
                 html = this.template({
                     'src': this.getUrl(),
                     'title': this.model.get('content').title,
-                    'width': this.model.get('width'),
-                    'height': this.model.get('height')
+                    'width': this.getFrameWidth(),
+                    'height': this.getFrameHeight()
                 });
             } else {
                 html = this.legacyTemplate({

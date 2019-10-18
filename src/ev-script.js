@@ -66,8 +66,6 @@ define(function(require) {
             // Set this in order to select the default identity provider in the
             // forms auth identity provider dropdown.
             defaultProvider: '',
-            // Set this in order to select the default width in video settings
-            defaultVideoWidth: 848,
             // Location for plupload flash runtime
             pluploadFlashPath: '',
             // Callbacks to set locale and date/time formats

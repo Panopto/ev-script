@@ -5,8 +5,8 @@ define(['backbone'], function(Backbone) {
     return Backbone.Model.extend({
         defaults: {
             type: 'dropbox',
-            width: 848,
-            height: 495,
+            width: '848',
+            height: '495',
             search: ''
         }
     });
