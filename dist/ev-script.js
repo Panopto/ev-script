@@ -1,5 +1,5 @@
 /**
- * ev-script 2.1.7 2019-10-10
+ * ev-script 2.1.8 2019-10-18
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2019 Symphony Video, Inc.
@@ -22915,8 +22915,8 @@ define('ev-script/models/dropbox-settings',['backbone'], function(Backbone) {
     return Backbone.Model.extend({
         defaults: {
             type: 'dropbox',
-            width: 848,
-            height: 495,
+            width: '848',
+            height: '495',
             search: ''
         }
     });
@@ -29745,14 +29745,15 @@ define('ev-script/views/video-embed',['require','underscore','urijs/URI','ev-scr
 
 });
 
-define('ev-script/models/video-encoding',['require','backbone','ev-script/models/base','underscore','ev-script/util/cache'],function(require) {
+define('ev-script/models/video-encoding',['require','backbone','ev-script/models/base','underscore','ev-script/util/cache','ev-script/models/video-settings'],function(require) {
 
     'use strict';
 
     var Backbone = require('backbone'),
         BaseModel = require('ev-script/models/base'),
         _ = require('underscore'),
-        cacheUtil = require('ev-script/util/cache');
+        cacheUtil = require('ev-script/util/cache'),
+        VideoSettings = require('ev-script/models/video-settings');
 
     return BaseModel.extend({
         cacheName: 'encodings',
@@ -29762,12 +29763,13 @@ define('ev-script/models/video-encoding',['require','backbone','ev-script/models
         getDims: function(original) {
             var dims = [],
                 originalWidth = parseInt(this.get('width'), 10) || 848,
-                originalHeight = parseInt(this.get('height'), 10) || 480;
+                originalHeight = parseInt(this.get('height'), 10) || 480,
+                defaultVideoWidth = (new VideoSettings()).get('width');
             if (this.isAudio()) {
                 dims[0] = 400;
                 dims[1] = 225;
-            } else if (!original && this.config.defaultVideoWidth && this.config.defaultVideoWidth <= originalWidth) {
-                dims[0] = parseInt(this.config.defaultVideoWidth, 10) || 848;
+            } else if (!original && defaultVideoWidth <= originalWidth) {
+                dims[0] = parseInt(defaultVideoWidth, 10) || 848;
                 dims[1] = Math.ceil(dims[0] / (originalWidth / originalHeight));
             } else {
                 dims[0] = originalWidth;
@@ -31175,7 +31177,8 @@ define('ev-script/util/size',['require','underscore'],function(require) {
 
     return {
         optionsSixteenByNine: ['1280x720', '1024x576', '848x480', '720x405', '640x360', '610x344', '560x315', '480x270', '400x225', '320x180', '240x135', '160x90'],
-        optionsDropbox: ['1280x750', '1024x600', '848x495', '720x420', '640x374', '610x356', '560x330', '480x280', '400x234', '320x190', '240x140', '160x94'],
+        // optionsDropbox: ['1280x750', '1024x600', '848x495', '720x420', '640x374', '610x356', '560x330', '480x280', '400x234', '320x190', '240x140', '160x94'],
+        optionsDropbox: ['1280x550', '1024x550', '848x550', '720x750', '640x750', '610x750', '560x750', '480x750', '400x750'],//, '320x190', '240x140', '160x94'],
         getAvailableDimensions: function(type) {
             return type && type === 'dropbox' ?
                 this.optionsDropbox :
@@ -31206,14 +31209,15 @@ define('text!ev-script/templates/video-settings.html',[],function () { return '<
 
 define('text!ev-script/templates/sizes.html',[],function () { return '<% _.each(sizes, function(size) { %>\n    <option value="<%= size %>" <% if (size === target) { print(\'selected="selected"\'); } %>><%= size %></option>\n<% }); %>\n';});
 
-define('ev-script/views/video-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','jquery-ui/ui/widgets/dialog','text!ev-script/templates/video-settings.html','text!ev-script/templates/sizes.html'],function(require) {
+define('ev-script/views/video-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','ev-script/models/video-settings','jquery-ui/ui/widgets/dialog','text!ev-script/templates/video-settings.html','text!ev-script/templates/sizes.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         SettingsView = require('ev-script/views/settings'),
-        sizeUtil = require('ev-script/util/size');
+        sizeUtil = require('ev-script/util/size'),
+        VideoSettings = require('ev-script/models/video-settings');
 
     require('jquery-ui/ui/widgets/dialog');
 
@@ -31280,14 +31284,15 @@ define('ev-script/views/video-settings',['require','jquery','underscore','ev-scr
             var width = this.field.model.get('width'),
                 height = this.field.model.get('height'),
                 options = [],
+                defaultVideoWidth = (new VideoSettings()).get('width'),
                 targetWidth;
             if ((!width || !height) && this.encoding.id) {
                 width = this.encoding.getWidth();
                 height = this.encoding.getHeight();
             }
             // Use default IF encoding can handle it
-            if (this.config.defaultVideoWidth && this.config.defaultVideoWidth <= width) {
-                targetWidth =  this.config.defaultVideoWidth;
+            if (defaultVideoWidth <= width) {
+                targetWidth =  defaultVideoWidth;
             } else {
                 targetWidth = width;
             }
@@ -31530,7 +31535,7 @@ define('ev-script/views/playlist-preview',['require','ev-script/views/preview','
 });
 
 
-define('text!ev-script/templates/playlist-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <div class="title">\n            <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" href="#" rel="<%= item.get(\'id\') %>">\n                <% if (item.get(\'isRestricted\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n                <%= item.get(\'title\') %>\n            </a>\n        </div>\n        <div class="content-info">\n            <% if (showOrgName) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Organization\') %></div>\n                    <div class="value"><%= item.get(\'organizationName\') %></div>\n                </div>\n            <% } %>\n            <% if (showLibName) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Library\') %></div>\n                    <div class="value"><%= item.get(\'libraryName\') %></div>\n                </div>\n            <% } %>\n        </div>\n    </div>\n</div>\n';});
+define('text!ev-script/templates/playlist-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <!--\n        <div class="thumbnail-wrap">\n            <i class="fa fa-list-alt" style="font-size: 75px"></i>\n        </div>\n        -->\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <div class="title">\n            <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" href="#" rel="<%= item.get(\'id\') %>">\n                <% if (item.get(\'isRestricted\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n                <%= item.get(\'title\') %>\n            </a>\n        </div>\n        <div class="content-info">\n            <% if (showOrgName) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Organization\') %></div>\n                    <div class="value"><%= item.get(\'organizationName\') %></div>\n                </div>\n            <% } %>\n            <% if (showLibName) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Library\') %></div>\n                    <div class="value"><%= item.get(\'libraryName\') %></div>\n                </div>\n            <% } %>\n        </div>\n    </div>\n</div>\n';});
 
 define('ev-script/views/playlist-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/playlist-settings','ev-script/views/playlist-preview','text!ev-script/templates/playlist-result.html'],function(require) {
 
@@ -31890,7 +31895,7 @@ define('text!ev-script/templates/dropbox-embed.html',[],function () { return '<i
 
 define('text!ev-script/templates/dropbox-embed-legacy.html',[],function () { return '<a href="<%- src %>" target="_blank"><%- title %></a>';});
 
-define('ev-script/views/dropbox-embed',['require','underscore','urijs/URI','ev-script/views/embed','ev-script/views/video-embed','text!ev-script/templates/dropbox-embed.html','text!ev-script/templates/dropbox-embed-legacy.html'],function(require) {
+define('ev-script/views/dropbox-embed',['require','underscore','urijs/URI','ev-script/views/embed','ev-script/views/video-embed','ev-script/util/size','text!ev-script/templates/dropbox-embed.html','text!ev-script/templates/dropbox-embed-legacy.html'],function(require) {
 
     'use strict';
 
@@ -31898,7 +31903,8 @@ define('ev-script/views/dropbox-embed',['require','underscore','urijs/URI','ev-s
         URI = require('urijs/URI'),
         EmbedView = require('ev-script/views/embed'),
         // We borrow portions of video-embed impl
-        VideoEmbedView = require('ev-script/views/video-embed');
+        VideoEmbedView = require('ev-script/views/video-embed'),
+        sizeUtil = require('ev-script/util/size');
 
     return EmbedView.extend({
         template: _.template(require('text!ev-script/templates/dropbox-embed.html')),
@@ -31913,10 +31919,22 @@ define('ev-script/views/dropbox-embed',['require','underscore','urijs/URI','ev-s
             return this.info.checkVersion('>=5.3.0');
         },
         getMediaWidth: function() {
-            return parseInt(this.model.get('width'), 10) || 848;
+            return parseInt(this.model.get('width'), 10);
         },
         getMediaHeight: function() {
-            return parseInt(this.model.get('height'), 10) || 495;
+            var dropbox = this.model.get('content') || {},
+                width = parseInt(this.model.get('width'), 10),
+                height = parseInt(this.model.get('height'), 10);
+            if (width < 768) {
+                if (dropbox.showDescription && dropbox.showKeywords) {
+                    height += 450;
+                } else if (dropbox.showDescription || dropbox.showKeywords) {
+                    height += 150;
+                }
+            } else if (dropbox.showDescription && dropbox.showKeywords) {
+                height += 100;
+            }
+            return height;
         },
         getFrameWidth: function() {
             return this.getMediaWidth();
@@ -31938,8 +31956,8 @@ define('ev-script/views/dropbox-embed',['require','underscore','urijs/URI','ev-s
                 html = this.template({
                     'src': this.getUrl(),
                     'title': this.model.get('content').title,
-                    'width': this.model.get('width'),
-                    'height': this.model.get('height')
+                    'width': this.getFrameWidth(),
+                    'height': this.getFrameHeight()
                 });
             } else {
                 html = this.legacyTemplate({
@@ -31980,7 +31998,7 @@ define('ev-script/views/dropbox-preview',['require','ev-script/views/preview','e
 });
 
 
-define('text!ev-script/templates/dropbox-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <div class="title">\n            <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" href="#" rel="<%= item.get(\'id\') %>">\n                <% if (item.get(\'isRestricted\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n                <%= item.get(\'title\') %>\n            </a>\n            <% if (item.get(\'url\')) { %>\n                <a class="url" href="<%= item.get(\'url\') %>" target="_blank"><%= item.get(\'url\') %></a>\n            <% } %>\n        </div>\n        <div class="content-info">\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Description\') %></div>\n                <div class="value"><%= item.get(\'description\') %></div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Date Produced\') %></div>\n                <div class="value">\n                    <%\n                        var dateCreated = new Date(item.get(\'createdOn\')),\n                            localDate = dateCreated.setMinutes(dateCreated.getMinutes() - dateCreated.getTimezoneOffset());\n                        print(moment(localDate).format(dateTimeFormat));\n                    %>\n                </div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Enabled\') %></div>\n                <div class="value">\n                    <% if (item.get(\'isEnabled\')) { %>\n                        <i class="fa fa-check" style="color: green"></i>\n                    <% } else { %>\n                        <i class="fa fa-times" style="color: red"></i>\n                    <% } %>\n                </div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Public\') %></div>\n                <div class="value">\n                    <% if (item.get(\'isPublic\')) { %>\n                        <i class="fa fa-check" style="color: green"></i>\n                    <% } else { %>\n                        <i class="fa fa-times" style="color: red"></i>\n                    <% } %>\n                </div>\n            </div>\n            <% if (item.get(\'availableAfter\')) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Available After\') %></div>\n                    <div class="value" style="color: <%= item.get(\'currentAvailability\').after ? \'green\' : \'red\' %>">\n                        <%\n                            var availableAfter = new Date(item.get(\'availableAfter\')),\n                                localDate = availableAfter.setMinutes(availableAfter.getMinutes() - availableAfter.getTimezoneOffset());\n                            print(moment(localDate).format(dateTimeFormat));\n                        %>\n                    </div>\n                </div>\n            <% } %>\n            <% if (item.get(\'availableUntil\')) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Available Until\') %></div>\n                    <div class="value" style="color: <%= item.get(\'currentAvailability\').until ? \'green\' : \'red\' %>">\n                        <%\n                            var availableUntil = new Date(item.get(\'availableUntil\')),\n                                localDate = availableUntil.setMinutes(availableUntil.getMinutes() - availableUntil.getTimezoneOffset());\n                            print(moment(localDate).format(dateTimeFormat));\n                        %>\n                    </div>\n                </div>\n            <% } %>\n        </div>\n    </div>\n</div>\n';});
+define('text!ev-script/templates/dropbox-result.html',[],function () { return '<div class="<%= (index % 2 ? \'odd\' : \'even\') %> result-item">\n    <div class="content-actions">\n        <div class="thumbnail-wrap">\n            <i class="fa fa-dropbox" style="font-size: 75px"></i>\n        </div>\n        <div class="action-links">\n            <a class="action-add" href="#" title="<%= i18n.formatMessage(\'Click to choose {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage(\'Choose\') %></span>\n            </a>\n            <a class="action-preview" href="#" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" rel="<%= item.get(\'id\') %>">\n                <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage(\'Preview\') %></span>\n            </a>\n        </div>\n    </div>\n    <div class="content-meta">\n        <div class="title">\n            <a class="action-preview" title="<%= i18n.formatMessage(\'Click to preview {0}\', item.get(\'title\')) %>" href="#" rel="<%= item.get(\'id\') %>">\n                <% if (item.get(\'isRestricted\')) { print(\'<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>\'); } %>\n                <%= item.get(\'title\') %>\n            </a>\n            <% if (item.get(\'url\')) { %>\n                <a class="url" href="<%= item.get(\'url\') %>" target="_blank"><%= item.get(\'url\') %></a>\n            <% } %>\n        </div>\n        <div class="content-info">\n            <div class="info-row trunc">\n                <div class="label"><%= i18n.formatMessage(\'Description\') %></div>\n                <div class="value"><%= item.get(\'description\') %></div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Date Produced\') %></div>\n                <div class="value">\n                    <%\n                        var dateCreated = new Date(item.get(\'createdOn\')),\n                            localDate = dateCreated.setMinutes(dateCreated.getMinutes() - dateCreated.getTimezoneOffset());\n                        print(moment(localDate).format(dateTimeFormat));\n                    %>\n                </div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Enabled\') %></div>\n                <div class="value">\n                    <% if (item.get(\'isEnabled\')) { %>\n                        <i class="fa fa-check" style="color: green"></i>\n                    <% } else { %>\n                        <i class="fa fa-times" style="color: red"></i>\n                    <% } %>\n                </div>\n            </div>\n            <div class="info-row">\n                <div class="label"><%= i18n.formatMessage(\'Public\') %></div>\n                <div class="value">\n                    <% if (item.get(\'isPublic\')) { %>\n                        <i class="fa fa-check" style="color: green"></i>\n                    <% } else { %>\n                        <i class="fa fa-times" style="color: red"></i>\n                    <% } %>\n                </div>\n            </div>\n            <% if (item.get(\'availableAfter\')) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Available After\') %></div>\n                    <div class="value" style="color: <%= item.get(\'currentAvailability\').after ? \'green\' : \'red\' %>">\n                        <%\n                            var availableAfter = new Date(item.get(\'availableAfter\')),\n                                localDate = availableAfter.setMinutes(availableAfter.getMinutes() - availableAfter.getTimezoneOffset());\n                            print(moment(localDate).format(dateTimeFormat));\n                        %>\n                    </div>\n                </div>\n            <% } %>\n            <% if (item.get(\'availableUntil\')) { %>\n                <div class="info-row">\n                    <div class="label"><%= i18n.formatMessage(\'Available Until\') %></div>\n                    <div class="value" style="color: <%= item.get(\'currentAvailability\').until ? \'green\' : \'red\' %>">\n                        <%\n                            var availableUntil = new Date(item.get(\'availableUntil\')),\n                                localDate = availableUntil.setMinutes(availableUntil.getMinutes() - availableUntil.getTimezoneOffset());\n                            print(moment(localDate).format(dateTimeFormat));\n                        %>\n                    </div>\n                </div>\n            <% } %>\n        </div>\n    </div>\n</div>\n';});
 
 define('ev-script/views/dropbox-results',['require','underscore','jquery','ev-script/views/results','ev-script/models/dropbox-settings','ev-script/views/dropbox-preview','text!ev-script/templates/dropbox-result.html'],function(require) {
 
@@ -32143,25 +32161,25 @@ define('ev-script/views/dropbox-settings',['require','jquery','underscore','ev-s
             var attrs = {},
                 sizeVal = this.$('#size').val(),
                 original = sizeVal === 'original',
-                defaultSettings = new DropboxSettings();
+                type = this.field.model.get('type'),
+                defaultWidth = (new DropboxSettings()).get('width'),
+                dims;
 
             if (!sizeVal || original) {
-                _.extend(attrs, {
-                    width: defaultSettings.get('width'),
-                    height: defaultSettings.get('height')
-                });
-            } else {
-                var dims = sizeVal.split('x');
-                _.extend(attrs, {
-                    width: parseInt(dims[0], 10),
-                    height: parseInt(dims[1], 10)
-                });
+                sizeVal = sizeUtil.findClosestDimension(defaultWidth, type);
             }
+
+            dims = sizeVal.split('x');
+            _.extend(attrs, {
+                width: parseInt(dims[0], 10),
+                height: parseInt(dims[1], 10)
+            });
 
             this.field.model.set(attrs);
         },
         render: function() {
-            var sizes = [],
+            var width = this.field.model.get('width'),
+                sizes = [],
                 type = this.field.model.get('type');
             this.$el.html(this.template({
                 appInfo: this.info,
@@ -32173,7 +32191,7 @@ define('ev-script/views/dropbox-settings',['require','jquery','underscore','ev-s
             this.$('.size').append(this.sizesTemplate({
                 sizes: sizes,
                 // Select the override or current width
-                target: sizeUtil.findClosestDimension(this.field.model.get('width'), type)
+                target: sizeUtil.findClosestDimension(width, type)
             }));
 
             var content = this.field.model.get('content');
@@ -32503,14 +32521,15 @@ define('ev-script/views/quiz-picker',['require','jquery','underscore','urijs/URI
 
 define('text!ev-script/templates/quiz-settings.html',[],function () { return '<form>\n    <div role="group" aria-labelledby="quizSettingsTitle">\n        <div id="quizSettingsTitle" style="display:none;"><%= i18n.formatMessage(\'Quiz Embed Options\') %></div>\n        <div class="fieldWrap">\n            <label for="size"><%= i18n.formatMessage(\'Size\') %></label>\n            <select class="form-select size" id="size" name="size">\n                <option value="original"><%= i18n.formatMessage(\'Original\') %></option>\n            </select>\n        </div>\n        <div>\n            <div class="fieldWrap inline-option">\n                <input id="showtitle" class="form-checkbox" <% if (model.get(\'showtitle\')) { print(\'checked="checked"\'); } %> name="showtitle" type="checkbox"/>\n                <label for="showtitle"><%= i18n.formatMessage(\'Title\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                <label for="metadata"><%= i18n.formatMessage(\'Meta Data\') %></label>\n            </div>\n            <div class="fieldWrap inline-option">\n                <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n            </div>\n         </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </div>\n</form>\n';});
 
-define('ev-script/views/quiz-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','jquery-ui/ui/widgets/dialog','text!ev-script/templates/quiz-settings.html','text!ev-script/templates/sizes.html'],function(require) {
+define('ev-script/views/quiz-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/util/size','ev-script/models/quiz-settings','jquery-ui/ui/widgets/dialog','text!ev-script/templates/quiz-settings.html','text!ev-script/templates/sizes.html'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         SettingsView = require('ev-script/views/settings'),
-        sizeUtil = require('ev-script/util/size');
+        sizeUtil = require('ev-script/util/size'),
+        QuizSettings = require('ev-script/models/quiz-settings');
 
     require('jquery-ui/ui/widgets/dialog');
 
@@ -32557,14 +32576,15 @@ define('ev-script/views/quiz-settings',['require','jquery','underscore','ev-scri
             var width = this.field.model.get('width'),
                 height = this.field.model.get('height'),
                 options = [],
+                defaultQuizWidth = (new QuizSettings()).get('width'),
                 targetWidth;
             if ((!width || !height) && this.encoding.id) {
                 width = this.encoding.getWidth();
                 height = this.encoding.getHeight();
             }
             // Use default IF encoding can handle it
-            if (this.config.defaultVideoWidth && this.config.defaultVideoWidth <= width) {
-                targetWidth =  this.config.defaultVideoWidth;
+            if (defaultQuizWidth <= width) {
+                targetWidth =  defaultQuizWidth;
             } else {
                 targetWidth = width;
             }
@@ -36477,8 +36497,6 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
             // Set this in order to select the default identity provider in the
             // forms auth identity provider dropdown.
             defaultProvider: '',
-            // Set this in order to select the default width in video settings
-            defaultVideoWidth: 848,
             // Location for plupload flash runtime
             pluploadFlashPath: '',
             // Callbacks to set locale and date/time formats
