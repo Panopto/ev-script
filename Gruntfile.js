@@ -143,8 +143,8 @@ module.exports = function(grunt) {
       .use(serveIndex(base))
       .use(errorhandler());
     https.createServer({
-      key: fs.readFileSync('assets/ssl/certs/ev-script-key.pem'),
-      cert: fs.readFileSync('assets/ssl/certs/ev-script-cert.pem')
+      key: fs.readFileSync('certs/ev-script-key.pem'),
+      cert: fs.readFileSync('certs/ev-script-cert.pem')
     }, app).listen(port);
   });
 

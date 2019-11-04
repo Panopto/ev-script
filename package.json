@@ -21,6 +21,9 @@
     "node": "*"
   },
   "keywords": [],
+  "scripts": {
+    "gen-cert": "node scripts/gen-cert.js"
+  },
   "devDependencies": {
     "almond": "^0.3.1",
     "bootstrap-less": "^3.3.4",
@@ -45,6 +48,7 @@
     "requirejs": "^2.3.6",
     "requirejs-json": "^0.0.3",
     "requirejs-text": "^2.0.14",
+    "selfsigned": "^1.10.7",
     "serve-index": "^1.9.1",
     "serve-static": "^1.13.2"
   },
