@@ -139,8 +139,13 @@ module.exports = function(grunt) {
       base = path.resolve('.');
     grunt.log.writeln('Starting ssl web server in "' + base + '" on port ' + port + '.');
     var app = connect()
+      .use(logger('combined'))
       .use(serveStatic(base))
-      .use(serveIndex(base))
+      .use(serveIndex(base, {
+        filter: function(filename, index, files, dir) {
+          return filename !== 'certs';
+        }
+      }))
       .use(errorhandler());
     https.createServer({
       key: fs.readFileSync('certs/ev-script-key.pem'),
