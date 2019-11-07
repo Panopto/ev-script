@@ -6,7 +6,7 @@ define(['backbone'], function(Backbone) {
         defaults: {
             type: 'dropbox',
             width: '848',
-            height: '495',
+            height: '620',
             search: ''
         }
     });
