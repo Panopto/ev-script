@@ -51,7 +51,8 @@ define(function(require) {
                 this.model.get('content').url;
         },
         scale: function(maxWidth, maxHeight) {
-            return VideoEmbedView.prototype.scale.call(this, maxWidth, maxHeight);
+            this.model.set('width', Math.min(this.getFrameWidth(), maxWidth));
+            this.model.set('height', Math.min(this.getFrameHeight(), maxHeight));
         },
         render: function(isPreview) {
             var html;
@@ -59,8 +60,8 @@ define(function(require) {
                 html = this.template({
                     'src': this.getUrl(),
                     'title': this.model.get('content').title,
-                    'width': this.getFrameWidth(),
-                    'height': this.getFrameHeight()
+                    'width': isPreview ? this.model.get('width') : this.getFrameWidth(),
+                    'height': isPreview ? this.model.get('height') : this.getFrameHeight()
                 });
             } else {
                 html = this.legacyTemplate({
