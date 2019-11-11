@@ -7,7 +7,9 @@ define(['backbone'], function(Backbone) {
             type: 'dropbox',
             width: '848',
             height: '620',
-            search: ''
+            search: '',
+            embedtype: 'fixed',
+            forceembedtype: false
         }
     });
 });

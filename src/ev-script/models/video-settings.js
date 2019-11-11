@@ -26,7 +26,9 @@ define(['backbone'], function(Backbone) {
             search: '',
             sourceId: 'content',
             isaudio: false,
-            contenttype: ''
+            contenttype: '',
+            embedtype: 'fixed',
+            forceembedtype: false
         }
     });
 });

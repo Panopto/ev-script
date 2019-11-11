@@ -26,7 +26,8 @@ define(function(require) {
                     'showcaptions': this.$('#showcaptions').is(':checked'),
                     'attachments': this.$('#attachments').is(':checked'),
                     'links': this.$('#links').is(':checked'),
-                    'metadata': this.$('#metadata').is(':checked')
+                    'metadata': this.$('#metadata').is(':checked'),
+                    'embedtype': this.$('#embedtype').val()
                 },
                 sizeVal = this.$('#size').val(),
                 original = sizeVal === 'original';

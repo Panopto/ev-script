@@ -9,7 +9,8 @@ define(function(require) {
         VideoEmbedView = require('ev-script/views/video-embed');
 
     return EmbedView.extend({
-        template: _.template(require('text!ev-script/templates/quiz-embed.html')),
+        fixedTemplate: _.template(require('text!ev-script/templates/quiz-embed-fixed.html')),
+        responsiveTemplate: _.template(require('text!ev-script/templates/quiz-embed-responsive.html')),
         initialize: function(options) {
 
             _.bindAll(this, 'render', 'getSrcUrl');

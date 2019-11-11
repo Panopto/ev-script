@@ -10,7 +10,8 @@ define(function(require) {
         sizeUtil = require('ev-script/util/size');
 
     return EmbedView.extend({
-        template: _.template(require('text!ev-script/templates/dropbox-embed.html')),
+        fixedTemplate: _.template(require('text!ev-script/templates/dropbox-embed-fixed.html')),
+        responsiveTemplate: _.template(require('text!ev-script/templates/dropbox-embed-responsive.html')),
         legacytemplate: _.template(require('text!ev-script/templates/dropbox-embed-legacy.html')),
         initialize: function(options) {
 
@@ -55,21 +56,30 @@ define(function(require) {
             this.model.set('height', Math.min(this.getFrameHeight(), maxHeight));
         },
         render: function(isPreview) {
-            var html;
+            var embedType = this.model.get('embedtype'),
+                title = this.model.get('content').title,
+                embed;
             if (this.isEmbedSupported()) {
-                html = this.template({
-                    'src': this.getUrl(),
-                    'title': this.model.get('content').title,
-                    'width': isPreview ? this.model.get('width') : this.getFrameWidth(),
-                    'height': isPreview ? this.model.get('height') : this.getFrameHeight()
-                });
+                if (embedType === 'fixed') {
+                    embed = this.fixedTemplate({
+                        'src': this.getUrl(),
+                        'title': title,
+                        'width': isPreview ? this.model.get('width') : this.getFrameWidth(),
+                        'height': isPreview ? this.model.get('height') : this.getFrameHeight()
+                    });
+                } else if (embedType === 'responsive') {
+                    embed = this.responsiveTemplate({
+                        'src': this.getUrl(),
+                        'title': title
+                    });
+                }
             } else {
-                html = this.legacyTemplate({
+                embed = this.legacyTemplate({
                     'src': this.getUrl(),
                     'title': this.model.get('content').title
                 });
             }
-            this.$el.html(html);
+            this.$el.html(embed);
         }
     });
 

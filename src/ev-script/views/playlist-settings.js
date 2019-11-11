@@ -43,7 +43,8 @@ define(function(require) {
                     'dateproduced': this.$('#dateproduced').is(':checked'),
                     'audiopreviewimage': this.$('#audiopreviewimage').is(':checked'),
                     'captionsearch': this.$('#captionsearch').is(':checked'),
-                    'viewersreport': this.$('#viewersreport').is(':checked')
+                    'viewersreport': this.$('#viewersreport').is(':checked'),
+                    'embedtype': this.$('#embedtype').val()
                 };
             if (attrs.layout === 'playlist') {
                 attrs.playlistLayout = {
@@ -84,7 +85,7 @@ define(function(require) {
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
-                height: Math.min(460, $(window).height() - this.config.dialogMargin),
+                height: Math.min(500, $(window).height() - this.config.dialogMargin),
                 closeText: this.i18n.formatMessage('Close')
             });
         },

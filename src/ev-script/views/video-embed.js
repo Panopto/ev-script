@@ -7,19 +7,33 @@ define(function(require) {
         EmbedView = require('ev-script/views/embed');
 
     return EmbedView.extend({
-        template: _.template(require('text!ev-script/templates/video-embed.html')),
+        fixedTemplate: _.template(require('text!ev-script/templates/video-embed-fixed.html')),
+        responsiveTemplate: _.template(require('text!ev-script/templates/video-embed-responsive.html')),
         render: function(isPreview) {
             // Width and height really should be set by now...but use a reasonable default if not
             var width = this.getMediaWidth(),
                 height = this.getMediaHeight(),
                 frameHeight = this.getFrameHeight(),
                 isAudio = this.model.get('isaudio'),
-                embed = this.template({
+                embedType = this.model.get('embedtype'),
+                title = this.model.get('content').title,
+                embed;
+
+            if (embedType === 'fixed') {
+                embed = this.fixedTemplate({
                     src: this.getSrcUrl(width, height, isPreview),
+                    title: title,
                     width: width,
                     height: isAudio ? frameHeight : height,
                     frameHeight: this.getFrameHeight()
                 });
+            } else if (embedType === 'responsive') {
+                embed = this.responsiveTemplate({
+                    src: this.getSrcUrl(width, height, isPreview),
+                    title: title
+                });
+            }
+
             this.$el.html(embed);
         },
         getSrcUrl: function(width, height, isPreview) {
@@ -43,10 +57,14 @@ define(function(require) {
                 'startTime': 0,
                 'displayCredits': this.model.get('metadata'),
                 'showCaptions': this.model.get('showcaptions'),
-                'hideControls': true,
-                'width': width,
-                'height': height
+                'hideControls': true
             });
+            if (this.model.get('embedtype') === 'fixed') {
+                url.addQuery({
+                    'width': width,
+                    'height': height
+                });
+            }
             if (isPreview) {
                 url.addQuery('isContentPreview', true);
             }
@@ -93,8 +111,8 @@ define(function(require) {
                 embedHeight = this.getFrameHeight(),
                 mediaWidth = this.getMediaWidth(),
                 mediaHeight = this.getMediaHeight();
-            // We can't scale our audio
-            if (this.model.get('isaudio')) {
+            if (this.model.get('isaudio') || // We can't scale our audio
+                this.model.get('embedtype') === 'responsive') {
                 return;
             }
             while (embedWidth > maxWidth || embedHeight > maxHeight) {

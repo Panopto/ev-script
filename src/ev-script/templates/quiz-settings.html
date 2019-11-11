@@ -1,7 +1,16 @@
 <form>
     <div role="group" aria-labelledby="quizSettingsTitle">
         <div id="quizSettingsTitle" style="display:none;"><%= i18n.formatMessage('Quiz Embed Options') %></div>
-        <div class="fieldWrap">
+        <% if (!model.get('forceembedtype')) { %>
+        <div class="fieldWrap inline-option">
+            <label for="embedtype"><%= i18n.formatMessage('Type') %></label>
+            <select class="form-select embedtype" id="embedtype" name="embedtype">
+                <option value="responsive" <% if (model.get('embedtype') === 'responsive') { print('selected'); } %>><%= i18n.formatMessage('iFrame Responsive') %></option>
+                <option value="fixed" <% if (model.get('embedtype') === 'fixed') { print('selected'); } %>><%= i18n.formatMessage('iFrame') %></option>
+            </select>
+        </div>
+        <% } %>
+        <div class="fieldWrap sizeWrap inline-option" <% if (model.get('embedtype') === 'responsive') { print('style="display:none;"'); } %>>
             <label for="size"><%= i18n.formatMessage('Size') %></label>
             <select class="form-select size" id="size" name="size">
                 <option value="original"><%= i18n.formatMessage('Original') %></option>

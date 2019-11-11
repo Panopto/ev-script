@@ -12,9 +12,9 @@ define(['backbone'], function(Backbone) {
             attachments: false,
             links: false,
             metadata: false,
-            // isaudio: false,
-            // contenttype: ''
-            search: ''
+            search: '',
+            embedtype: 'fixed',
+            forceembedtype: false
         }
     });
 });

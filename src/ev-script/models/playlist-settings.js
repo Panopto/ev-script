@@ -34,7 +34,9 @@ define(['backbone'], function(Backbone) {
             audiopreviewimage: false,
             captionsearch: true,
             viewersreport: true,
-            search: ''
+            search: '',
+            embedtype: 'fixed',
+            forceembedtype: false
         }
     });
 });

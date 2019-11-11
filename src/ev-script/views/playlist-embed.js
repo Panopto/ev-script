@@ -7,21 +7,23 @@ define(function(require) {
         EmbedView = require('ev-script/views/embed');
 
     return EmbedView.extend({
-        template: _.template(require('text!ev-script/templates/playlist-embed.html')),
+        fixedTemplate: _.template(require('text!ev-script/templates/playlist-embed-fixed.html')),
+        responsiveTemplate: _.template(require('text!ev-script/templates/playlist-embed-responsive.html')),
         initialize: function(options) {
             EmbedView.prototype.initialize.call(this, options);
         },
         render: function(isPreview) {
             var src = URI(this.config.ensembleUrl + '/app/plugin/embed.aspx'),
-                width = this.getFrameWidth(),
-                height = this.getFrameHeight();
+                embedType = this.model.get('embedtype'),
+                width,
+                height,
+                embed;
+
             src.addQuery({
                 'DestinationID': this.model.get('id'),
                 'playlistEmbed': true,
                 'isNewPluginEmbed': true,
                 'hideControls': true,
-                'width': width,
-                'height': height,
                 'displayTitle': true,
                 'displayEmbedCode': this.model.get('embedcode'),
                 'displayVideoDuration': this.model.get('duration'),
@@ -37,10 +39,12 @@ define(function(require) {
                 'displayCaptionSearch': this.model.get('captionsearch'),
                 'displayViewersReport': this.model.get('viewersreport')
             });
+
             if (isPreview) {
                 // Hack to bypass restrictions for preview
                 src.addQuery('isPermalinkPreview', true);
             }
+
             if (this.model.get('layout') === 'showcase') {
                 var showcaseLayout = this.model.get('showcaseLayout');
                 src.addQuery('displayShowcase', true);
@@ -66,11 +70,30 @@ define(function(require) {
                     src.addQuery('resultsCount', playlistLayout.playlistNumberOfResults);
                 }
             }
-            this.$el.html(this.template({
-                'src': src,
-                'width': width,
-                'height': height
-            }));
+
+            if (embedType === 'fixed') {
+                width = this.getFrameWidth();
+                height = this.getFrameHeight();
+                src.addQuery({
+                    'width': width,
+                    'height': height
+                });
+                embed = this.fixedTemplate({
+                    'src': src,
+                    'width': width,
+                    'height': height
+                });
+            } else if (embedType === 'responsive') {
+                src.addQuery({
+                    'isResponsive': true,
+                    'useIFrame': true
+                });
+                embed = this.responsiveTemplate({
+                    'src': src
+                });
+            }
+
+            this.$el.html(embed);
         }
     });
 

@@ -1042,7 +1042,8 @@ fieldset[disabled] .ev-dialog .form-actions .action-cancel.active {
 .ev-dialog .ev-settings .fieldWrap label {
   width: auto;
 }
-.ev-dialog .ev-settings .fieldWrap .size {
+.ev-dialog .ev-settings .fieldWrap .size,
+.ev-dialog .ev-settings .fieldWrap .embedtype {
   margin-left: 1em;
 }
 .ev-dialog .ev-settings .fieldWrap input[type=checkbox][disabled] {

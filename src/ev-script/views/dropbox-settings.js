@@ -14,7 +14,9 @@ define(function(require) {
         template: _.template(require('text!ev-script/templates/dropbox-settings.html')),
         sizesTemplate: _.template(require('text!ev-script/templates/sizes.html')),
         updateModel: function() {
-            var attrs = {},
+            var attrs = {
+                    'embedtype': this.$('#embedtype').val()
+                },
                 sizeVal = this.$('#size').val(),
                 original = sizeVal === 'original',
                 type = this.field.model.get('type'),

@@ -1,6 +1,15 @@
 <form>
     <div role="group" aria-labelledby="playlistSettingsTitle">
         <div id="playlistSettingsTitle" style="display:none;"><%= i18n.formatMessage('Playlist Embed Options') %></div>
+        <% if (!model.get('forceembedtype')) { %>
+        <div class="fieldWrap inline-option">
+            <label for="embedtype"><%= i18n.formatMessage('Type') %></label>
+            <select class="form-select embedtype" id="embedtype" name="embedtype">
+                <option value="responsive" <% if (model.get('embedtype') === 'responsive') { print('selected'); } %>><%= i18n.formatMessage('iFrame Responsive') %></option>
+                <option value="fixed" <% if (model.get('embedtype') === 'fixed') { print('selected'); } %>><%= i18n.formatMessage('iFrame') %></option>
+            </select>
+        </div>
+        <% } %>
         <div class="accordion">
             <h3><%= i18n.formatMessage('Choose Layout') %></h3>
             <div>

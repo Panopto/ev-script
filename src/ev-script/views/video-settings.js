@@ -46,7 +46,8 @@ define(function(require) {
                     'embedcode': this.$('#embedcode').is(':checked'),
                     'download': this.$('#download').is(':checked'),
                     'viewersreport': this.$('#viewersreport').is(':checked'),
-                    'embedthumbnail': this.$('#embedthumbnail').is(':checked')
+                    'embedthumbnail': this.$('#embedthumbnail').is(':checked'),
+                    'embedtype': this.$('#embedtype').val()
                 },
                 sizeVal = this.$('#size').val(),
                 original = sizeVal === 'original';
