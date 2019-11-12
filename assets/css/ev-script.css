@@ -36,14 +36,16 @@ select[multiple].ev-field-wrap .form-text {
 .ev-field-wrap .form-select {
   background-color: #fff;
 }
-.ev-field-wrap .form-actions .form-submit {
+.ev-field-wrap .form-actions .form-submit,
+.ev-field-wrap .form-actions .form-cancel {
   padding: 0.3em 0.3em;
   font-size: inherit;
   line-height: inherit;
   border-radius: 2px;
   border: 1px solid transparent;
 }
-.ev-field-wrap .form-actions .form-submit span {
+.ev-field-wrap .form-actions .form-submit span,
+.ev-field-wrap .form-actions .form-cancel span {
   margin-left: 0.4em;
 }
 .ev-field-wrap .form-actions .action-submit {
@@ -877,14 +879,16 @@ select[multiple].ev-dialog .form-text {
 .ev-dialog .form-select {
   background-color: #fff;
 }
-.ev-dialog .form-actions .form-submit {
+.ev-dialog .form-actions .form-submit,
+.ev-dialog .form-actions .form-cancel {
   padding: 0.3em 0.3em;
   font-size: inherit;
   line-height: inherit;
   border-radius: 2px;
   border: 1px solid transparent;
 }
-.ev-dialog .form-actions .form-submit span {
+.ev-dialog .form-actions .form-submit span,
+.ev-dialog .form-actions .form-cancel span {
   margin-left: 0.4em;
 }
 .ev-dialog .form-actions .action-submit {
