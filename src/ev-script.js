@@ -59,8 +59,8 @@ define(function(require) {
             scrollHeight: null,
             // In scenarios where we have multiple fields on a page we want to
             // automatically hide inactive pickers to preserve screen real
-            // estate.  Set to false to disable.
-            hidePickers: true,
+            // estate.  Set to true to enable.
+            hidePickers: false,
             // The difference between window dimensions and maximum dialog size.
             dialogMargin: 40,
             // Set this in order to select the default identity provider in the

@@ -55,7 +55,9 @@ define(function(require) {
                 chosenItem = this.resultsView.collection.get(id);
             this.model.set(this.getSettingsModelAttributes(chosenItem));
             this.events.trigger('itemChosen', this.model);
-            this.events.trigger('hidePicker', this.field.id);
+            if (this.config.hidePickers) {
+                this.events.trigger('hidePicker', this.field.id);
+            }
             e.preventDefault();
         },
         hidePicker: function() {

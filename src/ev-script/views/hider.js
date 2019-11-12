@@ -29,7 +29,8 @@ define(function(require) {
                 this.$el.html(this.template({
                     i18n: this.i18n,
                     showLogout: user,
-                    username: username
+                    username: username,
+                    enableHide: this.config.hidePickers
                 }));
             }, this));
         },
