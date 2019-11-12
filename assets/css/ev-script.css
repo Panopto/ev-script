@@ -57,6 +57,7 @@ select[multiple].ev-field-wrap .form-text {
   color: #fff;
   background-color: #44ab00;
   border-color: #3f9d00;
+  cursor: pointer;
 }
 .ev-field-wrap .form-actions .action-submit:hover,
 .ev-field-wrap .form-actions .action-submit:focus,
@@ -107,6 +108,7 @@ fieldset[disabled] .ev-field-wrap .form-actions .action-submit.active {
   color: #555555;
   background-color: #f3f4ee;
   border-color: #999999;
+  cursor: pointer;
 }
 .ev-field-wrap .form-actions .action-cancel:hover,
 .ev-field-wrap .form-actions .action-cancel:focus,
@@ -482,6 +484,7 @@ fieldset[disabled] .ev-field-wrap .form-actions .action-cancel.active {
   color: #fff;
   background-color: #44ab00;
   border-color: #3f9d00;
+  cursor: pointer;
 }
 .ev-field-wrap .ev-actions .action-upload:hover,
 .ev-field-wrap .ev-actions .action-upload:focus,
@@ -527,6 +530,7 @@ fieldset[disabled] .ev-field-wrap .ev-actions .action-upload.active {
   color: #fff;
   background-color: #1e1c1f;
   border-color: #000;
+  cursor: pointer;
 }
 .ev-field-wrap .ev-actions .action-record:hover,
 .ev-field-wrap .ev-actions .action-record:focus,
@@ -900,6 +904,7 @@ select[multiple].ev-dialog .form-text {
   color: #fff;
   background-color: #44ab00;
   border-color: #3f9d00;
+  cursor: pointer;
 }
 .ev-dialog .form-actions .action-submit:hover,
 .ev-dialog .form-actions .action-submit:focus,
@@ -950,6 +955,7 @@ fieldset[disabled] .ev-dialog .form-actions .action-submit.active {
   color: #555555;
   background-color: #f3f4ee;
   border-color: #999999;
+  cursor: pointer;
 }
 .ev-dialog .form-actions .action-cancel:hover,
 .ev-dialog .form-actions .action-cancel:focus,
