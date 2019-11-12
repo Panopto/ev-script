@@ -1,5 +1,5 @@
 /**
- * ev-script 2.1.10 2019-11-11
+ * ev-script 2.1.10 2019-11-12
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2019 Symphony Video, Inc.
@@ -28625,7 +28625,7 @@ define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-s
 }.call(this));
 
 
-define('text!ev-script/templates/hider.html',[],function () { return '<div class="action-wrap">\n  <a class="action-hide" href="#" title="<%= i18n.formatMessage(\'Hide Picker\') %>"><i class="fa fa-lg fa-folder"></i><span><%= i18n.formatMessage(\'Hide\') %></span></a>\n  <% if (showLogout) { %>\n    <a class="action-logout" href="#" title="<%= i18n.formatMessage(\'Logout {0}\', username) %>"><i class="fa fa-lg fa-power-off"></i><span><%= i18n.formatMessage(\'Logout\') %></span></a>\n  <% } %>\n</div>';});
+define('text!ev-script/templates/hider.html',[],function () { return '<div class="action-wrap">\n  <% if (enableHide) { %>\n    <a class="action-hide" href="#" title="<%= i18n.formatMessage(\'Hide Picker\') %>"><i class="fa fa-lg fa-folder"></i><span><%= i18n.formatMessage(\'Hide\') %></span></a>\n  <% } %>\n  <% if (showLogout) { %>\n    <a class="action-logout" href="#" title="<%= i18n.formatMessage(\'Logout {0}\', username) %>"><i class="fa fa-lg fa-power-off"></i><span><%= i18n.formatMessage(\'Logout\') %></span></a>\n  <% } %>\n</div>';});
 
 define('ev-script/views/hider',['require','jquery','underscore','ev-script/views/base','text!ev-script/templates/hider.html'],function(require) {
 
@@ -28658,7 +28658,8 @@ define('ev-script/views/hider',['require','jquery','underscore','ev-script/views
                 this.$el.html(this.template({
                     i18n: this.i18n,
                     showLogout: user,
-                    username: username
+                    username: username,
+                    enableHide: this.config.hidePickers
                 }));
             }, this));
         },
@@ -28744,7 +28745,9 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
                 chosenItem = this.resultsView.collection.get(id);
             this.model.set(this.getSettingsModelAttributes(chosenItem));
             this.events.trigger('itemChosen', this.model);
-            this.events.trigger('hidePicker', this.field.id);
+            if (this.config.hidePickers) {
+                this.events.trigger('hidePicker', this.field.id);
+            }
             e.preventDefault();
         },
         hidePicker: function() {
@@ -36578,8 +36581,8 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
             scrollHeight: null,
             // In scenarios where we have multiple fields on a page we want to
             // automatically hide inactive pickers to preserve screen real
-            // estate.  Set to false to disable.
-            hidePickers: true,
+            // estate.  Set to true to enable.
+            hidePickers: false,
             // The difference between window dimensions and maximum dialog size.
             dialogMargin: 40,
             // Set this in order to select the default identity provider in the
