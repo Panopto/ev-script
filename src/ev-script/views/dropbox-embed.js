@@ -30,13 +30,12 @@ define(function(require) {
                 width = parseInt(this.model.get('width'), 10),
                 height = parseInt(this.model.get('height'), 10);
             if (width < 768) {
-                if (dropbox.showDescription && dropbox.showKeywords) {
-                    height += 450;
-                } else if (dropbox.showDescription || dropbox.showKeywords) {
+                if (dropbox.showDescription) {
                     height += 150;
                 }
-            } else if (dropbox.showDescription && dropbox.showKeywords) {
-                height += 100;
+                if (dropbox.showKeywords) {
+                    height += 150;
+                }
             }
             return height;
         },

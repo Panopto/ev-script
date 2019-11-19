@@ -6,7 +6,7 @@ define(function(require) {
 
     return {
         optionsSixteenByNine: ['1280x720', '1024x576', '848x480', '720x405', '640x360', '610x344', '560x315', '480x270', '400x225', '320x180', '240x135', '160x90'],
-        optionsDropbox: ['1280x620', '1024x620', '848x620', '720x820', '640x820', '610x820', '560x820', '480x820', '400x820'],
+        optionsDropbox: ['1280x720', '1024x720', '848x720', '720x920', '640x920', '610x920', '560x920', '480x920', '400x920'],
         getAvailableDimensions: function(type) {
             return type && type === 'dropbox' ?
                 this.optionsDropbox :
