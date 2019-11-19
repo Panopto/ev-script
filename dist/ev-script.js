@@ -1,5 +1,5 @@
 /**
- * ev-script 2.1.10 2019-11-12
+ * ev-script 2.1.11 2019-11-19
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2019 Symphony Video, Inc.
@@ -22923,7 +22923,7 @@ define('ev-script/models/dropbox-settings',['backbone'], function(Backbone) {
         defaults: {
             type: 'dropbox',
             width: '848',
-            height: '620',
+            height: '720',
             search: '',
             embedtype: 'fixed',
             forceembedtype: false
@@ -31220,7 +31220,7 @@ define('ev-script/util/size',['require','underscore'],function(require) {
 
     return {
         optionsSixteenByNine: ['1280x720', '1024x576', '848x480', '720x405', '640x360', '610x344', '560x315', '480x270', '400x225', '320x180', '240x135', '160x90'],
-        optionsDropbox: ['1280x620', '1024x620', '848x620', '720x820', '640x820', '610x820', '560x820', '480x820', '400x820'],
+        optionsDropbox: ['1280x720', '1024x720', '848x720', '720x920', '640x920', '610x920', '560x920', '480x920', '400x920'],
         getAvailableDimensions: function(type) {
             return type && type === 'dropbox' ?
                 this.optionsDropbox :
@@ -32000,13 +32000,12 @@ define('ev-script/views/dropbox-embed',['require','underscore','urijs/URI','ev-s
                 width = parseInt(this.model.get('width'), 10),
                 height = parseInt(this.model.get('height'), 10);
             if (width < 768) {
-                if (dropbox.showDescription && dropbox.showKeywords) {
-                    height += 450;
-                } else if (dropbox.showDescription || dropbox.showKeywords) {
+                if (dropbox.showDescription) {
                     height += 150;
                 }
-            } else if (dropbox.showDescription && dropbox.showKeywords) {
-                height += 100;
+                if (dropbox.showKeywords) {
+                    height += 150;
+                }
             }
             return height;
         },
