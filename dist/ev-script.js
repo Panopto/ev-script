@@ -1,8 +1,8 @@
 /**
- * ev-script 2.1.11 2019-11-19
+ * ev-script 2.1.12 2020-01-21
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
- * Copyright (c) 2019 Symphony Video, Inc.
+ * Copyright (c) 2020 Symphony Video, Inc.
  * Licensed (MIT AND GPL-2.0)
  */
 (function (root, factory) {
@@ -27117,10 +27117,11 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
         },
         render: function() {
             var dialogWidth = Math.min(540, $(window).width() - this.config.dialogMargin),
-                dialogHeight = Math.min(250, $(window).height() - this.config.dialogMargin),
+                dialogHeight = Math.min(!this.config.defaultProvider ? 350 : 250, $(window).height() - this.config.dialogMargin),
                 frameSrc = URI(this.config.ensembleUrl)
                     .path(this.config.authLoginPath)
-                    .addQuery('idp', this.config.defaultProvider),
+                    .addQuery('idp', this.config.defaultProvider)
+                    .addQuery('institutionId', this.config.institutionId),
                 $html = $(this.template({
                     i18n: this.i18n,
                     frameSrc: frameSrc,
@@ -36584,8 +36585,10 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
             hidePickers: false,
             // The difference between window dimensions and maximum dialog size.
             dialogMargin: 40,
-            // Set this in order to select the default identity provider in the
-            // forms auth identity provider dropdown.
+            // Required if defaultProvider is not set below.  Specifies the
+            // current institution for identity provider selection.
+            institutionId: '',
+            // Set this in order to select the default identity provider.
             defaultProvider: '',
             // Location for plupload flash runtime
             pluploadFlashPath: '',
@@ -36607,6 +36610,10 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
         };
 
         var config = _.extend({}, defaults, appOptions);
+
+        if (!config.institutionId && !config.defaultProvider) {
+            throw 'One of institutionId or defaultProvider is required';
+        }
 
         // Set logging
         log.setDefaultLevel(config.logLevel);
