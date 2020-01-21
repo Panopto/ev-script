@@ -21,10 +21,11 @@ define(function(require, template) {
         },
         render: function() {
             var dialogWidth = Math.min(540, $(window).width() - this.config.dialogMargin),
-                dialogHeight = Math.min(250, $(window).height() - this.config.dialogMargin),
+                dialogHeight = Math.min(!this.config.defaultProvider ? 350 : 250, $(window).height() - this.config.dialogMargin),
                 frameSrc = URI(this.config.ensembleUrl)
                     .path(this.config.authLoginPath)
-                    .addQuery('idp', this.config.defaultProvider),
+                    .addQuery('idp', this.config.defaultProvider)
+                    .addQuery('institutionId', this.config.institutionId),
                 $html = $(this.template({
                     i18n: this.i18n,
                     frameSrc: frameSrc,

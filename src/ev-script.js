@@ -63,8 +63,10 @@ define(function(require) {
             hidePickers: false,
             // The difference between window dimensions and maximum dialog size.
             dialogMargin: 40,
-            // Set this in order to select the default identity provider in the
-            // forms auth identity provider dropdown.
+            // Required if defaultProvider is not set below.  Specifies the
+            // current institution for identity provider selection.
+            institutionId: '',
+            // Set this in order to select the default identity provider.
             defaultProvider: '',
             // Location for plupload flash runtime
             pluploadFlashPath: '',
@@ -86,6 +88,10 @@ define(function(require) {
         };
 
         var config = _.extend({}, defaults, appOptions);
+
+        if (!config.institutionId && !config.defaultProvider) {
+            throw 'One of institutionId or defaultProvider is required';
+        }
 
         // Set logging
         log.setDefaultLevel(config.logLevel);
