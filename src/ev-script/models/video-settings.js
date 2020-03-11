@@ -23,6 +23,7 @@ define(['backbone'], function(Backbone) {
             download: false,
             viewersreport: true,
             embedthumbnail: false,
+            axdxs: false,
             search: '',
             sourceId: 'content',
             isaudio: false,

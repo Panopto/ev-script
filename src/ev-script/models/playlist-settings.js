@@ -7,19 +7,12 @@ define(['backbone'], function(Backbone) {
             type: 'playlist',
             width: '800',
             height: '1000',
-            layout: 'playlist',
-            playlistLayout: {
-                playlistSortBy: 'videoDate',
-                playlistSortDirection: 'desc',
-                playlistSearchString: '',
-                playlistCategory: '',
-                playlistNumberOfResults: ''
-            },
-            showcaseLayout: {
-                // featuredContent: true,
-                categoryList: true,
-                categoryOrientation: 'horizontal'
-            },
+            layout: 'list',
+            sortby: 'DateAdded',
+            desc: true,
+            search: '',
+            categories: '',
+            resultscount: '',
             embedcode: false,
             statistics: true,
             duration: true,
@@ -34,7 +27,9 @@ define(['backbone'], function(Backbone) {
             audiopreviewimage: false,
             captionsearch: true,
             viewersreport: true,
-            search: '',
+            axdxs: false,
+            nextup: true,
+            featuredcontentid: '',
             embedtype: 'fixed',
             forceembedtype: false
         }

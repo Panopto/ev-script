@@ -5,10 +5,10 @@ define(function(require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         SettingsView = require('ev-script/views/settings'),
-        Categories = require('ev-script/collections/categories');
+        BaseCollection = require('ev-script/collections/base');
 
     require('jquery-ui/ui/widgets/dialog');
-    require('jquery-ui/ui/widgets/accordion');
+    require('jquery-ui/ui/widgets/tabs');
 
     return SettingsView.extend({
         template: _.template(require('text!ev-script/templates/playlist-settings.html')),
@@ -28,55 +28,58 @@ define(function(require) {
         },
         updateModel: function() {
             var content = this.field.model.get('content'),
+                categories = [],
                 attrs = {
+                    'embedtype': this.$('#embedtype').val(),
                     'layout': this.$('input[name="layout"]:checked').val(),
-                    'embedcode': content && content.isRestricted ? false : this.$('#embedcode').is(':checked'),
-                    'statistics': this.$('#statistics').is(':checked'),
-                    'duration': this.$('#duration').is(':checked'),
-                    'attachments': this.$('#attachments').is(':checked'),
                     'annotations': this.$('#annotations').is(':checked'),
-                    'links': this.$('#links').is(':checked'),
-                    'credits': this.$('#credits').is(':checked'),
-                    'socialsharing': content && content.isRestricted ? false : this.$('#socialsharing').is(':checked'),
-                    'autoplay': this.$('#autoplay').is(':checked'),
                     'showcaptions': this.$('#showcaptions').is(':checked'),
-                    'dateproduced': this.$('#dateproduced').is(':checked'),
-                    'audiopreviewimage': this.$('#audiopreviewimage').is(':checked'),
                     'captionsearch': this.$('#captionsearch').is(':checked'),
+                    'socialsharing': content && content.isRestricted ? false : this.$('#socialsharing').is(':checked'),
                     'viewersreport': this.$('#viewersreport').is(':checked'),
-                    'embedtype': this.$('#embedtype').val()
+                    'axdxs': this.$('#axdxs').is(':checked'),
+                    'attachments': this.$('#attachments').is(':checked'),
+                    'audiopreviewimage': this.$('#audiopreviewimage').is(':checked'),
+                    'autoplay': this.$('#autoplay').is(':checked'),
+                    'credits': this.$('#credits').is(':checked'),
+                    'dateproduced': this.$('#dateproduced').is(':checked'),
+                    'embedcode': content && content.isRestricted ? false : this.$('#embedcode').is(':checked'),
+                    'duration': this.$('#duration').is(':checked'),
+                    'links': this.$('#links').is(':checked'),
+                    'nextup': this.$('#nextup').is(':checked')
                 };
-            if (attrs.layout === 'playlist') {
-                attrs.playlistLayout = {
-                    playlistSortBy: this.$('#playlistSortBy option:selected').val(),
-                    playlistSortDirection: this.$('input[name="playlistSortDirection"]:checked').val(),
-                    playlistSearchString: this.$('#playlistSearchString').val(),
-                    playlistCategory: this.$('#playlistCategory option:selected').val(),
-                    playlistNumberOfResults: this.$('#playlistNumberOfResults').val()
-                };
-            } else {
-                attrs.showcaseLayout = {
-                    // featuredContent: this.$('#featuredContent').is(':checked')
-                    categoryList: this.$('#categoryList').is(':checked'),
-                    categoryOrientation: this.$('input[name="categoryOrientation"]:checked').val()
-                };
-            }
+
+            this.$('#categories option:selected').each(function(index, category) {
+                var value = $(category).val();
+                if (value === -1) {
+                    categories = [];
+                    return false;
+                }
+                categories.push(value);
+            });
+
+            _.extend(attrs, {
+                sortby: this.$('#sortby option:selected').val(),
+                desc: this.$('input[name="sortDirection"]:checked').val() === 'desc',
+                search: this.$('#search').val(),
+                categories: categories.join(','),
+                resultscount: this.$('#resultscount').val()
+            });
+
             this.field.model.set(attrs);
         },
         render: function() {
             var content = this.field.model.get('content');
             this.$el.html(this.template({
                 appInfo: this.info,
+                config: this.config,
                 i18n: this.i18n,
                 model: this.field.model,
                 isSecure: content && content.isRestricted,
-                categories: this.categories || new Categories([], {})
+                categories: this.categories || new BaseCollection([], {}),
+                _: _
             }));
-            this.$('.accordion').accordion({
-                active: 2,
-                heightStyle: 'content',
-                collapsible: true
-            });
+            this.$('.tabs').tabs();
             this.$el.dialog({
                 title: this.unencode(content ? content.title : this.field.model.get('id')),
                 modal: true,
@@ -90,21 +93,22 @@ define(function(require) {
             });
         },
         changeLayout: function(e) {
-            if (e.currentTarget.value === 'playlist') {
-                this.$('.playlistOptions').show();
-                this.$('.showcaseOptions').hide();
+            var layout = e.currentTarget.value;
+            this.$('.layout-section').hide();
+            this.$('.' + layout + 'Options').show();
+            if (layout === 'loop') {
+                this.$('#nextup').prop('disabled', false);
             } else {
-                this.$('.playlistOptions').hide();
-                this.$('.showcaseOptions').show();
+                this.$('#nextup').prop('disabled', true);
             }
         },
         changeCategoryList: function(e) {
             if ($(e.currentTarget).is(':checked')) {
-                this.$('#categoryOrientationHorizontal').attr('disabled', false);
-                this.$('#categoryOrientationVertical').attr('disabled', false);
+                this.$('#categoryOrientationHorizontal').prop('disabled', false);
+                this.$('#categoryOrientationVertical').prop('disabled', false);
             } else {
-                this.$('#categoryOrientationHorizontal').attr('disabled', true);
-                this.$('#categoryOrientationVertical').attr('disabled', true);
+                this.$('#categoryOrientationHorizontal').prop('disabled', true);
+                this.$('#categoryOrientationVertical').prop('disabled', true);
             }
         }
     });

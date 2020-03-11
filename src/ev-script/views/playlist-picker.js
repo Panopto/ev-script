@@ -89,6 +89,15 @@ define(function(require) {
                 }, this),
                 error: _.bind(this.ajaxError, this)
             });
+        },
+        getSettingsModelAttributes: function(chosenItem) {
+            var defaultLayout = chosenItem.get('defaultLayout').replace(/^\w/, function (chr) {
+                    return chr.toLowerCase();
+                });
+            return _.extend(PickerView.prototype.getSettingsModelAttributes.call(this, chosenItem), {
+                layout: defaultLayout,
+                featuredcontentid: chosenItem.get('featuredContentId')
+            });
         }
     });
 

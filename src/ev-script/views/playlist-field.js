@@ -4,34 +4,67 @@ define(function(require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        URITemplate = require('urijs/URITemplate'),
         FieldView = require('ev-script/views/field'),
+        BaseCollection = require('ev-script/collections/base'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
         PlaylistPickerView = require('ev-script/views/playlist-picker'),
         PlaylistSettingsView = require('ev-script/views/playlist-settings'),
         PlaylistPreviewView = require('ev-script/views/playlist-preview'),
-        Categories = require('ev-script/collections/categories');
+        Categories = require('ev-script/models/categories');
 
     return FieldView.extend({
         initialize: function(options) {
             FieldView.prototype.initialize.call(this, options);
+            // Other functions are bound in base field view
+            _.bindAll(this, 'getCategorySearchUrl');
+        },
+        getCategorySearchUrl: function() {
+            var playlist = this.model.get('content'),
+                searchLink = playlist._links['ev:PlaylistCategory/Search'],
+                searchUrl = searchLink ? searchLink.href : null,
+                template = searchUrl ? new URITemplate(searchUrl) : null;
+            return template ? template.expand({}) : null;
         },
         initCallback: function() {
-            this.categories = new Categories([], {});
+            // Recursively load pages until we have all categories.
+            var fetchCategories = _.bind(function(url, categories) {
+                    if (!url) {
+                        return;
+                    }
+                    var categorySearch = new Categories({}, {
+                        href: url
+                    });
+                    categorySearch.fetch({
+                        picker: this.picker,
+                        success: _.bind(function(model, response, options) {
+                            var next = model.getLink('next'),
+                                embeddedCats = model.getEmbedded(model.collectionKey);
+                            if (embeddedCats) {
+                                categories.add(embeddedCats.models);
+                            }
+                            if (next) {
+                                fetchCategories(next.href);
+                            } else {
+                                categories.trigger('reset');
+                            }
+                        }, this),
+                        error: _.bind(this.ajaxError, this)
+                    });
+                }, this);
+
+            this.categories = new BaseCollection(null, {});
 
             if (!this.model.isNew()) {
-                this.categories.playlistId = this.model.id;
-                this.categories.fetch({ reset: true });
+                fetchCategories(this.getCategorySearchUrl(), this.categories);
             }
             this.model.on('change', _.bind(function() {
-                // If the id has changed, we need to fetch the relevant encoding
+                // If the id has changed, we need to refetch categories
                 if (this.model.changed.id) {
+                    this.categories.reset([], { silent: true });
                     // Only fetch categories if identifier is set
                     if (!this.model.isNew()) {
-                        this.categories.playlistId = this.model.id;
-                        this.categories.fetch({ reset: true });
-                    } else {
-                        this.categories.reset([], { silent: true });
-                        this.categories.playlistId = '';
+                        fetchCategories(this.getCategorySearchUrl(), this.categories);
                     }
                 }
                 if (!this.model.isNew()) {

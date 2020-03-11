@@ -53,6 +53,7 @@ define(function(require) {
                 'displayEmbedCode': this.model.get('embedcode'),
                 'displayDownloadIcon': this.model.get('download'),
                 'displayViewersReport': this.model.get('viewersreport'),
+                'displayAxdxs': this.model.get('axdxs'),
                 'embedAsThumbnail': this.model.get('embedthumbnail'),
                 'startTime': 0,
                 'displayCredits': this.model.get('metadata'),

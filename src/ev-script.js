@@ -78,7 +78,9 @@ define(function(require) {
                 return this.getDateFormatCallback() + ' ' + this.getTimeFormatCallback();
             },
             // Path to i18n folder
-            i18nPath: 'i18n',
+            i18nPath: '',
+            // Path to images folder
+            imagePath: '',
             // Auth options
             authLoginPath: '/app/lti/login.aspx',
             authLogoutPath: '/api/logout',

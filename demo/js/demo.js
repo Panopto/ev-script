@@ -6,10 +6,11 @@
     var app = new EV.EnsembleApp(_.extend(evSettings, {
         scrollHeight: 200,
         fitToParent: true,
-        getLocaleCallback: function() { return 'en-US'; },
+        getLocaleCallback: function() { return 'en'; },
         getDateFormatCallback: function() { return 'DD/MM/YYYY'; },
         getTimeFormatCallback: function() { return 'hh:mm A'; },
-        i18nPath: '../../src/ev-script/i18n'
+        i18nPath: '../../src/ev-script/i18n',
+        imagePath: '../../assets/css/images'
     }));
 
     // Sample default overrides

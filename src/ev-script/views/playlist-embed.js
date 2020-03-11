@@ -13,17 +13,21 @@ define(function(require) {
             EmbedView.prototype.initialize.call(this, options);
         },
         render: function(isPreview) {
-            var src = URI(this.config.ensembleUrl + '/app/plugin/embed.aspx'),
+            var src = URI(this.config.ensembleUrl + '/hapi/v1/ui/Playlists/' + this.model.get('id') + '/Plugin'),
+                layout = this.model.get('layout'),
                 embedType = this.model.get('embedtype'),
                 width,
                 height,
                 embed;
 
             src.addQuery({
-                'DestinationID': this.model.get('id'),
-                'playlistEmbed': true,
-                'isNewPluginEmbed': true,
-                'hideControls': true,
+                'isPreview': isPreview,
+                'layout': layout,
+                'sortBy': this.model.get('sortby'),
+                'desc': this.model.get('desc'),
+                'search': this.model.get('search'),
+                'categories': this.model.get('categories'),
+                'resultsCount': this.model.get('resultscount'),
                 'displayTitle': true,
                 'displayEmbedCode': this.model.get('embedcode'),
                 'displayVideoDuration': this.model.get('duration'),
@@ -32,62 +36,27 @@ define(function(require) {
                 'displayLinks': this.model.get('links'),
                 'displayCredits': this.model.get('credits'),
                 'displaySharing': this.model.get('socialsharing'),
+                'displayCopyUrl': this.model.get('socialsharing'),
                 'autoPlay': this.model.get('autoplay'),
                 'showCaptions': this.model.get('showcaptions'),
                 'displayDateProduced': this.model.get('dateproduced'),
                 'audioPreviewImage': this.model.get('audiopreviewimage'),
                 'displayCaptionSearch': this.model.get('captionsearch'),
-                'displayViewersReport': this.model.get('viewersreport')
+                'displayViewersReport': this.model.get('viewersreport'),
+                'displayAxdxs' : this.model.get('axdxs'),
+                'displayNextUp': this.model.get('nextup'),
+                'featuredContentId': this.model.get('featuredcontentid')
             });
-
-            if (isPreview) {
-                // Hack to bypass restrictions for preview
-                src.addQuery('isPermalinkPreview', true);
-            }
-
-            if (this.model.get('layout') === 'showcase') {
-                var showcaseLayout = this.model.get('showcaseLayout');
-                src.addQuery('displayShowcase', true);
-                if (showcaseLayout.categoryList) {
-                    src.addQuery({
-                        'displayCategoryList': true,
-                        'categoryOrientation': showcaseLayout.categoryOrientation
-                    });
-                }
-            } else {
-                var playlistLayout = this.model.get('playlistLayout');
-                src.addQuery({
-                    'orderBy': playlistLayout.playlistSortBy,
-                    'orderByDirection': playlistLayout.playlistSortDirection
-                });
-                if (playlistLayout.playlistSearchString) {
-                    src.addQuery('searchString', playlistLayout.playlistSearchString);
-                }
-                if (playlistLayout.playlistCategory) {
-                    src.addQuery('categoryID', playlistLayout.playlistCategory);
-                }
-                if (playlistLayout.playlistNumberOfResults) {
-                    src.addQuery('resultsCount', playlistLayout.playlistNumberOfResults);
-                }
-            }
 
             if (embedType === 'fixed') {
                 width = this.getFrameWidth();
                 height = this.getFrameHeight();
-                src.addQuery({
-                    'width': width,
-                    'height': height
-                });
                 embed = this.fixedTemplate({
                     'src': src,
                     'width': width,
                     'height': height
                 });
             } else if (embedType === 'responsive') {
-                src.addQuery({
-                    'isResponsive': true,
-                    'useIFrame': true
-                });
                 embed = this.responsiveTemplate({
                     'src': src
                 });

@@ -1059,9 +1059,99 @@ fieldset[disabled] .ev-dialog .form-actions .action-cancel.active {
 .ev-dialog .ev-settings .fieldWrap input[type=checkbox][disabled] {
   cursor: not-allowed;
 }
+.ev-dialog .ev-settings .playlist-filter .fieldWrap label {
+  width: 32%;
+}
+.ev-dialog .ev-settings .playlist-filter .sort-group select {
+  margin-right: 1em;
+}
+.ev-dialog .ev-settings .playlist-filter .sort-group label {
+  width: auto;
+  margin-right: 1em;
+}
 .ev-dialog .ev-settings .inline-option {
   display: inline-block;
-  width: 200px;
+  width: 32%;
+}
+.ev-dialog .ev-settings .checkbox-option {
+  display: inline-block;
+  width: 32%;
+}
+.ev-dialog .ev-settings .checkbox-option label {
+  width: 85%;
+  vertical-align: middle;
+}
+.ev-dialog .ev-settings .checkbox-option input {
+  width: 10%;
+  vertical-align: middle;
+}
+.ev-dialog .ev-settings .playlist-layout {
+  -webkit-box-flex: 5;
+  -moz-box-flex: 5;
+  -webkit-flex: 5 1 auto;
+  -moz-flex: 5 1 auto;
+  -ms-flex: 5 1 auto;
+  flex: 5 1 auto;
+  -ms-flex-positive: 5;
+  -ms-flex-negative: 1;
+  -ms-flex-preferred-size: auto;
+  display: -moz-box;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  -webkit-flex-flow: column nowrap;
+  -moz-flex-flow: column nowrap;
+  -ms-flex-flow: column nowrap;
+  flex-flow: column nowrap;
+}
+.ev-dialog .ev-settings .playlist-layout .layout-option-row {
+  justify-content: space-evenly;
+  -webkit-box-flex: 5;
+  -moz-box-flex: 5;
+  -webkit-flex: 5 1 auto;
+  -moz-flex: 5 1 auto;
+  -ms-flex: 5 1 auto;
+  flex: 5 1 auto;
+  -ms-flex-positive: 5;
+  -ms-flex-negative: 1;
+  -ms-flex-preferred-size: auto;
+  display: -moz-box;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  -webkit-flex-flow: row nowrap;
+  -moz-flex-flow: row nowrap;
+  -ms-flex-flow: row nowrap;
+  flex-flow: row nowrap;
+}
+.ev-dialog .ev-settings .playlist-layout .layout-option-row .layout-option [type=radio] {
+  position: absolute;
+  left: -9999px;
+}
+.ev-dialog .ev-settings .playlist-layout .layout-option-row .layout-option [type=radio] + label {
+  text-align: center;
+  width: calc(100% - 14px);
+  height: calc(100% - 14px);
+  cursor: pointer;
+  padding: 5px;
+  border: 2px solid #fff;
+  border-radius: 4px;
+}
+.ev-dialog .ev-settings .playlist-layout .layout-option-row .layout-option [type=radio] + label img {
+  display: block;
+  margin: 0 auto;
+  width: 60px;
+}
+.ev-dialog .ev-settings .playlist-layout .layout-option-row .layout-option [type=radio] + label div {
+  margin-top: 5px;
+}
+.ev-dialog .ev-settings .playlist-layout .layout-option-row .layout-option [type=radio]:checked + label {
+  border-color: #44ab00;
+  cursor: default;
 }
 .ev-dialog .ev-settings label {
   color: #606060;
@@ -1144,4 +1234,12 @@ fieldset[disabled] .ev-dialog .form-actions .action-cancel.active {
 }
 .ev-dialog .ev-preview {
   text-align: center;
+}
+/* Override aggressive padding for jQuery UI accordion used in playlist settings */
+.ui-accordion .ui-accordion-content {
+  padding: 1em;
+}
+/* Utility */
+.mr5 {
+  margin-right: 5px;
 }

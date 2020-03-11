@@ -531,9 +531,75 @@
         cursor: not-allowed;
       }
     }
+    .playlist-filter {
+      .fieldWrap {
+        label {
+          width: 32%;
+        }
+      }
+      .sort-group {
+        select {
+          margin-right: 1em;
+        }
+        label {
+          width: auto;
+          margin-right: 1em;
+        }
+      }
+    }
     .inline-option {
       display: inline-block;
-      width: 200px;
+      width: 32%;
+    }
+    .checkbox-option {
+      display: inline-block;
+      width: 32%;
+      label {
+        width: 85%;
+        vertical-align: middle;
+      }
+      input {
+        width: 10%;
+        vertical-align: middle;
+      }
+    }
+    .playlist-layout {
+      .flex(5, 1, auto);
+      .display(flex);
+      .flex-flow(column, nowrap);
+      .layout-option-row {
+        justify-content: space-evenly;
+        .flex(5, 1, auto);
+        .display(flex);
+        .flex-flow(row, nowrap);
+        .layout-option {
+          [type=radio] {
+            position: absolute;
+            left: -9999px;
+          }
+          [type=radio] + label {
+            text-align: center;
+            width: calc(100% - 14px);
+            height: calc(100% - 14px);
+            cursor: pointer;
+            padding: 5px;
+            border: 2px solid #fff;
+            border-radius: 4px;
+            img {
+              display: block;
+              margin: 0 auto;
+              width: 60px;
+            }
+            div {
+              margin-top: 5px;
+            }
+          }
+          [type=radio]:checked + label {
+            border-color: @button-green;
+            cursor: default;
+          }
+        }
+      }
     }
     label {
       color: @label-color;
@@ -628,4 +694,14 @@
   .ev-preview {
     text-align: center;
   }
+}
+
+/* Override aggressive padding for jQuery UI accordion used in playlist settings */
+.ui-accordion .ui-accordion-content {
+  padding: 1em;
+}
+
+/* Utility */
+.mr5 {
+  margin-right: 5px;
 }

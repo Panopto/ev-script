@@ -22,11 +22,15 @@ define(function(require) {
         },
         checkboxHandler: function(e) {
             var $checkbox = $(e.currentTarget);
-            if ($checkbox.is('#embedthumbnail') && $checkbox.is(':checked')) {
+            if (($checkbox.is('#axdxs') || $checkbox.is('#embedthumbnail')) &&
+                $checkbox.is(':checked')) {
                 this.$('#audiopreviewimage').prop('checked', true);
+                return;
             }
             if ($checkbox.is('#audiopreviewimage') && !$checkbox.is(':checked')) {
+                this.$('#axdxs').prop('checked', false);
                 this.$('#embedthumbnail').prop('checked', false);
+                return;
             }
         },
         updateModel: function() {
@@ -46,6 +50,7 @@ define(function(require) {
                     'embedcode': this.$('#embedcode').is(':checked'),
                     'download': this.$('#download').is(':checked'),
                     'viewersreport': this.$('#viewersreport').is(':checked'),
+                    'axdxs': this.$('#axdxs').is(':checked'),
                     'embedthumbnail': this.$('#embedthumbnail').is(':checked'),
                     'embedtype': this.$('#embedtype').val()
                 },
@@ -115,7 +120,7 @@ define(function(require) {
                 resizable: false,
                 dialogClass: 'ev-dialog',
                 width: Math.min(680, $(window).width() - this.config.dialogMargin),
-                height: Math.min(300, $(window).height() - this.config.dialogMargin),
+                height: Math.min(340, $(window).height() - this.config.dialogMargin),
                 closeText: this.i18n.formatMessage('Close')
             });
         }

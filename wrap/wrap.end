@@ -6,7 +6,7 @@
     });
 
     define('jquery-ui/ui/widgets/dialog', ['jquery'], function() {});
-    define('jquery-ui/ui/widgets/accordion', ['jquery'], function() {});
+    define('jquery-ui/ui/widgets/tabs', ['jquery'], function() {});
 
     define('plupload', function() {
         return plupload;
