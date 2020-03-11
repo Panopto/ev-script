@@ -1059,6 +1059,11 @@ fieldset[disabled] .ev-dialog .form-actions .action-cancel.active {
 .ev-dialog .ev-settings .fieldWrap input[type=checkbox][disabled] {
   cursor: not-allowed;
 }
+.ev-dialog .ev-settings .playlist-layout h4,
+.ev-dialog .ev-settings .playlist-filter h4,
+.ev-dialog .ev-settings .playlist-display h4 {
+  margin: 0 0 1em 0;
+}
 .ev-dialog .ev-settings .playlist-filter .fieldWrap label {
   width: 32%;
   vertical-align: top;
@@ -1237,9 +1242,9 @@ fieldset[disabled] .ev-dialog .form-actions .action-cancel.active {
 .ev-dialog .ev-preview {
   text-align: center;
 }
-/* Override aggressive padding for jQuery UI accordion used in playlist settings */
-.ui-accordion .ui-accordion-content {
-  padding: 1em;
+/* Override aggressive padding for jQuery UI tabs used in settings */
+.ui-tabs .ui-tabs-panel {
+  padding: 1em 0.4em;
 }
 /* Utility */
 .mr5 {

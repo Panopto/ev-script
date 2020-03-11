@@ -88,46 +88,44 @@
                 </div>
             </div>
             <div id="filter" class="playlist-filter">
-                <div class="layout-section">
-                    <h4><%= i18n.formatMessage('Filter By') %></h4>
-                    <div>
-                        <div class="fieldWrap">
-                            <label for="search"><%= i18n.formatMessage('Search String') %></label>
-                            <input id="search" class="form-text" name="search" value="<%- model.get('search') %>" type="text"/>
-                        </div>
-                        <div class="fieldWrap">
-                            <label for="categories"><%= i18n.formatMessage('Categories') %></label>
-                            <select id="categories" class="form-select" name="categories" multiple>
-                                <option value="-1" <% if (!model.get('categories')) { print('selected="selected"'); } %>><%= i18n.formatMessage('All Categories') %></option>
-                                <% categories.each(function(category) { %>
-                                    <option value="<%= category.id %>" <% if (model.get('categories') && _.contains(model.get('categories').split(','), category.id)) { print('selected="selected"'); } %>><%- category.get('title') %></option>
-                                <% }); %>
-                            </select>
-                        </div>
-                        <div class="fieldWrap">
-                            <label for="resultscount"><%= i18n.formatMessage('Number of Results') %></label>
-                            <input id="resultscount" class="form-text" name="resultscount" value="<%- model.get('resultscount') %>" type="text"/>
-                        </div>
+                <h4><%= i18n.formatMessage('Filter By') %></h4>
+                <div>
+                    <div class="fieldWrap">
+                        <label for="search"><%= i18n.formatMessage('Search String') %></label>
+                        <input id="search" class="form-text" name="search" value="<%- model.get('search') %>" type="text"/>
                     </div>
-                    <h4><label for="sortby"><%= i18n.formatMessage('Sort By') %></label></h4>
-                    <div class="fieldWrap sort-group">
-                        <select id="sortby" class="form-select">
-                            <option value="DateAdded" <% if (model.get('sortby') === 'DateAdded') { print('selected="selected"'); } %>><%= i18n.formatMessage('Date Added') %></option>
-                            <option value="DateProduced" <% if (model.get('sortby') === 'DateProduced') { print('selected="selected"'); } %>><%= i18n.formatMessage('Date Produced') %></option>
-                            <option value="Description" <% if (model.get('sortby') === 'Description') { print('selected="selected"'); } %>><%= i18n.formatMessage('Description') %></option>
-                            <option value="Title" <% if (model.get('sortby') === 'Title') { print('selected="selected"'); } %>><%= i18n.formatMessage('Title') %></option>
-                            <option value="Duration" <% if (model.get('sortby') === 'Duration') { print('selected="selected"'); } %>><%= i18n.formatMessage('Duration') %></option>
-                            <option value="Keywords" <% if (model.get('sortby') === 'Keywords') { print('selected="selected"'); } %>><%= i18n.formatMessage('Keywords') %></option>
-                            <!-- <option value="videoCustomPosition">Custom Order</option> -->
+                    <div class="fieldWrap">
+                        <label for="categories"><%= i18n.formatMessage('Categories') %></label>
+                        <select id="categories" class="form-select" name="categories" multiple>
+                            <option value="-1" <% if (!model.get('categories')) { print('selected="selected"'); } %>><%= i18n.formatMessage('All Categories') %></option>
+                            <% categories.each(function(category) { %>
+                                <option value="<%= category.id %>" <% if (model.get('categories') && _.contains(model.get('categories').split(','), category.id)) { print('selected="selected"'); } %>><%- category.get('title') %></option>
+                            <% }); %>
                         </select>
-                        <input id="sortAsc" class="form-radio" <% if (!model.get('desc')) { print('checked="checked"'); } %> name="sortDirection" value="asc" type="radio"/>
-                        <label for="sortAsc"><%= i18n.formatMessage('Ascending') %></label>
-                        <input id="sortDesc" class="form-radio" <% if (model.get('desc')) { print('checked="checked"'); } %> name="sortDirection" value="desc" type="radio"/>
-                        <label for="sortDesc"><%= i18n.formatMessage('Descending') %></label>
+                    </div>
+                    <div class="fieldWrap">
+                        <label for="resultscount"><%= i18n.formatMessage('Number of Results') %></label>
+                        <input id="resultscount" class="form-text" name="resultscount" value="<%- model.get('resultscount') %>" type="text"/>
                     </div>
                 </div>
+                <h4><label for="sortby"><%= i18n.formatMessage('Sort By') %></label></h4>
+                <div class="fieldWrap sort-group">
+                    <select id="sortby" class="form-select">
+                        <option value="DateAdded" <% if (model.get('sortby') === 'DateAdded') { print('selected="selected"'); } %>><%= i18n.formatMessage('Date Added') %></option>
+                        <option value="DateProduced" <% if (model.get('sortby') === 'DateProduced') { print('selected="selected"'); } %>><%= i18n.formatMessage('Date Produced') %></option>
+                        <option value="Description" <% if (model.get('sortby') === 'Description') { print('selected="selected"'); } %>><%= i18n.formatMessage('Description') %></option>
+                        <option value="Title" <% if (model.get('sortby') === 'Title') { print('selected="selected"'); } %>><%= i18n.formatMessage('Title') %></option>
+                        <option value="Duration" <% if (model.get('sortby') === 'Duration') { print('selected="selected"'); } %>><%= i18n.formatMessage('Duration') %></option>
+                        <option value="Keywords" <% if (model.get('sortby') === 'Keywords') { print('selected="selected"'); } %>><%= i18n.formatMessage('Keywords') %></option>
+                        <!-- <option value="videoCustomPosition">Custom Order</option> -->
+                    </select>
+                    <input id="sortAsc" class="form-radio" <% if (!model.get('desc')) { print('checked="checked"'); } %> name="sortDirection" value="asc" type="radio"/>
+                    <label for="sortAsc"><%= i18n.formatMessage('Ascending') %></label>
+                    <input id="sortDesc" class="form-radio" <% if (model.get('desc')) { print('checked="checked"'); } %> name="sortDirection" value="desc" type="radio"/>
+                    <label for="sortDesc"><%= i18n.formatMessage('Descending') %></label>
+                </div>
             </div>
-            <div id="display">
+            <div id="display" class="playlist-display">
                 <div class="fieldWrap checkbox-option">
                     <input id="annotations" class="form-checkbox" <% if (model.get('annotations')) { print('checked="checked"'); } %> name="annotations" type="checkbox"/>
                     <label for="annotations"><%= i18n.formatMessage('Annotations') %></label>

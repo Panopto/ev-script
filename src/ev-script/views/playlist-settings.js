@@ -94,8 +94,6 @@ define(function(require) {
         },
         changeLayout: function(e) {
             var layout = e.currentTarget.value;
-            this.$('.layout-section').hide();
-            this.$('.' + layout + 'Options').show();
             if (layout === 'loop') {
                 this.$('#nextup').prop('disabled', false);
             } else {
