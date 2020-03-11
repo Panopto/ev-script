@@ -1061,6 +1061,7 @@ fieldset[disabled] .ev-dialog .form-actions .action-cancel.active {
 }
 .ev-dialog .ev-settings .playlist-filter .fieldWrap label {
   width: 32%;
+  vertical-align: top;
 }
 .ev-dialog .ev-settings .playlist-filter .sort-group select {
   margin-right: 1em;
@@ -1068,6 +1069,7 @@ fieldset[disabled] .ev-dialog .form-actions .action-cancel.active {
 .ev-dialog .ev-settings .playlist-filter .sort-group label {
   width: auto;
   margin-right: 1em;
+  vertical-align: middle;
 }
 .ev-dialog .ev-settings .inline-option {
   display: inline-block;
