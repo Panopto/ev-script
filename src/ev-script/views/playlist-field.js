@@ -68,6 +68,61 @@ define(function(require) {
                     }
                 }
                 if (!this.model.isNew()) {
+                    if (this.model.changed.layout) {
+                        var layout = this.model.get('layout');
+
+                        switch (layout) {
+                            case 'list':
+                            case 'grid':
+                                this.model.set({
+                                    'width': 800,
+                                    'height': 720
+                                });
+                                break;
+                            case 'listWithPlayer':
+                            case 'gridWithPlayer':
+                                this.model.set({
+                                    'width': 700,
+                                    'height': 750
+                                });
+                                break;
+                            case 'verticalListWithPlayer':
+                                this.model.set({
+                                    'width': 1000,
+                                    'height': 420
+                                });
+                                break;
+                            case 'horizontalListWithPlayer':
+                                this.model.set({
+                                    'width': 800,
+                                    'height': 690
+                                });
+                                break;
+                            case 'showcase':
+                                this.model.set({
+                                    'width': 1000,
+                                    'height': 590
+                                });
+                                break;
+                            case 'horizontalList':
+                                this.model.set({
+                                    'width': 1000,
+                                    'height': 230
+                                });
+                                break;
+                            case 'loop':
+                                this.model.set({
+                                    'width': 800,
+                                    'height': 455
+                                });
+                                break;
+                            default:
+                                this.model.set({
+                                    'width': 800,
+                                    'height': 1000
+                                });
+                        }
+                    }
                     this.updateField();
                 }
             }, this));
