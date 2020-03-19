@@ -1,5 +1,5 @@
 /**
- * ev-script 2.2.0 2020-03-13
+ * ev-script 2.2.1 2020-03-19
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -31979,7 +31979,7 @@ define('ev-script/views/playlist-field',['require','jquery','underscore','urijs/
                             case 'horizontalListWithPlayer':
                                 this.model.set({
                                     'width': 800,
-                                    'height': 690
+                                    'height': 630
                                 });
                                 break;
                             case 'showcase':

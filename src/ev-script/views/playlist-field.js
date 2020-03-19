@@ -95,7 +95,7 @@ define(function(require) {
                             case 'horizontalListWithPlayer':
                                 this.model.set({
                                     'width': 800,
-                                    'height': 690
+                                    'height': 630
                                 });
                                 break;
                             case 'showcase':
