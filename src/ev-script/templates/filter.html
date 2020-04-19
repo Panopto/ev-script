@@ -1,7 +1,20 @@
-<div id="<%= id %>-org-select" class="ev-filter-item ev-org-select"></div>
-<div id="<%= id %>-lib-select" class="ev-filter-item ev-lib-select"></div>
-<div id="<%= id %>-type-select" class="ev-filter-item ev-type-select"></div>
-<div id="<%= id %>-search" class="ev-filter-item ev-search"></div>
+<div id="<%= id %>-org-select" class="ev-filter-item ev-org-select">
+  <label for="<%= id %>-org-select-select"><%= i18n.formatMessage('Organization:') %></label>
+  <select id="<%= id %>-org-select-select" class="form-select organizations" title="<%= i18n.formatMessage('Select Organization') %>" style="width: 200px"></select>
+</div>
+<div id="<%= id %>-lib-select" class="ev-filter-item ev-lib-select">
+  <label for="<%= id %>-lib-select-select"><%= i18n.formatMessage('Library:') %></label>
+  <select id="<%= id %>-lib-select-select" class="form-select libraries" title="<%= i18n.formatMessage('Select Library') %>" style="width: 200px"></select>
+</div>
+<div id="<%= id %>-type-select" class="ev-filter-item ev-type-select" style="display:none;">
+  <label for="<%= id %>-type-select-select"><%= i18n.formatMessage('Type:') %></label>
+  <select id="<%= id %>-type-select-select" class="form-select source" title="<%= i18n.formatMessage('Select Library Type') %>">
+    <option value="content" <% if (sourceId === 'content') { print('selected="selected"'); } %>><%= i18n.formatMessage('Media Library') %></option>
+    <option value="shared" <% if (sourceId === 'shared') { print('selected="selected"'); } %>><%= i18n.formatMessage('Shared Library') %></option>
+  </select>
+</div>
+<div id="<%= id %>-search" class="ev-filter-item ev-search">
+</div>
 <div class="ev-filter-item ev-actions">
   <a href="#" class="action-home" style="display: none;" title="<%= i18n.formatMessage('Click to navigate to default library') %>">
     <i class="fa fa-home fa-fw fa-lg"></i>

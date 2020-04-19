@@ -36,7 +36,9 @@ module.exports = function(grunt) {
         'globalize': 'node_modules/globalize/dist/globalize',
         'moment': 'node_modules/moment/min/moment-with-locales',
         'urijs': 'node_modules/urijs/src',
-        'loglevel': 'node_modules/loglevel/dist/loglevel'
+        'loglevel': 'node_modules/loglevel/dist/loglevel',
+        'select2': 'node_modules/select2/src/js',
+        'jquery-mousewheel': 'node_modules/jquery-mousewheel/jquery.mousewheel'
       },
       name: 'node_modules/almond/almond',
       out: 'dist/ev-script.js',

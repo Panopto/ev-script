@@ -5,6 +5,7 @@ define(function(require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         log = require('loglevel'),
+        URI = require('urijs/URI'),
         Backbone = require('backbone'),
         BaseCollection = require('ev-script/collections/base'),
         cacheUtil = require('ev-script/util/cache'),
@@ -59,8 +60,8 @@ define(function(require) {
                 cache: false
             });
             if (method === 'read') {
-                var url = this.url(),
-                    cached = this.getCached(url);
+                var key = URI(this.url()).removeQuery('_'), // Remove cache busting parameter
+                    cached = this.getCached(key);
                 if (cached) {
                     var deferred = $.Deferred();
                     if (options.success) {
@@ -71,7 +72,7 @@ define(function(require) {
                     // Grab the response and cache
                     options.success = options.success || function(collection, response, options) {};
                     options.success = _.wrap(options.success, _.bind(function(success) {
-                        this.setCached(url, arguments[1]);
+                        this.setCached(key, arguments[1]);
                         success.apply(this, Array.prototype.slice.call(arguments, 1));
                     }, this));
                     this.promise = Backbone.Model.prototype.sync.call(this, method, collection, options);

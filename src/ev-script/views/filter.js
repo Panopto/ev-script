@@ -8,62 +8,43 @@ define(function(require) {
         URITemplate = require('urijs/URITemplate'),
         BaseView = require('ev-script/views/base'),
         BaseCollection = require('ev-script/collections/base'),
-        BaseModel = require('ev-script/models/base'),
-        OrganizationSelectView = require('ev-script/views/organization-select'),
         Organizations = require('ev-script/models/organizations'),
-        LibrarySelectView = require('ev-script/views/library-select'),
         Libraries = require('ev-script/models/libraries'),
-        TypeSelectView = require('ev-script/views/library-type-select'),
-        SearchView = require('ev-script/views/search');
+        SearchView = require('ev-script/views/search'),
+        hapiAdapter = require('ev-script/util/hapiAdapter');
+
+    require('select2/select2/compat/containerCss');
+    require('select2/select2/compat/dropdownCss');
+    require('select2/jquery.select2');
+    require('select2/select2/i18n/en');
+    require('select2/select2/i18n/es');
+    require('select2/select2/i18n/fr');
 
     return BaseView.extend({
         template: _.template(require('text!ev-script/templates/filter.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization',
-                'changeLibrary', 'activateRecord', 'deactivateRecord',
-                'showHome', 'hideHome',     'showUpload', 'hideUpload',
-                'showRecord', 'hideRecord',     'setFocus', 'getLibrary',
-                'goHome');
+                'changeLibrary', 'changeSource', 'activateRecord',
+                'deactivateRecord', 'showHome', 'hideHome', 'showUpload',
+                'hideUpload', 'showRecord', 'hideRecord', 'setFocus',
+                'getLibrary', 'goHome');
 
             this.picker = options.picker;
             this.id = options.id;
 
+            this.language = this.i18n.cldr.locale.split('-')[0];
+
             this.$el.html(this.template({
                 id: this.id,
-                i18n: this.i18n
+                i18n: this.i18n,
+                sourceId: this.picker.model.get('sourceId')
             }));
 
-            var orgSelectOptions = {
-                id: this.id + '-org-select',
-                el: this.$('.ev-org-select'),
-                picker: this.picker,
-                collection: new BaseCollection(null, {}),
-                noneOption: options.requireLibrarySelection ? null : {
-                    name: '-- ' + this.i18n.formatMessage('All Organizations') + ' --',
-                    value: ''
-                }
-            };
-            this.orgSelect = new OrganizationSelectView(orgSelectOptions);
-
-            var libSelectOptions = {
-                id: this.id + '-lib-select',
-                el: this.$('.ev-lib-select'),
-                picker: this.picker,
-                collection: new BaseCollection(null, {}),
-                noneOption: options.requireLibrarySelection ? null : {
-                    name: '-- ' + this.i18n.formatMessage('All Libraries') + ' --',
-                    value: ''
-                }
-            };
-            this.libSelect = new LibrarySelectView(libSelectOptions);
+            this.requireSelection = options.requireLibrarySelection;
 
             if (options.showTypeSelect || _.isUndefined(options.showTypeSelect)) {
-                this.typeSelectView = new TypeSelectView({
-                    id: this.id + '-type-select',
-                    el: this.$('.ev-type-select'),
-                    picker: this.picker
-                });
+                this.$('.ev-type-select').show();
             }
 
             this.searchView = new SearchView({
@@ -71,6 +52,11 @@ define(function(require) {
                 el: this.$('.ev-search'),
                 picker: this.picker
             });
+
+            this.orgCollection = new BaseCollection(null, {});
+            this.orgCollection.comparator = 'title';
+            this.libCollection = new BaseCollection(null, {});
+            this.libCollection.comparator = 'title';
 
             var $loader = this.$('div.loader');
             $(window.document).on('ajaxSend', _.bind(function(e, xhr, settings) {
@@ -89,14 +75,13 @@ define(function(require) {
         events: {
             'click a.action-home': 'goHome',
             'change select.organizations': 'changeOrganization',
-            'change select.libraries': 'changeLibrary'
+            'change select.libraries': 'changeLibrary',
+            'change select.source': 'changeSource'
         },
         goHome: function(e) {
-            // Once the libraries are loaded, we can proceed to select the appropriate one
-            this.$('select.libraries').one('change', _.bind(function() {
-                this.libSelect.select(this.root.getUser().get('defaultLibraryId'));
-            }, this));
-            this.orgSelect.select(this.root.getUser().get('defaultOrganizationId'));
+            this.$orgSelect.trigger('hapi:useGet');
+            this.$libSelect.trigger('hapi:useGet');
+            this.orgCollection.reset(null);
             e.preventDefault();
         },
         changeOrganization: function(e) {
@@ -121,77 +106,99 @@ define(function(require) {
                 this.showHome();
             }
         },
+        changeSource: function(e) {
+            log.debug('[views/filter] changeLibrary');
+            log.debug(arguments);
+
+            var sourceVal = this.$('.source').val();
+            this.picker.model.set({
+                sourceId: sourceVal
+            });
+
+            this.events.trigger('typeSelectChange', sourceVal);
+            e.preventDefault();
+        },
         loadOrgs: function() {
             log.debug('[views/filter] loadOrgs');
-            this.orgSelect.collection.reset(null, { silent: true });
+
             // In case root is loading...wait for it to finish
             this.root.promise.done(_.bind(function() {
-                var searchTemplate = new URITemplate(this.root.getLink('ev:Organizations/Search').href),
-                    searchUrl = searchTemplate.expand({}),
-                    // Recursively load pages until we have all orgs.
-                    fetchOrgs = _.bind(function(url) {
-                        var orgs = new Organizations({}, {
-                            href: url
-                        });
-                        orgs.fetch({
+                var searchTemplate = new URITemplate(this.root.getLink('ev:Organizations/Search').href);
+
+                if (!this.$orgSelect) {
+                    this.$orgSelect = this.$('.organizations').select2({
+                        dataAdapter: hapiAdapter,
+                        width: 'style',
+                        containerCssClass: 'ui-widget',
+                        dropdownCssClass: 'ui-widget',
+                        language: this.language,
+                        hapi: {
+                            collection: this.orgCollection,
+                            collectionName: 'organizations',
+                            templates: {
+                                search: new URITemplate(this.root.getLink('ev:Organizations/Search').href),
+                                get: new URITemplate(this.root.getLink('ev:Organizations/Get').href)
+                            },
+                            useGet: true,
+                            modelClass: Organizations,
                             picker: this.picker,
-                            success: _.bind(function(model, response, options) {
-                                var next = model.getLink('next'),
-                                    embeddedOrgs = model.getEmbedded('organizations');
-                                if (embeddedOrgs) {
-                                    this.orgSelect.collection.add(embeddedOrgs.models);
-                                }
-                                if (next) {
-                                    fetchOrgs(next.href);
-                                } else {
-                                    // TODO - use events instead?
-                                    this.orgSelect.collection.trigger('reset');
-                                }
-                            }, this),
-                            error: _.bind(this.ajaxError, this)
-                        });
-                    }, this);
-                fetchOrgs(searchUrl);
+                            ajaxError: this.ajaxError,
+                            noneOption: this.requireSelection ? null : {
+                                id: '',
+                                text: '-- ' + this.i18n.formatMessage('All Organizations') + ' --'
+                            },
+                            defaultId: this.root.getUser().get('defaultOrganizationId')
+                        }
+                    });
+                }
             }, this));
         },
         loadLibraries: function() {
             log.debug('[views/filter] loadLibraries');
             var orgId = this.picker.model.get('organizationId'),
-                org = this.orgSelect.collection.findWhere({ 'id': orgId }),
-                searchTemplate = org && new URITemplate(org.getLink('ev:Libraries/Search').href),
-                searchUrl = searchTemplate && searchTemplate.expand({}),
-                // Recursively load pages until we have all libraries.
-                fetchLibs = _.bind(function(url) {
-                    var libs = new Libraries({}, {
-                        href: url
-                    });
-                    libs.fetch({
+                org = this.orgCollection.findWhere({ 'id': orgId }),
+                getTemplate = new URITemplate(this.root.getLink('ev:Libraries/Get').href),
+                searchTemplate = new URITemplate(org ?
+                    org.getLink('ev:Libraries/Search').href :
+                    this.root.getLink('ev:Libraries/Search').href);
+
+            if (!this.$libSelect) {
+                this.$libSelect = this.$('.libraries').select2({
+                    dataAdapter: hapiAdapter,
+                    width: 'style',
+                    containerCssClass: 'ui-widget',
+                    dropdownCssClass: 'ui-widget',
+                    language: this.language,
+                    hapi: {
+                        collection: this.libCollection,
+                        collectionName: 'libraries',
+                        templates: {
+                            search: searchTemplate,
+                            get: getTemplate
+                        },
+                        useGet: true,
+                        modelClass: Libraries,
                         picker: this.picker,
-                        success: _.bind(function(model, response, options) {
-                            var next = model.getLink('next'),
-                                embeddedLibs = model.getEmbedded('libraries');
-                            if (embeddedLibs) {
-                                this.libSelect.collection.add(embeddedLibs.models);
-                            }
-                            if (next) {
-                                fetchLibs(next.href);
-                            } else {
-                                // TODO - use events instead?
-                                this.libSelect.collection.trigger('reset');
-                            }
-                        }, this),
-                        error: _.bind(this.ajaxError, this)
-                    });
-                }, this);
-            if (org) {
-                this.libSelect.collection.reset(null, { silent: true });
-                fetchLibs(searchUrl);
+                        ajaxError: this.ajaxError,
+                        noneOption: this.requireSelection ? null : {
+                            id: '',
+                            text: '-- ' + this.i18n.formatMessage('All Libraries') + ' --'
+                        },
+                        defaultId: this.root.getUser().get('defaultLibraryId')
+                    }
+                });
             } else {
-                this.libSelect.collection.reset(null);
+                this.$libSelect.trigger('hapi:updateTemplates', [
+                    {
+                        search: searchTemplate,
+                        get: getTemplate
+                    }
+                ]);
+                this.libCollection.reset(null);
             }
         },
         getLibrary: function(id) {
-            return this.libSelect.collection.findWhere({ 'id': id });
+            return this.libCollection.findWhere({ 'id': id });
         },
         activateRecord: function() {
             this.$('.record-active').show();

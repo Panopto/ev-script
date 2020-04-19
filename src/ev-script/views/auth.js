@@ -29,7 +29,7 @@ define(function(require, template) {
                 $html = $(this.template({
                     i18n: this.i18n,
                     frameSrc: frameSrc,
-                    frameWidth: dialogWidth - 50,
+                    frameWidth: '100%',
                     frameHeight: dialogHeight - 60
                 }));
             this.$dialog = $('<div class="ev-auth"></div>');

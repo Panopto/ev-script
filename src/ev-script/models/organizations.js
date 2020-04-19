@@ -6,6 +6,8 @@ define(function(require) {
         cacheUtil = require('ev-script/util/cache');
 
     return BaseModel.extend({
+        cacheName: 'organizations',
+        collectionKey: 'organizations'
         // initialize: function(models, options) {
         //     BaseModel.prototype.initialize.call(this, models, options);
         // },
