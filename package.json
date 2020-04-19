@@ -2,7 +2,7 @@
   "name": "ev-script",
   "title": "Ensemble Video Chooser Library",
   "description": "JavaScript library providing UI to populate form field w/ user selected media and/or playlist metadata for embedding.",
-  "version": "2.1.14",
+  "version": "2.1.15",
   "main": "./dist/ev-script.js",
   "homepage": "https://github.com/ensembleVideo/ev-script",
   "author": {

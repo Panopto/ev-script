@@ -1,5 +1,5 @@
 /**
- * ev-script 2.1.14 2020-04-19
+ * ev-script 2.1.15 2020-04-19
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -38920,10 +38920,10 @@ define('ev-script/views/dropbox-picker',['require','jquery','underscore','urijs/
         },
         loadDropboxes: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
-                libraryId = this.model.get('libraryId'),
-                library = this.filter.getLibrary(libraryId),
-                searchTemplate = new URITemplate(library.getLink('ev:Dropboxes/Search').href),
+                searchTemplate = new URITemplate(this.root.getLink('ev:Dropboxes/Search').href),
                 searchUrl = searchTemplate.expand({
+                    organizationId: this.model.get('organizationId'),
+                    libraryId: this.model.get('libraryId'),
                     search: searchVal,
                     sortBy: 'title',
                     pageSize: 20
