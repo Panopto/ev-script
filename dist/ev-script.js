@@ -1,5 +1,5 @@
 /**
- * ev-script 2.2.2 2020-04-20
+ * ev-script 2.2.3 2020-04-20
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -27788,7 +27788,7 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
         },
         render: function() {
             var dialogWidth = Math.min(540, $(window).width() - this.config.dialogMargin),
-                dialogHeight = Math.min(!this.config.defaultProvider ? 350 : 250, $(window).height() - this.config.dialogMargin),
+                dialogHeight = Math.min(!this.config.defaultProvider ? 380 : 280, $(window).height() - this.config.dialogMargin),
                 frameSrc = URI(this.config.ensembleUrl)
                     .path(this.config.authLoginPath)
                     .addQuery('idp', this.config.defaultProvider)
@@ -30429,7 +30429,7 @@ define('ev-script/util/hapiAdapter',['require','underscore','ev-script/models/ba
                         collection.add(new BaseModel(response, {}));
                         this.select({
                             id: response.id,
-                            text: response.title,
+                            text: response.name,
                             selected: true
                         });
                     }, this),
@@ -30448,7 +30448,7 @@ define('ev-script/util/hapiAdapter',['require','underscore','ev-script/models/ba
                 var model = collection.at(0);
                 this.select({
                     id: model.id,
-                    text: model.get('title'),
+                    text: model.get('name'),
                     selected: true
                 });
             }
@@ -30479,7 +30479,7 @@ define('ev-script/util/hapiAdapter',['require','underscore','ev-script/models/ba
                     dataMap = function(model) {
                         return {
                             id: model.id,
-                            text: model.get('title')
+                            text: model.get('name')
                         };
                     };
 
@@ -35779,9 +35779,9 @@ define('ev-script/views/filter',['require','jquery','underscore','loglevel','uri
             });
 
             this.orgCollection = new BaseCollection(null, {});
-            this.orgCollection.comparator = 'title';
+            this.orgCollection.comparator = 'name';
             this.libCollection = new BaseCollection(null, {});
-            this.libCollection.comparator = 'title';
+            this.libCollection.comparator = 'name';
 
             var $loader = this.$('div.loader');
             $(window.document).on('ajaxSend', _.bind(function(e, xhr, settings) {

@@ -54,9 +54,9 @@ define(function(require) {
             });
 
             this.orgCollection = new BaseCollection(null, {});
-            this.orgCollection.comparator = 'title';
+            this.orgCollection.comparator = 'name';
             this.libCollection = new BaseCollection(null, {});
-            this.libCollection.comparator = 'title';
+            this.libCollection.comparator = 'name';
 
             var $loader = this.$('div.loader');
             $(window.document).on('ajaxSend', _.bind(function(e, xhr, settings) {

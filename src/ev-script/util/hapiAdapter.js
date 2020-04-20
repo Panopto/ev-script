@@ -48,7 +48,7 @@ define(function(require) {
                         collection.add(new BaseModel(response, {}));
                         this.select({
                             id: response.id,
-                            text: response.title,
+                            text: response.name,
                             selected: true
                         });
                     }, this),
@@ -67,7 +67,7 @@ define(function(require) {
                 var model = collection.at(0);
                 this.select({
                     id: model.id,
-                    text: model.get('title'),
+                    text: model.get('name'),
                     selected: true
                 });
             }
@@ -98,7 +98,7 @@ define(function(require) {
                     dataMap = function(model) {
                         return {
                             id: model.id,
-                            text: model.get('title')
+                            text: model.get('name')
                         };
                     };
 
