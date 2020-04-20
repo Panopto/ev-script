@@ -1,5 +1,5 @@
 /**
- * ev-script 2.2.1 2020-03-19
+ * ev-script 2.2.2 2020-04-20
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -458,8 +458,8 @@ var requirejs, require, define;
 
 define("node_modules/almond/almond", function(){});
 
-//     Underscore.js 1.9.1
-//     http://underscorejs.org
+//     Underscore.js 1.9.2
+//     https://underscorejs.org
 //     (c) 2009-2018 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 //     Underscore may be freely distributed under the MIT license.
 
@@ -520,7 +520,7 @@ define("node_modules/almond/almond", function(){});
   }
 
   // Current version.
-  _.VERSION = '1.9.1';
+  _.VERSION = '1.9.2';
 
   // Internal function that returns an efficient (for current engines) version
   // of the passed-in callback, to be repeatedly applied in other Underscore
@@ -623,7 +623,7 @@ define("node_modules/almond/almond", function(){});
 
   // Helper for collection methods to determine whether a collection
   // should be iterated as an array or as an object.
-  // Related: http://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength
+  // Related: https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength
   // Avoids a very nasty iOS 8 JIT bug on ARM-64. #2094
   var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
   var getLength = shallowProperty('length');
@@ -851,7 +851,7 @@ define("node_modules/almond/almond", function(){});
   };
 
   // Sample **n** random values from a collection using the modern version of the
-  // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
+  // [Fisher-Yates shuffle](https://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
   // If **n** is not specified, returns a single random element.
   // The internal `guard` argument allows it to work with `map`.
   _.sample = function(obj, n, guard) {
@@ -1181,7 +1181,7 @@ define("node_modules/almond/almond", function(){});
 
   // Generate an integer Array containing an arithmetic progression. A port of
   // the native Python `range()` function. See
-  // [the Python documentation](http://docs.python.org/library/functions.html#range).
+  // [the Python documentation](https://docs.python.org/library/functions.html#range).
   _.range = function(start, stop, step) {
     if (stop == null) {
       stop = start || 0;
@@ -1650,7 +1650,7 @@ define("node_modules/almond/almond", function(){});
   var eq, deepEq;
   eq = function(a, b, aStack, bStack) {
     // Identical objects are equal. `0 === -0`, but they aren't identical.
-    // See the [Harmony `egal` proposal](http://wiki.ecmascript.org/doku.php?id=harmony:egal).
+    // See the [Harmony `egal` proposal](https://wiki.ecmascript.org/doku.php?id=harmony:egal).
     if (a === b) return a !== 0 || 1 / a === 1 / b;
     // `null` or `undefined` only equal to itself (strict comparison).
     if (a == null || b == null) return false;
@@ -2151,9 +2151,9 @@ define("node_modules/almond/almond", function(){});
   }
 }());
 
-//     Backbone.js 1.3.3
+//     Backbone.js 1.4.0
 
-//     (c) 2010-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+//     (c) 2010-2019 Jeremy Ashkenas and DocumentCloud
 //     Backbone may be freely distributed under the MIT license.
 //     For all details and documentation:
 //     http://backbonejs.org
@@ -2162,8 +2162,8 @@ define("node_modules/almond/almond", function(){});
 
   // Establish the root object, `window` (`self`) in the browser, or `global` on the server.
   // We use `self` instead of `window` for `WebWorker` support.
-  var root = (typeof self == 'object' && self.self === self && self) ||
-            (typeof global == 'object' && global.global === global && global);
+  var root = typeof self == 'object' && self.self === self && self ||
+            typeof global == 'object' && global.global === global && global;
 
   // Set up Backbone appropriately for the environment. Start with AMD.
   if (typeof define === 'function' && define.amd) {
@@ -2181,7 +2181,7 @@ define("node_modules/almond/almond", function(){});
 
   // Finally, as a browser global.
   } else {
-    root.Backbone = factory(root, {}, root._, (root.jQuery || root.Zepto || root.ender || root.$));
+    root.Backbone = factory(root, {}, root._, root.jQuery || root.Zepto || root.ender || root.$);
   }
 
 })(function(root, Backbone, _, $) {
@@ -2197,7 +2197,7 @@ define("node_modules/almond/almond", function(){});
   var slice = Array.prototype.slice;
 
   // Current version of the library. Keep in sync with `package.json`.
-  Backbone.VERSION = '1.3.3';
+  Backbone.VERSION = '1.4.0';
 
   // For Backbone's purposes, jQuery, Zepto, Ender, or My Library (kidding) owns
   // the `$` variable.
@@ -2221,54 +2221,6 @@ define("node_modules/almond/almond", function(){});
   // form param named `model`.
   Backbone.emulateJSON = false;
 
-  // Proxy Backbone class methods to Underscore functions, wrapping the model's
-  // `attributes` object or collection's `models` array behind the scenes.
-  //
-  // collection.filter(function(model) { return model.get('age') > 10 });
-  // collection.each(this.addView);
-  //
-  // `Function#apply` can be slow so we use the method's arg count, if we know it.
-  var addMethod = function(length, method, attribute) {
-    switch (length) {
-      case 1: return function() {
-        return _[method](this[attribute]);
-      };
-      case 2: return function(value) {
-        return _[method](this[attribute], value);
-      };
-      case 3: return function(iteratee, context) {
-        return _[method](this[attribute], cb(iteratee, this), context);
-      };
-      case 4: return function(iteratee, defaultVal, context) {
-        return _[method](this[attribute], cb(iteratee, this), defaultVal, context);
-      };
-      default: return function() {
-        var args = slice.call(arguments);
-        args.unshift(this[attribute]);
-        return _[method].apply(_, args);
-      };
-    }
-  };
-  var addUnderscoreMethods = function(Class, methods, attribute) {
-    _.each(methods, function(length, method) {
-      if (_[method]) Class.prototype[method] = addMethod(length, method, attribute);
-    });
-  };
-
-  // Support `collection.sortBy('attr')` and `collection.findWhere({id: 1})`.
-  var cb = function(iteratee, instance) {
-    if (_.isFunction(iteratee)) return iteratee;
-    if (_.isObject(iteratee) && !instance._isModel(iteratee)) return modelMatcher(iteratee);
-    if (_.isString(iteratee)) return function(model) { return model.get(iteratee); };
-    return iteratee;
-  };
-  var modelMatcher = function(attrs) {
-    var matcher = _.matches(attrs);
-    return function(model) {
-      return matcher(model.attributes);
-    };
-  };
-
   // Backbone.Events
   // ---------------
 
@@ -2286,6 +2238,9 @@ define("node_modules/almond/almond", function(){});
 
   // Regular expression used to split event strings.
   var eventSplitter = /\s+/;
+
+  // A private global variable to share between listeners and listenees.
+  var _listening;
 
   // Iterates over the standard `event, callback` (as well as the fancy multiple
   // space-separated events `"change blur", callback` and jQuery-style event
@@ -2313,23 +2268,21 @@ define("node_modules/almond/almond", function(){});
   // Bind an event to a `callback` function. Passing `"all"` will bind
   // the callback to all events fired.
   Events.on = function(name, callback, context) {
-    return internalOn(this, name, callback, context);
-  };
-
-  // Guard the `listening` argument from the public API.
-  var internalOn = function(obj, name, callback, context, listening) {
-    obj._events = eventsApi(onApi, obj._events || {}, name, callback, {
+    this._events = eventsApi(onApi, this._events || {}, name, callback, {
       context: context,
-      ctx: obj,
-      listening: listening
+      ctx: this,
+      listening: _listening
     });
 
-    if (listening) {
-      var listeners = obj._listeners || (obj._listeners = {});
-      listeners[listening.id] = listening;
+    if (_listening) {
+      var listeners = this._listeners || (this._listeners = {});
+      listeners[_listening.id] = _listening;
+      // Allow the listening to use a counter, instead of tracking
+      // callbacks for library interop
+      _listening.interop = false;
     }
 
-    return obj;
+    return this;
   };
 
   // Inversion-of-control versions of `on`. Tell *this* object to listen to
@@ -2339,17 +2292,23 @@ define("node_modules/almond/almond", function(){});
     if (!obj) return this;
     var id = obj._listenId || (obj._listenId = _.uniqueId('l'));
     var listeningTo = this._listeningTo || (this._listeningTo = {});
-    var listening = listeningTo[id];
+    var listening = _listening = listeningTo[id];
 
     // This object is not listening to any other events on `obj` yet.
     // Setup the necessary references to track the listening callbacks.
     if (!listening) {
-      var thisId = this._listenId || (this._listenId = _.uniqueId('l'));
-      listening = listeningTo[id] = {obj: obj, objId: id, id: thisId, listeningTo: listeningTo, count: 0};
+      this._listenId || (this._listenId = _.uniqueId('l'));
+      listening = _listening = listeningTo[id] = new Listening(this, obj);
     }
 
-    // Bind callbacks on obj, and keep track of them on listening.
-    internalOn(obj, name, callback, this, listening);
+    // Bind callbacks on obj.
+    var error = tryCatchOn(obj, name, callback, this);
+    _listening = void 0;
+
+    if (error) throw error;
+    // If the target obj is not Backbone.Events, track events manually.
+    if (listening.interop) listening.on(name, callback);
+
     return this;
   };
 
@@ -2365,6 +2324,16 @@ define("node_modules/almond/almond", function(){});
     return events;
   };
 
+  // An try-catch guarded #on function, to prevent poisoning the global
+  // `_listening` variable.
+  var tryCatchOn = function(obj, name, callback, context) {
+    try {
+      obj.on(name, callback, context);
+    } catch (e) {
+      return e;
+    }
+  };
+
   // Remove one or many callbacks. If `context` is null, removes all
   // callbacks with that function. If `callback` is null, removes all
   // callbacks for the event. If `name` is null, removes all bound
@@ -2375,6 +2344,7 @@ define("node_modules/almond/almond", function(){});
       context: context,
       listeners: this._listeners
     });
+
     return this;
   };
 
@@ -2385,7 +2355,6 @@ define("node_modules/almond/almond", function(){});
     if (!listeningTo) return this;
 
     var ids = obj ? [obj._listenId] : _.keys(listeningTo);
-
     for (var i = 0; i < ids.length; i++) {
       var listening = listeningTo[ids[i]];
 
@@ -2394,7 +2363,9 @@ define("node_modules/almond/almond", function(){});
       if (!listening) break;
 
       listening.obj.off(name, callback, this);
+      if (listening.interop) listening.off(name, callback);
     }
+    if (_.isEmpty(listeningTo)) this._listeningTo = void 0;
 
     return this;
   };
@@ -2403,21 +2374,18 @@ define("node_modules/almond/almond", function(){});
   var offApi = function(events, name, callback, options) {
     if (!events) return;
 
-    var i = 0, listening;
     var context = options.context, listeners = options.listeners;
+    var i = 0, names;
 
-    // Delete all events listeners and "drop" events.
-    if (!name && !callback && !context) {
-      var ids = _.keys(listeners);
-      for (; i < ids.length; i++) {
-        listening = listeners[ids[i]];
-        delete listeners[listening.id];
-        delete listening.listeningTo[listening.objId];
+    // Delete all event listeners and "drop" events.
+    if (!name && !context && !callback) {
+      for (names = _.keys(listeners); i < names.length; i++) {
+        listeners[names[i]].cleanup();
       }
       return;
     }
 
-    var names = name ? [name] : _.keys(events);
+    names = name ? [name] : _.keys(events);
     for (; i < names.length; i++) {
       name = names[i];
       var handlers = events[name];
@@ -2425,7 +2393,7 @@ define("node_modules/almond/almond", function(){});
       // Bail out if there are no events stored.
       if (!handlers) break;
 
-      // Replace events if there are any remaining.  Otherwise, clean up.
+      // Find any remaining events.
       var remaining = [];
       for (var j = 0; j < handlers.length; j++) {
         var handler = handlers[j];
@@ -2436,21 +2404,19 @@ define("node_modules/almond/almond", function(){});
         ) {
           remaining.push(handler);
         } else {
-          listening = handler.listening;
-          if (listening && --listening.count === 0) {
-            delete listeners[listening.id];
-            delete listening.listeningTo[listening.objId];
-          }
+          var listening = handler.listening;
+          if (listening) listening.off(name, callback);
         }
       }
 
-      // Update tail event if the list has any events.  Otherwise, clean up.
+      // Replace events if there are any remaining.  Otherwise, clean up.
       if (remaining.length) {
         events[name] = remaining;
       } else {
         delete events[name];
       }
     }
+
     return events;
   };
 
@@ -2460,7 +2426,7 @@ define("node_modules/almond/almond", function(){});
   // once for each event, not once for a combination of all events.
   Events.once = function(name, callback, context) {
     // Map the event into a `{event: once}` object.
-    var events = eventsApi(onceMap, {}, name, callback, _.bind(this.off, this));
+    var events = eventsApi(onceMap, {}, name, callback, this.off.bind(this));
     if (typeof name === 'string' && context == null) callback = void 0;
     return this.on(events, callback, context);
   };
@@ -2468,7 +2434,7 @@ define("node_modules/almond/almond", function(){});
   // Inversion-of-control versions of `once`.
   Events.listenToOnce = function(obj, name, callback) {
     // Map the event into a `{event: once}` object.
-    var events = eventsApi(onceMap, {}, name, callback, _.bind(this.stopListening, this, obj));
+    var events = eventsApi(onceMap, {}, name, callback, this.stopListening.bind(this, obj));
     return this.listenTo(obj, events);
   };
 
@@ -2526,6 +2492,44 @@ define("node_modules/almond/almond", function(){});
     }
   };
 
+  // A listening class that tracks and cleans up memory bindings
+  // when all callbacks have been offed.
+  var Listening = function(listener, obj) {
+    this.id = listener._listenId;
+    this.listener = listener;
+    this.obj = obj;
+    this.interop = true;
+    this.count = 0;
+    this._events = void 0;
+  };
+
+  Listening.prototype.on = Events.on;
+
+  // Offs a callback (or several).
+  // Uses an optimized counter if the listenee uses Backbone.Events.
+  // Otherwise, falls back to manual tracking to support events
+  // library interop.
+  Listening.prototype.off = function(name, callback) {
+    var cleanup;
+    if (this.interop) {
+      this._events = eventsApi(offApi, this._events, name, callback, {
+        context: void 0,
+        listeners: void 0
+      });
+      cleanup = !this._events;
+    } else {
+      this.count--;
+      cleanup = this.count === 0;
+    }
+    if (cleanup) this.cleanup();
+  };
+
+  // Cleans up memory bindings between the listener and the listenee.
+  Listening.prototype.cleanup = function() {
+    delete this.listener._listeningTo[this.obj._listenId];
+    if (!this.interop) delete this.obj._listeners[this.id];
+  };
+
   // Aliases for backwards compatibility.
   Events.bind   = Events.on;
   Events.unbind = Events.off;
@@ -2547,6 +2551,7 @@ define("node_modules/almond/almond", function(){});
   var Model = Backbone.Model = function(attributes, options) {
     var attrs = attributes || {};
     options || (options = {});
+    this.preinitialize.apply(this, arguments);
     this.cid = _.uniqueId(this.cidPrefix);
     this.attributes = {};
     if (options.collection) this.collection = options.collection;
@@ -2574,6 +2579,10 @@ define("node_modules/almond/almond", function(){});
     // The prefix is used to create the client id which is used to identify models locally.
     // You may want to override this if you're experiencing name clashes with model ids.
     cidPrefix: 'c',
+
+    // preinitialize is an empty function by default. You can override it with a function
+    // or object.  preinitialize will run before any instantiation logic is run in the Model.
+    preinitialize: function(){},
 
     // Initialize is an empty function by default. Override it with your own
     // initialization logic.
@@ -2715,12 +2724,14 @@ define("node_modules/almond/almond", function(){});
       if (!diff) return this.hasChanged() ? _.clone(this.changed) : false;
       var old = this._changing ? this._previousAttributes : this.attributes;
       var changed = {};
+      var hasChanged;
       for (var attr in diff) {
         var val = diff[attr];
         if (_.isEqual(old[attr], val)) continue;
         changed[attr] = val;
+        hasChanged = true;
       }
-      return _.size(changed) ? changed : false;
+      return hasChanged ? changed : false;
     },
 
     // Get the previous value of an attribute, recorded at the time the last
@@ -2796,7 +2807,7 @@ define("node_modules/almond/almond", function(){});
       // Set temporary attributes if `{wait: true}` to properly find new ids.
       if (attrs && wait) this.attributes = _.extend({}, attributes, attrs);
 
-      var method = this.isNew() ? 'create' : (options.patch ? 'patch' : 'update');
+      var method = this.isNew() ? 'create' : options.patch ? 'patch' : 'update';
       if (method === 'patch' && !options.attrs) options.attrs = attrs;
       var xhr = this.sync(method, this, options);
 
@@ -2884,14 +2895,6 @@ define("node_modules/almond/almond", function(){});
 
   });
 
-  // Underscore methods that we want to implement on the Model, mapped to the
-  // number of arguments they take.
-  var modelMethods = {keys: 1, values: 1, pairs: 1, invert: 1, pick: 0,
-      omit: 0, chain: 1, isEmpty: 1};
-
-  // Mix in each Underscore method as a proxy to `Model#attributes`.
-  addUnderscoreMethods(Model, modelMethods, 'attributes');
-
   // Backbone.Collection
   // -------------------
 
@@ -2907,6 +2910,7 @@ define("node_modules/almond/almond", function(){});
   // its models in sort order, as they're added and removed.
   var Collection = Backbone.Collection = function(models, options) {
     options || (options = {});
+    this.preinitialize.apply(this, arguments);
     if (options.model) this.model = options.model;
     if (options.comparator !== void 0) this.comparator = options.comparator;
     this._reset();
@@ -2935,6 +2939,11 @@ define("node_modules/almond/almond", function(){});
     // The default model for a collection is just a **Backbone.Model**.
     // This should be overridden in most cases.
     model: Model,
+
+
+    // preinitialize is an empty function by default. You can override it with a function
+    // or object.  preinitialize will run before any instantiation logic is run in the Collection.
+    preinitialize: function(){},
 
     // Initialize is an empty function by default. Override it with your own
     // initialization logic.
@@ -3138,7 +3147,7 @@ define("node_modules/almond/almond", function(){});
     get: function(obj) {
       if (obj == null) return void 0;
       return this._byId[obj] ||
-        this._byId[this.modelId(obj.attributes || obj)] ||
+        this._byId[this.modelId(this._isModel(obj) ? obj.attributes : obj)] ||
         obj.cid && this._byId[obj.cid];
     },
 
@@ -3174,7 +3183,7 @@ define("node_modules/almond/almond", function(){});
       options || (options = {});
 
       var length = comparator.length;
-      if (_.isFunction(comparator)) comparator = _.bind(comparator, this);
+      if (_.isFunction(comparator)) comparator = comparator.bind(this);
 
       // Run sort based on type of `comparator`.
       if (length === 1 || _.isString(comparator)) {
@@ -3244,6 +3253,21 @@ define("node_modules/almond/almond", function(){});
     // Define how to uniquely identify models in the collection.
     modelId: function(attrs) {
       return attrs[this.model.prototype.idAttribute || 'id'];
+    },
+
+    // Get an iterator of all models in this collection.
+    values: function() {
+      return new CollectionIterator(this, ITERATOR_VALUES);
+    },
+
+    // Get an iterator of all model IDs in this collection.
+    keys: function() {
+      return new CollectionIterator(this, ITERATOR_KEYS);
+    },
+
+    // Get an iterator of all [ID, model] tuples in this collection.
+    entries: function() {
+      return new CollectionIterator(this, ITERATOR_KEYSVALUES);
     },
 
     // Private method to reset all internal state. Called when the collection
@@ -3342,20 +3366,71 @@ define("node_modules/almond/almond", function(){});
 
   });
 
-  // Underscore methods that we want to implement on the Collection.
-  // 90% of the core usefulness of Backbone Collections is actually implemented
-  // right here:
-  var collectionMethods = {forEach: 3, each: 3, map: 3, collect: 3, reduce: 0,
-      foldl: 0, inject: 0, reduceRight: 0, foldr: 0, find: 3, detect: 3, filter: 3,
-      select: 3, reject: 3, every: 3, all: 3, some: 3, any: 3, include: 3, includes: 3,
-      contains: 3, invoke: 0, max: 3, min: 3, toArray: 1, size: 1, first: 3,
-      head: 3, take: 3, initial: 3, rest: 3, tail: 3, drop: 3, last: 3,
-      without: 0, difference: 0, indexOf: 3, shuffle: 1, lastIndexOf: 3,
-      isEmpty: 1, chain: 1, sample: 3, partition: 3, groupBy: 3, countBy: 3,
-      sortBy: 3, indexBy: 3, findIndex: 3, findLastIndex: 3};
+  // Defining an @@iterator method implements JavaScript's Iterable protocol.
+  // In modern ES2015 browsers, this value is found at Symbol.iterator.
+  /* global Symbol */
+  var $$iterator = typeof Symbol === 'function' && Symbol.iterator;
+  if ($$iterator) {
+    Collection.prototype[$$iterator] = Collection.prototype.values;
+  }
 
-  // Mix in each Underscore method as a proxy to `Collection#models`.
-  addUnderscoreMethods(Collection, collectionMethods, 'models');
+  // CollectionIterator
+  // ------------------
+
+  // A CollectionIterator implements JavaScript's Iterator protocol, allowing the
+  // use of `for of` loops in modern browsers and interoperation between
+  // Backbone.Collection and other JavaScript functions and third-party libraries
+  // which can operate on Iterables.
+  var CollectionIterator = function(collection, kind) {
+    this._collection = collection;
+    this._kind = kind;
+    this._index = 0;
+  };
+
+  // This "enum" defines the three possible kinds of values which can be emitted
+  // by a CollectionIterator that correspond to the values(), keys() and entries()
+  // methods on Collection, respectively.
+  var ITERATOR_VALUES = 1;
+  var ITERATOR_KEYS = 2;
+  var ITERATOR_KEYSVALUES = 3;
+
+  // All Iterators should themselves be Iterable.
+  if ($$iterator) {
+    CollectionIterator.prototype[$$iterator] = function() {
+      return this;
+    };
+  }
+
+  CollectionIterator.prototype.next = function() {
+    if (this._collection) {
+
+      // Only continue iterating if the iterated collection is long enough.
+      if (this._index < this._collection.length) {
+        var model = this._collection.at(this._index);
+        this._index++;
+
+        // Construct a value depending on what kind of values should be iterated.
+        var value;
+        if (this._kind === ITERATOR_VALUES) {
+          value = model;
+        } else {
+          var id = this._collection.modelId(model.attributes);
+          if (this._kind === ITERATOR_KEYS) {
+            value = id;
+          } else { // ITERATOR_KEYSVALUES
+            value = [id, model];
+          }
+        }
+        return {value: value, done: false};
+      }
+
+      // Once exhausted, remove the reference to the collection so future
+      // calls to the next method always return done.
+      this._collection = void 0;
+    }
+
+    return {value: void 0, done: true};
+  };
 
   // Backbone.View
   // -------------
@@ -3372,6 +3447,7 @@ define("node_modules/almond/almond", function(){});
   // if an existing element is not provided...
   var View = Backbone.View = function(options) {
     this.cid = _.uniqueId('view');
+    this.preinitialize.apply(this, arguments);
     _.extend(this, _.pick(options, viewOptions));
     this._ensureElement();
     this.initialize.apply(this, arguments);
@@ -3394,6 +3470,10 @@ define("node_modules/almond/almond", function(){});
     $: function(selector) {
       return this.$el.find(selector);
     },
+
+    // preinitialize is an empty function by default. You can override it with a function
+    // or object.  preinitialize will run before any instantiation logic is run in the View
+    preinitialize: function(){},
 
     // Initialize is an empty function by default. Override it with your own
     // initialization logic.
@@ -3462,7 +3542,7 @@ define("node_modules/almond/almond", function(){});
         if (!_.isFunction(method)) method = this[method];
         if (!method) continue;
         var match = key.match(delegateEventSplitter);
-        this.delegate(match[1], match[2], _.bind(method, this));
+        this.delegate(match[1], match[2], method.bind(this));
       }
       return this;
     },
@@ -3518,6 +3598,94 @@ define("node_modules/almond/almond", function(){});
       this.$el.attr(attributes);
     }
 
+  });
+
+  // Proxy Backbone class methods to Underscore functions, wrapping the model's
+  // `attributes` object or collection's `models` array behind the scenes.
+  //
+  // collection.filter(function(model) { return model.get('age') > 10 });
+  // collection.each(this.addView);
+  //
+  // `Function#apply` can be slow so we use the method's arg count, if we know it.
+  var addMethod = function(base, length, method, attribute) {
+    switch (length) {
+      case 1: return function() {
+        return base[method](this[attribute]);
+      };
+      case 2: return function(value) {
+        return base[method](this[attribute], value);
+      };
+      case 3: return function(iteratee, context) {
+        return base[method](this[attribute], cb(iteratee, this), context);
+      };
+      case 4: return function(iteratee, defaultVal, context) {
+        return base[method](this[attribute], cb(iteratee, this), defaultVal, context);
+      };
+      default: return function() {
+        var args = slice.call(arguments);
+        args.unshift(this[attribute]);
+        return base[method].apply(base, args);
+      };
+    }
+  };
+
+  var addUnderscoreMethods = function(Class, base, methods, attribute) {
+    _.each(methods, function(length, method) {
+      if (base[method]) Class.prototype[method] = addMethod(base, length, method, attribute);
+    });
+  };
+
+  // Support `collection.sortBy('attr')` and `collection.findWhere({id: 1})`.
+  var cb = function(iteratee, instance) {
+    if (_.isFunction(iteratee)) return iteratee;
+    if (_.isObject(iteratee) && !instance._isModel(iteratee)) return modelMatcher(iteratee);
+    if (_.isString(iteratee)) return function(model) { return model.get(iteratee); };
+    return iteratee;
+  };
+  var modelMatcher = function(attrs) {
+    var matcher = _.matches(attrs);
+    return function(model) {
+      return matcher(model.attributes);
+    };
+  };
+
+  // Underscore methods that we want to implement on the Collection.
+  // 90% of the core usefulness of Backbone Collections is actually implemented
+  // right here:
+  var collectionMethods = {forEach: 3, each: 3, map: 3, collect: 3, reduce: 0,
+    foldl: 0, inject: 0, reduceRight: 0, foldr: 0, find: 3, detect: 3, filter: 3,
+    select: 3, reject: 3, every: 3, all: 3, some: 3, any: 3, include: 3, includes: 3,
+    contains: 3, invoke: 0, max: 3, min: 3, toArray: 1, size: 1, first: 3,
+    head: 3, take: 3, initial: 3, rest: 3, tail: 3, drop: 3, last: 3,
+    without: 0, difference: 0, indexOf: 3, shuffle: 1, lastIndexOf: 3,
+    isEmpty: 1, chain: 1, sample: 3, partition: 3, groupBy: 3, countBy: 3,
+    sortBy: 3, indexBy: 3, findIndex: 3, findLastIndex: 3};
+
+
+  // Underscore methods that we want to implement on the Model, mapped to the
+  // number of arguments they take.
+  var modelMethods = {keys: 1, values: 1, pairs: 1, invert: 1, pick: 0,
+    omit: 0, chain: 1, isEmpty: 1};
+
+  // Mix in each Underscore method as a proxy to `Collection#models`.
+
+  _.each([
+    [Collection, collectionMethods, 'models'],
+    [Model, modelMethods, 'attributes']
+  ], function(config) {
+    var Base = config[0],
+        methods = config[1],
+        attribute = config[2];
+
+    Base.mixin = function(obj) {
+      var mappings = _.reduce(_.functions(obj), function(memo, name) {
+        memo[name] = 0;
+        return memo;
+      }, {});
+      addUnderscoreMethods(Base, obj, mappings, attribute);
+    };
+
+    addUnderscoreMethods(Base, _, methods, attribute);
   });
 
   // Backbone.sync
@@ -3600,11 +3768,11 @@ define("node_modules/almond/almond", function(){});
 
   // Map from CRUD to HTTP for our default `Backbone.sync` implementation.
   var methodMap = {
-    'create': 'POST',
-    'update': 'PUT',
-    'patch': 'PATCH',
-    'delete': 'DELETE',
-    'read': 'GET'
+    create: 'POST',
+    update: 'PUT',
+    patch: 'PATCH',
+    delete: 'DELETE',
+    read: 'GET'
   };
 
   // Set the default implementation of `Backbone.ajax` to proxy through to `$`.
@@ -3620,6 +3788,7 @@ define("node_modules/almond/almond", function(){});
   // matched. Creating a new one sets its `routes` hash, if not set statically.
   var Router = Backbone.Router = function(options) {
     options || (options = {});
+    this.preinitialize.apply(this, arguments);
     if (options.routes) this.routes = options.routes;
     this._bindRoutes();
     this.initialize.apply(this, arguments);
@@ -3634,6 +3803,10 @@ define("node_modules/almond/almond", function(){});
 
   // Set up all inheritable **Backbone.Router** properties and methods.
   _.extend(Router.prototype, Events, {
+
+    // preinitialize is an empty function by default. You can override it with a function
+    // or object.  preinitialize will run before any instantiation logic is run in the Router.
+    preinitialize: function(){},
 
     // Initialize is an empty function by default. Override it with your own
     // initialization logic.
@@ -3692,11 +3865,11 @@ define("node_modules/almond/almond", function(){});
     // against the current location hash.
     _routeToRegExp: function(route) {
       route = route.replace(escapeRegExp, '\\$&')
-                   .replace(optionalParam, '(?:$1)?')
-                   .replace(namedParam, function(match, optional) {
-                     return optional ? match : '([^/?]+)';
-                   })
-                   .replace(splatParam, '([^?]*?)');
+        .replace(optionalParam, '(?:$1)?')
+        .replace(namedParam, function(match, optional) {
+          return optional ? match : '([^/?]+)';
+        })
+        .replace(splatParam, '([^?]*?)');
       return new RegExp('^' + route + '(?:\\?([\\s\\S]*))?$');
     },
 
@@ -3724,7 +3897,7 @@ define("node_modules/almond/almond", function(){});
   // falls back to polling.
   var History = Backbone.History = function() {
     this.handlers = [];
-    this.checkUrl = _.bind(this.checkUrl, this);
+    this.checkUrl = this.checkUrl.bind(this);
 
     // Ensure that `History` can be used outside of the browser.
     if (typeof window !== 'undefined') {
@@ -3965,11 +4138,14 @@ define("node_modules/almond/almond", function(){});
       }
       var url = rootPath + fragment;
 
-      // Strip the hash and decode for matching.
-      fragment = this.decodeFragment(fragment.replace(pathStripper, ''));
+      // Strip the fragment of the query and hash for matching.
+      fragment = fragment.replace(pathStripper, '');
 
-      if (this.fragment === fragment) return;
-      this.fragment = fragment;
+      // Decode for matching.
+      var decodedFragment = this.decodeFragment(fragment);
+
+      if (this.fragment === decodedFragment) return;
+      this.fragment = decodedFragment;
 
       // If pushState is available, we use it to set the fragment as a real URL.
       if (this._usePushState) {
@@ -4072,7 +4248,7 @@ define("node_modules/almond/almond", function(){});
   return Backbone;
 });
 
-/*! loglevel - v1.6.1 - https://github.com/pimterry/loglevel - (c) 2018 Tim Perry - licensed MIT */
+/*! loglevel - v1.6.7 - https://github.com/pimterry/loglevel - (c) 2020 Tim Perry - licensed MIT */
 (function (root, definition) {
     "use strict";
     if (typeof define === 'function' && define.amd) {
@@ -4088,6 +4264,9 @@ define("node_modules/almond/almond", function(){});
     // Slightly dubious tricks to cut down minimized file size
     var noop = function() {};
     var undefinedType = "undefined";
+    var isIE = (typeof window !== undefinedType) && (typeof window.navigator !== undefinedType) && (
+        /Trident\/|MSIE /.test(window.navigator.userAgent)
+    );
 
     var logMethods = [
         "trace",
@@ -4114,6 +4293,19 @@ define("node_modules/almond/almond", function(){});
         }
     }
 
+    // Trace() doesn't print the message in IE, so for that case we need to wrap it
+    function traceForIE() {
+        if (console.log) {
+            if (console.log.apply) {
+                console.log.apply(console, arguments);
+            } else {
+                // In old IE, native console methods themselves don't have apply().
+                Function.prototype.apply.apply(console.log, [console, arguments]);
+            }
+        }
+        if (console.trace) console.trace();
+    }
+
     // Build the best logging method possible for this env
     // Wherever possible we want to bind, not wrap, to preserve stack traces
     function realMethod(methodName) {
@@ -4123,6 +4315,8 @@ define("node_modules/almond/almond", function(){});
 
         if (typeof console === undefinedType) {
             return false; // No method possible, for now - fixed later by enableLoggingWhenConsoleArrives
+        } else if (methodName === 'trace' && isIE) {
+            return traceForIE;
         } else if (console[methodName] !== undefined) {
             return bindMethod(console, methodName);
         } else if (console.log !== undefined) {
@@ -4319,17 +4513,17 @@ define("node_modules/almond/almond", function(){});
 }));
 
 /**
- * CLDR JavaScript Library v0.5.0
+ * CLDR JavaScript Library v0.5.1
  * http://jquery.com/
  *
  * Copyright 2013 Rafael Xavier de Souza
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2017-08-11T11:52Z
+ * Date: 2019-01-21T13:43Z
  */
 /*!
- * CLDR JavaScript Library v0.5.0 2017-08-11T11:52Z MIT license © Rafael Xavier
+ * CLDR JavaScript Library v0.5.1 2019-01-21T13:43Z MIT license © Rafael Xavier
  * http://git.io/h4lmVg
  */
 (function( root, factory ) {
@@ -4619,7 +4813,7 @@ define("node_modules/almond/almond", function(){});
 				maxBundle = coreLikelySubtags( Cldr, cldr, subtags );
 				minBundle = coreRemoveLikelySubtags( Cldr, cldr, maxBundle );
 				minBundle = minBundle.join( Cldr.localeSep );
-				existing = availableBundleMapQueue[ minBundle ];
+				existing = availableBundleMap[ minBundle ];
 				if ( existing && existing.length < bundle.length ) {
 					return;
 				}
@@ -5002,17 +5196,17 @@ define("node_modules/almond/almond", function(){});
 }));
 
 /**
- * CLDR JavaScript Library v0.5.0
+ * CLDR JavaScript Library v0.5.1
  * http://jquery.com/
  *
  * Copyright 2013 Rafael Xavier de Souza
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2017-08-11T11:52Z
+ * Date: 2019-01-21T13:43Z
  */
 /*!
- * CLDR JavaScript Library v0.5.0 2017-08-11T11:52Z MIT license © Rafael Xavier
+ * CLDR JavaScript Library v0.5.1 2019-01-21T13:43Z MIT license © Rafael Xavier
  * http://git.io/h4lmVg
  */
 (function( factory ) {
@@ -5588,7 +5782,7 @@ EventEmitter = (function () {
 }));
 
 /**
- * Globalize v1.4.0
+ * Globalize v1.5.0
  *
  * http://github.com/jquery/globalize
  *
@@ -5596,10 +5790,10 @@ EventEmitter = (function () {
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2018-07-17T20:38Z
+ * Date: 2020-03-25T12:19Z
  */
 /*!
- * Globalize v1.4.0 2018-07-17T20:38Z Released under the MIT license
+ * Globalize v1.5.0 2020-03-25T12:19Z Released under the MIT license
  * http://git.io/TrdQbw
  */
 (function( root, factory ) {
@@ -5697,6 +5891,77 @@ var createError = function( code, message, attributes ) {
 	objectExtend( error, attributes );
 
 	return error;
+};
+
+
+
+
+/**
+ * Pushes part to parts array, concat two consecutive parts of the same type.
+ */
+var partsPush = function( parts, type, value ) {
+
+		// Concat two consecutive parts of same type
+		if ( parts.length && parts[ parts.length - 1 ].type === type ) {
+			parts[ parts.length - 1 ].value += value;
+			return;
+		}
+
+		parts.push( { type: type, value: value } );
+};
+
+
+
+
+/**
+ * formatMessage( message, data )
+ *
+ * @message [String] A message with optional {vars} to be replaced.
+ *
+ * @data [Array or JSON] Object with replacing-variables content.
+ *
+ * Return the formatted message. For example:
+ *
+ * - formatMessage( "{0} second", [ 1 ] );
+ * > [{type: "variable", value: "1", name: "0"}, {type: "literal", value: " second"}]
+ *
+ * - formatMessage( "{0}/{1}", ["m", "s"] );
+ * > [
+ *     { type: "variable", value: "m", name: "0" },
+ *     { type: "literal", value: " /" },
+ *     { type: "variable", value: "s", name: "1" }
+ *   ]
+ */
+var formatMessageToParts = function( message, data ) {
+
+	var lastOffset = 0,
+		parts = [];
+
+	// Create parts.
+	message.replace( /{[0-9a-zA-Z-_. ]+}/g, function( nameIncludingBrackets, offset ) {
+		var name = nameIncludingBrackets.slice( 1, -1 );
+		partsPush( parts, "literal", message.slice( lastOffset, offset ));
+		partsPush( parts, "variable", data[ name ] );
+		parts[ parts.length - 1 ].name = name;
+		lastOffset += offset + nameIncludingBrackets.length;
+	});
+
+	// Skip empty ones such as `{ type: 'literal', value: '' }`.
+	return parts.filter(function( part ) {
+		return part.value !== "";
+	});
+};
+
+
+
+
+/**
+ * Returns joined parts values.
+ */
+var partsJoin = function( parts ) {
+	return parts.map( function( part ) {
+		return part.value;
+	}).join( "" );
 };
 
 
@@ -6001,8 +6266,11 @@ Globalize.locale = function( locale ) {
 Globalize._alwaysArray = alwaysArray;
 Globalize._createError = createError;
 Globalize._formatMessage = formatMessage;
+Globalize._formatMessageToParts = formatMessageToParts;
 Globalize._isPlainObject = isPlainObject;
 Globalize._objectExtend = objectExtend;
+Globalize._partsJoin = partsJoin;
+Globalize._partsPush = partsPush;
 Globalize._regexpEscape = regexpEscape;
 Globalize._runtimeBind = runtimeBind;
 Globalize._stringPad = stringPad;
@@ -7163,22 +7431,36 @@ return Globalize;
     function createDate (y, m, d, h, M, s, ms) {
         // can't just apply() to create a date:
         // https://stackoverflow.com/q/181348
-        var date = new Date(y, m, d, h, M, s, ms);
-
+        var date;
         // the date constructor remaps years 0-99 to 1900-1999
-        if (y < 100 && y >= 0 && isFinite(date.getFullYear())) {
-            date.setFullYear(y);
+        if (y < 100 && y >= 0) {
+            // preserve leap years using a full 400 year cycle, then reset
+            date = new Date(y + 400, m, d, h, M, s, ms);
+            if (isFinite(date.getFullYear())) {
+                date.setFullYear(y);
+            }
+        } else {
+            date = new Date(y, m, d, h, M, s, ms);
         }
+
         return date;
     }
 
     function createUTCDate (y) {
-        var date = new Date(Date.UTC.apply(null, arguments));
-
+        var date;
         // the Date.UTC function remaps years 0-99 to 1900-1999
-        if (y < 100 && y >= 0 && isFinite(date.getUTCFullYear())) {
-            date.setUTCFullYear(y);
+        if (y < 100 && y >= 0) {
+            var args = Array.prototype.slice.call(arguments);
+            // preserve leap years using a full 400 year cycle, then reset
+            args[0] = y + 400;
+            date = new Date(Date.UTC.apply(null, args));
+            if (isFinite(date.getUTCFullYear())) {
+                date.setUTCFullYear(y);
+            }
+        } else {
+            date = new Date(Date.UTC.apply(null, arguments));
         }
+
         return date;
     }
 
@@ -7280,7 +7562,7 @@ return Globalize;
 
     var defaultLocaleWeek = {
         dow : 0, // Sunday is the first day of the week.
-        doy : 6  // The week that contains Jan 1st is the first week of the year.
+        doy : 6  // The week that contains Jan 6th is the first week of the year.
     };
 
     function localeFirstDayOfWeek () {
@@ -7389,25 +7671,28 @@ return Globalize;
     }
 
     // LOCALES
+    function shiftWeekdays (ws, n) {
+        return ws.slice(n, 7).concat(ws.slice(0, n));
+    }
 
     var defaultLocaleWeekdays = 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_');
     function localeWeekdays (m, format) {
-        if (!m) {
-            return isArray(this._weekdays) ? this._weekdays :
-                this._weekdays['standalone'];
-        }
-        return isArray(this._weekdays) ? this._weekdays[m.day()] :
-            this._weekdays[this._weekdays.isFormat.test(format) ? 'format' : 'standalone'][m.day()];
+        var weekdays = isArray(this._weekdays) ? this._weekdays :
+            this._weekdays[(m && m !== true && this._weekdays.isFormat.test(format)) ? 'format' : 'standalone'];
+        return (m === true) ? shiftWeekdays(weekdays, this._week.dow)
+            : (m) ? weekdays[m.day()] : weekdays;
     }
 
     var defaultLocaleWeekdaysShort = 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_');
     function localeWeekdaysShort (m) {
-        return (m) ? this._weekdaysShort[m.day()] : this._weekdaysShort;
+        return (m === true) ? shiftWeekdays(this._weekdaysShort, this._week.dow)
+            : (m) ? this._weekdaysShort[m.day()] : this._weekdaysShort;
     }
 
     var defaultLocaleWeekdaysMin = 'Su_Mo_Tu_We_Th_Fr_Sa'.split('_');
     function localeWeekdaysMin (m) {
-        return (m) ? this._weekdaysMin[m.day()] : this._weekdaysMin;
+        return (m === true) ? shiftWeekdays(this._weekdaysMin, this._week.dow)
+            : (m) ? this._weekdaysMin[m.day()] : this._weekdaysMin;
     }
 
     function handleStrictParse$1(weekdayName, format, strict) {
@@ -8156,13 +8441,13 @@ return Globalize;
                     weekdayOverflow = true;
                 }
             } else if (w.e != null) {
-                // local weekday -- counting starts from begining of week
+                // local weekday -- counting starts from beginning of week
                 weekday = w.e + dow;
                 if (w.e < 0 || w.e > 6) {
                     weekdayOverflow = true;
                 }
             } else {
-                // default to begining of week
+                // default to beginning of week
                 weekday = dow;
             }
         }
@@ -8756,7 +9041,7 @@ return Globalize;
             years = normalizedInput.year || 0,
             quarters = normalizedInput.quarter || 0,
             months = normalizedInput.month || 0,
-            weeks = normalizedInput.week || 0,
+            weeks = normalizedInput.week || normalizedInput.isoWeek || 0,
             days = normalizedInput.day || 0,
             hours = normalizedInput.hour || 0,
             minutes = normalizedInput.minute || 0,
@@ -9060,7 +9345,7 @@ return Globalize;
                 ms : toInt(absRound(match[MILLISECOND] * 1000)) * sign // the millisecond decimal point is included in the match
             };
         } else if (!!(match = isoRegex.exec(input))) {
-            sign = (match[1] === '-') ? -1 : (match[1] === '+') ? 1 : 1;
+            sign = (match[1] === '-') ? -1 : 1;
             duration = {
                 y : parseIso(match[2], sign),
                 M : parseIso(match[3], sign),
@@ -9102,7 +9387,7 @@ return Globalize;
     }
 
     function positiveMomentsDifference(base, other) {
-        var res = {milliseconds: 0, months: 0};
+        var res = {};
 
         res.months = other.month() - base.month() +
             (other.year() - base.year()) * 12;
@@ -9211,7 +9496,7 @@ return Globalize;
         if (!(this.isValid() && localInput.isValid())) {
             return false;
         }
-        units = normalizeUnits(!isUndefined(units) ? units : 'millisecond');
+        units = normalizeUnits(units) || 'millisecond';
         if (units === 'millisecond') {
             return this.valueOf() > localInput.valueOf();
         } else {
@@ -9224,7 +9509,7 @@ return Globalize;
         if (!(this.isValid() && localInput.isValid())) {
             return false;
         }
-        units = normalizeUnits(!isUndefined(units) ? units : 'millisecond');
+        units = normalizeUnits(units) || 'millisecond';
         if (units === 'millisecond') {
             return this.valueOf() < localInput.valueOf();
         } else {
@@ -9233,9 +9518,14 @@ return Globalize;
     }
 
     function isBetween (from, to, units, inclusivity) {
+        var localFrom = isMoment(from) ? from : createLocal(from),
+            localTo = isMoment(to) ? to : createLocal(to);
+        if (!(this.isValid() && localFrom.isValid() && localTo.isValid())) {
+            return false;
+        }
         inclusivity = inclusivity || '()';
-        return (inclusivity[0] === '(' ? this.isAfter(from, units) : !this.isBefore(from, units)) &&
-            (inclusivity[1] === ')' ? this.isBefore(to, units) : !this.isAfter(to, units));
+        return (inclusivity[0] === '(' ? this.isAfter(localFrom, units) : !this.isBefore(localFrom, units)) &&
+            (inclusivity[1] === ')' ? this.isBefore(localTo, units) : !this.isAfter(localTo, units));
     }
 
     function isSame (input, units) {
@@ -9244,7 +9534,7 @@ return Globalize;
         if (!(this.isValid() && localInput.isValid())) {
             return false;
         }
-        units = normalizeUnits(units || 'millisecond');
+        units = normalizeUnits(units) || 'millisecond';
         if (units === 'millisecond') {
             return this.valueOf() === localInput.valueOf();
         } else {
@@ -9254,11 +9544,11 @@ return Globalize;
     }
 
     function isSameOrAfter (input, units) {
-        return this.isSame(input, units) || this.isAfter(input,units);
+        return this.isSame(input, units) || this.isAfter(input, units);
     }
 
     function isSameOrBefore (input, units) {
-        return this.isSame(input, units) || this.isBefore(input,units);
+        return this.isSame(input, units) || this.isBefore(input, units);
     }
 
     function diff (input, units, asFloat) {
@@ -9435,62 +9725,130 @@ return Globalize;
         return this._locale;
     }
 
+    var MS_PER_SECOND = 1000;
+    var MS_PER_MINUTE = 60 * MS_PER_SECOND;
+    var MS_PER_HOUR = 60 * MS_PER_MINUTE;
+    var MS_PER_400_YEARS = (365 * 400 + 97) * 24 * MS_PER_HOUR;
+
+    // actual modulo - handles negative numbers (for dates before 1970):
+    function mod$1(dividend, divisor) {
+        return (dividend % divisor + divisor) % divisor;
+    }
+
+    function localStartOfDate(y, m, d) {
+        // the date constructor remaps years 0-99 to 1900-1999
+        if (y < 100 && y >= 0) {
+            // preserve leap years using a full 400 year cycle, then reset
+            return new Date(y + 400, m, d) - MS_PER_400_YEARS;
+        } else {
+            return new Date(y, m, d).valueOf();
+        }
+    }
+
+    function utcStartOfDate(y, m, d) {
+        // Date.UTC remaps years 0-99 to 1900-1999
+        if (y < 100 && y >= 0) {
+            // preserve leap years using a full 400 year cycle, then reset
+            return Date.UTC(y + 400, m, d) - MS_PER_400_YEARS;
+        } else {
+            return Date.UTC(y, m, d);
+        }
+    }
+
     function startOf (units) {
+        var time;
         units = normalizeUnits(units);
-        // the following switch intentionally omits break keywords
-        // to utilize falling through the cases.
+        if (units === undefined || units === 'millisecond' || !this.isValid()) {
+            return this;
+        }
+
+        var startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
+
         switch (units) {
             case 'year':
-                this.month(0);
-                /* falls through */
+                time = startOfDate(this.year(), 0, 1);
+                break;
             case 'quarter':
+                time = startOfDate(this.year(), this.month() - this.month() % 3, 1);
+                break;
             case 'month':
-                this.date(1);
-                /* falls through */
+                time = startOfDate(this.year(), this.month(), 1);
+                break;
             case 'week':
+                time = startOfDate(this.year(), this.month(), this.date() - this.weekday());
+                break;
             case 'isoWeek':
+                time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1));
+                break;
             case 'day':
             case 'date':
-                this.hours(0);
-                /* falls through */
+                time = startOfDate(this.year(), this.month(), this.date());
+                break;
             case 'hour':
-                this.minutes(0);
-                /* falls through */
+                time = this._d.valueOf();
+                time -= mod$1(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR);
+                break;
             case 'minute':
-                this.seconds(0);
-                /* falls through */
+                time = this._d.valueOf();
+                time -= mod$1(time, MS_PER_MINUTE);
+                break;
             case 'second':
-                this.milliseconds(0);
+                time = this._d.valueOf();
+                time -= mod$1(time, MS_PER_SECOND);
+                break;
         }
 
-        // weeks are a special case
-        if (units === 'week') {
-            this.weekday(0);
-        }
-        if (units === 'isoWeek') {
-            this.isoWeekday(1);
-        }
-
-        // quarters are also special
-        if (units === 'quarter') {
-            this.month(Math.floor(this.month() / 3) * 3);
-        }
-
+        this._d.setTime(time);
+        hooks.updateOffset(this, true);
         return this;
     }
 
     function endOf (units) {
+        var time;
         units = normalizeUnits(units);
-        if (units === undefined || units === 'millisecond') {
+        if (units === undefined || units === 'millisecond' || !this.isValid()) {
             return this;
         }
 
-        // 'date' is an alias for 'day', so it should be considered as such.
-        if (units === 'date') {
-            units = 'day';
+        var startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
+
+        switch (units) {
+            case 'year':
+                time = startOfDate(this.year() + 1, 0, 1) - 1;
+                break;
+            case 'quarter':
+                time = startOfDate(this.year(), this.month() - this.month() % 3 + 3, 1) - 1;
+                break;
+            case 'month':
+                time = startOfDate(this.year(), this.month() + 1, 1) - 1;
+                break;
+            case 'week':
+                time = startOfDate(this.year(), this.month(), this.date() - this.weekday() + 7) - 1;
+                break;
+            case 'isoWeek':
+                time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1) + 7) - 1;
+                break;
+            case 'day':
+            case 'date':
+                time = startOfDate(this.year(), this.month(), this.date() + 1) - 1;
+                break;
+            case 'hour':
+                time = this._d.valueOf();
+                time += MS_PER_HOUR - mod$1(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR) - 1;
+                break;
+            case 'minute':
+                time = this._d.valueOf();
+                time += MS_PER_MINUTE - mod$1(time, MS_PER_MINUTE) - 1;
+                break;
+            case 'second':
+                time = this._d.valueOf();
+                time += MS_PER_SECOND - mod$1(time, MS_PER_SECOND) - 1;
+                break;
         }
 
-        return this.startOf(units).add(1, (units === 'isoWeek' ? 'week' : units)).subtract(1, 'ms');
+        this._d.setTime(time);
+        hooks.updateOffset(this, true);
+        return this;
     }
 
     function valueOf () {
@@ -10196,10 +10554,14 @@ return Globalize;
 
         units = normalizeUnits(units);
 
-        if (units === 'month' || units === 'year') {
-            days   = this._days   + milliseconds / 864e5;
+        if (units === 'month' || units === 'quarter' || units === 'year') {
+            days = this._days + milliseconds / 864e5;
             months = this._months + daysToMonths(days);
-            return units === 'month' ? months : months / 12;
+            switch (units) {
+                case 'month':   return months;
+                case 'quarter': return months / 3;
+                case 'year':    return months / 12;
+            }
         } else {
             // handle milliseconds separately because of floating point math errors (issue #1867)
             days = this._days + Math.round(monthsToDays(this._months));
@@ -10242,6 +10604,7 @@ return Globalize;
     var asDays         = makeAs('d');
     var asWeeks        = makeAs('w');
     var asMonths       = makeAs('M');
+    var asQuarters     = makeAs('Q');
     var asYears        = makeAs('y');
 
     function clone$1 () {
@@ -10433,6 +10796,7 @@ return Globalize;
     proto$2.asDays         = asDays;
     proto$2.asWeeks        = asWeeks;
     proto$2.asMonths       = asMonths;
+    proto$2.asQuarters     = asQuarters;
     proto$2.asYears        = asYears;
     proto$2.valueOf        = valueOf$1;
     proto$2._bubble        = bubble;
@@ -10478,7 +10842,7 @@ return Globalize;
 
     //! moment.js
 
-    hooks.version = '2.22.2';
+    hooks.version = '2.24.0';
 
     setHookCallback(createLocal);
 
@@ -10519,7 +10883,7 @@ return Globalize;
         TIME: 'HH:mm',                                  // <input type="time" />
         TIME_SECONDS: 'HH:mm:ss',                       // <input type="time" step="1" />
         TIME_MS: 'HH:mm:ss.SSS',                        // <input type="time" step="0.001" />
-        WEEK: 'YYYY-[W]WW',                             // <input type="week" />
+        WEEK: 'GGGG-[W]WW',                             // <input type="week" />
         MONTH: 'YYYY-MM'                                // <input type="month" />
     };
 
@@ -10627,7 +10991,7 @@ return Globalize;
         },
         week : {
             dow : 0, // Sunday is the first day of the week.
-            doy : 4  // The week that contains Jan 1st is the first week of the year.
+            doy : 4  // The week that contains Jan 4th is the first week of the year.
         }
     });
 
@@ -10674,7 +11038,7 @@ return Globalize;
         },
         week : {
             dow : 0, // Sunday is the first day of the week.
-            doy : 12  // The week that contains Jan 1st is the first week of the year.
+            doy : 12  // The week that contains Jan 12th is the first week of the year.
         }
     });
 
@@ -10784,7 +11148,7 @@ return Globalize;
         },
         week : {
             dow : 6, // Saturday is the first day of the week.
-            doy : 12  // The week that contains Jan 1st is the first week of the year.
+            doy : 12  // The week that contains Jan 12th is the first week of the year.
         }
     });
 
@@ -10831,7 +11195,7 @@ return Globalize;
         },
         week : {
             dow : 6, // Saturday is the first day of the week.
-            doy : 12  // The week that contains Jan 1st is the first week of the year.
+            doy : 12  // The week that contains Jan 12th is the first week of the year.
         }
     });
 
@@ -10923,7 +11287,7 @@ return Globalize;
         },
         week : {
             dow : 0, // Sunday is the first day of the week.
-            doy : 6  // The week that contains Jan 1st is the first week of the year.
+            doy : 6  // The week that contains Jan 6th is the first week of the year.
         }
     });
 
@@ -11093,7 +11457,7 @@ return Globalize;
         },
         week : {
             dow : 6, // Saturday is the first day of the week.
-            doy : 12  // The week that contains Jan 1st is the first week of the year.
+            doy : 12  // The week that contains Jan 12th is the first week of the year.
         }
     });
 
@@ -11186,7 +11550,7 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -11306,7 +11670,7 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -11384,7 +11748,7 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -11537,7 +11901,7 @@ return Globalize;
         },
         week : {
             dow : 0, // Sunday is the first day of the week.
-            doy : 6  // The week that contains Jan 1st is the first week of the year.
+            doy : 6  // The week that contains Jan 6th is the first week of the year.
         }
     });
 
@@ -11644,7 +12008,7 @@ return Globalize;
         },
         week : {
             dow : 0, // Sunday is the first day of the week.
-            doy : 6  // The week that contains Jan 1st is the first week of the year.
+            doy : 6  // The week that contains Jan 6th is the first week of the year.
         }
     });
 
@@ -11879,7 +12243,7 @@ return Globalize;
         ordinal : '%d.',
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -11963,6 +12327,12 @@ return Globalize;
 
     var months$3 = 'leden_únor_březen_duben_květen_červen_červenec_srpen_září_říjen_listopad_prosinec'.split('_'),
         monthsShort = 'led_úno_bře_dub_kvě_čvn_čvc_srp_zář_říj_lis_pro'.split('_');
+
+    var monthsParse = [/^led/i, /^úno/i, /^bře/i, /^dub/i, /^kvě/i, /^(čvn|červen$|června)/i, /^(čvc|červenec|července)/i, /^srp/i, /^zář/i, /^říj/i, /^lis/i, /^pro/i];
+    // NOTE: 'červen' is substring of 'červenec'; therefore 'červenec' must precede 'červen' in the regex to be fully matched.
+    // Otherwise parser matches '1. červenec' as '1. červen' + 'ec'.
+    var monthsRegex$1 = /^(leden|únor|březen|duben|květen|červenec|července|červen|června|srpen|září|říjen|listopad|prosinec|led|úno|bře|dub|kvě|čvn|čvc|srp|zář|říj|lis|pro)/i;
+
     function plural$1(n) {
         return (n > 1) && (n < 5) && (~~(n / 10) !== 1);
     }
@@ -12029,28 +12399,15 @@ return Globalize;
     hooks.defineLocale('cs', {
         months : months$3,
         monthsShort : monthsShort,
-        monthsParse : (function (months, monthsShort) {
-            var i, _monthsParse = [];
-            for (i = 0; i < 12; i++) {
-                // use custom parser to solve problem with July (červenec)
-                _monthsParse[i] = new RegExp('^' + months[i] + '$|^' + monthsShort[i] + '$', 'i');
-            }
-            return _monthsParse;
-        }(months$3, monthsShort)),
-        shortMonthsParse : (function (monthsShort) {
-            var i, _shortMonthsParse = [];
-            for (i = 0; i < 12; i++) {
-                _shortMonthsParse[i] = new RegExp('^' + monthsShort[i] + '$', 'i');
-            }
-            return _shortMonthsParse;
-        }(monthsShort)),
-        longMonthsParse : (function (months) {
-            var i, _longMonthsParse = [];
-            for (i = 0; i < 12; i++) {
-                _longMonthsParse[i] = new RegExp('^' + months[i] + '$', 'i');
-            }
-            return _longMonthsParse;
-        }(months$3)),
+        monthsRegex : monthsRegex$1,
+        monthsShortRegex : monthsRegex$1,
+        // NOTE: 'červen' is substring of 'červenec'; therefore 'červenec' must precede 'červen' in the regex to be fully matched.
+        // Otherwise parser matches '1. červenec' as '1. červen' + 'ec'.
+        monthsStrictRegex : /^(leden|ledna|února|únor|březen|března|duben|dubna|květen|května|červenec|července|červen|června|srpen|srpna|září|říjen|října|listopadu|listopad|prosinec|prosince)/i,
+        monthsShortStrictRegex : /^(led|úno|bře|dub|kvě|čvn|čvc|srp|zář|říj|lis|pro)/i,
+        monthsParse : monthsParse,
+        longMonthsParse : monthsParse,
+        shortMonthsParse : monthsParse,
         weekdays : 'neděle_pondělí_úterý_středa_čtvrtek_pátek_sobota'.split('_'),
         weekdaysShort : 'ne_po_út_st_čt_pá_so'.split('_'),
         weekdaysMin : 'ne_po_út_st_čt_pá_so'.split('_'),
@@ -12173,7 +12530,7 @@ return Globalize;
         ordinal : '%d-мӗш',
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -12568,7 +12925,7 @@ return Globalize;
         },
         week : {
             dow : 7,  // Sunday is the first day of the week.
-            doy : 12  // The week that contains Jan 1st is the first week of the year.
+            doy : 12  // The week that contains Jan 12th is the first week of the year.
         }
     });
 
@@ -12653,6 +13010,61 @@ return Globalize;
         week : {
             dow : 1, // Monday is the first day of the week.
             doy : 4  // The week that contains Jan 4st is the first week of the year.
+        }
+    });
+
+    //! moment.js locale configuration
+
+    hooks.defineLocale('en-SG', {
+        months : 'January_February_March_April_May_June_July_August_September_October_November_December'.split('_'),
+        monthsShort : 'Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec'.split('_'),
+        weekdays : 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_'),
+        weekdaysShort : 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_'),
+        weekdaysMin : 'Su_Mo_Tu_We_Th_Fr_Sa'.split('_'),
+        longDateFormat : {
+            LT : 'HH:mm',
+            LTS : 'HH:mm:ss',
+            L : 'DD/MM/YYYY',
+            LL : 'D MMMM YYYY',
+            LLL : 'D MMMM YYYY HH:mm',
+            LLLL : 'dddd, D MMMM YYYY HH:mm'
+        },
+        calendar : {
+            sameDay : '[Today at] LT',
+            nextDay : '[Tomorrow at] LT',
+            nextWeek : 'dddd [at] LT',
+            lastDay : '[Yesterday at] LT',
+            lastWeek : '[Last] dddd [at] LT',
+            sameElse : 'L'
+        },
+        relativeTime : {
+            future : 'in %s',
+            past : '%s ago',
+            s : 'a few seconds',
+            ss : '%d seconds',
+            m : 'a minute',
+            mm : '%d minutes',
+            h : 'an hour',
+            hh : '%d hours',
+            d : 'a day',
+            dd : '%d days',
+            M : 'a month',
+            MM : '%d months',
+            y : 'a year',
+            yy : '%d years'
+        },
+        dayOfMonthOrdinalParse: /\d{1,2}(st|nd|rd|th)/,
+        ordinal : function (number) {
+            var b = number % 10,
+                output = (~~(number % 100 / 10) === 1) ? 'th' :
+                (b === 1) ? 'st' :
+                (b === 2) ? 'nd' :
+                (b === 3) ? 'rd' : 'th';
+            return number + output;
+        },
+        week : {
+            dow : 1, // Monday is the first day of the week.
+            doy : 4  // The week that contains Jan 4th is the first week of the year.
         }
     });
 
@@ -12828,7 +13240,7 @@ return Globalize;
         longDateFormat : {
             LT : 'HH:mm',
             LTS : 'HH:mm:ss',
-            L : 'DD-MM-YYYY',
+            L : 'DD/MM/YYYY',
             LL : 'D MMMM YYYY',
             LLL : 'D MMMM YYYY HH:mm',
             LLLL : 'dddd D MMMM YYYY HH:mm'
@@ -13032,7 +13444,7 @@ return Globalize;
         ordinal : '%da',
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -13041,8 +13453,8 @@ return Globalize;
     var monthsShortDot = 'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split('_'),
         monthsShort$1 = 'ene_feb_mar_abr_may_jun_jul_ago_sep_oct_nov_dic'.split('_');
 
-    var monthsParse = [/^ene/i, /^feb/i, /^mar/i, /^abr/i, /^may/i, /^jun/i, /^jul/i, /^ago/i, /^sep/i, /^oct/i, /^nov/i, /^dic/i];
-    var monthsRegex$1 = /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|ene\.?|feb\.?|mar\.?|abr\.?|may\.?|jun\.?|jul\.?|ago\.?|sep\.?|oct\.?|nov\.?|dic\.?)/i;
+    var monthsParse$1 = [/^ene/i, /^feb/i, /^mar/i, /^abr/i, /^may/i, /^jun/i, /^jul/i, /^ago/i, /^sep/i, /^oct/i, /^nov/i, /^dic/i];
+    var monthsRegex$2 = /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|ene\.?|feb\.?|mar\.?|abr\.?|may\.?|jun\.?|jul\.?|ago\.?|sep\.?|oct\.?|nov\.?|dic\.?)/i;
 
     hooks.defineLocale('es-do', {
         months : 'enero_febrero_marzo_abril_mayo_junio_julio_agosto_septiembre_octubre_noviembre_diciembre'.split('_'),
@@ -13055,13 +13467,13 @@ return Globalize;
                 return monthsShortDot[m.month()];
             }
         },
-        monthsRegex: monthsRegex$1,
-        monthsShortRegex: monthsRegex$1,
+        monthsRegex: monthsRegex$2,
+        monthsShortRegex: monthsRegex$2,
         monthsStrictRegex: /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/i,
         monthsShortStrictRegex: /^(ene\.?|feb\.?|mar\.?|abr\.?|may\.?|jun\.?|jul\.?|ago\.?|sep\.?|oct\.?|nov\.?|dic\.?)/i,
-        monthsParse: monthsParse,
-        longMonthsParse: monthsParse,
-        shortMonthsParse: monthsParse,
+        monthsParse: monthsParse$1,
+        longMonthsParse: monthsParse$1,
+        shortMonthsParse: monthsParse$1,
         weekdays : 'domingo_lunes_martes_miércoles_jueves_viernes_sábado'.split('_'),
         weekdaysShort : 'dom._lun._mar._mié._jue._vie._sáb.'.split('_'),
         weekdaysMin : 'do_lu_ma_mi_ju_vi_sá'.split('_'),
@@ -13121,6 +13533,9 @@ return Globalize;
     var monthsShortDot$1 = 'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split('_'),
         monthsShort$2 = 'ene_feb_mar_abr_may_jun_jul_ago_sep_oct_nov_dic'.split('_');
 
+    var monthsParse$2 = [/^ene/i, /^feb/i, /^mar/i, /^abr/i, /^may/i, /^jun/i, /^jul/i, /^ago/i, /^sep/i, /^oct/i, /^nov/i, /^dic/i];
+    var monthsRegex$3 = /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|ene\.?|feb\.?|mar\.?|abr\.?|may\.?|jun\.?|jul\.?|ago\.?|sep\.?|oct\.?|nov\.?|dic\.?)/i;
+
     hooks.defineLocale('es-us', {
         months : 'enero_febrero_marzo_abril_mayo_junio_julio_agosto_septiembre_octubre_noviembre_diciembre'.split('_'),
         monthsShort : function (m, format) {
@@ -13132,7 +13547,13 @@ return Globalize;
                 return monthsShortDot$1[m.month()];
             }
         },
-        monthsParseExact : true,
+        monthsRegex: monthsRegex$3,
+        monthsShortRegex: monthsRegex$3,
+        monthsStrictRegex: /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/i,
+        monthsShortStrictRegex: /^(ene\.?|feb\.?|mar\.?|abr\.?|may\.?|jun\.?|jul\.?|ago\.?|sep\.?|oct\.?|nov\.?|dic\.?)/i,
+        monthsParse: monthsParse$2,
+        longMonthsParse: monthsParse$2,
+        shortMonthsParse: monthsParse$2,
         weekdays : 'domingo_lunes_martes_miércoles_jueves_viernes_sábado'.split('_'),
         weekdaysShort : 'dom._lun._mar._mié._jue._vie._sáb.'.split('_'),
         weekdaysMin : 'do_lu_ma_mi_ju_vi_sá'.split('_'),
@@ -13141,9 +13562,9 @@ return Globalize;
             LT : 'h:mm A',
             LTS : 'h:mm:ss A',
             L : 'MM/DD/YYYY',
-            LL : 'MMMM [de] D [de] YYYY',
-            LLL : 'MMMM [de] D [de] YYYY h:mm A',
-            LLLL : 'dddd, MMMM [de] D [de] YYYY h:mm A'
+            LL : 'D [de] MMMM [de] YYYY',
+            LLL : 'D [de] MMMM [de] YYYY h:mm A',
+            LLLL : 'dddd, D [de] MMMM [de] YYYY h:mm A'
         },
         calendar : {
             sameDay : function () {
@@ -13183,7 +13604,7 @@ return Globalize;
         ordinal : '%dº',
         week : {
             dow : 0, // Sunday is the first day of the week.
-            doy : 6  // The week that contains Jan 1st is the first week of the year.
+            doy : 6  // The week that contains Jan 6th is the first week of the year.
         }
     });
 
@@ -13192,8 +13613,8 @@ return Globalize;
     var monthsShortDot$2 = 'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split('_'),
         monthsShort$3 = 'ene_feb_mar_abr_may_jun_jul_ago_sep_oct_nov_dic'.split('_');
 
-    var monthsParse$1 = [/^ene/i, /^feb/i, /^mar/i, /^abr/i, /^may/i, /^jun/i, /^jul/i, /^ago/i, /^sep/i, /^oct/i, /^nov/i, /^dic/i];
-    var monthsRegex$2 = /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|ene\.?|feb\.?|mar\.?|abr\.?|may\.?|jun\.?|jul\.?|ago\.?|sep\.?|oct\.?|nov\.?|dic\.?)/i;
+    var monthsParse$3 = [/^ene/i, /^feb/i, /^mar/i, /^abr/i, /^may/i, /^jun/i, /^jul/i, /^ago/i, /^sep/i, /^oct/i, /^nov/i, /^dic/i];
+    var monthsRegex$4 = /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|ene\.?|feb\.?|mar\.?|abr\.?|may\.?|jun\.?|jul\.?|ago\.?|sep\.?|oct\.?|nov\.?|dic\.?)/i;
 
     hooks.defineLocale('es', {
         months : 'enero_febrero_marzo_abril_mayo_junio_julio_agosto_septiembre_octubre_noviembre_diciembre'.split('_'),
@@ -13206,13 +13627,13 @@ return Globalize;
                 return monthsShortDot$2[m.month()];
             }
         },
-        monthsRegex : monthsRegex$2,
-        monthsShortRegex : monthsRegex$2,
+        monthsRegex : monthsRegex$4,
+        monthsShortRegex : monthsRegex$4,
         monthsStrictRegex : /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/i,
         monthsShortStrictRegex : /^(ene\.?|feb\.?|mar\.?|abr\.?|may\.?|jun\.?|jul\.?|ago\.?|sep\.?|oct\.?|nov\.?|dic\.?)/i,
-        monthsParse : monthsParse$1,
-        longMonthsParse : monthsParse$1,
-        shortMonthsParse : monthsParse$1,
+        monthsParse : monthsParse$3,
+        longMonthsParse : monthsParse$3,
+        shortMonthsParse : monthsParse$3,
         weekdays : 'domingo_lunes_martes_miércoles_jueves_viernes_sábado'.split('_'),
         weekdaysShort : 'dom._lun._mar._mié._jue._vie._sáb.'.split('_'),
         weekdaysMin : 'do_lu_ma_mi_ju_vi_sá'.split('_'),
@@ -13385,7 +13806,7 @@ return Globalize;
         ordinal : '%d.',
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -13479,7 +13900,7 @@ return Globalize;
         ordinal : '%dم',
         week : {
             dow : 6, // Saturday is the first day of the week.
-            doy : 12 // The week that contains Jan 1st is the first week of the year.
+            doy : 12 // The week that contains Jan 12th is the first week of the year.
         }
     });
 
@@ -13609,13 +14030,13 @@ return Globalize;
             past : '%s síðani',
             s : 'fá sekund',
             ss : '%d sekundir',
-            m : 'ein minutt',
+            m : 'ein minuttur',
             mm : '%d minuttir',
             h : 'ein tími',
             hh : '%d tímar',
             d : 'ein dagur',
             dd : '%d dagar',
-            M : 'ein mánaði',
+            M : 'ein mánaður',
             MM : '%d mánaðir',
             y : 'eitt ár',
             yy : '%d ár'
@@ -13892,25 +14313,90 @@ return Globalize;
 
     //! moment.js locale configuration
 
+
     var months$5 = [
+        'Eanáir', 'Feabhra', 'Márta', 'Aibreán', 'Bealtaine', 'Méitheamh', 'Iúil', 'Lúnasa', 'Meán Fómhair', 'Deaireadh Fómhair', 'Samhain', 'Nollaig'
+    ];
+
+    var monthsShort$4 = ['Eaná', 'Feab', 'Márt', 'Aibr', 'Beal', 'Méit', 'Iúil', 'Lúna', 'Meán', 'Deai', 'Samh', 'Noll'];
+
+    var weekdays$1 = ['Dé Domhnaigh', 'Dé Luain', 'Dé Máirt', 'Dé Céadaoin', 'Déardaoin', 'Dé hAoine', 'Dé Satharn'];
+
+    var weekdaysShort = ['Dom', 'Lua', 'Mái', 'Céa', 'Déa', 'hAo', 'Sat'];
+
+    var weekdaysMin = ['Do', 'Lu', 'Má', 'Ce', 'Dé', 'hA', 'Sa'];
+
+    hooks.defineLocale('ga', {
+        months: months$5,
+        monthsShort: monthsShort$4,
+        monthsParseExact: true,
+        weekdays: weekdays$1,
+        weekdaysShort: weekdaysShort,
+        weekdaysMin: weekdaysMin,
+        longDateFormat: {
+            LT: 'HH:mm',
+            LTS: 'HH:mm:ss',
+            L: 'DD/MM/YYYY',
+            LL: 'D MMMM YYYY',
+            LLL: 'D MMMM YYYY HH:mm',
+            LLLL: 'dddd, D MMMM YYYY HH:mm'
+        },
+        calendar: {
+            sameDay: '[Inniu ag] LT',
+            nextDay: '[Amárach ag] LT',
+            nextWeek: 'dddd [ag] LT',
+            lastDay: '[Inné aig] LT',
+            lastWeek: 'dddd [seo caite] [ag] LT',
+            sameElse: 'L'
+        },
+        relativeTime: {
+            future: 'i %s',
+            past: '%s ó shin',
+            s: 'cúpla soicind',
+            ss: '%d soicind',
+            m: 'nóiméad',
+            mm: '%d nóiméad',
+            h: 'uair an chloig',
+            hh: '%d uair an chloig',
+            d: 'lá',
+            dd: '%d lá',
+            M: 'mí',
+            MM: '%d mí',
+            y: 'bliain',
+            yy: '%d bliain'
+        },
+        dayOfMonthOrdinalParse: /\d{1,2}(d|na|mh)/,
+        ordinal: function (number) {
+            var output = number === 1 ? 'd' : number % 10 === 2 ? 'na' : 'mh';
+            return number + output;
+        },
+        week: {
+            dow: 1, // Monday is the first day of the week.
+            doy: 4  // The week that contains Jan 4th is the first week of the year.
+        }
+    });
+
+    //! moment.js locale configuration
+
+    var months$6 = [
         'Am Faoilleach', 'An Gearran', 'Am Màrt', 'An Giblean', 'An Cèitean', 'An t-Ògmhios', 'An t-Iuchar', 'An Lùnastal', 'An t-Sultain', 'An Dàmhair', 'An t-Samhain', 'An Dùbhlachd'
     ];
 
-    var monthsShort$4 = ['Faoi', 'Gear', 'Màrt', 'Gibl', 'Cèit', 'Ògmh', 'Iuch', 'Lùn', 'Sult', 'Dàmh', 'Samh', 'Dùbh'];
+    var monthsShort$5 = ['Faoi', 'Gear', 'Màrt', 'Gibl', 'Cèit', 'Ògmh', 'Iuch', 'Lùn', 'Sult', 'Dàmh', 'Samh', 'Dùbh'];
 
-    var weekdays$1 = ['Didòmhnaich', 'Diluain', 'Dimàirt', 'Diciadain', 'Diardaoin', 'Dihaoine', 'Disathairne'];
+    var weekdays$2 = ['Didòmhnaich', 'Diluain', 'Dimàirt', 'Diciadain', 'Diardaoin', 'Dihaoine', 'Disathairne'];
 
-    var weekdaysShort = ['Did', 'Dil', 'Dim', 'Dic', 'Dia', 'Dih', 'Dis'];
+    var weekdaysShort$1 = ['Did', 'Dil', 'Dim', 'Dic', 'Dia', 'Dih', 'Dis'];
 
-    var weekdaysMin = ['Dò', 'Lu', 'Mà', 'Ci', 'Ar', 'Ha', 'Sa'];
+    var weekdaysMin$1 = ['Dò', 'Lu', 'Mà', 'Ci', 'Ar', 'Ha', 'Sa'];
 
     hooks.defineLocale('gd', {
-        months : months$5,
-        monthsShort : monthsShort$4,
+        months : months$6,
+        monthsShort : monthsShort$5,
         monthsParseExact : true,
-        weekdays : weekdays$1,
-        weekdaysShort : weekdaysShort,
-        weekdaysMin : weekdaysMin,
+        weekdays : weekdays$2,
+        weekdaysShort : weekdaysShort$1,
+        weekdaysMin : weekdaysMin$1,
         longDateFormat : {
             LT : 'HH:mm',
             LTS : 'HH:mm:ss',
@@ -14027,8 +14513,8 @@ return Globalize;
             'ss': [number + ' secondanim', number + ' second'],
             'm': ['eka mintan', 'ek minute'],
             'mm': [number + ' mintanim', number + ' mintam'],
-            'h': ['eka horan', 'ek hor'],
-            'hh': [number + ' horanim', number + ' horam'],
+            'h': ['eka voran', 'ek vor'],
+            'hh': [number + ' voranim', number + ' voram'],
             'd': ['eka disan', 'ek dis'],
             'dd': [number + ' disanim', number + ' dis'],
             'M': ['eka mhoinean', 'ek mhoino'],
@@ -14238,7 +14724,7 @@ return Globalize;
         },
         week: {
             dow: 0, // Sunday is the first day of the week.
-            doy: 6 // The week that contains Jan 1st is the first week of the year.
+            doy: 6 // The week that contains Jan 6th is the first week of the year.
         }
     });
 
@@ -14435,7 +14921,7 @@ return Globalize;
         },
         week : {
             dow : 0, // Sunday is the first day of the week.
-            doy : 6  // The week that contains Jan 1st is the first week of the year.
+            doy : 6  // The week that contains Jan 6th is the first week of the year.
         }
     });
 
@@ -14577,7 +15063,7 @@ return Globalize;
         ordinal : '%d.',
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -14758,7 +15244,7 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -14828,7 +15314,7 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -14954,6 +15440,63 @@ return Globalize;
 
     //! moment.js locale configuration
 
+    hooks.defineLocale('it-ch', {
+        months : 'gennaio_febbraio_marzo_aprile_maggio_giugno_luglio_agosto_settembre_ottobre_novembre_dicembre'.split('_'),
+        monthsShort : 'gen_feb_mar_apr_mag_giu_lug_ago_set_ott_nov_dic'.split('_'),
+        weekdays : 'domenica_lunedì_martedì_mercoledì_giovedì_venerdì_sabato'.split('_'),
+        weekdaysShort : 'dom_lun_mar_mer_gio_ven_sab'.split('_'),
+        weekdaysMin : 'do_lu_ma_me_gi_ve_sa'.split('_'),
+        longDateFormat : {
+            LT : 'HH:mm',
+            LTS : 'HH:mm:ss',
+            L : 'DD.MM.YYYY',
+            LL : 'D MMMM YYYY',
+            LLL : 'D MMMM YYYY HH:mm',
+            LLLL : 'dddd D MMMM YYYY HH:mm'
+        },
+        calendar : {
+            sameDay: '[Oggi alle] LT',
+            nextDay: '[Domani alle] LT',
+            nextWeek: 'dddd [alle] LT',
+            lastDay: '[Ieri alle] LT',
+            lastWeek: function () {
+                switch (this.day()) {
+                    case 0:
+                        return '[la scorsa] dddd [alle] LT';
+                    default:
+                        return '[lo scorso] dddd [alle] LT';
+                }
+            },
+            sameElse: 'L'
+        },
+        relativeTime : {
+            future : function (s) {
+                return ((/^[0-9].+$/).test(s) ? 'tra' : 'in') + ' ' + s;
+            },
+            past : '%s fa',
+            s : 'alcuni secondi',
+            ss : '%d secondi',
+            m : 'un minuto',
+            mm : '%d minuti',
+            h : 'un\'ora',
+            hh : '%d ore',
+            d : 'un giorno',
+            dd : '%d giorni',
+            M : 'un mese',
+            MM : '%d mesi',
+            y : 'un anno',
+            yy : '%d anni'
+        },
+        dayOfMonthOrdinalParse : /\d{1,2}º/,
+        ordinal: '%dº',
+        week : {
+            dow : 1, // Monday is the first day of the week.
+            doy : 4  // The week that contains Jan 4th is the first week of the year.
+        }
+    });
+
+    //! moment.js locale configuration
+
     hooks.defineLocale('it', {
         months : 'gennaio_febbraio_marzo_aprile_maggio_giugno_luglio_agosto_settembre_ottobre_novembre_dicembre'.split('_'),
         monthsShort : 'gen_feb_mar_apr_mag_giu_lug_ago_set_ott_nov_dic'.split('_'),
@@ -15012,7 +15555,7 @@ return Globalize;
     //! moment.js locale configuration
 
     hooks.defineLocale('ja', {
-        months : '1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月'.split('_'),
+        months : '一月_二月_三月_四月_五月_六月_七月_八月_九月_十月_十一月_十二月'.split('_'),
         monthsShort : '1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月'.split('_'),
         weekdays : '日曜日_月曜日_火曜日_水曜日_木曜日_金曜日_土曜日'.split('_'),
         weekdaysShort : '日_月_火_水_木_金_土'.split('_'),
@@ -15155,7 +15698,7 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -15307,7 +15850,7 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -15519,7 +16062,7 @@ return Globalize;
         },
         week : {
             dow : 0, // Sunday is the first day of the week.
-            doy : 6  // The week that contains Jan 1st is the first week of the year.
+            doy : 6  // The week that contains Jan 6th is the first week of the year.
         }
     });
 
@@ -15594,6 +16137,113 @@ return Globalize;
 
     //! moment.js locale configuration
 
+    var symbolMap$a = {
+        '1': '١',
+        '2': '٢',
+        '3': '٣',
+        '4': '٤',
+        '5': '٥',
+        '6': '٦',
+        '7': '٧',
+        '8': '٨',
+        '9': '٩',
+        '0': '٠'
+    }, numberMap$9 = {
+        '١': '1',
+        '٢': '2',
+        '٣': '3',
+        '٤': '4',
+        '٥': '5',
+        '٦': '6',
+        '٧': '7',
+        '٨': '8',
+        '٩': '9',
+        '٠': '0'
+    },
+    months$7 = [
+        'کانونی دووەم',
+        'شوبات',
+        'ئازار',
+        'نیسان',
+        'ئایار',
+        'حوزەیران',
+        'تەمموز',
+        'ئاب',
+        'ئەیلوول',
+        'تشرینی یەكەم',
+        'تشرینی دووەم',
+        'كانونی یەکەم'
+    ];
+
+
+    hooks.defineLocale('ku', {
+        months : months$7,
+        monthsShort : months$7,
+        weekdays : 'یه‌كشه‌ممه‌_دووشه‌ممه‌_سێشه‌ممه‌_چوارشه‌ممه‌_پێنجشه‌ممه‌_هه‌ینی_شه‌ممه‌'.split('_'),
+        weekdaysShort : 'یه‌كشه‌م_دووشه‌م_سێشه‌م_چوارشه‌م_پێنجشه‌م_هه‌ینی_شه‌ممه‌'.split('_'),
+        weekdaysMin : 'ی_د_س_چ_پ_ه_ش'.split('_'),
+        weekdaysParseExact : true,
+        longDateFormat : {
+            LT : 'HH:mm',
+            LTS : 'HH:mm:ss',
+            L : 'DD/MM/YYYY',
+            LL : 'D MMMM YYYY',
+            LLL : 'D MMMM YYYY HH:mm',
+            LLLL : 'dddd, D MMMM YYYY HH:mm'
+        },
+        meridiemParse: /ئێواره‌|به‌یانی/,
+        isPM: function (input) {
+            return /ئێواره‌/.test(input);
+        },
+        meridiem : function (hour, minute, isLower) {
+            if (hour < 12) {
+                return 'به‌یانی';
+            } else {
+                return 'ئێواره‌';
+            }
+        },
+        calendar : {
+            sameDay : '[ئه‌مرۆ كاتژمێر] LT',
+            nextDay : '[به‌یانی كاتژمێر] LT',
+            nextWeek : 'dddd [كاتژمێر] LT',
+            lastDay : '[دوێنێ كاتژمێر] LT',
+            lastWeek : 'dddd [كاتژمێر] LT',
+            sameElse : 'L'
+        },
+        relativeTime : {
+            future : 'له‌ %s',
+            past : '%s',
+            s : 'چه‌ند چركه‌یه‌ك',
+            ss : 'چركه‌ %d',
+            m : 'یه‌ك خوله‌ك',
+            mm : '%d خوله‌ك',
+            h : 'یه‌ك كاتژمێر',
+            hh : '%d كاتژمێر',
+            d : 'یه‌ك ڕۆژ',
+            dd : '%d ڕۆژ',
+            M : 'یه‌ك مانگ',
+            MM : '%d مانگ',
+            y : 'یه‌ك ساڵ',
+            yy : '%d ساڵ'
+        },
+        preparse: function (string) {
+            return string.replace(/[١٢٣٤٥٦٧٨٩٠]/g, function (match) {
+                return numberMap$9[match];
+            }).replace(/،/g, ',');
+        },
+        postformat: function (string) {
+            return string.replace(/\d/g, function (match) {
+                return symbolMap$a[match];
+            }).replace(/,/g, '،');
+        },
+        week : {
+            dow : 6, // Saturday is the first day of the week.
+            doy : 12 // The week that contains Jan 12th is the first week of the year.
+        }
+    });
+
+    //! moment.js locale configuration
+
     var suffixes$2 = {
         0: '-чү',
         1: '-чи',
@@ -15635,8 +16285,8 @@ return Globalize;
             sameDay : '[Бүгүн саат] LT',
             nextDay : '[Эртең саат] LT',
             nextWeek : 'dddd [саат] LT',
-            lastDay : '[Кече саат] LT',
-            lastWeek : '[Өткен аптанын] dddd [күнү] [саат] LT',
+            lastDay : '[Кечээ саат] LT',
+            lastWeek : '[Өткөн аптанын] dddd [күнү] [саат] LT',
             sameElse : 'L'
         },
         relativeTime : {
@@ -15663,7 +16313,7 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -16136,7 +16786,7 @@ return Globalize;
         ordinal : '%d.',
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -16266,7 +16916,7 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -16433,7 +17083,7 @@ return Globalize;
 
     //! moment.js locale configuration
 
-    var symbolMap$a = {
+    var symbolMap$b = {
         '1': '१',
         '2': '२',
         '3': '३',
@@ -16445,7 +17095,7 @@ return Globalize;
         '9': '९',
         '0': '०'
     },
-    numberMap$9 = {
+    numberMap$a = {
         '१': '1',
         '२': '2',
         '३': '3',
@@ -16537,12 +17187,12 @@ return Globalize;
         },
         preparse: function (string) {
             return string.replace(/[१२३४५६७८९०]/g, function (match) {
-                return numberMap$9[match];
+                return numberMap$a[match];
             });
         },
         postformat: function (string) {
             return string.replace(/\d/g, function (match) {
-                return symbolMap$a[match];
+                return symbolMap$b[match];
             });
         },
         meridiemParse: /रात्री|सकाळी|दुपारी|सायंकाळी/,
@@ -16575,7 +17225,7 @@ return Globalize;
         },
         week : {
             dow : 0, // Sunday is the first day of the week.
-            doy : 6  // The week that contains Jan 1st is the first week of the year.
+            doy : 6  // The week that contains Jan 6th is the first week of the year.
         }
     });
 
@@ -16645,7 +17295,7 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -16715,7 +17365,7 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -16769,7 +17419,7 @@ return Globalize;
 
     //! moment.js locale configuration
 
-    var symbolMap$b = {
+    var symbolMap$c = {
         '1': '၁',
         '2': '၂',
         '3': '၃',
@@ -16780,7 +17430,7 @@ return Globalize;
         '8': '၈',
         '9': '၉',
         '0': '၀'
-    }, numberMap$a = {
+    }, numberMap$b = {
         '၁': '1',
         '၂': '2',
         '၃': '3',
@@ -16834,17 +17484,17 @@ return Globalize;
         },
         preparse: function (string) {
             return string.replace(/[၁၂၃၄၅၆၇၈၉၀]/g, function (match) {
-                return numberMap$a[match];
+                return numberMap$b[match];
             });
         },
         postformat: function (string) {
             return string.replace(/\d/g, function (match) {
-                return symbolMap$b[match];
+                return symbolMap$c[match];
             });
         },
         week: {
             dow: 1, // Monday is the first day of the week.
-            doy: 4 // The week that contains Jan 1st is the first week of the year.
+            doy: 4 // The week that contains Jan 4th is the first week of the year.
         }
     });
 
@@ -16900,7 +17550,7 @@ return Globalize;
 
     //! moment.js locale configuration
 
-    var symbolMap$c = {
+    var symbolMap$d = {
         '1': '१',
         '2': '२',
         '3': '३',
@@ -16912,7 +17562,7 @@ return Globalize;
         '9': '९',
         '0': '०'
     },
-    numberMap$b = {
+    numberMap$c = {
         '१': '1',
         '२': '2',
         '३': '3',
@@ -16943,12 +17593,12 @@ return Globalize;
         },
         preparse: function (string) {
             return string.replace(/[१२३४५६७८९०]/g, function (match) {
-                return numberMap$b[match];
+                return numberMap$c[match];
             });
         },
         postformat: function (string) {
             return string.replace(/\d/g, function (match) {
-                return symbolMap$c[match];
+                return symbolMap$d[match];
             });
         },
         meridiemParse: /राति|बिहान|दिउँसो|साँझ/,
@@ -17005,7 +17655,7 @@ return Globalize;
         },
         week : {
             dow : 0, // Sunday is the first day of the week.
-            doy : 6  // The week that contains Jan 1st is the first week of the year.
+            doy : 6  // The week that contains Jan 6th is the first week of the year.
         }
     });
 
@@ -17014,8 +17664,8 @@ return Globalize;
     var monthsShortWithDots$1 = 'jan._feb._mrt._apr._mei_jun._jul._aug._sep._okt._nov._dec.'.split('_'),
         monthsShortWithoutDots$1 = 'jan_feb_mrt_apr_mei_jun_jul_aug_sep_okt_nov_dec'.split('_');
 
-    var monthsParse$2 = [/^jan/i, /^feb/i, /^maart|mrt.?$/i, /^apr/i, /^mei$/i, /^jun[i.]?$/i, /^jul[i.]?$/i, /^aug/i, /^sep/i, /^okt/i, /^nov/i, /^dec/i];
-    var monthsRegex$3 = /^(januari|februari|maart|april|mei|april|ju[nl]i|augustus|september|oktober|november|december|jan\.?|feb\.?|mrt\.?|apr\.?|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i;
+    var monthsParse$4 = [/^jan/i, /^feb/i, /^maart|mrt.?$/i, /^apr/i, /^mei$/i, /^jun[i.]?$/i, /^jul[i.]?$/i, /^aug/i, /^sep/i, /^okt/i, /^nov/i, /^dec/i];
+    var monthsRegex$5 = /^(januari|februari|maart|april|mei|ju[nl]i|augustus|september|oktober|november|december|jan\.?|feb\.?|mrt\.?|apr\.?|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i;
 
     hooks.defineLocale('nl-be', {
         months : 'januari_februari_maart_april_mei_juni_juli_augustus_september_oktober_november_december'.split('_'),
@@ -17029,14 +17679,14 @@ return Globalize;
             }
         },
 
-        monthsRegex: monthsRegex$3,
-        monthsShortRegex: monthsRegex$3,
-        monthsStrictRegex: /^(januari|februari|maart|mei|ju[nl]i|april|augustus|september|oktober|november|december)/i,
+        monthsRegex: monthsRegex$5,
+        monthsShortRegex: monthsRegex$5,
+        monthsStrictRegex: /^(januari|februari|maart|april|mei|ju[nl]i|augustus|september|oktober|november|december)/i,
         monthsShortStrictRegex: /^(jan\.?|feb\.?|mrt\.?|apr\.?|mei|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i,
 
-        monthsParse : monthsParse$2,
-        longMonthsParse : monthsParse$2,
-        shortMonthsParse : monthsParse$2,
+        monthsParse : monthsParse$4,
+        longMonthsParse : monthsParse$4,
+        shortMonthsParse : monthsParse$4,
 
         weekdays : 'zondag_maandag_dinsdag_woensdag_donderdag_vrijdag_zaterdag'.split('_'),
         weekdaysShort : 'zo._ma._di._wo._do._vr._za.'.split('_'),
@@ -17089,8 +17739,8 @@ return Globalize;
     var monthsShortWithDots$2 = 'jan._feb._mrt._apr._mei_jun._jul._aug._sep._okt._nov._dec.'.split('_'),
         monthsShortWithoutDots$2 = 'jan_feb_mrt_apr_mei_jun_jul_aug_sep_okt_nov_dec'.split('_');
 
-    var monthsParse$3 = [/^jan/i, /^feb/i, /^maart|mrt.?$/i, /^apr/i, /^mei$/i, /^jun[i.]?$/i, /^jul[i.]?$/i, /^aug/i, /^sep/i, /^okt/i, /^nov/i, /^dec/i];
-    var monthsRegex$4 = /^(januari|februari|maart|april|mei|april|ju[nl]i|augustus|september|oktober|november|december|jan\.?|feb\.?|mrt\.?|apr\.?|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i;
+    var monthsParse$5 = [/^jan/i, /^feb/i, /^maart|mrt.?$/i, /^apr/i, /^mei$/i, /^jun[i.]?$/i, /^jul[i.]?$/i, /^aug/i, /^sep/i, /^okt/i, /^nov/i, /^dec/i];
+    var monthsRegex$6 = /^(januari|februari|maart|april|mei|ju[nl]i|augustus|september|oktober|november|december|jan\.?|feb\.?|mrt\.?|apr\.?|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i;
 
     hooks.defineLocale('nl', {
         months : 'januari_februari_maart_april_mei_juni_juli_augustus_september_oktober_november_december'.split('_'),
@@ -17104,14 +17754,14 @@ return Globalize;
             }
         },
 
-        monthsRegex: monthsRegex$4,
-        monthsShortRegex: monthsRegex$4,
-        monthsStrictRegex: /^(januari|februari|maart|mei|ju[nl]i|april|augustus|september|oktober|november|december)/i,
+        monthsRegex: monthsRegex$6,
+        monthsShortRegex: monthsRegex$6,
+        monthsStrictRegex: /^(januari|februari|maart|april|mei|ju[nl]i|augustus|september|oktober|november|december)/i,
         monthsShortStrictRegex: /^(jan\.?|feb\.?|mrt\.?|apr\.?|mei|ju[nl]\.?|aug\.?|sep\.?|okt\.?|nov\.?|dec\.?)/i,
 
-        monthsParse : monthsParse$3,
-        longMonthsParse : monthsParse$3,
-        shortMonthsParse : monthsParse$3,
+        monthsParse : monthsParse$5,
+        longMonthsParse : monthsParse$5,
+        shortMonthsParse : monthsParse$5,
 
         weekdays : 'zondag_maandag_dinsdag_woensdag_donderdag_vrijdag_zaterdag'.split('_'),
         weekdaysShort : 'zo._ma._di._wo._do._vr._za.'.split('_'),
@@ -17209,7 +17859,7 @@ return Globalize;
 
     //! moment.js locale configuration
 
-    var symbolMap$d = {
+    var symbolMap$e = {
         '1': '੧',
         '2': '੨',
         '3': '੩',
@@ -17221,7 +17871,7 @@ return Globalize;
         '9': '੯',
         '0': '੦'
     },
-    numberMap$c = {
+    numberMap$d = {
         '੧': '1',
         '੨': '2',
         '੩': '3',
@@ -17235,7 +17885,7 @@ return Globalize;
     };
 
     hooks.defineLocale('pa-in', {
-        // There are months name as per Nanakshahi Calender but they are not used as rigidly in modern Punjabi.
+        // There are months name as per Nanakshahi Calendar but they are not used as rigidly in modern Punjabi.
         months : 'ਜਨਵਰੀ_ਫ਼ਰਵਰੀ_ਮਾਰਚ_ਅਪ੍ਰੈਲ_ਮਈ_ਜੂਨ_ਜੁਲਾਈ_ਅਗਸਤ_ਸਤੰਬਰ_ਅਕਤੂਬਰ_ਨਵੰਬਰ_ਦਸੰਬਰ'.split('_'),
         monthsShort : 'ਜਨਵਰੀ_ਫ਼ਰਵਰੀ_ਮਾਰਚ_ਅਪ੍ਰੈਲ_ਮਈ_ਜੂਨ_ਜੁਲਾਈ_ਅਗਸਤ_ਸਤੰਬਰ_ਅਕਤੂਬਰ_ਨਵੰਬਰ_ਦਸੰਬਰ'.split('_'),
         weekdays : 'ਐਤਵਾਰ_ਸੋਮਵਾਰ_ਮੰਗਲਵਾਰ_ਬੁਧਵਾਰ_ਵੀਰਵਾਰ_ਸ਼ੁੱਕਰਵਾਰ_ਸ਼ਨੀਚਰਵਾਰ'.split('_'),
@@ -17275,12 +17925,12 @@ return Globalize;
         },
         preparse: function (string) {
             return string.replace(/[੧੨੩੪੫੬੭੮੯੦]/g, function (match) {
-                return numberMap$c[match];
+                return numberMap$d[match];
             });
         },
         postformat: function (string) {
             return string.replace(/\d/g, function (match) {
-                return symbolMap$d[match];
+                return symbolMap$e[match];
             });
         },
         // Punjabi notation for meridiems are quite fuzzy in practice. While there exists
@@ -17315,7 +17965,7 @@ return Globalize;
         },
         week : {
             dow : 0, // Sunday is the first day of the week.
-            doy : 6  // The week that contains Jan 1st is the first week of the year.
+            doy : 6  // The week that contains Jan 6th is the first week of the year.
         }
     });
 
@@ -17436,8 +18086,8 @@ return Globalize;
     //! moment.js locale configuration
 
     hooks.defineLocale('pt-br', {
-        months : 'janeiro_fevereiro_março_abril_maio_junho_julho_agosto_setembro_outubro_novembro_dezembro'.split('_'),
-        monthsShort : 'jan_fev_mar_abr_mai_jun_jul_ago_set_out_nov_dez'.split('_'),
+        months : 'Janeiro_Fevereiro_Março_Abril_Maio_Junho_Julho_Agosto_Setembro_Outubro_Novembro_Dezembro'.split('_'),
+        monthsShort : 'Jan_Fev_Mar_Abr_Mai_Jun_Jul_Ago_Set_Out_Nov_Dez'.split('_'),
         weekdays : 'Domingo_Segunda-feira_Terça-feira_Quarta-feira_Quinta-feira_Sexta-feira_Sábado'.split('_'),
         weekdaysShort : 'Dom_Seg_Ter_Qua_Qui_Sex_Sáb'.split('_'),
         weekdaysMin : 'Do_2ª_3ª_4ª_5ª_6ª_Sá'.split('_'),
@@ -17485,8 +18135,8 @@ return Globalize;
     //! moment.js locale configuration
 
     hooks.defineLocale('pt', {
-        months : 'janeiro_fevereiro_março_abril_maio_junho_julho_agosto_setembro_outubro_novembro_dezembro'.split('_'),
-        monthsShort : 'jan_fev_mar_abr_mai_jun_jul_ago_set_out_nov_dez'.split('_'),
+        months : 'Janeiro_Fevereiro_Março_Abril_Maio_Junho_Julho_Agosto_Setembro_Outubro_Novembro_Dezembro'.split('_'),
+        monthsShort : 'Jan_Fev_Mar_Abr_Mai_Jun_Jul_Ago_Set_Out_Nov_Dez'.split('_'),
         weekdays : 'Domingo_Segunda-feira_Terça-feira_Quarta-feira_Quinta-feira_Sexta-feira_Sábado'.split('_'),
         weekdaysShort : 'Dom_Seg_Ter_Qua_Qui_Sex_Sáb'.split('_'),
         weekdaysMin : 'Do_2ª_3ª_4ª_5ª_6ª_Sá'.split('_'),
@@ -17594,7 +18244,7 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -17620,7 +18270,7 @@ return Globalize;
             return number + ' ' + plural$4(format[key], +number);
         }
     }
-    var monthsParse$4 = [/^янв/i, /^фев/i, /^мар/i, /^апр/i, /^ма[йя]/i, /^июн/i, /^июл/i, /^авг/i, /^сен/i, /^окт/i, /^ноя/i, /^дек/i];
+    var monthsParse$6 = [/^янв/i, /^фев/i, /^мар/i, /^апр/i, /^ма[йя]/i, /^июн/i, /^июл/i, /^авг/i, /^сен/i, /^окт/i, /^ноя/i, /^дек/i];
 
     // http://new.gramota.ru/spravka/rules/139-prop : § 103
     // Сокращения месяцев: http://new.gramota.ru/spravka/buro/search-answer?s=242637
@@ -17642,9 +18292,9 @@ return Globalize;
         },
         weekdaysShort : 'вс_пн_вт_ср_чт_пт_сб'.split('_'),
         weekdaysMin : 'вс_пн_вт_ср_чт_пт_сб'.split('_'),
-        monthsParse : monthsParse$4,
-        longMonthsParse : monthsParse$4,
-        shortMonthsParse : monthsParse$4,
+        monthsParse : monthsParse$6,
+        longMonthsParse : monthsParse$6,
+        shortMonthsParse : monthsParse$6,
 
         // полные названия с падежами, по три буквы, для некоторых, по 4 буквы, сокращения с точкой и без точки
         monthsRegex: /^(январ[ья]|янв\.?|феврал[ья]|февр?\.?|марта?|мар\.?|апрел[ья]|апр\.?|ма[йя]|июн[ья]|июн\.?|июл[ья]|июл\.?|августа?|авг\.?|сентябр[ья]|сент?\.?|октябр[ья]|окт\.?|ноябр[ья]|нояб?\.?|декабр[ья]|дек\.?)/i,
@@ -17770,7 +18420,7 @@ return Globalize;
 
     //! moment.js locale configuration
 
-    var months$6 = [
+    var months$8 = [
         'جنوري',
         'فيبروري',
         'مارچ',
@@ -17795,8 +18445,8 @@ return Globalize;
     ];
 
     hooks.defineLocale('sd', {
-        months : months$6,
-        monthsShort : months$6,
+        months : months$8,
+        monthsShort : months$8,
         weekdays : days$1,
         weekdaysShort : days$1,
         weekdaysMin : days$1,
@@ -17963,8 +18613,8 @@ return Globalize;
 
     //! moment.js locale configuration
 
-    var months$7 = 'január_február_marec_apríl_máj_jún_júl_august_september_október_november_december'.split('_'),
-        monthsShort$5 = 'jan_feb_mar_apr_máj_jún_júl_aug_sep_okt_nov_dec'.split('_');
+    var months$9 = 'január_február_marec_apríl_máj_jún_júl_august_september_október_november_december'.split('_'),
+        monthsShort$6 = 'jan_feb_mar_apr_máj_jún_júl_aug_sep_okt_nov_dec'.split('_');
     function plural$5(n) {
         return (n > 1) && (n < 5);
     }
@@ -18029,8 +18679,8 @@ return Globalize;
     }
 
     hooks.defineLocale('sk', {
-        months : months$7,
-        monthsShort : monthsShort$5,
+        months : months$9,
+        monthsShort : monthsShort$6,
         weekdays : 'nedeľa_pondelok_utorok_streda_štvrtok_piatok_sobota'.split('_'),
         weekdaysShort : 'ne_po_ut_st_št_pi_so'.split('_'),
         weekdaysMin : 'ne_po_ut_st_št_pi_so'.split('_'),
@@ -18120,7 +18770,7 @@ return Globalize;
                 } else if (number < 5) {
                     result += withoutSuffix || isFuture ? 'sekunde' : 'sekundah';
                 } else {
-                    result += withoutSuffix || isFuture ? 'sekund' : 'sekund';
+                    result += 'sekund';
                 }
                 return result;
             case 'm':
@@ -18262,7 +18912,7 @@ return Globalize;
         ordinal : '%d.',
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -18417,7 +19067,7 @@ return Globalize;
         ordinal : '%d.',
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -18516,7 +19166,7 @@ return Globalize;
         ordinal : '%d.',
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -18696,13 +19346,13 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
     //! moment.js locale configuration
 
-    var symbolMap$e = {
+    var symbolMap$f = {
         '1': '௧',
         '2': '௨',
         '3': '௩',
@@ -18713,7 +19363,7 @@ return Globalize;
         '8': '௮',
         '9': '௯',
         '0': '௦'
-    }, numberMap$d = {
+    }, numberMap$e = {
         '௧': '1',
         '௨': '2',
         '௩': '3',
@@ -18770,12 +19420,12 @@ return Globalize;
         },
         preparse: function (string) {
             return string.replace(/[௧௨௩௪௫௬௭௮௯௦]/g, function (match) {
-                return numberMap$d[match];
+                return numberMap$e[match];
             });
         },
         postformat: function (string) {
             return string.replace(/\d/g, function (match) {
-                return symbolMap$e[match];
+                return symbolMap$f[match];
             });
         },
         // refer http://ta.wikipedia.org/s/1er1
@@ -18813,15 +19463,15 @@ return Globalize;
         },
         week : {
             dow : 0, // Sunday is the first day of the week.
-            doy : 6  // The week that contains Jan 1st is the first week of the year.
+            doy : 6  // The week that contains Jan 6th is the first week of the year.
         }
     });
 
     //! moment.js locale configuration
 
     hooks.defineLocale('te', {
-        months : 'జనవరి_ఫిబ్రవరి_మార్చి_ఏప్రిల్_మే_జూన్_జూలై_ఆగస్టు_సెప్టెంబర్_అక్టోబర్_నవంబర్_డిసెంబర్'.split('_'),
-        monthsShort : 'జన._ఫిబ్ర._మార్చి_ఏప్రి._మే_జూన్_జూలై_ఆగ._సెప్._అక్టో._నవ._డిసె.'.split('_'),
+        months : 'జనవరి_ఫిబ్రవరి_మార్చి_ఏప్రిల్_మే_జూన్_జులై_ఆగస్టు_సెప్టెంబర్_అక్టోబర్_నవంబర్_డిసెంబర్'.split('_'),
+        monthsShort : 'జన._ఫిబ్ర._మార్చి_ఏప్రి._మే_జూన్_జులై_ఆగ._సెప్._అక్టో._నవ._డిసె.'.split('_'),
         monthsParseExact : true,
         weekdays : 'ఆదివారం_సోమవారం_మంగళవారం_బుధవారం_గురువారం_శుక్రవారం_శనివారం'.split('_'),
         weekdaysShort : 'ఆది_సోమ_మంగళ_బుధ_గురు_శుక్ర_శని'.split('_'),
@@ -18890,7 +19540,7 @@ return Globalize;
         },
         week : {
             dow : 0, // Sunday is the first day of the week.
-            doy : 6  // The week that contains Jan 1st is the first week of the year.
+            doy : 6  // The week that contains Jan 6th is the first week of the year.
         }
     });
 
@@ -19346,7 +19996,7 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -19471,7 +20121,7 @@ return Globalize;
         },
         week : {
             dow : 6, // Saturday is the first day of the week.
-            doy : 12  // The week that contains Jan 1st is the first week of the year.
+            doy : 12  // The week that contains Jan 12th is the first week of the year.
         }
     });
 
@@ -19517,7 +20167,7 @@ return Globalize;
         },
         week : {
             dow : 6, // Saturday is the first day of the week.
-            doy : 12  // The week that contains Jan 1st is the first week of the year.
+            doy : 12  // The week that contains Jan 12th is the first week of the year.
         }
     });
 
@@ -19660,6 +20310,9 @@ return Globalize;
             'genitive': 'неділі_понеділка_вівторка_середи_четверга_п’ятниці_суботи'.split('_')
         };
 
+        if (m === true) {
+            return weekdays['nominative'].slice(1, 7).concat(weekdays['nominative'].slice(0, 1));
+        }
         if (!m) {
             return weekdays['nominative'];
         }
@@ -19763,13 +20416,13 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
     //! moment.js locale configuration
 
-    var months$8 = [
+    var months$a = [
         'جنوری',
         'فروری',
         'مارچ',
@@ -19794,8 +20447,8 @@ return Globalize;
     ];
 
     hooks.defineLocale('ur', {
-        months : months$8,
-        monthsShort : months$8,
+        months : months$a,
+        monthsShort : months$a,
         weekdays : days$2,
         weekdaysShort : days$2,
         weekdaysMin : days$2,
@@ -19895,7 +20548,7 @@ return Globalize;
         },
         week : {
             dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 1st is the first week of the year.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
         }
     });
 
@@ -23507,7 +24160,7 @@ define("urijs/punycode", function(){});
  * URI.js - Mutating URLs
  * IPv6 Support
  *
- * Version: 1.19.1
+ * Version: 1.19.2
  *
  * Author: Rodney Rehm
  * Web: http://medialize.github.io/URI.js/
@@ -23693,7 +24346,7 @@ define("urijs/punycode", function(){});
  * URI.js - Mutating URLs
  * Second Level Domain (SLD) Support
  *
- * Version: 1.19.1
+ * Version: 1.19.2
  *
  * Author: Rodney Rehm
  * Web: http://medialize.github.io/URI.js/
@@ -23938,7 +24591,7 @@ define("urijs/punycode", function(){});
 /*!
  * URI.js - Mutating URLs
  *
- * Version: 1.19.1
+ * Version: 1.19.2
  *
  * Author: Rodney Rehm
  * Web: http://medialize.github.io/URI.js/
@@ -24018,7 +24671,7 @@ define("urijs/punycode", function(){});
     return /^[0-9]+$/.test(value);
   }
 
-  URI.version = '1.19.1';
+  URI.version = '1.19.2';
 
   var p = URI.prototype;
   var hasOwn = Object.prototype.hasOwnProperty;
@@ -24606,6 +25259,7 @@ define("urijs/punycode", function(){});
 
   URI.build = function(parts) {
     var t = '';
+    var requireAbsolutePath = false
 
     if (parts.protocol) {
       t += parts.protocol + ':';
@@ -24613,12 +25267,13 @@ define("urijs/punycode", function(){});
 
     if (!parts.urn && (t || parts.hostname)) {
       t += '//';
+      requireAbsolutePath = true
     }
 
     t += (URI.buildAuthority(parts) || '');
 
     if (typeof parts.path === 'string') {
-      if (parts.path.charAt(0) !== '/' && typeof parts.hostname === 'string') {
+      if (parts.path.charAt(0) !== '/' && requireAbsolutePath) {
         t += '/';
       }
 
@@ -24681,7 +25336,7 @@ define("urijs/punycode", function(){});
     var t = '';
     var unique, key, i, length;
     for (key in data) {
-      if (hasOwn.call(data, key) && key) {
+      if (hasOwn.call(data, key)) {
         if (isArray(data[key])) {
           unique = {};
           for (i = 0, length = data[key].length; i < length; i++) {
@@ -26278,7 +26933,7 @@ define("urijs/punycode", function(){});
  * URI.js - Mutating URLs
  * URI Template Support - http://tools.ietf.org/html/rfc6570
  *
- * Version: 1.19.1
+ * Version: 1.19.2
  *
  * Author: Rodney Rehm
  * Web: http://medialize.github.io/URI.js/
@@ -26998,13 +27653,14 @@ define('ev-script/collections/base',['require','jquery','underscore','loglevel',
 
 });
 
-define('ev-script/models/base',['require','jquery','underscore','loglevel','backbone','ev-script/collections/base','ev-script/util/cache'],function(require) {
+define('ev-script/models/base',['require','jquery','underscore','loglevel','urijs/URI','backbone','ev-script/collections/base','ev-script/util/cache'],function(require) {
 
     'use strict';
 
     var $ = require('jquery'),
         _ = require('underscore'),
         log = require('loglevel'),
+        URI = require('urijs/URI'),
         Backbone = require('backbone'),
         BaseCollection = require('ev-script/collections/base'),
         cacheUtil = require('ev-script/util/cache'),
@@ -27059,8 +27715,8 @@ define('ev-script/models/base',['require','jquery','underscore','loglevel','back
                 cache: false
             });
             if (method === 'read') {
-                var url = this.url(),
-                    cached = this.getCached(url);
+                var key = URI(this.url()).removeQuery('_'), // Remove cache busting parameter
+                    cached = this.getCached(key);
                 if (cached) {
                     var deferred = $.Deferred();
                     if (options.success) {
@@ -27071,7 +27727,7 @@ define('ev-script/models/base',['require','jquery','underscore','loglevel','back
                     // Grab the response and cache
                     options.success = options.success || function(collection, response, options) {};
                     options.success = _.wrap(options.success, _.bind(function(success) {
-                        this.setCached(url, arguments[1]);
+                        this.setCached(key, arguments[1]);
                         success.apply(this, Array.prototype.slice.call(arguments, 1));
                     }, this));
                     this.promise = Backbone.Model.prototype.sync.call(this, method, collection, options);
@@ -27140,7 +27796,7 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
                 $html = $(this.template({
                     i18n: this.i18n,
                     frameSrc: frameSrc,
-                    frameWidth: dialogWidth - 50,
+                    frameWidth: '100%',
                     frameHeight: dialogHeight - 60
                 }));
             this.$dialog = $('<div class="ev-auth"></div>');
@@ -27303,7 +27959,7 @@ define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-s
             this.renderActions();
 
             // Authentication check
-            this.doAuthenticate();
+            this.authenticating = this.doAuthenticate();
 
             log.debug('[views/field] Field initialized');
             log.debug(this);
@@ -27317,16 +27973,17 @@ define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-s
         doAuthenticate: function() {
             var deferred = $.Deferred();
             this.root.promise.always(_.bind(function() {
-                if (!this.root.getUser()) {
+                var user = this.root.getUser();
+                if (!user || !user.get('isProvisioned')) {
                     var authView = new AuthView({
                         el: this.el,
                         submitCallback: _.bind(function() {
                             this.root.fetch().always(_.bind(function() {
-                                // if (this.root.getUser()) {
                                 if (this.root.getUser()) {
                                     this.events.trigger('loggedIn');
                                     deferred.resolve();
                                 } else {
+                                    this.authAttempted = true;
                                     this.events.trigger('loggedOut');
                                     deferred.reject();
                                 }
@@ -27342,7 +27999,10 @@ define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-s
             return deferred;
         },
         chooseHandler: function(e) {
-            this.doAuthenticate().done(_.bind(function() {
+            if (this.authenticating.state() !== 'pending') {
+                this.authenticating = this.doAuthenticate();
+            }
+            this.authenticating.done(_.bind(function() {
                 this.events.trigger('showPicker', this.id);
             }, this));
             e.preventDefault();
@@ -28778,61 +29438,6 @@ define('ev-script/views/picker',['require','jquery','underscore','ev-script/view
 
 });
 
-
-define('text!ev-script/templates/organization-select.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Organization:\') %></label>\n<select id="<%= id %>" class="form-select organizations" title="<%= i18n.formatMessage(\'Select Organization\') %>"></select>\n';});
-
-
-define('text!ev-script/templates/options.html',[],function () { return '<% if (noneOption) { %>\n    <option value="<%= noneOption.value %>" <% if (selectedId === noneOption.value ) { print(\'selected="selected"\'); } %>><%- noneOption.name %></option>\n<% } %>\n<% collection.each(function(item) { %>\n    <option value="<%= item.id %>" <% if (selectedId === item.id) { print(\'selected="selected"\'); } %>><%- item.get(\'title\') || item.get(\'Name\') || item.get(\'name\') %></option>\n<% }); %>\n';});
-
-define('ev-script/views/organization-select',['require','jquery','underscore','ev-script/views/base','text!ev-script/templates/organization-select.html','text!ev-script/templates/options.html'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/organization-select.html')),
-        optionsTemplate: _.template(require('text!ev-script/templates/options.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render', 'select');
-            this.$el.html(this.template({
-                id: this.id + '-select',
-                i18n: this.i18n
-            }));
-
-            this.picker = options.picker;
-            this.noneOption = options.noneOption;
-            this.$select = this.$('select');
-            this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
-            this.collection.on('reset', this.render);
-        },
-        render: function() {
-            var singleItem = this.collection.length === 1,
-                user = this.root && this.root.getUser(),
-                selectedId = singleItem ?
-                    this.collection.at(0).get('id') :
-                    this.picker.model.get('organizationId');
-            if (!selectedId || !this.collection.get(selectedId)) {
-                selectedId = (user && user.get('defaultOrganizationId')) || '';
-            }
-            this.$select.html(this.optionsTemplate({
-                noneOption: singleItem ? null : this.noneOption,
-                selectedId: selectedId,
-                collection: this.collection
-            }));
-            this.$select.trigger('change');
-        },
-        select: function(selectedId) {
-            $('option[value="' + selectedId + '"]', this.$select).prop('selected', true);
-            this.$select.trigger('change');
-        }
-    });
-
-});
-
 define('ev-script/models/organizations',['require','ev-script/models/base','ev-script/util/cache'],function(require) {
 
     'use strict';
@@ -28841,62 +29446,11 @@ define('ev-script/models/organizations',['require','ev-script/models/base','ev-s
         cacheUtil = require('ev-script/util/cache');
 
     return BaseModel.extend({
+        cacheName: 'organizations',
+        collectionKey: 'organizations'
         // initialize: function(models, options) {
         //     BaseModel.prototype.initialize.call(this, models, options);
         // },
-    });
-
-});
-
-
-define('text!ev-script/templates/library-select.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Library:\') %></label>\n<select id="<%= id %>" class="form-select libraries" title="<%= i18n.formatMessage(\'Select Library\') %>"></select>\n';});
-
-define('ev-script/views/library-select',['require','jquery','underscore','ev-script/views/base','text!ev-script/templates/library-select.html','text!ev-script/templates/options.html'],function(require) {
-
-    'use strict';
-
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/library-select.html')),
-        optionsTemplate: _.template(require('text!ev-script/templates/options.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'render', 'select');
-
-            this.$el.html(this.template({
-                id: this.id + '-select',
-                i18n: this.i18n
-            }));
-
-            this.picker = options.picker;
-            this.noneOption = options.noneOption;
-            this.$select = this.$('select');
-            this.$select.html('<option value="-1">' + this.i18n.formatMessage('Loading...') + '</option>');
-            this.collection.on('reset', this.render);
-        },
-        render: function() {
-            var singleItem = this.collection.length === 1,
-                user = this.root && this.root.getUser(),
-                selectedId = singleItem ?
-                    this.collection.at(0).get('id') :
-                    this.picker.model.get('libraryId');
-            if (!selectedId || !this.collection.get(selectedId)) {
-                selectedId = (user && user.get('defaultLibraryId')) || '';
-            }
-            this.$select.html(this.optionsTemplate({
-                noneOption: singleItem ? null : this.noneOption,
-                selectedId: selectedId,
-                collection: this.collection
-            }));
-            this.$select.trigger('change');
-        },
-        select: function(selectedId) {
-            $('option[value="' + selectedId + '"]', this.$select).prop('selected', true);
-            this.$select.trigger('change');
-        }
     });
 
 });
@@ -28913,46 +29467,6 @@ define('ev-script/models/libraries',['require','ev-script/models/base','ev-scrip
         // initialize: function(models, options) {
         //     BaseModel.prototype.initialize.call(this, models, options);
         // },
-    });
-
-});
-
-
-define('text!ev-script/templates/library-type-select.html',[],function () { return '<label for="<%= id %>"><%= i18n.formatMessage(\'Type:\') %></label>\n<select id="<%= id %>" class="form-select source" title="<%= i18n.formatMessage(\'Select Library Type\') %>">\n  <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Media Library\') %></option>\n  <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Shared Library\') %></option>\n</select>\n';});
-
-define('ev-script/views/library-type-select',['require','underscore','ev-script/views/base','text!ev-script/templates/library-type-select.html'],function(require) {
-
-    'use strict';
-
-    var _ = require('underscore'),
-        BaseView = require('ev-script/views/base');
-
-    return BaseView.extend({
-        template: _.template(require('text!ev-script/templates/library-type-select.html')),
-        initialize: function(options) {
-            BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'changeHandler');
-            this.picker = options.picker;
-            this.render();
-        },
-        events: {
-            'change .source': 'changeHandler'
-        },
-        render: function() {
-            this.$el.html(this.template({
-                id: this.id + '-select',
-                i18n: this.i18n,
-                sourceId: this.picker.model.get('sourceId')
-            }));
-        },
-        changeHandler: function(e) {
-            var sourceVal = this.$('.source').val();
-            this.picker.model.set({
-                sourceId: sourceVal
-            });
-            this.events.trigger('typeSelectChange', sourceVal);
-            e.preventDefault();
-        }
     });
 
 });
@@ -29020,10 +29534,6196 @@ define('ev-script/views/search',['require','underscore','ev-script/views/base','
 
 });
 
+define('select2/select2/utils',[
+  'jquery'
+], function ($) {
+  var Utils = {};
 
-define('text!ev-script/templates/filter.html',[],function () { return '<div id="<%= id %>-org-select" class="ev-filter-item ev-org-select"></div>\n<div id="<%= id %>-lib-select" class="ev-filter-item ev-lib-select"></div>\n<div id="<%= id %>-type-select" class="ev-filter-item ev-type-select"></div>\n<div id="<%= id %>-search" class="ev-filter-item ev-search"></div>\n<div class="ev-filter-item ev-actions">\n  <a href="#" class="action-home" style="display: none;" title="<%= i18n.formatMessage(\'Click to navigate to default library\') %>">\n    <i class="fa fa-home fa-fw fa-lg"></i>\n  </a>\n  <button type="button" class="action-upload" style="display: none;" title="<%= i18n.formatMessage(\'Click to upload new media\') %>">\n    <i class="fa fa-upload fa-fw"></i><span><%= i18n.formatMessage(\'Upload\') %><span>\n  </button>\n  <button type="button" class="action-record" style="display: none;" title="<%= i18n.formatMessage(\'Click to record screen\') %>">\n    <i class="record-inactive fa fa-circle fa-fw"></i>\n    <i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i>\n    <span><%= i18n.formatMessage(\'Record\') %><span>\n  </button>\n</div>\n<div class="ev-filter-item loader"></div>\n';});
+  Utils.Extend = function (ChildClass, SuperClass) {
+    var __hasProp = {}.hasOwnProperty;
 
-define('ev-script/views/filter',['require','jquery','underscore','loglevel','urijs/URITemplate','ev-script/views/base','ev-script/collections/base','ev-script/models/base','ev-script/views/organization-select','ev-script/models/organizations','ev-script/views/library-select','ev-script/models/libraries','ev-script/views/library-type-select','ev-script/views/search','text!ev-script/templates/filter.html'],function(require) {
+    function BaseConstructor () {
+      this.constructor = ChildClass;
+    }
+
+    for (var key in SuperClass) {
+      if (__hasProp.call(SuperClass, key)) {
+        ChildClass[key] = SuperClass[key];
+      }
+    }
+
+    BaseConstructor.prototype = SuperClass.prototype;
+    ChildClass.prototype = new BaseConstructor();
+    ChildClass.__super__ = SuperClass.prototype;
+
+    return ChildClass;
+  };
+
+  function getMethods (theClass) {
+    var proto = theClass.prototype;
+
+    var methods = [];
+
+    for (var methodName in proto) {
+      var m = proto[methodName];
+
+      if (typeof m !== 'function') {
+        continue;
+      }
+
+      if (methodName === 'constructor') {
+        continue;
+      }
+
+      methods.push(methodName);
+    }
+
+    return methods;
+  }
+
+  Utils.Decorate = function (SuperClass, DecoratorClass) {
+    var decoratedMethods = getMethods(DecoratorClass);
+    var superMethods = getMethods(SuperClass);
+
+    function DecoratedClass () {
+      var unshift = Array.prototype.unshift;
+
+      var argCount = DecoratorClass.prototype.constructor.length;
+
+      var calledConstructor = SuperClass.prototype.constructor;
+
+      if (argCount > 0) {
+        unshift.call(arguments, SuperClass.prototype.constructor);
+
+        calledConstructor = DecoratorClass.prototype.constructor;
+      }
+
+      calledConstructor.apply(this, arguments);
+    }
+
+    DecoratorClass.displayName = SuperClass.displayName;
+
+    function ctr () {
+      this.constructor = DecoratedClass;
+    }
+
+    DecoratedClass.prototype = new ctr();
+
+    for (var m = 0; m < superMethods.length; m++) {
+      var superMethod = superMethods[m];
+
+      DecoratedClass.prototype[superMethod] =
+        SuperClass.prototype[superMethod];
+    }
+
+    var calledMethod = function (methodName) {
+      // Stub out the original method if it's not decorating an actual method
+      var originalMethod = function () {};
+
+      if (methodName in DecoratedClass.prototype) {
+        originalMethod = DecoratedClass.prototype[methodName];
+      }
+
+      var decoratedMethod = DecoratorClass.prototype[methodName];
+
+      return function () {
+        var unshift = Array.prototype.unshift;
+
+        unshift.call(arguments, originalMethod);
+
+        return decoratedMethod.apply(this, arguments);
+      };
+    };
+
+    for (var d = 0; d < decoratedMethods.length; d++) {
+      var decoratedMethod = decoratedMethods[d];
+
+      DecoratedClass.prototype[decoratedMethod] = calledMethod(decoratedMethod);
+    }
+
+    return DecoratedClass;
+  };
+
+  var Observable = function () {
+    this.listeners = {};
+  };
+
+  Observable.prototype.on = function (event, callback) {
+    this.listeners = this.listeners || {};
+
+    if (event in this.listeners) {
+      this.listeners[event].push(callback);
+    } else {
+      this.listeners[event] = [callback];
+    }
+  };
+
+  Observable.prototype.trigger = function (event) {
+    var slice = Array.prototype.slice;
+    var params = slice.call(arguments, 1);
+
+    this.listeners = this.listeners || {};
+
+    // Params should always come in as an array
+    if (params == null) {
+      params = [];
+    }
+
+    // If there are no arguments to the event, use a temporary object
+    if (params.length === 0) {
+      params.push({});
+    }
+
+    // Set the `_type` of the first object to the event
+    params[0]._type = event;
+
+    if (event in this.listeners) {
+      this.invoke(this.listeners[event], slice.call(arguments, 1));
+    }
+
+    if ('*' in this.listeners) {
+      this.invoke(this.listeners['*'], arguments);
+    }
+  };
+
+  Observable.prototype.invoke = function (listeners, params) {
+    for (var i = 0, len = listeners.length; i < len; i++) {
+      listeners[i].apply(this, params);
+    }
+  };
+
+  Utils.Observable = Observable;
+
+  Utils.generateChars = function (length) {
+    var chars = '';
+
+    for (var i = 0; i < length; i++) {
+      var randomChar = Math.floor(Math.random() * 36);
+      chars += randomChar.toString(36);
+    }
+
+    return chars;
+  };
+
+  Utils.bind = function (func, context) {
+    return function () {
+      func.apply(context, arguments);
+    };
+  };
+
+  Utils._convertData = function (data) {
+    for (var originalKey in data) {
+      var keys = originalKey.split('-');
+
+      var dataLevel = data;
+
+      if (keys.length === 1) {
+        continue;
+      }
+
+      for (var k = 0; k < keys.length; k++) {
+        var key = keys[k];
+
+        // Lowercase the first letter
+        // By default, dash-separated becomes camelCase
+        key = key.substring(0, 1).toLowerCase() + key.substring(1);
+
+        if (!(key in dataLevel)) {
+          dataLevel[key] = {};
+        }
+
+        if (k == keys.length - 1) {
+          dataLevel[key] = data[originalKey];
+        }
+
+        dataLevel = dataLevel[key];
+      }
+
+      delete data[originalKey];
+    }
+
+    return data;
+  };
+
+  Utils.hasScroll = function (index, el) {
+    // Adapted from the function created by @ShadowScripter
+    // and adapted by @BillBarry on the Stack Exchange Code Review website.
+    // The original code can be found at
+    // http://codereview.stackexchange.com/q/13338
+    // and was designed to be used with the Sizzle selector engine.
+
+    var $el = $(el);
+    var overflowX = el.style.overflowX;
+    var overflowY = el.style.overflowY;
+
+    //Check both x and y declarations
+    if (overflowX === overflowY &&
+        (overflowY === 'hidden' || overflowY === 'visible')) {
+      return false;
+    }
+
+    if (overflowX === 'scroll' || overflowY === 'scroll') {
+      return true;
+    }
+
+    return ($el.innerHeight() < el.scrollHeight ||
+      $el.innerWidth() < el.scrollWidth);
+  };
+
+  Utils.escapeMarkup = function (markup) {
+    var replaceMap = {
+      '\\': '&#92;',
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      '\'': '&#39;',
+      '/': '&#47;'
+    };
+
+    // Do not try to escape the markup if it's not a string
+    if (typeof markup !== 'string') {
+      return markup;
+    }
+
+    return String(markup).replace(/[&<>"'\/\\]/g, function (match) {
+      return replaceMap[match];
+    });
+  };
+
+  // Append an array of jQuery nodes to a given element.
+  Utils.appendMany = function ($element, $nodes) {
+    // jQuery 1.7.x does not support $.fn.append() with an array
+    // Fall back to a jQuery object collection using $.fn.add()
+    if ($.fn.jquery.substr(0, 3) === '1.7') {
+      var $jqNodes = $();
+
+      $.map($nodes, function (node) {
+        $jqNodes = $jqNodes.add(node);
+      });
+
+      $nodes = $jqNodes;
+    }
+
+    $element.append($nodes);
+  };
+
+  // Cache objects in Utils.__cache instead of $.data (see #4346)
+  Utils.__cache = {};
+
+  var id = 0;
+  Utils.GetUniqueElementId = function (element) {
+    // Get a unique element Id. If element has no id,
+    // creates a new unique number, stores it in the id
+    // attribute and returns the new id.
+    // If an id already exists, it simply returns it.
+
+    var select2Id = element.getAttribute('data-select2-id');
+    if (select2Id == null) {
+      // If element has id, use it.
+      if (element.id) {
+        select2Id = element.id;
+        element.setAttribute('data-select2-id', select2Id);
+      } else {
+        element.setAttribute('data-select2-id', ++id);
+        select2Id = id.toString();
+      }
+    }
+    return select2Id;
+  };
+
+  Utils.StoreData = function (element, name, value) {
+    // Stores an item in the cache for a specified element.
+    // name is the cache key.
+    var id = Utils.GetUniqueElementId(element);
+    if (!Utils.__cache[id]) {
+      Utils.__cache[id] = {};
+    }
+
+    Utils.__cache[id][name] = value;
+  };
+
+  Utils.GetData = function (element, name) {
+    // Retrieves a value from the cache by its key (name)
+    // name is optional. If no name specified, return
+    // all cache items for the specified element.
+    // and for a specified element.
+    var id = Utils.GetUniqueElementId(element);
+    if (name) {
+      if (Utils.__cache[id]) {
+        if (Utils.__cache[id][name] != null) {
+          return Utils.__cache[id][name];
+        }
+        return $(element).data(name); // Fallback to HTML5 data attribs.
+      }
+      return $(element).data(name); // Fallback to HTML5 data attribs.
+    } else {
+      return Utils.__cache[id];
+    }
+  };
+
+  Utils.RemoveData = function (element) {
+    // Removes all cached items for a specified element.
+    var id = Utils.GetUniqueElementId(element);
+    if (Utils.__cache[id] != null) {
+      delete Utils.__cache[id];
+    }
+
+    element.removeAttribute('data-select2-id');
+  };
+
+  return Utils;
+});
+
+define('select2/select2/data/base',[
+  '../utils'
+], function (Utils) {
+  function BaseAdapter ($element, options) {
+    BaseAdapter.__super__.constructor.call(this);
+  }
+
+  Utils.Extend(BaseAdapter, Utils.Observable);
+
+  BaseAdapter.prototype.current = function (callback) {
+    throw new Error('The `current` method must be defined in child classes.');
+  };
+
+  BaseAdapter.prototype.query = function (params, callback) {
+    throw new Error('The `query` method must be defined in child classes.');
+  };
+
+  BaseAdapter.prototype.bind = function (container, $container) {
+    // Can be implemented in subclasses
+  };
+
+  BaseAdapter.prototype.destroy = function () {
+    // Can be implemented in subclasses
+  };
+
+  BaseAdapter.prototype.generateResultId = function (container, data) {
+    var id = container.id + '-result-';
+
+    id += Utils.generateChars(4);
+
+    if (data.id != null) {
+      id += '-' + data.id.toString();
+    } else {
+      id += '-' + Utils.generateChars(4);
+    }
+    return id;
+  };
+
+  return BaseAdapter;
+});
+
+define('select2/select2/data/select',[
+  './base',
+  '../utils',
+  'jquery'
+], function (BaseAdapter, Utils, $) {
+  function SelectAdapter ($element, options) {
+    this.$element = $element;
+    this.options = options;
+
+    SelectAdapter.__super__.constructor.call(this);
+  }
+
+  Utils.Extend(SelectAdapter, BaseAdapter);
+
+  SelectAdapter.prototype.current = function (callback) {
+    var data = [];
+    var self = this;
+
+    this.$element.find(':selected').each(function () {
+      var $option = $(this);
+
+      var option = self.item($option);
+
+      data.push(option);
+    });
+
+    callback(data);
+  };
+
+  SelectAdapter.prototype.select = function (data) {
+    var self = this;
+
+    data.selected = true;
+
+    // If data.element is a DOM node, use it instead
+    if ($(data.element).is('option')) {
+      data.element.selected = true;
+
+      this.$element.trigger('input').trigger('change');
+
+      return;
+    }
+
+    if (this.$element.prop('multiple')) {
+      this.current(function (currentData) {
+        var val = [];
+
+        data = [data];
+        data.push.apply(data, currentData);
+
+        for (var d = 0; d < data.length; d++) {
+          var id = data[d].id;
+
+          if ($.inArray(id, val) === -1) {
+            val.push(id);
+          }
+        }
+
+        self.$element.val(val);
+        self.$element.trigger('input').trigger('change');
+      });
+    } else {
+      var val = data.id;
+
+      this.$element.val(val);
+      this.$element.trigger('input').trigger('change');
+    }
+  };
+
+  SelectAdapter.prototype.unselect = function (data) {
+    var self = this;
+
+    if (!this.$element.prop('multiple')) {
+      return;
+    }
+
+    data.selected = false;
+
+    if ($(data.element).is('option')) {
+      data.element.selected = false;
+
+      this.$element.trigger('input').trigger('change');
+
+      return;
+    }
+
+    this.current(function (currentData) {
+      var val = [];
+
+      for (var d = 0; d < currentData.length; d++) {
+        var id = currentData[d].id;
+
+        if (id !== data.id && $.inArray(id, val) === -1) {
+          val.push(id);
+        }
+      }
+
+      self.$element.val(val);
+
+      self.$element.trigger('input').trigger('change');
+    });
+  };
+
+  SelectAdapter.prototype.bind = function (container, $container) {
+    var self = this;
+
+    this.container = container;
+
+    container.on('select', function (params) {
+      self.select(params.data);
+    });
+
+    container.on('unselect', function (params) {
+      self.unselect(params.data);
+    });
+  };
+
+  SelectAdapter.prototype.destroy = function () {
+    // Remove anything added to child elements
+    this.$element.find('*').each(function () {
+      // Remove any custom data set by Select2
+      Utils.RemoveData(this);
+    });
+  };
+
+  SelectAdapter.prototype.query = function (params, callback) {
+    var data = [];
+    var self = this;
+
+    var $options = this.$element.children();
+
+    $options.each(function () {
+      var $option = $(this);
+
+      if (!$option.is('option') && !$option.is('optgroup')) {
+        return;
+      }
+
+      var option = self.item($option);
+
+      var matches = self.matches(params, option);
+
+      if (matches !== null) {
+        data.push(matches);
+      }
+    });
+
+    callback({
+      results: data
+    });
+  };
+
+  SelectAdapter.prototype.addOptions = function ($options) {
+    Utils.appendMany(this.$element, $options);
+  };
+
+  SelectAdapter.prototype.option = function (data) {
+    var option;
+
+    if (data.children) {
+      option = document.createElement('optgroup');
+      option.label = data.text;
+    } else {
+      option = document.createElement('option');
+
+      if (option.textContent !== undefined) {
+        option.textContent = data.text;
+      } else {
+        option.innerText = data.text;
+      }
+    }
+
+    if (data.id !== undefined) {
+      option.value = data.id;
+    }
+
+    if (data.disabled) {
+      option.disabled = true;
+    }
+
+    if (data.selected) {
+      option.selected = true;
+    }
+
+    if (data.title) {
+      option.title = data.title;
+    }
+
+    var $option = $(option);
+
+    var normalizedData = this._normalizeItem(data);
+    normalizedData.element = option;
+
+    // Override the option's data with the combined data
+    Utils.StoreData(option, 'data', normalizedData);
+
+    return $option;
+  };
+
+  SelectAdapter.prototype.item = function ($option) {
+    var data = {};
+
+    data = Utils.GetData($option[0], 'data');
+
+    if (data != null) {
+      return data;
+    }
+
+    if ($option.is('option')) {
+      data = {
+        id: $option.val(),
+        text: $option.text(),
+        disabled: $option.prop('disabled'),
+        selected: $option.prop('selected'),
+        title: $option.prop('title')
+      };
+    } else if ($option.is('optgroup')) {
+      data = {
+        text: $option.prop('label'),
+        children: [],
+        title: $option.prop('title')
+      };
+
+      var $children = $option.children('option');
+      var children = [];
+
+      for (var c = 0; c < $children.length; c++) {
+        var $child = $($children[c]);
+
+        var child = this.item($child);
+
+        children.push(child);
+      }
+
+      data.children = children;
+    }
+
+    data = this._normalizeItem(data);
+    data.element = $option[0];
+
+    Utils.StoreData($option[0], 'data', data);
+
+    return data;
+  };
+
+  SelectAdapter.prototype._normalizeItem = function (item) {
+    if (item !== Object(item)) {
+      item = {
+        id: item,
+        text: item
+      };
+    }
+
+    item = $.extend({}, {
+      text: ''
+    }, item);
+
+    var defaults = {
+      selected: false,
+      disabled: false
+    };
+
+    if (item.id != null) {
+      item.id = item.id.toString();
+    }
+
+    if (item.text != null) {
+      item.text = item.text.toString();
+    }
+
+    if (item._resultId == null && item.id && this.container != null) {
+      item._resultId = this.generateResultId(this.container, item);
+    }
+
+    return $.extend({}, defaults, item);
+  };
+
+  SelectAdapter.prototype.matches = function (params, data) {
+    var matcher = this.options.get('matcher');
+
+    return matcher(params, data);
+  };
+
+  return SelectAdapter;
+});
+
+define('select2/select2/data/array',[
+  './select',
+  '../utils',
+  'jquery'
+], function (SelectAdapter, Utils, $) {
+  function ArrayAdapter ($element, options) {
+    this._dataToConvert = options.get('data') || [];
+
+    ArrayAdapter.__super__.constructor.call(this, $element, options);
+  }
+
+  Utils.Extend(ArrayAdapter, SelectAdapter);
+
+  ArrayAdapter.prototype.bind = function (container, $container) {
+    ArrayAdapter.__super__.bind.call(this, container, $container);
+
+    this.addOptions(this.convertToOptions(this._dataToConvert));
+  };
+
+  ArrayAdapter.prototype.select = function (data) {
+    var $option = this.$element.find('option').filter(function (i, elm) {
+      return elm.value == data.id.toString();
+    });
+
+    if ($option.length === 0) {
+      $option = this.option(data);
+
+      this.addOptions($option);
+    }
+
+    ArrayAdapter.__super__.select.call(this, data);
+  };
+
+  ArrayAdapter.prototype.convertToOptions = function (data) {
+    var self = this;
+
+    var $existing = this.$element.find('option');
+    var existingIds = $existing.map(function () {
+      return self.item($(this)).id;
+    }).get();
+
+    var $options = [];
+
+    // Filter out all items except for the one passed in the argument
+    function onlyItem (item) {
+      return function () {
+        return $(this).val() == item.id;
+      };
+    }
+
+    for (var d = 0; d < data.length; d++) {
+      var item = this._normalizeItem(data[d]);
+
+      // Skip items which were pre-loaded, only merge the data
+      if ($.inArray(item.id, existingIds) >= 0) {
+        var $existingOption = $existing.filter(onlyItem(item));
+
+        var existingData = this.item($existingOption);
+        var newData = $.extend(true, {}, item, existingData);
+
+        var $newOption = this.option(newData);
+
+        $existingOption.replaceWith($newOption);
+
+        continue;
+      }
+
+      var $option = this.option(item);
+
+      if (item.children) {
+        var $children = this.convertToOptions(item.children);
+
+        Utils.appendMany($option, $children);
+      }
+
+      $options.push($option);
+    }
+
+    return $options;
+  };
+
+  return ArrayAdapter;
+});
+
+define('select2/select2/dropdown/infiniteScroll',[
+  'jquery'
+], function ($) {
+  function InfiniteScroll (decorated, $element, options, dataAdapter) {
+    this.lastParams = {};
+
+    decorated.call(this, $element, options, dataAdapter);
+
+    this.$loadingMore = this.createLoadingMore();
+    this.loading = false;
+  }
+
+  InfiniteScroll.prototype.append = function (decorated, data) {
+    this.$loadingMore.remove();
+    this.loading = false;
+
+    decorated.call(this, data);
+
+    if (this.showLoadingMore(data)) {
+      this.$results.append(this.$loadingMore);
+      this.loadMoreIfNeeded();
+    }
+  };
+
+  InfiniteScroll.prototype.bind = function (decorated, container, $container) {
+    var self = this;
+
+    decorated.call(this, container, $container);
+
+    container.on('query', function (params) {
+      self.lastParams = params;
+      self.loading = true;
+    });
+
+    container.on('query:append', function (params) {
+      self.lastParams = params;
+      self.loading = true;
+    });
+
+    this.$results.on('scroll', this.loadMoreIfNeeded.bind(this));
+  };
+
+  InfiniteScroll.prototype.loadMoreIfNeeded = function () {
+    var isLoadMoreVisible = $.contains(
+      document.documentElement,
+      this.$loadingMore[0]
+    );
+
+    if (this.loading || !isLoadMoreVisible) {
+      return;
+    }
+
+    var currentOffset = this.$results.offset().top +
+      this.$results.outerHeight(false);
+    var loadingMoreOffset = this.$loadingMore.offset().top +
+      this.$loadingMore.outerHeight(false);
+
+    if (currentOffset + 50 >= loadingMoreOffset) {
+      this.loadMore();
+    }
+  };
+
+  InfiniteScroll.prototype.loadMore = function () {
+    this.loading = true;
+
+    var params = $.extend({}, {page: 1}, this.lastParams);
+
+    params.page++;
+
+    this.trigger('query:append', params);
+  };
+
+  InfiniteScroll.prototype.showLoadingMore = function (_, data) {
+    return data.pagination && data.pagination.more;
+  };
+
+  InfiniteScroll.prototype.createLoadingMore = function () {
+    var $option = $(
+      '<li ' +
+      'class="select2-results__option select2-results__option--load-more"' +
+      'role="option" aria-disabled="true"></li>'
+    );
+
+    var message = this.options.get('translations').get('loadingMore');
+
+    $option.html(message(this.lastParams));
+
+    return $option;
+  };
+
+  return InfiniteScroll;
+});
+
+define('ev-script/util/hapiAdapter',['require','underscore','ev-script/models/base','select2/select2/data/array','select2/select2/utils','select2/select2/dropdown/infiniteScroll'],function(require) {
+
+    var _ = require('underscore'),
+        BaseModel = require('ev-script/models/base'),
+        ArrayAdapter = require('select2/select2/data/array'),
+        Utils = require('select2/select2/utils'),
+        InfiniteScroll = require('select2/select2/dropdown/infiniteScroll');
+
+    function HapiAdapter ($element, options) {
+
+        options.set('resultsAdapter', Utils.Decorate(
+            options.get('resultsAdapter'),
+            InfiniteScroll
+        ));
+
+        this.hapiOptions = options.get('hapi');
+        this.hapiOptions.collection.on('reset', _.bind(function() {
+            $element.val(null).trigger('change.select2');
+        }, this));
+        $element.on('hapi:updateTemplates', _.bind(function(e, templates) {
+            this.hapiOptions.templates = templates;
+        }, this));
+        $element.on('hapi:useGet', _.bind(function(e) {
+            this.hapiOptions.useGet = true;
+        }, this));
+
+        HapiAdapter.__super__.constructor.call(this, $element, options);
+    }
+
+    Utils.Extend(HapiAdapter, ArrayAdapter);
+
+    HapiAdapter.prototype.current = function (callback) {
+
+        var $selected = this.$element.find(':selected'),
+            collection = this.hapiOptions.collection;
+        if (!$selected.length || !collection.size()) {
+            if (this.hapiOptions.useGet) {
+                this.hapiOptions.useGet = false;
+                var item = new this.hapiOptions.modelClass({}, {
+                        href: this.hapiOptions.templates.get.expand({
+                            id: this.hapiOptions.defaultId
+                        })
+                    });
+
+                item.fetch({
+                    picker: this.hapiOptions.picker,
+                    success: _.bind(function(model, response, options) {
+                        collection.add(new BaseModel(response, {}));
+                        this.select({
+                            id: response.id,
+                            text: response.title,
+                            selected: true
+                        });
+                    }, this),
+                    error: _.bind(this.hapiOptions.ajaxError, this)
+                });
+            } else if (!collection.size()) {
+                this.query({
+                    pageNumber: 1,
+                    term: ''
+                }, _.bind(function(data) {
+                    var first = _.first(data.results);
+                    first.selected = true;
+                    this.select(first);
+                }, this));
+            } else {
+                var model = collection.at(0);
+                this.select({
+                    id: model.id,
+                    text: model.get('title'),
+                    selected: true
+                });
+            }
+        } else {
+            if ($selected.val() === '' || collection.findWhere({ 'id': $selected.val() })) {
+                callback([this.item($selected)]);
+            } else {
+                callback([]);
+            }
+        }
+    };
+
+    HapiAdapter.prototype.query = function (params, callback) {
+        var items = new this.hapiOptions.modelClass({}, {
+            href: this.hapiOptions.templates.search.expand({
+                pageSize: 100,
+                pageNumber: params.page,
+                search: params.term
+            })
+        });
+        items.fetch({
+            picker: this.hapiOptions.picker,
+            success: _.bind(function(model, response, options) {
+                var next = model.getLink('next'),
+                    embedded = model.getEmbedded(this.hapiOptions.collectionName),
+                    collection = this.hapiOptions.collection,
+                    noneOption = this.hapiOptions.noneOption,
+                    dataMap = function(model) {
+                        return {
+                            id: model.id,
+                            text: model.get('title')
+                        };
+                    };
+
+                if (embedded) {
+                    collection.add(embedded.models);
+                }
+
+                var data = {
+                    results: [],
+                    pagination: {
+                        more: next
+                    }
+                };
+
+                if (noneOption && !params.page) {
+                    data.results.push(noneOption);
+                }
+
+                data.results = data.results.concat(_.map(embedded.models, dataMap));
+
+                callback(data);
+            }, this),
+            error: _.bind(this.hapiOptions.ajaxError, this)
+        });
+
+    };
+
+    return HapiAdapter;
+});
+
+define('select2/select2/compat/utils',[
+  'jquery'
+], function ($) {
+  function syncCssClasses ($dest, $src, adapter) {
+    var classes, replacements = [], adapted;
+
+    classes = $.trim($dest.attr('class'));
+
+    if (classes) {
+      classes = '' + classes; // for IE which returns object
+
+      $(classes.split(/\s+/)).each(function () {
+        // Save all Select2 classes
+        if (this.indexOf('select2-') === 0) {
+          replacements.push(this);
+        }
+      });
+    }
+
+    classes = $.trim($src.attr('class'));
+
+    if (classes) {
+      classes = '' + classes; // for IE which returns object
+
+      $(classes.split(/\s+/)).each(function () {
+        // Only adapt non-Select2 classes
+        if (this.indexOf('select2-') !== 0) {
+          adapted = adapter(this);
+
+          if (adapted != null) {
+            replacements.push(adapted);
+          }
+        }
+      });
+    }
+
+    $dest.attr('class', replacements.join(' '));
+  }
+
+  return {
+    syncCssClasses: syncCssClasses
+  };
+});
+
+define('select2/select2/compat/containerCss',[
+  'jquery',
+  './utils'
+], function ($, CompatUtils) {
+  // No-op CSS adapter that discards all classes by default
+  function _containerAdapter (clazz) {
+    return null;
+  }
+
+  function ContainerCSS () { }
+
+  ContainerCSS.prototype.render = function (decorated) {
+    var $container = decorated.call(this);
+
+    var containerCssClass = this.options.get('containerCssClass') || '';
+
+    if ($.isFunction(containerCssClass)) {
+      containerCssClass = containerCssClass(this.$element);
+    }
+
+    var containerCssAdapter = this.options.get('adaptContainerCssClass');
+    containerCssAdapter = containerCssAdapter || _containerAdapter;
+
+    if (containerCssClass.indexOf(':all:') !== -1) {
+      containerCssClass = containerCssClass.replace(':all:', '');
+
+      var _cssAdapter = containerCssAdapter;
+
+      containerCssAdapter = function (clazz) {
+        var adapted = _cssAdapter(clazz);
+
+        if (adapted != null) {
+          // Append the old one along with the adapted one
+          return adapted + ' ' + clazz;
+        }
+
+        return clazz;
+      };
+    }
+
+    var containerCss = this.options.get('containerCss') || {};
+
+    if ($.isFunction(containerCss)) {
+      containerCss = containerCss(this.$element);
+    }
+
+    CompatUtils.syncCssClasses($container, this.$element, containerCssAdapter);
+
+    $container.css(containerCss);
+    $container.addClass(containerCssClass);
+
+    return $container;
+  };
+
+  return ContainerCSS;
+});
+
+define('select2/select2/compat/dropdownCss',[
+  'jquery',
+  './utils'
+], function ($, CompatUtils) {
+  // No-op CSS adapter that discards all classes by default
+  function _dropdownAdapter (clazz) {
+    return null;
+  }
+
+  function DropdownCSS () { }
+
+  DropdownCSS.prototype.render = function (decorated) {
+    var $dropdown = decorated.call(this);
+
+    var dropdownCssClass = this.options.get('dropdownCssClass') || '';
+
+    if ($.isFunction(dropdownCssClass)) {
+      dropdownCssClass = dropdownCssClass(this.$element);
+    }
+
+    var dropdownCssAdapter = this.options.get('adaptDropdownCssClass');
+    dropdownCssAdapter = dropdownCssAdapter || _dropdownAdapter;
+
+    if (dropdownCssClass.indexOf(':all:') !== -1) {
+      dropdownCssClass = dropdownCssClass.replace(':all:', '');
+
+      var _cssAdapter = dropdownCssAdapter;
+
+      dropdownCssAdapter = function (clazz) {
+        var adapted = _cssAdapter(clazz);
+
+        if (adapted != null) {
+          // Append the old one along with the adapted one
+          return adapted + ' ' + clazz;
+        }
+
+        return clazz;
+      };
+    }
+
+    var dropdownCss = this.options.get('dropdownCss') || {};
+
+    if ($.isFunction(dropdownCss)) {
+      dropdownCss = dropdownCss(this.$element);
+    }
+
+    CompatUtils.syncCssClasses($dropdown, this.$element, dropdownCssAdapter);
+
+    $dropdown.css(dropdownCss);
+    $dropdown.addClass(dropdownCssClass);
+
+    return $dropdown;
+  };
+
+  return DropdownCSS;
+});
+
+/*!
+ * jQuery Mousewheel 3.1.13
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license
+ * http://jquery.org/license
+ */
+
+(function (factory) {
+    if ( typeof define === 'function' && define.amd ) {
+        // AMD. Register as an anonymous module.
+        define('jquery-mousewheel',['jquery'], factory);
+    } else if (typeof exports === 'object') {
+        // Node/CommonJS style for Browserify
+        module.exports = factory;
+    } else {
+        // Browser globals
+        factory(jQuery);
+    }
+}(function ($) {
+
+    var toFix  = ['wheel', 'mousewheel', 'DOMMouseScroll', 'MozMousePixelScroll'],
+        toBind = ( 'onwheel' in document || document.documentMode >= 9 ) ?
+                    ['wheel'] : ['mousewheel', 'DomMouseScroll', 'MozMousePixelScroll'],
+        slice  = Array.prototype.slice,
+        nullLowestDeltaTimeout, lowestDelta;
+
+    if ( $.event.fixHooks ) {
+        for ( var i = toFix.length; i; ) {
+            $.event.fixHooks[ toFix[--i] ] = $.event.mouseHooks;
+        }
+    }
+
+    var special = $.event.special.mousewheel = {
+        version: '3.1.12',
+
+        setup: function() {
+            if ( this.addEventListener ) {
+                for ( var i = toBind.length; i; ) {
+                    this.addEventListener( toBind[--i], handler, false );
+                }
+            } else {
+                this.onmousewheel = handler;
+            }
+            // Store the line height and page height for this particular element
+            $.data(this, 'mousewheel-line-height', special.getLineHeight(this));
+            $.data(this, 'mousewheel-page-height', special.getPageHeight(this));
+        },
+
+        teardown: function() {
+            if ( this.removeEventListener ) {
+                for ( var i = toBind.length; i; ) {
+                    this.removeEventListener( toBind[--i], handler, false );
+                }
+            } else {
+                this.onmousewheel = null;
+            }
+            // Clean up the data we added to the element
+            $.removeData(this, 'mousewheel-line-height');
+            $.removeData(this, 'mousewheel-page-height');
+        },
+
+        getLineHeight: function(elem) {
+            var $elem = $(elem),
+                $parent = $elem['offsetParent' in $.fn ? 'offsetParent' : 'parent']();
+            if (!$parent.length) {
+                $parent = $('body');
+            }
+            return parseInt($parent.css('fontSize'), 10) || parseInt($elem.css('fontSize'), 10) || 16;
+        },
+
+        getPageHeight: function(elem) {
+            return $(elem).height();
+        },
+
+        settings: {
+            adjustOldDeltas: true, // see shouldAdjustOldDeltas() below
+            normalizeOffset: true  // calls getBoundingClientRect for each event
+        }
+    };
+
+    $.fn.extend({
+        mousewheel: function(fn) {
+            return fn ? this.bind('mousewheel', fn) : this.trigger('mousewheel');
+        },
+
+        unmousewheel: function(fn) {
+            return this.unbind('mousewheel', fn);
+        }
+    });
+
+
+    function handler(event) {
+        var orgEvent   = event || window.event,
+            args       = slice.call(arguments, 1),
+            delta      = 0,
+            deltaX     = 0,
+            deltaY     = 0,
+            absDelta   = 0,
+            offsetX    = 0,
+            offsetY    = 0;
+        event = $.event.fix(orgEvent);
+        event.type = 'mousewheel';
+
+        // Old school scrollwheel delta
+        if ( 'detail'      in orgEvent ) { deltaY = orgEvent.detail * -1;      }
+        if ( 'wheelDelta'  in orgEvent ) { deltaY = orgEvent.wheelDelta;       }
+        if ( 'wheelDeltaY' in orgEvent ) { deltaY = orgEvent.wheelDeltaY;      }
+        if ( 'wheelDeltaX' in orgEvent ) { deltaX = orgEvent.wheelDeltaX * -1; }
+
+        // Firefox < 17 horizontal scrolling related to DOMMouseScroll event
+        if ( 'axis' in orgEvent && orgEvent.axis === orgEvent.HORIZONTAL_AXIS ) {
+            deltaX = deltaY * -1;
+            deltaY = 0;
+        }
+
+        // Set delta to be deltaY or deltaX if deltaY is 0 for backwards compatabilitiy
+        delta = deltaY === 0 ? deltaX : deltaY;
+
+        // New school wheel delta (wheel event)
+        if ( 'deltaY' in orgEvent ) {
+            deltaY = orgEvent.deltaY * -1;
+            delta  = deltaY;
+        }
+        if ( 'deltaX' in orgEvent ) {
+            deltaX = orgEvent.deltaX;
+            if ( deltaY === 0 ) { delta  = deltaX * -1; }
+        }
+
+        // No change actually happened, no reason to go any further
+        if ( deltaY === 0 && deltaX === 0 ) { return; }
+
+        // Need to convert lines and pages to pixels if we aren't already in pixels
+        // There are three delta modes:
+        //   * deltaMode 0 is by pixels, nothing to do
+        //   * deltaMode 1 is by lines
+        //   * deltaMode 2 is by pages
+        if ( orgEvent.deltaMode === 1 ) {
+            var lineHeight = $.data(this, 'mousewheel-line-height');
+            delta  *= lineHeight;
+            deltaY *= lineHeight;
+            deltaX *= lineHeight;
+        } else if ( orgEvent.deltaMode === 2 ) {
+            var pageHeight = $.data(this, 'mousewheel-page-height');
+            delta  *= pageHeight;
+            deltaY *= pageHeight;
+            deltaX *= pageHeight;
+        }
+
+        // Store lowest absolute delta to normalize the delta values
+        absDelta = Math.max( Math.abs(deltaY), Math.abs(deltaX) );
+
+        if ( !lowestDelta || absDelta < lowestDelta ) {
+            lowestDelta = absDelta;
+
+            // Adjust older deltas if necessary
+            if ( shouldAdjustOldDeltas(orgEvent, absDelta) ) {
+                lowestDelta /= 40;
+            }
+        }
+
+        // Adjust older deltas if necessary
+        if ( shouldAdjustOldDeltas(orgEvent, absDelta) ) {
+            // Divide all the things by 40!
+            delta  /= 40;
+            deltaX /= 40;
+            deltaY /= 40;
+        }
+
+        // Get a whole, normalized value for the deltas
+        delta  = Math[ delta  >= 1 ? 'floor' : 'ceil' ](delta  / lowestDelta);
+        deltaX = Math[ deltaX >= 1 ? 'floor' : 'ceil' ](deltaX / lowestDelta);
+        deltaY = Math[ deltaY >= 1 ? 'floor' : 'ceil' ](deltaY / lowestDelta);
+
+        // Normalise offsetX and offsetY properties
+        if ( special.settings.normalizeOffset && this.getBoundingClientRect ) {
+            var boundingRect = this.getBoundingClientRect();
+            offsetX = event.clientX - boundingRect.left;
+            offsetY = event.clientY - boundingRect.top;
+        }
+
+        // Add information to the event object
+        event.deltaX = deltaX;
+        event.deltaY = deltaY;
+        event.deltaFactor = lowestDelta;
+        event.offsetX = offsetX;
+        event.offsetY = offsetY;
+        // Go ahead and set deltaMode to 0 since we converted to pixels
+        // Although this is a little odd since we overwrite the deltaX/Y
+        // properties with normalized deltas.
+        event.deltaMode = 0;
+
+        // Add event and delta to the front of the arguments
+        args.unshift(event, delta, deltaX, deltaY);
+
+        // Clearout lowestDelta after sometime to better
+        // handle multiple device types that give different
+        // a different lowestDelta
+        // Ex: trackpad = 3 and mouse wheel = 120
+        if (nullLowestDeltaTimeout) { clearTimeout(nullLowestDeltaTimeout); }
+        nullLowestDeltaTimeout = setTimeout(nullLowestDelta, 200);
+
+        return ($.event.dispatch || $.event.handle).apply(this, args);
+    }
+
+    function nullLowestDelta() {
+        lowestDelta = null;
+    }
+
+    function shouldAdjustOldDeltas(orgEvent, absDelta) {
+        // If this is an older event and the delta is divisable by 120,
+        // then we are assuming that the browser is treating this as an
+        // older mouse wheel event and that we should divide the deltas
+        // by 40 to try and get a more usable deltaFactor.
+        // Side note, this actually impacts the reported scroll distance
+        // in older browsers and can cause scrolling to be slower than native.
+        // Turn this off by setting $.event.special.mousewheel.settings.adjustOldDeltas to false.
+        return special.settings.adjustOldDeltas && orgEvent.type === 'mousewheel' && absDelta % 120 === 0;
+    }
+
+}));
+
+define('select2/select2/results',[
+  'jquery',
+  './utils'
+], function ($, Utils) {
+  function Results ($element, options, dataAdapter) {
+    this.$element = $element;
+    this.data = dataAdapter;
+    this.options = options;
+
+    Results.__super__.constructor.call(this);
+  }
+
+  Utils.Extend(Results, Utils.Observable);
+
+  Results.prototype.render = function () {
+    var $results = $(
+      '<ul class="select2-results__options" role="listbox"></ul>'
+    );
+
+    if (this.options.get('multiple')) {
+      $results.attr('aria-multiselectable', 'true');
+    }
+
+    this.$results = $results;
+
+    return $results;
+  };
+
+  Results.prototype.clear = function () {
+    this.$results.empty();
+  };
+
+  Results.prototype.displayMessage = function (params) {
+    var escapeMarkup = this.options.get('escapeMarkup');
+
+    this.clear();
+    this.hideLoading();
+
+    var $message = $(
+      '<li role="alert" aria-live="assertive"' +
+      ' class="select2-results__option"></li>'
+    );
+
+    var message = this.options.get('translations').get(params.message);
+
+    $message.append(
+      escapeMarkup(
+        message(params.args)
+      )
+    );
+
+    $message[0].className += ' select2-results__message';
+
+    this.$results.append($message);
+  };
+
+  Results.prototype.hideMessages = function () {
+    this.$results.find('.select2-results__message').remove();
+  };
+
+  Results.prototype.append = function (data) {
+    this.hideLoading();
+
+    var $options = [];
+
+    if (data.results == null || data.results.length === 0) {
+      if (this.$results.children().length === 0) {
+        this.trigger('results:message', {
+          message: 'noResults'
+        });
+      }
+
+      return;
+    }
+
+    data.results = this.sort(data.results);
+
+    for (var d = 0; d < data.results.length; d++) {
+      var item = data.results[d];
+
+      var $option = this.option(item);
+
+      $options.push($option);
+    }
+
+    this.$results.append($options);
+  };
+
+  Results.prototype.position = function ($results, $dropdown) {
+    var $resultsContainer = $dropdown.find('.select2-results');
+    $resultsContainer.append($results);
+  };
+
+  Results.prototype.sort = function (data) {
+    var sorter = this.options.get('sorter');
+
+    return sorter(data);
+  };
+
+  Results.prototype.highlightFirstItem = function () {
+    var $options = this.$results
+      .find('.select2-results__option[aria-selected]');
+
+    var $selected = $options.filter('[aria-selected=true]');
+
+    // Check if there are any selected options
+    if ($selected.length > 0) {
+      // If there are selected options, highlight the first
+      $selected.first().trigger('mouseenter');
+    } else {
+      // If there are no selected options, highlight the first option
+      // in the dropdown
+      $options.first().trigger('mouseenter');
+    }
+
+    this.ensureHighlightVisible();
+  };
+
+  Results.prototype.setClasses = function () {
+    var self = this;
+
+    this.data.current(function (selected) {
+      var selectedIds = $.map(selected, function (s) {
+        return s.id.toString();
+      });
+
+      var $options = self.$results
+        .find('.select2-results__option[aria-selected]');
+
+      $options.each(function () {
+        var $option = $(this);
+
+        var item = Utils.GetData(this, 'data');
+
+        // id needs to be converted to a string when comparing
+        var id = '' + item.id;
+
+        if ((item.element != null && item.element.selected) ||
+            (item.element == null && $.inArray(id, selectedIds) > -1)) {
+          $option.attr('aria-selected', 'true');
+        } else {
+          $option.attr('aria-selected', 'false');
+        }
+      });
+
+    });
+  };
+
+  Results.prototype.showLoading = function (params) {
+    this.hideLoading();
+
+    var loadingMore = this.options.get('translations').get('searching');
+
+    var loading = {
+      disabled: true,
+      loading: true,
+      text: loadingMore(params)
+    };
+    var $loading = this.option(loading);
+    $loading.className += ' loading-results';
+
+    this.$results.prepend($loading);
+  };
+
+  Results.prototype.hideLoading = function () {
+    this.$results.find('.loading-results').remove();
+  };
+
+  Results.prototype.option = function (data) {
+    var option = document.createElement('li');
+    option.className = 'select2-results__option';
+
+    var attrs = {
+      'role': 'option',
+      'aria-selected': 'false'
+    };
+
+    var matches = window.Element.prototype.matches ||
+      window.Element.prototype.msMatchesSelector ||
+      window.Element.prototype.webkitMatchesSelector;
+
+    if ((data.element != null && matches.call(data.element, ':disabled')) ||
+        (data.element == null && data.disabled)) {
+      delete attrs['aria-selected'];
+      attrs['aria-disabled'] = 'true';
+    }
+
+    if (data.id == null) {
+      delete attrs['aria-selected'];
+    }
+
+    if (data._resultId != null) {
+      option.id = data._resultId;
+    }
+
+    if (data.title) {
+      option.title = data.title;
+    }
+
+    if (data.children) {
+      attrs.role = 'group';
+      attrs['aria-label'] = data.text;
+      delete attrs['aria-selected'];
+    }
+
+    for (var attr in attrs) {
+      var val = attrs[attr];
+
+      option.setAttribute(attr, val);
+    }
+
+    if (data.children) {
+      var $option = $(option);
+
+      var label = document.createElement('strong');
+      label.className = 'select2-results__group';
+
+      var $label = $(label);
+      this.template(data, label);
+
+      var $children = [];
+
+      for (var c = 0; c < data.children.length; c++) {
+        var child = data.children[c];
+
+        var $child = this.option(child);
+
+        $children.push($child);
+      }
+
+      var $childrenContainer = $('<ul></ul>', {
+        'class': 'select2-results__options select2-results__options--nested'
+      });
+
+      $childrenContainer.append($children);
+
+      $option.append(label);
+      $option.append($childrenContainer);
+    } else {
+      this.template(data, option);
+    }
+
+    Utils.StoreData(option, 'data', data);
+
+    return option;
+  };
+
+  Results.prototype.bind = function (container, $container) {
+    var self = this;
+
+    var id = container.id + '-results';
+
+    this.$results.attr('id', id);
+
+    container.on('results:all', function (params) {
+      self.clear();
+      self.append(params.data);
+
+      if (container.isOpen()) {
+        self.setClasses();
+        self.highlightFirstItem();
+      }
+    });
+
+    container.on('results:append', function (params) {
+      self.append(params.data);
+
+      if (container.isOpen()) {
+        self.setClasses();
+      }
+    });
+
+    container.on('query', function (params) {
+      self.hideMessages();
+      self.showLoading(params);
+    });
+
+    container.on('select', function () {
+      if (!container.isOpen()) {
+        return;
+      }
+
+      self.setClasses();
+
+      if (self.options.get('scrollAfterSelect')) {
+        self.highlightFirstItem();
+      }
+    });
+
+    container.on('unselect', function () {
+      if (!container.isOpen()) {
+        return;
+      }
+
+      self.setClasses();
+
+      if (self.options.get('scrollAfterSelect')) {
+        self.highlightFirstItem();
+      }
+    });
+
+    container.on('open', function () {
+      // When the dropdown is open, aria-expended="true"
+      self.$results.attr('aria-expanded', 'true');
+      self.$results.attr('aria-hidden', 'false');
+
+      self.setClasses();
+      self.ensureHighlightVisible();
+    });
+
+    container.on('close', function () {
+      // When the dropdown is closed, aria-expended="false"
+      self.$results.attr('aria-expanded', 'false');
+      self.$results.attr('aria-hidden', 'true');
+      self.$results.removeAttr('aria-activedescendant');
+    });
+
+    container.on('results:toggle', function () {
+      var $highlighted = self.getHighlightedResults();
+
+      if ($highlighted.length === 0) {
+        return;
+      }
+
+      $highlighted.trigger('mouseup');
+    });
+
+    container.on('results:select', function () {
+      var $highlighted = self.getHighlightedResults();
+
+      if ($highlighted.length === 0) {
+        return;
+      }
+
+      var data = Utils.GetData($highlighted[0], 'data');
+
+      if ($highlighted.attr('aria-selected') == 'true') {
+        self.trigger('close', {});
+      } else {
+        self.trigger('select', {
+          data: data
+        });
+      }
+    });
+
+    container.on('results:previous', function () {
+      var $highlighted = self.getHighlightedResults();
+
+      var $options = self.$results.find('[aria-selected]');
+
+      var currentIndex = $options.index($highlighted);
+
+      // If we are already at the top, don't move further
+      // If no options, currentIndex will be -1
+      if (currentIndex <= 0) {
+        return;
+      }
+
+      var nextIndex = currentIndex - 1;
+
+      // If none are highlighted, highlight the first
+      if ($highlighted.length === 0) {
+        nextIndex = 0;
+      }
+
+      var $next = $options.eq(nextIndex);
+
+      $next.trigger('mouseenter');
+
+      var currentOffset = self.$results.offset().top;
+      var nextTop = $next.offset().top;
+      var nextOffset = self.$results.scrollTop() + (nextTop - currentOffset);
+
+      if (nextIndex === 0) {
+        self.$results.scrollTop(0);
+      } else if (nextTop - currentOffset < 0) {
+        self.$results.scrollTop(nextOffset);
+      }
+    });
+
+    container.on('results:next', function () {
+      var $highlighted = self.getHighlightedResults();
+
+      var $options = self.$results.find('[aria-selected]');
+
+      var currentIndex = $options.index($highlighted);
+
+      var nextIndex = currentIndex + 1;
+
+      // If we are at the last option, stay there
+      if (nextIndex >= $options.length) {
+        return;
+      }
+
+      var $next = $options.eq(nextIndex);
+
+      $next.trigger('mouseenter');
+
+      var currentOffset = self.$results.offset().top +
+        self.$results.outerHeight(false);
+      var nextBottom = $next.offset().top + $next.outerHeight(false);
+      var nextOffset = self.$results.scrollTop() + nextBottom - currentOffset;
+
+      if (nextIndex === 0) {
+        self.$results.scrollTop(0);
+      } else if (nextBottom > currentOffset) {
+        self.$results.scrollTop(nextOffset);
+      }
+    });
+
+    container.on('results:focus', function (params) {
+      params.element.addClass('select2-results__option--highlighted');
+    });
+
+    container.on('results:message', function (params) {
+      self.displayMessage(params);
+    });
+
+    if ($.fn.mousewheel) {
+      this.$results.on('mousewheel', function (e) {
+        var top = self.$results.scrollTop();
+
+        var bottom = self.$results.get(0).scrollHeight - top + e.deltaY;
+
+        var isAtTop = e.deltaY > 0 && top - e.deltaY <= 0;
+        var isAtBottom = e.deltaY < 0 && bottom <= self.$results.height();
+
+        if (isAtTop) {
+          self.$results.scrollTop(0);
+
+          e.preventDefault();
+          e.stopPropagation();
+        } else if (isAtBottom) {
+          self.$results.scrollTop(
+            self.$results.get(0).scrollHeight - self.$results.height()
+          );
+
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      });
+    }
+
+    this.$results.on('mouseup', '.select2-results__option[aria-selected]',
+      function (evt) {
+      var $this = $(this);
+
+      var data = Utils.GetData(this, 'data');
+
+      if ($this.attr('aria-selected') === 'true') {
+        if (self.options.get('multiple')) {
+          self.trigger('unselect', {
+            originalEvent: evt,
+            data: data
+          });
+        } else {
+          self.trigger('close', {});
+        }
+
+        return;
+      }
+
+      self.trigger('select', {
+        originalEvent: evt,
+        data: data
+      });
+    });
+
+    this.$results.on('mouseenter', '.select2-results__option[aria-selected]',
+      function (evt) {
+      var data = Utils.GetData(this, 'data');
+
+      self.getHighlightedResults()
+          .removeClass('select2-results__option--highlighted');
+
+      self.trigger('results:focus', {
+        data: data,
+        element: $(this)
+      });
+    });
+  };
+
+  Results.prototype.getHighlightedResults = function () {
+    var $highlighted = this.$results
+    .find('.select2-results__option--highlighted');
+
+    return $highlighted;
+  };
+
+  Results.prototype.destroy = function () {
+    this.$results.remove();
+  };
+
+  Results.prototype.ensureHighlightVisible = function () {
+    var $highlighted = this.getHighlightedResults();
+
+    if ($highlighted.length === 0) {
+      return;
+    }
+
+    var $options = this.$results.find('[aria-selected]');
+
+    var currentIndex = $options.index($highlighted);
+
+    var currentOffset = this.$results.offset().top;
+    var nextTop = $highlighted.offset().top;
+    var nextOffset = this.$results.scrollTop() + (nextTop - currentOffset);
+
+    var offsetDelta = nextTop - currentOffset;
+    nextOffset -= $highlighted.outerHeight(false) * 2;
+
+    if (currentIndex <= 2) {
+      this.$results.scrollTop(0);
+    } else if (offsetDelta > this.$results.outerHeight() || offsetDelta < 0) {
+      this.$results.scrollTop(nextOffset);
+    }
+  };
+
+  Results.prototype.template = function (result, container) {
+    var template = this.options.get('templateResult');
+    var escapeMarkup = this.options.get('escapeMarkup');
+
+    var content = template(result, container);
+
+    if (content == null) {
+      container.style.display = 'none';
+    } else if (typeof content === 'string') {
+      container.innerHTML = escapeMarkup(content);
+    } else {
+      $(container).append(content);
+    }
+  };
+
+  return Results;
+});
+
+define('select2/select2/keys',[
+
+], function () {
+  var KEYS = {
+    BACKSPACE: 8,
+    TAB: 9,
+    ENTER: 13,
+    SHIFT: 16,
+    CTRL: 17,
+    ALT: 18,
+    ESC: 27,
+    SPACE: 32,
+    PAGE_UP: 33,
+    PAGE_DOWN: 34,
+    END: 35,
+    HOME: 36,
+    LEFT: 37,
+    UP: 38,
+    RIGHT: 39,
+    DOWN: 40,
+    DELETE: 46
+  };
+
+  return KEYS;
+});
+
+define('select2/select2/selection/base',[
+  'jquery',
+  '../utils',
+  '../keys'
+], function ($, Utils, KEYS) {
+  function BaseSelection ($element, options) {
+    this.$element = $element;
+    this.options = options;
+
+    BaseSelection.__super__.constructor.call(this);
+  }
+
+  Utils.Extend(BaseSelection, Utils.Observable);
+
+  BaseSelection.prototype.render = function () {
+    var $selection = $(
+      '<span class="select2-selection" role="combobox" ' +
+      ' aria-haspopup="true" aria-expanded="false">' +
+      '</span>'
+    );
+
+    this._tabindex = 0;
+
+    if (Utils.GetData(this.$element[0], 'old-tabindex') != null) {
+      this._tabindex = Utils.GetData(this.$element[0], 'old-tabindex');
+    } else if (this.$element.attr('tabindex') != null) {
+      this._tabindex = this.$element.attr('tabindex');
+    }
+
+    $selection.attr('title', this.$element.attr('title'));
+    $selection.attr('tabindex', this._tabindex);
+    $selection.attr('aria-disabled', 'false');
+
+    this.$selection = $selection;
+
+    return $selection;
+  };
+
+  BaseSelection.prototype.bind = function (container, $container) {
+    var self = this;
+
+    var resultsId = container.id + '-results';
+
+    this.container = container;
+
+    this.$selection.on('focus', function (evt) {
+      self.trigger('focus', evt);
+    });
+
+    this.$selection.on('blur', function (evt) {
+      self._handleBlur(evt);
+    });
+
+    this.$selection.on('keydown', function (evt) {
+      self.trigger('keypress', evt);
+
+      if (evt.which === KEYS.SPACE) {
+        evt.preventDefault();
+      }
+    });
+
+    container.on('results:focus', function (params) {
+      self.$selection.attr('aria-activedescendant', params.data._resultId);
+    });
+
+    container.on('selection:update', function (params) {
+      self.update(params.data);
+    });
+
+    container.on('open', function () {
+      // When the dropdown is open, aria-expanded="true"
+      self.$selection.attr('aria-expanded', 'true');
+      self.$selection.attr('aria-owns', resultsId);
+
+      self._attachCloseHandler(container);
+    });
+
+    container.on('close', function () {
+      // When the dropdown is closed, aria-expanded="false"
+      self.$selection.attr('aria-expanded', 'false');
+      self.$selection.removeAttr('aria-activedescendant');
+      self.$selection.removeAttr('aria-owns');
+
+      self.$selection.trigger('focus');
+
+      self._detachCloseHandler(container);
+    });
+
+    container.on('enable', function () {
+      self.$selection.attr('tabindex', self._tabindex);
+      self.$selection.attr('aria-disabled', 'false');
+    });
+
+    container.on('disable', function () {
+      self.$selection.attr('tabindex', '-1');
+      self.$selection.attr('aria-disabled', 'true');
+    });
+  };
+
+  BaseSelection.prototype._handleBlur = function (evt) {
+    var self = this;
+
+    // This needs to be delayed as the active element is the body when the tab
+    // key is pressed, possibly along with others.
+    window.setTimeout(function () {
+      // Don't trigger `blur` if the focus is still in the selection
+      if (
+        (document.activeElement == self.$selection[0]) ||
+        ($.contains(self.$selection[0], document.activeElement))
+      ) {
+        return;
+      }
+
+      self.trigger('blur', evt);
+    }, 1);
+  };
+
+  BaseSelection.prototype._attachCloseHandler = function (container) {
+
+    $(document.body).on('mousedown.select2.' + container.id, function (e) {
+      var $target = $(e.target);
+
+      var $select = $target.closest('.select2');
+
+      var $all = $('.select2.select2-container--open');
+
+      $all.each(function () {
+        if (this == $select[0]) {
+          return;
+        }
+
+        var $element = Utils.GetData(this, 'element');
+
+        $element.select2('close');
+      });
+    });
+  };
+
+  BaseSelection.prototype._detachCloseHandler = function (container) {
+    $(document.body).off('mousedown.select2.' + container.id);
+  };
+
+  BaseSelection.prototype.position = function ($selection, $container) {
+    var $selectionContainer = $container.find('.selection');
+    $selectionContainer.append($selection);
+  };
+
+  BaseSelection.prototype.destroy = function () {
+    this._detachCloseHandler(this.container);
+  };
+
+  BaseSelection.prototype.update = function (data) {
+    throw new Error('The `update` method must be defined in child classes.');
+  };
+
+  /**
+   * Helper method to abstract the "enabled" (not "disabled") state of this
+   * object.
+   *
+   * @return {true} if the instance is not disabled.
+   * @return {false} if the instance is disabled.
+   */
+  BaseSelection.prototype.isEnabled = function () {
+    return !this.isDisabled();
+  };
+
+  /**
+   * Helper method to abstract the "disabled" state of this object.
+   *
+   * @return {true} if the disabled option is true.
+   * @return {false} if the disabled option is false.
+   */
+  BaseSelection.prototype.isDisabled = function () {
+    return this.options.get('disabled');
+  };
+
+  return BaseSelection;
+});
+
+define('select2/select2/selection/single',[
+  'jquery',
+  './base',
+  '../utils',
+  '../keys'
+], function ($, BaseSelection, Utils, KEYS) {
+  function SingleSelection () {
+    SingleSelection.__super__.constructor.apply(this, arguments);
+  }
+
+  Utils.Extend(SingleSelection, BaseSelection);
+
+  SingleSelection.prototype.render = function () {
+    var $selection = SingleSelection.__super__.render.call(this);
+
+    $selection.addClass('select2-selection--single');
+
+    $selection.html(
+      '<span class="select2-selection__rendered"></span>' +
+      '<span class="select2-selection__arrow" role="presentation">' +
+        '<b role="presentation"></b>' +
+      '</span>'
+    );
+
+    return $selection;
+  };
+
+  SingleSelection.prototype.bind = function (container, $container) {
+    var self = this;
+
+    SingleSelection.__super__.bind.apply(this, arguments);
+
+    var id = container.id + '-container';
+
+    this.$selection.find('.select2-selection__rendered')
+      .attr('id', id)
+      .attr('role', 'textbox')
+      .attr('aria-readonly', 'true');
+    this.$selection.attr('aria-labelledby', id);
+
+    this.$selection.on('mousedown', function (evt) {
+      // Only respond to left clicks
+      if (evt.which !== 1) {
+        return;
+      }
+
+      self.trigger('toggle', {
+        originalEvent: evt
+      });
+    });
+
+    this.$selection.on('focus', function (evt) {
+      // User focuses on the container
+    });
+
+    this.$selection.on('blur', function (evt) {
+      // User exits the container
+    });
+
+    container.on('focus', function (evt) {
+      if (!container.isOpen()) {
+        self.$selection.trigger('focus');
+      }
+    });
+  };
+
+  SingleSelection.prototype.clear = function () {
+    var $rendered = this.$selection.find('.select2-selection__rendered');
+    $rendered.empty();
+    $rendered.removeAttr('title'); // clear tooltip on empty
+  };
+
+  SingleSelection.prototype.display = function (data, container) {
+    var template = this.options.get('templateSelection');
+    var escapeMarkup = this.options.get('escapeMarkup');
+
+    return escapeMarkup(template(data, container));
+  };
+
+  SingleSelection.prototype.selectionContainer = function () {
+    return $('<span></span>');
+  };
+
+  SingleSelection.prototype.update = function (data) {
+    if (data.length === 0) {
+      this.clear();
+      return;
+    }
+
+    var selection = data[0];
+
+    var $rendered = this.$selection.find('.select2-selection__rendered');
+    var formatted = this.display(selection, $rendered);
+
+    $rendered.empty().append(formatted);
+
+    var title = selection.title || selection.text;
+
+    if (title) {
+      $rendered.attr('title', title);
+    } else {
+      $rendered.removeAttr('title');
+    }
+  };
+
+  return SingleSelection;
+});
+
+define('select2/select2/selection/multiple',[
+  'jquery',
+  './base',
+  '../utils'
+], function ($, BaseSelection, Utils) {
+  function MultipleSelection ($element, options) {
+    MultipleSelection.__super__.constructor.apply(this, arguments);
+  }
+
+  Utils.Extend(MultipleSelection, BaseSelection);
+
+  MultipleSelection.prototype.render = function () {
+    var $selection = MultipleSelection.__super__.render.call(this);
+
+    $selection.addClass('select2-selection--multiple');
+
+    $selection.html(
+      '<ul class="select2-selection__rendered"></ul>'
+    );
+
+    return $selection;
+  };
+
+  MultipleSelection.prototype.bind = function (container, $container) {
+    var self = this;
+
+    MultipleSelection.__super__.bind.apply(this, arguments);
+
+    this.$selection.on('click', function (evt) {
+      self.trigger('toggle', {
+        originalEvent: evt
+      });
+    });
+
+    this.$selection.on(
+      'click',
+      '.select2-selection__choice__remove',
+      function (evt) {
+        // Ignore the event if it is disabled
+        if (self.isDisabled()) {
+          return;
+        }
+
+        var $remove = $(this);
+        var $selection = $remove.parent();
+
+        var data = Utils.GetData($selection[0], 'data');
+
+        self.trigger('unselect', {
+          originalEvent: evt,
+          data: data
+        });
+      }
+    );
+  };
+
+  MultipleSelection.prototype.clear = function () {
+    var $rendered = this.$selection.find('.select2-selection__rendered');
+    $rendered.empty();
+    $rendered.removeAttr('title');
+  };
+
+  MultipleSelection.prototype.display = function (data, container) {
+    var template = this.options.get('templateSelection');
+    var escapeMarkup = this.options.get('escapeMarkup');
+
+    return escapeMarkup(template(data, container));
+  };
+
+  MultipleSelection.prototype.selectionContainer = function () {
+    var $container = $(
+      '<li class="select2-selection__choice">' +
+        '<span class="select2-selection__choice__remove" role="presentation">' +
+          '&times;' +
+        '</span>' +
+      '</li>'
+    );
+
+    return $container;
+  };
+
+  MultipleSelection.prototype.update = function (data) {
+    this.clear();
+
+    if (data.length === 0) {
+      return;
+    }
+
+    var $selections = [];
+
+    for (var d = 0; d < data.length; d++) {
+      var selection = data[d];
+
+      var $selection = this.selectionContainer();
+      var formatted = this.display(selection, $selection);
+
+      $selection.append(formatted);
+
+      var title = selection.title || selection.text;
+
+      if (title) {
+        $selection.attr('title', title);
+      }
+
+      Utils.StoreData($selection[0], 'data', selection);
+
+      $selections.push($selection);
+    }
+
+    var $rendered = this.$selection.find('.select2-selection__rendered');
+
+    Utils.appendMany($rendered, $selections);
+  };
+
+  return MultipleSelection;
+});
+
+define('select2/select2/selection/placeholder',[
+  '../utils'
+], function (Utils) {
+  function Placeholder (decorated, $element, options) {
+    this.placeholder = this.normalizePlaceholder(options.get('placeholder'));
+
+    decorated.call(this, $element, options);
+  }
+
+  Placeholder.prototype.normalizePlaceholder = function (_, placeholder) {
+    if (typeof placeholder === 'string') {
+      placeholder = {
+        id: '',
+        text: placeholder
+      };
+    }
+
+    return placeholder;
+  };
+
+  Placeholder.prototype.createPlaceholder = function (decorated, placeholder) {
+    var $placeholder = this.selectionContainer();
+
+    $placeholder.html(this.display(placeholder));
+    $placeholder.addClass('select2-selection__placeholder')
+                .removeClass('select2-selection__choice');
+
+    return $placeholder;
+  };
+
+  Placeholder.prototype.update = function (decorated, data) {
+    var singlePlaceholder = (
+      data.length == 1 && data[0].id != this.placeholder.id
+    );
+    var multipleSelections = data.length > 1;
+
+    if (multipleSelections || singlePlaceholder) {
+      return decorated.call(this, data);
+    }
+
+    this.clear();
+
+    var $placeholder = this.createPlaceholder(this.placeholder);
+
+    this.$selection.find('.select2-selection__rendered').append($placeholder);
+  };
+
+  return Placeholder;
+});
+
+define('select2/select2/selection/allowClear',[
+  'jquery',
+  '../keys',
+  '../utils'
+], function ($, KEYS, Utils) {
+  function AllowClear () { }
+
+  AllowClear.prototype.bind = function (decorated, container, $container) {
+    var self = this;
+
+    decorated.call(this, container, $container);
+
+    if (this.placeholder == null) {
+      if (this.options.get('debug') && window.console && console.error) {
+        console.error(
+          'Select2: The `allowClear` option should be used in combination ' +
+          'with the `placeholder` option.'
+        );
+      }
+    }
+
+    this.$selection.on('mousedown', '.select2-selection__clear',
+      function (evt) {
+        self._handleClear(evt);
+    });
+
+    container.on('keypress', function (evt) {
+      self._handleKeyboardClear(evt, container);
+    });
+  };
+
+  AllowClear.prototype._handleClear = function (_, evt) {
+    // Ignore the event if it is disabled
+    if (this.isDisabled()) {
+      return;
+    }
+
+    var $clear = this.$selection.find('.select2-selection__clear');
+
+    // Ignore the event if nothing has been selected
+    if ($clear.length === 0) {
+      return;
+    }
+
+    evt.stopPropagation();
+
+    var data = Utils.GetData($clear[0], 'data');
+
+    var previousVal = this.$element.val();
+    this.$element.val(this.placeholder.id);
+
+    var unselectData = {
+      data: data
+    };
+    this.trigger('clear', unselectData);
+    if (unselectData.prevented) {
+      this.$element.val(previousVal);
+      return;
+    }
+
+    for (var d = 0; d < data.length; d++) {
+      unselectData = {
+        data: data[d]
+      };
+
+      // Trigger the `unselect` event, so people can prevent it from being
+      // cleared.
+      this.trigger('unselect', unselectData);
+
+      // If the event was prevented, don't clear it out.
+      if (unselectData.prevented) {
+        this.$element.val(previousVal);
+        return;
+      }
+    }
+
+    this.$element.trigger('input').trigger('change');
+
+    this.trigger('toggle', {});
+  };
+
+  AllowClear.prototype._handleKeyboardClear = function (_, evt, container) {
+    if (container.isOpen()) {
+      return;
+    }
+
+    if (evt.which == KEYS.DELETE || evt.which == KEYS.BACKSPACE) {
+      this._handleClear(evt);
+    }
+  };
+
+  AllowClear.prototype.update = function (decorated, data) {
+    decorated.call(this, data);
+
+    if (this.$selection.find('.select2-selection__placeholder').length > 0 ||
+        data.length === 0) {
+      return;
+    }
+
+    var removeAll = this.options.get('translations').get('removeAllItems');
+
+    var $remove = $(
+      '<span class="select2-selection__clear" title="' + removeAll() +'">' +
+        '&times;' +
+      '</span>'
+    );
+    Utils.StoreData($remove[0], 'data', data);
+
+    this.$selection.find('.select2-selection__rendered').prepend($remove);
+  };
+
+  return AllowClear;
+});
+
+define('select2/select2/selection/search',[
+  'jquery',
+  '../utils',
+  '../keys'
+], function ($, Utils, KEYS) {
+  function Search (decorated, $element, options) {
+    decorated.call(this, $element, options);
+  }
+
+  Search.prototype.render = function (decorated) {
+    var $search = $(
+      '<li class="select2-search select2-search--inline">' +
+        '<input class="select2-search__field" type="search" tabindex="-1"' +
+        ' autocomplete="off" autocorrect="off" autocapitalize="none"' +
+        ' spellcheck="false" role="searchbox" aria-autocomplete="list" />' +
+      '</li>'
+    );
+
+    this.$searchContainer = $search;
+    this.$search = $search.find('input');
+
+    var $rendered = decorated.call(this);
+
+    this._transferTabIndex();
+
+    return $rendered;
+  };
+
+  Search.prototype.bind = function (decorated, container, $container) {
+    var self = this;
+
+    var resultsId = container.id + '-results';
+
+    decorated.call(this, container, $container);
+
+    container.on('open', function () {
+      self.$search.attr('aria-controls', resultsId);
+      self.$search.trigger('focus');
+    });
+
+    container.on('close', function () {
+      self.$search.val('');
+      self.$search.removeAttr('aria-controls');
+      self.$search.removeAttr('aria-activedescendant');
+      self.$search.trigger('focus');
+    });
+
+    container.on('enable', function () {
+      self.$search.prop('disabled', false);
+
+      self._transferTabIndex();
+    });
+
+    container.on('disable', function () {
+      self.$search.prop('disabled', true);
+    });
+
+    container.on('focus', function (evt) {
+      self.$search.trigger('focus');
+    });
+
+    container.on('results:focus', function (params) {
+      if (params.data._resultId) {
+        self.$search.attr('aria-activedescendant', params.data._resultId);
+      } else {
+        self.$search.removeAttr('aria-activedescendant');
+      }
+    });
+
+    this.$selection.on('focusin', '.select2-search--inline', function (evt) {
+      self.trigger('focus', evt);
+    });
+
+    this.$selection.on('focusout', '.select2-search--inline', function (evt) {
+      self._handleBlur(evt);
+    });
+
+    this.$selection.on('keydown', '.select2-search--inline', function (evt) {
+      evt.stopPropagation();
+
+      self.trigger('keypress', evt);
+
+      self._keyUpPrevented = evt.isDefaultPrevented();
+
+      var key = evt.which;
+
+      if (key === KEYS.BACKSPACE && self.$search.val() === '') {
+        var $previousChoice = self.$searchContainer
+          .prev('.select2-selection__choice');
+
+        if ($previousChoice.length > 0) {
+          var item = Utils.GetData($previousChoice[0], 'data');
+
+          self.searchRemoveChoice(item);
+
+          evt.preventDefault();
+        }
+      }
+    });
+
+    this.$selection.on('click', '.select2-search--inline', function (evt) {
+      if (self.$search.val()) {
+        evt.stopPropagation();
+      }
+    });
+
+    // Try to detect the IE version should the `documentMode` property that
+    // is stored on the document. This is only implemented in IE and is
+    // slightly cleaner than doing a user agent check.
+    // This property is not available in Edge, but Edge also doesn't have
+    // this bug.
+    var msie = document.documentMode;
+    var disableInputEvents = msie && msie <= 11;
+
+    // Workaround for browsers which do not support the `input` event
+    // This will prevent double-triggering of events for browsers which support
+    // both the `keyup` and `input` events.
+    this.$selection.on(
+      'input.searchcheck',
+      '.select2-search--inline',
+      function (evt) {
+        // IE will trigger the `input` event when a placeholder is used on a
+        // search box. To get around this issue, we are forced to ignore all
+        // `input` events in IE and keep using `keyup`.
+        if (disableInputEvents) {
+          self.$selection.off('input.search input.searchcheck');
+          return;
+        }
+
+        // Unbind the duplicated `keyup` event
+        self.$selection.off('keyup.search');
+      }
+    );
+
+    this.$selection.on(
+      'keyup.search input.search',
+      '.select2-search--inline',
+      function (evt) {
+        // IE will trigger the `input` event when a placeholder is used on a
+        // search box. To get around this issue, we are forced to ignore all
+        // `input` events in IE and keep using `keyup`.
+        if (disableInputEvents && evt.type === 'input') {
+          self.$selection.off('input.search input.searchcheck');
+          return;
+        }
+
+        var key = evt.which;
+
+        // We can freely ignore events from modifier keys
+        if (key == KEYS.SHIFT || key == KEYS.CTRL || key == KEYS.ALT) {
+          return;
+        }
+
+        // Tabbing will be handled during the `keydown` phase
+        if (key == KEYS.TAB) {
+          return;
+        }
+
+        self.handleSearch(evt);
+      }
+    );
+  };
+
+  /**
+   * This method will transfer the tabindex attribute from the rendered
+   * selection to the search box. This allows for the search box to be used as
+   * the primary focus instead of the selection container.
+   *
+   * @private
+   */
+  Search.prototype._transferTabIndex = function (decorated) {
+    this.$search.attr('tabindex', this.$selection.attr('tabindex'));
+    this.$selection.attr('tabindex', '-1');
+  };
+
+  Search.prototype.createPlaceholder = function (decorated, placeholder) {
+    this.$search.attr('placeholder', placeholder.text);
+  };
+
+  Search.prototype.update = function (decorated, data) {
+    var searchHadFocus = this.$search[0] == document.activeElement;
+
+    this.$search.attr('placeholder', '');
+
+    decorated.call(this, data);
+
+    this.$selection.find('.select2-selection__rendered')
+                   .append(this.$searchContainer);
+
+    this.resizeSearch();
+    if (searchHadFocus) {
+      this.$search.trigger('focus');
+    }
+  };
+
+  Search.prototype.handleSearch = function () {
+    this.resizeSearch();
+
+    if (!this._keyUpPrevented) {
+      var input = this.$search.val();
+
+      this.trigger('query', {
+        term: input
+      });
+    }
+
+    this._keyUpPrevented = false;
+  };
+
+  Search.prototype.searchRemoveChoice = function (decorated, item) {
+    this.trigger('unselect', {
+      data: item
+    });
+
+    this.$search.val(item.text);
+    this.handleSearch();
+  };
+
+  Search.prototype.resizeSearch = function () {
+    this.$search.css('width', '25px');
+
+    var width = '';
+
+    if (this.$search.attr('placeholder') !== '') {
+      width = this.$selection.find('.select2-selection__rendered').width();
+    } else {
+      var minimumWidth = this.$search.val().length + 1;
+
+      width = (minimumWidth * 0.75) + 'em';
+    }
+
+    this.$search.css('width', width);
+  };
+
+  return Search;
+});
+
+define('select2/select2/selection/eventRelay',[
+  'jquery'
+], function ($) {
+  function EventRelay () { }
+
+  EventRelay.prototype.bind = function (decorated, container, $container) {
+    var self = this;
+    var relayEvents = [
+      'open', 'opening',
+      'close', 'closing',
+      'select', 'selecting',
+      'unselect', 'unselecting',
+      'clear', 'clearing'
+    ];
+
+    var preventableEvents = [
+      'opening', 'closing', 'selecting', 'unselecting', 'clearing'
+    ];
+
+    decorated.call(this, container, $container);
+
+    container.on('*', function (name, params) {
+      // Ignore events that should not be relayed
+      if ($.inArray(name, relayEvents) === -1) {
+        return;
+      }
+
+      // The parameters should always be an object
+      params = params || {};
+
+      // Generate the jQuery event for the Select2 event
+      var evt = $.Event('select2:' + name, {
+        params: params
+      });
+
+      self.$element.trigger(evt);
+
+      // Only handle preventable events if it was one
+      if ($.inArray(name, preventableEvents) === -1) {
+        return;
+      }
+
+      params.prevented = evt.isDefaultPrevented();
+    });
+  };
+
+  return EventRelay;
+});
+
+define('select2/select2/translation',[
+  'jquery',
+  'require'
+], function ($, require) {
+  function Translation (dict) {
+    this.dict = dict || {};
+  }
+
+  Translation.prototype.all = function () {
+    return this.dict;
+  };
+
+  Translation.prototype.get = function (key) {
+    return this.dict[key];
+  };
+
+  Translation.prototype.extend = function (translation) {
+    this.dict = $.extend({}, translation.all(), this.dict);
+  };
+
+  // Static functions
+
+  Translation._cache = {};
+
+  Translation.loadPath = function (path) {
+    if (!(path in Translation._cache)) {
+      var translations = require(path);
+
+      Translation._cache[path] = translations;
+    }
+
+    return new Translation(Translation._cache[path]);
+  };
+
+  return Translation;
+});
+
+define('select2/select2/diacritics',[
+
+], function () {
+  var diacritics = {
+    '\u24B6': 'A',
+    '\uFF21': 'A',
+    '\u00C0': 'A',
+    '\u00C1': 'A',
+    '\u00C2': 'A',
+    '\u1EA6': 'A',
+    '\u1EA4': 'A',
+    '\u1EAA': 'A',
+    '\u1EA8': 'A',
+    '\u00C3': 'A',
+    '\u0100': 'A',
+    '\u0102': 'A',
+    '\u1EB0': 'A',
+    '\u1EAE': 'A',
+    '\u1EB4': 'A',
+    '\u1EB2': 'A',
+    '\u0226': 'A',
+    '\u01E0': 'A',
+    '\u00C4': 'A',
+    '\u01DE': 'A',
+    '\u1EA2': 'A',
+    '\u00C5': 'A',
+    '\u01FA': 'A',
+    '\u01CD': 'A',
+    '\u0200': 'A',
+    '\u0202': 'A',
+    '\u1EA0': 'A',
+    '\u1EAC': 'A',
+    '\u1EB6': 'A',
+    '\u1E00': 'A',
+    '\u0104': 'A',
+    '\u023A': 'A',
+    '\u2C6F': 'A',
+    '\uA732': 'AA',
+    '\u00C6': 'AE',
+    '\u01FC': 'AE',
+    '\u01E2': 'AE',
+    '\uA734': 'AO',
+    '\uA736': 'AU',
+    '\uA738': 'AV',
+    '\uA73A': 'AV',
+    '\uA73C': 'AY',
+    '\u24B7': 'B',
+    '\uFF22': 'B',
+    '\u1E02': 'B',
+    '\u1E04': 'B',
+    '\u1E06': 'B',
+    '\u0243': 'B',
+    '\u0182': 'B',
+    '\u0181': 'B',
+    '\u24B8': 'C',
+    '\uFF23': 'C',
+    '\u0106': 'C',
+    '\u0108': 'C',
+    '\u010A': 'C',
+    '\u010C': 'C',
+    '\u00C7': 'C',
+    '\u1E08': 'C',
+    '\u0187': 'C',
+    '\u023B': 'C',
+    '\uA73E': 'C',
+    '\u24B9': 'D',
+    '\uFF24': 'D',
+    '\u1E0A': 'D',
+    '\u010E': 'D',
+    '\u1E0C': 'D',
+    '\u1E10': 'D',
+    '\u1E12': 'D',
+    '\u1E0E': 'D',
+    '\u0110': 'D',
+    '\u018B': 'D',
+    '\u018A': 'D',
+    '\u0189': 'D',
+    '\uA779': 'D',
+    '\u01F1': 'DZ',
+    '\u01C4': 'DZ',
+    '\u01F2': 'Dz',
+    '\u01C5': 'Dz',
+    '\u24BA': 'E',
+    '\uFF25': 'E',
+    '\u00C8': 'E',
+    '\u00C9': 'E',
+    '\u00CA': 'E',
+    '\u1EC0': 'E',
+    '\u1EBE': 'E',
+    '\u1EC4': 'E',
+    '\u1EC2': 'E',
+    '\u1EBC': 'E',
+    '\u0112': 'E',
+    '\u1E14': 'E',
+    '\u1E16': 'E',
+    '\u0114': 'E',
+    '\u0116': 'E',
+    '\u00CB': 'E',
+    '\u1EBA': 'E',
+    '\u011A': 'E',
+    '\u0204': 'E',
+    '\u0206': 'E',
+    '\u1EB8': 'E',
+    '\u1EC6': 'E',
+    '\u0228': 'E',
+    '\u1E1C': 'E',
+    '\u0118': 'E',
+    '\u1E18': 'E',
+    '\u1E1A': 'E',
+    '\u0190': 'E',
+    '\u018E': 'E',
+    '\u24BB': 'F',
+    '\uFF26': 'F',
+    '\u1E1E': 'F',
+    '\u0191': 'F',
+    '\uA77B': 'F',
+    '\u24BC': 'G',
+    '\uFF27': 'G',
+    '\u01F4': 'G',
+    '\u011C': 'G',
+    '\u1E20': 'G',
+    '\u011E': 'G',
+    '\u0120': 'G',
+    '\u01E6': 'G',
+    '\u0122': 'G',
+    '\u01E4': 'G',
+    '\u0193': 'G',
+    '\uA7A0': 'G',
+    '\uA77D': 'G',
+    '\uA77E': 'G',
+    '\u24BD': 'H',
+    '\uFF28': 'H',
+    '\u0124': 'H',
+    '\u1E22': 'H',
+    '\u1E26': 'H',
+    '\u021E': 'H',
+    '\u1E24': 'H',
+    '\u1E28': 'H',
+    '\u1E2A': 'H',
+    '\u0126': 'H',
+    '\u2C67': 'H',
+    '\u2C75': 'H',
+    '\uA78D': 'H',
+    '\u24BE': 'I',
+    '\uFF29': 'I',
+    '\u00CC': 'I',
+    '\u00CD': 'I',
+    '\u00CE': 'I',
+    '\u0128': 'I',
+    '\u012A': 'I',
+    '\u012C': 'I',
+    '\u0130': 'I',
+    '\u00CF': 'I',
+    '\u1E2E': 'I',
+    '\u1EC8': 'I',
+    '\u01CF': 'I',
+    '\u0208': 'I',
+    '\u020A': 'I',
+    '\u1ECA': 'I',
+    '\u012E': 'I',
+    '\u1E2C': 'I',
+    '\u0197': 'I',
+    '\u24BF': 'J',
+    '\uFF2A': 'J',
+    '\u0134': 'J',
+    '\u0248': 'J',
+    '\u24C0': 'K',
+    '\uFF2B': 'K',
+    '\u1E30': 'K',
+    '\u01E8': 'K',
+    '\u1E32': 'K',
+    '\u0136': 'K',
+    '\u1E34': 'K',
+    '\u0198': 'K',
+    '\u2C69': 'K',
+    '\uA740': 'K',
+    '\uA742': 'K',
+    '\uA744': 'K',
+    '\uA7A2': 'K',
+    '\u24C1': 'L',
+    '\uFF2C': 'L',
+    '\u013F': 'L',
+    '\u0139': 'L',
+    '\u013D': 'L',
+    '\u1E36': 'L',
+    '\u1E38': 'L',
+    '\u013B': 'L',
+    '\u1E3C': 'L',
+    '\u1E3A': 'L',
+    '\u0141': 'L',
+    '\u023D': 'L',
+    '\u2C62': 'L',
+    '\u2C60': 'L',
+    '\uA748': 'L',
+    '\uA746': 'L',
+    '\uA780': 'L',
+    '\u01C7': 'LJ',
+    '\u01C8': 'Lj',
+    '\u24C2': 'M',
+    '\uFF2D': 'M',
+    '\u1E3E': 'M',
+    '\u1E40': 'M',
+    '\u1E42': 'M',
+    '\u2C6E': 'M',
+    '\u019C': 'M',
+    '\u24C3': 'N',
+    '\uFF2E': 'N',
+    '\u01F8': 'N',
+    '\u0143': 'N',
+    '\u00D1': 'N',
+    '\u1E44': 'N',
+    '\u0147': 'N',
+    '\u1E46': 'N',
+    '\u0145': 'N',
+    '\u1E4A': 'N',
+    '\u1E48': 'N',
+    '\u0220': 'N',
+    '\u019D': 'N',
+    '\uA790': 'N',
+    '\uA7A4': 'N',
+    '\u01CA': 'NJ',
+    '\u01CB': 'Nj',
+    '\u24C4': 'O',
+    '\uFF2F': 'O',
+    '\u00D2': 'O',
+    '\u00D3': 'O',
+    '\u00D4': 'O',
+    '\u1ED2': 'O',
+    '\u1ED0': 'O',
+    '\u1ED6': 'O',
+    '\u1ED4': 'O',
+    '\u00D5': 'O',
+    '\u1E4C': 'O',
+    '\u022C': 'O',
+    '\u1E4E': 'O',
+    '\u014C': 'O',
+    '\u1E50': 'O',
+    '\u1E52': 'O',
+    '\u014E': 'O',
+    '\u022E': 'O',
+    '\u0230': 'O',
+    '\u00D6': 'O',
+    '\u022A': 'O',
+    '\u1ECE': 'O',
+    '\u0150': 'O',
+    '\u01D1': 'O',
+    '\u020C': 'O',
+    '\u020E': 'O',
+    '\u01A0': 'O',
+    '\u1EDC': 'O',
+    '\u1EDA': 'O',
+    '\u1EE0': 'O',
+    '\u1EDE': 'O',
+    '\u1EE2': 'O',
+    '\u1ECC': 'O',
+    '\u1ED8': 'O',
+    '\u01EA': 'O',
+    '\u01EC': 'O',
+    '\u00D8': 'O',
+    '\u01FE': 'O',
+    '\u0186': 'O',
+    '\u019F': 'O',
+    '\uA74A': 'O',
+    '\uA74C': 'O',
+    '\u0152': 'OE',
+    '\u01A2': 'OI',
+    '\uA74E': 'OO',
+    '\u0222': 'OU',
+    '\u24C5': 'P',
+    '\uFF30': 'P',
+    '\u1E54': 'P',
+    '\u1E56': 'P',
+    '\u01A4': 'P',
+    '\u2C63': 'P',
+    '\uA750': 'P',
+    '\uA752': 'P',
+    '\uA754': 'P',
+    '\u24C6': 'Q',
+    '\uFF31': 'Q',
+    '\uA756': 'Q',
+    '\uA758': 'Q',
+    '\u024A': 'Q',
+    '\u24C7': 'R',
+    '\uFF32': 'R',
+    '\u0154': 'R',
+    '\u1E58': 'R',
+    '\u0158': 'R',
+    '\u0210': 'R',
+    '\u0212': 'R',
+    '\u1E5A': 'R',
+    '\u1E5C': 'R',
+    '\u0156': 'R',
+    '\u1E5E': 'R',
+    '\u024C': 'R',
+    '\u2C64': 'R',
+    '\uA75A': 'R',
+    '\uA7A6': 'R',
+    '\uA782': 'R',
+    '\u24C8': 'S',
+    '\uFF33': 'S',
+    '\u1E9E': 'S',
+    '\u015A': 'S',
+    '\u1E64': 'S',
+    '\u015C': 'S',
+    '\u1E60': 'S',
+    '\u0160': 'S',
+    '\u1E66': 'S',
+    '\u1E62': 'S',
+    '\u1E68': 'S',
+    '\u0218': 'S',
+    '\u015E': 'S',
+    '\u2C7E': 'S',
+    '\uA7A8': 'S',
+    '\uA784': 'S',
+    '\u24C9': 'T',
+    '\uFF34': 'T',
+    '\u1E6A': 'T',
+    '\u0164': 'T',
+    '\u1E6C': 'T',
+    '\u021A': 'T',
+    '\u0162': 'T',
+    '\u1E70': 'T',
+    '\u1E6E': 'T',
+    '\u0166': 'T',
+    '\u01AC': 'T',
+    '\u01AE': 'T',
+    '\u023E': 'T',
+    '\uA786': 'T',
+    '\uA728': 'TZ',
+    '\u24CA': 'U',
+    '\uFF35': 'U',
+    '\u00D9': 'U',
+    '\u00DA': 'U',
+    '\u00DB': 'U',
+    '\u0168': 'U',
+    '\u1E78': 'U',
+    '\u016A': 'U',
+    '\u1E7A': 'U',
+    '\u016C': 'U',
+    '\u00DC': 'U',
+    '\u01DB': 'U',
+    '\u01D7': 'U',
+    '\u01D5': 'U',
+    '\u01D9': 'U',
+    '\u1EE6': 'U',
+    '\u016E': 'U',
+    '\u0170': 'U',
+    '\u01D3': 'U',
+    '\u0214': 'U',
+    '\u0216': 'U',
+    '\u01AF': 'U',
+    '\u1EEA': 'U',
+    '\u1EE8': 'U',
+    '\u1EEE': 'U',
+    '\u1EEC': 'U',
+    '\u1EF0': 'U',
+    '\u1EE4': 'U',
+    '\u1E72': 'U',
+    '\u0172': 'U',
+    '\u1E76': 'U',
+    '\u1E74': 'U',
+    '\u0244': 'U',
+    '\u24CB': 'V',
+    '\uFF36': 'V',
+    '\u1E7C': 'V',
+    '\u1E7E': 'V',
+    '\u01B2': 'V',
+    '\uA75E': 'V',
+    '\u0245': 'V',
+    '\uA760': 'VY',
+    '\u24CC': 'W',
+    '\uFF37': 'W',
+    '\u1E80': 'W',
+    '\u1E82': 'W',
+    '\u0174': 'W',
+    '\u1E86': 'W',
+    '\u1E84': 'W',
+    '\u1E88': 'W',
+    '\u2C72': 'W',
+    '\u24CD': 'X',
+    '\uFF38': 'X',
+    '\u1E8A': 'X',
+    '\u1E8C': 'X',
+    '\u24CE': 'Y',
+    '\uFF39': 'Y',
+    '\u1EF2': 'Y',
+    '\u00DD': 'Y',
+    '\u0176': 'Y',
+    '\u1EF8': 'Y',
+    '\u0232': 'Y',
+    '\u1E8E': 'Y',
+    '\u0178': 'Y',
+    '\u1EF6': 'Y',
+    '\u1EF4': 'Y',
+    '\u01B3': 'Y',
+    '\u024E': 'Y',
+    '\u1EFE': 'Y',
+    '\u24CF': 'Z',
+    '\uFF3A': 'Z',
+    '\u0179': 'Z',
+    '\u1E90': 'Z',
+    '\u017B': 'Z',
+    '\u017D': 'Z',
+    '\u1E92': 'Z',
+    '\u1E94': 'Z',
+    '\u01B5': 'Z',
+    '\u0224': 'Z',
+    '\u2C7F': 'Z',
+    '\u2C6B': 'Z',
+    '\uA762': 'Z',
+    '\u24D0': 'a',
+    '\uFF41': 'a',
+    '\u1E9A': 'a',
+    '\u00E0': 'a',
+    '\u00E1': 'a',
+    '\u00E2': 'a',
+    '\u1EA7': 'a',
+    '\u1EA5': 'a',
+    '\u1EAB': 'a',
+    '\u1EA9': 'a',
+    '\u00E3': 'a',
+    '\u0101': 'a',
+    '\u0103': 'a',
+    '\u1EB1': 'a',
+    '\u1EAF': 'a',
+    '\u1EB5': 'a',
+    '\u1EB3': 'a',
+    '\u0227': 'a',
+    '\u01E1': 'a',
+    '\u00E4': 'a',
+    '\u01DF': 'a',
+    '\u1EA3': 'a',
+    '\u00E5': 'a',
+    '\u01FB': 'a',
+    '\u01CE': 'a',
+    '\u0201': 'a',
+    '\u0203': 'a',
+    '\u1EA1': 'a',
+    '\u1EAD': 'a',
+    '\u1EB7': 'a',
+    '\u1E01': 'a',
+    '\u0105': 'a',
+    '\u2C65': 'a',
+    '\u0250': 'a',
+    '\uA733': 'aa',
+    '\u00E6': 'ae',
+    '\u01FD': 'ae',
+    '\u01E3': 'ae',
+    '\uA735': 'ao',
+    '\uA737': 'au',
+    '\uA739': 'av',
+    '\uA73B': 'av',
+    '\uA73D': 'ay',
+    '\u24D1': 'b',
+    '\uFF42': 'b',
+    '\u1E03': 'b',
+    '\u1E05': 'b',
+    '\u1E07': 'b',
+    '\u0180': 'b',
+    '\u0183': 'b',
+    '\u0253': 'b',
+    '\u24D2': 'c',
+    '\uFF43': 'c',
+    '\u0107': 'c',
+    '\u0109': 'c',
+    '\u010B': 'c',
+    '\u010D': 'c',
+    '\u00E7': 'c',
+    '\u1E09': 'c',
+    '\u0188': 'c',
+    '\u023C': 'c',
+    '\uA73F': 'c',
+    '\u2184': 'c',
+    '\u24D3': 'd',
+    '\uFF44': 'd',
+    '\u1E0B': 'd',
+    '\u010F': 'd',
+    '\u1E0D': 'd',
+    '\u1E11': 'd',
+    '\u1E13': 'd',
+    '\u1E0F': 'd',
+    '\u0111': 'd',
+    '\u018C': 'd',
+    '\u0256': 'd',
+    '\u0257': 'd',
+    '\uA77A': 'd',
+    '\u01F3': 'dz',
+    '\u01C6': 'dz',
+    '\u24D4': 'e',
+    '\uFF45': 'e',
+    '\u00E8': 'e',
+    '\u00E9': 'e',
+    '\u00EA': 'e',
+    '\u1EC1': 'e',
+    '\u1EBF': 'e',
+    '\u1EC5': 'e',
+    '\u1EC3': 'e',
+    '\u1EBD': 'e',
+    '\u0113': 'e',
+    '\u1E15': 'e',
+    '\u1E17': 'e',
+    '\u0115': 'e',
+    '\u0117': 'e',
+    '\u00EB': 'e',
+    '\u1EBB': 'e',
+    '\u011B': 'e',
+    '\u0205': 'e',
+    '\u0207': 'e',
+    '\u1EB9': 'e',
+    '\u1EC7': 'e',
+    '\u0229': 'e',
+    '\u1E1D': 'e',
+    '\u0119': 'e',
+    '\u1E19': 'e',
+    '\u1E1B': 'e',
+    '\u0247': 'e',
+    '\u025B': 'e',
+    '\u01DD': 'e',
+    '\u24D5': 'f',
+    '\uFF46': 'f',
+    '\u1E1F': 'f',
+    '\u0192': 'f',
+    '\uA77C': 'f',
+    '\u24D6': 'g',
+    '\uFF47': 'g',
+    '\u01F5': 'g',
+    '\u011D': 'g',
+    '\u1E21': 'g',
+    '\u011F': 'g',
+    '\u0121': 'g',
+    '\u01E7': 'g',
+    '\u0123': 'g',
+    '\u01E5': 'g',
+    '\u0260': 'g',
+    '\uA7A1': 'g',
+    '\u1D79': 'g',
+    '\uA77F': 'g',
+    '\u24D7': 'h',
+    '\uFF48': 'h',
+    '\u0125': 'h',
+    '\u1E23': 'h',
+    '\u1E27': 'h',
+    '\u021F': 'h',
+    '\u1E25': 'h',
+    '\u1E29': 'h',
+    '\u1E2B': 'h',
+    '\u1E96': 'h',
+    '\u0127': 'h',
+    '\u2C68': 'h',
+    '\u2C76': 'h',
+    '\u0265': 'h',
+    '\u0195': 'hv',
+    '\u24D8': 'i',
+    '\uFF49': 'i',
+    '\u00EC': 'i',
+    '\u00ED': 'i',
+    '\u00EE': 'i',
+    '\u0129': 'i',
+    '\u012B': 'i',
+    '\u012D': 'i',
+    '\u00EF': 'i',
+    '\u1E2F': 'i',
+    '\u1EC9': 'i',
+    '\u01D0': 'i',
+    '\u0209': 'i',
+    '\u020B': 'i',
+    '\u1ECB': 'i',
+    '\u012F': 'i',
+    '\u1E2D': 'i',
+    '\u0268': 'i',
+    '\u0131': 'i',
+    '\u24D9': 'j',
+    '\uFF4A': 'j',
+    '\u0135': 'j',
+    '\u01F0': 'j',
+    '\u0249': 'j',
+    '\u24DA': 'k',
+    '\uFF4B': 'k',
+    '\u1E31': 'k',
+    '\u01E9': 'k',
+    '\u1E33': 'k',
+    '\u0137': 'k',
+    '\u1E35': 'k',
+    '\u0199': 'k',
+    '\u2C6A': 'k',
+    '\uA741': 'k',
+    '\uA743': 'k',
+    '\uA745': 'k',
+    '\uA7A3': 'k',
+    '\u24DB': 'l',
+    '\uFF4C': 'l',
+    '\u0140': 'l',
+    '\u013A': 'l',
+    '\u013E': 'l',
+    '\u1E37': 'l',
+    '\u1E39': 'l',
+    '\u013C': 'l',
+    '\u1E3D': 'l',
+    '\u1E3B': 'l',
+    '\u017F': 'l',
+    '\u0142': 'l',
+    '\u019A': 'l',
+    '\u026B': 'l',
+    '\u2C61': 'l',
+    '\uA749': 'l',
+    '\uA781': 'l',
+    '\uA747': 'l',
+    '\u01C9': 'lj',
+    '\u24DC': 'm',
+    '\uFF4D': 'm',
+    '\u1E3F': 'm',
+    '\u1E41': 'm',
+    '\u1E43': 'm',
+    '\u0271': 'm',
+    '\u026F': 'm',
+    '\u24DD': 'n',
+    '\uFF4E': 'n',
+    '\u01F9': 'n',
+    '\u0144': 'n',
+    '\u00F1': 'n',
+    '\u1E45': 'n',
+    '\u0148': 'n',
+    '\u1E47': 'n',
+    '\u0146': 'n',
+    '\u1E4B': 'n',
+    '\u1E49': 'n',
+    '\u019E': 'n',
+    '\u0272': 'n',
+    '\u0149': 'n',
+    '\uA791': 'n',
+    '\uA7A5': 'n',
+    '\u01CC': 'nj',
+    '\u24DE': 'o',
+    '\uFF4F': 'o',
+    '\u00F2': 'o',
+    '\u00F3': 'o',
+    '\u00F4': 'o',
+    '\u1ED3': 'o',
+    '\u1ED1': 'o',
+    '\u1ED7': 'o',
+    '\u1ED5': 'o',
+    '\u00F5': 'o',
+    '\u1E4D': 'o',
+    '\u022D': 'o',
+    '\u1E4F': 'o',
+    '\u014D': 'o',
+    '\u1E51': 'o',
+    '\u1E53': 'o',
+    '\u014F': 'o',
+    '\u022F': 'o',
+    '\u0231': 'o',
+    '\u00F6': 'o',
+    '\u022B': 'o',
+    '\u1ECF': 'o',
+    '\u0151': 'o',
+    '\u01D2': 'o',
+    '\u020D': 'o',
+    '\u020F': 'o',
+    '\u01A1': 'o',
+    '\u1EDD': 'o',
+    '\u1EDB': 'o',
+    '\u1EE1': 'o',
+    '\u1EDF': 'o',
+    '\u1EE3': 'o',
+    '\u1ECD': 'o',
+    '\u1ED9': 'o',
+    '\u01EB': 'o',
+    '\u01ED': 'o',
+    '\u00F8': 'o',
+    '\u01FF': 'o',
+    '\u0254': 'o',
+    '\uA74B': 'o',
+    '\uA74D': 'o',
+    '\u0275': 'o',
+    '\u0153': 'oe',
+    '\u01A3': 'oi',
+    '\u0223': 'ou',
+    '\uA74F': 'oo',
+    '\u24DF': 'p',
+    '\uFF50': 'p',
+    '\u1E55': 'p',
+    '\u1E57': 'p',
+    '\u01A5': 'p',
+    '\u1D7D': 'p',
+    '\uA751': 'p',
+    '\uA753': 'p',
+    '\uA755': 'p',
+    '\u24E0': 'q',
+    '\uFF51': 'q',
+    '\u024B': 'q',
+    '\uA757': 'q',
+    '\uA759': 'q',
+    '\u24E1': 'r',
+    '\uFF52': 'r',
+    '\u0155': 'r',
+    '\u1E59': 'r',
+    '\u0159': 'r',
+    '\u0211': 'r',
+    '\u0213': 'r',
+    '\u1E5B': 'r',
+    '\u1E5D': 'r',
+    '\u0157': 'r',
+    '\u1E5F': 'r',
+    '\u024D': 'r',
+    '\u027D': 'r',
+    '\uA75B': 'r',
+    '\uA7A7': 'r',
+    '\uA783': 'r',
+    '\u24E2': 's',
+    '\uFF53': 's',
+    '\u00DF': 's',
+    '\u015B': 's',
+    '\u1E65': 's',
+    '\u015D': 's',
+    '\u1E61': 's',
+    '\u0161': 's',
+    '\u1E67': 's',
+    '\u1E63': 's',
+    '\u1E69': 's',
+    '\u0219': 's',
+    '\u015F': 's',
+    '\u023F': 's',
+    '\uA7A9': 's',
+    '\uA785': 's',
+    '\u1E9B': 's',
+    '\u24E3': 't',
+    '\uFF54': 't',
+    '\u1E6B': 't',
+    '\u1E97': 't',
+    '\u0165': 't',
+    '\u1E6D': 't',
+    '\u021B': 't',
+    '\u0163': 't',
+    '\u1E71': 't',
+    '\u1E6F': 't',
+    '\u0167': 't',
+    '\u01AD': 't',
+    '\u0288': 't',
+    '\u2C66': 't',
+    '\uA787': 't',
+    '\uA729': 'tz',
+    '\u24E4': 'u',
+    '\uFF55': 'u',
+    '\u00F9': 'u',
+    '\u00FA': 'u',
+    '\u00FB': 'u',
+    '\u0169': 'u',
+    '\u1E79': 'u',
+    '\u016B': 'u',
+    '\u1E7B': 'u',
+    '\u016D': 'u',
+    '\u00FC': 'u',
+    '\u01DC': 'u',
+    '\u01D8': 'u',
+    '\u01D6': 'u',
+    '\u01DA': 'u',
+    '\u1EE7': 'u',
+    '\u016F': 'u',
+    '\u0171': 'u',
+    '\u01D4': 'u',
+    '\u0215': 'u',
+    '\u0217': 'u',
+    '\u01B0': 'u',
+    '\u1EEB': 'u',
+    '\u1EE9': 'u',
+    '\u1EEF': 'u',
+    '\u1EED': 'u',
+    '\u1EF1': 'u',
+    '\u1EE5': 'u',
+    '\u1E73': 'u',
+    '\u0173': 'u',
+    '\u1E77': 'u',
+    '\u1E75': 'u',
+    '\u0289': 'u',
+    '\u24E5': 'v',
+    '\uFF56': 'v',
+    '\u1E7D': 'v',
+    '\u1E7F': 'v',
+    '\u028B': 'v',
+    '\uA75F': 'v',
+    '\u028C': 'v',
+    '\uA761': 'vy',
+    '\u24E6': 'w',
+    '\uFF57': 'w',
+    '\u1E81': 'w',
+    '\u1E83': 'w',
+    '\u0175': 'w',
+    '\u1E87': 'w',
+    '\u1E85': 'w',
+    '\u1E98': 'w',
+    '\u1E89': 'w',
+    '\u2C73': 'w',
+    '\u24E7': 'x',
+    '\uFF58': 'x',
+    '\u1E8B': 'x',
+    '\u1E8D': 'x',
+    '\u24E8': 'y',
+    '\uFF59': 'y',
+    '\u1EF3': 'y',
+    '\u00FD': 'y',
+    '\u0177': 'y',
+    '\u1EF9': 'y',
+    '\u0233': 'y',
+    '\u1E8F': 'y',
+    '\u00FF': 'y',
+    '\u1EF7': 'y',
+    '\u1E99': 'y',
+    '\u1EF5': 'y',
+    '\u01B4': 'y',
+    '\u024F': 'y',
+    '\u1EFF': 'y',
+    '\u24E9': 'z',
+    '\uFF5A': 'z',
+    '\u017A': 'z',
+    '\u1E91': 'z',
+    '\u017C': 'z',
+    '\u017E': 'z',
+    '\u1E93': 'z',
+    '\u1E95': 'z',
+    '\u01B6': 'z',
+    '\u0225': 'z',
+    '\u0240': 'z',
+    '\u2C6C': 'z',
+    '\uA763': 'z',
+    '\u0386': '\u0391',
+    '\u0388': '\u0395',
+    '\u0389': '\u0397',
+    '\u038A': '\u0399',
+    '\u03AA': '\u0399',
+    '\u038C': '\u039F',
+    '\u038E': '\u03A5',
+    '\u03AB': '\u03A5',
+    '\u038F': '\u03A9',
+    '\u03AC': '\u03B1',
+    '\u03AD': '\u03B5',
+    '\u03AE': '\u03B7',
+    '\u03AF': '\u03B9',
+    '\u03CA': '\u03B9',
+    '\u0390': '\u03B9',
+    '\u03CC': '\u03BF',
+    '\u03CD': '\u03C5',
+    '\u03CB': '\u03C5',
+    '\u03B0': '\u03C5',
+    '\u03CE': '\u03C9',
+    '\u03C2': '\u03C3',
+    '\u2019': '\''
+  };
+
+  return diacritics;
+});
+
+define('select2/select2/data/ajax',[
+  './array',
+  '../utils',
+  'jquery'
+], function (ArrayAdapter, Utils, $) {
+  function AjaxAdapter ($element, options) {
+    this.ajaxOptions = this._applyDefaults(options.get('ajax'));
+
+    if (this.ajaxOptions.processResults != null) {
+      this.processResults = this.ajaxOptions.processResults;
+    }
+
+    AjaxAdapter.__super__.constructor.call(this, $element, options);
+  }
+
+  Utils.Extend(AjaxAdapter, ArrayAdapter);
+
+  AjaxAdapter.prototype._applyDefaults = function (options) {
+    var defaults = {
+      data: function (params) {
+        return $.extend({}, params, {
+          q: params.term
+        });
+      },
+      transport: function (params, success, failure) {
+        var $request = $.ajax(params);
+
+        $request.then(success);
+        $request.fail(failure);
+
+        return $request;
+      }
+    };
+
+    return $.extend({}, defaults, options, true);
+  };
+
+  AjaxAdapter.prototype.processResults = function (results) {
+    return results;
+  };
+
+  AjaxAdapter.prototype.query = function (params, callback) {
+    var matches = [];
+    var self = this;
+
+    if (this._request != null) {
+      // JSONP requests cannot always be aborted
+      if ($.isFunction(this._request.abort)) {
+        this._request.abort();
+      }
+
+      this._request = null;
+    }
+
+    var options = $.extend({
+      type: 'GET'
+    }, this.ajaxOptions);
+
+    if (typeof options.url === 'function') {
+      options.url = options.url.call(this.$element, params);
+    }
+
+    if (typeof options.data === 'function') {
+      options.data = options.data.call(this.$element, params);
+    }
+
+    function request () {
+      var $request = options.transport(options, function (data) {
+        var results = self.processResults(data, params);
+
+        if (self.options.get('debug') && window.console && console.error) {
+          // Check to make sure that the response included a `results` key.
+          if (!results || !results.results || !$.isArray(results.results)) {
+            console.error(
+              'Select2: The AJAX results did not return an array in the ' +
+              '`results` key of the response.'
+            );
+          }
+        }
+
+        callback(results);
+      }, function () {
+        // Attempt to detect if a request was aborted
+        // Only works if the transport exposes a status property
+        if ('status' in $request &&
+            ($request.status === 0 || $request.status === '0')) {
+          return;
+        }
+
+        self.trigger('results:message', {
+          message: 'errorLoading'
+        });
+      });
+
+      self._request = $request;
+    }
+
+    if (this.ajaxOptions.delay && params.term != null) {
+      if (this._queryTimeout) {
+        window.clearTimeout(this._queryTimeout);
+      }
+
+      this._queryTimeout = window.setTimeout(request, this.ajaxOptions.delay);
+    } else {
+      request();
+    }
+  };
+
+  return AjaxAdapter;
+});
+
+define('select2/select2/data/tags',[
+  'jquery'
+], function ($) {
+  function Tags (decorated, $element, options) {
+    var tags = options.get('tags');
+
+    var createTag = options.get('createTag');
+
+    if (createTag !== undefined) {
+      this.createTag = createTag;
+    }
+
+    var insertTag = options.get('insertTag');
+
+    if (insertTag !== undefined) {
+        this.insertTag = insertTag;
+    }
+
+    decorated.call(this, $element, options);
+
+    if ($.isArray(tags)) {
+      for (var t = 0; t < tags.length; t++) {
+        var tag = tags[t];
+        var item = this._normalizeItem(tag);
+
+        var $option = this.option(item);
+
+        this.$element.append($option);
+      }
+    }
+  }
+
+  Tags.prototype.query = function (decorated, params, callback) {
+    var self = this;
+
+    this._removeOldTags();
+
+    if (params.term == null || params.page != null) {
+      decorated.call(this, params, callback);
+      return;
+    }
+
+    function wrapper (obj, child) {
+      var data = obj.results;
+
+      for (var i = 0; i < data.length; i++) {
+        var option = data[i];
+
+        var checkChildren = (
+          option.children != null &&
+          !wrapper({
+            results: option.children
+          }, true)
+        );
+
+        var optionText = (option.text || '').toUpperCase();
+        var paramsTerm = (params.term || '').toUpperCase();
+
+        var checkText = optionText === paramsTerm;
+
+        if (checkText || checkChildren) {
+          if (child) {
+            return false;
+          }
+
+          obj.data = data;
+          callback(obj);
+
+          return;
+        }
+      }
+
+      if (child) {
+        return true;
+      }
+
+      var tag = self.createTag(params);
+
+      if (tag != null) {
+        var $option = self.option(tag);
+        $option.attr('data-select2-tag', true);
+
+        self.addOptions([$option]);
+
+        self.insertTag(data, tag);
+      }
+
+      obj.results = data;
+
+      callback(obj);
+    }
+
+    decorated.call(this, params, wrapper);
+  };
+
+  Tags.prototype.createTag = function (decorated, params) {
+    var term = $.trim(params.term);
+
+    if (term === '') {
+      return null;
+    }
+
+    return {
+      id: term,
+      text: term
+    };
+  };
+
+  Tags.prototype.insertTag = function (_, data, tag) {
+    data.unshift(tag);
+  };
+
+  Tags.prototype._removeOldTags = function (_) {
+    var $options = this.$element.find('option[data-select2-tag]');
+
+    $options.each(function () {
+      if (this.selected) {
+        return;
+      }
+
+      $(this).remove();
+    });
+  };
+
+  return Tags;
+});
+
+define('select2/select2/data/tokenizer',[
+  'jquery'
+], function ($) {
+  function Tokenizer (decorated, $element, options) {
+    var tokenizer = options.get('tokenizer');
+
+    if (tokenizer !== undefined) {
+      this.tokenizer = tokenizer;
+    }
+
+    decorated.call(this, $element, options);
+  }
+
+  Tokenizer.prototype.bind = function (decorated, container, $container) {
+    decorated.call(this, container, $container);
+
+    this.$search =  container.dropdown.$search || container.selection.$search ||
+      $container.find('.select2-search__field');
+  };
+
+  Tokenizer.prototype.query = function (decorated, params, callback) {
+    var self = this;
+
+    function createAndSelect (data) {
+      // Normalize the data object so we can use it for checks
+      var item = self._normalizeItem(data);
+
+      // Check if the data object already exists as a tag
+      // Select it if it doesn't
+      var $existingOptions = self.$element.find('option').filter(function () {
+        return $(this).val() === item.id;
+      });
+
+      // If an existing option wasn't found for it, create the option
+      if (!$existingOptions.length) {
+        var $option = self.option(item);
+        $option.attr('data-select2-tag', true);
+
+        self._removeOldTags();
+        self.addOptions([$option]);
+      }
+
+      // Select the item, now that we know there is an option for it
+      select(item);
+    }
+
+    function select (data) {
+      self.trigger('select', {
+        data: data
+      });
+    }
+
+    params.term = params.term || '';
+
+    var tokenData = this.tokenizer(params, this.options, createAndSelect);
+
+    if (tokenData.term !== params.term) {
+      // Replace the search term if we have the search box
+      if (this.$search.length) {
+        this.$search.val(tokenData.term);
+        this.$search.trigger('focus');
+      }
+
+      params.term = tokenData.term;
+    }
+
+    decorated.call(this, params, callback);
+  };
+
+  Tokenizer.prototype.tokenizer = function (_, params, options, callback) {
+    var separators = options.get('tokenSeparators') || [];
+    var term = params.term;
+    var i = 0;
+
+    var createTag = this.createTag || function (params) {
+      return {
+        id: params.term,
+        text: params.term
+      };
+    };
+
+    while (i < term.length) {
+      var termChar = term[i];
+
+      if ($.inArray(termChar, separators) === -1) {
+        i++;
+
+        continue;
+      }
+
+      var part = term.substr(0, i);
+      var partParams = $.extend({}, params, {
+        term: part
+      });
+
+      var data = createTag(partParams);
+
+      if (data == null) {
+        i++;
+        continue;
+      }
+
+      callback(data);
+
+      // Reset the term to not include the tokenized portion
+      term = term.substr(i + 1) || '';
+      i = 0;
+    }
+
+    return {
+      term: term
+    };
+  };
+
+  return Tokenizer;
+});
+
+define('select2/select2/data/minimumInputLength',[
+
+], function () {
+  function MinimumInputLength (decorated, $e, options) {
+    this.minimumInputLength = options.get('minimumInputLength');
+
+    decorated.call(this, $e, options);
+  }
+
+  MinimumInputLength.prototype.query = function (decorated, params, callback) {
+    params.term = params.term || '';
+
+    if (params.term.length < this.minimumInputLength) {
+      this.trigger('results:message', {
+        message: 'inputTooShort',
+        args: {
+          minimum: this.minimumInputLength,
+          input: params.term,
+          params: params
+        }
+      });
+
+      return;
+    }
+
+    decorated.call(this, params, callback);
+  };
+
+  return MinimumInputLength;
+});
+
+define('select2/select2/data/maximumInputLength',[
+
+], function () {
+  function MaximumInputLength (decorated, $e, options) {
+    this.maximumInputLength = options.get('maximumInputLength');
+
+    decorated.call(this, $e, options);
+  }
+
+  MaximumInputLength.prototype.query = function (decorated, params, callback) {
+    params.term = params.term || '';
+
+    if (this.maximumInputLength > 0 &&
+        params.term.length > this.maximumInputLength) {
+      this.trigger('results:message', {
+        message: 'inputTooLong',
+        args: {
+          maximum: this.maximumInputLength,
+          input: params.term,
+          params: params
+        }
+      });
+
+      return;
+    }
+
+    decorated.call(this, params, callback);
+  };
+
+  return MaximumInputLength;
+});
+
+define('select2/select2/data/maximumSelectionLength',[
+
+], function (){
+  function MaximumSelectionLength (decorated, $e, options) {
+    this.maximumSelectionLength = options.get('maximumSelectionLength');
+
+    decorated.call(this, $e, options);
+  }
+
+  MaximumSelectionLength.prototype.bind =
+    function (decorated, container, $container) {
+      var self = this;
+
+      decorated.call(this, container, $container);
+
+      container.on('select', function () {
+        self._checkIfMaximumSelected();
+      });
+  };
+
+  MaximumSelectionLength.prototype.query =
+    function (decorated, params, callback) {
+      var self = this;
+
+      this._checkIfMaximumSelected(function () {
+        decorated.call(self, params, callback);
+      });
+  };
+
+  MaximumSelectionLength.prototype._checkIfMaximumSelected =
+    function (_, successCallback) {
+      var self = this;
+
+      this.current(function (currentData) {
+        var count = currentData != null ? currentData.length : 0;
+        if (self.maximumSelectionLength > 0 &&
+          count >= self.maximumSelectionLength) {
+          self.trigger('results:message', {
+            message: 'maximumSelected',
+            args: {
+              maximum: self.maximumSelectionLength
+            }
+          });
+          return;
+        }
+
+        if (successCallback) {
+          successCallback();
+        }
+      });
+  };
+
+  return MaximumSelectionLength;
+});
+
+define('select2/select2/dropdown',[
+  'jquery',
+  './utils'
+], function ($, Utils) {
+  function Dropdown ($element, options) {
+    this.$element = $element;
+    this.options = options;
+
+    Dropdown.__super__.constructor.call(this);
+  }
+
+  Utils.Extend(Dropdown, Utils.Observable);
+
+  Dropdown.prototype.render = function () {
+    var $dropdown = $(
+      '<span class="select2-dropdown">' +
+        '<span class="select2-results"></span>' +
+      '</span>'
+    );
+
+    $dropdown.attr('dir', this.options.get('dir'));
+
+    this.$dropdown = $dropdown;
+
+    return $dropdown;
+  };
+
+  Dropdown.prototype.bind = function () {
+    // Should be implemented in subclasses
+  };
+
+  Dropdown.prototype.position = function ($dropdown, $container) {
+    // Should be implemented in subclasses
+  };
+
+  Dropdown.prototype.destroy = function () {
+    // Remove the dropdown from the DOM
+    this.$dropdown.remove();
+  };
+
+  return Dropdown;
+});
+
+define('select2/select2/dropdown/search',[
+  'jquery',
+  '../utils'
+], function ($, Utils) {
+  function Search () { }
+
+  Search.prototype.render = function (decorated) {
+    var $rendered = decorated.call(this);
+
+    var $search = $(
+      '<span class="select2-search select2-search--dropdown">' +
+        '<input class="select2-search__field" type="search" tabindex="-1"' +
+        ' autocomplete="off" autocorrect="off" autocapitalize="none"' +
+        ' spellcheck="false" role="searchbox" aria-autocomplete="list" />' +
+      '</span>'
+    );
+
+    this.$searchContainer = $search;
+    this.$search = $search.find('input');
+
+    $rendered.prepend($search);
+
+    return $rendered;
+  };
+
+  Search.prototype.bind = function (decorated, container, $container) {
+    var self = this;
+
+    var resultsId = container.id + '-results';
+
+    decorated.call(this, container, $container);
+
+    this.$search.on('keydown', function (evt) {
+      self.trigger('keypress', evt);
+
+      self._keyUpPrevented = evt.isDefaultPrevented();
+    });
+
+    // Workaround for browsers which do not support the `input` event
+    // This will prevent double-triggering of events for browsers which support
+    // both the `keyup` and `input` events.
+    this.$search.on('input', function (evt) {
+      // Unbind the duplicated `keyup` event
+      $(this).off('keyup');
+    });
+
+    this.$search.on('keyup input', function (evt) {
+      self.handleSearch(evt);
+    });
+
+    container.on('open', function () {
+      self.$search.attr('tabindex', 0);
+      self.$search.attr('aria-controls', resultsId);
+
+      self.$search.trigger('focus');
+
+      window.setTimeout(function () {
+        self.$search.trigger('focus');
+      }, 0);
+    });
+
+    container.on('close', function () {
+      self.$search.attr('tabindex', -1);
+      self.$search.removeAttr('aria-controls');
+      self.$search.removeAttr('aria-activedescendant');
+
+      self.$search.val('');
+      self.$search.trigger('blur');
+    });
+
+    container.on('focus', function () {
+      if (!container.isOpen()) {
+        self.$search.trigger('focus');
+      }
+    });
+
+    container.on('results:all', function (params) {
+      if (params.query.term == null || params.query.term === '') {
+        var showSearch = self.showSearch(params);
+
+        if (showSearch) {
+          self.$searchContainer.removeClass('select2-search--hide');
+        } else {
+          self.$searchContainer.addClass('select2-search--hide');
+        }
+      }
+    });
+
+    container.on('results:focus', function (params) {
+      if (params.data._resultId) {
+        self.$search.attr('aria-activedescendant', params.data._resultId);
+      } else {
+        self.$search.removeAttr('aria-activedescendant');
+      }
+    });
+  };
+
+  Search.prototype.handleSearch = function (evt) {
+    if (!this._keyUpPrevented) {
+      var input = this.$search.val();
+
+      this.trigger('query', {
+        term: input
+      });
+    }
+
+    this._keyUpPrevented = false;
+  };
+
+  Search.prototype.showSearch = function (_, params) {
+    return true;
+  };
+
+  return Search;
+});
+
+define('select2/select2/dropdown/hidePlaceholder',[
+
+], function () {
+  function HidePlaceholder (decorated, $element, options, dataAdapter) {
+    this.placeholder = this.normalizePlaceholder(options.get('placeholder'));
+
+    decorated.call(this, $element, options, dataAdapter);
+  }
+
+  HidePlaceholder.prototype.append = function (decorated, data) {
+    data.results = this.removePlaceholder(data.results);
+
+    decorated.call(this, data);
+  };
+
+  HidePlaceholder.prototype.normalizePlaceholder = function (_, placeholder) {
+    if (typeof placeholder === 'string') {
+      placeholder = {
+        id: '',
+        text: placeholder
+      };
+    }
+
+    return placeholder;
+  };
+
+  HidePlaceholder.prototype.removePlaceholder = function (_, data) {
+    var modifiedData = data.slice(0);
+
+    for (var d = data.length - 1; d >= 0; d--) {
+      var item = data[d];
+
+      if (this.placeholder.id === item.id) {
+        modifiedData.splice(d, 1);
+      }
+    }
+
+    return modifiedData;
+  };
+
+  return HidePlaceholder;
+});
+
+define('select2/select2/dropdown/attachBody',[
+  'jquery',
+  '../utils'
+], function ($, Utils) {
+  function AttachBody (decorated, $element, options) {
+    this.$dropdownParent = $(options.get('dropdownParent') || document.body);
+
+    decorated.call(this, $element, options);
+  }
+
+  AttachBody.prototype.bind = function (decorated, container, $container) {
+    var self = this;
+
+    decorated.call(this, container, $container);
+
+    container.on('open', function () {
+      self._showDropdown();
+      self._attachPositioningHandler(container);
+
+      // Must bind after the results handlers to ensure correct sizing
+      self._bindContainerResultHandlers(container);
+    });
+
+    container.on('close', function () {
+      self._hideDropdown();
+      self._detachPositioningHandler(container);
+    });
+
+    this.$dropdownContainer.on('mousedown', function (evt) {
+      evt.stopPropagation();
+    });
+  };
+
+  AttachBody.prototype.destroy = function (decorated) {
+    decorated.call(this);
+
+    this.$dropdownContainer.remove();
+  };
+
+  AttachBody.prototype.position = function (decorated, $dropdown, $container) {
+    // Clone all of the container classes
+    $dropdown.attr('class', $container.attr('class'));
+
+    $dropdown.removeClass('select2');
+    $dropdown.addClass('select2-container--open');
+
+    $dropdown.css({
+      position: 'absolute',
+      top: -999999
+    });
+
+    this.$container = $container;
+  };
+
+  AttachBody.prototype.render = function (decorated) {
+    var $container = $('<span></span>');
+
+    var $dropdown = decorated.call(this);
+    $container.append($dropdown);
+
+    this.$dropdownContainer = $container;
+
+    return $container;
+  };
+
+  AttachBody.prototype._hideDropdown = function (decorated) {
+    this.$dropdownContainer.detach();
+  };
+
+  AttachBody.prototype._bindContainerResultHandlers =
+      function (decorated, container) {
+
+    // These should only be bound once
+    if (this._containerResultsHandlersBound) {
+      return;
+    }
+
+    var self = this;
+
+    container.on('results:all', function () {
+      self._positionDropdown();
+      self._resizeDropdown();
+    });
+
+    container.on('results:append', function () {
+      self._positionDropdown();
+      self._resizeDropdown();
+    });
+
+    container.on('results:message', function () {
+      self._positionDropdown();
+      self._resizeDropdown();
+    });
+
+    container.on('select', function () {
+      self._positionDropdown();
+      self._resizeDropdown();
+    });
+
+    container.on('unselect', function () {
+      self._positionDropdown();
+      self._resizeDropdown();
+    });
+
+    this._containerResultsHandlersBound = true;
+  };
+
+  AttachBody.prototype._attachPositioningHandler =
+      function (decorated, container) {
+    var self = this;
+
+    var scrollEvent = 'scroll.select2.' + container.id;
+    var resizeEvent = 'resize.select2.' + container.id;
+    var orientationEvent = 'orientationchange.select2.' + container.id;
+
+    var $watchers = this.$container.parents().filter(Utils.hasScroll);
+    $watchers.each(function () {
+      Utils.StoreData(this, 'select2-scroll-position', {
+        x: $(this).scrollLeft(),
+        y: $(this).scrollTop()
+      });
+    });
+
+    $watchers.on(scrollEvent, function (ev) {
+      var position = Utils.GetData(this, 'select2-scroll-position');
+      $(this).scrollTop(position.y);
+    });
+
+    $(window).on(scrollEvent + ' ' + resizeEvent + ' ' + orientationEvent,
+      function (e) {
+      self._positionDropdown();
+      self._resizeDropdown();
+    });
+  };
+
+  AttachBody.prototype._detachPositioningHandler =
+      function (decorated, container) {
+    var scrollEvent = 'scroll.select2.' + container.id;
+    var resizeEvent = 'resize.select2.' + container.id;
+    var orientationEvent = 'orientationchange.select2.' + container.id;
+
+    var $watchers = this.$container.parents().filter(Utils.hasScroll);
+    $watchers.off(scrollEvent);
+
+    $(window).off(scrollEvent + ' ' + resizeEvent + ' ' + orientationEvent);
+  };
+
+  AttachBody.prototype._positionDropdown = function () {
+    var $window = $(window);
+
+    var isCurrentlyAbove = this.$dropdown.hasClass('select2-dropdown--above');
+    var isCurrentlyBelow = this.$dropdown.hasClass('select2-dropdown--below');
+
+    var newDirection = null;
+
+    var offset = this.$container.offset();
+
+    offset.bottom = offset.top + this.$container.outerHeight(false);
+
+    var container = {
+      height: this.$container.outerHeight(false)
+    };
+
+    container.top = offset.top;
+    container.bottom = offset.top + container.height;
+
+    var dropdown = {
+      height: this.$dropdown.outerHeight(false)
+    };
+
+    var viewport = {
+      top: $window.scrollTop(),
+      bottom: $window.scrollTop() + $window.height()
+    };
+
+    var enoughRoomAbove = viewport.top < (offset.top - dropdown.height);
+    var enoughRoomBelow = viewport.bottom > (offset.bottom + dropdown.height);
+
+    var css = {
+      left: offset.left,
+      top: container.bottom
+    };
+
+    // Determine what the parent element is to use for calculating the offset
+    var $offsetParent = this.$dropdownParent;
+
+    // For statically positioned elements, we need to get the element
+    // that is determining the offset
+    if ($offsetParent.css('position') === 'static') {
+      $offsetParent = $offsetParent.offsetParent();
+    }
+
+    var parentOffset = {
+      top: 0,
+      left: 0
+    };
+
+    if (
+      $.contains(document.body, $offsetParent[0]) ||
+      $offsetParent[0].isConnected
+      ) {
+      parentOffset = $offsetParent.offset();
+    }
+
+    css.top -= parentOffset.top;
+    css.left -= parentOffset.left;
+
+    if (!isCurrentlyAbove && !isCurrentlyBelow) {
+      newDirection = 'below';
+    }
+
+    if (!enoughRoomBelow && enoughRoomAbove && !isCurrentlyAbove) {
+      newDirection = 'above';
+    } else if (!enoughRoomAbove && enoughRoomBelow && isCurrentlyAbove) {
+      newDirection = 'below';
+    }
+
+    if (newDirection == 'above' ||
+      (isCurrentlyAbove && newDirection !== 'below')) {
+      css.top = container.top - parentOffset.top - dropdown.height;
+    }
+
+    if (newDirection != null) {
+      this.$dropdown
+        .removeClass('select2-dropdown--below select2-dropdown--above')
+        .addClass('select2-dropdown--' + newDirection);
+      this.$container
+        .removeClass('select2-container--below select2-container--above')
+        .addClass('select2-container--' + newDirection);
+    }
+
+    this.$dropdownContainer.css(css);
+  };
+
+  AttachBody.prototype._resizeDropdown = function () {
+    var css = {
+      width: this.$container.outerWidth(false) + 'px'
+    };
+
+    if (this.options.get('dropdownAutoWidth')) {
+      css.minWidth = css.width;
+      css.position = 'relative';
+      css.width = 'auto';
+    }
+
+    this.$dropdown.css(css);
+  };
+
+  AttachBody.prototype._showDropdown = function (decorated) {
+    this.$dropdownContainer.appendTo(this.$dropdownParent);
+
+    this._positionDropdown();
+    this._resizeDropdown();
+  };
+
+  return AttachBody;
+});
+
+define('select2/select2/dropdown/minimumResultsForSearch',[
+
+], function () {
+  function countResults (data) {
+    var count = 0;
+
+    for (var d = 0; d < data.length; d++) {
+      var item = data[d];
+
+      if (item.children) {
+        count += countResults(item.children);
+      } else {
+        count++;
+      }
+    }
+
+    return count;
+  }
+
+  function MinimumResultsForSearch (decorated, $element, options, dataAdapter) {
+    this.minimumResultsForSearch = options.get('minimumResultsForSearch');
+
+    if (this.minimumResultsForSearch < 0) {
+      this.minimumResultsForSearch = Infinity;
+    }
+
+    decorated.call(this, $element, options, dataAdapter);
+  }
+
+  MinimumResultsForSearch.prototype.showSearch = function (decorated, params) {
+    if (countResults(params.data.results) < this.minimumResultsForSearch) {
+      return false;
+    }
+
+    return decorated.call(this, params);
+  };
+
+  return MinimumResultsForSearch;
+});
+
+define('select2/select2/dropdown/selectOnClose',[
+  '../utils'
+], function (Utils) {
+  function SelectOnClose () { }
+
+  SelectOnClose.prototype.bind = function (decorated, container, $container) {
+    var self = this;
+
+    decorated.call(this, container, $container);
+
+    container.on('close', function (params) {
+      self._handleSelectOnClose(params);
+    });
+  };
+
+  SelectOnClose.prototype._handleSelectOnClose = function (_, params) {
+    if (params && params.originalSelect2Event != null) {
+      var event = params.originalSelect2Event;
+
+      // Don't select an item if the close event was triggered from a select or
+      // unselect event
+      if (event._type === 'select' || event._type === 'unselect') {
+        return;
+      }
+    }
+
+    var $highlightedResults = this.getHighlightedResults();
+
+    // Only select highlighted results
+    if ($highlightedResults.length < 1) {
+      return;
+    }
+
+    var data = Utils.GetData($highlightedResults[0], 'data');
+
+    // Don't re-select already selected resulte
+    if (
+      (data.element != null && data.element.selected) ||
+      (data.element == null && data.selected)
+    ) {
+      return;
+    }
+
+    this.trigger('select', {
+        data: data
+    });
+  };
+
+  return SelectOnClose;
+});
+
+define('select2/select2/dropdown/closeOnSelect',[
+
+], function () {
+  function CloseOnSelect () { }
+
+  CloseOnSelect.prototype.bind = function (decorated, container, $container) {
+    var self = this;
+
+    decorated.call(this, container, $container);
+
+    container.on('select', function (evt) {
+      self._selectTriggered(evt);
+    });
+
+    container.on('unselect', function (evt) {
+      self._selectTriggered(evt);
+    });
+  };
+
+  CloseOnSelect.prototype._selectTriggered = function (_, evt) {
+    var originalEvent = evt.originalEvent;
+
+    // Don't close if the control key is being held
+    if (originalEvent && (originalEvent.ctrlKey || originalEvent.metaKey)) {
+      return;
+    }
+
+    this.trigger('close', {
+      originalEvent: originalEvent,
+      originalSelect2Event: evt
+    });
+  };
+
+  return CloseOnSelect;
+});
+
+define('select2/select2/i18n/en',[],function () {
+  // English
+  return {
+    errorLoading: function () {
+      return 'The results could not be loaded.';
+    },
+    inputTooLong: function (args) {
+      var overChars = args.input.length - args.maximum;
+
+      var message = 'Please delete ' + overChars + ' character';
+
+      if (overChars != 1) {
+        message += 's';
+      }
+
+      return message;
+    },
+    inputTooShort: function (args) {
+      var remainingChars = args.minimum - args.input.length;
+
+      var message = 'Please enter ' + remainingChars + ' or more characters';
+
+      return message;
+    },
+    loadingMore: function () {
+      return 'Loading more results…';
+    },
+    maximumSelected: function (args) {
+      var message = 'You can only select ' + args.maximum + ' item';
+
+      if (args.maximum != 1) {
+        message += 's';
+      }
+
+      return message;
+    },
+    noResults: function () {
+      return 'No results found';
+    },
+    searching: function () {
+      return 'Searching…';
+    },
+    removeAllItems: function () {
+      return 'Remove all items';
+    }
+  };
+});
+
+define('select2/select2/defaults',[
+  'jquery',
+  'require',
+
+  './results',
+
+  './selection/single',
+  './selection/multiple',
+  './selection/placeholder',
+  './selection/allowClear',
+  './selection/search',
+  './selection/eventRelay',
+
+  './utils',
+  './translation',
+  './diacritics',
+
+  './data/select',
+  './data/array',
+  './data/ajax',
+  './data/tags',
+  './data/tokenizer',
+  './data/minimumInputLength',
+  './data/maximumInputLength',
+  './data/maximumSelectionLength',
+
+  './dropdown',
+  './dropdown/search',
+  './dropdown/hidePlaceholder',
+  './dropdown/infiniteScroll',
+  './dropdown/attachBody',
+  './dropdown/minimumResultsForSearch',
+  './dropdown/selectOnClose',
+  './dropdown/closeOnSelect',
+
+  './i18n/en'
+], function ($, require,
+
+             ResultsList,
+
+             SingleSelection, MultipleSelection, Placeholder, AllowClear,
+             SelectionSearch, EventRelay,
+
+             Utils, Translation, DIACRITICS,
+
+             SelectData, ArrayData, AjaxData, Tags, Tokenizer,
+             MinimumInputLength, MaximumInputLength, MaximumSelectionLength,
+
+             Dropdown, DropdownSearch, HidePlaceholder, InfiniteScroll,
+             AttachBody, MinimumResultsForSearch, SelectOnClose, CloseOnSelect,
+
+             EnglishTranslation) {
+  function Defaults () {
+    this.reset();
+  }
+
+  Defaults.prototype.apply = function (options) {
+    options = $.extend(true, {}, this.defaults, options);
+
+    if (options.dataAdapter == null) {
+      if (options.ajax != null) {
+        options.dataAdapter = AjaxData;
+      } else if (options.data != null) {
+        options.dataAdapter = ArrayData;
+      } else {
+        options.dataAdapter = SelectData;
+      }
+
+      if (options.minimumInputLength > 0) {
+        options.dataAdapter = Utils.Decorate(
+          options.dataAdapter,
+          MinimumInputLength
+        );
+      }
+
+      if (options.maximumInputLength > 0) {
+        options.dataAdapter = Utils.Decorate(
+          options.dataAdapter,
+          MaximumInputLength
+        );
+      }
+
+      if (options.maximumSelectionLength > 0) {
+        options.dataAdapter = Utils.Decorate(
+          options.dataAdapter,
+          MaximumSelectionLength
+        );
+      }
+
+      if (options.tags) {
+        options.dataAdapter = Utils.Decorate(options.dataAdapter, Tags);
+      }
+
+      if (options.tokenSeparators != null || options.tokenizer != null) {
+        options.dataAdapter = Utils.Decorate(
+          options.dataAdapter,
+          Tokenizer
+        );
+      }
+
+      if (options.query != null) {
+        var Query = require(options.amdBase + 'compat/query');
+
+        options.dataAdapter = Utils.Decorate(
+          options.dataAdapter,
+          Query
+        );
+      }
+
+      if (options.initSelection != null) {
+        var InitSelection = require(options.amdBase + 'compat/initSelection');
+
+        options.dataAdapter = Utils.Decorate(
+          options.dataAdapter,
+          InitSelection
+        );
+      }
+    }
+
+    if (options.resultsAdapter == null) {
+      options.resultsAdapter = ResultsList;
+
+      if (options.ajax != null) {
+        options.resultsAdapter = Utils.Decorate(
+          options.resultsAdapter,
+          InfiniteScroll
+        );
+      }
+
+      if (options.placeholder != null) {
+        options.resultsAdapter = Utils.Decorate(
+          options.resultsAdapter,
+          HidePlaceholder
+        );
+      }
+
+      if (options.selectOnClose) {
+        options.resultsAdapter = Utils.Decorate(
+          options.resultsAdapter,
+          SelectOnClose
+        );
+      }
+    }
+
+    if (options.dropdownAdapter == null) {
+      if (options.multiple) {
+        options.dropdownAdapter = Dropdown;
+      } else {
+        var SearchableDropdown = Utils.Decorate(Dropdown, DropdownSearch);
+
+        options.dropdownAdapter = SearchableDropdown;
+      }
+
+      if (options.minimumResultsForSearch !== 0) {
+        options.dropdownAdapter = Utils.Decorate(
+          options.dropdownAdapter,
+          MinimumResultsForSearch
+        );
+      }
+
+      if (options.closeOnSelect) {
+        options.dropdownAdapter = Utils.Decorate(
+          options.dropdownAdapter,
+          CloseOnSelect
+        );
+      }
+
+      if (
+        options.dropdownCssClass != null ||
+        options.dropdownCss != null ||
+        options.adaptDropdownCssClass != null
+      ) {
+        var DropdownCSS = require(options.amdBase + 'compat/dropdownCss');
+
+        options.dropdownAdapter = Utils.Decorate(
+          options.dropdownAdapter,
+          DropdownCSS
+        );
+      }
+
+      options.dropdownAdapter = Utils.Decorate(
+        options.dropdownAdapter,
+        AttachBody
+      );
+    }
+
+    if (options.selectionAdapter == null) {
+      if (options.multiple) {
+        options.selectionAdapter = MultipleSelection;
+      } else {
+        options.selectionAdapter = SingleSelection;
+      }
+
+      // Add the placeholder mixin if a placeholder was specified
+      if (options.placeholder != null) {
+        options.selectionAdapter = Utils.Decorate(
+          options.selectionAdapter,
+          Placeholder
+        );
+      }
+
+      if (options.allowClear) {
+        options.selectionAdapter = Utils.Decorate(
+          options.selectionAdapter,
+          AllowClear
+        );
+      }
+
+      if (options.multiple) {
+        options.selectionAdapter = Utils.Decorate(
+          options.selectionAdapter,
+          SelectionSearch
+        );
+      }
+
+      if (
+        options.containerCssClass != null ||
+        options.containerCss != null ||
+        options.adaptContainerCssClass != null
+      ) {
+        var ContainerCSS = require(options.amdBase + 'compat/containerCss');
+
+        options.selectionAdapter = Utils.Decorate(
+          options.selectionAdapter,
+          ContainerCSS
+        );
+      }
+
+      options.selectionAdapter = Utils.Decorate(
+        options.selectionAdapter,
+        EventRelay
+      );
+    }
+
+    // If the defaults were not previously applied from an element, it is
+    // possible for the language option to have not been resolved
+    options.language = this._resolveLanguage(options.language);
+
+    // Always fall back to English since it will always be complete
+    options.language.push('en');
+
+    var uniqueLanguages = [];
+
+    for (var l = 0; l < options.language.length; l++) {
+      var language = options.language[l];
+
+      if (uniqueLanguages.indexOf(language) === -1) {
+        uniqueLanguages.push(language);
+      }
+    }
+
+    options.language = uniqueLanguages;
+
+    options.translations = this._processTranslations(
+      options.language,
+      options.debug
+    );
+
+    return options;
+  };
+
+  Defaults.prototype.reset = function () {
+    function stripDiacritics (text) {
+      // Used 'uni range + named function' from http://jsperf.com/diacritics/18
+      function match(a) {
+        return DIACRITICS[a] || a;
+      }
+
+      return text.replace(/[^\u0000-\u007E]/g, match);
+    }
+
+    function matcher (params, data) {
+      // Always return the object if there is nothing to compare
+      if ($.trim(params.term) === '') {
+        return data;
+      }
+
+      // Do a recursive check for options with children
+      if (data.children && data.children.length > 0) {
+        // Clone the data object if there are children
+        // This is required as we modify the object to remove any non-matches
+        var match = $.extend(true, {}, data);
+
+        // Check each child of the option
+        for (var c = data.children.length - 1; c >= 0; c--) {
+          var child = data.children[c];
+
+          var matches = matcher(params, child);
+
+          // If there wasn't a match, remove the object in the array
+          if (matches == null) {
+            match.children.splice(c, 1);
+          }
+        }
+
+        // If any children matched, return the new object
+        if (match.children.length > 0) {
+          return match;
+        }
+
+        // If there were no matching children, check just the plain object
+        return matcher(params, match);
+      }
+
+      var original = stripDiacritics(data.text).toUpperCase();
+      var term = stripDiacritics(params.term).toUpperCase();
+
+      // Check if the text contains the term
+      if (original.indexOf(term) > -1) {
+        return data;
+      }
+
+      // If it doesn't contain the term, don't return anything
+      return null;
+    }
+
+    this.defaults = {
+      amdBase: './',
+      amdLanguageBase: './i18n/',
+      closeOnSelect: true,
+      debug: false,
+      dropdownAutoWidth: false,
+      escapeMarkup: Utils.escapeMarkup,
+      language: {},
+      matcher: matcher,
+      minimumInputLength: 0,
+      maximumInputLength: 0,
+      maximumSelectionLength: 0,
+      minimumResultsForSearch: 0,
+      selectOnClose: false,
+      scrollAfterSelect: false,
+      sorter: function (data) {
+        return data;
+      },
+      templateResult: function (result) {
+        return result.text;
+      },
+      templateSelection: function (selection) {
+        return selection.text;
+      },
+      theme: 'default',
+      width: 'resolve'
+    };
+  };
+
+  Defaults.prototype.applyFromElement = function (options, $element) {
+    var optionLanguage = options.language;
+    var defaultLanguage = this.defaults.language;
+    var elementLanguage = $element.prop('lang');
+    var parentLanguage = $element.closest('[lang]').prop('lang');
+
+    var languages = Array.prototype.concat.call(
+      this._resolveLanguage(elementLanguage),
+      this._resolveLanguage(optionLanguage),
+      this._resolveLanguage(defaultLanguage),
+      this._resolveLanguage(parentLanguage)
+    );
+
+    options.language = languages;
+
+    return options;
+  };
+
+  Defaults.prototype._resolveLanguage = function (language) {
+    if (!language) {
+      return [];
+    }
+
+    if ($.isEmptyObject(language)) {
+      return [];
+    }
+
+    if ($.isPlainObject(language)) {
+      return [language];
+    }
+
+    var languages;
+
+    if (!$.isArray(language)) {
+      languages = [language];
+    } else {
+      languages = language;
+    }
+
+    var resolvedLanguages = [];
+
+    for (var l = 0; l < languages.length; l++) {
+      resolvedLanguages.push(languages[l]);
+
+      if (typeof languages[l] === 'string' && languages[l].indexOf('-') > 0) {
+        // Extract the region information if it is included
+        var languageParts = languages[l].split('-');
+        var baseLanguage = languageParts[0];
+
+        resolvedLanguages.push(baseLanguage);
+      }
+    }
+
+    return resolvedLanguages;
+  };
+
+  Defaults.prototype._processTranslations = function (languages, debug) {
+    var translations = new Translation();
+
+    for (var l = 0; l < languages.length; l++) {
+      var languageData = new Translation();
+
+      var language = languages[l];
+
+      if (typeof language === 'string') {
+        try {
+          // Try to load it with the original name
+          languageData = Translation.loadPath(language);
+        } catch (e) {
+          try {
+            // If we couldn't load it, check if it wasn't the full path
+            language = this.defaults.amdLanguageBase + language;
+            languageData = Translation.loadPath(language);
+          } catch (ex) {
+            // The translation could not be loaded at all. Sometimes this is
+            // because of a configuration problem, other times this can be
+            // because of how Select2 helps load all possible translation files
+            if (debug && window.console && console.warn) {
+              console.warn(
+                'Select2: The language file for "' + language + '" could ' +
+                'not be automatically loaded. A fallback will be used instead.'
+              );
+            }
+          }
+        }
+      } else if ($.isPlainObject(language)) {
+        languageData = new Translation(language);
+      } else {
+        languageData = language;
+      }
+
+      translations.extend(languageData);
+    }
+
+    return translations;
+  };
+
+  Defaults.prototype.set = function (key, value) {
+    var camelKey = $.camelCase(key);
+
+    var data = {};
+    data[camelKey] = value;
+
+    var convertedData = Utils._convertData(data);
+
+    $.extend(true, this.defaults, convertedData);
+  };
+
+  var defaults = new Defaults();
+
+  return defaults;
+});
+
+define('select2/select2/options',[
+  'require',
+  'jquery',
+  './defaults',
+  './utils'
+], function (require, $, Defaults, Utils) {
+  function Options (options, $element) {
+    this.options = options;
+
+    if ($element != null) {
+      this.fromElement($element);
+    }
+
+    if ($element != null) {
+      this.options = Defaults.applyFromElement(this.options, $element);
+    }
+
+    this.options = Defaults.apply(this.options);
+
+    if ($element && $element.is('input')) {
+      var InputCompat = require(this.get('amdBase') + 'compat/inputData');
+
+      this.options.dataAdapter = Utils.Decorate(
+        this.options.dataAdapter,
+        InputCompat
+      );
+    }
+  }
+
+  Options.prototype.fromElement = function ($e) {
+    var excludedData = ['select2'];
+
+    if (this.options.multiple == null) {
+      this.options.multiple = $e.prop('multiple');
+    }
+
+    if (this.options.disabled == null) {
+      this.options.disabled = $e.prop('disabled');
+    }
+
+    if (this.options.dir == null) {
+      if ($e.prop('dir')) {
+        this.options.dir = $e.prop('dir');
+      } else if ($e.closest('[dir]').prop('dir')) {
+        this.options.dir = $e.closest('[dir]').prop('dir');
+      } else {
+        this.options.dir = 'ltr';
+      }
+    }
+
+    $e.prop('disabled', this.options.disabled);
+    $e.prop('multiple', this.options.multiple);
+
+    if (Utils.GetData($e[0], 'select2Tags')) {
+      if (this.options.debug && window.console && console.warn) {
+        console.warn(
+          'Select2: The `data-select2-tags` attribute has been changed to ' +
+          'use the `data-data` and `data-tags="true"` attributes and will be ' +
+          'removed in future versions of Select2.'
+        );
+      }
+
+      Utils.StoreData($e[0], 'data', Utils.GetData($e[0], 'select2Tags'));
+      Utils.StoreData($e[0], 'tags', true);
+    }
+
+    if (Utils.GetData($e[0], 'ajaxUrl')) {
+      if (this.options.debug && window.console && console.warn) {
+        console.warn(
+          'Select2: The `data-ajax-url` attribute has been changed to ' +
+          '`data-ajax--url` and support for the old attribute will be removed' +
+          ' in future versions of Select2.'
+        );
+      }
+
+      $e.attr('ajax--url', Utils.GetData($e[0], 'ajaxUrl'));
+      Utils.StoreData($e[0], 'ajax-Url', Utils.GetData($e[0], 'ajaxUrl'));
+    }
+
+    var dataset = {};
+
+    function upperCaseLetter(_, letter) {
+      return letter.toUpperCase();
+    }
+
+    // Pre-load all of the attributes which are prefixed with `data-`
+    for (var attr = 0; attr < $e[0].attributes.length; attr++) {
+      var attributeName = $e[0].attributes[attr].name;
+      var prefix = 'data-';
+
+      if (attributeName.substr(0, prefix.length) == prefix) {
+        // Get the contents of the attribute after `data-`
+        var dataName = attributeName.substring(prefix.length);
+
+        // Get the data contents from the consistent source
+        // This is more than likely the jQuery data helper
+        var dataValue = Utils.GetData($e[0], dataName);
+
+        // camelCase the attribute name to match the spec
+        var camelDataName = dataName.replace(/-([a-z])/g, upperCaseLetter);
+
+        // Store the data attribute contents into the dataset since
+        dataset[camelDataName] = dataValue;
+      }
+    }
+
+    // Prefer the element's `dataset` attribute if it exists
+    // jQuery 1.x does not correctly handle data attributes with multiple dashes
+    if ($.fn.jquery && $.fn.jquery.substr(0, 2) == '1.' && $e[0].dataset) {
+      dataset = $.extend(true, {}, $e[0].dataset, dataset);
+    }
+
+    // Prefer our internal data cache if it exists
+    var data = $.extend(true, {}, Utils.GetData($e[0]), dataset);
+
+    data = Utils._convertData(data);
+
+    for (var key in data) {
+      if ($.inArray(key, excludedData) > -1) {
+        continue;
+      }
+
+      if ($.isPlainObject(this.options[key])) {
+        $.extend(this.options[key], data[key]);
+      } else {
+        this.options[key] = data[key];
+      }
+    }
+
+    return this;
+  };
+
+  Options.prototype.get = function (key) {
+    return this.options[key];
+  };
+
+  Options.prototype.set = function (key, val) {
+    this.options[key] = val;
+  };
+
+  return Options;
+});
+
+define('select2/select2/core',[
+  'jquery',
+  './options',
+  './utils',
+  './keys'
+], function ($, Options, Utils, KEYS) {
+  var Select2 = function ($element, options) {
+    if (Utils.GetData($element[0], 'select2') != null) {
+      Utils.GetData($element[0], 'select2').destroy();
+    }
+
+    this.$element = $element;
+
+    this.id = this._generateId($element);
+
+    options = options || {};
+
+    this.options = new Options(options, $element);
+
+    Select2.__super__.constructor.call(this);
+
+    // Set up the tabindex
+
+    var tabindex = $element.attr('tabindex') || 0;
+    Utils.StoreData($element[0], 'old-tabindex', tabindex);
+    $element.attr('tabindex', '-1');
+
+    // Set up containers and adapters
+
+    var DataAdapter = this.options.get('dataAdapter');
+    this.dataAdapter = new DataAdapter($element, this.options);
+
+    var $container = this.render();
+
+    this._placeContainer($container);
+
+    var SelectionAdapter = this.options.get('selectionAdapter');
+    this.selection = new SelectionAdapter($element, this.options);
+    this.$selection = this.selection.render();
+
+    this.selection.position(this.$selection, $container);
+
+    var DropdownAdapter = this.options.get('dropdownAdapter');
+    this.dropdown = new DropdownAdapter($element, this.options);
+    this.$dropdown = this.dropdown.render();
+
+    this.dropdown.position(this.$dropdown, $container);
+
+    var ResultsAdapter = this.options.get('resultsAdapter');
+    this.results = new ResultsAdapter($element, this.options, this.dataAdapter);
+    this.$results = this.results.render();
+
+    this.results.position(this.$results, this.$dropdown);
+
+    // Bind events
+
+    var self = this;
+
+    // Bind the container to all of the adapters
+    this._bindAdapters();
+
+    // Register any DOM event handlers
+    this._registerDomEvents();
+
+    // Register any internal event handlers
+    this._registerDataEvents();
+    this._registerSelectionEvents();
+    this._registerDropdownEvents();
+    this._registerResultsEvents();
+    this._registerEvents();
+
+    // Set the initial state
+    this.dataAdapter.current(function (initialData) {
+      self.trigger('selection:update', {
+        data: initialData
+      });
+    });
+
+    // Hide the original select
+    $element.addClass('select2-hidden-accessible');
+    $element.attr('aria-hidden', 'true');
+
+    // Synchronize any monitored attributes
+    this._syncAttributes();
+
+    Utils.StoreData($element[0], 'select2', this);
+
+    // Ensure backwards compatibility with $element.data('select2').
+    $element.data('select2', this);
+  };
+
+  Utils.Extend(Select2, Utils.Observable);
+
+  Select2.prototype._generateId = function ($element) {
+    var id = '';
+
+    if ($element.attr('id') != null) {
+      id = $element.attr('id');
+    } else if ($element.attr('name') != null) {
+      id = $element.attr('name') + '-' + Utils.generateChars(2);
+    } else {
+      id = Utils.generateChars(4);
+    }
+
+    id = id.replace(/(:|\.|\[|\]|,)/g, '');
+    id = 'select2-' + id;
+
+    return id;
+  };
+
+  Select2.prototype._placeContainer = function ($container) {
+    $container.insertAfter(this.$element);
+
+    var width = this._resolveWidth(this.$element, this.options.get('width'));
+
+    if (width != null) {
+      $container.css('width', width);
+    }
+  };
+
+  Select2.prototype._resolveWidth = function ($element, method) {
+    var WIDTH = /^width:(([-+]?([0-9]*\.)?[0-9]+)(px|em|ex|%|in|cm|mm|pt|pc))/i;
+
+    if (method == 'resolve') {
+      var styleWidth = this._resolveWidth($element, 'style');
+
+      if (styleWidth != null) {
+        return styleWidth;
+      }
+
+      return this._resolveWidth($element, 'element');
+    }
+
+    if (method == 'element') {
+      var elementWidth = $element.outerWidth(false);
+
+      if (elementWidth <= 0) {
+        return 'auto';
+      }
+
+      return elementWidth + 'px';
+    }
+
+    if (method == 'style') {
+      var style = $element.attr('style');
+
+      if (typeof(style) !== 'string') {
+        return null;
+      }
+
+      var attrs = style.split(';');
+
+      for (var i = 0, l = attrs.length; i < l; i = i + 1) {
+        var attr = attrs[i].replace(/\s/g, '');
+        var matches = attr.match(WIDTH);
+
+        if (matches !== null && matches.length >= 1) {
+          return matches[1];
+        }
+      }
+
+      return null;
+    }
+
+    if (method == 'computedstyle') {
+      var computedStyle = window.getComputedStyle($element[0]);
+
+      return computedStyle.width;
+    }
+
+    return method;
+  };
+
+  Select2.prototype._bindAdapters = function () {
+    this.dataAdapter.bind(this, this.$container);
+    this.selection.bind(this, this.$container);
+
+    this.dropdown.bind(this, this.$container);
+    this.results.bind(this, this.$container);
+  };
+
+  Select2.prototype._registerDomEvents = function () {
+    var self = this;
+
+    this.$element.on('change.select2', function () {
+      self.dataAdapter.current(function (data) {
+        self.trigger('selection:update', {
+          data: data
+        });
+      });
+    });
+
+    this.$element.on('focus.select2', function (evt) {
+      self.trigger('focus', evt);
+    });
+
+    this._syncA = Utils.bind(this._syncAttributes, this);
+    this._syncS = Utils.bind(this._syncSubtree, this);
+
+    if (this.$element[0].attachEvent) {
+      this.$element[0].attachEvent('onpropertychange', this._syncA);
+    }
+
+    var observer = window.MutationObserver ||
+      window.WebKitMutationObserver ||
+      window.MozMutationObserver
+    ;
+
+    if (observer != null) {
+      this._observer = new observer(function (mutations) {
+        self._syncA();
+        self._syncS(null, mutations);
+      });
+      this._observer.observe(this.$element[0], {
+        attributes: true,
+        childList: true,
+        subtree: false
+      });
+    } else if (this.$element[0].addEventListener) {
+      this.$element[0].addEventListener(
+        'DOMAttrModified',
+        self._syncA,
+        false
+      );
+      this.$element[0].addEventListener(
+        'DOMNodeInserted',
+        self._syncS,
+        false
+      );
+      this.$element[0].addEventListener(
+        'DOMNodeRemoved',
+        self._syncS,
+        false
+      );
+    }
+  };
+
+  Select2.prototype._registerDataEvents = function () {
+    var self = this;
+
+    this.dataAdapter.on('*', function (name, params) {
+      self.trigger(name, params);
+    });
+  };
+
+  Select2.prototype._registerSelectionEvents = function () {
+    var self = this;
+    var nonRelayEvents = ['toggle', 'focus'];
+
+    this.selection.on('toggle', function () {
+      self.toggleDropdown();
+    });
+
+    this.selection.on('focus', function (params) {
+      self.focus(params);
+    });
+
+    this.selection.on('*', function (name, params) {
+      if ($.inArray(name, nonRelayEvents) !== -1) {
+        return;
+      }
+
+      self.trigger(name, params);
+    });
+  };
+
+  Select2.prototype._registerDropdownEvents = function () {
+    var self = this;
+
+    this.dropdown.on('*', function (name, params) {
+      self.trigger(name, params);
+    });
+  };
+
+  Select2.prototype._registerResultsEvents = function () {
+    var self = this;
+
+    this.results.on('*', function (name, params) {
+      self.trigger(name, params);
+    });
+  };
+
+  Select2.prototype._registerEvents = function () {
+    var self = this;
+
+    this.on('open', function () {
+      self.$container.addClass('select2-container--open');
+    });
+
+    this.on('close', function () {
+      self.$container.removeClass('select2-container--open');
+    });
+
+    this.on('enable', function () {
+      self.$container.removeClass('select2-container--disabled');
+    });
+
+    this.on('disable', function () {
+      self.$container.addClass('select2-container--disabled');
+    });
+
+    this.on('blur', function () {
+      self.$container.removeClass('select2-container--focus');
+    });
+
+    this.on('query', function (params) {
+      if (!self.isOpen()) {
+        self.trigger('open', {});
+      }
+
+      this.dataAdapter.query(params, function (data) {
+        self.trigger('results:all', {
+          data: data,
+          query: params
+        });
+      });
+    });
+
+    this.on('query:append', function (params) {
+      this.dataAdapter.query(params, function (data) {
+        self.trigger('results:append', {
+          data: data,
+          query: params
+        });
+      });
+    });
+
+    this.on('keypress', function (evt) {
+      var key = evt.which;
+
+      if (self.isOpen()) {
+        if (key === KEYS.ESC || key === KEYS.TAB ||
+            (key === KEYS.UP && evt.altKey)) {
+          self.close(evt);
+
+          evt.preventDefault();
+        } else if (key === KEYS.ENTER) {
+          self.trigger('results:select', {});
+
+          evt.preventDefault();
+        } else if ((key === KEYS.SPACE && evt.ctrlKey)) {
+          self.trigger('results:toggle', {});
+
+          evt.preventDefault();
+        } else if (key === KEYS.UP) {
+          self.trigger('results:previous', {});
+
+          evt.preventDefault();
+        } else if (key === KEYS.DOWN) {
+          self.trigger('results:next', {});
+
+          evt.preventDefault();
+        }
+      } else {
+        if (key === KEYS.ENTER || key === KEYS.SPACE ||
+            (key === KEYS.DOWN && evt.altKey)) {
+          self.open();
+
+          evt.preventDefault();
+        }
+      }
+    });
+  };
+
+  Select2.prototype._syncAttributes = function () {
+    this.options.set('disabled', this.$element.prop('disabled'));
+
+    if (this.isDisabled()) {
+      if (this.isOpen()) {
+        this.close();
+      }
+
+      this.trigger('disable', {});
+    } else {
+      this.trigger('enable', {});
+    }
+  };
+
+  Select2.prototype._isChangeMutation = function (evt, mutations) {
+    var changed = false;
+    var self = this;
+
+    // Ignore any mutation events raised for elements that aren't options or
+    // optgroups. This handles the case when the select element is destroyed
+    if (
+      evt && evt.target && (
+        evt.target.nodeName !== 'OPTION' && evt.target.nodeName !== 'OPTGROUP'
+      )
+    ) {
+      return;
+    }
+
+    if (!mutations) {
+      // If mutation events aren't supported, then we can only assume that the
+      // change affected the selections
+      changed = true;
+    } else if (mutations.addedNodes && mutations.addedNodes.length > 0) {
+      for (var n = 0; n < mutations.addedNodes.length; n++) {
+        var node = mutations.addedNodes[n];
+
+        if (node.selected) {
+          changed = true;
+        }
+      }
+    } else if (mutations.removedNodes && mutations.removedNodes.length > 0) {
+      changed = true;
+    } else if ($.isArray(mutations)) {
+      $.each(mutations, function(evt, mutation) {
+        if (self._isChangeMutation(evt, mutation)) {
+          // We've found a change mutation.
+          // Let's escape from the loop and continue
+          changed = true;
+          return false;
+        }
+      });
+    }
+    return changed;
+  };
+
+  Select2.prototype._syncSubtree = function (evt, mutations) {
+    var changed = this._isChangeMutation(evt, mutations);
+    var self = this;
+
+    // Only re-pull the data if we think there is a change
+    if (changed) {
+      this.dataAdapter.current(function (currentData) {
+        self.trigger('selection:update', {
+          data: currentData
+        });
+      });
+    }
+  };
+
+  /**
+   * Override the trigger method to automatically trigger pre-events when
+   * there are events that can be prevented.
+   */
+  Select2.prototype.trigger = function (name, args) {
+    var actualTrigger = Select2.__super__.trigger;
+    var preTriggerMap = {
+      'open': 'opening',
+      'close': 'closing',
+      'select': 'selecting',
+      'unselect': 'unselecting',
+      'clear': 'clearing'
+    };
+
+    if (args === undefined) {
+      args = {};
+    }
+
+    if (name in preTriggerMap) {
+      var preTriggerName = preTriggerMap[name];
+      var preTriggerArgs = {
+        prevented: false,
+        name: name,
+        args: args
+      };
+
+      actualTrigger.call(this, preTriggerName, preTriggerArgs);
+
+      if (preTriggerArgs.prevented) {
+        args.prevented = true;
+
+        return;
+      }
+    }
+
+    actualTrigger.call(this, name, args);
+  };
+
+  Select2.prototype.toggleDropdown = function () {
+    if (this.isDisabled()) {
+      return;
+    }
+
+    if (this.isOpen()) {
+      this.close();
+    } else {
+      this.open();
+    }
+  };
+
+  Select2.prototype.open = function () {
+    if (this.isOpen()) {
+      return;
+    }
+
+    if (this.isDisabled()) {
+      return;
+    }
+
+    this.trigger('query', {});
+  };
+
+  Select2.prototype.close = function (evt) {
+    if (!this.isOpen()) {
+      return;
+    }
+
+    this.trigger('close', { originalEvent : evt });
+  };
+
+  /**
+   * Helper method to abstract the "enabled" (not "disabled") state of this
+   * object.
+   *
+   * @return {true} if the instance is not disabled.
+   * @return {false} if the instance is disabled.
+   */
+  Select2.prototype.isEnabled = function () {
+    return !this.isDisabled();
+  };
+
+  /**
+   * Helper method to abstract the "disabled" state of this object.
+   *
+   * @return {true} if the disabled option is true.
+   * @return {false} if the disabled option is false.
+   */
+  Select2.prototype.isDisabled = function () {
+    return this.options.get('disabled');
+  };
+
+  Select2.prototype.isOpen = function () {
+    return this.$container.hasClass('select2-container--open');
+  };
+
+  Select2.prototype.hasFocus = function () {
+    return this.$container.hasClass('select2-container--focus');
+  };
+
+  Select2.prototype.focus = function (data) {
+    // No need to re-trigger focus events if we are already focused
+    if (this.hasFocus()) {
+      return;
+    }
+
+    this.$container.addClass('select2-container--focus');
+    this.trigger('focus', {});
+  };
+
+  Select2.prototype.enable = function (args) {
+    if (this.options.get('debug') && window.console && console.warn) {
+      console.warn(
+        'Select2: The `select2("enable")` method has been deprecated and will' +
+        ' be removed in later Select2 versions. Use $element.prop("disabled")' +
+        ' instead.'
+      );
+    }
+
+    if (args == null || args.length === 0) {
+      args = [true];
+    }
+
+    var disabled = !args[0];
+
+    this.$element.prop('disabled', disabled);
+  };
+
+  Select2.prototype.data = function () {
+    if (this.options.get('debug') &&
+        arguments.length > 0 && window.console && console.warn) {
+      console.warn(
+        'Select2: Data can no longer be set using `select2("data")`. You ' +
+        'should consider setting the value instead using `$element.val()`.'
+      );
+    }
+
+    var data = [];
+
+    this.dataAdapter.current(function (currentData) {
+      data = currentData;
+    });
+
+    return data;
+  };
+
+  Select2.prototype.val = function (args) {
+    if (this.options.get('debug') && window.console && console.warn) {
+      console.warn(
+        'Select2: The `select2("val")` method has been deprecated and will be' +
+        ' removed in later Select2 versions. Use $element.val() instead.'
+      );
+    }
+
+    if (args == null || args.length === 0) {
+      return this.$element.val();
+    }
+
+    var newVal = args[0];
+
+    if ($.isArray(newVal)) {
+      newVal = $.map(newVal, function (obj) {
+        return obj.toString();
+      });
+    }
+
+    this.$element.val(newVal).trigger('input').trigger('change');
+  };
+
+  Select2.prototype.destroy = function () {
+    this.$container.remove();
+
+    if (this.$element[0].detachEvent) {
+      this.$element[0].detachEvent('onpropertychange', this._syncA);
+    }
+
+    if (this._observer != null) {
+      this._observer.disconnect();
+      this._observer = null;
+    } else if (this.$element[0].removeEventListener) {
+      this.$element[0]
+        .removeEventListener('DOMAttrModified', this._syncA, false);
+      this.$element[0]
+        .removeEventListener('DOMNodeInserted', this._syncS, false);
+      this.$element[0]
+        .removeEventListener('DOMNodeRemoved', this._syncS, false);
+    }
+
+    this._syncA = null;
+    this._syncS = null;
+
+    this.$element.off('.select2');
+    this.$element.attr('tabindex',
+    Utils.GetData(this.$element[0], 'old-tabindex'));
+
+    this.$element.removeClass('select2-hidden-accessible');
+    this.$element.attr('aria-hidden', 'false');
+    Utils.RemoveData(this.$element[0]);
+    this.$element.removeData('select2');
+
+    this.dataAdapter.destroy();
+    this.selection.destroy();
+    this.dropdown.destroy();
+    this.results.destroy();
+
+    this.dataAdapter = null;
+    this.selection = null;
+    this.dropdown = null;
+    this.results = null;
+  };
+
+  Select2.prototype.render = function () {
+    var $container = $(
+      '<span class="select2 select2-container">' +
+        '<span class="selection"></span>' +
+        '<span class="dropdown-wrapper" aria-hidden="true"></span>' +
+      '</span>'
+    );
+
+    $container.attr('dir', this.options.get('dir'));
+
+    this.$container = $container;
+
+    this.$container.addClass('select2-container--' + this.options.get('theme'));
+
+    Utils.StoreData($container[0], 'element', this.$element);
+
+    return $container;
+  };
+
+  return Select2;
+});
+
+define('select2/jquery.select2',[
+  'jquery',
+  'jquery-mousewheel',
+
+  './select2/core',
+  './select2/defaults',
+  './select2/utils'
+], function ($, _, Select2, Defaults, Utils) {
+  if ($.fn.select2 == null) {
+    // All methods that should return the element
+    var thisMethods = ['open', 'close', 'destroy'];
+
+    $.fn.select2 = function (options) {
+      options = options || {};
+
+      if (typeof options === 'object') {
+        this.each(function () {
+          var instanceOptions = $.extend(true, {}, options);
+
+          var instance = new Select2($(this), instanceOptions);
+        });
+
+        return this;
+      } else if (typeof options === 'string') {
+        var ret;
+        var args = Array.prototype.slice.call(arguments, 1);
+
+        this.each(function () {
+          var instance = Utils.GetData(this, 'select2');
+
+          if (instance == null && window.console && console.error) {
+            console.error(
+              'The select2(\'' + options + '\') method was called on an ' +
+              'element that is not using Select2.'
+            );
+          }
+
+          ret = instance[options].apply(instance, args);
+        });
+
+        // Check if we should be returning `this`
+        if ($.inArray(options, thisMethods) > -1) {
+          return this;
+        }
+
+        return ret;
+      } else {
+        throw new Error('Invalid arguments for Select2: ' + options);
+      }
+    };
+  }
+
+  if ($.fn.select2.defaults == null) {
+    $.fn.select2.defaults = Defaults;
+  }
+
+  return Select2;
+});
+
+define('select2/select2/i18n/es',[],function () {
+  // Spanish
+  return {
+    errorLoading: function () {
+      return 'No se pudieron cargar los resultados';
+    },
+    inputTooLong: function (args) {
+      var remainingChars = args.input.length - args.maximum;
+
+      var message = 'Por favor, elimine ' + remainingChars + ' car';
+
+      if (remainingChars == 1) {
+        message += 'ácter';
+      } else {
+        message += 'acteres';
+      }
+
+      return message;
+    },
+    inputTooShort: function (args) {
+      var remainingChars = args.minimum - args.input.length;
+
+      var message = 'Por favor, introduzca ' + remainingChars + ' car';
+
+      if (remainingChars == 1) {
+        message += 'ácter';
+      } else {
+        message += 'acteres';
+      }
+
+      return message;
+    },
+    loadingMore: function () {
+      return 'Cargando más resultados…';
+    },
+    maximumSelected: function (args) {
+      var message = 'Sólo puede seleccionar ' + args.maximum + ' elemento';
+
+      if (args.maximum != 1) {
+        message += 's';
+      }
+
+      return message;
+    },
+    noResults: function () {
+      return 'No se encontraron resultados';
+    },
+    searching: function () {
+      return 'Buscando…';
+    },
+    removeAllItems: function () {
+      return 'Eliminar todos los elementos';
+    }
+  };
+});
+
+define('select2/select2/i18n/fr',[],function () {
+  // French
+  return {
+    errorLoading: function () {
+      return 'Les résultats ne peuvent pas être chargés.';
+    },
+    inputTooLong: function (args) {
+      var overChars = args.input.length - args.maximum;
+
+      return 'Supprimez ' + overChars + ' caractère' +
+        ((overChars > 1) ? 's' : '');
+    },
+    inputTooShort: function (args) {
+      var remainingChars = args.minimum - args.input.length;
+
+      return 'Saisissez au moins ' + remainingChars + ' caractère' +
+        ((remainingChars > 1) ? 's' : '');
+    },
+    loadingMore: function () {
+      return 'Chargement de résultats supplémentaires…';
+    },
+    maximumSelected: function (args) {
+      return 'Vous pouvez seulement sélectionner ' + args.maximum +
+        ' élément' + ((args.maximum > 1) ? 's' : '');
+    },
+    noResults: function () {
+      return 'Aucun résultat trouvé';
+    },
+    searching: function () {
+      return 'Recherche en cours…';
+    },
+    removeAllItems: function () {
+      return 'Supprimer tous les éléments';
+    }
+  };
+});
+
+
+define('text!ev-script/templates/filter.html',[],function () { return '<div id="<%= id %>-org-select" class="ev-filter-item ev-org-select">\n  <label for="<%= id %>-org-select-select"><%= i18n.formatMessage(\'Organization:\') %></label>\n  <select id="<%= id %>-org-select-select" class="form-select organizations" title="<%= i18n.formatMessage(\'Select Organization\') %>" style="width: 200px"></select>\n</div>\n<div id="<%= id %>-lib-select" class="ev-filter-item ev-lib-select">\n  <label for="<%= id %>-lib-select-select"><%= i18n.formatMessage(\'Library:\') %></label>\n  <select id="<%= id %>-lib-select-select" class="form-select libraries" title="<%= i18n.formatMessage(\'Select Library\') %>" style="width: 200px"></select>\n</div>\n<div id="<%= id %>-type-select" class="ev-filter-item ev-type-select" style="display:none;">\n  <label for="<%= id %>-type-select-select"><%= i18n.formatMessage(\'Type:\') %></label>\n  <select id="<%= id %>-type-select-select" class="form-select source" title="<%= i18n.formatMessage(\'Select Library Type\') %>">\n    <option value="content" <% if (sourceId === \'content\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Media Library\') %></option>\n    <option value="shared" <% if (sourceId === \'shared\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Shared Library\') %></option>\n  </select>\n</div>\n<div id="<%= id %>-search" class="ev-filter-item ev-search">\n</div>\n<div class="ev-filter-item ev-actions">\n  <a href="#" class="action-home" style="display: none;" title="<%= i18n.formatMessage(\'Click to navigate to default library\') %>">\n    <i class="fa fa-home fa-fw fa-lg"></i>\n  </a>\n  <button type="button" class="action-upload" style="display: none;" title="<%= i18n.formatMessage(\'Click to upload new media\') %>">\n    <i class="fa fa-upload fa-fw"></i><span><%= i18n.formatMessage(\'Upload\') %><span>\n  </button>\n  <button type="button" class="action-record" style="display: none;" title="<%= i18n.formatMessage(\'Click to record screen\') %>">\n    <i class="record-inactive fa fa-circle fa-fw"></i>\n    <i class="record-active fa fa-refresh fa-spin fa-fw" style="display:none;"></i>\n    <span><%= i18n.formatMessage(\'Record\') %><span>\n  </button>\n</div>\n<div class="ev-filter-item loader"></div>\n';});
+
+define('ev-script/views/filter',['require','jquery','underscore','loglevel','urijs/URITemplate','ev-script/views/base','ev-script/collections/base','ev-script/models/organizations','ev-script/models/libraries','ev-script/views/search','ev-script/util/hapiAdapter','select2/select2/compat/containerCss','select2/select2/compat/dropdownCss','select2/jquery.select2','select2/select2/i18n/en','select2/select2/i18n/es','select2/select2/i18n/fr','text!ev-script/templates/filter.html'],function(require) {
 
     'use strict';
 
@@ -29033,62 +35733,43 @@ define('ev-script/views/filter',['require','jquery','underscore','loglevel','uri
         URITemplate = require('urijs/URITemplate'),
         BaseView = require('ev-script/views/base'),
         BaseCollection = require('ev-script/collections/base'),
-        BaseModel = require('ev-script/models/base'),
-        OrganizationSelectView = require('ev-script/views/organization-select'),
         Organizations = require('ev-script/models/organizations'),
-        LibrarySelectView = require('ev-script/views/library-select'),
         Libraries = require('ev-script/models/libraries'),
-        TypeSelectView = require('ev-script/views/library-type-select'),
-        SearchView = require('ev-script/views/search');
+        SearchView = require('ev-script/views/search'),
+        hapiAdapter = require('ev-script/util/hapiAdapter');
+
+    require('select2/select2/compat/containerCss');
+    require('select2/select2/compat/dropdownCss');
+    require('select2/jquery.select2');
+    require('select2/select2/i18n/en');
+    require('select2/select2/i18n/es');
+    require('select2/select2/i18n/fr');
 
     return BaseView.extend({
         template: _.template(require('text!ev-script/templates/filter.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
             _.bindAll(this, 'loadOrgs', 'loadLibraries', 'changeOrganization',
-                'changeLibrary', 'activateRecord', 'deactivateRecord',
-                'showHome', 'hideHome',     'showUpload', 'hideUpload',
-                'showRecord', 'hideRecord',     'setFocus', 'getLibrary',
-                'goHome');
+                'changeLibrary', 'changeSource', 'activateRecord',
+                'deactivateRecord', 'showHome', 'hideHome', 'showUpload',
+                'hideUpload', 'showRecord', 'hideRecord', 'setFocus',
+                'getLibrary', 'goHome');
 
             this.picker = options.picker;
             this.id = options.id;
 
+            this.language = this.i18n.cldr.locale.split('-')[0];
+
             this.$el.html(this.template({
                 id: this.id,
-                i18n: this.i18n
+                i18n: this.i18n,
+                sourceId: this.picker.model.get('sourceId')
             }));
 
-            var orgSelectOptions = {
-                id: this.id + '-org-select',
-                el: this.$('.ev-org-select'),
-                picker: this.picker,
-                collection: new BaseCollection(null, {}),
-                noneOption: options.requireLibrarySelection ? null : {
-                    name: '-- ' + this.i18n.formatMessage('All Organizations') + ' --',
-                    value: ''
-                }
-            };
-            this.orgSelect = new OrganizationSelectView(orgSelectOptions);
-
-            var libSelectOptions = {
-                id: this.id + '-lib-select',
-                el: this.$('.ev-lib-select'),
-                picker: this.picker,
-                collection: new BaseCollection(null, {}),
-                noneOption: options.requireLibrarySelection ? null : {
-                    name: '-- ' + this.i18n.formatMessage('All Libraries') + ' --',
-                    value: ''
-                }
-            };
-            this.libSelect = new LibrarySelectView(libSelectOptions);
+            this.requireSelection = options.requireLibrarySelection;
 
             if (options.showTypeSelect || _.isUndefined(options.showTypeSelect)) {
-                this.typeSelectView = new TypeSelectView({
-                    id: this.id + '-type-select',
-                    el: this.$('.ev-type-select'),
-                    picker: this.picker
-                });
+                this.$('.ev-type-select').show();
             }
 
             this.searchView = new SearchView({
@@ -29096,6 +35777,11 @@ define('ev-script/views/filter',['require','jquery','underscore','loglevel','uri
                 el: this.$('.ev-search'),
                 picker: this.picker
             });
+
+            this.orgCollection = new BaseCollection(null, {});
+            this.orgCollection.comparator = 'title';
+            this.libCollection = new BaseCollection(null, {});
+            this.libCollection.comparator = 'title';
 
             var $loader = this.$('div.loader');
             $(window.document).on('ajaxSend', _.bind(function(e, xhr, settings) {
@@ -29114,14 +35800,13 @@ define('ev-script/views/filter',['require','jquery','underscore','loglevel','uri
         events: {
             'click a.action-home': 'goHome',
             'change select.organizations': 'changeOrganization',
-            'change select.libraries': 'changeLibrary'
+            'change select.libraries': 'changeLibrary',
+            'change select.source': 'changeSource'
         },
         goHome: function(e) {
-            // Once the libraries are loaded, we can proceed to select the appropriate one
-            this.$('select.libraries').one('change', _.bind(function() {
-                this.libSelect.select(this.root.getUser().get('defaultLibraryId'));
-            }, this));
-            this.orgSelect.select(this.root.getUser().get('defaultOrganizationId'));
+            this.$orgSelect.trigger('hapi:useGet');
+            this.$libSelect.trigger('hapi:useGet');
+            this.orgCollection.reset(null);
             e.preventDefault();
         },
         changeOrganization: function(e) {
@@ -29146,77 +35831,99 @@ define('ev-script/views/filter',['require','jquery','underscore','loglevel','uri
                 this.showHome();
             }
         },
+        changeSource: function(e) {
+            log.debug('[views/filter] changeLibrary');
+            log.debug(arguments);
+
+            var sourceVal = this.$('.source').val();
+            this.picker.model.set({
+                sourceId: sourceVal
+            });
+
+            this.events.trigger('typeSelectChange', sourceVal);
+            e.preventDefault();
+        },
         loadOrgs: function() {
             log.debug('[views/filter] loadOrgs');
-            this.orgSelect.collection.reset(null, { silent: true });
+
             // In case root is loading...wait for it to finish
             this.root.promise.done(_.bind(function() {
-                var searchTemplate = new URITemplate(this.root.getLink('ev:Organizations/Search').href),
-                    searchUrl = searchTemplate.expand({}),
-                    // Recursively load pages until we have all orgs.
-                    fetchOrgs = _.bind(function(url) {
-                        var orgs = new Organizations({}, {
-                            href: url
-                        });
-                        orgs.fetch({
+                var searchTemplate = new URITemplate(this.root.getLink('ev:Organizations/Search').href);
+
+                if (!this.$orgSelect) {
+                    this.$orgSelect = this.$('.organizations').select2({
+                        dataAdapter: hapiAdapter,
+                        width: 'style',
+                        containerCssClass: 'ui-widget',
+                        dropdownCssClass: 'ui-widget',
+                        language: this.language,
+                        hapi: {
+                            collection: this.orgCollection,
+                            collectionName: 'organizations',
+                            templates: {
+                                search: new URITemplate(this.root.getLink('ev:Organizations/Search').href),
+                                get: new URITemplate(this.root.getLink('ev:Organizations/Get').href)
+                            },
+                            useGet: true,
+                            modelClass: Organizations,
                             picker: this.picker,
-                            success: _.bind(function(model, response, options) {
-                                var next = model.getLink('next'),
-                                    embeddedOrgs = model.getEmbedded('organizations');
-                                if (embeddedOrgs) {
-                                    this.orgSelect.collection.add(embeddedOrgs.models);
-                                }
-                                if (next) {
-                                    fetchOrgs(next.href);
-                                } else {
-                                    // TODO - use events instead?
-                                    this.orgSelect.collection.trigger('reset');
-                                }
-                            }, this),
-                            error: _.bind(this.ajaxError, this)
-                        });
-                    }, this);
-                fetchOrgs(searchUrl);
+                            ajaxError: this.ajaxError,
+                            noneOption: this.requireSelection ? null : {
+                                id: '',
+                                text: '-- ' + this.i18n.formatMessage('All Organizations') + ' --'
+                            },
+                            defaultId: this.root.getUser().get('defaultOrganizationId')
+                        }
+                    });
+                }
             }, this));
         },
         loadLibraries: function() {
             log.debug('[views/filter] loadLibraries');
             var orgId = this.picker.model.get('organizationId'),
-                org = this.orgSelect.collection.findWhere({ 'id': orgId }),
-                searchTemplate = org && new URITemplate(org.getLink('ev:Libraries/Search').href),
-                searchUrl = searchTemplate && searchTemplate.expand({}),
-                // Recursively load pages until we have all libraries.
-                fetchLibs = _.bind(function(url) {
-                    var libs = new Libraries({}, {
-                        href: url
-                    });
-                    libs.fetch({
+                org = this.orgCollection.findWhere({ 'id': orgId }),
+                getTemplate = new URITemplate(this.root.getLink('ev:Libraries/Get').href),
+                searchTemplate = new URITemplate(org ?
+                    org.getLink('ev:Libraries/Search').href :
+                    this.root.getLink('ev:Libraries/Search').href);
+
+            if (!this.$libSelect) {
+                this.$libSelect = this.$('.libraries').select2({
+                    dataAdapter: hapiAdapter,
+                    width: 'style',
+                    containerCssClass: 'ui-widget',
+                    dropdownCssClass: 'ui-widget',
+                    language: this.language,
+                    hapi: {
+                        collection: this.libCollection,
+                        collectionName: 'libraries',
+                        templates: {
+                            search: searchTemplate,
+                            get: getTemplate
+                        },
+                        useGet: true,
+                        modelClass: Libraries,
                         picker: this.picker,
-                        success: _.bind(function(model, response, options) {
-                            var next = model.getLink('next'),
-                                embeddedLibs = model.getEmbedded('libraries');
-                            if (embeddedLibs) {
-                                this.libSelect.collection.add(embeddedLibs.models);
-                            }
-                            if (next) {
-                                fetchLibs(next.href);
-                            } else {
-                                // TODO - use events instead?
-                                this.libSelect.collection.trigger('reset');
-                            }
-                        }, this),
-                        error: _.bind(this.ajaxError, this)
-                    });
-                }, this);
-            if (org) {
-                this.libSelect.collection.reset(null, { silent: true });
-                fetchLibs(searchUrl);
+                        ajaxError: this.ajaxError,
+                        noneOption: this.requireSelection ? null : {
+                            id: '',
+                            text: '-- ' + this.i18n.formatMessage('All Libraries') + ' --'
+                        },
+                        defaultId: this.root.getUser().get('defaultLibraryId')
+                    }
+                });
             } else {
-                this.libSelect.collection.reset(null);
+                this.$libSelect.trigger('hapi:updateTemplates', [
+                    {
+                        search: searchTemplate,
+                        get: getTemplate
+                    }
+                ]);
+                this.libCollection.reset(null);
             }
         },
         getLibrary: function(id) {
-            return this.libSelect.collection.findWhere({ 'id': id });
+            return this.libCollection.findWhere({ 'id': id });
         },
         activateRecord: function() {
             this.$('.record-active').show();
@@ -30638,6 +37345,9 @@ define('ev-script/collections/media-workflows',['require','ev-script/collections
 });
 
 
+define('text!ev-script/templates/options.html',[],function () { return '<% if (noneOption) { %>\n    <option value="<%= noneOption.value %>" <% if (selectedId === noneOption.value ) { print(\'selected="selected"\'); } %>><%- noneOption.name %></option>\n<% } %>\n<% collection.each(function(item) { %>\n    <option value="<%= item.id %>" <% if (selectedId === item.id) { print(\'selected="selected"\'); } %>><%- item.get(\'title\') || item.get(\'Name\') || item.get(\'name\') %></option>\n<% }); %>\n';});
+
+
 define('ev-script/views/workflow-select',['require','underscore','ev-script/views/base','text!ev-script/templates/options.html'],function(require) {
 
     'use strict';
@@ -30876,73 +37586,85 @@ define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-
 
 });
 
-;(function () {
+(function(f) {
 
-  var object =
-    typeof exports != 'undefined' ? exports :
-    typeof self != 'undefined' ? self : // #8: web workers
-    $.global; // #31: ExtendScript
+  'use strict';
+
+  /* istanbul ignore else */
+  if (typeof exports === 'object' && exports != null &&
+      typeof exports.nodeType !== 'number') {
+    module.exports = f ();
+  } else if (typeof define === 'function' && define.amd != null) {
+    define ('base64',[], f);
+  } else {
+    var base64 = f ();
+    var global = typeof self !== 'undefined' ? self : $.global;
+    if (typeof global.btoa !== 'function') global.btoa = base64.btoa;
+    if (typeof global.atob !== 'function') global.atob = base64.atob;
+  }
+
+} (function() {
+
+  'use strict';
 
   var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 
   function InvalidCharacterError(message) {
     this.message = message;
   }
-  InvalidCharacterError.prototype = new Error;
+  InvalidCharacterError.prototype = new Error ();
   InvalidCharacterError.prototype.name = 'InvalidCharacterError';
 
   // encoder
   // [https://gist.github.com/999166] by [https://github.com/nignag]
-  object.btoa || (
-  object.btoa = function (input) {
-    var str = String(input);
+  function btoa(input) {
+    var str = String (input);
     for (
       // initialize result and counter
       var block, charCode, idx = 0, map = chars, output = '';
       // if the next str index does not exist:
       //   change the mapping table to "="
       //   check if d has no fractional digits
-      str.charAt(idx | 0) || (map = '=', idx % 1);
+      str.charAt (idx | 0) || (map = '=', idx % 1);
       // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
-      output += map.charAt(63 & block >> 8 - idx % 1 * 8)
+      output += map.charAt (63 & block >> 8 - idx % 1 * 8)
     ) {
-      charCode = str.charCodeAt(idx += 3/4);
+      charCode = str.charCodeAt (idx += 3 / 4);
       if (charCode > 0xFF) {
-        throw new InvalidCharacterError("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");
+        throw new InvalidCharacterError ("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");
       }
       block = block << 8 | charCode;
     }
     return output;
-  });
+  }
 
   // decoder
   // [https://gist.github.com/1020396] by [https://github.com/atk]
-  object.atob || (
-  object.atob = function (input) {
-    var str = String(input).replace(/[=]+$/, ''); // #31: ExtendScript bad parse of /=
-    if (str.length % 4 == 1) {
-      throw new InvalidCharacterError("'atob' failed: The string to be decoded is not correctly encoded.");
+  function atob(input) {
+    var str = (String (input)).replace (/[=]+$/, ''); // #31: ExtendScript bad parse of /=
+    if (str.length % 4 === 1) {
+      throw new InvalidCharacterError ("'atob' failed: The string to be decoded is not correctly encoded.");
     }
     for (
       // initialize result and counters
       var bc = 0, bs, buffer, idx = 0, output = '';
       // get next character
-      buffer = str.charAt(idx++);
+      buffer = str.charAt (idx++); // eslint-disable-line no-cond-assign
       // character found in table? initialize bit storage and add its ascii value;
       ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer,
         // and if not first of each 4 characters,
         // convert the first 8 bits to one ascii character
-        bc++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0
+        bc++ % 4) ? output += String.fromCharCode (255 & bs >> (-2 * bc & 6)) : 0
     ) {
       // try to find character in table (0-63, not found => -1)
-      buffer = chars.indexOf(buffer);
+      buffer = chars.indexOf (buffer);
     }
     return output;
-  });
+  }
 
-}());
+  return {btoa: btoa, atob: atob};
 
-define("base64", function(){});
+}));
 
 
 define('text!ev-script/templates/anthem.html',[],function () { return '<iframe src="ensemble://<%= tokenDetailsApiUrl %>" style="display:none;"></iframe>\n';});
@@ -32272,10 +38994,10 @@ define('ev-script/views/dropbox-picker',['require','jquery','underscore','urijs/
         },
         loadDropboxes: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
-                libraryId = this.model.get('libraryId'),
-                library = this.filter.getLibrary(libraryId),
-                searchTemplate = new URITemplate(library.getLink('ev:Dropboxes/Search').href),
+                searchTemplate = new URITemplate(this.root.getLink('ev:Dropboxes/Search').href),
                 searchUrl = searchTemplate.expand({
+                    organizationId: this.model.get('organizationId'),
+                    libraryId: this.model.get('libraryId'),
                     search: searchVal,
                     sortBy: 'title',
                     pageSize: 20
@@ -34251,17 +40973,17 @@ define('ev-script/models/info',['require','underscore','semver','ev-script/model
 }));
 
 /**
- * CLDR JavaScript Library v0.5.0
+ * CLDR JavaScript Library v0.5.1
  * http://jquery.com/
  *
  * Copyright 2013 Rafael Xavier de Souza
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2017-08-11T11:52Z
+ * Date: 2019-01-21T13:43Z
  */
 /*!
- * CLDR JavaScript Library v0.5.0 2017-08-11T11:52Z MIT license © Rafael Xavier
+ * CLDR JavaScript Library v0.5.1 2019-01-21T13:43Z MIT license © Rafael Xavier
  * http://git.io/h4lmVg
  */
 (function( factory ) {
@@ -34353,17 +41075,17 @@ define('ev-script/models/info',['require','underscore','semver','ev-script/model
 }));
 
 /**
- * CLDR JavaScript Library v0.5.0
+ * CLDR JavaScript Library v0.5.1
  * http://jquery.com/
  *
  * Copyright 2013 Rafael Xavier de Souza
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2017-08-11T11:52Z
+ * Date: 2019-01-21T13:43Z
  */
 /*!
- * CLDR JavaScript Library v0.5.0 2017-08-11T11:52Z MIT license © Rafael Xavier
+ * CLDR JavaScript Library v0.5.1 2019-01-21T13:43Z MIT license © Rafael Xavier
  * http://git.io/h4lmVg
  */
 (function( factory ) {
@@ -34518,7 +41240,7 @@ define('ev-script/models/info',['require','underscore','semver','ev-script/model
 }));
 
 /**
- * Globalize v1.4.0
+ * Globalize v1.5.0
  *
  * http://github.com/jquery/globalize
  *
@@ -34526,10 +41248,10 @@ define('ev-script/models/info',['require','underscore','semver','ev-script/model
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2018-07-17T20:38Z
+ * Date: 2020-03-25T12:19Z
  */
 /*!
- * Globalize v1.4.0 2018-07-17T20:38Z Released under the MIT license
+ * Globalize v1.5.0 2020-03-25T12:19Z Released under the MIT license
  * http://git.io/TrdQbw
  */
 (function( root, factory ) {

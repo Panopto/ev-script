@@ -73,7 +73,7 @@ define(function(require) {
             this.renderActions();
 
             // Authentication check
-            this.doAuthenticate();
+            this.authenticating = this.doAuthenticate();
 
             log.debug('[views/field] Field initialized');
             log.debug(this);
@@ -87,16 +87,17 @@ define(function(require) {
         doAuthenticate: function() {
             var deferred = $.Deferred();
             this.root.promise.always(_.bind(function() {
-                if (!this.root.getUser()) {
+                var user = this.root.getUser();
+                if (!user || !user.get('isProvisioned')) {
                     var authView = new AuthView({
                         el: this.el,
                         submitCallback: _.bind(function() {
                             this.root.fetch().always(_.bind(function() {
-                                // if (this.root.getUser()) {
                                 if (this.root.getUser()) {
                                     this.events.trigger('loggedIn');
                                     deferred.resolve();
                                 } else {
+                                    this.authAttempted = true;
                                     this.events.trigger('loggedOut');
                                     deferred.reject();
                                 }
@@ -112,7 +113,10 @@ define(function(require) {
             return deferred;
         },
         chooseHandler: function(e) {
-            this.doAuthenticate().done(_.bind(function() {
+            if (this.authenticating.state() !== 'pending') {
+                this.authenticating = this.doAuthenticate();
+            }
+            this.authenticating.done(_.bind(function() {
                 this.events.trigger('showPicker', this.id);
             }, this));
             e.preventDefault();
