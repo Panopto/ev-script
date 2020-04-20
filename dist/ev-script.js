@@ -27788,7 +27788,7 @@ define('ev-script/views/auth',['require','exports','module','jquery','underscore
         },
         render: function() {
             var dialogWidth = Math.min(540, $(window).width() - this.config.dialogMargin),
-                dialogHeight = Math.min(!this.config.defaultProvider ? 380 : 280, $(window).height() - this.config.dialogMargin),
+                dialogHeight = Math.min(!this.config.defaultProvider ? 400 : 300, $(window).height() - this.config.dialogMargin),
                 frameSrc = URI(this.config.ensembleUrl)
                     .path(this.config.authLoginPath)
                     .addQuery('idp', this.config.defaultProvider)
