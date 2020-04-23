@@ -1,8 +1,10 @@
 <form>
+    <input type="hidden" name="wrapstyle" id="wrapstyle" class="wrapstyle" value="<%- model.get('wrapstyle') %>" />
+    <input type="hidden" name="wrapscript" id="wrapscript" class="wrapscript" value="<%- model.get('wrapscript') %>" />
     <div role="group" aria-labelledby="playlistSettingsTitle">
         <div id="playlistSettingsTitle" style="display:none;"><%= i18n.formatMessage('Playlist Embed Options') %></div>
         <% if (!model.get('forceembedtype')) { %>
-        <div class="fieldWrap inline-option">
+        <div class="fieldWrap inline mr10">
             <label for="embedtype"><%= i18n.formatMessage('Type') %></label>
             <select class="form-select embedtype" id="embedtype" name="embedtype">
                 <option value="responsive" <% if (model.get('embedtype') === 'responsive') { print('selected'); } %>><%= i18n.formatMessage('iFrame Responsive') %></option>
@@ -10,6 +12,16 @@
             </select>
         </div>
         <% } %>
+        <div class="fieldWrap inline fixedOptionsContainer" <% if (model.get('embedtype') !== 'fixed') { print('style="display: none;"'); } %> >
+            <label for="width"><%= i18n.formatMessage('Width') %></label>
+            <input type="number" id="width" name="width" class="form-text width mr10" min="1" max="9999" required="true" value="<%= model.get('width') %>" />
+            <label for="height"><%= i18n.formatMessage('Height') %></label>
+            <input type="number" id="height" name="height" class="form-text height" min="1" max="9999" required="true" value="<%= model.get('height') %>" />
+        </div>
+        <div class="fieldWrap inline responsiveOptionsContainer" <% if (model.get('embedtype') !== 'responsive') { print('style="display: none;"'); } %> >
+            <input id="jswrapper" class="form-checkbox" <% if (model.get('jswrapper')) { print('checked="checked"'); } %> name="jswrapper" type="checkbox"/>
+            <label for="jswrapper"><%= i18n.formatMessage('Include Javascript Wrapper') %></label>
+        </div>
         <div class="tabs">
             <ul>
                 <li><a href="#layout"><i class="fa fa-th mr5"></i><span><%= i18n.formatMessage('Layout') %></span></a></li>
@@ -168,24 +180,20 @@
                     <label for="autoplay"><%= i18n.formatMessage('Auto Play (PC Only)') %></label>
                 </div>
                 <div class="fieldWrap checkbox-option">
-                    <input id="credits" class="form-checkbox" <% if (model.get('credits')) { print('checked="checked"'); } %> name="credits" type="checkbox"/>
-                    <label for="credits"><%= i18n.formatMessage('Credits') %></label>
-                </div>
-                <div class="fieldWrap checkbox-option">
-                    <input id="dateproduced" class="form-checkbox" <% if (model.get('dateproduced')) { print('checked="checked"'); } %> name="dateproduced" type="checkbox"/>
-                    <label for="dateproduced"><%= i18n.formatMessage('Date Produced') %></label>
-                </div>
-                <div class="fieldWrap checkbox-option">
-                    <input id="duration" class="form-checkbox" <% if (model.get('duration')) { print('checked="checked"'); } %> name="duration" type="checkbox"/>
-                    <label for="duration"><%= i18n.formatMessage('Duration') %></label>
-                </div>
-                <div class="fieldWrap checkbox-option">
                     <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get('embedcode')) { print('checked="checked"'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print('disabled') } %> />
                     <label for="embedcode"><%= i18n.formatMessage('Embed Code') %></label>
                 </div>
                 <div class="fieldWrap checkbox-option">
                     <input id="links" class="form-checkbox" <% if (model.get('links')) { print('checked="checked"'); } %> name="links" type="checkbox"/>
                     <label for="links"><%= i18n.formatMessage('Links') %></label>
+                </div>
+                <div class="fieldWrap checkbox-option">
+                    <input id="logo" class="form-checkbox" <% if (model.get('logo')) { print('checked="checked"'); } %> name="logo" type="checkbox"/>
+                    <label for="logo"><%= i18n.formatMessage('Logo') %></label>
+                </div>
+                <div class="fieldWrap checkbox-option">
+                    <input id="metadata" class="form-checkbox" <% if (model.get('metadata')) { print('checked="checked"'); } %> name="metadata" type="checkbox"/>
+                    <label for="metadata"><%= i18n.formatMessage('Meta Data') %></label>
                 </div>
                 <div class="fieldWrap checkbox-option">
                     <input id="nextup" class="form-checkbox" <% if (model.get('nextup')) { print('checked="checked"'); } %> <% if (model.get('layout') !== 'loop') { print('disabled="disabled"'); } %> name="nextup" type="checkbox"/>

@@ -8,7 +8,7 @@ define(['backbone'], function(Backbone) {
             width: '848',
             height: '720',
             search: '',
-            embedtype: 'fixed',
+            embedtype: 'responsive',
             forceembedtype: false
         }
     });

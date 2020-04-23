@@ -28,7 +28,7 @@ define(['backbone'], function(Backbone) {
             sourceId: 'content',
             isaudio: false,
             contenttype: '',
-            embedtype: 'fixed',
+            embedtype: 'responsive',
             forceembedtype: false
         }
     });

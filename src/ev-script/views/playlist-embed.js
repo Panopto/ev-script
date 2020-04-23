@@ -16,36 +16,36 @@ define(function(require) {
             var src = URI(this.config.ensembleUrl + '/hapi/v1/ui/Playlists/' + this.model.get('id') + '/Plugin'),
                 layout = this.model.get('layout'),
                 embedType = this.model.get('embedtype'),
+                categories = this.model.get('categories'),
                 width,
                 height,
                 embed;
 
             src.addQuery({
-                'isPreview': isPreview,
+                'isPreview': Boolean(isPreview),
                 'layout': layout,
                 'sortBy': this.model.get('sortby'),
                 'desc': this.model.get('desc'),
                 'search': this.model.get('search'),
-                'categories': this.model.get('categories'),
+                'categories': categories === '-1' ? '' : categories,
                 'resultsCount': this.model.get('resultscount'),
+                'featuredContentId': this.model.get('featuredcontentid'),
                 'displayTitle': true,
+                'displayLogo': this.model.get('logo'),
                 'displayEmbedCode': this.model.get('embedcode'),
-                'displayVideoDuration': this.model.get('duration'),
                 'displayAttachments': this.model.get('attachments'),
                 'displayAnnotations': this.model.get('annotations'),
                 'displayLinks': this.model.get('links'),
-                'displayCredits': this.model.get('credits'),
                 'displaySharing': this.model.get('socialsharing'),
                 'displayCopyUrl': this.model.get('socialsharing'),
                 'autoPlay': this.model.get('autoplay'),
                 'showCaptions': this.model.get('showcaptions'),
-                'displayDateProduced': this.model.get('dateproduced'),
-                'audioPreviewImage': this.model.get('audiopreviewimage'),
+                'displayMetadata': this.model.get('metadata'),
                 'displayCaptionSearch': this.model.get('captionsearch'),
+                'audioPreviewImage': this.model.get('audiopreviewimage'),
                 'displayViewersReport': this.model.get('viewersreport'),
-                'displayAxdxs' : this.model.get('axdxs'),
-                'displayNextUp': this.model.get('nextup'),
-                'featuredContentId': this.model.get('featuredcontentid')
+                'displayAxdxs': this.model.get('axdxs'),
+                'isResponsive': embedType === 'responsive'
             });
 
             if (embedType === 'fixed') {
@@ -58,7 +58,11 @@ define(function(require) {
                 });
             } else if (embedType === 'responsive') {
                 embed = this.responsiveTemplate({
-                    'src': src
+                    'elementId': 'pl-wrapper-' + this.model.get('id'),
+                    'src': src,
+                    'wrapstyle': this.model.get('wrapstyle'),
+                    'wrapscript': this.model.get('wrapscript'),
+                    'jswrapper': this.model.get('jswrapper')
                 });
             }
 

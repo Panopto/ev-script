@@ -13,7 +13,7 @@ define(['backbone'], function(Backbone) {
             links: false,
             metadata: false,
             search: '',
-            embedtype: 'fixed',
+            embedtype: 'responsive',
             forceembedtype: false
         }
     });

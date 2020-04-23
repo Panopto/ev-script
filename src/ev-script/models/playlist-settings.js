@@ -5,9 +5,9 @@ define(['backbone'], function(Backbone) {
     return Backbone.Model.extend({
         defaults: {
             type: 'playlist',
-            width: '800',
-            height: '1000',
-            layout: 'list',
+            width: '1000',
+            height: '590',
+            layout: 'showcase',
             sortby: 'DateAdded',
             desc: true,
             search: '',
@@ -15,23 +15,23 @@ define(['backbone'], function(Backbone) {
             resultscount: '',
             embedcode: false,
             statistics: true,
-            duration: true,
             attachments: true,
             annotations: true,
             links: true,
-            credits: true,
+            logo: true,
+            metadata: true,
             socialsharing: false,
             autoplay: false,
             showcaptions: false,
-            dateproduced: true,
             audiopreviewimage: false,
             captionsearch: true,
             viewersreport: true,
             axdxs: false,
             nextup: true,
             featuredcontentid: '',
-            embedtype: 'fixed',
-            forceembedtype: false
+            embedtype: 'responsive',
+            forceembedtype: false,
+            jswrapper: true
         }
     });
 });
