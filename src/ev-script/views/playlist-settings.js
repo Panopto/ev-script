@@ -99,7 +99,8 @@ define(function(require) {
         },
         changeLayout: function(e) {
             var layout = e.currentTarget.value,
-                elementId = 'pl-wrapper-' + this.field.model.get('id');
+                elementId = 'pl-wrapper-' + this.field.model.get('id'),
+                isResponsive = this.field.model.get('embedtype') === 'responsive';
             if (layout === 'loop') {
                 this.$('#nextup').prop('disabled', false);
             } else {
@@ -113,7 +114,9 @@ define(function(require) {
                     this.$('.height').val(590);
                     this.$('#wrapstyle').val('position: relative; padding-bottom: 56.25%; padding-top: 132px; height: 0; overflow: auto; -webkit-overflow-scrolling: touch;');
                     this.$('#wrapscript').val('function handleResize() { var e = document.getElementById("' + elementId + '"); if (null != e) { var i = e.getElementsByTagName("iframe")[0]; if (null != i) { e.style = "width: 100%; height: 100%;"; i.style = "width: 100%; height: 100%;"; var n = e.offsetWidth; e.style.height = n >= 400 ? 56.25 * n / 100 + 140 + "px" : 56.25 * n / 100 + 390 + "px" }}} handleResize(), window.onresize = function (e) { handleResize() };');
-                    this.$('.responsiveOptionsContainer').show();
+                    if (isResponsive) {
+                        this.$('.responsiveOptionsContainer').show();
+                    }
                     break;
                 case 'listWithPlayer':
                 case 'gridWithPlayer':
@@ -128,7 +131,9 @@ define(function(require) {
                     this.$('.height').val(390);
                     this.$('#wrapstyle').val('position: relative; padding-bottom: 39%; padding-top: 0px; height: 0; overflow: auto; -webkit-overflow-scrolling: touch;');
                     this.$('#wrapscript').val('function handleResize() { var e = document.getElementById("' + elementId + '"); if (null != e) { var i = e.getElementsByTagName("iframe")[0]; if (null != i) { e.style = "width: 100%; height: 100%;"; i.style = "width: 100%; height: 100%;"; var n = e.offsetWidth; e.style.height = n >= 822 ? 66.6 * n / 100 * .5625 + 15 + "px" : .5625 * n + 350 + "px" }}} handleResize(), window.onresize = function (e) { handleResize() };');
-                    this.$('.responsiveOptionsContainer').show();
+                    if (isResponsive) {
+                        this.$('.responsiveOptionsContainer').show();
+                    }
                     break;
                 case 'horizontalListWithPlayer':
                     this.$('.width').val(800);
@@ -142,7 +147,9 @@ define(function(require) {
                     this.$('.height').val(590);
                     this.$('#wrapstyle').val('position: relative; padding-bottom: 39%; padding-top: 300px; height: 0; overflow: auto; -webkit-overflow-scrolling: touch;');
                     this.$('#wrapscript').val('function handleResize() { var e = document.getElementById("' + elementId + '"); if (null != e) { var i = e.getElementsByTagName("iframe")[0]; if (null != i) { e.style = "width: 100%; height: 100%;"; i.style = "width: 100%; height: 100%;"; var n = e.offsetWidth; e.style.height = n >= 822 ? 66.6 * n / 100 * .5625 + 300 + "px" : 66.6 * n / 100 * .5625 + 500 + "px" }}} handleResize(), window.onresize = function (e) { handleResize() };');
-                    this.$('.responsiveOptionsContainer').show();
+                    if (isResponsive) {
+                        this.$('.responsiveOptionsContainer').show();
+                    }
                     break;
                 case 'horizontalList':
                     this.$('.width').val(1000);
