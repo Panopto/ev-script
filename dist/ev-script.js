@@ -1,5 +1,5 @@
 /**
- * ev-script 2.2.6 2020-05-08
+ * ev-script 2.2.7 2020-05-28
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -40072,7 +40072,7 @@ define('ev-script/views/workflow-select',['require','underscore','ev-script/view
 });
 
 
-define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <div role="group" aria-labelledby="uploadTitle">\n        <div id="uploadTitle" style="display: none;"><%= i18n.formatMessage(\'Upload Media to Ensemble\') %></div>\n        <select class="form-select" name="MediaWorkflowID" id="MediaWorkflowID"></select>\n        <label for="MediaWorkflowID" style="display: none;"><%= i18n.formatMessage(\'Media Workflow\') %></label>\n        <div class="policy-message"></div>\n        <div class="fieldWrap">\n            <label for="Title"><%= i18n.formatMessage(\'Title\') %> *</label>\n            <input class="form-text" type="text" name="Title" id="Title" />\n        </div>\n        <div class="fieldWrap">\n            <label for="Description"><%= i18n.formatMessage(\'Description\') %></label>\n            <textarea class="form-text" name="Description" id="Description" />\n        </div>\n        <div class="upload"></div>\n    </div>\n</form>\n';});
+define('text!ev-script/templates/upload.html',[],function () { return '<form class="upload-form" method="POST" action="">\n    <div role="group" aria-labelledby="uploadTitle">\n        <div id="uploadTitle" style="display: none;"><%= i18n.formatMessage(\'Upload Media to Ensemble\') %></div>\n        <select class="form-select" name="MediaWorkflowID" id="MediaWorkflowID"></select>\n        <label for="MediaWorkflowID" style="display: none;"><%= i18n.formatMessage(\'Media Workflow\') %></label>\n        <div class="policy-message"></div>\n        <div class="fieldWrap">\n            <label for="Title"><%= i18n.formatMessage(\'Title\') %> *</label>\n            <input class="form-text" type="text" name="Title" id="Title" />\n        </div>\n        <div class="fieldWrap">\n            <label for="Description"><%= i18n.formatMessage(\'Description\') %></label>\n            <textarea class="form-text" name="Description" id="Description"></textarea>\n        </div>\n        <div class="upload"></div>\n    </div>\n</form>';});
 
 define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-script/views/base','backbone','ev-script/views/workflow-select','ev-script/models/video-settings','jquery.plupload.queue','text!ev-script/templates/upload.html'],function(require) {
 
