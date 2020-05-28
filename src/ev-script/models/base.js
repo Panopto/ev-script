@@ -16,6 +16,7 @@ define(function(require) {
             options = options || {};
             this.href = options.href;
             this.config = cacheUtil.getConfig();
+            this.auth = cacheUtil.getAuth();
             this.promise = $.Deferred().resolve().promise();
 
             // While getCache will return a default cache if cacheName is not
@@ -49,39 +50,57 @@ define(function(require) {
                 new BaseModel(resource, {});
         },
         sync: function(method, collection, options) {
-            _.defaults(options || (options = {}), {
-                xhrFields: {
-                    withCredentials: true
-                },
-                dataType: 'json',
-                accepts: {
-                    json: 'application/hal+json'
-                },
-                cache: false
-            });
-            if (method === 'read') {
-                var key = URI(this.url()).removeQuery('_'), // Remove cache busting parameter
-                    cached = this.getCached(key);
-                if (cached) {
-                    var deferred = $.Deferred();
-                    if (options.success) {
-                        deferred.done(options.success);
+            var deferred = $.Deferred();
+
+            this.promise = deferred.promise();
+
+            this.auth.userManager.getUser()
+            .then(_.bind(function(user) {
+                _.defaults(options || (options = {}), {
+                    headers: {
+                        'Authorization': 'Bearer ' + (user ? user.access_token : '')
+                    },
+                    dataType: 'json',
+                    accepts: {
+                        json: 'application/hal+json'
+                    },
+                    cache: false
+                });
+                if (method === 'read') {
+                    var key = URI(this.url()).removeQuery('_'), // Remove cache busting parameter
+                        cached = this.getCached(key);
+                    if (cached) {
+                        if (options.success) {
+                            deferred.done(options.success);
+                        }
+                        deferred.resolve(cached);
+                    } else {
+                        // Grab the response and cache
+                        options.success = options.success || function(collection, response, options) {};
+                        options.success = _.wrap(options.success, _.bind(function(success) {
+                            this.setCached(key, arguments[1]);
+                            success.apply(this, Array.prototype.slice.call(arguments, 1));
+                        }, this));
+                        Backbone.Model.prototype.sync.call(this, method, collection, options)
+                        .done(function(data, status, xhr) {
+                            deferred.resolve(data, status, xhr);
+                        })
+                        .fail(function(xhr, status, error) {
+                            deferred.reject(xhr, status, error);
+                        });
                     }
-                    return deferred.resolve(cached).promise();
                 } else {
-                    // Grab the response and cache
-                    options.success = options.success || function(collection, response, options) {};
-                    options.success = _.wrap(options.success, _.bind(function(success) {
-                        this.setCached(key, arguments[1]);
-                        success.apply(this, Array.prototype.slice.call(arguments, 1));
-                    }, this));
-                    this.promise = Backbone.Model.prototype.sync.call(this, method, collection, options);
-                    return this.promise;
+                    Backbone.Model.prototype.sync.call(this, method, collection, options)
+                    .done(function(data, status, xhr) {
+                        deferred.resolve(data, status, xhr);
+                    })
+                    .fail(function(xhr, status, error) {
+                        deferred.reject(xhr, status, error);
+                    });
                 }
-            } else {
-                this.promise = Backbone.Model.prototype.sync.call(this, method, collection, options);
-                return this.promise;
-            }
+            }, this));
+
+            return this.promise;
         },
         url: function() {
             return this.href ? this.href : this.getLink('self').href;

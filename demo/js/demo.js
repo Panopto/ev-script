@@ -9,8 +9,10 @@
         getLocaleCallback: function() { return 'en'; },
         getDateFormatCallback: function() { return 'DD/MM/YYYY'; },
         getTimeFormatCallback: function() { return 'hh:mm A'; },
-        i18nPath: '../../src/ev-script/i18n',
-        imagePath: '../../assets/css/images'
+        i18nPath: '/src/ev-script/i18n',
+        imagePath: '/assets/css/images',
+        appRoot: '/demo',
+        loglevel: 'debug'
     }));
 
     // Sample default overrides

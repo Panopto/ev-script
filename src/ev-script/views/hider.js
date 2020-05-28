@@ -39,17 +39,11 @@ define(function(require) {
             e.preventDefault();
         },
         logoutHandler: function(e) {
-            $.ajax({
-                url: this.config.ensembleUrl + this.config.authLogoutPath,
-                method: 'POST',
-                xhrFields: {
-                    withCredentials: true
-                }
-            })
-            .always(_.bind(function() {
+            this.auth.userManager.signoutPopup()
+            .then(_.bind(function() {
                 this.events.trigger('hidePickers');
                 this.events.trigger('loggedOut');
-            },this));
+            }, this));
             e.preventDefault();
         }
     });

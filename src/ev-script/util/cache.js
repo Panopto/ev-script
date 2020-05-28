@@ -67,6 +67,14 @@ define(function(require) {
         return getCache().get('root');
     };
 
+    var setAuth = function(auth) {
+        return getCache().set('auth', auth);
+    };
+
+    var getAuth = function() {
+        return getCache().get('auth');
+    };
+
     var events = eventsUtil.getEvents();
     events.on('loggedOut', function() {
         // Clear all caches except the default 'app' cache on logout
@@ -107,6 +115,8 @@ define(function(require) {
         getI18n: getI18n,
         setRoot: setRoot,
         getRoot: getRoot,
+        getAuth: getAuth,
+        setAuth: setAuth,
         getCache: getCache
     };
 

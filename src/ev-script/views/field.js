@@ -5,7 +5,6 @@ define(function(require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         log = require('loglevel'),
-        AuthView = require('ev-script/views/auth'),
         BaseView = require('ev-script/views/base');
 
     /*
@@ -85,31 +84,57 @@ define(function(require) {
             'click .ev-field .action-remove': 'removeHandler'
         },
         doAuthenticate: function() {
-            var deferred = $.Deferred();
-            this.root.promise.always(_.bind(function() {
-                var user = this.root.getUser();
-                if (!user || !user.get('isProvisioned')) {
-                    var authView = new AuthView({
-                        el: this.el,
-                        submitCallback: _.bind(function() {
-                            this.root.fetch().always(_.bind(function() {
-                                if (this.root.getUser()) {
-                                    this.events.trigger('loggedIn');
-                                    deferred.resolve();
-                                } else {
-                                    this.authAttempted = true;
-                                    this.events.trigger('loggedOut');
-                                    deferred.reject();
-                                }
-                            }, this));
-                        }, this),
-                        auth: this
-                    });
-                    authView.render();
+            var deferred = $.Deferred(),
+                loggedInHandler = _.bind(function(user) {
+                    log.debug('[views/field] Found user');
+                    log.debug(user);
+                    // Need to re-fetch root
+                    this.root.fetch().always(_.bind(function() {
+                        this.events.trigger('loggedIn');
+                        deferred.resolve();
+                    }, this));
+                }, this),
+                loginHandler = _.bind(function() {
+                    log.debug('[views/field] No user found...attempting silent sign-in');
+                    this.auth.userManager.signinSilent()
+                    .then(loggedInHandler)
+                    .catch(_.bind(function(err) {
+                        log.debug('[views/field] No user found...attempting pop-up sign-in');
+
+                        var width = 500,
+                            height = 500,
+                            top = parseInt((screen.availHeight / 2) - (height / 2), 10),
+                            left = parseInt((screen.availWidth / 2) - (width / 2), 10),
+                            features = 'location=no,toolbar=no,width=500,height=500,left=' + left + ',top=' + top + ',screenX=' + left + ',screenY=' + top + ',chrome=yes;centerscreen=yes;';
+
+                        this.auth.userManager.signinPopup({
+                            popupWindowFeatures: features
+                        })
+                        .then(loggedInHandler)
+                        .catch(_.bind(function(err) {
+                            log.debug('[views/field] No user found...triggering loggedOut');
+                            this.events.trigger('loggedOut');
+                            deferred.reject();
+                        }, this));
+                    }, this));
+                }, this);
+
+            log.debug('[views/field] Checking for user');
+
+            this.auth.userManager.getUser()
+            .then(_.bind(function(user) {
+                if (!user) {
+                    loginHandler();
+                } else if (this.config.currentUserId && this.config.currentUserId !== user.profile.sub) {
+                    this.auth.userManager.removeUser().then(loginHandler);
                 } else {
-                    deferred.resolve();
+                    loggedInHandler(user);
                 }
+            }, this))
+            .catch(_.bind(function(err) {
+                log.error(err);
             }, this));
+
             return deferred;
         },
         chooseHandler: function(e) {

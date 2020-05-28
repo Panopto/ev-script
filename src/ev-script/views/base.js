@@ -16,6 +16,7 @@ define(function(require) {
             this.info = cacheUtil.getInfo();
             this.events = eventsUtil.getEvents();
             this.i18n = cacheUtil.getI18n();
+            this.auth = cacheUtil.getAuth();
         },
         ajaxError: function(collection, xhr, options) {
             if (xhr.status === 401) {

@@ -9,6 +9,8 @@ define(function(require) {
         log = require('loglevel'),
         Globalize = require('globalize'),
         moment = require('moment'),
+        oidc = require('oidc'),
+        URI = require('urijs/URI'),
         likelySubtags = require('json!cldr-data/supplemental/likelySubtags.json'),
         messages = require('json!ev-script/i18n/root/messages.json'),
 
@@ -34,7 +36,10 @@ define(function(require) {
         Root = require('ev-script/models/root'),
         Info = require('ev-script/models/info'),
         eventsUtil = require('ev-script/util/events'),
-        cacheUtil = require('ev-script/util/cache');
+        cacheUtil = require('ev-script/util/cache'),
+
+        // Auth router
+        AuthRouter = require('ev-script/routers/auth');
 
     // Require jquery.cookie here so it is bundled. It is used in our factory
     // for configuration of i18n.
@@ -48,52 +53,62 @@ define(function(require) {
     var EnsembleApp = function(appOptions) {
 
         var defaults = {
-            // Application root of the EV installation.
-            ensembleUrl: '',
-            // Path to the api under the ensembleUrl.
-            apiPath: '/hapi',
-            // Number of results to fetch at a time from the server (page size).
-            pageSize: 100,
-            // The height of our scroll loader. This can be an integer (number
-            // of pixels), or css string, e.g. '80%'.
-            scrollHeight: null,
-            // In scenarios where we have multiple fields on a page we want to
-            // automatically hide inactive pickers to preserve screen real
-            // estate.  Set to true to enable.
-            hidePickers: false,
-            // The difference between window dimensions and maximum dialog size.
-            dialogMargin: 40,
-            // Required if defaultProvider is not set below.  Specifies the
-            // current institution for identity provider selection.
-            institutionId: '',
-            // Set this in order to select the default identity provider.
-            defaultProvider: '',
-            // Location for plupload flash runtime
-            pluploadFlashPath: '',
-            // Callbacks to set locale and date/time formats
-            getLocaleCallback: function() { return 'en-US'; },
-            getDateFormatCallback: function() { return 'MM/DD/YYYY'; },
-            getTimeFormatCallback: function() { return 'hh:mmA'; },
-            getDateTimeFormat: function() {
-                return this.getDateFormatCallback() + ' ' + this.getTimeFormatCallback();
+                // Application root of the EV installation.
+                ensembleUrl: '',
+                // Path to the api under the ensembleUrl.
+                apiPath: '/hapi',
+                // Number of results to fetch at a time from the server (page size).
+                pageSize: 100,
+                // The height of our scroll loader. This can be an integer (number
+                // of pixels), or css string, e.g. '80%'.
+                scrollHeight: null,
+                // In scenarios where we have multiple fields on a page we want to
+                // automatically hide inactive pickers to preserve screen real
+                // estate.  Set to true to enable.
+                hidePickers: false,
+                // The difference between window dimensions and maximum dialog size.
+                dialogMargin: 40,
+                // Required if defaultProvider is not set below.  Specifies the
+                // current institution for identity provider selection.
+                institutionId: '',
+                // Set this in order to select the default identity provider.
+                defaultProvider: '',
+                // Location for plupload flash runtime
+                pluploadFlashPath: '',
+                // Callbacks to set locale and date/time formats
+                getLocaleCallback: function() { return 'en-US'; },
+                getDateFormatCallback: function() { return 'MM/DD/YYYY'; },
+                getTimeFormatCallback: function() { return 'hh:mmA'; },
+                getDateTimeFormat: function() {
+                    return this.getDateFormatCallback() + ' ' + this.getTimeFormatCallback();
+                },
+                // Path to i18n folder
+                i18nPath: '',
+                // Path to images folder
+                imagePath: '',
+                // Logging
+                logLevel: 'info',
+                // Application root
+                appRoot: '/',
+                // Current user id
+                currentUserId: ''
             },
-            // Path to i18n folder
-            i18nPath: '',
-            // Path to images folder
-            imagePath: '',
-            // Auth options
-            authLoginPath: '/app/lti/login.aspx',
-            authLogoutPath: '/api/logout',
-            authCompleteMessage: 'ev_auth_complete',
-            // Logging
-            logLevel: 'info'
-        };
+            config,
+            locale,
+            loading,
+            currentUri,
+            userManager,
+            authRouter,
+            loadApp;
 
-        var config = _.extend({}, defaults, appOptions);
+        config = _.extend({}, defaults, appOptions);
 
         if (!config.institutionId && !config.defaultProvider) {
-            throw 'One of institutionId or defaultProvider is required';
+            throw new Error('One of institutionId or defaultProvider is required');
         }
+
+        // Make sure appRoot has trailing slash
+        config.appRoot = /\/$/.test(config.appRoot) ? config.appRoot : config.appRoot + '/';
 
         // Set logging
         log.setDefaultLevel(config.logLevel);
@@ -102,22 +117,52 @@ define(function(require) {
         log.debug('[ev-script] Config:');
         log.debug(config);
 
-        var locale = config.getLocaleCallback();
+        locale = config.getLocaleCallback();
         log.debug('[ev-script] Locale: ' + locale);
         // Set locale for moment
         moment.locale(locale);
 
         // Features depend on asynchronously retreival of data below...so leverage
         // promises to coordinate loading
-        var loading = $.Deferred();
+        loading = $.Deferred();
         _.extend(this, loading.promise());
 
         // Create an event aggregator specific to our app
         this.events = eventsUtil.getEvents();
 
-        var loadApp = _.bind(function() {
+        // Setup auth
+        oidc.Log.logger = console;
+        oidc.Log.level = oidc.Log.DEBUG;
+
+        currentUri = URI(window.location.href);
+
+        userManager = new oidc.UserManager({
+            client_id: 'ev-chooser',
+            authority: config.ensembleUrl + config.apiPath,
+            popup_redirect_uri: currentUri.origin() + URI.joinPaths(currentUri, 'auth/popupCallback'),
+            silent_redirect_uri: currentUri.origin() + URI.joinPaths(currentUri, 'auth/silentCallback'),
+            post_logout_redirect_uri: currentUri.origin() + URI.joinPaths(currentUri, 'auth/logoutCallback'),
+            response_type: 'code',
+            scope: 'openid email profile hapi offline_access',
+            loadUserInfo: true,
+            automaticSilentRenew: true,
+            filterProtocolClaims: true,
+            // TODO - if no localStorage use in-memory store?
+            userStore: new oidc.WebStorageStateStore({ store: window.localStorage })
+        });
+        userManager.clearStaleState();
+        userManager.events.addUserLoaded(function(e) {
+            console.log(e);
+        });
+
+        loadApp = _.bind(function() {
 
             log.info('[ev-script] Loading app');
+
+            cacheUtil.setAuth({
+                userManager: userManager,
+                router: authRouter
+            });
 
             cacheUtil.setConfig(config);
 
@@ -230,6 +275,11 @@ define(function(require) {
 
         }, this);
 
+        authRouter = new AuthRouter({
+            userManager: userManager,
+            defaultCallback: loadApp
+        });
+
         // Load messages for locale
         log.info('[ev-script] Retreiving localized messages');
         $.getJSON(config.i18nPath + '/' + locale + '/messages.json')
@@ -240,10 +290,14 @@ define(function(require) {
             Globalize.load(likelySubtags);
             Globalize.loadMessages(messages);
 
-            loadApp();
+            Backbone.history.start({
+                pushState: true,
+                silent: false,
+                root: config.appRoot
+            });
         })
         .fail(function(xhr, status, error) {
-            loadApp();
+            throw new Error('Failed to load i18n messages!');
         });
     };
 
