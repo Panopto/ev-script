@@ -1,5 +1,5 @@
 /**
- * ev-script 2.2.8 2020-05-28
+ * ev-script 2.2.9 2020-06-02
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -39942,6 +39942,27 @@ define('ev-script/models/videos',['require','ev-script/models/base','ev-script/u
 
 });
 
+define('ev-script/models/shared-videos',['require','ev-script/models/base','ev-script/util/cache','urijs/URI','underscore'],function(require) {
+
+    'use strict';
+
+    var BaseModel = require('ev-script/models/base'),
+        cacheUtil = require('ev-script/util/cache'),
+        URI = require('urijs/URI'),
+        _ = require('underscore');
+
+    return BaseModel.extend({
+        cacheName: 'shared-videos',
+        parse: function(response, options) {
+            response._embedded.contents = _.map(response._embedded.sharing, function(share) {
+                return share._embedded['ev:Contents/Get'];
+            });
+            return response;
+        }
+    });
+
+});
+
 define('ev-script/collections/legacy-base',['require','jquery','underscore','backbone','ev-script/util/cache'],function(require) {
 
     'use strict';
@@ -40360,7 +40381,7 @@ define('ev-script/views/upload',['require','jquery','underscore','plupload','ev-
 
 define('text!ev-script/templates/anthem.html',[],function () { return '<iframe src="ensemble://<%= tokenDetailsApiUrl %>" style="display:none;"></iframe>\n';});
 
-define('ev-script/views/video-picker',['require','jquery','underscore','platform','urijs/URITemplate','ev-script/views/picker','ev-script/views/filter','ev-script/views/video-results','ev-script/models/videos','ev-script/collections/media-workflows','ev-script/views/upload','base64','text!ev-script/templates/anthem.html'],function(require) {
+define('ev-script/views/video-picker',['require','jquery','underscore','platform','urijs/URITemplate','ev-script/views/picker','ev-script/views/filter','ev-script/views/video-results','ev-script/models/videos','ev-script/models/shared-videos','ev-script/collections/media-workflows','ev-script/views/upload','base64','text!ev-script/templates/anthem.html'],function(require) {
 
     'use strict';
 
@@ -40372,6 +40393,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
         FilterView = require('ev-script/views/filter'),
         VideoResultsView = require('ev-script/views/video-results'),
         Videos = require('ev-script/models/videos'),
+        SharedVideos = require('ev-script/models/shared-videos'),
         MediaWorkflows = require('ev-script/collections/media-workflows'),
         UploadView = require('ev-script/views/upload');
 
@@ -40526,28 +40548,32 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
         loadVideos: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
                 sourceId = this.model.get('sourceId'),
-                searchTemplate = sourceId === 'shared' ?
-                    new URITemplate(this.root.getLink('ev:SharedContents/Search').href) :
+                isShared = sourceId === 'shared',
+                searchTemplate = isShared ?
+                    new URITemplate(this.root.getLink('ev:Sharing/Search').href) :
                     new URITemplate(this.root.getLink('ev:Contents/Search').href),
                 searchUrl = searchTemplate.expand({
                     organizationId: this.model.get('organizationId'),
                     libraryId: this.model.get('libraryId'),
                     search: searchVal,
-                    sortBy: 'dateAdded',
+                    sortBy: isShared ? 'PostDate' : 'dateAdded',
                     isPublished: true,
                     desc: true,
                     pageSize: 20
                 }),
-                videos = new Videos({}, {
-                    href: searchUrl
-                });
+                videos = isShared ?
+                    new SharedVideos({}, {
+                        href: searchUrl
+                    }) :
+                    new Videos({}, {
+                        href: searchUrl
+                    });
 
             videos.fetch({
                 picker: this,
                 success: _.bind(function(model, response, options) {
-                    model.collectionKey = sourceId === 'shared' ? 'sharedContents' : 'contents';
                     this.resultsView.model = model;
-                    this.resultsView.collection = model.getEmbedded(model.collectionKey);
+                    this.resultsView.collection = model.getEmbedded('contents');
                     this.resultsView.render();
                 }, this),
                 error: _.bind(this.ajaxError, this)
