@@ -10,6 +10,7 @@ define(function(require) {
         FilterView = require('ev-script/views/filter'),
         VideoResultsView = require('ev-script/views/video-results'),
         Videos = require('ev-script/models/videos'),
+        SharedVideos = require('ev-script/models/shared-videos'),
         MediaWorkflows = require('ev-script/collections/media-workflows'),
         UploadView = require('ev-script/views/upload');
 
@@ -164,28 +165,32 @@ define(function(require) {
         loadVideos: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
                 sourceId = this.model.get('sourceId'),
-                searchTemplate = sourceId === 'shared' ?
-                    new URITemplate(this.root.getLink('ev:SharedContents/Search').href) :
+                isShared = sourceId === 'shared',
+                searchTemplate = isShared ?
+                    new URITemplate(this.root.getLink('ev:Sharing/Search').href) :
                     new URITemplate(this.root.getLink('ev:Contents/Search').href),
                 searchUrl = searchTemplate.expand({
                     organizationId: this.model.get('organizationId'),
                     libraryId: this.model.get('libraryId'),
                     search: searchVal,
-                    sortBy: 'dateAdded',
+                    sortBy: isShared ? 'PostDate' : 'dateAdded',
                     isPublished: true,
                     desc: true,
                     pageSize: 20
                 }),
-                videos = new Videos({}, {
-                    href: searchUrl
-                });
+                videos = isShared ?
+                    new SharedVideos({}, {
+                        href: searchUrl
+                    }) :
+                    new Videos({}, {
+                        href: searchUrl
+                    });
 
             videos.fetch({
                 picker: this,
                 success: _.bind(function(model, response, options) {
-                    model.collectionKey = sourceId === 'shared' ? 'sharedContents' : 'contents';
                     this.resultsView.model = model;
-                    this.resultsView.collection = model.getEmbedded(model.collectionKey);
+                    this.resultsView.collection = model.getEmbedded('contents');
                     this.resultsView.render();
                 }, this),
                 error: _.bind(this.ajaxError, this)
