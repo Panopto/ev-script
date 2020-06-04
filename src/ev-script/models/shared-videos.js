@@ -8,7 +8,7 @@ define(function(require) {
         _ = require('underscore');
 
     return BaseModel.extend({
-        cacheName: 'shared-videos',
+        cacheName: 'videos',
         parse: function(response, options) {
             response._embedded.contents = _.map(response._embedded.sharing, function(share) {
                 return share._embedded['ev:Contents/Get'];
