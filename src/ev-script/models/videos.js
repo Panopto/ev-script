@@ -9,7 +9,7 @@ define(function(require) {
 
     return BaseModel.extend({
         cacheName: 'videos',
-        collectionKey: 'videos'
+        collectionKey: 'contents'
         // initialize: function(attributes, options) {
         //     BaseModel.prototype.initialize.call(this, attributes, options);
         // },
