@@ -228,6 +228,12 @@ define(function(require) {
         },
         setFocus: function() {
             this.$('select').filter(':visible').first().focus();
+        },
+        disable: function() {
+            this.$('*').prop('disabled', true);
+        },
+        enable: function() {
+            this.$('*').prop('disabled', false);
         }
     });
 
