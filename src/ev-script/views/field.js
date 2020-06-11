@@ -93,6 +93,9 @@ define(function(require) {
                         this.events.trigger('loggedIn');
                         deferred.resolve();
                     }, this));
+
+                    // Start silent renew
+                    this.auth.userManager.startSilentRenew();
                 }, this),
                 loginHandler = _.bind(function() {
                     log.debug('[views/field] No user found...attempting silent sign-in');
@@ -123,7 +126,7 @@ define(function(require) {
 
             this.auth.userManager.getUser()
             .then(_.bind(function(user) {
-                if (!user) {
+                if (!user || user.expired) {
                     loginHandler();
                 } else if (this.config.currentUserId && this.config.currentUserId !== user.profile.sub) {
                     this.auth.userManager.removeUser().then(loginHandler);

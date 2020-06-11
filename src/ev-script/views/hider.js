@@ -39,6 +39,7 @@ define(function(require) {
             e.preventDefault();
         },
         logoutHandler: function(e) {
+            this.auth.userManager.stopSilentRenew();
             this.auth.userManager.signoutPopup()
             .then(_.bind(function() {
                 this.events.trigger('hidePickers');

@@ -145,7 +145,7 @@ define(function(require) {
             response_type: 'code',
             scope: 'openid email profile hapi offline_access',
             loadUserInfo: true,
-            automaticSilentRenew: true,
+            automaticSilentRenew: false,
             filterProtocolClaims: true,
             // TODO - if no localStorage use in-memory store?
             userStore: new oidc.WebStorageStateStore({ store: window.localStorage })

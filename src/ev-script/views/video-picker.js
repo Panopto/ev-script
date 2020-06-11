@@ -11,7 +11,8 @@ define(function(require) {
         VideoResultsView = require('ev-script/views/video-results'),
         Videos = require('ev-script/models/videos'),
         SharedVideos = require('ev-script/models/shared-videos'),
-        MediaWorkflows = require('ev-script/collections/media-workflows'),
+        Libraries = require('ev-script/models/libraries'),
+        Workflows = require('ev-script/models/workflows'),
         UploadView = require('ev-script/views/upload');
 
     require('base64');
@@ -100,7 +101,8 @@ define(function(require) {
             }
 
             this.workflows.promise.done(_.bind(function() {
-                if (!this.workflows.isEmpty() && !this.isSharedContent()) {
+                var workflows = this.workflows.getEmbedded(this.workflows.collectionKey);
+                if (workflows && !workflows.isEmpty() && !this.isSharedContent()) {
                     this.filter.showUpload();
                     if (this.canRecord()) {
                         this.filter.showRecord();
@@ -234,12 +236,18 @@ define(function(require) {
         },
         loadWorkflows: function() {
             var libraryId = this.model.get('libraryId'),
-                isShared = this.isSharedContent();
+                searchTemplate = new URITemplate(this.root.getLink('ev:Workflows/Search').href),
+                searchUrl = searchTemplate.expand({
+                    libraryId: libraryId,
+                    pageSize: 100,
+                    type: 'UploadDirectory',
+                    isEnabled: true
+                });
 
-            this.workflows = new MediaWorkflows({}, {});
-            this.workflows.filterValue = libraryId;
+            this.workflows = new Workflows({}, {
+                href: searchUrl
+            });
             this.workflows.fetch({
-                cacheKey: this.workflows.filterValue,
                 error: _.bind(this.ajaxError, this),
                 reset: true
             });
