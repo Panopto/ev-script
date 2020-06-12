@@ -20,7 +20,7 @@ define(function(require) {
             EmbedView.prototype.initialize.call(this, options);
         },
         isEmbedSupported: function() {
-            return this.info.checkVersion('>=5.3.0');
+            return this.info.checkVersion('5.3.0', '>=');
         },
         getMediaWidth: function() {
             return parseInt(this.model.get('width'), 10);

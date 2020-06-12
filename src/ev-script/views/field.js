@@ -19,7 +19,7 @@ define(function(require) {
             'previewHandler', 'getPickerInstance', 'getSettingsInstance',
             'getPreviewInstance', 'updateField', 'getFieldType',
             'getFieldLabel', 'itemChosenHandler', 'getActionsHtml',
-            'initCallback', 'doAuthenticate');
+            'initCallback', 'loginHandler');
 
             this.$field = options.$field;
             this.$el.addClass('ev-field-wrap');
@@ -66,13 +66,29 @@ define(function(require) {
             }, this);
             this.events.on('itemChosen', this.itemChosenHandler);
 
+            this.events.on('loggedOut', _.bind(function() {
+                this.$('.ev-field-message')
+                .html(this.i18n.formatMessage('You must {0}login{1} in order to use this tool.',
+                    '<a role="link" tabindex="0" class="login-link"><b>', '</b></a>'))
+                .show();
+            }, this));
+            this.events.on('loggedIn', _.bind(function() {
+                this.$('.ev-field-message')
+                .empty()
+                .hide();
+            }, this));
+
             this.picker = this.getPickerInstance(pickerOptions);
             this.settings = this.getSettingsInstance(settingsOptions);
             this.$field.after(this.picker.$el);
             this.renderActions();
 
+            this.loginCallback = _.bind(function() {
+                return this.root.fetch();
+            }, this);
+
             // Authentication check
-            this.authenticating = this.doAuthenticate();
+            this.authenticating = this.auth.doAuthenticate(this.loginCallback);
 
             log.debug('[views/field] Field initialized');
             log.debug(this);
@@ -81,73 +97,11 @@ define(function(require) {
             'click .ev-field .action-choose': 'chooseHandler',
             'click .ev-field .action-preview': 'previewHandler',
             'click .ev-field .action-options': 'optionsHandler',
-            'click .ev-field .action-remove': 'removeHandler'
-        },
-        doAuthenticate: function() {
-            var deferred = $.Deferred(),
-                loggedInHandler = _.bind(function(user) {
-                    log.debug('[views/field] Found user');
-                    log.debug(user);
-                    // Need to re-fetch root
-                    this.root.fetch().always(_.bind(function() {
-                        this.events.trigger('loggedIn');
-                        deferred.resolve();
-                    }, this));
-
-                    // Start silent renew
-                    this.auth.userManager.startSilentRenew();
-                }, this),
-                loginHandler = _.bind(function() {
-                    log.debug('[views/field] No user found...attempting silent sign-in');
-                    this.auth.userManager.signinSilent()
-                    .then(loggedInHandler)
-                    .catch(_.bind(function(err) {
-                        log.debug('[views/field] No user found...attempting pop-up sign-in');
-
-                        var width = 500,
-                            height = 500,
-                            top = parseInt((screen.availHeight / 2) - (height / 2), 10),
-                            left = parseInt((screen.availWidth / 2) - (width / 2), 10),
-                            features = 'location=no,toolbar=no,width=500,height=500,left=' + left + ',top=' + top + ',screenX=' + left + ',screenY=' + top + ',chrome=yes;centerscreen=yes;';
-
-                        this.auth.userManager.signinPopup({
-                            popupWindowFeatures: features
-                        })
-                        .then(loggedInHandler)
-                        .catch(_.bind(function(err) {
-                            log.debug('[views/field] No user found...triggering loggedOut');
-                            this.events.trigger('loggedOut');
-                            deferred.reject();
-                        }, this));
-                    }, this));
-                }, this);
-
-            log.debug('[views/field] Checking for user');
-
-            this.auth.userManager.getUser()
-            .then(_.bind(function(user) {
-                if (!user || user.expired) {
-                    loginHandler();
-                } else if (this.config.currentUserId && this.config.currentUserId !== user.profile.sub) {
-                    this.auth.userManager.removeUser().then(loginHandler);
-                } else {
-                    loggedInHandler(user);
-                }
-            }, this))
-            .catch(_.bind(function(err) {
-                log.error(err);
-            }, this));
-
-            return deferred;
+            'click .ev-field .action-remove': 'removeHandler',
+            'click .ev-field .login-link': 'loginHandler'
         },
         chooseHandler: function(e) {
-            if (this.authenticating.state() !== 'pending') {
-                this.authenticating = this.doAuthenticate();
-            }
-            this.authenticating.done(_.bind(function() {
-                this.events.trigger('showPicker', this.id);
-            }, this));
-            e.preventDefault();
+            this.loginHandler(e);
         },
         optionsHandler: function(e) {
             if (this.settings) {
@@ -174,6 +128,15 @@ define(function(require) {
                 model: this.model,
                 picker: this.picker
             });
+            e.preventDefault();
+        },
+        loginHandler: function(e) {
+            if (this.authenticating.state() !== 'pending') {
+                this.authenticating = this.auth.doAuthenticate(this.loginCallback);
+            }
+            this.authenticating.done(_.bind(function() {
+                this.events.trigger('showPicker', this.id);
+            }, this));
             e.preventDefault();
         },
         renderActions: function() {

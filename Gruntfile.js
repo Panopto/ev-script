@@ -28,7 +28,7 @@ module.exports = function(grunt) {
                 'backbone': 'node_modules/backbone/backbone',
                 'text': 'node_modules/requirejs-text/text',
                 'json': 'node_modules/requirejs-json/json',
-                'semver': 'node_modules/semver/semver.browser',
+                'compare-versions': 'node_modules/compare-versions/index',
                 'platform': 'node_modules/platform/platform',
                 'base64': 'node_modules/Base64/base64',
                 'cldr': 'node_modules/cldrjs/dist/cldr',

@@ -3,16 +3,13 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
-        semver = require('semver'),
+        compareVersions = require('compare-versions'),
         BaseModel = require('ev-script/models/base');
 
     return BaseModel.extend({
-        // initialize: function(attributes, options) {
-        //     BaseModel.prototype.initialize.call(this, attributes, options);
-        // },
-        checkVersion: function(condition) {
+        checkVersion: function(target, condition) {
             var version = this.get('applicationVersion');
-            return version && semver.satisfies(version, condition);
+            return version && compareVersions.compare(version, target, condition);
         }
     });
 

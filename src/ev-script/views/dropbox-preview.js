@@ -10,7 +10,7 @@ define(function(require) {
         render: function() {
             var embedView,
                 targetUrl;
-            if (this.info.checkVersion('<5.3.0')) {
+            if (this.info.checkVersion('5.3.0', '<')) {
                 embedView = new DropboxEmbedView({
                     model: new this.model.constructor(this.model.toJSON())
                 });

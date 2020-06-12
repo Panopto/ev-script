@@ -39,11 +39,9 @@ define(function(require) {
             e.preventDefault();
         },
         logoutHandler: function(e) {
-            this.auth.userManager.stopSilentRenew();
-            this.auth.userManager.signoutPopup()
+            this.auth.logout()
             .then(_.bind(function() {
                 this.events.trigger('hidePickers');
-                this.events.trigger('loggedOut');
             }, this));
             e.preventDefault();
         }

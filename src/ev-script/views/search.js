@@ -15,7 +15,8 @@ define(function(require) {
         },
         events: {
             'keydown .search': 'searchHandler',
-            'keyup .search': 'autoSearch'
+            'keyup .search': 'autoSearch',
+            'search .search': 'autoSearch'
         },
         render: function() {
             this.$el.html(this.template({

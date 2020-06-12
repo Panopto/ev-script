@@ -3,6 +3,9 @@
 @import (reference) '../../node_modules/bootstrap-less/bootstrap/mixins.less';
 @import (reference) '../../node_modules/flex.less/flex.less';
 
+// normalize
+@import (inline) '../../node_modules/normalize.css/normalize.css';
+
 // select2
 @import (inline) '../../node_modules/select2/dist/css/select2.css';
 
@@ -193,6 +196,10 @@
       font-weight: bold;
       font-size: 100%;
       max-width: 400px;
+    }
+    .login-link {
+      cursor: pointer;
+      text-decoration: underline;
     }
     .responsive(@label-break, {
       .thumbnail {
@@ -726,4 +733,23 @@
 }
 .inline {
   display: inline-block;
+}
+
+// Alerts
+.alert {
+  padding: 1em;
+  margin: 0.4em;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  width: 100%;
+}
+.alert-info {
+  color: #31708f;
+  background-color: #d9edf7;
+  border-color: #bce8f1;
+}
+.alert-warning {
+  color: #8a6d3b;
+  background-color: #fcf8e3;
+  border-color: #faebcc;
 }

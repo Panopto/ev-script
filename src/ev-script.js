@@ -9,8 +9,6 @@ define(function(require) {
         log = require('loglevel'),
         Globalize = require('globalize'),
         moment = require('moment'),
-        oidc = require('oidc'),
-        URI = require('urijs/URI'),
         likelySubtags = require('json!cldr-data/supplemental/likelySubtags.json'),
         messages = require('json!ev-script/i18n/root/messages.json'),
 
@@ -38,8 +36,8 @@ define(function(require) {
         eventsUtil = require('ev-script/util/events'),
         cacheUtil = require('ev-script/util/cache'),
 
-        // Auth router
-        AuthRouter = require('ev-script/routers/auth');
+        // Auth
+        AuthUtil = require('ev-script/util/auth');
 
     // Require jquery.cookie here so it is bundled. It is used in our factory
     // for configuration of i18n.
@@ -96,10 +94,9 @@ define(function(require) {
             config,
             locale,
             loading,
-            currentUri,
             userManager,
-            authRouter,
-            loadApp;
+            loadApp,
+            auth;
 
         config = _.extend({}, defaults, appOptions);
 
@@ -130,47 +127,21 @@ define(function(require) {
         // Create an event aggregator specific to our app
         this.events = eventsUtil.getEvents();
 
-        // Setup auth
-        oidc.Log.logger = console;
-        oidc.Log.level = oidc.Log.DEBUG;
-
-        currentUri = URI(window.location.href);
-
-        userManager = new oidc.UserManager({
-            client_id: 'ev-chooser',
-            authority: config.ensembleUrl + config.apiPath,
-            popup_redirect_uri: currentUri.origin() + URI.joinPaths(currentUri, 'auth/popupCallback'),
-            silent_redirect_uri: currentUri.origin() + URI.joinPaths(currentUri, 'auth/silentCallback'),
-            post_logout_redirect_uri: currentUri.origin() + URI.joinPaths(currentUri, 'auth/logoutCallback'),
-            response_type: 'code',
-            scope: 'openid email profile hapi offline_access',
-            loadUserInfo: true,
-            automaticSilentRenew: false,
-            filterProtocolClaims: true,
-            // TODO - if no localStorage use in-memory store?
-            userStore: new oidc.WebStorageStateStore({ store: window.localStorage })
-        });
-        userManager.clearStaleState();
-        userManager.events.addUserLoaded(function(e) {
-            console.log(e);
-        });
-
         loadApp = _.bind(function() {
 
             log.info('[ev-script] Loading app');
 
-            cacheUtil.setAuth({
-                userManager: userManager,
-                router: authRouter
-            });
+            cacheUtil.setAuth(auth);
 
             cacheUtil.setConfig(config);
 
             cacheUtil.setI18n(new Globalize(!messages[locale] ? 'en-US' : locale));
 
+            // Setup our api root resource
             var root = new Root({}, {
                 href: config.ensembleUrl + config.apiPath
             });
+
             cacheUtil.setRoot(root);
 
             root.fetch({})
@@ -275,9 +246,11 @@ define(function(require) {
 
         }, this);
 
-        authRouter = new AuthRouter({
-            userManager: userManager,
-            defaultCallback: loadApp
+        // Setup auth
+        auth = new AuthUtil({
+            config: config,
+            events: this.events,
+            callback: loadApp
         });
 
         // Load messages for locale
