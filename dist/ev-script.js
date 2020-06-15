@@ -55646,12 +55646,21 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
         oidc = require('oidc'),
         URI = require('urijs/URI'),
         AuthRouter = require('ev-script/routers/auth'),
+        oidcUserStore,
+        oidcStateStore,
         Auth = function(options) {
             this.config = options.config;
             this.events = options.events;
 
             oidc.Log.logger = console;
             oidc.Log.level = oidc.Log.DEBUG;
+
+            try {
+                oidcUserStore = new oidc.WebStorageStateStore({ store: window.localStorage });
+            } catch(error) {
+                log.warn(error.message);
+                oidcUserStore = oidcStateStore = new oidc.WebStorageStateStore({ store: new oidc.InMemoryWebStorage() });
+            }
 
             this.userManager = new oidc.UserManager({
                 client_id: 'ev-chooser',
@@ -55666,7 +55675,8 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
                 automaticSilentRenew: false,
                 filterProtocolClaims: true,
                 // TODO - if no localStorage use in-memory store?
-                userStore: new oidc.WebStorageStateStore({ store: window.localStorage }),
+                userStore: oidcUserStore,
+                stateStore: oidcStateStore,
                 silentRequestTimeout: 3000
             });
             this.userManager.clearStaleState();
