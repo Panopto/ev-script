@@ -47,7 +47,14 @@ module.exports = function(grunt) {
                 start: '<%= banner %>' + grunt.file.read('wrap/wrap.start'),
                 end: grunt.file.read('wrap/wrap.end')
             },
-            optimize: 'none'
+            optimize: 'none',
+            onBuildRead: function(moduleName, path, contents) {
+                if (/\/\/# sourceMappingURL=.*/gi.test(contents)) {
+                    grunt.log.writeln('Removing sourceMappingURL from  \'' + moduleName + '\'');
+                    return contents.replace(/\/\/# sourceMappingURL=.*/gi, '');
+                }
+                return contents;
+            }
         },
         rjs_prod_opts = _.extend({}, rjs_dev_opts, {
             out: 'dist/ev-script.min.js',
