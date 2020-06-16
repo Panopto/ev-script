@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.0 2020-06-15
+ * ev-script 2.3.0 2020-06-16
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -55610,19 +55610,12 @@ define('ev-script/routers/auth',['require','underscore','backbone'],function(req
         },
         routes: {
             '': 'default',
-            'auth/redirectCallback': 'redirectCallback',
             'auth/popupCallback': 'popupCallback',
             'auth/silentCallback': 'silentCallback',
             'auth/logoutCallback': 'logoutCallback'
         },
         default: function() {
             this.defaultCallback();
-        },
-        redirectCallback: function() {
-            this.userManager.signinRedirectCallback()
-            .then(_.bind(function() {
-                window.location = window.location.origin + this.config.appRoot;
-            }, this));
         },
         popupCallback: function() {
             this.userManager.signinPopupCallback();
@@ -55655,6 +55648,7 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
             oidc.Log.logger = console;
             oidc.Log.level = oidc.Log.DEBUG;
 
+            // If access to localStorage is blocked...fallback to in-memory
             try {
                 oidcUserStore = new oidc.WebStorageStateStore({ store: window.localStorage });
             } catch(error) {
@@ -55674,7 +55668,6 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
                 loadUserInfo: true,
                 automaticSilentRenew: false,
                 filterProtocolClaims: true,
-                // TODO - if no localStorage use in-memory store?
                 userStore: oidcUserStore,
                 stateStore: oidcStateStore,
                 silentRequestTimeout: 3000
@@ -55718,28 +55711,22 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
                 this.userManager.signinSilent()
                 .then(loggedInHandler)
                 .catch(_.bind(function(err) {
-                    // From iframe we need a popup
-                    if (window.location !== window.parent.location) {
-                        log.debug('[doAuthenticate] No user found...attempting pop-up sign-in');
+                    log.debug('[doAuthenticate] No user found...attempting pop-up sign-in');
 
-                        var width = 500,
-                            height = 500,
-                            top = parseInt((screen.availHeight / 2) - (height / 2), 10),
-                            left = parseInt((screen.availWidth / 2) - (width / 2), 10),
-                            features = 'location=no,toolbar=no,width=500,height=500,left=' + left + ',top=' + top + ',screenX=' + left + ',screenY=' + top + ',chrome=yes;centerscreen=yes;';
+                    var width = 500,
+                        height = 500,
+                        top = parseInt((screen.availHeight / 2) - (height / 2), 10),
+                        left = parseInt((screen.availWidth / 2) - (width / 2), 10),
+                        features = 'location=no,toolbar=no,width=500,height=500,left=' + left + ',top=' + top + ',screenX=' + left + ',screenY=' + top + ',chrome=yes;centerscreen=yes;';
 
-                        this.userManager.signinPopup({
-                            popupWindowFeatures: features
-                        })
-                        .then(loggedInHandler)
-                        .catch(loggedOutHandler);
-                    } else {
-                        log.debug('[doAuthenticate] No user found...attempting redirect sign-in');
-
-                        this.userManager.signinRedirect()
-                        .then(loggedInHandler)
-                        .catch(loggedOutHandler);
-                    }
+                    this.userManager.signinPopup({
+                        popupWindowFeatures: features,
+                        extraQueryParams: {
+                            'ev_institution_id': this.config.institutionId
+                        }
+                    })
+                    .then(loggedInHandler)
+                    .catch(loggedOutHandler);
                 }, this));
             }, this);
 
@@ -58304,11 +58291,8 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
                 hidePickers: false,
                 // The difference between window dimensions and maximum dialog size.
                 dialogMargin: 40,
-                // Required if defaultProvider is not set below.  Specifies the
-                // current institution for identity provider selection.
+                // Specifies the current institution for identity provider selection.
                 institutionId: '',
-                // Set this in order to select the default identity provider.
-                defaultProvider: '',
                 // Location for plupload flash runtime
                 pluploadFlashPath: '',
                 // Callbacks to set locale and date/time formats
@@ -58338,10 +58322,6 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
 
         config = _.extend({}, defaults, appOptions);
 
-        if (!config.institutionId && !config.defaultProvider) {
-            throw new Error('One of institutionId or defaultProvider is required');
-        }
-
         // Make sure appRoot has trailing slash
         config.appRoot = /\/$/.test(config.appRoot) ? config.appRoot : config.appRoot + '/';
 
@@ -58368,6 +58348,10 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
         loadApp = _.bind(function() {
 
             log.info('[ev-script] Loading app');
+
+            if (!config.institutionId) {
+                throw new Error('institutionId is required');
+            }
 
             cacheUtil.setAuth(auth);
 
