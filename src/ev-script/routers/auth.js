@@ -15,19 +15,12 @@ define(function(require) {
         },
         routes: {
             '': 'default',
-            'auth/redirectCallback': 'redirectCallback',
             'auth/popupCallback': 'popupCallback',
             'auth/silentCallback': 'silentCallback',
             'auth/logoutCallback': 'logoutCallback'
         },
         default: function() {
             this.defaultCallback();
-        },
-        redirectCallback: function() {
-            this.userManager.signinRedirectCallback()
-            .then(_.bind(function() {
-                window.location = window.location.origin + this.config.appRoot;
-            }, this));
         },
         popupCallback: function() {
             this.userManager.signinPopupCallback();

@@ -80,28 +80,22 @@ define(function(require) {
                 this.userManager.signinSilent()
                 .then(loggedInHandler)
                 .catch(_.bind(function(err) {
-                    // From iframe we need a popup
-                    if (window.location !== window.parent.location) {
-                        log.debug('[doAuthenticate] No user found...attempting pop-up sign-in');
+                    log.debug('[doAuthenticate] No user found...attempting pop-up sign-in');
 
-                        var width = 500,
-                            height = 500,
-                            top = parseInt((screen.availHeight / 2) - (height / 2), 10),
-                            left = parseInt((screen.availWidth / 2) - (width / 2), 10),
-                            features = 'location=no,toolbar=no,width=500,height=500,left=' + left + ',top=' + top + ',screenX=' + left + ',screenY=' + top + ',chrome=yes;centerscreen=yes;';
+                    var width = 500,
+                        height = 500,
+                        top = parseInt((screen.availHeight / 2) - (height / 2), 10),
+                        left = parseInt((screen.availWidth / 2) - (width / 2), 10),
+                        features = 'location=no,toolbar=no,width=500,height=500,left=' + left + ',top=' + top + ',screenX=' + left + ',screenY=' + top + ',chrome=yes;centerscreen=yes;';
 
-                        this.userManager.signinPopup({
-                            popupWindowFeatures: features
-                        })
-                        .then(loggedInHandler)
-                        .catch(loggedOutHandler);
-                    } else {
-                        log.debug('[doAuthenticate] No user found...attempting redirect sign-in');
-
-                        this.userManager.signinRedirect()
-                        .then(loggedInHandler)
-                        .catch(loggedOutHandler);
-                    }
+                    this.userManager.signinPopup({
+                        popupWindowFeatures: features,
+                        extraQueryParams: {
+                            'ev_institution_id': this.config.institutionId
+                        }
+                    })
+                    .then(loggedInHandler)
+                    .catch(loggedOutHandler);
                 }, this));
             }, this);
 

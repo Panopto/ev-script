@@ -66,11 +66,8 @@ define(function(require) {
                 hidePickers: false,
                 // The difference between window dimensions and maximum dialog size.
                 dialogMargin: 40,
-                // Required if defaultProvider is not set below.  Specifies the
-                // current institution for identity provider selection.
+                // Specifies the current institution for identity provider selection.
                 institutionId: '',
-                // Set this in order to select the default identity provider.
-                defaultProvider: '',
                 // Location for plupload flash runtime
                 pluploadFlashPath: '',
                 // Callbacks to set locale and date/time formats
@@ -100,10 +97,6 @@ define(function(require) {
 
         config = _.extend({}, defaults, appOptions);
 
-        if (!config.institutionId && !config.defaultProvider) {
-            throw new Error('One of institutionId or defaultProvider is required');
-        }
-
         // Make sure appRoot has trailing slash
         config.appRoot = /\/$/.test(config.appRoot) ? config.appRoot : config.appRoot + '/';
 
@@ -130,6 +123,10 @@ define(function(require) {
         loadApp = _.bind(function() {
 
             log.info('[ev-script] Loading app');
+
+            if (!config.institutionId) {
+                throw new Error('institutionId is required');
+            }
 
             cacheUtil.setAuth(auth);
 
