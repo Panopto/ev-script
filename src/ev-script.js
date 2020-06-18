@@ -86,7 +86,9 @@ define(function(require) {
                 // Application root
                 appRoot: '/',
                 // Current user id
-                currentUserId: ''
+                currentUserId: '',
+                // oauth2 client id
+                clientId: ''
             },
             config,
             locale,

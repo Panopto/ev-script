@@ -26,7 +26,7 @@ define(function(require) {
             }
 
             this.userManager = new oidc.UserManager({
-                client_id: 'ev-chooser',
+                client_id: this.config.clientId,
                 authority: this.config.ensembleUrl + this.config.apiPath,
                 redirect_uri: window.location.origin + URI.joinPaths(this.config.appRoot, 'auth/redirectCallback'),
                 popup_redirect_uri: window.location.origin + URI.joinPaths(this.config.appRoot, 'auth/popupCallback'),
