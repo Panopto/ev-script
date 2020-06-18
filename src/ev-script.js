@@ -99,6 +99,10 @@ define(function(require) {
 
         config = _.extend({}, defaults, appOptions);
 
+        if (!config.clientId) {
+            throw new Error('clientId is required');
+        }
+
         // Make sure appRoot has trailing slash
         config.appRoot = /\/$/.test(config.appRoot) ? config.appRoot : config.appRoot + '/';
 
