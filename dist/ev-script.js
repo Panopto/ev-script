@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.0 2020-06-16
+ * ev-script 2.3.0 2020-06-18
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -55657,7 +55657,7 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
             }
 
             this.userManager = new oidc.UserManager({
-                client_id: 'ev-chooser',
+                client_id: this.config.clientId,
                 authority: this.config.ensembleUrl + this.config.apiPath,
                 redirect_uri: window.location.origin + URI.joinPaths(this.config.appRoot, 'auth/redirectCallback'),
                 popup_redirect_uri: window.location.origin + URI.joinPaths(this.config.appRoot, 'auth/popupCallback'),
@@ -58311,7 +58311,9 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
                 // Application root
                 appRoot: '/',
                 // Current user id
-                currentUserId: ''
+                currentUserId: '',
+                // oauth2 client id
+                clientId: ''
             },
             config,
             locale,
@@ -58321,6 +58323,10 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
             auth;
 
         config = _.extend({}, defaults, appOptions);
+
+        if (!config.clientId) {
+            throw new Error('clientId is required');
+        }
 
         // Make sure appRoot has trailing slash
         config.appRoot = /\/$/.test(config.appRoot) ? config.appRoot : config.appRoot + '/';
