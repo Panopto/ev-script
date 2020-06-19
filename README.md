@@ -16,17 +16,6 @@ Install dependencies:
 
     npm install
 
-Build jquery-ui:
-
-    cd node_modules/jquery-ui
-    npm install
-    grunt sizer
-
-Verify success by running the default grunt task:
-
-    cd ../..
-    grunt
-
 ## Demo
 
 Run the grunt demo task:
@@ -34,3 +23,17 @@ Run the grunt demo task:
     grunt demo
 
 and navigate to [https://localhost:8000/demo](https://localhost:8000/demo).
+
+## Build
+
+Run the default task:
+
+    grunt
+
+Development only:
+
+    grunt dev
+
+Production only:
+
+    grunt prod

@@ -71,7 +71,7 @@
   "dependencies": {
     "font-awesome": "^4.7.0",
     "jquery": "^3.5.1",
-    "jquery-ui": "^1.11.3",
+    "jquery-ui-dist": "^1.12.1",
     "plupload": "^2.3.6"
   }
 }
