@@ -79,6 +79,8 @@ define(function(require) {
                 dropboxes = new Dropboxes({}, {
                     href: searchUrl
                 });
+
+            this.filter.disable();
             dropboxes.fetch({
                 picker: this,
                 success: _.bind(function(model, response, options) {
@@ -87,7 +89,10 @@ define(function(require) {
                     this.resultsView.render();
                 }, this),
                 error: _.bind(this.ajaxError, this)
-            });
+            })
+            .always(_.bind(function() {
+                this.filter.enable();
+            }, this));
         }
     });
 

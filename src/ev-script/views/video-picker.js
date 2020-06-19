@@ -10,6 +10,7 @@ define(function(require) {
         FilterView = require('ev-script/views/filter'),
         VideoResultsView = require('ev-script/views/video-results'),
         Videos = require('ev-script/models/videos'),
+        SharedVideos = require('ev-script/models/shared-videos'),
         MediaWorkflows = require('ev-script/collections/media-workflows'),
         UploadView = require('ev-script/views/upload');
 
@@ -21,11 +22,12 @@ define(function(require) {
             PickerView.prototype.initialize.call(this, options);
 
             _.bindAll(this, 'loadVideos', 'loadWorkflows', 'changeLibrary',
-            'handleSubmit', 'uploadHandler', 'recordHandler', 'handleSearch');
+            'handleSubmit', 'uploadHandler', 'recordHandler', 'handleSearch',
+            'isSharedContent', 'changeLibraryType', 'handleUploadVisibility');
 
             this.events
-            .off('typeSelectChange', this.loadVideos)
-            .on('typeSelectChange', this.loadVideos);
+            .off('typeSelectChange', this.changeLibraryType)
+            .on('typeSelectChange', this.changeLibraryType);
 
             this.events
             .off('search', this.handleSearch)
@@ -65,8 +67,21 @@ define(function(require) {
             'submit .ev-filter-block': 'handleSubmit'
         },
         changeLibrary: function(e) {
+            var libraryId = this.model.get('libraryId');
+
             this.loadVideos();
-            this.loadWorkflows();
+
+            if (!libraryId && this.workflows) {
+                this.workflows.reset();
+            } else {
+                this.loadWorkflows();
+            }
+
+            this.handleUploadVisibility();
+        },
+        changeLibraryType: function(e) {
+            this.loadVideos();
+            this.handleUploadVisibility();
         },
         handleSubmit: function(e) {
             this.loadVideos();
@@ -76,6 +91,25 @@ define(function(require) {
             if (model === this.model) {
                 this.loadVideos();
             }
+        },
+        handleUploadVisibility: function() {
+            if (!this.workflows) {
+                this.filter.hideUpload();
+                this.filter.hideRecord();
+                return;
+            }
+
+            this.workflows.promise.done(_.bind(function() {
+                if (!this.workflows.isEmpty() && !this.isSharedContent()) {
+                    this.filter.showUpload();
+                    if (this.canRecord()) {
+                        this.filter.showRecord();
+                    }
+                } else {
+                    this.filter.hideUpload();
+                    this.filter.hideRecord();
+                }
+            }, this));
         },
         uploadHandler: function(e) {
             var uploadView = new UploadView({
@@ -163,57 +197,49 @@ define(function(require) {
         },
         loadVideos: function() {
             var searchVal = $.trim(this.model.get('search').toLowerCase()),
-                sourceId = this.model.get('sourceId'),
-                searchTemplate = sourceId === 'shared' ?
-                    new URITemplate(this.root.getLink('ev:SharedContents/Search').href) :
+                isShared = this.isSharedContent(),
+                searchTemplate = isShared ?
+                    new URITemplate(this.root.getLink('ev:Sharing/Search').href) :
                     new URITemplate(this.root.getLink('ev:Contents/Search').href),
                 searchUrl = searchTemplate.expand({
                     organizationId: this.model.get('organizationId'),
                     libraryId: this.model.get('libraryId'),
                     search: searchVal,
-                    sortBy: 'dateAdded',
+                    sortBy: isShared ? 'PostDate' : 'dateAdded',
                     isPublished: true,
                     desc: true,
                     pageSize: 20
-                }),
-                videos = new Videos({}, {
+                });
+            this.videos = isShared ?
+                new SharedVideos({}, {
+                    href: searchUrl
+                }) :
+                new Videos({}, {
                     href: searchUrl
                 });
 
-            videos.fetch({
+            this.filter.disable();
+            this.videos.fetch({
                 picker: this,
                 success: _.bind(function(model, response, options) {
-                    model.collectionKey = sourceId === 'shared' ? 'sharedContents' : 'contents';
                     this.resultsView.model = model;
-                    this.resultsView.collection = model.getEmbedded(model.collectionKey);
+                    this.resultsView.collection = model.getEmbedded('contents');
                     this.resultsView.render();
                 }, this),
                 error: _.bind(this.ajaxError, this)
-            });
+            })
+            .always(_.bind(function() {
+                this.filter.enable();
+            }, this));
         },
         loadWorkflows: function() {
-            var libraryId = this.model.get('libraryId');
+            var libraryId = this.model.get('libraryId'),
+                isShared = this.isSharedContent();
+
             this.workflows = new MediaWorkflows({}, {});
-            if (!libraryId) {
-                this.workflows.trigger('reset');
-                this.filter.hideUpload();
-                this.filter.hideRecord();
-                return;
-            }
             this.workflows.filterValue = libraryId;
             this.workflows.fetch({
                 cacheKey: this.workflows.filterValue,
-                success: _.bind(function(collection, response, options) {
-                    if (!collection.isEmpty()) {
-                        this.filter.showUpload();
-                        if (this.canRecord()) {
-                            this.filter.showRecord();
-                        }
-                    } else {
-                        this.filter.hideUpload();
-                        this.filter.hideRecord();
-                    }
-                }, this),
                 error: _.bind(this.ajaxError, this),
                 reset: true
             });
@@ -225,6 +251,9 @@ define(function(require) {
         isMobile: function() {
             var family = platform.os.family;
             return family === 'Android' || family === 'iOS' || family === 'Windows Phone';
+        },
+        isSharedContent: function() {
+            return this.model && this.model.get('sourceId') === 'shared';
         }
     });
 

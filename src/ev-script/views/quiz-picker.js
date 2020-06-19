@@ -82,6 +82,8 @@ define(function(require) {
                 quizzes = new Quizzes({}, {
                     href: searchUrl
                 });
+
+            this.filter.disable();
             quizzes.fetch({
                 picker: this,
                 success: _.bind(function(model, response, options) {
@@ -90,7 +92,10 @@ define(function(require) {
                     this.resultsView.render();
                 }, this),
                 error: _.bind(this.ajaxError, this)
-            });
+            })
+            .always(_.bind(function() {
+                this.filter.enable();
+            }, this));
         },
         getSettingsModelAttributes: function(chosenItem) {
             return _.extend(PickerView.prototype.getSettingsModelAttributes.call(this, chosenItem), {
