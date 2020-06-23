@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.0 2020-06-18
+ * ev-script 2.3.0 2020-06-23
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
