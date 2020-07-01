@@ -9,7 +9,6 @@
     var evSettings = {
         ensembleUrl: ensembleUrl,
         pageSize: 10,
-        pluploadFlashPath: '/node_modules/plupload/js/Moxie.swf',
         institutionId: '52AF905C-187A-4405-AB61-0BBEC3E7E62F',
         clientId: 'ev-lti-chooser',
         certConfig: [{ name: 'commonName', value: 'ensemblevideo.com' }]

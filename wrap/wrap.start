@@ -4,13 +4,11 @@
         // that are passed to our factory.
         define([
             'jquery',
-            'plupload',
             'jquery-ui/ui/widgets/dialog',
-            'jquery-ui/ui/widgets/accordion',
-            'jquery.plupload.queue'
+            'jquery-ui/ui/widgets/accordion'
         ], factory);
     } else {
         // Browser globals
-        root.EV = factory(root.$, root.plupload);
+        root.EV = factory(root.$);
     }
-}(this, function ($, plupload) {
+}(this, function ($) {

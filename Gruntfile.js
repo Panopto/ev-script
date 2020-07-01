@@ -20,9 +20,7 @@ module.exports = function(grunt) {
                 'jquery': 'empty:',
                 'jquery-ui': 'empty:',
                 'jquery.cookie': 'node_modules/jquery.cookie/jquery.cookie',
-                'jquery.plupload.queue': 'empty:',
                 'jquery-expander': 'node_modules/jquery-expander/jquery.expander',
-                'plupload': 'empty:',
                 'ev-scroll-loader': 'node_modules/ev-scroll-loader/dist/jquery.ev-scroll-loader',
                 'underscore': 'node_modules/underscore/underscore',
                 'backbone': 'node_modules/backbone/backbone',
@@ -39,7 +37,9 @@ module.exports = function(grunt) {
                 'loglevel': 'node_modules/loglevel/dist/loglevel',
                 'select2': 'node_modules/select2/src/js',
                 'jquery-mousewheel': 'node_modules/jquery-mousewheel/jquery.mousewheel',
-                'oidc': 'node_modules/oidc-client/lib/oidc-client'
+                'oidc': 'node_modules/oidc-client/lib/oidc-client',
+                'uppy': 'node_modules/uppy/dist/uppy.min',
+                'uppy-locales': 'node_modules/@uppy/locales/dist'
             },
             name: 'node_modules/almond/almond',
             out: 'dist/ev-script.js',

@@ -8,12 +8,6 @@
     define('jquery-ui/ui/widgets/dialog', ['jquery'], function() {});
     define('jquery-ui/ui/widgets/tabs', ['jquery'], function() {});
 
-    define('plupload', function() {
-        return plupload;
-    });
-
-    define('jquery.plupload.queue', ['jquery', 'plupload'], function() {});
-
     // Set the current locale based on i18n.langtag cookie
     require('jquery.cookie');
     require.config({

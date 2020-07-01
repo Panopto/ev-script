@@ -9,6 +9,9 @@
 // select2
 @import (inline) '../../node_modules/select2/dist/css/select2.css';
 
+// uppy
+@import (inline) '../../node_modules/uppy/dist/uppy.css';
+
 // Colors
 @border-color: #999999;
 @ev-yellow: #f9d700;
@@ -678,24 +681,6 @@
       display: inline-block;
       width: 25%;
     }
-    .plupload_header {
-      display: none;
-    }
-    .plupload_cancel {
-      margin-right: 3em;
-      display: block;
-      float: right;
-    }
-    .plupload_container {
-      padding: 0;
-    }
-    .plupload_filelist {
-      overflow-y: auto;
-      height: auto;
-    }
-    .plupload_droptext {
-      line-height: normal;
-    }
     .info {
       margin-top: 1em;
       color: @label-color;
@@ -737,11 +722,11 @@
 
 // Alerts
 .alert {
-  padding: 1em;
-  margin: 0.4em;
+  padding: 10px;
+  margin: 5px;
   border: 1px solid transparent;
   border-radius: 4px;
-  width: 100%;
+  width: calc(100% - 22px);
 }
 .alert-info {
   color: #31708f;
@@ -752,4 +737,64 @@
   color: #8a6d3b;
   background-color: #fcf8e3;
   border-color: #faebcc;
+}
+
+// Uppy
+.uppy-Dashboard-browse {
+    position: relative;
+    width: 100%;
+    height: 140px;
+    outline: 0;
+}
+
+.uppy-Dashboard-browse:hover,
+.uppy-Dashboard-browse:focus {
+  outline: none !important;
+  border: none !important;
+}
+
+.uppy-Dashboard-browse::before {
+  content: "\f0ee";
+  font-family: FontAwesome;
+  color: #565657;
+  font-size: 160px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -80px;
+}
+
+.uppy-Dashboard-dropFilesTitle {
+  color: #000000 !important;
+  width: 100% !important;
+}
+
+.uppy-Dashboard-browse:hover:before {
+  color: #1f2120
+}
+
+.form-control:focus {
+  outline: none !important;
+  border: solid 2px rgba(27,127,204,.8) !important;
+}
+
+.uppy-Dashboard-dropFilesTitle::after {
+  display: block;
+  width: 100% !important;
+  white-space: pre;
+  text-align: center !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  color: #525252 !important;
+  margin: auto !important;
+  padding-top: 5px !important;
+}
+
+.uppy-Dashboard-AddFiles {
+  border: none !important;
+}
+
+.uppy-Dashboard-inner {
+  border-color: #999999;
+  border-radius: 4px;
 }

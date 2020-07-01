@@ -21,7 +21,7 @@ define(function(require) {
 
             if (embedType === 'fixed') {
                 embed = this.fixedTemplate({
-                    src: this.getSrcUrl(width, height, isPreview),
+                    src: this.getUrl(width, height, isPreview),
                     title: title,
                     width: width,
                     height: isAudio ? frameHeight : height,
@@ -29,17 +29,23 @@ define(function(require) {
                 });
             } else if (embedType === 'responsive') {
                 embed = this.responsiveTemplate({
-                    src: this.getSrcUrl(width, height, isPreview),
+                    src: this.getUrl(width, height, isPreview),
                     title: title
                 });
             }
 
             this.$el.html(embed);
         },
-        getSrcUrl: function(width, height, isPreview) {
+        getUrl: function(width, height, isPreview) {
             var id = this.model.get('id'),
-                url = URI(this.config.ensembleUrl);
-                url.path('/hapi/v1/contents/' + id + '/plugin');
+                url = URI(this.config.ensembleUrl),
+                mediaWidth = width || this.getMediaWidth(),
+                mediaHeight = height || this.getMediaHeight(),
+                basePath = '/hapi/v1/contents/' + id,
+                action = isPreview && !this.config.hasStorage ?
+                    '/launch' : '/plugin';
+
+            url.path(basePath + action);
             url.addQuery({
                 'autoPlay': this.model.get('autoplay'),
                 'displayTitle': this.model.get('showtitle'),
@@ -62,14 +68,14 @@ define(function(require) {
             });
             if (this.model.get('embedtype') === 'fixed') {
                 url.addQuery({
-                    'width': width,
-                    'height': height
+                    'width': mediaWidth,
+                    'height': mediaHeight
                 });
             }
             if (isPreview) {
                 url.addQuery('isContentPreview', true);
             }
-            return url;
+            return url.toString();
         },
         getMediaWidth: function() {
             return parseInt(this.model.get('width'), 10) || 848;

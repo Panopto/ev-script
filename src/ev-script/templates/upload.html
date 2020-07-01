@@ -6,12 +6,13 @@
         <div class="policy-message"></div>
         <div class="fieldWrap">
             <label for="Title"><%= i18n.formatMessage('Title') %> *</label>
-            <input class="form-text" type="text" name="Title" id="Title" />
+            <input class="form-text" type="text" name="Title" id="Title" required />
         </div>
         <div class="fieldWrap">
             <label for="Description"><%= i18n.formatMessage('Description') %></label>
             <textarea class="form-text" name="Description" id="Description"></textarea>
         </div>
+        <div role="alert" class="alert alert-warning" style="display: none;"></div>
         <div class="upload"></div>
     </div>
 </form>

@@ -68,8 +68,6 @@ define(function(require) {
                 dialogMargin: 40,
                 // Specifies the current institution for identity provider selection.
                 institutionId: '',
-                // Location for plupload flash runtime
-                pluploadFlashPath: '',
                 // Callbacks to set locale and date/time formats
                 getLocaleCallback: function() { return 'en-US'; },
                 getDateFormatCallback: function() { return 'MM/DD/YYYY'; },
@@ -105,6 +103,14 @@ define(function(require) {
 
         // Make sure appRoot has trailing slash
         config.appRoot = /\/$/.test(config.appRoot) ? config.appRoot : config.appRoot + '/';
+
+        // See if we have localStorage available
+        try {
+            window.localStorage.getItem('test');
+            config.hasStorage = true;
+        } catch (exception) {
+            config.hasStorage = false;
+        }
 
         // Set logging
         log.setDefaultLevel(config.logLevel);

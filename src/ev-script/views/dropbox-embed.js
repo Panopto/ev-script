@@ -3,7 +3,6 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
-        URI = require('urijs/URI'),
         EmbedView = require('ev-script/views/embed'),
         // We borrow portions of video-embed impl
         VideoEmbedView = require('ev-script/views/video-embed'),
@@ -46,8 +45,10 @@ define(function(require) {
             return this.getMediaHeight();
         },
         getUrl: function(isPreview) {
-            return this.isEmbedSupported() ?
-                URI(this.config.ensembleUrl + '/hapi/v1/ui/dropboxes/' + this.model.get('id') + '/embed') :
+            // Assuming if localStorage is not available that third-party
+            // cookies are blocked.  In that case need to preview in new window.
+            return this.isEmbedSupported() && this.config.hasStorage ?
+                this.config.ensembleUrl + '/hapi/v1/ui/dropboxes/' + this.model.get('id') + '/embed' :
                 this.model.get('content').url;
         },
         scale: function(maxWidth, maxHeight) {

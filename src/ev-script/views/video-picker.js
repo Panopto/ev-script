@@ -34,10 +34,6 @@ define(function(require) {
             .off('search', this.handleSearch)
             .on('search', this.handleSearch);
 
-            this.events
-            .off('fileUploaded', this.loadVideos)
-            .on('fileUploaded', this.loadVideos);
-
             var reload = _.bind(function(target) {
                 if (target === 'videos') {
                     this.loadVideos();
@@ -94,7 +90,12 @@ define(function(require) {
             }
         },
         handleUploadVisibility: function() {
-            if (!this.workflows) {
+            var libraryId = this.model.get('libraryId'),
+                library = this.filter.getLibrary(libraryId);
+
+            if (!library ||
+                !this.workflows ||
+                !library.getLink('ev:Contents/Create')) {
                 this.filter.hideUpload();
                 this.filter.hideRecord();
                 return;
@@ -114,10 +115,13 @@ define(function(require) {
             }, this));
         },
         uploadHandler: function(e) {
-            var uploadView = new UploadView({
-                field: this.field,
-                workflows: this.workflows
-            });
+            var libraryId = this.model.get('libraryId'),
+                library = this.filter.getLibrary(libraryId),
+                uploadView = new UploadView({
+                    library: library,
+                    workflows: this.workflows,
+                    model: this.model
+                });
             e.preventDefault();
         },
         recordHandler: function(e) {
