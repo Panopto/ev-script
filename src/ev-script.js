@@ -37,7 +37,9 @@ define(function(require) {
         cacheUtil = require('ev-script/util/cache'),
 
         // Auth
-        AuthUtil = require('ev-script/util/auth');
+        AuthUtil = require('ev-script/util/auth'),
+
+        supportedLanguages = [ 'en', 'en-US', 'es', 'es-MX', 'fr', 'fr-FR' ];
 
     // Require jquery.cookie here so it is bundled. It is used in our factory
     // for configuration of i18n.
@@ -68,8 +70,8 @@ define(function(require) {
                 dialogMargin: 40,
                 // Specifies the current institution for identity provider selection.
                 institutionId: '',
-                // Callbacks to set locale and date/time formats
-                getLocaleCallback: function() { return 'en-US'; },
+                // Callbacks to set date/time formats
+                // TODO - remove
                 getDateFormatCallback: function() { return 'MM/DD/YYYY'; },
                 getTimeFormatCallback: function() { return 'hh:mmA'; },
                 getDateTimeFormat: function() {
@@ -89,7 +91,6 @@ define(function(require) {
                 clientId: ''
             },
             config,
-            locale,
             loading,
             userManager,
             loadApp,
@@ -119,13 +120,6 @@ define(function(require) {
         log.debug('[ev-script] Config:');
         log.debug(config);
 
-        locale = config.getLocaleCallback();
-        log.debug('[ev-script] Locale: ' + locale);
-        // Set locale for moment
-        if (locale) {
-            moment.locale(locale);
-        }
-
         // Features depend on asynchronously retreival of data below...so leverage
         // promises to coordinate loading
         loading = $.Deferred();
@@ -136,138 +130,85 @@ define(function(require) {
 
         loadApp = _.bind(function() {
 
-            // Load messages for locale
-            log.info('[ev-script] Retreiving localized messages');
-            $.getJSON(config.i18nPath + '/' + locale + '/messages.json')
-            .done(_.bind(function(data, status, xhr) {
-                _.extend(messages, data);
+            log.info('[ev-script] Loading app');
 
-                // Setup globalize
-                Globalize.load(likelySubtags);
-                Globalize.loadMessages(messages);
+            if (!config.institutionId) {
+                throw new Error('institutionId is required');
+            }
 
-                log.info('[ev-script] Loading app');
+            cacheUtil.setAuth(auth);
 
-                if (!config.institutionId) {
-                    throw new Error('institutionId is required');
-                }
+            cacheUtil.setConfig(config);
 
-                cacheUtil.setAuth(auth);
+            // Setup our api root resource
+            var root = new Root({}, {
+                href: config.ensembleUrl + config.apiPath
+            });
 
-                cacheUtil.setConfig(config);
+            cacheUtil.setRoot(root);
 
-                cacheUtil.setI18n(new Globalize(!messages[locale] ? 'en-US' : locale));
-
-                // Setup our api root resource
-                var root = new Root({}, {
-                    href: config.ensembleUrl + config.apiPath
+            root.fetch({})
+            .done(_.bind(function() {
+                var info = new Info({}, {
+                    href: root.getLink('ev:Info/Get').href
                 });
+                cacheUtil.setInfo(info);
 
-                cacheUtil.setRoot(root);
+                // Load application info from EV
+                info.fetch({})
+                .always(_.bind(function() {
+                    var currentUser,
+                        locale,
+                        localizationPreferences,
+                        desiredLanguages;
+                    if (!info.get('applicationVersion')) {
+                        loading.reject('Failed to retrieve application info.');
+                    } else {
+                        currentUser = root.getEmbedded('ev:Users/Current');
+                        if (currentUser) {
+                            localizationPreferences = currentUser
+                                .getEmbedded('ev:LocalizationPreferences/Get');
+                            locale = localizationPreferences.get('language');
+                        } else if (navigator.languages) {
+                            desiredLanguages = _.intersection(navigator.languages, supportedLanguages);
+                            locale = desiredLanguages[0];
+                        }
+                        // Fall back to branding settings if user not authenticated or browser languages don't resolve
+                        if (!locale) {
+                            localizationPreferences = root
+                                .getEmbedded('ev:Brandings/Current')
+                                .getEmbedded('ev:LocalizationPreferences/Get');
+                            locale = localizationPreferences.get('language');
+                        }
+                        log.debug('[ev-script] Locale: ' + locale);
+                        config.locale = locale;
+                        moment.locale(locale);
 
-                root.fetch({})
-                .done(_.bind(function() {
-                    var info = new Info({}, {
-                        href: root.getLink('ev:Info/Get').href
-                    });
-                    cacheUtil.setInfo(info);
+                        // Load messages for locale
+                        log.info('[ev-script] Retreiving localized messages');
+                        $.getJSON(config.i18nPath + '/' + locale + '/messages.json')
+                        .done(_.bind(function(data, status, xhr) {
+                            _.extend(messages, data);
 
-                    // Load application info from EV
-                    info.fetch({})
-                    .always(_.bind(function() {
-                        if (!info.get('applicationVersion')) {
-                            loading.reject('Failed to retrieve application info.');
-                        } else {
-                            // TODO - document and add some flexibility to params (e.g. in addition
-                            // to selector allow element or object).
-                            this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
-                                log.debug('[ev-script] handleField');
-                                log.debug(arguments);
-                                var $field = $(fieldSelector, fieldWrap),
-                                    fieldOptions = {
-                                        id: fieldWrap.id || 'ev-field',
-                                        el: fieldWrap,
-                                        model: settingsModel,
-                                        $field: $field
-                                    },
-                                    fieldView;
-                                if (settingsModel instanceof VideoSettings) {
-                                    fieldView = new VideoFieldView(fieldOptions);
-                                } else if (settingsModel instanceof PlaylistSettings) {
-                                    fieldView = new PlaylistFieldView(fieldOptions);
-                                } else if (settingsModel instanceof DropboxSettings) {
-                                    fieldView = new DropboxFieldView(fieldOptions);
-                                } else if (settingsModel instanceof QuizSettings) {
-                                    fieldView = new QuizFieldView(fieldOptions);
-                                } else {
-                                    throw new Error('Unrecognized settings model type');
-                                }
-                            };
+                            // Setup globalize
+                            Globalize.load(likelySubtags);
+                            Globalize.loadMessages(messages);
 
-                            // TODO - document.  See handleField comment too.
-                            this.handleEmbed = function(embedWrap, settingsModel) {
-                                log.debug('[ev-script] handleEmbed');
-                                log.debug(arguments);
-                                if (settingsModel instanceof VideoSettings) {
-                                    var videoEmbed = new VideoEmbedView({
-                                        el: embedWrap,
-                                        model: settingsModel
-                                    });
-                                    videoEmbed.render();
-                                } else if (settingsModel instanceof PlaylistSettings) {
-                                    var playlistEmbed = new PlaylistEmbedView({
-                                        el: embedWrap,
-                                        model: settingsModel
-                                    });
-                                    playlistEmbed.render();
-                                } else if (settingsModel instanceof DropboxSettings) {
-                                    var dropboxEmbed = new DropboxEmbedView({
-                                        el: embedWrap,
-                                        model: settingsModel
-                                    });
-                                    dropboxEmbed.render();
-                                } else if (settingsModel instanceof QuizSettings) {
-                                    var quizEmbed = new QuizEmbedView({
-                                        el: embedWrap,
-                                        model: settingsModel
-                                    });
-                                    quizEmbed.render();
-                                } else {
-                                    throw new Error('Unrecognized settings model type');
-                                }
-                            };
-
-                            this.getEmbedCode = function(settings) {
-                                log.debug('[ev-script] getEmbedCode');
-                                log.debug(arguments);
-                                var $div = $('<div/>');
-                                if (settings.type === 'video') {
-                                    this.handleEmbed($div[0], new VideoSettings(settings));
-                                } else if (settings.type === 'playlist') {
-                                    this.handleEmbed($div[0], new PlaylistSettings(settings));
-                                } else if (settings.type === 'dropbox') {
-                                    this.handleEmbed($div[0], new DropboxSettings(settings));
-                                } else if (settings.type === 'quiz') {
-                                    this.handleEmbed($div[0], new QuizSettings(settings));
-                                } else {
-                                    throw new Error('Unrecognized settings model type');
-                                }
-                                return $div.html();
-                            };
+                            cacheUtil.setI18n(new Globalize(!messages[locale] ? 'en-US' : locale));
 
                             log.info('[ev-script] App loaded');
                             this.events.trigger('appLoaded');
                             loading.resolve();
-                        }
-                    }, this));
-                }, this))
-                .fail(_.bind(function() {
-                    loading.reject('An error occurred while connecting to the Ensemble Video API');
+                        }, this))
+                        .fail(function(xhr, status, error) {
+                            throw new Error('Failed to load i18n messages!');
+                        });
+                    }
                 }, this));
             }, this))
-            .fail(function(xhr, status, error) {
-                throw new Error('Failed to load i18n messages!');
-            });
+            .fail(_.bind(function() {
+                loading.reject('An error occurred while connecting to the Ensemble Video API');
+            }, this));
         }, this);
 
         // Setup auth
@@ -282,6 +223,84 @@ define(function(require) {
             silent: false,
             root: config.appRoot
         });
+
+        // TODO - document and add some flexibility to params (e.g. in addition
+        // to selector allow element or object).
+        this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
+            log.debug('[ev-script] handleField');
+            log.debug(arguments);
+            var $field = $(fieldSelector, fieldWrap),
+                fieldOptions = {
+                    id: fieldWrap.id || 'ev-field',
+                    el: fieldWrap,
+                    model: settingsModel,
+                    $field: $field
+                },
+                fieldView;
+            if (settingsModel instanceof VideoSettings) {
+                fieldView = new VideoFieldView(fieldOptions);
+            } else if (settingsModel instanceof PlaylistSettings) {
+                fieldView = new PlaylistFieldView(fieldOptions);
+            } else if (settingsModel instanceof DropboxSettings) {
+                fieldView = new DropboxFieldView(fieldOptions);
+            } else if (settingsModel instanceof QuizSettings) {
+                fieldView = new QuizFieldView(fieldOptions);
+            } else {
+                throw new Error('Unrecognized settings model type');
+            }
+        };
+
+        // TODO - document.  See handleField comment too.
+        this.handleEmbed = function(embedWrap, settingsModel) {
+            log.debug('[ev-script] handleEmbed');
+            log.debug(arguments);
+            if (settingsModel instanceof VideoSettings) {
+                var videoEmbed = new VideoEmbedView({
+                    el: embedWrap,
+                    model: settingsModel
+                });
+                videoEmbed.render();
+            } else if (settingsModel instanceof PlaylistSettings) {
+                var playlistEmbed = new PlaylistEmbedView({
+                    el: embedWrap,
+                    model: settingsModel
+                });
+                playlistEmbed.render();
+            } else if (settingsModel instanceof DropboxSettings) {
+                var dropboxEmbed = new DropboxEmbedView({
+                    el: embedWrap,
+                    model: settingsModel
+                });
+                dropboxEmbed.render();
+            } else if (settingsModel instanceof QuizSettings) {
+                var quizEmbed = new QuizEmbedView({
+                    el: embedWrap,
+                    model: settingsModel
+                });
+                quizEmbed.render();
+            } else {
+                throw new Error('Unrecognized settings model type');
+            }
+        };
+
+        this.getEmbedCode = function(settings) {
+            log.debug('[ev-script] getEmbedCode');
+            log.debug(arguments);
+            var $div = $('<div/>');
+            if (settings.type === 'video') {
+                this.handleEmbed($div[0], new VideoSettings(settings));
+            } else if (settings.type === 'playlist') {
+                this.handleEmbed($div[0], new PlaylistSettings(settings));
+            } else if (settings.type === 'dropbox') {
+                this.handleEmbed($div[0], new DropboxSettings(settings));
+            } else if (settings.type === 'quiz') {
+                this.handleEmbed($div[0], new QuizSettings(settings));
+            } else {
+                throw new Error('Unrecognized settings model type');
+            }
+            return $div.html();
+        };
+
     };
 
     return {

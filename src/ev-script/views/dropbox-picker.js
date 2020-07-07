@@ -73,7 +73,7 @@ define(function(require) {
                     organizationId: this.model.get('organizationId'),
                     libraryId: this.model.get('libraryId'),
                     search: searchVal,
-                    sortBy: 'title',
+                    sortBy: 'name',
                     pageSize: 20
                 }),
                 dropboxes = new Dropboxes({}, {

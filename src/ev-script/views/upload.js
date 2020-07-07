@@ -89,7 +89,7 @@ define(function(require) {
                     minNumberOfFiles: 1,
                     allowedFileTypes: this.extensions
                 },
-                locale: uppyLocales[this.config.getLocaleCallback() || 'en-US'],
+                locale: uppyLocales[this.config.locale || 'en-US'],
                 onBeforeUpload: _.bind(function (files) {
                     var title = this.$title.val(),
                         description = this.$description.val(),

@@ -155,7 +155,7 @@ define(function(require) {
                 displaySettings: this.settings,
                 label: label,
                 type: type,
-                name: this.model.get('content') && this.model.get('content').title || ''
+                name: this.model.get('content') && this.model.get('content').name || ''
             }));
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {

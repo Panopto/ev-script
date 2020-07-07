@@ -139,8 +139,7 @@ module.exports = function(grunt) {
         https = require('https'),
         fs = require('fs'),
         url = require('url'),
-        request = require('request'),
-        settings = require('./ev-config.js').evSettings;
+        request = require('request');
 
     grunt.registerTask('server', 'Demo server', function() {
         var port = 8000,

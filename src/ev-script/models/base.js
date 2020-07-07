@@ -58,7 +58,8 @@ define(function(require) {
             .then(_.bind(function(user) {
                 _.defaults(options || (options = {}), {
                     headers: {
-                        'Authorization': 'Bearer ' + (user ? user.access_token : '')
+                        'Authorization': 'Bearer ' + (user ? user.access_token : ''),
+                        'X-EV-InstitutionId': this.config.institutionId
                     },
                     dataType: 'json',
                     accepts: {

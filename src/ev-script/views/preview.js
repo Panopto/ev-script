@@ -60,7 +60,7 @@ define(function(require) {
             });
         },
         getTitle: function() {
-            return this.unencode(this.model.get('content').title);
+            return this.unencode(this.model.get('content').name);
         }
     });
 

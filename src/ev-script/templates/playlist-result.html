@@ -6,19 +6,19 @@
         </div>
         -->
         <div class="action-links">
-            <a class="action-add" href="#" title="<%= i18n.formatMessage('Click to choose {0}', item.get('title')) %>" rel="<%= item.get('id') %>">
+            <a class="action-add" href="#" title="<%= i18n.formatMessage('Click to choose {0}', item.get('name')) %>" rel="<%= item.get('id') %>">
                 <i class="fa fa-plus-circle fa-lg"></i><span><%= i18n.formatMessage('Choose') %></span>
             </a>
-            <a class="action-preview" href="#" title="<%= i18n.formatMessage('Click to preview {0}', item.get('title')) %>" rel="<%= item.get('id') %>">
+            <a class="action-preview" href="#" title="<%= i18n.formatMessage('Click to preview {0}', item.get('name')) %>" rel="<%= item.get('id') %>">
                 <i class="fa fa-play-circle fa-lg"></i><span><%= i18n.formatMessage('Preview') %></span>
             </a>
         </div>
     </div>
     <div class="content-meta">
         <div class="title">
-            <a class="action-preview" title="<%= i18n.formatMessage('Click to preview {0}', item.get('title')) %>" href="#" rel="<%= item.get('id') %>">
+            <a class="action-preview" title="<%= i18n.formatMessage('Click to preview {0}', item.get('name')) %>" href="#" rel="<%= item.get('id') %>">
                 <% if (item.get('isRestricted')) { print('<span class="item-security"><i class="fa fa-lock fa-lg"></i></span>'); } %>
-                <%= item.get('title') %>
+                <%= item.get('name') %>
             </a>
         </div>
         <div class="content-info">

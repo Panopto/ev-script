@@ -33,7 +33,7 @@ define(function(require) {
                 silent_redirect_uri: window.location.origin + URI.joinPaths(this.config.appRoot, 'auth/silentCallback'),
                 post_logout_redirect_uri: window.location.origin + URI.joinPaths(this.config.appRoot, 'auth/logoutCallback'),
                 response_type: 'code',
-                scope: 'openid email profile hapi offline_access',
+                scope: 'openid email profile all offline_access',
                 loadUserInfo: true,
                 automaticSilentRenew: false,
                 filterProtocolClaims: true,

@@ -16,7 +16,7 @@ define(function(require) {
                 frameHeight = this.getFrameHeight(),
                 isAudio = this.model.get('isaudio'),
                 embedType = this.model.get('embedtype'),
-                title = this.model.get('content').title,
+                title = this.model.get('content').name,
                 embed;
 
             if (embedType === 'fixed') {

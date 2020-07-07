@@ -57,7 +57,7 @@ define(function(require) {
         },
         render: function(isPreview) {
             var embedType = this.model.get('embedtype'),
-                title = this.model.get('content').title,
+                title = this.model.get('content').name,
                 embed;
             if (this.isEmbedSupported()) {
                 if (embedType === 'fixed') {
@@ -76,7 +76,7 @@ define(function(require) {
             } else {
                 embed = this.legacyTemplate({
                     'src': this.getUrl(),
-                    'title': this.model.get('content').title
+                    'title': this.model.get('content').name
                 });
             }
             this.$el.html(embed);
