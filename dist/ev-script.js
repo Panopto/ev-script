@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.0 2020-07-07
+ * ev-script 2.3.0 2020-07-10
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -26540,6 +26540,7 @@ return {
         "Your changes haven't been saved!": "Your changes haven't been saved!",
         "unknown": "Unknown",
         "uploaded": "Uploaded",
+        "uploading": "Uploading",
         "renamed": "Renamed",
         "pending_processing": "Pending Processing",
         "waiting_for_conversion": "Waiting For Conversion",
@@ -30537,79 +30538,66 @@ define('ev-script/util/cache',['require','jquery','underscore','backbone','ev-sc
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        eventsUtil = require('ev-script/util/events');
-
-    var Cache = function() {
-        this.cache = {};
-        this.get = function(index) {
-            return index ? this.cache[index] : null;
-        };
-        this.set = function(index, value) {
-            return index ? this.cache[index] = value : null;
-        };
-        this.clear = function() {
+        eventsUtil = require('ev-script/util/events'),
+        Cache = function() {
             this.cache = {};
-        };
-        return this;
-    };
+            this.get = function(index) {
+                return index ? this.cache[index] : null;
+            };
+            this.set = function(index, value) {
+                return index ? this.cache[index] = value : null;
+            };
+            this.clear = function() {
+                this.cache = {};
+            };
+            return this;
+        },
+        caches = new Cache(),
+        getCache = function(cacheName, skipInit) {
+            var appCache;
+            cacheName = cacheName || 'app';
+            appCache = caches.get(cacheName);
+            if (!appCache && !skipInit) {
+                appCache = caches.set(cacheName, new Cache());
+            }
+            return appCache;
+        },
+        // Convenience method to initialize a cache for app-specific configuration
+        setConfig = function(config) {
+            return getCache().set('config', config);
+        },
+        getConfig = function() {
+            return getCache().get('config');
+        },
+        // Convenience method to initialize a cache for upstream application info
+        setInfo = function(info) {
+            return getCache().set('info', info);
+        },
+        getInfo = function() {
+            return getCache().get('info');
+        },
+        setI18n = function(i18n) {
+            return getCache().set('i18n', i18n);
+        },
+        getI18n = function() {
+            return getCache().get('i18n');
+        },
+        setRoot = function(root) {
+            return getCache().set('root', root);
+        },
+        getRoot = function() {
+            return getCache().get('root');
+        },
+        setAuth = function(auth) {
+            return getCache().set('auth', auth);
+        },
+        getAuth = function() {
+            return getCache().get('auth');
+        },
+        events = eventsUtil.getEvents();
 
-    var caches = new Cache();
-
-    var getCache = function(cacheName, skipInit) {
-        var appCache;
-        cacheName = cacheName || 'app';
-        appCache = caches.get(cacheName);
-        if (!appCache && !skipInit) {
-            appCache = caches.set(cacheName, new Cache());
-        }
-        return appCache;
-    };
-
-    // Convenience method to initialize a cache for app-specific configuration
-    var setConfig = function(config) {
-        return getCache().set('config', config);
-    };
-
-    var getConfig = function() {
-        return getCache().get('config');
-    };
-
-    // Convenience method to initialize a cache for upstream application info
-    var setInfo = function(info) {
-        return getCache().set('info', info);
-    };
-
-    var getInfo = function() {
-        return getCache().get('info');
-    };
-
-    var setI18n = function(i18n) {
-        return getCache().set('i18n', i18n);
-    };
-
-    var getI18n = function() {
-        return getCache().get('i18n');
-    };
-
-    var setRoot = function(root) {
-        return getCache().set('root', root);
-    };
-
-    var getRoot = function() {
-        return getCache().get('root');
-    };
-
-    var setAuth = function(auth) {
-        return getCache().set('auth', auth);
-    };
-
-    var getAuth = function() {
-        return getCache().get('auth');
-    };
-
-    var events = eventsUtil.getEvents();
-    events.on('loggedOut', function() {
-        // Clear all caches except the default 'app' cache on logout
+    events.on('loggedIn loggedOut', function() {
+        // Clear all caches except the default 'app' cache on auth events
         var appCache = getCache(),
             root = getRoot();
         _.each(caches.cache, function(cache) {
@@ -30882,12 +30870,26 @@ define('ev-script/views/base',['require','jquery','underscore','loglevel','backb
 
     return Backbone.View.extend({
         initialize: function(options) {
+            _.bindAll(this, 'destroy', 'ajaxError', 'trigger');
+
             this.config = cacheUtil.getConfig();
             this.root = cacheUtil.getRoot();
             this.info = cacheUtil.getInfo();
             this.events = eventsUtil.getEvents();
             this.i18n = cacheUtil.getI18n();
             this.auth = cacheUtil.getAuth();
+
+            this.events.on('destroy', this.destroy);
+
+            this.events.on('localeUpdated', _.bind(function(i18n) {
+                this.i18n = i18n;
+            }, this));
+        },
+        destroy: function(context) {
+            if (this.field && this.field === context) {
+                this.undelegateEvents();
+                this.remove();
+            }
         },
         ajaxError: function(collection, xhr, options) {
             if (xhr.status === 401) {
@@ -30940,27 +30942,11 @@ define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-s
             'previewHandler', 'getPickerInstance', 'getSettingsInstance',
             'getPreviewInstance', 'updateField', 'getFieldType',
             'getFieldLabel', 'itemChosenHandler', 'getActionsHtml',
-            'initCallback', 'loginHandler');
+            'initCallback', 'loginHandler', 'handleLogin', '_init');
 
             this.$field = options.$field;
             this.$el.addClass('ev-field-wrap');
             this.showChoose = true;
-
-            var pickerOptions = {
-                    id: this.id + '-picker',
-                    tagName: 'div',
-                    className: 'ev-' + this.model.get('type') + '-picker',
-                    field: this
-                },
-                settingsOptions = {
-                    id: this.id + '-settings',
-                    tagName: 'div',
-                    className: 'ev-settings',
-                    field: this
-                };
-
-            // Subclasses may need to prepare before we start instantiation of views
-            this.initCallback();
 
             this.events.on('showPicker', function(fieldId) {
                 if (this.id === fieldId) {
@@ -30988,31 +30974,66 @@ define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-s
             this.events.on('itemChosen', this.itemChosenHandler);
 
             this.events.on('loggedOut', _.bind(function() {
-                this.$('.ev-field-message')
-                .html(this.i18n.formatMessage('You must {0}login{1} in order to use this tool.',
-                    '<a role="link" tabindex="0" class="login-link"><b>', '</b></a>'))
-                .show();
+                // Wait for our root to reload
+                this.root.promise.done(_.bind(function() {
+                    this.$('.action-remove').click();
+                    this.$('.ev-field-message')
+                    .html(this.i18n.formatMessage('You must {0}login{1} in order to use this tool.',
+                        '<a role="link" tabindex="0" class="login-link"><b>', '</b></a>'))
+                    .show();
+                }, this));
             }, this));
-            this.events.on('loggedIn', _.bind(function() {
-                this.$('.ev-field-message')
-                .empty()
-                .hide();
+
+            this.events.on('loggedIn', _.bind(function(silent) {
+                this.$('.ev-field-message').empty().hide();
             }, this));
+
+            this.events.on('localeReset', _.bind(function() {
+                this.reloadField();
+            }, this));
+
+            this.handleLogin(true);
+        },
+        _init: function() {
+            var pickerOptions = {
+                    id: this.id + '-picker',
+                    tagName: 'div',
+                    className: 'ev-' + this.model.get('type') + '-picker',
+                    field: this
+                },
+                settingsOptions = {
+                    id: this.id + '-settings',
+                    tagName: 'div',
+                    className: 'ev-settings',
+                    field: this
+                };
+
+            if (this.initialized) {
+                log.debug('[views/field] Field already initialized');
+                return;
+            }
+
+            this.initialized = true;
 
             this.picker = this.getPickerInstance(pickerOptions);
             this.settings = this.getSettingsInstance(settingsOptions);
             this.$field.after(this.picker.$el);
+
             this.renderActions();
 
-            this.loginCallback = _.bind(function() {
-                return this.root.fetch();
-            }, this);
-
-            // Authentication check
-            this.authenticating = this.auth.doAuthenticate(this.loginCallback);
+            this.events.trigger('showPicker', this.id);
 
             log.debug('[views/field] Field initialized');
             log.debug(this);
+        },
+        destroy: function() {},
+        reloadField: function() {
+            log.debug('[views/field] Reloading field');
+            this.$actions.remove();
+            this.$actions = undefined;
+            this.events.trigger('destroy', this);
+            this.initialized = false;
+            this.handleLogin();
         },
         events: {
             'click .ev-field .action-choose': 'chooseHandler',
@@ -31052,13 +31073,22 @@ define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-s
             e.preventDefault();
         },
         loginHandler: function(e) {
-            if (this.authenticating.state() !== 'pending') {
-                this.authenticating = this.auth.doAuthenticate(this.loginCallback);
-            }
-            this.authenticating.done(_.bind(function() {
-                this.events.trigger('showPicker', this.id);
-            }, this));
+            this.handleLogin(true);
             e.preventDefault();
+        },
+        handleLogin: function(attemptLogin) {
+            this.root.promise.done(_.bind(function() {
+                if (!this.root.getUser()) {
+                    this.renderActions();
+                    if (attemptLogin) {
+                        this.auth.doAuthenticate();
+                    }
+                } else {
+                    // Subclasses may need to prepare before we start instantiation of views
+                    this.initCallback();
+                    this._init();
+                }
+            }, this));
         },
         renderActions: function() {
             var ensembleUrl = this.config.ensembleUrl,
@@ -32341,17 +32371,13 @@ define('ev-script/views/hider',['require','jquery','underscore','ev-script/views
         template: _.template(require('text!ev-script/templates/hider.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'hideHandler', 'logoutHandler', 'authHandler', 'render');
-            this.events.on('loggedIn', this.authHandler);
-            this.events.on('loggedOut', this.authHandler);
+            _.bindAll(this, 'hideHandler', 'logoutHandler', 'render');
+            this.events.on('loggedOut', this.render);
             this.field = options.field;
         },
         events: {
             'click a.action-hide': 'hideHandler',
             'click a.action-logout': 'logoutHandler'
-        },
-        authHandler: function() {
-            this.render();
         },
         render: function() {
             this.root.promise.always(_.bind(function() {
@@ -55722,11 +55748,12 @@ var Version = "1.10.1";exports.Version = Version;
 /******/ });
 });
 
-define('ev-script/routers/auth',['require','underscore','backbone'],function(require) {
+define('ev-script/routers/auth',['require','underscore','loglevel','backbone'],function(require) {
 
     'use strict';
 
     var _ = require('underscore'),
+        log = require('loglevel'),
         Backbone = require('backbone');
 
     return Backbone.Router.extend({
@@ -55744,15 +55771,19 @@ define('ev-script/routers/auth',['require','underscore','backbone'],function(req
             'auth/logoutCallback': 'logoutCallback'
         },
         default: function() {
+            log.info('[routers/auth] default route');
             this.defaultCallback();
         },
         popupCallback: function() {
+            log.info('[routers/auth] popupCallback route');
             this.userManager.signinPopupCallback();
         },
         silentCallback: function() {
+            log.info('[routers/auth] silentCallback route');
             this.userManager.signinSilentCallback();
         },
         logoutCallback: function() {
+            log.info('[routers/auth] logoutCallback route');
             this.userManager.signoutPopupCallback();
         }
     });
@@ -55775,7 +55806,7 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
             this.events = options.events;
 
             oidc.Log.logger = console;
-            oidc.Log.level = oidc.Log.DEBUG;
+            // oidc.Log.level = oidc.Log.DEBUG;
 
             // If access to localStorage is blocked...fallback to in-memory
             try {
@@ -55806,6 +55837,9 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
                 console.log(e);
             });
 
+            // Start silent renew
+            this.userManager.startSilentRenew();
+
             this.authRouter = new AuthRouter({
                 userManager: this.userManager,
                 defaultCallback: options.callback,
@@ -55813,32 +55847,24 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
             });
         };
 
-    // loginCallback is optional function which returns jquery promise
-    // Allows action after user is loaded but prior to authentication completion
-    Auth.prototype.doAuthenticate = function(loginCallback) {
-        var deferred = $.Deferred(),
-            loggedInHandler = _.bind(function(user) {
+    Auth.prototype.doAuthenticate = function() {
+        var loggedInHandler = _.bind(function(user, silent) {
                 log.debug('[doAuthenticate] Found user');
                 log.debug(user);
-                if (loginCallback) {
-                    loginCallback().always(_.bind(function() {
-                        this.events.trigger('loggedIn');
-                        deferred.resolve();
-                    }, this));
-                }
-
-                // Start silent renew
-                this.userManager.startSilentRenew();
+                this.events.trigger('loggedIn', silent);
+                this.deferred.resolve();
             }, this),
             loggedOutHandler = _.bind(function(err) {
                 log.debug('[doAuthenticate] No user found...triggering loggedOut');
                 this.events.trigger('loggedOut');
-                deferred.reject();
+                this.deferred.reject();
             }, this),
             loginHandler = _.bind(function() {
                 log.debug('[doAuthenticate] No user found...attempting silent sign-in');
                 this.userManager.signinSilent()
-                .then(loggedInHandler)
+                .then(function(user) {
+                    loggedInHandler(user, true);
+                })
                 .catch(_.bind(function(err) {
                     log.debug('[doAuthenticate] No user found...attempting pop-up sign-in');
 
@@ -55859,23 +55885,26 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
                 }, this));
             }, this);
 
-        log.debug('[doAuthenticate] Checking for user');
+        if (!this.deferred || this.deferred.state() !== 'pending') {
+            this.deferred = $.Deferred();
+            log.debug('[doAuthenticate] Checking for user');
 
-        this.userManager.getUser()
-        .then(_.bind(function(user) {
-            if (!user || user.expired) {
-                loginHandler();
-            } else if (this.config.currentUserId && this.config.currentUserId !== user.profile.sub) {
-                this.userManager.removeUser().then(loginHandler);
-            } else {
-                loggedInHandler(user);
-            }
-        }, this))
-        .catch(_.bind(function(err) {
-            log.error(err);
-        }, this));
+            this.userManager.getUser()
+            .then(_.bind(function(user) {
+                if (!user || user.expired) {
+                    loginHandler();
+                } else if (this.config.currentUserId && this.config.currentUserId !== user.profile.sub) {
+                    this.userManager.removeUser().then(loginHandler);
+                } else {
+                    loggedInHandler(user, true);
+                }
+            }, this))
+            .catch(_.bind(function(err) {
+                log.error(err);
+            }, this));
+        }
 
-        return deferred;
+        return this.deferred.promise();
     };
 
     Auth.prototype.logout = function() {
@@ -58445,10 +58474,14 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
                 clientId: ''
             },
             config,
+            events,
+            i18n,
+            setLocale,
             loading,
             userManager,
             loadApp,
-            auth;
+            auth,
+            root;
 
         config = _.extend({}, defaults, appOptions);
 
@@ -58458,6 +58491,9 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
 
         // Make sure appRoot has trailing slash
         config.appRoot = /\/$/.test(config.appRoot) ? config.appRoot : config.appRoot + '/';
+
+        // Setup globalize
+        Globalize.load(likelySubtags);
 
         // See if we have localStorage available
         try {
@@ -58480,9 +58516,71 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
         _.extend(this, loading.promise());
 
         // Create an event aggregator specific to our app
-        this.events = eventsUtil.getEvents();
+        this.events = events = eventsUtil.getEvents();
 
-        loadApp = _.bind(function() {
+        setLocale = function(silent) {
+            var deferred = $.Deferred(),
+                currentUser,
+                locale,
+                localizationPreferences,
+                desiredLanguages;
+
+            root.promise.done(function() {
+                currentUser = root.getUser();
+                if (currentUser) {
+                    localizationPreferences = currentUser
+                        .getEmbedded('ev:LocalizationPreferences/Get');
+                    locale = localizationPreferences.get('language');
+                } else if (navigator.languages) {
+                    desiredLanguages = _.intersection(navigator.languages, supportedLanguages);
+                    locale = desiredLanguages[0];
+                }
+                // Fall back to branding settings if user not authenticated or browser languages don't resolve
+                if (!locale) {
+                    localizationPreferences = root
+                        .getEmbedded('ev:Brandings/Current')
+                        .getEmbedded('ev:LocalizationPreferences/Get');
+                    locale = localizationPreferences.get('language');
+                }
+
+                log.debug('[ev-script] Locale: ' + locale);
+
+                if (config.locale === locale) {
+                    deferred.resolve(cacheUtil.getI18n());
+                    return deferred.promise();
+                }
+
+                config.locale = locale;
+                moment.locale(locale);
+
+                // Load messages for locale
+                log.info('[ev-script] Retrieving localized messages');
+                $.getJSON(config.i18nPath + '/' + locale + '/messages.json')
+                .done(function(data, status, xhr) {
+                    _.extend(messages, data);
+
+                    Globalize.loadMessages(messages);
+
+                    i18n = new Globalize(!messages[locale] ? 'en-US' : locale);
+                    cacheUtil.setI18n(i18n);
+
+                    if (!silent) {
+                        events.trigger('localeUpdated', i18n);
+                    }
+
+                    deferred.resolve(i18n);
+                })
+                .fail(function(xhr, status, error) {
+                    deferred.reject();
+                    throw new Error('Failed to load i18n messages!');
+                });
+            });
+
+
+            return deferred.promise();
+        };
+
+        loadApp = function() {
 
             log.info('[ev-script] Loading app');
 
@@ -58495,80 +58593,64 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
             cacheUtil.setConfig(config);
 
             // Setup our api root resource
-            var root = new Root({}, {
+            root = new Root({}, {
                 href: config.ensembleUrl + config.apiPath
             });
 
             cacheUtil.setRoot(root);
 
             root.fetch({})
-            .done(_.bind(function() {
+            .done(function() {
                 var info = new Info({}, {
-                    href: root.getLink('ev:Info/Get').href
-                });
+                        href: root.getLink('ev:Info/Get').href
+                    }),
+                    resetLocale = function() {
+                        root.promise.done(function() {
+                            var currentI18n = _.extend({}, i18n);
+                            log.debug('[ev-script] Resetting locale');
+                            setLocale()
+                            .then(function(newI18n) {
+                                if (currentI18n.cldr.locale !== newI18n.cldr.locale) {
+                                    log.debug('[ev-script] Locale reset');
+                                    events.trigger('localeReset');
+                                }
+                            });
+                        });
+                    };
+
                 cacheUtil.setInfo(info);
 
                 // Load application info from EV
                 info.fetch({})
-                .always(_.bind(function() {
-                    var currentUser,
-                        locale,
-                        localizationPreferences,
-                        desiredLanguages;
+                .always(function() {
                     if (!info.get('applicationVersion')) {
                         loading.reject('Failed to retrieve application info.');
                     } else {
-                        currentUser = root.getEmbedded('ev:Users/Current');
-                        if (currentUser) {
-                            localizationPreferences = currentUser
-                                .getEmbedded('ev:LocalizationPreferences/Get');
-                            locale = localizationPreferences.get('language');
-                        } else if (navigator.languages) {
-                            desiredLanguages = _.intersection(navigator.languages, supportedLanguages);
-                            locale = desiredLanguages[0];
-                        }
-                        // Fall back to branding settings if user not authenticated or browser languages don't resolve
-                        if (!locale) {
-                            localizationPreferences = root
-                                .getEmbedded('ev:Brandings/Current')
-                                .getEmbedded('ev:LocalizationPreferences/Get');
-                            locale = localizationPreferences.get('language');
-                        }
-                        log.debug('[ev-script] Locale: ' + locale);
-                        config.locale = locale;
-                        moment.locale(locale);
+                        // Auth events may impact rendered localized messages so reload
+                        events.on('loggedIn', resetLocale);
+                        events.on('loggedOut', resetLocale);
 
-                        // Load messages for locale
-                        log.info('[ev-script] Retreiving localized messages');
-                        $.getJSON(config.i18nPath + '/' + locale + '/messages.json')
-                        .done(_.bind(function(data, status, xhr) {
-                            _.extend(messages, data);
-
-                            // Setup globalize
-                            Globalize.load(likelySubtags);
-                            Globalize.loadMessages(messages);
-
-                            cacheUtil.setI18n(new Globalize(!messages[locale] ? 'en-US' : locale));
-
+                        setLocale(true)
+                        .done(function(data, status, xhr) {
                             log.info('[ev-script] App loaded');
-                            this.events.trigger('appLoaded');
+                            events.trigger('appLoaded');
                             loading.resolve();
-                        }, this))
+                        })
                         .fail(function(xhr, status, error) {
-                            throw new Error('Failed to load i18n messages!');
+                            throw new Error('Failed to load app!');
                         });
                     }
-                }, this));
-            }, this))
-            .fail(_.bind(function() {
+                });
+            })
+            .fail(function() {
                 loading.reject('An error occurred while connecting to the Ensemble Video API');
-            }, this));
-        }, this);
+            });
+        };
 
         // Setup auth
         auth = new AuthUtil({
             config: config,
-            events: this.events,
+            events: events,
             callback: loadApp
         });
 
@@ -58581,8 +58663,6 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
         // TODO - document and add some flexibility to params (e.g. in addition
         // to selector allow element or object).
         this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
-            log.debug('[ev-script] handleField');
-            log.debug(arguments);
             var $field = $(fieldSelector, fieldWrap),
                 fieldOptions = {
                     id: fieldWrap.id || 'ev-field',
@@ -58591,6 +58671,10 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
                     $field: $field
                 },
                 fieldView;
+
+            log.debug('[ev-script] handleField');
+            log.debug(arguments);
+
             if (settingsModel instanceof VideoSettings) {
                 fieldView = new VideoFieldView(fieldOptions);
             } else if (settingsModel instanceof PlaylistSettings) {
@@ -58602,6 +58686,7 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
             } else {
                 throw new Error('Unrecognized settings model type');
             }
+
         };
 
         // TODO - document.  See handleField comment too.
@@ -58655,6 +58740,9 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
             return $div.html();
         };
 
+        this.getI18n = function() {
+            return i18n;
+        };
     };
 
     return {
