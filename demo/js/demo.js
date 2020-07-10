@@ -3,48 +3,6 @@
 
     'use strict';
 
-    var app = new EV.EnsembleApp({
-        ensembleUrl: 'https://cloud.ensemblevideo.com',
-        pageSize: 10,
-        institutionId: '52AF905C-187A-4405-AB61-0BBEC3E7E62F',
-        clientId: 'ev-lti-chooser',
-        scrollHeight: 200,
-        fitToParent: true,
-        getDateFormatCallback: function() { return 'DD/MM/YYYY'; },
-        getTimeFormatCallback: function() { return 'hh:mm A'; },
-        i18nPath: '/src/ev-script/i18n',
-        imagePath: '/assets/css/images',
-        appRoot: '/demo',
-        loglevel: 'debug'
-    });
-
-    // Sample default overrides
-    // EV.DropboxSettings.prototype.defaults.width = '480';
-    // EV.DropboxSettings.prototype.defaults.height = '820';
-    // EV.DropboxSettings.prototype.defaults.embedtype = 'responsive';
-    // EV.PlaylistSettings.prototype.defaults.embedtype = 'responsive';
-    // EV.PlaylistSettings.prototype.defaults.forceembedtype = true;
-
-    app.events.bind('fieldUpdated', function($field, value) {
-        var $embeds = $('.embed'),
-            type = $field[0].id,
-            $embed = $embeds.filter('.' + type);
-        if (value) {
-            if (type === 'video') {
-                app.handleEmbed($embed, new EV.VideoSettings(value));
-            } else if (type === 'playlist') {
-                app.handleEmbed($embed, new EV.PlaylistSettings(value));
-            } else if (type === 'dropbox') {
-                app.handleEmbed($embed, new EV.DropboxSettings(value));
-            } else if (type === 'quiz') {
-                app.handleEmbed($embed, new EV.QuizSettings(value));
-            }
-            console.log('Embed code: ' + app.getEmbedCode(value));
-        } else {
-            $embed.html('');
-        }
-    });
-
     $(document).ready(function() {
         var $container = $('.chooserContainer'),
             $tabs = $('#tabs'),
@@ -58,11 +16,75 @@
             resize = function(event) {
                 $container.height($(window).height() * 0.8);
                 $tabs.tabs('refresh');
+            },
+            app = new EV.EnsembleApp({
+                ensembleUrl: 'https://cloud.ensemblevideo.com',
+                pageSize: 10,
+                institutionId: '52AF905C-187A-4405-AB61-0BBEC3E7E62F',
+                clientId: 'ev-lti-chooser',
+                scrollHeight: 200,
+                fitToParent: true,
+                // TODO - remove
+                getDateFormatCallback: function() { return 'DD/MM/YYYY'; },
+                getTimeFormatCallback: function() { return 'hh:mm A'; },
+                i18nPath: '/src/ev-script/i18n',
+                imagePath: '/assets/css/images',
+                appRoot: '/demo',
+                logLevel: 'debug'
+            }),
+            updateTabI18n = function() {
+                var $tabsList = $('.tabsList', $tabs),
+                    $videosAnchor = $('.videosTab a', $tabsList),
+                    $playlistsAnchor = $('.playlistsTab a', $tabsList),
+                    $dropboxesAnchor = $('.dropboxesTab a', $tabsList),
+                    $quizzesAnchor = $('.quizzesTab a', $tabsList),
+                    i18n = app.getI18n(),
+                    videoI18n = i18n.formatMessage('Media'),
+                    playlistI18n = i18n.formatMessage('Playlist'),
+                    dropboxI18n = i18n.formatMessage('Dropbox'),
+                    quizI18n = i18n.formatMessage('Quiz');
+
+                $videosAnchor.text(i18n.formatMessage('Choose {0}', videoI18n));
+                $playlistsAnchor.text(i18n.formatMessage('Choose {0}', playlistI18n));
+                $dropboxesAnchor.text(i18n.formatMessage('Choose {0}', dropboxI18n));
+                $quizzesAnchor.text(i18n.formatMessage('Choose {0}', quizI18n));
             };
+
+        // Sample default overrides
+        // EV.DropboxSettings.prototype.defaults.width = '480';
+        // EV.DropboxSettings.prototype.defaults.height = '820';
+        // EV.DropboxSettings.prototype.defaults.embedtype = 'responsive';
+        // EV.PlaylistSettings.prototype.defaults.embedtype = 'responsive';
+        // EV.PlaylistSettings.prototype.defaults.forceembedtype = true;
+
+        app.events.on('fieldUpdated', function($field, value) {
+            var $embeds = $('.embed'),
+                type = $field[0].id,
+                $embed = $embeds.filter('.' + type);
+            if (value) {
+                if (type === 'video') {
+                    app.handleEmbed($embed, new EV.VideoSettings(value));
+                } else if (type === 'playlist') {
+                    app.handleEmbed($embed, new EV.PlaylistSettings(value));
+                } else if (type === 'dropbox') {
+                    app.handleEmbed($embed, new EV.DropboxSettings(value));
+                } else if (type === 'quiz') {
+                    app.handleEmbed($embed, new EV.QuizSettings(value));
+                }
+                console.log('Embed code: ' + app.getEmbedCode(value));
+            } else {
+                $embed.html('');
+            }
+        });
+
+        app.events.on('localeUpdated', function() {
+            updateTabI18n();
+        });
 
         $(window).resize(resize);
 
         app.done(function() {
+            updateTabI18n();
             app.handleField($videoWrap[0], new EV.VideoSettings(), '#video');
             $('.action-choose', $videoWrap).click();
             $tabs.tabs({

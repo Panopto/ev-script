@@ -15,7 +15,7 @@ define(function(require) {
             this.events = options.events;
 
             oidc.Log.logger = console;
-            oidc.Log.level = oidc.Log.DEBUG;
+            // oidc.Log.level = oidc.Log.DEBUG;
 
             // If access to localStorage is blocked...fallback to in-memory
             try {
@@ -46,6 +46,9 @@ define(function(require) {
                 console.log(e);
             });
 
+            // Start silent renew
+            this.userManager.startSilentRenew();
+
             this.authRouter = new AuthRouter({
                 userManager: this.userManager,
                 defaultCallback: options.callback,
@@ -53,32 +56,24 @@ define(function(require) {
             });
         };
 
-    // loginCallback is optional function which returns jquery promise
-    // Allows action after user is loaded but prior to authentication completion
-    Auth.prototype.doAuthenticate = function(loginCallback) {
-        var deferred = $.Deferred(),
-            loggedInHandler = _.bind(function(user) {
+    Auth.prototype.doAuthenticate = function() {
+        var loggedInHandler = _.bind(function(user, silent) {
                 log.debug('[doAuthenticate] Found user');
                 log.debug(user);
-                if (loginCallback) {
-                    loginCallback().always(_.bind(function() {
-                        this.events.trigger('loggedIn');
-                        deferred.resolve();
-                    }, this));
-                }
-
-                // Start silent renew
-                this.userManager.startSilentRenew();
+                this.events.trigger('loggedIn', silent);
+                this.deferred.resolve();
             }, this),
             loggedOutHandler = _.bind(function(err) {
                 log.debug('[doAuthenticate] No user found...triggering loggedOut');
                 this.events.trigger('loggedOut');
-                deferred.reject();
+                this.deferred.reject();
             }, this),
             loginHandler = _.bind(function() {
                 log.debug('[doAuthenticate] No user found...attempting silent sign-in');
                 this.userManager.signinSilent()
-                .then(loggedInHandler)
+                .then(function(user) {
+                    loggedInHandler(user, true);
+                })
                 .catch(_.bind(function(err) {
                     log.debug('[doAuthenticate] No user found...attempting pop-up sign-in');
 
@@ -99,23 +94,26 @@ define(function(require) {
                 }, this));
             }, this);
 
-        log.debug('[doAuthenticate] Checking for user');
+        if (!this.deferred || this.deferred.state() !== 'pending') {
+            this.deferred = $.Deferred();
+            log.debug('[doAuthenticate] Checking for user');
 
-        this.userManager.getUser()
-        .then(_.bind(function(user) {
-            if (!user || user.expired) {
-                loginHandler();
-            } else if (this.config.currentUserId && this.config.currentUserId !== user.profile.sub) {
-                this.userManager.removeUser().then(loginHandler);
-            } else {
-                loggedInHandler(user);
-            }
-        }, this))
-        .catch(_.bind(function(err) {
-            log.error(err);
-        }, this));
+            this.userManager.getUser()
+            .then(_.bind(function(user) {
+                if (!user || user.expired) {
+                    loginHandler();
+                } else if (this.config.currentUserId && this.config.currentUserId !== user.profile.sub) {
+                    this.userManager.removeUser().then(loginHandler);
+                } else {
+                    loggedInHandler(user, true);
+                }
+            }, this))
+            .catch(_.bind(function(err) {
+                log.error(err);
+            }, this));
+        }
 
-        return deferred;
+        return this.deferred.promise();
     };
 
     Auth.prototype.logout = function() {

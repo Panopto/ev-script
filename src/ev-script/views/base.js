@@ -11,12 +11,26 @@ define(function(require) {
 
     return Backbone.View.extend({
         initialize: function(options) {
+            _.bindAll(this, 'destroy', 'ajaxError', 'trigger');
+
             this.config = cacheUtil.getConfig();
             this.root = cacheUtil.getRoot();
             this.info = cacheUtil.getInfo();
             this.events = eventsUtil.getEvents();
             this.i18n = cacheUtil.getI18n();
             this.auth = cacheUtil.getAuth();
+
+            this.events.on('destroy', this.destroy);
+
+            this.events.on('localeUpdated', _.bind(function(i18n) {
+                this.i18n = i18n;
+            }, this));
+        },
+        destroy: function(context) {
+            if (this.field && this.field === context) {
+                this.undelegateEvents();
+                this.remove();
+            }
         },
         ajaxError: function(collection, xhr, options) {
             if (xhr.status === 401) {

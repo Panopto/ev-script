@@ -161,6 +161,7 @@
         "Your changes haven't been saved!": "¡Tus cambios no han sido guardados!",
         "unknown": "Desconocido",
         "uploaded": "Cargado",
+        "uploading": "Cargando",
         "renamed": "Renombrado",
         "pending_processing": "Procesamiento Pendiente",
         "waiting_for_conversion": "Esperando para Conversión",

@@ -14,13 +14,13 @@
     <h3>Ensemble Video - Integration Example</h3>
     <div class="chooserContainer">
       <div id="tabs" style="display:none;">
-        <ul>
-          <li><a href="#videosTab">Choose Media</a></li>
-          <li><a href="#playlistsTab">Choose Playlist</a></li>
-          <li><a href="#dropboxesTab">Choose Dropbox</a></li>
-          <li><a href="#quizzesTab">Choose Quiz</a></li>
+        <ul class="tabsList">
+          <li class="videosTab"><a href="#videosPanel">Choose Media</a></li>
+          <li class="playlistsTab"><a href="#playlistsPanel">Choose Playlist</a></li>
+          <li class="dropboxesTab"><a href="#dropboxesPanel">Choose Dropbox</a></li>
+          <li class="quizzesTab"><a href="#quizzesPanel">Choose Quiz</a></li>
         </ul>
-        <div id="videosTab" class="chooserTab">
+        <div id="videosPanel" class="chooserPanel">
           <h2 style="display: none;">Choose Media</h2>
           <form>
             <div role="group" id="videoWrap">
@@ -29,7 +29,7 @@
             </div>
           </form>
         </div>
-        <div id="playlistsTab" class="chooserTab">
+        <div id="playlistsPanel" class="chooserPanel">
           <h2 style="display: none;">Choose Playlist</h2>
           <form>
             <div role="group" id="playlistWrap">
@@ -38,7 +38,7 @@
             </div>
           </form>
         </div>
-        <div id="dropboxesTab" class="chooserTab">
+        <div id="dropboxesPanel" class="chooserPanel">
           <h2 style="display: none;">Choose Dropbox</h2>
           <form>
             <div role="group" id="dropboxWrap">
@@ -47,7 +47,7 @@
             </div>
           </form>
         </div>
-        <div id="quizzesTab" class="chooserTab">
+        <div id="quizzesPanel" class="chooserPanel">
           <h2 style="display: none;">Choose Quiz</h2>
           <form>
             <div role="group" id="quizWrap">

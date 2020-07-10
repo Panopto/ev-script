@@ -3,6 +3,7 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
+        log = require('loglevel'),
         Backbone = require('backbone');
 
     return Backbone.Router.extend({
@@ -20,15 +21,19 @@ define(function(require) {
             'auth/logoutCallback': 'logoutCallback'
         },
         default: function() {
+            log.info('[routers/auth] default route');
             this.defaultCallback();
         },
         popupCallback: function() {
+            log.info('[routers/auth] popupCallback route');
             this.userManager.signinPopupCallback();
         },
         silentCallback: function() {
+            log.info('[routers/auth] silentCallback route');
             this.userManager.signinSilentCallback();
         },
         logoutCallback: function() {
+            log.info('[routers/auth] logoutCallback route');
             this.userManager.signoutPopupCallback();
         }
     });

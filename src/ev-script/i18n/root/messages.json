@@ -161,6 +161,7 @@
         "Your changes haven't been saved!": "Your changes haven't been saved!",
         "unknown": "Unknown",
         "uploaded": "Uploaded",
+        "uploading": "Uploading",
         "renamed": "Renamed",
         "pending_processing": "Pending Processing",
         "waiting_for_conversion": "Waiting For Conversion",

@@ -91,10 +91,14 @@ define(function(require) {
                 clientId: ''
             },
             config,
+            events,
+            i18n,
+            setLocale,
             loading,
             userManager,
             loadApp,
-            auth;
+            auth,
+            root;
 
         config = _.extend({}, defaults, appOptions);
 
@@ -104,6 +108,9 @@ define(function(require) {
 
         // Make sure appRoot has trailing slash
         config.appRoot = /\/$/.test(config.appRoot) ? config.appRoot : config.appRoot + '/';
+
+        // Setup globalize
+        Globalize.load(likelySubtags);
 
         // See if we have localStorage available
         try {
@@ -126,9 +133,71 @@ define(function(require) {
         _.extend(this, loading.promise());
 
         // Create an event aggregator specific to our app
-        this.events = eventsUtil.getEvents();
+        this.events = events = eventsUtil.getEvents();
 
-        loadApp = _.bind(function() {
+        setLocale = function(silent) {
+            var deferred = $.Deferred(),
+                currentUser,
+                locale,
+                localizationPreferences,
+                desiredLanguages;
+
+            root.promise.done(function() {
+                currentUser = root.getUser();
+                if (currentUser) {
+                    localizationPreferences = currentUser
+                        .getEmbedded('ev:LocalizationPreferences/Get');
+                    locale = localizationPreferences.get('language');
+                } else if (navigator.languages) {
+                    desiredLanguages = _.intersection(navigator.languages, supportedLanguages);
+                    locale = desiredLanguages[0];
+                }
+                // Fall back to branding settings if user not authenticated or browser languages don't resolve
+                if (!locale) {
+                    localizationPreferences = root
+                        .getEmbedded('ev:Brandings/Current')
+                        .getEmbedded('ev:LocalizationPreferences/Get');
+                    locale = localizationPreferences.get('language');
+                }
+
+                log.debug('[ev-script] Locale: ' + locale);
+
+                if (config.locale === locale) {
+                    deferred.resolve(cacheUtil.getI18n());
+                    return deferred.promise();
+                }
+
+                config.locale = locale;
+                moment.locale(locale);
+
+                // Load messages for locale
+                log.info('[ev-script] Retrieving localized messages');
+                $.getJSON(config.i18nPath + '/' + locale + '/messages.json')
+                .done(function(data, status, xhr) {
+                    _.extend(messages, data);
+
+                    Globalize.loadMessages(messages);
+
+                    i18n = new Globalize(!messages[locale] ? 'en-US' : locale);
+                    cacheUtil.setI18n(i18n);
+
+                    if (!silent) {
+                        events.trigger('localeUpdated', i18n);
+                    }
+
+                    deferred.resolve(i18n);
+                })
+                .fail(function(xhr, status, error) {
+                    deferred.reject();
+                    throw new Error('Failed to load i18n messages!');
+                });
+            });
+
+
+            return deferred.promise();
+        };
+
+        loadApp = function() {
 
             log.info('[ev-script] Loading app');
 
@@ -141,80 +210,64 @@ define(function(require) {
             cacheUtil.setConfig(config);
 
             // Setup our api root resource
-            var root = new Root({}, {
+            root = new Root({}, {
                 href: config.ensembleUrl + config.apiPath
             });
 
             cacheUtil.setRoot(root);
 
             root.fetch({})
-            .done(_.bind(function() {
+            .done(function() {
                 var info = new Info({}, {
-                    href: root.getLink('ev:Info/Get').href
-                });
+                        href: root.getLink('ev:Info/Get').href
+                    }),
+                    resetLocale = function() {
+                        root.promise.done(function() {
+                            var currentI18n = _.extend({}, i18n);
+                            log.debug('[ev-script] Resetting locale');
+                            setLocale()
+                            .then(function(newI18n) {
+                                if (currentI18n.cldr.locale !== newI18n.cldr.locale) {
+                                    log.debug('[ev-script] Locale reset');
+                                    events.trigger('localeReset');
+                                }
+                            });
+                        });
+                    };
+
                 cacheUtil.setInfo(info);
 
                 // Load application info from EV
                 info.fetch({})
-                .always(_.bind(function() {
-                    var currentUser,
-                        locale,
-                        localizationPreferences,
-                        desiredLanguages;
+                .always(function() {
                     if (!info.get('applicationVersion')) {
                         loading.reject('Failed to retrieve application info.');
                     } else {
-                        currentUser = root.getEmbedded('ev:Users/Current');
-                        if (currentUser) {
-                            localizationPreferences = currentUser
-                                .getEmbedded('ev:LocalizationPreferences/Get');
-                            locale = localizationPreferences.get('language');
-                        } else if (navigator.languages) {
-                            desiredLanguages = _.intersection(navigator.languages, supportedLanguages);
-                            locale = desiredLanguages[0];
-                        }
-                        // Fall back to branding settings if user not authenticated or browser languages don't resolve
-                        if (!locale) {
-                            localizationPreferences = root
-                                .getEmbedded('ev:Brandings/Current')
-                                .getEmbedded('ev:LocalizationPreferences/Get');
-                            locale = localizationPreferences.get('language');
-                        }
-                        log.debug('[ev-script] Locale: ' + locale);
-                        config.locale = locale;
-                        moment.locale(locale);
+                        // Auth events may impact rendered localized messages so reload
+                        events.on('loggedIn', resetLocale);
+                        events.on('loggedOut', resetLocale);
 
-                        // Load messages for locale
-                        log.info('[ev-script] Retreiving localized messages');
-                        $.getJSON(config.i18nPath + '/' + locale + '/messages.json')
-                        .done(_.bind(function(data, status, xhr) {
-                            _.extend(messages, data);
-
-                            // Setup globalize
-                            Globalize.load(likelySubtags);
-                            Globalize.loadMessages(messages);
-
-                            cacheUtil.setI18n(new Globalize(!messages[locale] ? 'en-US' : locale));
-
+                        setLocale(true)
+                        .done(function(data, status, xhr) {
                             log.info('[ev-script] App loaded');
-                            this.events.trigger('appLoaded');
+                            events.trigger('appLoaded');
                             loading.resolve();
-                        }, this))
+                        })
                         .fail(function(xhr, status, error) {
-                            throw new Error('Failed to load i18n messages!');
+                            throw new Error('Failed to load app!');
                         });
                     }
-                }, this));
-            }, this))
-            .fail(_.bind(function() {
+                });
+            })
+            .fail(function() {
                 loading.reject('An error occurred while connecting to the Ensemble Video API');
-            }, this));
-        }, this);
+            });
+        };
 
         // Setup auth
         auth = new AuthUtil({
             config: config,
-            events: this.events,
+            events: events,
             callback: loadApp
         });
 
@@ -227,8 +280,6 @@ define(function(require) {
         // TODO - document and add some flexibility to params (e.g. in addition
         // to selector allow element or object).
         this.handleField = function(fieldWrap, settingsModel, fieldSelector) {
-            log.debug('[ev-script] handleField');
-            log.debug(arguments);
             var $field = $(fieldSelector, fieldWrap),
                 fieldOptions = {
                     id: fieldWrap.id || 'ev-field',
@@ -237,6 +288,10 @@ define(function(require) {
                     $field: $field
                 },
                 fieldView;
+
+            log.debug('[ev-script] handleField');
+            log.debug(arguments);
+
             if (settingsModel instanceof VideoSettings) {
                 fieldView = new VideoFieldView(fieldOptions);
             } else if (settingsModel instanceof PlaylistSettings) {
@@ -248,6 +303,7 @@ define(function(require) {
             } else {
                 throw new Error('Unrecognized settings model type');
             }
+
         };
 
         // TODO - document.  See handleField comment too.
@@ -301,6 +357,9 @@ define(function(require) {
             return $div.html();
         };
 
+        this.getI18n = function() {
+            return i18n;
+        };
     };
 
     return {

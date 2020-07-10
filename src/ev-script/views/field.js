@@ -19,27 +19,11 @@ define(function(require) {
             'previewHandler', 'getPickerInstance', 'getSettingsInstance',
             'getPreviewInstance', 'updateField', 'getFieldType',
             'getFieldLabel', 'itemChosenHandler', 'getActionsHtml',
-            'initCallback', 'loginHandler');
+            'initCallback', 'loginHandler', 'handleLogin', '_init');
 
             this.$field = options.$field;
             this.$el.addClass('ev-field-wrap');
             this.showChoose = true;
-
-            var pickerOptions = {
-                    id: this.id + '-picker',
-                    tagName: 'div',
-                    className: 'ev-' + this.model.get('type') + '-picker',
-                    field: this
-                },
-                settingsOptions = {
-                    id: this.id + '-settings',
-                    tagName: 'div',
-                    className: 'ev-settings',
-                    field: this
-                };
-
-            // Subclasses may need to prepare before we start instantiation of views
-            this.initCallback();
 
             this.events.on('showPicker', function(fieldId) {
                 if (this.id === fieldId) {
@@ -67,31 +51,66 @@ define(function(require) {
             this.events.on('itemChosen', this.itemChosenHandler);
 
             this.events.on('loggedOut', _.bind(function() {
-                this.$('.ev-field-message')
-                .html(this.i18n.formatMessage('You must {0}login{1} in order to use this tool.',
-                    '<a role="link" tabindex="0" class="login-link"><b>', '</b></a>'))
-                .show();
+                // Wait for our root to reload
+                this.root.promise.done(_.bind(function() {
+                    this.$('.action-remove').click();
+                    this.$('.ev-field-message')
+                    .html(this.i18n.formatMessage('You must {0}login{1} in order to use this tool.',
+                        '<a role="link" tabindex="0" class="login-link"><b>', '</b></a>'))
+                    .show();
+                }, this));
             }, this));
-            this.events.on('loggedIn', _.bind(function() {
-                this.$('.ev-field-message')
-                .empty()
-                .hide();
+
+            this.events.on('loggedIn', _.bind(function(silent) {
+                this.$('.ev-field-message').empty().hide();
             }, this));
+
+            this.events.on('localeReset', _.bind(function() {
+                this.reloadField();
+            }, this));
+
+            this.handleLogin(true);
+        },
+        _init: function() {
+            var pickerOptions = {
+                    id: this.id + '-picker',
+                    tagName: 'div',
+                    className: 'ev-' + this.model.get('type') + '-picker',
+                    field: this
+                },
+                settingsOptions = {
+                    id: this.id + '-settings',
+                    tagName: 'div',
+                    className: 'ev-settings',
+                    field: this
+                };
+
+            if (this.initialized) {
+                log.debug('[views/field] Field already initialized');
+                return;
+            }
+
+            this.initialized = true;
 
             this.picker = this.getPickerInstance(pickerOptions);
             this.settings = this.getSettingsInstance(settingsOptions);
             this.$field.after(this.picker.$el);
+
             this.renderActions();
 
-            this.loginCallback = _.bind(function() {
-                return this.root.fetch();
-            }, this);
-
-            // Authentication check
-            this.authenticating = this.auth.doAuthenticate(this.loginCallback);
+            this.events.trigger('showPicker', this.id);
 
             log.debug('[views/field] Field initialized');
             log.debug(this);
+        },
+        destroy: function() {},
+        reloadField: function() {
+            log.debug('[views/field] Reloading field');
+            this.$actions.remove();
+            this.$actions = undefined;
+            this.events.trigger('destroy', this);
+            this.initialized = false;
+            this.handleLogin();
         },
         events: {
             'click .ev-field .action-choose': 'chooseHandler',
@@ -131,13 +150,22 @@ define(function(require) {
             e.preventDefault();
         },
         loginHandler: function(e) {
-            if (this.authenticating.state() !== 'pending') {
-                this.authenticating = this.auth.doAuthenticate(this.loginCallback);
-            }
-            this.authenticating.done(_.bind(function() {
-                this.events.trigger('showPicker', this.id);
-            }, this));
+            this.handleLogin(true);
             e.preventDefault();
+        },
+        handleLogin: function(attemptLogin) {
+            this.root.promise.done(_.bind(function() {
+                if (!this.root.getUser()) {
+                    this.renderActions();
+                    if (attemptLogin) {
+                        this.auth.doAuthenticate();
+                    }
+                } else {
+                    // Subclasses may need to prepare before we start instantiation of views
+                    this.initCallback();
+                    this._init();
+                }
+            }, this));
         },
         renderActions: function() {
             var ensembleUrl = this.config.ensembleUrl,
