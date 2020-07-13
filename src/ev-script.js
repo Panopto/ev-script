@@ -71,7 +71,6 @@ define(function(require) {
                 // Specifies the current institution for identity provider selection.
                 institutionId: '',
                 // Callbacks to set date/time formats
-                // TODO - remove
                 getDateFormatCallback: function() { return 'MM/DD/YYYY'; },
                 getTimeFormatCallback: function() { return 'hh:mmA'; },
                 getDateTimeFormat: function() {
@@ -152,13 +151,20 @@ define(function(require) {
                     desiredLanguages = _.intersection(navigator.languages, supportedLanguages);
                     locale = desiredLanguages[0];
                 }
-                // Fall back to branding settings if user not authenticated or browser languages don't resolve
-                if (!locale) {
+                if (!localizationPreferences) {
                     localizationPreferences = root
                         .getEmbedded('ev:Brandings/Current')
                         .getEmbedded('ev:LocalizationPreferences/Get');
-                    locale = localizationPreferences.get('language');
+                    if (!locale) {
+                        locale = localizationPreferences.get('language');
+                    }
                 }
+                config.getDateFormatCallback = function() {
+                    return localizationPreferences.get('dateFormat').toUpperCase();
+                };
+                config.getTimeFormatCallback = function() {
+                    return localizationPreferences.get('timeFormat').replace('tt', 'A');
+                };
 
                 log.debug('[ev-script] Locale: ' + locale);
 
