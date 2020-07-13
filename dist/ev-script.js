@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.0 2020-07-10
+ * ev-script 2.3.0 2020-07-13
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -58454,7 +58454,6 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
                 // Specifies the current institution for identity provider selection.
                 institutionId: '',
                 // Callbacks to set date/time formats
-                // TODO - remove
                 getDateFormatCallback: function() { return 'MM/DD/YYYY'; },
                 getTimeFormatCallback: function() { return 'hh:mmA'; },
                 getDateTimeFormat: function() {
@@ -58535,13 +58534,20 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
                     desiredLanguages = _.intersection(navigator.languages, supportedLanguages);
                     locale = desiredLanguages[0];
                 }
-                // Fall back to branding settings if user not authenticated or browser languages don't resolve
-                if (!locale) {
+                if (!localizationPreferences) {
                     localizationPreferences = root
                         .getEmbedded('ev:Brandings/Current')
                         .getEmbedded('ev:LocalizationPreferences/Get');
-                    locale = localizationPreferences.get('language');
+                    if (!locale) {
+                        locale = localizationPreferences.get('language');
+                    }
                 }
+                config.getDateFormatCallback = function() {
+                    return localizationPreferences.get('dateFormat').toUpperCase();
+                };
+                config.getTimeFormatCallback = function() {
+                    return localizationPreferences.get('timeFormat').replace('tt', 'A');
+                };
 
                 log.debug('[ev-script] Locale: ' + locale);
 
