@@ -24,9 +24,6 @@
                 clientId: 'ev-lti-chooser',
                 scrollHeight: 200,
                 fitToParent: true,
-                // TODO - remove
-                getDateFormatCallback: function() { return 'DD/MM/YYYY'; },
-                getTimeFormatCallback: function() { return 'hh:mm A'; },
                 i18nPath: '/src/ev-script/i18n',
                 imagePath: '/assets/css/images',
                 appRoot: '/demo',
