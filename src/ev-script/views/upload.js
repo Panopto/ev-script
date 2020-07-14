@@ -124,7 +124,7 @@ define(function(require) {
                                 data: JSON.stringify({
                                     libraryId: this.library.get('id'),
                                     type: 'UploadDirectory',
-                                    title: title,
+                                    name: title,
                                     description: description,
                                     autoPublish: true
                                 }),
