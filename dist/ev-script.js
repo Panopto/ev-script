@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.0 2020-07-13
+ * ev-script 2.3.1 2020-07-14
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -40552,7 +40552,7 @@ define('ev-script/views/upload',['require','jquery','underscore','loglevel','uri
                                 data: JSON.stringify({
                                     libraryId: this.library.get('id'),
                                     type: 'UploadDirectory',
-                                    title: title,
+                                    name: title,
                                     description: description,
                                     autoPublish: true
                                 }),
