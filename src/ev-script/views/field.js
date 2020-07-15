@@ -86,19 +86,20 @@ define(function(require) {
                 };
 
             if (this.initialized) {
+                this.events.trigger('showPicker', this.id);
                 log.debug('[views/field] Field already initialized');
                 return;
             }
 
             this.initialized = true;
 
-            this.picker = this.getPickerInstance(pickerOptions);
-            this.settings = this.getSettingsInstance(settingsOptions);
-            this.$field.after(this.picker.$el);
-
             this.renderActions();
 
-            this.events.trigger('showPicker', this.id);
+            this.picker = this.getPickerInstance(pickerOptions);
+            this.settings = this.getSettingsInstance(settingsOptions);
+            this.$actions.after(this.picker.$el);
+
+            this.events.trigger('fieldInitialized', this.id);
 
             log.debug('[views/field] Field initialized');
             log.debug(this);

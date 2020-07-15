@@ -78,6 +78,13 @@
             updateTabI18n();
         });
 
+        app.events.on('loggedIn fieldInitialized', function() {
+            var panelId = $('.tabsList li.ui-state-active').attr('aria-controls'),
+                $panel = $('#' + panelId),
+                $fieldWrap = $('.ev-field-wrap', $panel);
+            $('.action-choose', $fieldWrap).click();
+        });
+
         $(window).resize(resize);
 
         app.done(function() {
