@@ -78,11 +78,8 @@
             updateTabI18n();
         });
 
-        app.events.on('loggedIn fieldInitialized', function() {
-            var panelId = $('.tabsList li.ui-state-active').attr('aria-controls'),
-                $panel = $('#' + panelId),
-                $fieldWrap = $('.ev-field-wrap', $panel);
-            $('.action-choose', $fieldWrap).click();
+        app.events.on('fieldInitialized', function(fieldId) {
+            app.events.trigger('showPicker', fieldId);
         });
 
         $(window).resize(resize);
@@ -90,7 +87,6 @@
         app.done(function() {
             updateTabI18n();
             app.handleField($videoWrap[0], new EV.VideoSettings(), '#video');
-            $('.action-choose', $videoWrap).click();
             $tabs.tabs({
                 heightStyle: 'fill',
                 create: function() {
@@ -101,8 +97,6 @@
                     var $embeds = $('.embed');
                     $embeds.hide();
                     if (ui.newTab.index() === 0) {
-                        // Automatically open chooser "folder"
-                        $('.action-choose', $videoWrap).click();
                         $embeds.filter('.video').show();
                     }
                     // Initialize playlist content once (and only once) the playlist tab is selected
@@ -111,7 +105,6 @@
                             playlistSelected = true;
                             app.handleField($playlistWrap[0], new EV.PlaylistSettings(), '#playlist');
                         }
-                        $('.action-choose', $playlistWrap).click();
                         $embeds.filter('.playlist').show();
                     }
                     if (ui.newTab.index() === 2) {
@@ -119,7 +112,6 @@
                             dropboxSelected = true;
                             app.handleField($dropboxWrap[0], new EV.DropboxSettings(), '#dropbox');
                         }
-                        $('.action-choose', $dropboxWrap).click();
                         $embeds.filter('.dropbox').show();
                     }
                     if (ui.newTab.index() === 3) {
@@ -127,7 +119,6 @@
                             quizSelected = true;
                             app.handleField($quizWrap[0], new EV.QuizSettings(), '#quiz');
                         }
-                        $('.action-choose', $quizWrap).click();
                         $embeds.filter('.quiz').show();
                     }
                 }

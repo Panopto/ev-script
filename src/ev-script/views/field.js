@@ -86,7 +86,7 @@ define(function(require) {
                 };
 
             if (this.initialized) {
-                this.events.trigger('showPicker', this.id);
+                this.events.trigger('fieldInitialized', this.id);
                 log.debug('[views/field] Field already initialized');
                 return;
             }
