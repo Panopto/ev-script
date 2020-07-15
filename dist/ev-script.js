@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.1 2020-07-14
+ * ev-script 2.3.2 2020-07-15
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -31009,19 +31009,20 @@ define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-s
                 };
 
             if (this.initialized) {
+                this.events.trigger('fieldInitialized', this.id);
                 log.debug('[views/field] Field already initialized');
                 return;
             }
 
             this.initialized = true;
 
-            this.picker = this.getPickerInstance(pickerOptions);
-            this.settings = this.getSettingsInstance(settingsOptions);
-            this.$field.after(this.picker.$el);
-
             this.renderActions();
 
-            this.events.trigger('showPicker', this.id);
+            this.picker = this.getPickerInstance(pickerOptions);
+            this.settings = this.getSettingsInstance(settingsOptions);
+            this.$actions.after(this.picker.$el);
+
+            this.events.trigger('fieldInitialized', this.id);
 
             log.debug('[views/field] Field initialized');
             log.debug(this);
