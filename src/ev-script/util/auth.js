@@ -56,11 +56,11 @@ define(function(require) {
             });
         };
 
-    Auth.prototype.doAuthenticate = function() {
+    Auth.prototype.doAuthenticate = function(currentField) {
         var loggedInHandler = _.bind(function(user, silent) {
                 log.debug('[doAuthenticate] Found user');
                 log.debug(user);
-                this.events.trigger('loggedIn', silent);
+                this.events.trigger('loggedIn', currentField, silent);
                 this.deferred.resolve();
             }, this),
             loggedOutHandler = _.bind(function(err) {

@@ -61,7 +61,7 @@ define(function(require) {
                 }, this));
             }, this));
 
-            this.events.on('loggedIn', _.bind(function(silent) {
+            this.events.on('loggedIn', _.bind(function() {
                 this.$('.ev-field-message').empty().hide();
             }, this));
 
@@ -159,7 +159,7 @@ define(function(require) {
                 if (!this.root.getUser()) {
                     this.renderActions();
                     if (attemptLogin) {
-                        this.auth.doAuthenticate();
+                        this.auth.doAuthenticate(this.id);
                     }
                 } else {
                     // Subclasses may need to prepare before we start instantiation of views

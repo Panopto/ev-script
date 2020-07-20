@@ -78,7 +78,7 @@
             updateTabI18n();
         });
 
-        app.events.on('fieldInitialized', function(fieldId) {
+        app.events.on('fieldInitialized loggedIn', function(fieldId) {
             app.events.trigger('showPicker', fieldId);
         });
 
