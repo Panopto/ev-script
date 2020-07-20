@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.2 2020-07-15
+ * ev-script 2.3.3 2020-07-20
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -30984,7 +30984,7 @@ define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-s
                 }, this));
             }, this));
 
-            this.events.on('loggedIn', _.bind(function(silent) {
+            this.events.on('loggedIn', _.bind(function() {
                 this.$('.ev-field-message').empty().hide();
             }, this));
 
@@ -31082,7 +31082,7 @@ define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-s
                 if (!this.root.getUser()) {
                     this.renderActions();
                     if (attemptLogin) {
-                        this.auth.doAuthenticate();
+                        this.auth.doAuthenticate(this.id);
                     }
                 } else {
                     // Subclasses may need to prepare before we start instantiation of views
@@ -55848,11 +55848,11 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
             });
         };
 
-    Auth.prototype.doAuthenticate = function() {
+    Auth.prototype.doAuthenticate = function(currentField) {
         var loggedInHandler = _.bind(function(user, silent) {
                 log.debug('[doAuthenticate] Found user');
                 log.debug(user);
-                this.events.trigger('loggedIn', silent);
+                this.events.trigger('loggedIn', currentField, silent);
                 this.deferred.resolve();
             }, this),
             loggedOutHandler = _.bind(function(err) {
