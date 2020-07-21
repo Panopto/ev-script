@@ -93,6 +93,7 @@ define(function(require) {
             events,
             i18n,
             setLocale,
+            resetLocale,
             loading,
             userManager,
             loadApp,
@@ -203,6 +204,20 @@ define(function(require) {
             return deferred.promise();
         };
 
+        resetLocale = function() {
+            root.promise.done(function() {
+                var currentI18n = _.extend({}, i18n);
+                log.debug('[ev-script] Resetting locale');
+                setLocale()
+                .then(function(newI18n) {
+                    if (currentI18n.cldr.locale !== newI18n.cldr.locale) {
+                        log.debug('[ev-script] Locale reset');
+                        events.trigger('localeReset');
+                    }
+                });
+            });
+        };
+
         loadApp = function() {
 
             log.info('[ev-script] Loading app');
@@ -222,24 +237,15 @@ define(function(require) {
 
             cacheUtil.setRoot(root);
 
+            // Auth events may impact rendered localized messages so reload
+            events.on('loggedIn', resetLocale);
+            events.on('loggedOut', resetLocale);
+
             root.fetch({})
             .done(function() {
                 var info = new Info({}, {
                         href: root.getLink('ev:Info/Get').href
-                    }),
-                    resetLocale = function() {
-                        root.promise.done(function() {
-                            var currentI18n = _.extend({}, i18n);
-                            log.debug('[ev-script] Resetting locale');
-                            setLocale()
-                            .then(function(newI18n) {
-                                if (currentI18n.cldr.locale !== newI18n.cldr.locale) {
-                                    log.debug('[ev-script] Locale reset');
-                                    events.trigger('localeReset');
-                                }
-                            });
-                        });
-                    };
+                    });
 
                 cacheUtil.setInfo(info);
 
@@ -249,10 +255,6 @@ define(function(require) {
                     if (!info.get('applicationVersion')) {
                         loading.reject('Failed to retrieve application info.');
                     } else {
-                        // Auth events may impact rendered localized messages so reload
-                        events.on('loggedIn', resetLocale);
-                        events.on('loggedOut', resetLocale);
-
                         setLocale(true)
                         .done(function(data, status, xhr) {
                             log.info('[ev-script] App loaded');
