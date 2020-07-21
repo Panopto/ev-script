@@ -63,6 +63,7 @@ define(function(require) {
 
             this.events.on('loggedIn', _.bind(function() {
                 this.$('.ev-field-message').empty().hide();
+                this.handleLogin();
             }, this));
 
             this.events.on('localeReset', _.bind(function() {
