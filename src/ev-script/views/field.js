@@ -19,7 +19,8 @@ define(function(require) {
             'previewHandler', 'getPickerInstance', 'getSettingsInstance',
             'getPreviewInstance', 'updateField', 'getFieldType',
             'getFieldLabel', 'itemChosenHandler', 'getActionsHtml',
-            'initCallback', 'loginHandler', 'handleLogin', '_init');
+            'initCallback', 'loginHandler', 'handleLogin', 'toggleLoginMsg',
+            '_init');
 
             this.$field = options.$field;
             this.$el.addClass('ev-field-wrap');
@@ -54,15 +55,12 @@ define(function(require) {
                 // Wait for our root to reload
                 this.root.promise.done(_.bind(function() {
                     this.$('.action-remove').click();
-                    this.$('.ev-field-message')
-                    .html(this.i18n.formatMessage('You must {0}login{1} in order to use this tool.',
-                        '<a role="link" tabindex="0" class="login-link"><b>', '</b></a>'))
-                    .show();
+                    this.toggleLoginMsg();
                 }, this));
             }, this));
 
             this.events.on('loggedIn', _.bind(function() {
-                this.$('.ev-field-message').empty().hide();
+                this.toggleLoginMsg(true);
                 this.handleLogin();
             }, this));
 
@@ -155,12 +153,22 @@ define(function(require) {
             this.handleLogin(true);
             e.preventDefault();
         },
+        toggleLoginMsg: function(off) {
+            if (off) {
+                this.$fieldMsg.hide();
+            } else {
+                this.$fieldMsg.show();
+            }
+        },
         handleLogin: function(attemptLogin) {
             this.root.promise.done(_.bind(function() {
-                if (!this.root.getUser()) {
+                var user = this.root.getUser(),
+                    prompt = user && this.config.currentUserId && this.config.currentUserId !== user.id;
+                if (!user || prompt) {
                     this.renderActions();
+                    this.toggleLoginMsg();
                     if (attemptLogin) {
-                        this.auth.doAuthenticate(this.id);
+                        this.auth.doAuthenticate(this.id, prompt);
                     }
                 } else {
                     // Subclasses may need to prepare before we start instantiation of views
@@ -187,6 +195,11 @@ define(function(require) {
                 type: type,
                 name: this.model.get('content') && this.model.get('content').name || ''
             }));
+
+            this.$fieldMsg = this.$('.ev-field-message');
+            this.$fieldMsg.html(this.i18n.formatMessage('You must {0}login{1} in order to use this tool.',
+                '<a role="link" tabindex="0" class="login-link"><b>', '</b></a>'));
+
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {
                 this.$('.action-choose').hide();

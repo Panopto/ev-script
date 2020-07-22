@@ -56,7 +56,7 @@ define(function(require) {
             });
         };
 
-    Auth.prototype.doAuthenticate = function(currentField) {
+    Auth.prototype.doAuthenticate = function(currentField, prompt) {
         var loggedInHandler = _.bind(function(user, silent) {
                 log.debug('[doAuthenticate] Found user');
                 log.debug(user);
@@ -68,30 +68,52 @@ define(function(require) {
                 this.events.trigger('loggedOut');
                 this.deferred.reject();
             }, this),
-            loginHandler = _.bind(function() {
-                log.debug('[doAuthenticate] No user found...attempting silent sign-in');
-                this.userManager.signinSilent()
-                .then(function(user) {
-                    loggedInHandler(user, true);
-                })
-                .catch(_.bind(function(err) {
-                    log.debug('[doAuthenticate] No user found...attempting pop-up sign-in');
+            loginHandler = _.bind(function(prompt) {
+                var width = 500,
+                    height = 500,
+                    top = parseInt((screen.availHeight / 2) - (height / 2), 10),
+                    left = parseInt((screen.availWidth / 2) - (width / 2), 10),
+                    features = 'location=no,toolbar=no,width=500,height=500,left=' + left + ',top=' + top + ',screenX=' + left + ',screenY=' + top + ',chrome=yes;centerscreen=yes;';
 
-                    var width = 500,
-                        height = 500,
-                        top = parseInt((screen.availHeight / 2) - (height / 2), 10),
-                        left = parseInt((screen.availWidth / 2) - (width / 2), 10),
-                        features = 'location=no,toolbar=no,width=500,height=500,left=' + left + ',top=' + top + ',screenX=' + left + ',screenY=' + top + ',chrome=yes;centerscreen=yes;';
+                if (!prompt) {
+                    log.debug('[doAuthenticate] No user found...attempting silent sign-in');
+                    this.userManager.signinSilent()
+                    .then(_.bind(function(user) {
+                        if (!JSON.parse(user.profile['http://ensemblevideo.com/claims/provisioned'].toLowerCase())) {
+                            log.debug('[doAuthenticate] User not provisioned');
+                            this.userManager.removeUser().then(function() {
+                                loginHandler(true);
+                            });
+                        } else {
+                            loggedInHandler(user, true);
+                        }
+                    }, this))
+                    .catch(_.bind(function(err) {
+                        log.debug('[doAuthenticate] No user found...attempting pop-up sign-in');
 
+                        this.userManager.signinPopup({
+                            popupWindowFeatures: features,
+                            extraQueryParams: {
+                                'ev_institution_id': this.config.institutionId,
+                                'ev_allow_non_provisioned': false
+                            }
+                        })
+                        .then(loggedInHandler)
+                        .catch(loggedOutHandler);
+                    }, this));
+                } else {
+                    log.debug('[doAuthenticate] Forcing login prompt');
                     this.userManager.signinPopup({
                         popupWindowFeatures: features,
+                        prompt: 'login',
                         extraQueryParams: {
-                            'ev_institution_id': this.config.institutionId
+                            'ev_institution_id': this.config.institutionId,
+                            'ev_allow_non_provisioned': false
                         }
                     })
                     .then(loggedInHandler)
                     .catch(loggedOutHandler);
-                }, this));
+                }
             }, this);
 
         if (!this.deferred || this.deferred.state() !== 'pending') {
@@ -100,10 +122,8 @@ define(function(require) {
 
             this.userManager.getUser()
             .then(_.bind(function(user) {
-                if (!user || user.expired) {
-                    loginHandler();
-                } else if (this.config.currentUserId && this.config.currentUserId !== user.profile.sub) {
-                    this.userManager.removeUser().then(loginHandler);
+                if (!user || user.expired || prompt) {
+                    loginHandler(prompt);
                 } else {
                     loggedInHandler(user, true);
                 }
