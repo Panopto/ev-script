@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.4 2020-07-21
+ * ev-script 2.3.5 2020-07-22
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -30942,7 +30942,8 @@ define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-s
             'previewHandler', 'getPickerInstance', 'getSettingsInstance',
             'getPreviewInstance', 'updateField', 'getFieldType',
             'getFieldLabel', 'itemChosenHandler', 'getActionsHtml',
-            'initCallback', 'loginHandler', 'handleLogin', '_init');
+            'initCallback', 'loginHandler', 'handleLogin', 'toggleLoginMsg',
+            '_init');
 
             this.$field = options.$field;
             this.$el.addClass('ev-field-wrap');
@@ -30977,15 +30978,12 @@ define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-s
                 // Wait for our root to reload
                 this.root.promise.done(_.bind(function() {
                     this.$('.action-remove').click();
-                    this.$('.ev-field-message')
-                    .html(this.i18n.formatMessage('You must {0}login{1} in order to use this tool.',
-                        '<a role="link" tabindex="0" class="login-link"><b>', '</b></a>'))
-                    .show();
+                    this.toggleLoginMsg();
                 }, this));
             }, this));
 
             this.events.on('loggedIn', _.bind(function() {
-                this.$('.ev-field-message').empty().hide();
+                this.toggleLoginMsg(true);
                 this.handleLogin();
             }, this));
 
@@ -31078,12 +31076,22 @@ define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-s
             this.handleLogin(true);
             e.preventDefault();
         },
+        toggleLoginMsg: function(off) {
+            if (off) {
+                this.$fieldMsg.hide();
+            } else {
+                this.$fieldMsg.show();
+            }
+        },
         handleLogin: function(attemptLogin) {
             this.root.promise.done(_.bind(function() {
-                if (!this.root.getUser()) {
+                var user = this.root.getUser(),
+                    prompt = user && this.config.currentUserId && this.config.currentUserId !== user.id;
+                if (!user || prompt) {
                     this.renderActions();
+                    this.toggleLoginMsg();
                     if (attemptLogin) {
-                        this.auth.doAuthenticate(this.id);
+                        this.auth.doAuthenticate(this.id, prompt);
                     }
                 } else {
                     // Subclasses may need to prepare before we start instantiation of views
@@ -31110,6 +31118,11 @@ define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-s
                 type: type,
                 name: this.model.get('content') && this.model.get('content').name || ''
             }));
+
+            this.$fieldMsg = this.$('.ev-field-message');
+            this.$fieldMsg.html(this.i18n.formatMessage('You must {0}login{1} in order to use this tool.',
+                '<a role="link" tabindex="0" class="login-link"><b>', '</b></a>'));
+
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {
                 this.$('.action-choose').hide();
@@ -42940,11 +42953,9 @@ define('ev-script/models/root',['require','underscore','ev-script/models/base'],
         BaseModel = require('ev-script/models/base');
 
     return BaseModel.extend({
-        // initialize: function(attributes, options) {
-        //     BaseModel.prototype.initialize.call(this, attributes, options);
-        // }
         getUser: function() {
-            return this.getEmbedded('ev:Users/Current');
+            var user = this.getEmbedded('ev:Users/Current');
+            return user && user.get('isProvisioned') ? user : null;
         }
     });
 
@@ -55849,7 +55860,7 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
             });
         };
 
-    Auth.prototype.doAuthenticate = function(currentField) {
+    Auth.prototype.doAuthenticate = function(currentField, prompt) {
         var loggedInHandler = _.bind(function(user, silent) {
                 log.debug('[doAuthenticate] Found user');
                 log.debug(user);
@@ -55861,30 +55872,52 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
                 this.events.trigger('loggedOut');
                 this.deferred.reject();
             }, this),
-            loginHandler = _.bind(function() {
-                log.debug('[doAuthenticate] No user found...attempting silent sign-in');
-                this.userManager.signinSilent()
-                .then(function(user) {
-                    loggedInHandler(user, true);
-                })
-                .catch(_.bind(function(err) {
-                    log.debug('[doAuthenticate] No user found...attempting pop-up sign-in');
+            loginHandler = _.bind(function(prompt) {
+                var width = 500,
+                    height = 500,
+                    top = parseInt((screen.availHeight / 2) - (height / 2), 10),
+                    left = parseInt((screen.availWidth / 2) - (width / 2), 10),
+                    features = 'location=no,toolbar=no,width=500,height=500,left=' + left + ',top=' + top + ',screenX=' + left + ',screenY=' + top + ',chrome=yes;centerscreen=yes;';
 
-                    var width = 500,
-                        height = 500,
-                        top = parseInt((screen.availHeight / 2) - (height / 2), 10),
-                        left = parseInt((screen.availWidth / 2) - (width / 2), 10),
-                        features = 'location=no,toolbar=no,width=500,height=500,left=' + left + ',top=' + top + ',screenX=' + left + ',screenY=' + top + ',chrome=yes;centerscreen=yes;';
+                if (!prompt) {
+                    log.debug('[doAuthenticate] No user found...attempting silent sign-in');
+                    this.userManager.signinSilent()
+                    .then(_.bind(function(user) {
+                        if (!JSON.parse(user.profile['http://ensemblevideo.com/claims/provisioned'].toLowerCase())) {
+                            log.debug('[doAuthenticate] User not provisioned');
+                            this.userManager.removeUser().then(function() {
+                                loginHandler(true);
+                            });
+                        } else {
+                            loggedInHandler(user, true);
+                        }
+                    }, this))
+                    .catch(_.bind(function(err) {
+                        log.debug('[doAuthenticate] No user found...attempting pop-up sign-in');
 
+                        this.userManager.signinPopup({
+                            popupWindowFeatures: features,
+                            extraQueryParams: {
+                                'ev_institution_id': this.config.institutionId,
+                                'ev_allow_non_provisioned': false
+                            }
+                        })
+                        .then(loggedInHandler)
+                        .catch(loggedOutHandler);
+                    }, this));
+                } else {
+                    log.debug('[doAuthenticate] Forcing login prompt');
                     this.userManager.signinPopup({
                         popupWindowFeatures: features,
+                        prompt: 'login',
                         extraQueryParams: {
-                            'ev_institution_id': this.config.institutionId
+                            'ev_institution_id': this.config.institutionId,
+                            'ev_allow_non_provisioned': false
                         }
                     })
                     .then(loggedInHandler)
                     .catch(loggedOutHandler);
-                }, this));
+                }
             }, this);
 
         if (!this.deferred || this.deferred.state() !== 'pending') {
@@ -55893,10 +55926,8 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
 
             this.userManager.getUser()
             .then(_.bind(function(user) {
-                if (!user || user.expired) {
-                    loginHandler();
-                } else if (this.config.currentUserId && this.config.currentUserId !== user.profile.sub) {
-                    this.userManager.removeUser().then(loginHandler);
+                if (!user || user.expired || prompt) {
+                    loginHandler(prompt);
                 } else {
                     loggedInHandler(user, true);
                 }
