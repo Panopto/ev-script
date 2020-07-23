@@ -41,7 +41,7 @@ define(function(require) {
                     if (cached) {
                         var deferred = $.Deferred();
                         if (options.success) {
-                            deferred.done(options.success);
+                            options.success.call(this, cached);
                         }
                         deferred.resolve(cached);
                     } else {

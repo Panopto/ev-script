@@ -67,13 +67,7 @@ define(function(require) {
             var libraryId = this.model.get('libraryId');
 
             this.loadVideos();
-
-            if (!libraryId && this.workflows) {
-                this.workflows.reset();
-            } else {
-                this.loadWorkflows();
-            }
-
+            this.loadWorkflows();
             this.handleUploadVisibility();
         },
         changeLibraryType: function(e) {
@@ -252,8 +246,8 @@ define(function(require) {
                 href: searchUrl
             });
             this.workflows.fetch({
+                picker: this,
                 error: _.bind(this.ajaxError, this),
-                reset: true
             });
         },
         canRecord: function() {

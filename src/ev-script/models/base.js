@@ -49,7 +49,7 @@ define(function(require) {
                     }, this)), {}) :
                 new BaseModel(resource, {});
         },
-        sync: function(method, collection, options) {
+        sync: function(method, model, options) {
             var deferred = $.Deferred();
 
             this.promise = deferred.promise();
@@ -72,17 +72,17 @@ define(function(require) {
                         cached = this.getCached(key);
                     if (cached) {
                         if (options.success) {
-                            deferred.done(options.success);
+                            options.success.call(this, cached);
                         }
                         deferred.resolve(cached);
                     } else {
                         // Grab the response and cache
-                        options.success = options.success || function(collection, response, options) {};
+                        options.success = options.success || function(model, response, options) {};
                         options.success = _.wrap(options.success, _.bind(function(success) {
                             this.setCached(key, arguments[1]);
                             success.apply(this, Array.prototype.slice.call(arguments, 1));
                         }, this));
-                        Backbone.Model.prototype.sync.call(this, method, collection, options)
+                        Backbone.Model.prototype.sync.call(this, method, model, options)
                         .done(function(data, status, xhr) {
                             deferred.resolve(data, status, xhr);
                         })
@@ -91,7 +91,7 @@ define(function(require) {
                         });
                     }
                 } else {
-                    Backbone.Model.prototype.sync.call(this, method, collection, options)
+                    Backbone.Model.prototype.sync.call(this, method, model, options)
                     .done(function(data, status, xhr) {
                         deferred.resolve(data, status, xhr);
                     })
