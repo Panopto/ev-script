@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.5 2020-07-22
+ * ev-script 2.3.6 2020-07-23
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -30685,7 +30685,7 @@ define('ev-script/collections/base',['require','jquery','underscore','loglevel',
                     if (cached) {
                         var deferred = $.Deferred();
                         if (options.success) {
-                            deferred.done(options.success);
+                            options.success.call(this, cached);
                         }
                         deferred.resolve(cached);
                     } else {
@@ -30779,7 +30779,7 @@ define('ev-script/models/base',['require','jquery','underscore','loglevel','urij
                     }, this)), {}) :
                 new BaseModel(resource, {});
         },
-        sync: function(method, collection, options) {
+        sync: function(method, model, options) {
             var deferred = $.Deferred();
 
             this.promise = deferred.promise();
@@ -30802,17 +30802,17 @@ define('ev-script/models/base',['require','jquery','underscore','loglevel','urij
                         cached = this.getCached(key);
                     if (cached) {
                         if (options.success) {
-                            deferred.done(options.success);
+                            options.success.call(this, cached);
                         }
                         deferred.resolve(cached);
                     } else {
                         // Grab the response and cache
-                        options.success = options.success || function(collection, response, options) {};
+                        options.success = options.success || function(model, response, options) {};
                         options.success = _.wrap(options.success, _.bind(function(success) {
                             this.setCached(key, arguments[1]);
                             success.apply(this, Array.prototype.slice.call(arguments, 1));
                         }, this));
-                        Backbone.Model.prototype.sync.call(this, method, collection, options)
+                        Backbone.Model.prototype.sync.call(this, method, model, options)
                         .done(function(data, status, xhr) {
                             deferred.resolve(data, status, xhr);
                         })
@@ -30821,7 +30821,7 @@ define('ev-script/models/base',['require','jquery','underscore','loglevel','urij
                         });
                     }
                 } else {
-                    Backbone.Model.prototype.sync.call(this, method, collection, options)
+                    Backbone.Model.prototype.sync.call(this, method, model, options)
                     .done(function(data, status, xhr) {
                         deferred.resolve(data, status, xhr);
                     })
@@ -40357,19 +40357,15 @@ define('ev-script/models/shared-videos',['require','ev-script/models/base','unde
 
 });
 
-define('ev-script/models/workflows',['require','ev-script/models/base','ev-script/util/cache'],function(require) {
+define('ev-script/models/workflows',['require','ev-script/models/base'],function(require) {
 
     'use strict';
 
-    var BaseModel = require('ev-script/models/base'),
-        cacheUtil = require('ev-script/util/cache');
+    var BaseModel = require('ev-script/models/base');
 
     return BaseModel.extend({
         cacheName: 'workflows',
         collectionKey: 'workflows'
-        // initialize: function(models, options) {
-        //     BaseModel.prototype.initialize.call(this, models, options);
-        // },
     });
 
 });
@@ -40907,13 +40903,7 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
             var libraryId = this.model.get('libraryId');
 
             this.loadVideos();
-
-            if (!libraryId && this.workflows) {
-                this.workflows.reset();
-            } else {
-                this.loadWorkflows();
-            }
-
+            this.loadWorkflows();
             this.handleUploadVisibility();
         },
         changeLibraryType: function(e) {
@@ -41092,8 +41082,8 @@ define('ev-script/views/video-picker',['require','jquery','underscore','platform
                 href: searchUrl
             });
             this.workflows.fetch({
+                picker: this,
                 error: _.bind(this.ajaxError, this),
-                reset: true
             });
         },
         canRecord: function() {
