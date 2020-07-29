@@ -144,6 +144,10 @@ define(function(require) {
             }, this));
     };
 
+    Auth.prototype.getUser = function() {
+        return this.userManager.getUser();
+    };
+
     return Auth;
 
 });

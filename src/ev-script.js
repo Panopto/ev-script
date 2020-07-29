@@ -368,6 +368,10 @@ define(function(require) {
         this.getI18n = function() {
             return i18n;
         };
+
+        this.getUser = function() {
+            return auth.getUser();
+        };
     };
 
     return {

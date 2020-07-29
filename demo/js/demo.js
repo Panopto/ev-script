@@ -82,6 +82,13 @@
             app.events.trigger('showPicker', fieldId);
         });
 
+        app.events.on('loggedIn', function() {
+            app.getUser().then(function(user) {
+                console.log('User:');
+                console.log(user);
+            });
+        });
+
         $(window).resize(resize);
 
         app.done(function() {
