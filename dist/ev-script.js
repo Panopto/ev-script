@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.6 2020-07-23
+ * ev-script 2.3.6 2020-07-29
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -55938,6 +55938,10 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
             }, this));
     };
 
+    Auth.prototype.getUser = function() {
+        return this.userManager.getUser();
+    };
+
     return Auth;
 
 });
@@ -58773,6 +58777,10 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
 
         this.getI18n = function() {
             return i18n;
+        };
+
+        this.getUser = function() {
+            return auth.getUser();
         };
     };
 
