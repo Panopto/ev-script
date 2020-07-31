@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.8 2020-07-31
+ * ev-script 2.3.9 2020-07-31
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -31089,7 +31089,9 @@ define('ev-script/views/field',['require','jquery','underscore','loglevel','ev-s
         handleLogin: function(attemptLogin) {
             this.root.promise.done(_.bind(function() {
                 var user = this.root.getUser(),
-                    prompt = user && this.config.currentUserId && this.config.currentUserId !== user.id;
+                    prompt = user &&
+                             !this.config.currentUserId ||
+                             (this.config.currentUserId && this.config.currentUserId !== user.id);
                 if (!user || prompt) {
                     this.renderActions();
                     this.toggleLoginMsg();
@@ -55864,6 +55866,7 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
         var loggedInHandler = _.bind(function(user, silent) {
                 log.debug('[doAuthenticate] Found user');
                 log.debug(user);
+                this.config.currentUserId = user.profile.sub;
                 this.events.trigger('loggedIn', currentField, silent);
                 this.deferred.resolve();
             }, this),
