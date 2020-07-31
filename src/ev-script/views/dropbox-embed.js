@@ -47,7 +47,9 @@ define(function(require) {
         getUrl: function(isPreview) {
             // Assuming if localStorage is not available that third-party
             // cookies are blocked.  In that case need to preview in new window.
-            return this.isEmbedSupported() && this.config.hasStorage ?
+            // If we're the top window we don't know if TPCs are blocked so
+            // assume so and launch to new window.
+            return this.isEmbedSupported() && this.config.hasStorage && !this.isTop() ?
                 this.config.ensembleUrl + '/hapi/v1/ui/dropboxes/' + this.model.get('id') + '/embed' :
                 this.model.get('content').url;
         },

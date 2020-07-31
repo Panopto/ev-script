@@ -11,7 +11,7 @@ define(function(require) {
 
     return Backbone.View.extend({
         initialize: function(options) {
-            _.bindAll(this, 'destroy', 'ajaxError', 'trigger');
+            _.bindAll(this, 'destroy', 'ajaxError', 'trigger', 'isTop');
 
             this.config = cacheUtil.getConfig();
             this.root = cacheUtil.getRoot();
@@ -54,6 +54,9 @@ define(function(require) {
                 arguments: arguments
             });
             return Backbone.View.prototype.trigger.apply(this, arguments);
+        },
+        isTop: function() {
+            return window.self === window.top;
         }
     });
 

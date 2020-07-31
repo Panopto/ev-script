@@ -36,7 +36,9 @@ define(function(require) {
 
                 // Assuming if localStorage is not available that third-party
                 // cookies are blocked.  In that case need to preview in new window.
-                if (this.config.hasStorage) {
+                // If we're the top window we don't know if TPCs are blocked so
+                // assume so.
+                if (this.config.hasStorage && !this.isTop()) {
                     return PreviewView.prototype.render.call(this, options);
                 }
 
