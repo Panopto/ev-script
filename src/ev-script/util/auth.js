@@ -60,6 +60,7 @@ define(function(require) {
         var loggedInHandler = _.bind(function(user, silent) {
                 log.debug('[doAuthenticate] Found user');
                 log.debug(user);
+                this.config.currentUserId = user.profile.sub;
                 this.events.trigger('loggedIn', currentField, silent);
                 this.deferred.resolve();
             }, this),

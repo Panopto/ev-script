@@ -163,7 +163,9 @@ define(function(require) {
         handleLogin: function(attemptLogin) {
             this.root.promise.done(_.bind(function() {
                 var user = this.root.getUser(),
-                    prompt = user && this.config.currentUserId && this.config.currentUserId !== user.id;
+                    prompt = user &&
+                             !this.config.currentUserId ||
+                             (this.config.currentUserId && this.config.currentUserId !== user.id);
                 if (!user || prompt) {
                     this.renderActions();
                     this.toggleLoginMsg();
