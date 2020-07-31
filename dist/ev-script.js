@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.7 2020-07-30
+ * ev-script 2.3.8 2020-07-31
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -30870,7 +30870,7 @@ define('ev-script/views/base',['require','jquery','underscore','loglevel','backb
 
     return Backbone.View.extend({
         initialize: function(options) {
-            _.bindAll(this, 'destroy', 'ajaxError', 'trigger');
+            _.bindAll(this, 'destroy', 'ajaxError', 'trigger', 'isTop');
 
             this.config = cacheUtil.getConfig();
             this.root = cacheUtil.getRoot();
@@ -30913,6 +30913,9 @@ define('ev-script/views/base',['require','jquery','underscore','loglevel','backb
                 arguments: arguments
             });
             return Backbone.View.prototype.trigger.apply(this, arguments);
+        },
+        isTop: function() {
+            return window.self === window.top;
         }
     });
 
@@ -39482,7 +39485,7 @@ define('ev-script/views/video-embed',['require','underscore','urijs/URI','ev-scr
                 mediaWidth = width || this.getMediaWidth(),
                 mediaHeight = height || this.getMediaHeight(),
                 basePath = '/hapi/v1/contents/' + id,
-                action = isPreview && !this.config.hasStorage ?
+                action = isPreview && (!this.config.hasStorage || this.isTop()) ?
                     '/launch' : '/plugin';
 
             url.path(basePath + action);
@@ -39679,7 +39682,9 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/models
 
                 // Assuming if localStorage is not available that third-party
                 // cookies are blocked.  In that case need to preview in new window.
-                if (this.config.hasStorage) {
+                // If we're the top window we don't know if TPCs are blocked so
+                // assume so.
+                if (this.config.hasStorage && !this.isTop()) {
                     return PreviewView.prototype.render.call(this, options);
                 }
 
@@ -41455,7 +41460,7 @@ define('ev-script/views/playlist-embed',['require','underscore','urijs/URI','ev-
 
             // Assuming if localStorage is not available that third-party
             // cookies are blocked.  In that case need to preview in new window.
-            if (isPreview && !this.config.hasStorage) {
+            if (isPreview && (!this.config.hasStorage || this.isTop())) {
                 target += '/preview';
                 src = URI(target);
             }
@@ -41535,7 +41540,9 @@ define('ev-script/views/playlist-preview',['require','ev-script/views/preview','
 
             // Assuming if localStorage is not available that third-party
             // cookies are blocked.  In that case need to preview in new window.
-            if (this.config.hasStorage) {
+            // If we're the top window we don't know if TPCs are blocked so
+            // assume so.
+            if (this.config.hasStorage && !this.isTop()) {
                 return PreviewView.prototype.render.call(this);
             }
 
@@ -42136,7 +42143,9 @@ define('ev-script/views/dropbox-embed',['require','underscore','ev-script/views/
         getUrl: function(isPreview) {
             // Assuming if localStorage is not available that third-party
             // cookies are blocked.  In that case need to preview in new window.
-            return this.isEmbedSupported() && this.config.hasStorage ?
+            // If we're the top window we don't know if TPCs are blocked so
+            // assume so and launch to new window.
+            return this.isEmbedSupported() && this.config.hasStorage && !this.isTop() ?
                 this.config.ensembleUrl + '/hapi/v1/ui/dropboxes/' + this.model.get('id') + '/embed' :
                 this.model.get('content').url;
         },
@@ -42189,7 +42198,8 @@ define('ev-script/views/dropbox-preview',['require','ev-script/views/preview','e
             // Assuming if localStorage is not available that third-party
             // cookies are blocked.  In that case need to preview in new window.
             if (this.info.checkVersion('5.3.0', '<') ||
-                !this.config.hasStorage) {
+                !this.config.hasStorage ||
+                this.isTop()) {
                 embedView = new DropboxEmbedView({
                     model: new this.model.constructor(this.model.toJSON()),
                     config: this.config
