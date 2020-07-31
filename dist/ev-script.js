@@ -55872,6 +55872,7 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
             }, this),
             loggedOutHandler = _.bind(function(err) {
                 log.debug('[doAuthenticate] No user found...triggering loggedOut');
+                this.config.currentUserId = null;
                 this.events.trigger('loggedOut');
                 this.deferred.reject();
             }, this),
@@ -55947,6 +55948,7 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
         this.userManager.stopSilentRenew();
         return this.userManager.signoutPopup()
             .then(_.bind(function() {
+                this.config.currentUserId = null;
                 this.events.trigger('loggedOut');
             }, this));
     };
