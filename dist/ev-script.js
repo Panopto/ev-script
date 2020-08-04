@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.10 2020-08-03
+ * ev-script 2.3.11 2020-08-04
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -42148,7 +42148,7 @@ define('ev-script/views/dropbox-embed',['require','underscore','ev-script/views/
             // cookies are blocked.  In that case need to preview in new window.
             // If we're the top window we don't know if TPCs are blocked so
             // assume so and launch to new window.
-            return this.isEmbedSupported() && this.config.hasStorage && !this.isTop() ?
+            return this.isEmbedSupported() && ((this.config.hasStorage && !this.isTop()) || !isPreview) ?
                 this.config.ensembleUrl + '/hapi/v1/ui/dropboxes/' + this.model.get('id') + '/embed' :
                 this.model.get('content').url;
         },
