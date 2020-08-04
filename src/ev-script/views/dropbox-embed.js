@@ -49,7 +49,7 @@ define(function(require) {
             // cookies are blocked.  In that case need to preview in new window.
             // If we're the top window we don't know if TPCs are blocked so
             // assume so and launch to new window.
-            return this.isEmbedSupported() && this.config.hasStorage && !this.isTop() ?
+            return this.isEmbedSupported() && ((this.config.hasStorage && !this.isTop()) || !isPreview) ?
                 this.config.ensembleUrl + '/hapi/v1/ui/dropboxes/' + this.model.get('id') + '/embed' :
                 this.model.get('content').url;
         },
