@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.11 2020-08-04
+ * ev-script 2.3.12 2020-08-10
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -58509,7 +58509,7 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
                 // Logging
                 logLevel: 'info',
                 // Application root
-                appRoot: '/',
+                appRoot: window.location.pathname.replace(/\/auth.*/, ''),
                 // Current user id
                 currentUserId: '',
                 // oauth2 client id
