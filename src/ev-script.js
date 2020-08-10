@@ -83,7 +83,7 @@ define(function(require) {
                 // Logging
                 logLevel: 'info',
                 // Application root
-                appRoot: '/',
+                appRoot: window.location.pathname.replace(/\/auth.*/, ''),
                 // Current user id
                 currentUserId: '',
                 // oauth2 client id
