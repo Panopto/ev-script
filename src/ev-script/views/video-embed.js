@@ -92,7 +92,7 @@ define(function(require) {
                 audioPreviewImage = this.model.get('audiopreviewimage');
             if (isAudio) {
                 if (this.isMenuVisible()) {
-                    height = audioPreviewImage ? height + 40 : 155;
+                    height = audioPreviewImage ? height + 40 : 165;
                 } else {
                     height = audioPreviewImage ? height : 40;
                 }
