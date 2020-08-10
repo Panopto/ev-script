@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.12 2020-08-10
+ * ev-script 2.3.13 2020-08-10
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -39538,7 +39538,7 @@ define('ev-script/views/video-embed',['require','underscore','urijs/URI','ev-scr
                 audioPreviewImage = this.model.get('audiopreviewimage');
             if (isAudio) {
                 if (this.isMenuVisible()) {
-                    height = audioPreviewImage ? height + 40 : 155;
+                    height = audioPreviewImage ? height + 40 : 165;
                 } else {
                     height = audioPreviewImage ? height : 40;
                 }
