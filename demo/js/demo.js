@@ -26,7 +26,6 @@
                 fitToParent: true,
                 i18nPath: '/src/ev-script/i18n',
                 imagePath: '/assets/css/images',
-                appRoot: '/demo',
                 logLevel: 'debug'
             }),
             updateTabI18n = function() {
