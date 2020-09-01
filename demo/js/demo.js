@@ -1,7 +1,10 @@
-/*global EV,evSettings,jQuery,document,window,_*/
+/*global EV,evSettings,jQuery,document,window,_,Cookies*/
 (function($) {
 
     'use strict';
+
+    var tpcEnabled = Cookies.get('tpc_check');
+    console.log('Third-party cookies enabled? ' + tpcEnabled);
 
     $(document).ready(function() {
         var $container = $('.chooserContainer'),
@@ -26,7 +29,8 @@
                 fitToParent: true,
                 i18nPath: '/src/ev-script/i18n',
                 imagePath: '/assets/css/images',
-                logLevel: 'debug'
+                logLevel: 'debug',
+                tpcEnabled: tpcEnabled
             }),
             updateTabI18n = function() {
                 var $tabsList = $('.tabsList', $tabs),

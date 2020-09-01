@@ -19,7 +19,7 @@ module.exports = function(grunt) {
                 'ev-script': 'src/ev-script',
                 'jquery': 'empty:',
                 'jquery-ui': 'empty:',
-                'jquery.cookie': 'node_modules/jquery.cookie/jquery.cookie',
+                'js-cookie': 'node_modules/js-cookie/src/js.cookie',
                 'jquery-expander': 'node_modules/jquery-expander/jquery.expander',
                 'ev-scroll-loader': 'node_modules/ev-scroll-loader/dist/jquery.ev-scroll-loader',
                 'underscore': 'node_modules/underscore/underscore',
@@ -139,7 +139,8 @@ module.exports = function(grunt) {
         https = require('https'),
         fs = require('fs'),
         url = require('url'),
-        request = require('request');
+        request = require('request'),
+        cookieParser = require('cookie-parser');
 
     grunt.registerTask('server', 'Demo server', function() {
         var port = 8000,
@@ -147,10 +148,26 @@ module.exports = function(grunt) {
             demo = path.join(base, 'demo');
         grunt.log.writeln('Starting ssl web server in "' + base + '" on port ' + port + '.');
         var app = express()
+            .use(cookieParser())
             .use(logger('combined'))
             .use('/certs', function(req, res) {
                 grunt.log.writeln('Skipping request for certs...');
                 res.send('');
+            })
+            .use(function(req, res, next) {
+                if (!req.cookies['tpc_check']) {
+                    grunt.log.writeln('Setting tpc_check cookie.');
+                    res.cookie('tpc_check', 'tpc_check', {
+                        sameSite: 'none',
+                        secure: true
+                    });
+                }
+                next();
+            })
+            // Fallback for auth routing
+            .use('/demo/auth/*', function(req, res) {
+                grunt.log.writeln('Handling auth route: ' + req.originalUrl);
+                res.sendFile(path.join(demo, 'index.html'));
             })
             .use(serveStatic(base))
             .use(serveIndex(base, {
@@ -158,11 +175,6 @@ module.exports = function(grunt) {
                     return filename !== 'certs';
                 }
             }))
-            // Fallback for auth routing
-            .use('/demo/auth/*', function(req, res) {
-                grunt.log.writeln('Handling auth route: ' + req.originalUrl);
-                res.sendFile(path.join(demo, 'index.html'));
-            })
             .use(errorhandler());
         https.createServer({
             key: fs.readFileSync('certs/ev-script-key.pem'),
