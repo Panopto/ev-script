@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.13 2020-08-10
+ * ev-script 2.3.14 2020-09-01
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -12,7 +12,8 @@
         define([
             'jquery',
             'jquery-ui/ui/widgets/dialog',
-            'jquery-ui/ui/widgets/accordion'
+            'jquery-ui/ui/widgets/accordion',
+            'jquery-ui/ui/widgets/tabs'
         ], factory);
     } else {
         // Browser globals
@@ -39488,7 +39489,7 @@ define('ev-script/views/video-embed',['require','underscore','urijs/URI','ev-scr
                 mediaWidth = width || this.getMediaWidth(),
                 mediaHeight = height || this.getMediaHeight(),
                 basePath = '/hapi/v1/contents/' + id,
-                action = isPreview && (!this.config.hasStorage || this.isTop()) ?
+                action = isPreview && (!this.config.tpcEnabled || this.isTop()) ?
                     '/launch' : '/plugin';
 
             url.path(basePath + action);
@@ -39687,7 +39688,7 @@ define('ev-script/views/video-preview',['require','underscore','ev-script/models
                 // cookies are blocked.  In that case need to preview in new window.
                 // If we're the top window we don't know if TPCs are blocked so
                 // assume so.
-                if (this.config.hasStorage && !this.isTop()) {
+                if (this.config.tpcEnabled && !this.isTop()) {
                     return PreviewView.prototype.render.call(this, options);
                 }
 
@@ -40611,7 +40612,7 @@ define('ev-script/views/upload',['require','jquery','underscore','loglevel','uri
             })
             .use(Uppy.Tus, {
                 retryDelays: [0, 1000, 3000, 5000, 10000, 30000],
-                removeFingerprintOnSuccess: this.config.hasStorage,
+                removeFingerprintOnSuccess: this.config.tpcEnabled,
                 withCredentials: true,
                 chunkSize: 2097152000
             })
@@ -41463,7 +41464,7 @@ define('ev-script/views/playlist-embed',['require','underscore','urijs/URI','ev-
 
             // Assuming if localStorage is not available that third-party
             // cookies are blocked.  In that case need to preview in new window.
-            if (isPreview && (!this.config.hasStorage || this.isTop())) {
+            if (isPreview && (!this.config.tpcEnabled || this.isTop())) {
                 target += '/preview';
                 src = URI(target);
             }
@@ -41545,7 +41546,7 @@ define('ev-script/views/playlist-preview',['require','ev-script/views/preview','
             // cookies are blocked.  In that case need to preview in new window.
             // If we're the top window we don't know if TPCs are blocked so
             // assume so.
-            if (this.config.hasStorage && !this.isTop()) {
+            if (this.config.tpcEnabled && !this.isTop()) {
                 return PreviewView.prototype.render.call(this);
             }
 
@@ -41771,7 +41772,7 @@ define('ev-script/views/playlist-picker',['require','jquery','underscore','urijs
 });
 
 
-define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <input type="hidden" name="wrapstyle" id="wrapstyle" class="wrapstyle" value="<%- model.get(\'wrapstyle\') %>" />\n    <input type="hidden" name="wrapscript" id="wrapscript" class="wrapscript" value="<%- model.get(\'wrapscript\') %>" />\n    <div role="group" aria-labelledby="playlistSettingsTitle">\n        <div id="playlistSettingsTitle" style="display:none;"><%= i18n.formatMessage(\'Playlist Embed Options\') %></div>\n        <% if (!model.get(\'forceembedtype\')) { %>\n        <div class="fieldWrap inline mr10">\n            <label for="embedtype"><%= i18n.formatMessage(\'Type\') %></label>\n            <select class="form-select embedtype" id="embedtype" name="embedtype">\n                <option value="responsive" <% if (model.get(\'embedtype\') === \'responsive\') { print(\'selected\'); } %>><%= i18n.formatMessage(\'iFrame Responsive\') %></option>\n                <option value="fixed" <% if (model.get(\'embedtype\') === \'fixed\') { print(\'selected\'); } %>><%= i18n.formatMessage(\'iFrame\') %></option>\n            </select>\n        </div>\n        <% } %>\n        <div class="fieldWrap inline fixedOptionsContainer" <% if (model.get(\'embedtype\') !== \'fixed\') { print(\'style="display: none;"\'); } %> >\n            <label for="width"><%= i18n.formatMessage(\'Width\') %></label>\n            <input type="number" id="width" name="width" class="form-text width mr10" min="1" max="9999" required="true" value="<%= model.get(\'width\') %>" />\n            <label for="height"><%= i18n.formatMessage(\'Height\') %></label>\n            <input type="number" id="height" name="height" class="form-text height" min="1" max="9999" required="true" value="<%= model.get(\'height\') %>" />\n        </div>\n        <div class="fieldWrap inline responsiveOptionsContainer" <% if (model.get(\'embedtype\') !== \'responsive\') { print(\'style="display: none;"\'); } %> >\n            <input id="jswrapper" class="form-checkbox" <% if (model.get(\'jswrapper\')) { print(\'checked="checked"\'); } %> name="jswrapper" type="checkbox"/>\n            <label for="jswrapper"><%= i18n.formatMessage(\'Include Javascript Wrapper\') %></label>\n        </div>\n        <div class="tabs">\n            <ul>\n                <li><a href="#layout"><i class="fa fa-th mr5"></i><span><%= i18n.formatMessage(\'Layout\') %></span></a></li>\n                <li><a href="#filter"><i class="fa fa-filter mr5"></i><span><%= i18n.formatMessage(\'Filter & Sort\') %></span></a></li>\n                <li><a href="#display"><i class="fa fa-eye mr5"></i><span><%= i18n.formatMessage(\'Display\') %></span></a></li>\n            </ul>\n            <div id="layout" class="playlist-layout">\n                <div class="layout-option-row">\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="verticalListWithPlayer" class="form-radio" <% if (model.get(\'layout\') === \'verticalListWithPlayer\') { print(\'checked="checked"\'); } %> name="layout" value="verticalListWithPlayer" type="radio"/>\n                        <label for="verticalListWithPlayer">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/player-vertical-scroller.png\' %>" alt="<%= i18n.formatMessage(\'Player with Vertical Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Player with Vertical Playlist\') %></div>\n                        </label>\n                    </div>\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="grid" class="form-radio" <% if (model.get(\'layout\') === \'grid\') { print(\'checked="checked"\'); } %> name="layout" value="grid" type="radio"/>\n                        <label for="grid">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/grid.png\' %>" alt="<%= i18n.formatMessage(\'Video Grid Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Video Grid Playlist\') %></div>\n                        </label>\n                    </div>\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="list" class="form-radio" <% if (model.get(\'layout\') === \'list\') { print(\'checked="checked"\'); } %> name="layout" value="list" type="radio"/>\n                        <label for="list">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/playlist.png\' %>" alt="<%= i18n.formatMessage(\'Vertical Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Vertical Playlist\') %></div>\n                        </label>\n                    </div>\n                </div>\n                <div class="layout-option-row">\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="horizontalListWithPlayer" class="form-radio" <% if (model.get(\'layout\') === \'horizontalListWithPlayer\') { print(\'checked="checked"\'); } %> name="layout" value="horizontalListWithPlayer" type="radio"/>\n                        <label for="horizontalListWithPlayer">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/player-horiz-scroller.png\' %>" alt="<%= i18n.formatMessage(\'Player above Horizontal Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Player above Horizontal Playlist\') %></div>\n                        </label>\n                    </div>\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="showcase" class="form-radio" <% if (model.get(\'layout\') === \'showcase\') { print(\'checked="checked"\'); } %> name="layout" value="showcase" type="radio"/>\n                        <label for="showcase">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/showcase.png\' %>" alt="<%= i18n.formatMessage(\'Video Showcase with Categories\') %>">\n                            <div><%= i18n.formatMessage(\'Video Showcase with Categories\') %></div>\n                        </label>\n                    </div>\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="horizontalList" class="form-radio" <% if (model.get(\'layout\') === \'horizontalList\') { print(\'checked="checked"\'); } %> name="layout" value="horizontalList" type="radio"/>\n                        <label for="horizontalList">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/horiz-scroller.png\' %>" alt="<%= i18n.formatMessage(\'Horizontal Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Horizontal Playlist\') %></div>\n                        </label>\n                    </div>\n                </div>\n                <div class="layout-option-row">\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="listWithPlayer" class="form-radio" <% if (model.get(\'layout\') === \'listWithPlayer\') { print(\'checked="checked"\'); } %> name="layout" value="listWithPlayer" type="radio"/>\n                        <label for="listWithPlayer">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/player-playlist.png\' %>" alt="<%= i18n.formatMessage(\'Player above Vertical Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Player above Vertical Playlist\') %></div>\n                        </label>\n                    </div>\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="gridWithPlayer" class="form-radio" <% if (model.get(\'layout\') === \'gridWithPlayer\') { print(\'checked="checked"\'); } %> name="layout" value="gridWithPlayer" type="radio"/>\n                        <label for="gridWithPlayer">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/player-grid.png\' %>" alt="<%= i18n.formatMessage(\'Player above Video Grid Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Player above Video Grid Playlist\') %></div>\n                        </label>\n                    </div>\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="loop" class="form-radio" <% if (model.get(\'layout\') === \'loop\') { print(\'checked="checked"\'); } %> name="layout" value="loop" type="radio"/>\n                        <label for="loop">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/looping-playlist.png\' %>" alt="<%= i18n.formatMessage(\'Looping Video Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Looping Video Playlist\') %></div>\n                        </label>\n                    </div>\n                </div>\n            </div>\n            <div id="filter" class="playlist-filter">\n                <h4><%= i18n.formatMessage(\'Filter By\') %></h4>\n                <div>\n                    <div class="fieldWrap">\n                        <label for="search"><%= i18n.formatMessage(\'Search String\') %></label>\n                        <input id="search" class="form-text" name="search" value="<%- model.get(\'search\') %>" type="text"/>\n                    </div>\n                    <div class="fieldWrap">\n                        <label for="categories"><%= i18n.formatMessage(\'Categories\') %></label>\n                        <select id="categories" class="form-select" name="categories" multiple>\n                            <option value="-1" <% if (!model.get(\'categories\')) { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'All Categories\') %></option>\n                            <% categories.each(function(category) { %>\n                                <option value="<%= category.id %>" <% if (model.get(\'categories\') && _.contains(model.get(\'categories\').split(\',\'), category.id)) { print(\'selected="selected"\'); } %>><%- category.get(\'name\') %></option>\n                            <% }); %>\n                        </select>\n                    </div>\n                    <div class="fieldWrap">\n                        <label for="resultscount"><%= i18n.formatMessage(\'Number of Results\') %></label>\n                        <input id="resultscount" class="form-text" name="resultscount" value="<%- model.get(\'resultscount\') %>" type="text"/>\n                    </div>\n                </div>\n                <h4><label for="sortby"><%= i18n.formatMessage(\'Sort By\') %></label></h4>\n                <div class="fieldWrap sort-group">\n                    <select id="sortby" class="form-select">\n                        <option value="DateAdded" <% if (model.get(\'sortby\') === \'DateAdded\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Added\') %></option>\n                        <option value="DateProduced" <% if (model.get(\'sortby\') === \'DateProduced\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Produced\') %></option>\n                        <option value="Description" <% if (model.get(\'sortby\') === \'Description\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Description\') %></option>\n                        <option value="Title" <% if (model.get(\'sortby\') === \'Title\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Title\') %></option>\n                        <option value="Duration" <% if (model.get(\'sortby\') === \'Duration\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Duration\') %></option>\n                        <option value="Keywords" <% if (model.get(\'sortby\') === \'Keywords\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Keywords\') %></option>\n                        <!-- <option value="videoCustomPosition">Custom Order</option> -->\n                    </select>\n                    <input id="sortAsc" class="form-radio" <% if (!model.get(\'desc\')) { print(\'checked="checked"\'); } %> name="sortDirection" value="asc" type="radio"/>\n                    <label for="sortAsc"><%= i18n.formatMessage(\'Ascending\') %></label>\n                    <input id="sortDesc" class="form-radio" <% if (model.get(\'desc\')) { print(\'checked="checked"\'); } %> name="sortDirection" value="desc" type="radio"/>\n                    <label for="sortDesc"><%= i18n.formatMessage(\'Descending\') %></label>\n                </div>\n            </div>\n            <div id="display" class="playlist-display">\n                <div class="fieldWrap checkbox-option">\n                    <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                    <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                    <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                    <label for="captionsearch"><%= i18n.formatMessage(\'Interactive Transcript\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="socialsharing"><%= i18n.formatMessage(\'Social Sharing & Links\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="showtitle" class="form-checkbox" checked="checked" disabled="disabled" name="showtitle" type="checkbox"/>\n                    <label for="showtitle"><%= i18n.formatMessage(\'Title\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="viewersreport" class="form-checkbox" <% if (model.get(\'viewersreport\')) { print(\'checked="checked"\'); } %>  name="viewersreport" type="checkbox"/>\n                    <label for="viewersreport"><%= i18n.formatMessage(\'Viewers Report\') %></label>\n                </div>\n                <h4><%= i18n.formatMessage(\'Additional Settings\') %></h4>\n                <div class="fieldWrap checkbox-option">\n                    <input id="axdxs" class="form-checkbox" <% if (model.get(\'axdxs\')) { print(\'checked="checked"\'); } %> name="axdxs" type="checkbox"/>\n                    <label for="axdxs"><%= i18n.formatMessage(\'Ads\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                    <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                    <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                    <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="logo" class="form-checkbox" <% if (model.get(\'logo\')) { print(\'checked="checked"\'); } %> name="logo" type="checkbox"/>\n                    <label for="logo"><%= i18n.formatMessage(\'Logo\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                    <label for="metadata"><%= i18n.formatMessage(\'Meta Data\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="nextup" class="form-checkbox" <% if (model.get(\'nextup\')) { print(\'checked="checked"\'); } %> <% if (model.get(\'layout\') !== \'loop\') { print(\'disabled="disabled"\'); } %> name="nextup" type="checkbox"/>\n                    <label for="nextup"><%= i18n.formatMessage(\'Display Next Up\') %></label>\n                </div>\n            </div>\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </div>\n</form>\n';});
+define('text!ev-script/templates/playlist-settings.html',[],function () { return '<form>\n    <input type="hidden" name="wrapstyle" id="wrapstyle" class="wrapstyle" value="<%- model.get(\'wrapstyle\') %>" />\n    <input type="hidden" name="wrapscript" id="wrapscript" class="wrapscript" value="<%- model.get(\'wrapscript\') %>" />\n    <div role="group" aria-labelledby="playlistSettingsTitle">\n        <div id="playlistSettingsTitle" style="display:none;"><%= i18n.formatMessage(\'Playlist Embed Options\') %></div>\n        <% if (!model.get(\'forceembedtype\')) { %>\n        <div class="fieldWrap inline mr10">\n            <label for="embedtype"><%= i18n.formatMessage(\'Type\') %></label>\n            <select class="form-select embedtype" id="embedtype" name="embedtype">\n                <option value="responsive" <% if (model.get(\'embedtype\') === \'responsive\') { print(\'selected\'); } %>><%= i18n.formatMessage(\'iFrame Responsive\') %></option>\n                <option value="fixed" <% if (model.get(\'embedtype\') === \'fixed\') { print(\'selected\'); } %>><%= i18n.formatMessage(\'iFrame\') %></option>\n            </select>\n        </div>\n        <% } %>\n        <div class="fieldWrap inline fixedOptionsContainer" <% if (model.get(\'embedtype\') !== \'fixed\') { print(\'style="display: none;"\'); } %> >\n            <label for="width"><%= i18n.formatMessage(\'Width\') %></label>\n            <input type="number" id="width" name="width" class="form-text width mr10" min="1" max="9999" required="true" value="<%= model.get(\'width\') %>" />\n            <label for="height"><%= i18n.formatMessage(\'Height\') %></label>\n            <input type="number" id="height" name="height" class="form-text height" min="1" max="9999" required="true" value="<%= model.get(\'height\') %>" />\n        </div>\n        <div class="fieldWrap inline responsiveOptionsContainer" <% if (model.get(\'embedtype\') !== \'responsive\') { print(\'style="display: none;"\'); } %> >\n            <input id="jswrapper" class="form-checkbox" <% if (model.get(\'jswrapper\')) { print(\'checked="checked"\'); } %> name="jswrapper" type="checkbox"/>\n            <label for="jswrapper"><%= i18n.formatMessage(\'Include Javascript Wrapper\') %></label>\n        </div>\n        <div class="tabs">\n            <ul>\n                <li><a href="#layout"><i class="fa fa-th mr5"></i><span><%= i18n.formatMessage(\'Layout\') %></span></a></li>\n                <li><a href="#filter"><i class="fa fa-filter mr5"></i><span><%= i18n.formatMessage(\'Filter & Sort\') %></span></a></li>\n                <li><a href="#display"><i class="fa fa-eye mr5"></i><span><%= i18n.formatMessage(\'Display\') %></span></a></li>\n            </ul>\n            <div id="layout" class="playlist-layout">\n                <div class="layout-option-row">\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="verticalListWithPlayer" class="form-radio" <% if (model.get(\'layout\') === \'verticalListWithPlayer\') { print(\'checked="checked"\'); } %> name="layout" value="verticalListWithPlayer" type="radio"/>\n                        <label for="verticalListWithPlayer">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/player-vertical-scroller.png\' %>" alt="<%= i18n.formatMessage(\'Player with Vertical Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Player with Vertical Playlist\') %></div>\n                        </label>\n                    </div>\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="grid" class="form-radio" <% if (model.get(\'layout\') === \'grid\') { print(\'checked="checked"\'); } %> name="layout" value="grid" type="radio"/>\n                        <label for="grid">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/grid.png\' %>" alt="<%= i18n.formatMessage(\'Video Grid Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Video Grid Playlist\') %></div>\n                        </label>\n                    </div>\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="list" class="form-radio" <% if (model.get(\'layout\') === \'list\') { print(\'checked="checked"\'); } %> name="layout" value="list" type="radio"/>\n                        <label for="list">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/playlist.png\' %>" alt="<%= i18n.formatMessage(\'Vertical Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Vertical Playlist\') %></div>\n                        </label>\n                    </div>\n                </div>\n                <div class="layout-option-row">\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="horizontalListWithPlayer" class="form-radio" <% if (model.get(\'layout\') === \'horizontalListWithPlayer\') { print(\'checked="checked"\'); } %> name="layout" value="horizontalListWithPlayer" type="radio"/>\n                        <label for="horizontalListWithPlayer">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/player-horiz-scroller.png\' %>" alt="<%= i18n.formatMessage(\'Player above Horizontal Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Player above Horizontal Playlist\') %></div>\n                        </label>\n                    </div>\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="showcase" class="form-radio" <% if (model.get(\'layout\') === \'showcase\') { print(\'checked="checked"\'); } %> name="layout" value="showcase" type="radio"/>\n                        <label for="showcase">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/showcase.png\' %>" alt="<%= i18n.formatMessage(\'Video Showcase with Categories\') %>">\n                            <div><%= i18n.formatMessage(\'Video Showcase with Categories\') %></div>\n                        </label>\n                    </div>\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="horizontalList" class="form-radio" <% if (model.get(\'layout\') === \'horizontalList\') { print(\'checked="checked"\'); } %> name="layout" value="horizontalList" type="radio"/>\n                        <label for="horizontalList">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/horiz-scroller.png\' %>" alt="<%= i18n.formatMessage(\'Horizontal Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Horizontal Playlist\') %></div>\n                        </label>\n                    </div>\n                </div>\n                <div class="layout-option-row">\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="listWithPlayer" class="form-radio" <% if (model.get(\'layout\') === \'listWithPlayer\') { print(\'checked="checked"\'); } %> name="layout" value="listWithPlayer" type="radio"/>\n                        <label for="listWithPlayer">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/player-playlist.png\' %>" alt="<%= i18n.formatMessage(\'Player above Vertical Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Player above Vertical Playlist\') %></div>\n                        </label>\n                    </div>\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="gridWithPlayer" class="form-radio" <% if (model.get(\'layout\') === \'gridWithPlayer\') { print(\'checked="checked"\'); } %> name="layout" value="gridWithPlayer" type="radio"/>\n                        <label for="gridWithPlayer">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/player-grid.png\' %>" alt="<%= i18n.formatMessage(\'Player above Video Grid Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Player above Video Grid Playlist\') %></div>\n                        </label>\n                    </div>\n                    <div class="fieldWrap inline-option layout-option">\n                        <input id="loop" class="form-radio" <% if (model.get(\'layout\') === \'loop\') { print(\'checked="checked"\'); } %> name="layout" value="loop" type="radio"/>\n                        <label for="loop">\n                            <img src="<%= config.imagePath + \'/playlist/layouts/looping-playlist.png\' %>" alt="<%= i18n.formatMessage(\'Looping Video Playlist\') %>">\n                            <div><%= i18n.formatMessage(\'Looping Video Playlist\') %></div>\n                        </label>\n                    </div>\n                </div>\n            </div>\n            <div id="filter" class="playlist-filter">\n                <h4><%= i18n.formatMessage(\'Filter By\') %></h4>\n                <div>\n                    <div class="fieldWrap">\n                        <label for="search"><%= i18n.formatMessage(\'Search String\') %></label>\n                        <input id="search" class="form-text" name="search" value="<%- model.get(\'search\') %>" type="text"/>\n                    </div>\n                    <div class="fieldWrap">\n                        <label for="categories"><%= i18n.formatMessage(\'Categories\') %></label>\n                        <select id="categories" class="form-select" name="categories" multiple>\n                            <option value="-1" <% if (!model.get(\'categories\')) { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'All Categories\') %></option>\n                            <% categories.each(function(category) { %>\n                                <option value="<%= category.id %>" <% if (model.get(\'categories\') && _.contains(model.get(\'categories\').split(\',\'), category.id)) { print(\'selected="selected"\'); } %>><%- category.get(\'name\') %></option>\n                            <% }); %>\n                        </select>\n                    </div>\n                    <div class="fieldWrap">\n                        <label for="resultscount"><%= i18n.formatMessage(\'Number of Results\') %></label>\n                        <input id="resultscount" class="form-text" name="resultscount" value="<%- model.get(\'resultscount\') %>" type="text"/>\n                    </div>\n                </div>\n                <h4><label for="sortby"><%= i18n.formatMessage(\'Sort By\') %></label></h4>\n                <div class="fieldWrap sort-group">\n                    <select id="sortby" class="form-select">\n                        <option value="DateAdded" <% if (model.get(\'sortby\') === \'DateAdded\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Added\') %></option>\n                        <option value="DateProduced" <% if (model.get(\'sortby\') === \'DateProduced\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Date Produced\') %></option>\n                        <option value="Description" <% if (model.get(\'sortby\') === \'Description\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Description\') %></option>\n                        <option value="Name" <% if (model.get(\'sortby\') === \'Name\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Title\') %></option>\n                        <option value="Duration" <% if (model.get(\'sortby\') === \'Duration\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Duration\') %></option>\n                        <option value="Keywords" <% if (model.get(\'sortby\') === \'Keywords\') { print(\'selected="selected"\'); } %>><%= i18n.formatMessage(\'Keywords\') %></option>\n                        <!-- <option value="videoCustomPosition">Custom Order</option> -->\n                    </select>\n                    <input id="sortAsc" class="form-radio" <% if (!model.get(\'desc\')) { print(\'checked="checked"\'); } %> name="sortDirection" value="asc" type="radio"/>\n                    <label for="sortAsc"><%= i18n.formatMessage(\'Ascending\') %></label>\n                    <input id="sortDesc" class="form-radio" <% if (model.get(\'desc\')) { print(\'checked="checked"\'); } %> name="sortDirection" value="desc" type="radio"/>\n                    <label for="sortDesc"><%= i18n.formatMessage(\'Descending\') %></label>\n                </div>\n            </div>\n            <div id="display" class="playlist-display">\n                <div class="fieldWrap checkbox-option">\n                    <input id="annotations" class="form-checkbox" <% if (model.get(\'annotations\')) { print(\'checked="checked"\'); } %> name="annotations" type="checkbox"/>\n                    <label for="annotations"><%= i18n.formatMessage(\'Annotations\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="showcaptions" class="form-checkbox" <% if (model.get(\'showcaptions\')) { print(\'checked="checked"\'); } %>  name="showcaptions" type="checkbox"/>\n                    <label for="showcaptions"><%= i18n.formatMessage(\'Captions "On" By Default\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="captionsearch" class="form-checkbox" <% if (model.get(\'captionsearch\')) { print(\'checked="checked"\'); } %> name="captionsearch" type="checkbox"/>\n                    <label for="captionsearch"><%= i18n.formatMessage(\'Interactive Transcript\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="socialsharing" class="form-checkbox" <% if (!isSecure && model.get(\'socialsharing\')) { print(\'checked="checked"\'); } %> name="socialsharing" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="socialsharing"><%= i18n.formatMessage(\'Social Sharing & Links\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="showtitle" class="form-checkbox" checked="checked" disabled="disabled" name="showtitle" type="checkbox"/>\n                    <label for="showtitle"><%= i18n.formatMessage(\'Title\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="viewersreport" class="form-checkbox" <% if (model.get(\'viewersreport\')) { print(\'checked="checked"\'); } %>  name="viewersreport" type="checkbox"/>\n                    <label for="viewersreport"><%= i18n.formatMessage(\'Viewers Report\') %></label>\n                </div>\n                <h4><%= i18n.formatMessage(\'Additional Settings\') %></h4>\n                <div class="fieldWrap checkbox-option">\n                    <input id="axdxs" class="form-checkbox" <% if (model.get(\'axdxs\')) { print(\'checked="checked"\'); } %> name="axdxs" type="checkbox"/>\n                    <label for="axdxs"><%= i18n.formatMessage(\'Ads\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="attachments" class="form-checkbox" <% if (model.get(\'attachments\')) { print(\'checked="checked"\'); } %> name="attachments" type="checkbox"/>\n                    <label for="attachments"><%= i18n.formatMessage(\'Attachments\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="audiopreviewimage" class="form-checkbox" <% if (model.get(\'audiopreviewimage\')) { print(\'checked="checked"\'); } %> name="audiopreviewimage" type="checkbox"/>\n                    <label for="audiopreviewimage"><%= i18n.formatMessage(\'Audio Preview Image\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="autoplay" class="form-checkbox" <% if (model.get(\'autoplay\')) { print(\'checked="checked"\'); } %>  name="autoplay" type="checkbox"/>\n                    <label for="autoplay"><%= i18n.formatMessage(\'Auto Play (PC Only)\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get(\'embedcode\')) { print(\'checked="checked"\'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print(\'disabled\') } %> />\n                    <label for="embedcode"><%= i18n.formatMessage(\'Embed Code\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="links" class="form-checkbox" <% if (model.get(\'links\')) { print(\'checked="checked"\'); } %> name="links" type="checkbox"/>\n                    <label for="links"><%= i18n.formatMessage(\'Links\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="logo" class="form-checkbox" <% if (model.get(\'logo\')) { print(\'checked="checked"\'); } %> name="logo" type="checkbox"/>\n                    <label for="logo"><%= i18n.formatMessage(\'Logo\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="metadata" class="form-checkbox" <% if (model.get(\'metadata\')) { print(\'checked="checked"\'); } %> name="metadata" type="checkbox"/>\n                    <label for="metadata"><%= i18n.formatMessage(\'Meta Data\') %></label>\n                </div>\n                <div class="fieldWrap checkbox-option">\n                    <input id="nextup" class="form-checkbox" <% if (model.get(\'nextup\')) { print(\'checked="checked"\'); } %> <% if (model.get(\'layout\') !== \'loop\') { print(\'disabled="disabled"\'); } %> name="nextup" type="checkbox"/>\n                    <label for="nextup"><%= i18n.formatMessage(\'Display Next Up\') %></label>\n                </div>\n            </div>\n        </div>\n        <div class="form-actions">\n            <button type="submit" class="form-submit action-submit" value="Submit"><i class="fa fa-save"></i><span><%= i18n.formatMessage(\'Save\') %></span></button>\n            <button type="button" class="form-submit action-cancel" value="Cancel"><i class="fa fa-times"></i><span><%= i18n.formatMessage(\'Cancel\') %></span></button>\n        </div>\n    </div>\n</form>\n';});
 
 define('ev-script/views/playlist-settings',['require','jquery','underscore','ev-script/views/settings','ev-script/collections/base','jquery-ui/ui/widgets/dialog','jquery-ui/ui/widgets/tabs','text!ev-script/templates/playlist-settings.html'],function(require) {
 
@@ -42148,7 +42149,7 @@ define('ev-script/views/dropbox-embed',['require','underscore','ev-script/views/
             // cookies are blocked.  In that case need to preview in new window.
             // If we're the top window we don't know if TPCs are blocked so
             // assume so and launch to new window.
-            return this.isEmbedSupported() && ((this.config.hasStorage && !this.isTop()) || !isPreview) ?
+            return this.isEmbedSupported() && ((this.config.tpcEnabled && !this.isTop()) || !isPreview) ?
                 this.config.ensembleUrl + '/hapi/v1/ui/dropboxes/' + this.model.get('id') + '/embed' :
                 this.model.get('content').url;
         },
@@ -42201,7 +42202,7 @@ define('ev-script/views/dropbox-preview',['require','ev-script/views/preview','e
             // Assuming if localStorage is not available that third-party
             // cookies are blocked.  In that case need to preview in new window.
             if (this.info.checkVersion('5.3.0', '<') ||
-                !this.config.hasStorage ||
+                !this.config.tpcEnabled ||
                 this.isTop()) {
                 embedView = new DropboxEmbedView({
                     model: new this.model.constructor(this.model.toJSON()),
@@ -55962,124 +55963,6 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
 
 });
 
-/*!
- * jQuery Cookie Plugin v1.4.1
- * https://github.com/carhartl/jquery-cookie
- *
- * Copyright 2013 Klaus Hartl
- * Released under the MIT license
- */
-(function (factory) {
-	if (typeof define === 'function' && define.amd) {
-		// AMD
-		define('jquery.cookie',['jquery'], factory);
-	} else if (typeof exports === 'object') {
-		// CommonJS
-		factory(require('jquery'));
-	} else {
-		// Browser globals
-		factory(jQuery);
-	}
-}(function ($) {
-
-	var pluses = /\+/g;
-
-	function encode(s) {
-		return config.raw ? s : encodeURIComponent(s);
-	}
-
-	function decode(s) {
-		return config.raw ? s : decodeURIComponent(s);
-	}
-
-	function stringifyCookieValue(value) {
-		return encode(config.json ? JSON.stringify(value) : String(value));
-	}
-
-	function parseCookieValue(s) {
-		if (s.indexOf('"') === 0) {
-			// This is a quoted cookie as according to RFC2068, unescape...
-			s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
-		}
-
-		try {
-			// Replace server-side written pluses with spaces.
-			// If we can't decode the cookie, ignore it, it's unusable.
-			// If we can't parse the cookie, ignore it, it's unusable.
-			s = decodeURIComponent(s.replace(pluses, ' '));
-			return config.json ? JSON.parse(s) : s;
-		} catch(e) {}
-	}
-
-	function read(s, converter) {
-		var value = config.raw ? s : parseCookieValue(s);
-		return $.isFunction(converter) ? converter(value) : value;
-	}
-
-	var config = $.cookie = function (key, value, options) {
-
-		// Write
-
-		if (value !== undefined && !$.isFunction(value)) {
-			options = $.extend({}, config.defaults, options);
-
-			if (typeof options.expires === 'number') {
-				var days = options.expires, t = options.expires = new Date();
-				t.setTime(+t + days * 864e+5);
-			}
-
-			return (document.cookie = [
-				encode(key), '=', stringifyCookieValue(value),
-				options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
-				options.path    ? '; path=' + options.path : '',
-				options.domain  ? '; domain=' + options.domain : '',
-				options.secure  ? '; secure' : ''
-			].join(''));
-		}
-
-		// Read
-
-		var result = key ? undefined : {};
-
-		// To prevent the for loop in the first place assign an empty array
-		// in case there are no cookies at all. Also prevents odd result when
-		// calling $.cookie().
-		var cookies = document.cookie ? document.cookie.split('; ') : [];
-
-		for (var i = 0, l = cookies.length; i < l; i++) {
-			var parts = cookies[i].split('=');
-			var name = decode(parts.shift());
-			var cookie = parts.join('=');
-
-			if (key && key === name) {
-				// If second argument (value) is a function it's a converter...
-				result = read(cookie, value);
-				break;
-			}
-
-			// Prevent storing a cookie that we couldn't decode.
-			if (!key && (cookie = read(cookie)) !== undefined) {
-				result[name] = cookie;
-			}
-		}
-
-		return result;
-	};
-
-	config.defaults = {};
-
-	$.removeCookie = function (key, options) {
-		if ($.cookie(key) === undefined) {
-			return false;
-		}
-
-		// Must not alter options, thus extending a fresh object...
-		$.cookie(key, '', $.extend({}, options, { expires: -1 }));
-		return !$.cookie(key);
-	};
-
-}));
-
 /**
  * CLDR JavaScript Library v0.5.1
  * http://jquery.com/
@@ -58425,7 +58308,7 @@ return Globalize;
 }));
 
 /*global log*/
-define('ev-script',['require','backbone','underscore','jquery','loglevel','globalize','moment','json!cldr-data/supplemental/likelySubtags.json','json!ev-script/i18n/root/messages.json','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/models/dropbox-settings','ev-script/models/quiz-settings','ev-script/views/video-field','ev-script/views/playlist-field','ev-script/views/dropbox-field','ev-script/views/quiz-field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/views/dropbox-embed','ev-script/views/quiz-embed','ev-script/models/root','ev-script/models/info','ev-script/util/events','ev-script/util/cache','ev-script/util/auth','jquery.cookie','cldr/supplemental','cldr/unresolved','globalize/message'],function(require) {
+define('ev-script',['require','backbone','underscore','jquery','loglevel','globalize','moment','json!cldr-data/supplemental/likelySubtags.json','json!ev-script/i18n/root/messages.json','ev-script/models/video-settings','ev-script/models/playlist-settings','ev-script/models/dropbox-settings','ev-script/models/quiz-settings','ev-script/views/video-field','ev-script/views/playlist-field','ev-script/views/dropbox-field','ev-script/views/quiz-field','ev-script/views/video-embed','ev-script/views/playlist-embed','ev-script/views/dropbox-embed','ev-script/views/quiz-embed','ev-script/models/root','ev-script/models/info','ev-script/util/events','ev-script/util/cache','ev-script/util/auth','cldr/supplemental','cldr/unresolved','globalize/message'],function(require) {
 
     'use strict';
 
@@ -58466,10 +58349,6 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
         AuthUtil = require('ev-script/util/auth'),
 
         supportedLanguages = [ 'en', 'en-US', 'es', 'es-MX', 'fr', 'fr-FR' ];
-
-    // Require jquery.cookie here so it is bundled. It is used in our factory
-    // for configuration of i18n.
-    require('jquery.cookie');
 
     // Load globalize deps
     require('cldr/supplemental');
@@ -58513,7 +58392,9 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
                 // Current user id
                 currentUserId: '',
                 // oauth2 client id
-                clientId: ''
+                clientId: '',
+                // Are third-party cookies available?
+                tpcEnabled: true
             },
             config,
             events,
@@ -58537,14 +58418,6 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
 
         // Setup globalize
         Globalize.load(likelySubtags);
-
-        // See if we have localStorage available
-        try {
-            window.localStorage.getItem('test');
-            config.hasStorage = true;
-        } catch (exception) {
-            config.hasStorage = false;
-        }
 
         // Set logging
         log.setDefaultLevel(config.logLevel);
@@ -58819,16 +58692,6 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
 
     define('jquery-ui/ui/widgets/dialog', ['jquery'], function() {});
     define('jquery-ui/ui/widgets/tabs', ['jquery'], function() {});
-
-    // Set the current locale based on i18n.langtag cookie
-    require('jquery.cookie');
-    require.config({
-        config: {
-            i18n: {
-                locale: ($.cookie('i18n.langtag') || 'en-us').toLowerCase()
-            }
-        }
-    });
 
     // Use almond's special top-level, synchronous require to trigger factory
     // functions, get the final module value, and export it as the public
