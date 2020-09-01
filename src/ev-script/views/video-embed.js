@@ -42,7 +42,7 @@ define(function(require) {
                 mediaWidth = width || this.getMediaWidth(),
                 mediaHeight = height || this.getMediaHeight(),
                 basePath = '/hapi/v1/contents/' + id,
-                action = isPreview && (!this.config.hasStorage || this.isTop()) ?
+                action = isPreview && (!this.config.tpcEnabled || this.isTop()) ?
                     '/launch' : '/plugin';
 
             url.path(basePath + action);

@@ -164,7 +164,7 @@ define(function(require) {
             })
             .use(Uppy.Tus, {
                 retryDelays: [0, 1000, 3000, 5000, 10000, 30000],
-                removeFingerprintOnSuccess: this.config.hasStorage,
+                removeFingerprintOnSuccess: this.config.tpcEnabled,
                 withCredentials: true,
                 chunkSize: 2097152000
             })

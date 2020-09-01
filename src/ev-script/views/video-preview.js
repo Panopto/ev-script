@@ -38,7 +38,7 @@ define(function(require) {
                 // cookies are blocked.  In that case need to preview in new window.
                 // If we're the top window we don't know if TPCs are blocked so
                 // assume so.
-                if (this.config.hasStorage && !this.isTop()) {
+                if (this.config.tpcEnabled && !this.isTop()) {
                     return PreviewView.prototype.render.call(this, options);
                 }
 

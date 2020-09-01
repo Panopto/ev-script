@@ -41,10 +41,6 @@ define(function(require) {
 
         supportedLanguages = [ 'en', 'en-US', 'es', 'es-MX', 'fr', 'fr-FR' ];
 
-    // Require jquery.cookie here so it is bundled. It is used in our factory
-    // for configuration of i18n.
-    require('jquery.cookie');
-
     // Load globalize deps
     require('cldr/supplemental');
     require('cldr/unresolved');
@@ -87,7 +83,9 @@ define(function(require) {
                 // Current user id
                 currentUserId: '',
                 // oauth2 client id
-                clientId: ''
+                clientId: '',
+                // Are third-party cookies available?
+                tpcEnabled: true
             },
             config,
             events,
@@ -111,14 +109,6 @@ define(function(require) {
 
         // Setup globalize
         Globalize.load(likelySubtags);
-
-        // See if we have localStorage available
-        try {
-            window.localStorage.getItem('test');
-            config.hasStorage = true;
-        } catch (exception) {
-            config.hasStorage = false;
-        }
 
         // Set logging
         log.setDefaultLevel(config.logLevel);
