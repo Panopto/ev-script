@@ -85,7 +85,9 @@ define(function(require) {
                 // oauth2 client id
                 clientId: '',
                 // Are third-party cookies available?
-                tpcEnabled: true
+                tpcEnabled: true,
+                // Use oauth2 redirect rather than popout?
+                useAuthRedirect: false
             },
             config,
             events,

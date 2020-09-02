@@ -18,6 +18,7 @@ define(function(require) {
             '': 'default',
             'auth/popupCallback': 'popupCallback',
             'auth/silentCallback': 'silentCallback',
+            'auth/redirectCallback': 'redirectCallback',
             'auth/logoutCallback': 'logoutCallback'
         },
         default: function() {
@@ -32,9 +33,27 @@ define(function(require) {
             log.info('[routers/auth] silentCallback route');
             this.userManager.signinSilentCallback();
         },
+        redirectCallback: function() {
+            log.info('[routers/auth] redirectCallback route');
+            this.userManager.signinRedirectCallback()
+            .then(_.bind(function(user) {
+                this.navigate('');
+                this.config.currentUserId = user.profile.sub;
+                this.default();
+            }, this));
+        },
         logoutCallback: function() {
             log.info('[routers/auth] logoutCallback route');
-            this.userManager.signoutPopupCallback();
+            if (this.config.useAuthRedirect) {
+                this.userManager.signoutRedirectCallback()
+                .then(_.bind(function(user) {
+                    this.navigate('');
+                    this.config.currentUserId = undefined;
+                    this.default();
+                }, this));
+            } else {
+                this.userManager.signoutPopupCallback();
+            }
         }
     });
 

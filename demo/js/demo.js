@@ -30,7 +30,8 @@
                 i18nPath: '/src/ev-script/i18n',
                 imagePath: '/assets/css/images',
                 logLevel: 'debug',
-                tpcEnabled: tpcEnabled
+                tpcEnabled: tpcEnabled,
+                // useAuthRedirect: true
             }),
             updateTabI18n = function() {
                 var $tabsList = $('.tabsList', $tabs),
