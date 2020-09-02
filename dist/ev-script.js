@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.14 2020-09-01
+ * ev-script 2.3.15 2020-09-01
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -55785,6 +55785,7 @@ define('ev-script/routers/auth',['require','underscore','loglevel','backbone'],f
             '': 'default',
             'auth/popupCallback': 'popupCallback',
             'auth/silentCallback': 'silentCallback',
+            'auth/redirectCallback': 'redirectCallback',
             'auth/logoutCallback': 'logoutCallback'
         },
         default: function() {
@@ -55799,9 +55800,27 @@ define('ev-script/routers/auth',['require','underscore','loglevel','backbone'],f
             log.info('[routers/auth] silentCallback route');
             this.userManager.signinSilentCallback();
         },
+        redirectCallback: function() {
+            log.info('[routers/auth] redirectCallback route');
+            this.userManager.signinRedirectCallback()
+            .then(_.bind(function(user) {
+                this.navigate('');
+                this.config.currentUserId = user.profile.sub;
+                this.default();
+            }, this));
+        },
         logoutCallback: function() {
             log.info('[routers/auth] logoutCallback route');
-            this.userManager.signoutPopupCallback();
+            if (this.config.useAuthRedirect) {
+                this.userManager.signoutRedirectCallback()
+                .then(_.bind(function(user) {
+                    this.navigate('');
+                    this.config.currentUserId = undefined;
+                    this.default();
+                }, this));
+            } else {
+                this.userManager.signoutPopupCallback();
+            }
         }
     });
 
@@ -55883,7 +55902,8 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
                     height = 500,
                     top = parseInt((screen.availHeight / 2) - (height / 2), 10),
                     left = parseInt((screen.availWidth / 2) - (width / 2), 10),
-                    features = 'location=no,toolbar=no,width=500,height=500,left=' + left + ',top=' + top + ',screenX=' + left + ',screenY=' + top + ',chrome=yes;centerscreen=yes;';
+                    features = 'location=no,toolbar=no,width=500,height=500,left=' + left + ',top=' + top + ',screenX=' + left + ',screenY=' + top + ',chrome=yes;centerscreen=yes;',
+                    useRedirect = this.config.useAuthRedirect;
 
                 if (!prompt) {
                     log.debug('[doAuthenticate] No user found...attempting silent sign-in');
@@ -55899,10 +55919,40 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
                         }
                     }, this))
                     .catch(_.bind(function(err) {
-                        log.debug('[doAuthenticate] No user found...attempting pop-up sign-in');
-
+                        log.debug('[doAuthenticate] No user found...attempting interactive sign-in');
+                        if (useRedirect) {
+                            this.userManager.signinRedirect({
+                                extraQueryParams: {
+                                    'ev_institution_id': this.config.institutionId,
+                                    'ev_allow_non_provisioned': false
+                                }
+                            });
+                        } else {
+                            this.userManager.signinPopup({
+                                popupWindowFeatures: features,
+                                extraQueryParams: {
+                                    'ev_institution_id': this.config.institutionId,
+                                    'ev_allow_non_provisioned': false
+                                }
+                            })
+                            .then(loggedInHandler)
+                            .catch(loggedOutHandler);
+                        }
+                    }, this));
+                } else {
+                    log.debug('[doAuthenticate] Forcing login prompt');
+                    if (useRedirect) {
+                        this.userManager.signinRedirect({
+                            prompt: 'login',
+                            extraQueryParams: {
+                                'ev_institution_id': this.config.institutionId,
+                                'ev_allow_non_provisioned': false
+                            }
+                        });
+                    } else {
                         this.userManager.signinPopup({
                             popupWindowFeatures: features,
+                            prompt: 'login',
                             extraQueryParams: {
                                 'ev_institution_id': this.config.institutionId,
                                 'ev_allow_non_provisioned': false
@@ -55910,19 +55960,7 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
                         })
                         .then(loggedInHandler)
                         .catch(loggedOutHandler);
-                    }, this));
-                } else {
-                    log.debug('[doAuthenticate] Forcing login prompt');
-                    this.userManager.signinPopup({
-                        popupWindowFeatures: features,
-                        prompt: 'login',
-                        extraQueryParams: {
-                            'ev_institution_id': this.config.institutionId,
-                            'ev_allow_non_provisioned': false
-                        }
-                    })
-                    .then(loggedInHandler)
-                    .catch(loggedOutHandler);
+                    }
                 }
             }, this);
 
@@ -55947,12 +55985,18 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
     };
 
     Auth.prototype.logout = function() {
-        this.userManager.stopSilentRenew();
-        return this.userManager.signoutPopup()
-            .then(_.bind(function() {
+        var signoutCallback = _.bind(function() {
                 this.config.currentUserId = null;
                 this.events.trigger('loggedOut');
-            }, this));
+            }, this);
+        this.userManager.stopSilentRenew();
+        if (this.config.useAuthRedirect) {
+            return this.userManager.signoutRedirect()
+                .then(signoutCallback);
+        } else {
+            return this.userManager.signoutPopup()
+                .then(signoutCallback);
+        }
     };
 
     Auth.prototype.getUser = function() {
@@ -58394,7 +58438,9 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
                 // oauth2 client id
                 clientId: '',
                 // Are third-party cookies available?
-                tpcEnabled: true
+                tpcEnabled: true,
+                // Use oauth2 redirect rather than popout?
+                useAuthRedirect: false
             },
             config,
             events,
