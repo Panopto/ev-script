@@ -1,5 +1,5 @@
 /**
- * ev-script 2.3.15 2020-09-01
+ * ev-script 2.3.16 2020-09-09
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2020 Symphony Video, Inc.
@@ -55806,6 +55806,7 @@ define('ev-script/routers/auth',['require','underscore','loglevel','backbone'],f
             .then(_.bind(function(user) {
                 this.navigate('');
                 this.config.currentUserId = user.profile.sub;
+                this.config.state = user.state;
                 this.default();
             }, this));
         },
@@ -55925,7 +55926,8 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
                                 extraQueryParams: {
                                     'ev_institution_id': this.config.institutionId,
                                     'ev_allow_non_provisioned': false
-                                }
+                                },
+                                state: this.config.state
                             });
                         } else {
                             this.userManager.signinPopup({
@@ -55947,7 +55949,8 @@ define('ev-script/util/auth',['require','jquery','underscore','loglevel','oidc',
                             extraQueryParams: {
                                 'ev_institution_id': this.config.institutionId,
                                 'ev_allow_non_provisioned': false
-                            }
+                            },
+                            state: this.config.state
                         });
                     } else {
                         this.userManager.signinPopup({
@@ -58440,7 +58443,9 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
                 // Are third-party cookies available?
                 tpcEnabled: true,
                 // Use oauth2 redirect rather than popout?
-                useAuthRedirect: false
+                useAuthRedirect: false,
+                // State to be passed in oauth redirect
+                state: undefined
             },
             config,
             events,
@@ -58716,6 +58721,10 @@ define('ev-script',['require','backbone','underscore','jquery','loglevel','globa
 
         this.getUser = function() {
             return auth.getUser();
+        };
+
+        this.getConfig = function() {
+            return config;
         };
     };
 
