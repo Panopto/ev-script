@@ -87,7 +87,9 @@ define(function(require) {
                 // Are third-party cookies available?
                 tpcEnabled: true,
                 // Use oauth2 redirect rather than popout?
-                useAuthRedirect: false
+                useAuthRedirect: false,
+                // State to be passed in oauth redirect
+                state: undefined
             },
             config,
             events,
@@ -363,6 +365,10 @@ define(function(require) {
 
         this.getUser = function() {
             return auth.getUser();
+        };
+
+        this.getConfig = function() {
+            return config;
         };
     };
 

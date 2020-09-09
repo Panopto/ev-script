@@ -98,7 +98,8 @@ define(function(require) {
                                 extraQueryParams: {
                                     'ev_institution_id': this.config.institutionId,
                                     'ev_allow_non_provisioned': false
-                                }
+                                },
+                                state: this.config.state
                             });
                         } else {
                             this.userManager.signinPopup({
@@ -120,7 +121,8 @@ define(function(require) {
                             extraQueryParams: {
                                 'ev_institution_id': this.config.institutionId,
                                 'ev_allow_non_provisioned': false
-                            }
+                            },
+                            state: this.config.state
                         });
                     } else {
                         this.userManager.signinPopup({

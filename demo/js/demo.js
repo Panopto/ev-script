@@ -1,4 +1,4 @@
-/*global EV,evSettings,jQuery,document,window,_,Cookies*/
+/*global EV,evSettings,jQuery,document,window,_,Cookies,URI*/
 (function($) {
 
     'use strict';
@@ -31,7 +31,8 @@
                 imagePath: '/assets/css/images',
                 logLevel: 'debug',
                 tpcEnabled: tpcEnabled,
-                // useAuthRedirect: true
+                useAuthRedirect: true,
+                state: new URI(window.location.href).search(true)
             }),
             updateTabI18n = function() {
                 var $tabsList = $('.tabsList', $tabs),
@@ -84,6 +85,10 @@
 
         app.events.on('fieldInitialized', function(fieldId) {
             app.events.trigger('showPicker', fieldId);
+            // State should persist across auth and be available when the field
+            // is initialized
+            console.log('State:');
+            console.log(app.getConfig().state);
         });
 
         app.events.on('loggedIn', function() {

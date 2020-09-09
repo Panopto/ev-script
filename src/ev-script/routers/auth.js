@@ -39,6 +39,7 @@ define(function(require) {
             .then(_.bind(function(user) {
                 this.navigate('');
                 this.config.currentUserId = user.profile.sub;
+                this.config.state = user.state;
                 this.default();
             }, this));
         },
