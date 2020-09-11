@@ -88,8 +88,8 @@ define(function(require) {
                 tpcEnabled: true,
                 // Use oauth2 redirect rather than popout?
                 useAuthRedirect: false,
-                // State to be passed in oauth redirect
-                state: undefined
+                // Callback used when redirecting for client to restore state
+                redirectCallback: function() {}
             },
             config,
             events,

@@ -4,6 +4,7 @@ define(function(require) {
 
     var _ = require('underscore'),
         log = require('loglevel'),
+        URI = require('urijs/URI'),
         Backbone = require('backbone');
 
     return Backbone.Router.extend({
@@ -37,9 +38,12 @@ define(function(require) {
             log.info('[routers/auth] redirectCallback route');
             this.userManager.signinRedirectCallback()
             .then(_.bind(function(user) {
-                this.navigate('');
+                var route = URI('').search(user.state).toString();
+                this.navigate(route);
+                if (this.config.redirectCallback) {
+                    this.config.redirectCallback(user.state);
+                }
                 this.config.currentUserId = user.profile.sub;
-                this.config.state = user.state;
                 this.default();
             }, this));
         },
@@ -47,8 +51,12 @@ define(function(require) {
             log.info('[routers/auth] logoutCallback route');
             if (this.config.useAuthRedirect) {
                 this.userManager.signoutRedirectCallback()
-                .then(_.bind(function(user) {
-                    this.navigate('');
+                .then(_.bind(function(resp) {
+                    var route = URI('').search(resp.state).toString();
+                    this.navigate(route);
+                    if (this.config.redirectCallback) {
+                        this.config.redirectCallback(resp.state);
+                    }
                     this.config.currentUserId = undefined;
                     this.default();
                 }, this));

@@ -20,10 +20,11 @@
                 $container.height($(window).height() * 0.8);
                 $tabs.tabs('refresh');
             },
+            search = URI(window.location.href).search(true),
             app = new EV.EnsembleApp({
                 ensembleUrl: 'https://cloud.ensemblevideo.com',
                 pageSize: 10,
-                institutionId: '52AF905C-187A-4405-AB61-0BBEC3E7E62F',
+                institutionId: search.institutionId,
                 clientId: 'ev-lti-chooser',
                 scrollHeight: 200,
                 fitToParent: true,
@@ -32,7 +33,10 @@
                 logLevel: 'debug',
                 tpcEnabled: tpcEnabled,
                 useAuthRedirect: true,
-                state: new URI(window.location.href).search(true)
+                redirectCallback: function(state) {
+                    var config = app.getConfig();
+                    config.institutionId = state.institutionId;
+                }
             }),
             updateTabI18n = function() {
                 var $tabsList = $('.tabsList', $tabs),
@@ -85,10 +89,6 @@
 
         app.events.on('fieldInitialized', function(fieldId) {
             app.events.trigger('showPicker', fieldId);
-            // State should persist across auth and be available when the field
-            // is initialized
-            console.log('State:');
-            console.log(app.getConfig().state);
         });
 
         app.events.on('loggedIn', function() {

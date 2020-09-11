@@ -15,7 +15,9 @@ define(function(require) {
             this.events = options.events;
 
             oidc.Log.logger = console;
-            // oidc.Log.level = oidc.Log.DEBUG;
+            if (this.config.logLevel.toLowerCase() === 'debug') {
+                oidc.Log.level = oidc.Log.DEBUG;
+            }
 
             // If access to localStorage is blocked...fallback to in-memory
             try {
@@ -99,7 +101,7 @@ define(function(require) {
                                     'ev_institution_id': this.config.institutionId,
                                     'ev_allow_non_provisioned': false
                                 },
-                                state: this.config.state
+                                state: URI(window.location.href).search(true)
                             });
                         } else {
                             this.userManager.signinPopup({
@@ -122,7 +124,7 @@ define(function(require) {
                                 'ev_institution_id': this.config.institutionId,
                                 'ev_allow_non_provisioned': false
                             },
-                            state: this.config.state
+                            state: URI(window.location.href).search(true)
                         });
                     } else {
                         this.userManager.signinPopup({
@@ -166,8 +168,10 @@ define(function(require) {
             }, this);
         this.userManager.stopSilentRenew();
         if (this.config.useAuthRedirect) {
-            return this.userManager.signoutRedirect()
-                .then(signoutCallback);
+            return this.userManager.signoutRedirect({
+                state: URI(window.location.href).search(true)
+            })
+            .then(signoutCallback);
         } else {
             return this.userManager.signoutPopup()
                 .then(signoutCallback);
