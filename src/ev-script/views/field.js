@@ -5,7 +5,6 @@ define(function(require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         log = require('loglevel'),
-        AuthView = require('ev-script/views/auth'),
         BaseView = require('ev-script/views/base');
 
     /*
@@ -20,27 +19,12 @@ define(function(require) {
             'previewHandler', 'getPickerInstance', 'getSettingsInstance',
             'getPreviewInstance', 'updateField', 'getFieldType',
             'getFieldLabel', 'itemChosenHandler', 'getActionsHtml',
-            'initCallback', 'doAuthenticate');
+            'initCallback', 'loginHandler', 'handleLogin', 'toggleLoginMsg',
+            '_init');
 
             this.$field = options.$field;
             this.$el.addClass('ev-field-wrap');
             this.showChoose = true;
-
-            var pickerOptions = {
-                    id: this.id + '-picker',
-                    tagName: 'div',
-                    className: 'ev-' + this.model.get('type') + '-picker',
-                    field: this
-                },
-                settingsOptions = {
-                    id: this.id + '-settings',
-                    tagName: 'div',
-                    className: 'ev-settings',
-                    field: this
-                };
-
-            // Subclasses may need to prepare before we start instantiation of views
-            this.initCallback();
 
             this.events.on('showPicker', function(fieldId) {
                 if (this.id === fieldId) {
@@ -67,59 +51,76 @@ define(function(require) {
             }, this);
             this.events.on('itemChosen', this.itemChosenHandler);
 
-            this.picker = this.getPickerInstance(pickerOptions);
-            this.settings = this.getSettingsInstance(settingsOptions);
-            this.$field.after(this.picker.$el);
+            this.events.on('loggedOut', _.bind(function() {
+                // Wait for our root to reload
+                this.root.promise.done(_.bind(function() {
+                    this.$('.action-remove').click();
+                    this.toggleLoginMsg();
+                }, this));
+            }, this));
+
+            this.events.on('loggedIn', _.bind(function() {
+                this.toggleLoginMsg(true);
+                this.handleLogin();
+            }, this));
+
+            this.events.on('localeReset', _.bind(function() {
+                this.reloadField();
+            }, this));
+
+            this.handleLogin(true);
+        },
+        _init: function() {
+            var pickerOptions = {
+                    id: this.id + '-picker',
+                    tagName: 'div',
+                    className: 'ev-' + this.model.get('type') + '-picker',
+                    field: this
+                },
+                settingsOptions = {
+                    id: this.id + '-settings',
+                    tagName: 'div',
+                    className: 'ev-settings',
+                    field: this
+                };
+
+            if (this.initialized) {
+                this.events.trigger('fieldInitialized', this.id);
+                log.debug('[views/field] Field already initialized');
+                return;
+            }
+
+            this.initialized = true;
+
             this.renderActions();
 
-            // Authentication check
-            this.authenticating = this.doAuthenticate();
+            this.picker = this.getPickerInstance(pickerOptions);
+            this.settings = this.getSettingsInstance(settingsOptions);
+            this.$actions.after(this.picker.$el);
+
+            this.events.trigger('fieldInitialized', this.id);
 
             log.debug('[views/field] Field initialized');
             log.debug(this);
+        },
+        destroy: function() {},
+        reloadField: function() {
+            log.debug('[views/field] Reloading field');
+            this.$actions.remove();
+            this.$actions = undefined;
+            this.events.trigger('destroy', this);
+            this.initialized = false;
+            this.handleLogin();
         },
         events: {
             'click .ev-field .action-choose': 'chooseHandler',
             'click .ev-field .action-preview': 'previewHandler',
             'click .ev-field .action-options': 'optionsHandler',
-            'click .ev-field .action-remove': 'removeHandler'
-        },
-        doAuthenticate: function() {
-            var deferred = $.Deferred();
-            this.root.promise.always(_.bind(function() {
-                var user = this.root.getUser();
-                if (!user || !user.get('isProvisioned')) {
-                    var authView = new AuthView({
-                        el: this.el,
-                        submitCallback: _.bind(function() {
-                            this.root.fetch().always(_.bind(function() {
-                                if (this.root.getUser()) {
-                                    this.events.trigger('loggedIn');
-                                    deferred.resolve();
-                                } else {
-                                    this.authAttempted = true;
-                                    this.events.trigger('loggedOut');
-                                    deferred.reject();
-                                }
-                            }, this));
-                        }, this),
-                        auth: this
-                    });
-                    authView.render();
-                } else {
-                    deferred.resolve();
-                }
-            }, this));
-            return deferred;
+            'click .ev-field .action-remove': 'removeHandler',
+            'click .ev-field .login-link': 'loginHandler'
         },
         chooseHandler: function(e) {
-            if (this.authenticating.state() !== 'pending') {
-                this.authenticating = this.doAuthenticate();
-            }
-            this.authenticating.done(_.bind(function() {
-                this.events.trigger('showPicker', this.id);
-            }, this));
-            e.preventDefault();
+            this.loginHandler(e);
         },
         optionsHandler: function(e) {
             if (this.settings) {
@@ -148,6 +149,37 @@ define(function(require) {
             });
             e.preventDefault();
         },
+        loginHandler: function(e) {
+            this.handleLogin(true);
+            e.preventDefault();
+        },
+        toggleLoginMsg: function(off) {
+            if (off) {
+                this.$fieldMsg.hide();
+            } else {
+                this.$fieldMsg.show();
+            }
+        },
+        handleLogin: function(attemptLogin) {
+            this.root.promise.done(_.bind(function() {
+                var user = this.root.getUser(),
+                    userId = user ? user.id : '',
+                    prompt = user &&
+                             !this.config.currentUserId ||
+                             (this.config.currentUserId !== userId);
+                if (!user || prompt) {
+                    this.renderActions();
+                    this.toggleLoginMsg();
+                    if (attemptLogin) {
+                        this.auth.doAuthenticate(this.id, prompt);
+                    }
+                } else {
+                    // Subclasses may need to prepare before we start instantiation of views
+                    this.initCallback();
+                    this._init();
+                }
+            }, this));
+        },
         renderActions: function() {
             var ensembleUrl = this.config.ensembleUrl,
                 label = this.getFieldLabel(),
@@ -164,8 +196,13 @@ define(function(require) {
                 displaySettings: this.settings,
                 label: label,
                 type: type,
-                name: this.model.get('content') && this.model.get('content').title || ''
+                name: this.model.get('content') && this.model.get('content').name || ''
             }));
+
+            this.$fieldMsg = this.$('.ev-field-message');
+            this.$fieldMsg.html(this.i18n.formatMessage('You must {0}login{1} in order to use this tool.',
+                '<a role="link" tabindex="0" class="login-link"><b>', '</b></a>'));
+
             // If our picker is shown, hide our 'Choose' button
             if (!this.showChoose) {
                 this.$('.action-choose').hide();

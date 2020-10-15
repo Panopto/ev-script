@@ -8,11 +8,11 @@ a:visited {
     color: #3399ff;
 }
 
-.chooserTab.ui-tabs-panel {
+.chooserPanel.ui-tabs-panel {
     padding: 0.4em;
 }
 
-.chooserTab form {
+.chooserPanel form {
     position: relative;
     height: 100%;
 }

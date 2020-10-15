@@ -113,7 +113,7 @@ define(function(require) {
             }
             var content = this.field.model.get('content');
             this.$el.dialog({
-                title: this.unencode(content ? content.title : this.field.model.get('id')),
+                title: this.unencode(content ? content.name : this.field.model.get('id')),
                 modal: true,
                 autoOpen: false,
                 draggable: false,

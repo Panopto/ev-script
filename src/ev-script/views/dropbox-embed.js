@@ -3,7 +3,6 @@ define(function(require) {
     'use strict';
 
     var _ = require('underscore'),
-        URI = require('urijs/URI'),
         EmbedView = require('ev-script/views/embed'),
         // We borrow portions of video-embed impl
         VideoEmbedView = require('ev-script/views/video-embed'),
@@ -20,7 +19,7 @@ define(function(require) {
             EmbedView.prototype.initialize.call(this, options);
         },
         isEmbedSupported: function() {
-            return this.info.checkVersion('>=5.3.0');
+            return this.info.checkVersion('5.3.0', '>=');
         },
         getMediaWidth: function() {
             return parseInt(this.model.get('width'), 10);
@@ -46,8 +45,12 @@ define(function(require) {
             return this.getMediaHeight();
         },
         getUrl: function(isPreview) {
-            return this.isEmbedSupported() ?
-                URI(this.config.ensembleUrl + '/hapi/v1/ui/dropboxes/' + this.model.get('id') + '/embed') :
+            // Assuming if localStorage is not available that third-party
+            // cookies are blocked.  In that case need to preview in new window.
+            // If we're the top window we don't know if TPCs are blocked so
+            // assume so and launch to new window.
+            return this.isEmbedSupported() && ((this.config.tpcEnabled && !this.isTop()) || !isPreview) ?
+                this.config.ensembleUrl + '/hapi/v1/ui/dropboxes/' + this.model.get('id') + '/embed' :
                 this.model.get('content').url;
         },
         scale: function(maxWidth, maxHeight) {
@@ -56,7 +59,7 @@ define(function(require) {
         },
         render: function(isPreview) {
             var embedType = this.model.get('embedtype'),
-                title = this.model.get('content').title,
+                title = this.model.get('content').name,
                 embed;
             if (this.isEmbedSupported()) {
                 if (embedType === 'fixed') {
@@ -75,7 +78,7 @@ define(function(require) {
             } else {
                 embed = this.legacyTemplate({
                     'src': this.getUrl(),
-                    'title': this.model.get('content').title
+                    'title': this.model.get('content').name
                 });
             }
             this.$el.html(embed);

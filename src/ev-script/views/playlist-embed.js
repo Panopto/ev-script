@@ -11,15 +11,22 @@ define(function(require) {
         responsiveTemplate: _.template(require('text!ev-script/templates/playlist-embed-responsive.html')),
         initialize: function(options) {
             EmbedView.prototype.initialize.call(this, options);
+
+            _.bindAll(this, 'render', 'getUrl');
         },
-        render: function(isPreview) {
-            var src = URI(this.config.ensembleUrl + '/hapi/v1/ui/Playlists/' + this.model.get('id') + '/Plugin'),
+        getUrl: function(isPreview) {
+            var target = this.config.ensembleUrl + '/hapi/v1/ui/Playlists/' + this.model.get('id') + '/Plugin',
+                src = URI(target),
                 layout = this.model.get('layout'),
                 embedType = this.model.get('embedtype'),
-                categories = this.model.get('categories'),
-                width,
-                height,
-                embed;
+                categories = this.model.get('categories');
+
+            // Assuming if localStorage is not available that third-party
+            // cookies are blocked.  In that case need to preview in new window.
+            if (isPreview && (!this.config.tpcEnabled || this.isTop())) {
+                target += '/preview';
+                src = URI(target);
+            }
 
             src.addQuery({
                 'isPreview': Boolean(isPreview),
@@ -47,6 +54,15 @@ define(function(require) {
                 'displayAxdxs': this.model.get('axdxs'),
                 'isResponsive': embedType === 'responsive'
             });
+
+            return src.toString();
+        },
+        render: function(isPreview) {
+            var src = this.getUrl(isPreview),
+                embedType = this.model.get('embedtype'),
+                width,
+                height,
+                embed;
 
             if (embedType === 'fixed') {
                 width = this.getFrameWidth();

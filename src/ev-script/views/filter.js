@@ -198,7 +198,7 @@ define(function(require) {
             }
         },
         getLibrary: function(id) {
-            return this.libCollection.findWhere({ 'id': id });
+            return id ? this.libCollection.findWhere({ 'id': id }) : null;
         },
         activateRecord: function() {
             this.$('.record-active').show();

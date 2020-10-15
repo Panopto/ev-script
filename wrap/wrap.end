@@ -8,22 +8,6 @@
     define('jquery-ui/ui/widgets/dialog', ['jquery'], function() {});
     define('jquery-ui/ui/widgets/tabs', ['jquery'], function() {});
 
-    define('plupload', function() {
-        return plupload;
-    });
-
-    define('jquery.plupload.queue', ['jquery', 'plupload'], function() {});
-
-    // Set the current locale based on i18n.langtag cookie
-    require('jquery.cookie');
-    require.config({
-        config: {
-            i18n: {
-                locale: ($.cookie('i18n.langtag') || 'en-us').toLowerCase()
-            }
-        }
-    });
-
     // Use almond's special top-level, synchronous require to trigger factory
     // functions, get the final module value, and export it as the public
     // value.

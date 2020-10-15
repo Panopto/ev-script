@@ -2,5 +2,5 @@
     <option value="<%= noneOption.value %>" <% if (selectedId === noneOption.value ) { print('selected="selected"'); } %>><%- noneOption.name %></option>
 <% } %>
 <% collection.each(function(item) { %>
-    <option value="<%= item.id %>" <% if (selectedId === item.id) { print('selected="selected"'); } %>><%- item.get('title') || item.get('Name') || item.get('name') %></option>
+    <option value="<%= item.id %>" <% if (selectedId === item.id) { print('selected="selected"'); } %>><%- item.get('name') %></option>
 <% }); %>

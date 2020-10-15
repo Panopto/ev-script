@@ -13,11 +13,11 @@ define(function(require) {
         responsiveTemplate: _.template(require('text!ev-script/templates/quiz-embed-responsive.html')),
         initialize: function(options) {
 
-            _.bindAll(this, 'render', 'getSrcUrl');
+            _.bindAll(this, 'render', 'getUrl');
 
             EmbedView.prototype.initialize.call(this, options);
         },
-        getSrcUrl: function(width, height, isPreview) {
+        getUrl: function(width, height, isPreview) {
             var key = this.model.get('content').key,
                 url = URI(this.config.ensembleUrl);
 
@@ -30,7 +30,7 @@ define(function(require) {
                 'displayCredits': this.model.get('metadata'),
                 'showCaptions': this.model.get('showcaptions')
             });
-            return url;
+            return url.toString();
         },
         getMediaWidth: function() {
             return parseInt(this.model.get('width'), 10) || 848;

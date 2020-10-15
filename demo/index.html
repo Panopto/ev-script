@@ -5,24 +5,22 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Ensemble Video - Integration Example</title>
-    <link rel="stylesheet" href="../../node_modules/normalize.css/normalize.css" media="screen">
-    <link rel="stylesheet" href="../../node_modules/font-awesome/css/font-awesome.css">
-    <link rel="stylesheet" href="../../node_modules/jquery-ui-dist/jquery-ui.css">
-    <link rel="stylesheet" href="../../node_modules/plupload/js/jquery.plupload.queue/css/jquery.plupload.queue.css">
-    <link rel="stylesheet" href="../../assets/css/ev-script.css">
-    <link rel="stylesheet" href="css/demo.css">
+    <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" href="/node_modules/jquery-ui-dist/jquery-ui.css">
+    <link rel="stylesheet" href="/assets/css/ev-script.css">
+    <link rel="stylesheet" href="/demo/css/demo.css">
   </head>
   <body>
     <h3>Ensemble Video - Integration Example</h3>
     <div class="chooserContainer">
       <div id="tabs" style="display:none;">
-        <ul>
-          <li><a href="#videosTab">Choose Media</a></li>
-          <li><a href="#playlistsTab">Choose Playlist</a></li>
-          <li><a href="#dropboxesTab">Choose Dropbox</a></li>
-          <li><a href="#quizzesTab">Choose Quiz</a></li>
+        <ul class="tabsList">
+          <li class="videosTab"><a href="#videosPanel">Choose Media</a></li>
+          <li class="playlistsTab"><a href="#playlistsPanel">Choose Playlist</a></li>
+          <li class="dropboxesTab"><a href="#dropboxesPanel">Choose Dropbox</a></li>
+          <li class="quizzesTab"><a href="#quizzesPanel">Choose Quiz</a></li>
         </ul>
-        <div id="videosTab" class="chooserTab">
+        <div id="videosPanel" class="chooserPanel">
           <h2 style="display: none;">Choose Media</h2>
           <form>
             <div role="group" id="videoWrap">
@@ -31,7 +29,7 @@
             </div>
           </form>
         </div>
-        <div id="playlistsTab" class="chooserTab">
+        <div id="playlistsPanel" class="chooserPanel">
           <h2 style="display: none;">Choose Playlist</h2>
           <form>
             <div role="group" id="playlistWrap">
@@ -40,7 +38,7 @@
             </div>
           </form>
         </div>
-        <div id="dropboxesTab" class="chooserTab">
+        <div id="dropboxesPanel" class="chooserPanel">
           <h2 style="display: none;">Choose Dropbox</h2>
           <form>
             <div role="group" id="dropboxWrap">
@@ -49,7 +47,7 @@
             </div>
           </form>
         </div>
-        <div id="quizzesTab" class="chooserTab">
+        <div id="quizzesPanel" class="chooserPanel">
           <h2 style="display: none;">Choose Quiz</h2>
           <form>
             <div role="group" id="quizWrap">
@@ -64,14 +62,12 @@
     <div class="embed playlist" style="display: none;"></div>
     <div class="embed dropbox" style="display: none;"></div>
     <div class="embed quiz" style="display: none;"></div>
-    <script src="../../node_modules/underscore/underscore.js"></script>
-    <script src="../../node_modules/jquery/dist/jquery.js"></script>
-    <script src="../../node_modules/jquery-ui-dist/jquery-ui.js"></script>
-    <script src="../../node_modules/plupload/js/moxie.js"></script>
-    <script src="../../node_modules/plupload/js/plupload.dev.js"></script>
-    <script src="../../node_modules/plupload/js/jquery.plupload.queue/jquery.plupload.queue.js"></script>
-    <script src="../../dist/ev-script.js"></script>
-    <script src="../../ev-config.js"></script>
-    <script src="js/demo.js"></script>
+    <script src="/node_modules/underscore/underscore.js"></script>
+    <script src="/node_modules/jquery/dist/jquery.js"></script>
+    <script src="/node_modules/jquery-ui-dist/jquery-ui.js"></script>
+    <script src="/node_modules/js-cookie/src/js.cookie.js"></script>
+    <script src="/node_modules/urijs/src/URI.js"></script>
+    <script src="/dist/ev-script.js"></script>
+    <script src="/demo/js/demo.js"></script>
   </body>
 </html>

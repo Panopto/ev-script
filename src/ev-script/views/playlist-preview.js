@@ -6,10 +6,27 @@ define(function(require) {
         PlaylistEmbedView = require('ev-script/views/playlist-embed');
 
     return PreviewView.extend({
-        // initialize: function(options) {
-        //     PreviewView.prototype.initialize.call(this, options);
-        // },
-        embedClass: PlaylistEmbedView
+        embedClass: PlaylistEmbedView,
+        render: function() {
+            var embedView,
+                targetUrl;
+
+            // Assuming if localStorage is not available that third-party
+            // cookies are blocked.  In that case need to preview in new window.
+            // If we're the top window we don't know if TPCs are blocked so
+            // assume so.
+            if (this.config.tpcEnabled && !this.isTop()) {
+                return PreviewView.prototype.render.call(this);
+            }
+
+            embedView = new PlaylistEmbedView({
+                model: new this.model.constructor(this.model.toJSON()),
+                config: this.config
+            });
+            targetUrl = embedView.getUrl(true);
+
+            window.open(targetUrl);
+        }
     });
 
 });

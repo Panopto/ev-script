@@ -86,7 +86,7 @@ define(function(require) {
             }));
             this.$('.tabs').tabs();
             this.$el.dialog({
-                title: this.unencode(content ? content.title : this.field.model.get('id')),
+                title: this.unencode(content ? content.name : this.field.model.get('id')),
                 modal: true,
                 autoOpen: false,
                 draggable: false,

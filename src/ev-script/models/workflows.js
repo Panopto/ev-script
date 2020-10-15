@@ -2,15 +2,11 @@ define(function(require) {
 
     'use strict';
 
-    var BaseModel = require('ev-script/models/base'),
-        cacheUtil = require('ev-script/util/cache');
+    var BaseModel = require('ev-script/models/base');
 
     return BaseModel.extend({
         cacheName: 'workflows',
         collectionKey: 'workflows'
-        // initialize: function(models, options) {
-        //     BaseModel.prototype.initialize.call(this, models, options);
-        // },
     });
 
 });

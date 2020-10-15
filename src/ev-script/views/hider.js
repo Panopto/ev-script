@@ -10,17 +10,13 @@ define(function(require) {
         template: _.template(require('text!ev-script/templates/hider.html')),
         initialize: function(options) {
             BaseView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'hideHandler', 'logoutHandler', 'authHandler', 'render');
-            this.events.on('loggedIn', this.authHandler);
-            this.events.on('loggedOut', this.authHandler);
+            _.bindAll(this, 'hideHandler', 'logoutHandler', 'render');
+            this.events.on('loggedOut', this.render);
             this.field = options.field;
         },
         events: {
             'click a.action-hide': 'hideHandler',
             'click a.action-logout': 'logoutHandler'
-        },
-        authHandler: function() {
-            this.render();
         },
         render: function() {
             this.root.promise.always(_.bind(function() {
@@ -39,17 +35,10 @@ define(function(require) {
             e.preventDefault();
         },
         logoutHandler: function(e) {
-            $.ajax({
-                url: this.config.ensembleUrl + this.config.authLogoutPath,
-                method: 'POST',
-                xhrFields: {
-                    withCredentials: true
-                }
-            })
-            .always(_.bind(function() {
+            this.auth.logout()
+            .then(_.bind(function() {
                 this.events.trigger('hidePickers');
-                this.events.trigger('loggedOut');
-            },this));
+            }, this));
             e.preventDefault();
         }
     });

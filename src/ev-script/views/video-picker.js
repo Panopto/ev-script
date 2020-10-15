@@ -11,7 +11,8 @@ define(function(require) {
         VideoResultsView = require('ev-script/views/video-results'),
         Videos = require('ev-script/models/videos'),
         SharedVideos = require('ev-script/models/shared-videos'),
-        MediaWorkflows = require('ev-script/collections/media-workflows'),
+        Libraries = require('ev-script/models/libraries'),
+        Workflows = require('ev-script/models/workflows'),
         UploadView = require('ev-script/views/upload');
 
     require('base64');
@@ -32,10 +33,6 @@ define(function(require) {
             this.events
             .off('search', this.handleSearch)
             .on('search', this.handleSearch);
-
-            this.events
-            .off('fileUploaded', this.loadVideos)
-            .on('fileUploaded', this.loadVideos);
 
             var reload = _.bind(function(target) {
                 if (target === 'videos') {
@@ -70,13 +67,7 @@ define(function(require) {
             var libraryId = this.model.get('libraryId');
 
             this.loadVideos();
-
-            if (!libraryId && this.workflows) {
-                this.workflows.reset();
-            } else {
-                this.loadWorkflows();
-            }
-
+            this.loadWorkflows();
             this.handleUploadVisibility();
         },
         changeLibraryType: function(e) {
@@ -93,14 +84,20 @@ define(function(require) {
             }
         },
         handleUploadVisibility: function() {
-            if (!this.workflows) {
+            var libraryId = this.model.get('libraryId'),
+                library = this.filter.getLibrary(libraryId);
+
+            if (!library ||
+                !this.workflows ||
+                !library.getLink('ev:Contents/Create')) {
                 this.filter.hideUpload();
                 this.filter.hideRecord();
                 return;
             }
 
             this.workflows.promise.done(_.bind(function() {
-                if (!this.workflows.isEmpty() && !this.isSharedContent()) {
+                var workflows = this.workflows.getEmbedded(this.workflows.collectionKey);
+                if (workflows && !workflows.isEmpty() && !this.isSharedContent()) {
                     this.filter.showUpload();
                     if (this.canRecord()) {
                         this.filter.showRecord();
@@ -112,10 +109,13 @@ define(function(require) {
             }, this));
         },
         uploadHandler: function(e) {
-            var uploadView = new UploadView({
-                field: this.field,
-                workflows: this.workflows
-            });
+            var libraryId = this.model.get('libraryId'),
+                library = this.filter.getLibrary(libraryId),
+                uploadView = new UploadView({
+                    library: library,
+                    workflows: this.workflows,
+                    model: this.model
+                });
             e.preventDefault();
         },
         recordHandler: function(e) {
@@ -234,14 +234,20 @@ define(function(require) {
         },
         loadWorkflows: function() {
             var libraryId = this.model.get('libraryId'),
-                isShared = this.isSharedContent();
+                searchTemplate = new URITemplate(this.root.getLink('ev:Workflows/Search').href),
+                searchUrl = searchTemplate.expand({
+                    libraryId: libraryId,
+                    pageSize: 100,
+                    type: 'UploadDirectory',
+                    isEnabled: true
+                });
 
-            this.workflows = new MediaWorkflows({}, {});
-            this.workflows.filterValue = libraryId;
+            this.workflows = new Workflows({}, {
+                href: searchUrl
+            });
             this.workflows.fetch({
-                cacheKey: this.workflows.filterValue,
+                picker: this,
                 error: _.bind(this.ajaxError, this),
-                reset: true
             });
         },
         canRecord: function() {

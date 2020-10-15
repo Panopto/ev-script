@@ -20,7 +20,8 @@ define(function(require) {
         render: function() {
             var $dialogWrap = $('<div class="dialogWrap ev-preview"></div>'),
                 embedView = new this.embedClass({
-                    model: new this.model.constructor(this.model.toJSON())
+                    model: new this.model.constructor(this.model.toJSON()),
+                    config: this.config
                 }),
                 // Desired difference between media width and containing dialog width
                 widthOffset = 50,
@@ -59,7 +60,7 @@ define(function(require) {
             });
         },
         getTitle: function() {
-            return this.unencode(this.model.get('content').title);
+            return this.unencode(this.model.get('content').name);
         }
     });
 
