@@ -16,7 +16,7 @@ define(['backbone'], function(Backbone) {
             embedcode: false,
             statistics: true,
             attachments: true,
-            annotations: true,
+            notes: true,
             links: true,
             logo: true,
             metadata: true,

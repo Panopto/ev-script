@@ -50,7 +50,7 @@ define(function(require) {
                 'autoPlay': this.model.get('autoplay'),
                 'displayTitle': this.model.get('showtitle'),
                 'displaySharing': this.model.get('socialsharing'),
-                'displayAnnotations': this.model.get('annotations'),
+                'displayNotes': this.model.get('notes'),
                 'displayCaptionSearch': this.model.get('captionsearch'),
                 'displayAttachments': this.model.get('attachments'),
                 'audioPreviewImage': this.model.get('audiopreviewimage'),
@@ -103,7 +103,7 @@ define(function(require) {
         },
         isMenuVisible: function() {
             return this.model.get('socialsharing') ||
-                   this.model.get('annotations') ||
+                   this.model.get('notes') ||
                    this.model.get('captionsearch') ||
                    this.model.get('attachments') ||
                    this.model.get('links') ||

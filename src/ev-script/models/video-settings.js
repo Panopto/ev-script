@@ -12,7 +12,7 @@ define(['backbone'], function(Backbone) {
             showcaptions: false,
             hidecontrols: false,
             socialsharing: false,
-            annotations: true,
+            notes: true,
             captionsearch: true,
             attachments: true,
             audiopreviewimage: true,

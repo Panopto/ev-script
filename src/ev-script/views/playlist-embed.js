@@ -41,7 +41,7 @@ define(function(require) {
                 'displayLogo': this.model.get('logo'),
                 'displayEmbedCode': this.model.get('embedcode'),
                 'displayAttachments': this.model.get('attachments'),
-                'displayAnnotations': this.model.get('annotations'),
+                'displayNotes': this.model.get('notes'),
                 'displayLinks': this.model.get('links'),
                 'displaySharing': this.model.get('socialsharing'),
                 'displayCopyUrl': this.model.get('socialsharing'),

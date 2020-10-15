@@ -35,7 +35,7 @@ define(function(require) {
                     'height': this.$('.height').val(),
                     'embedtype': this.$('#embedtype').val(),
                     'layout': this.$('input[name="layout"]:checked').val(),
-                    'annotations': this.$('#annotations').is(':checked'),
+                    'notes': this.$('#notes').is(':checked'),
                     'showcaptions': this.$('#showcaptions').is(':checked'),
                     'captionsearch': this.$('#captionsearch').is(':checked'),
                     'socialsharing': content && content.isRestricted ? false : this.$('#socialsharing').is(':checked'),

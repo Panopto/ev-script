@@ -139,8 +139,8 @@
             </div>
             <div id="display" class="playlist-display">
                 <div class="fieldWrap checkbox-option">
-                    <input id="annotations" class="form-checkbox" <% if (model.get('annotations')) { print('checked="checked"'); } %> name="annotations" type="checkbox"/>
-                    <label for="annotations"><%= i18n.formatMessage('Annotations') %></label>
+                    <input id="notes" class="form-checkbox" <% if (model.get('notes')) { print('checked="checked"'); } %> name="notes" type="checkbox"/>
+                    <label for="notes"><%= i18n.formatMessage('Notes') %></label>
                 </div>
                 <div class="fieldWrap checkbox-option">
                     <input id="showcaptions" class="form-checkbox" <% if (model.get('showcaptions')) { print('checked="checked"'); } %>  name="showcaptions" type="checkbox"/>

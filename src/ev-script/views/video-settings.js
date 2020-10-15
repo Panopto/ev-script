@@ -40,7 +40,7 @@ define(function(require) {
                     'showcaptions': this.$('#showcaptions').is(':checked'),
                     'hidecontrols': this.$('#hidecontrols').is(':checked'),
                     'socialsharing': this.$('#socialsharing').is(':checked'),
-                    'annotations': this.$('#annotations').is(':checked'),
+                    'notes': this.$('#notes').is(':checked'),
                     'captionsearch': this.$('#captionsearch').is(':checked'),
                     'attachments': this.$('#attachments').is(':checked'),
                     'audiopreviewimage': this.$('#audiopreviewimage').is(':checked'),
