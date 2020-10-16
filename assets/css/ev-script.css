@@ -1769,6 +1769,10 @@ template {
       margin-right: 8px;
       max-width: 20px;
       max-height: 20px; }
+    .uppy-ProviderBrowser-viewType--list .uppy-ProviderBrowserItem-inner span {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden; }
 
 .uppy-ProviderBrowserItem-fakeCheckbox {
   position: relative;
