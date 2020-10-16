@@ -22,6 +22,7 @@ define(['backbone'], function(Backbone) {
             metadata: true,
             socialsharing: false,
             autoplay: false,
+            comments: true,
             showcaptions: false,
             audiopreviewimage: false,
             captionsearch: true,

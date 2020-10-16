@@ -9,6 +9,7 @@ define(['backbone'], function(Backbone) {
             height: '480',
             showtitle: true,
             autoplay: false,
+            comments: true,
             showcaptions: false,
             hidecontrols: false,
             socialsharing: false,

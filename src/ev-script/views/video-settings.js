@@ -37,6 +37,7 @@ define(function(require) {
             var attrs = {
                     'showtitle': this.$('#showtitle').is(':checked'),
                     'autoplay': this.$('#autoplay').is(':checked'),
+                    'comments': this.$('#comments').is(':checked'),
                     'showcaptions': this.$('#showcaptions').is(':checked'),
                     'hidecontrols': this.$('#hidecontrols').is(':checked'),
                     'socialsharing': this.$('#socialsharing').is(':checked'),

@@ -44,6 +44,7 @@ define(function(require) {
                     'attachments': this.$('#attachments').is(':checked'),
                     'audiopreviewimage': this.$('#audiopreviewimage').is(':checked'),
                     'autoplay': this.$('#autoplay').is(':checked'),
+                    'comments': this.$('#comments').is(':checked'),
                     'logo': this.$('#logo').is(':checked'),
                     'metadata': this.$('#metadata').is(':checked'),
                     'embedcode': content && content.isRestricted ? false : this.$('#embedcode').is(':checked'),

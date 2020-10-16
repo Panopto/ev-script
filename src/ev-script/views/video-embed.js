@@ -48,6 +48,7 @@ define(function(require) {
             url.path(basePath + action);
             url.addQuery({
                 'autoPlay': this.model.get('autoplay'),
+                'displayComments': this.model.get('comments'),
                 'displayTitle': this.model.get('showtitle'),
                 'displaySharing': this.model.get('socialsharing'),
                 'displayNotes': this.model.get('notes'),

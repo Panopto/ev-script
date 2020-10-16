@@ -74,6 +74,10 @@
                 <label for="autoplay"><%= i18n.formatMessage('Auto Play (PC Only)') %></label>
             </div>
             <% } %>
+            <div class="fieldWrap checkbox-option">
+                <input id="comments" class="form-checkbox" <% if (model.get('comments')) { print('checked="checked"'); } %>  name="comments" type="checkbox"/>
+                <label for="comments"><%= i18n.formatMessage('Comments') %></label>
+            </div>
             <% if (!isYouTube) { %>
             <div class="fieldWrap checkbox-option">
                 <input id="download" class="form-checkbox" <% if (model.get('download')) { print('checked="checked"'); } %> name="download" type="checkbox"/>

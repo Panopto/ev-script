@@ -180,6 +180,10 @@
                     <label for="autoplay"><%= i18n.formatMessage('Auto Play (PC Only)') %></label>
                 </div>
                 <div class="fieldWrap checkbox-option">
+                    <input id="comments" class="form-checkbox" <% if (model.get('comments')) { print('checked="checked"'); } %>  name="comments" type="checkbox"/>
+                    <label for="comments"><%= i18n.formatMessage('Comments') %></label>
+                </div>
+                <div class="fieldWrap checkbox-option">
                     <input id="embedcode" class="form-checkbox" <% if (!isSecure && model.get('embedcode')) { print('checked="checked"'); } %> name="embedcode" type="checkbox" <% if (isSecure) { print('disabled') } %> />
                     <label for="embedcode"><%= i18n.formatMessage('Embed Code') %></label>
                 </div>

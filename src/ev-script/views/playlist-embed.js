@@ -46,6 +46,7 @@ define(function(require) {
                 'displaySharing': this.model.get('socialsharing'),
                 'displayCopyUrl': this.model.get('socialsharing'),
                 'autoPlay': this.model.get('autoplay'),
+                'displayComments': this.model.get('comments'),
                 'showCaptions': this.model.get('showcaptions'),
                 'displayMetadata': this.model.get('metadata'),
                 'displayCaptionSearch': this.model.get('captionsearch'),
