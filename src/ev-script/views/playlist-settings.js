@@ -14,9 +14,13 @@ define(function(require) {
         template: _.template(require('text!ev-script/templates/playlist-settings.html')),
         initialize: function(options) {
             SettingsView.prototype.initialize.call(this, options);
-            _.bindAll(this, 'changeLayout', 'changeCategoryList', 'changeEmbedType');
+            _.bindAll(this, 'changeLayout', 'changeCategoryList', 'changeEmbedType', 'changeSortBy');
             this.categories = options.categories;
             this.categories.on('reset', _.bind(function() {
+                this.render();
+            }, this));
+            this.orders = options.orders;
+            this.orders.on('reset', _.bind(function() {
                 this.render();
             }, this));
         },
@@ -24,12 +28,14 @@ define(function(require) {
             'submit': 'submitHandler',
             'click .action-cancel': 'cancelHandler',
             'change select[name="embedtype"]': 'changeEmbedType',
+            'change select[name="sortby"]': 'changeSortBy',
             'change input[name="layout"]': 'changeLayout',
             'change input[name="categoryList"]': 'changeCategoryList'
         },
         updateModel: function() {
             var content = this.field.model.get('content'),
                 categories = [],
+                sortby = this.$('#sortby option:selected').val(),
                 attrs = {
                     'width': this.$('.width').val(),
                     'height': this.$('.height').val(),
@@ -65,11 +71,12 @@ define(function(require) {
             });
 
             _.extend(attrs, {
-                sortby: this.$('#sortby option:selected').val(),
+                sortby: sortby,
                 desc: this.$('input[name="sortDirection"]:checked').val() === 'desc',
                 search: this.$('#search').val(),
                 categories: categories.join(','),
-                resultscount: this.$('#resultscount').val()
+                resultscount: this.$('#resultscount').val(),
+                customorder: this.$('#customOrders option:selected').val() 
             });
 
             this.field.model.set(attrs);
@@ -83,6 +90,7 @@ define(function(require) {
                 model: this.field.model,
                 isSecure: content && content.isRestricted,
                 categories: this.categories || new BaseCollection([], {}),
+                orders: this.orders,
                 _: _
             }));
             this.$('.tabs').tabs();
@@ -198,6 +206,23 @@ define(function(require) {
                 }
             } else {
                 throw 'Unrecognized embedtype: \'' + embedtype + '\'';
+            }
+        },
+        changeSortBy: function(e) {
+            var sortby = e.currentTarget.value,
+                $dirs = this.$('input[name="sortDirection"]'),
+                $labels = this.$('label[for="sortAsc"],label[for="sortDesc"]'),
+                $customOrder = this.$('select[name="customOrders"]');
+            if (sortby === 'Custom') {
+                $dirs.prop('disabled', true);
+                $dirs.hide();
+                $labels.hide();
+                $customOrder.show();
+            } else {
+                $dirs.prop('disabled', false);
+                $dirs.show();
+                $labels.show();
+                $customOrder.hide();
             }
         }
     });

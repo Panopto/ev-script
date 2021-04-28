@@ -122,19 +122,26 @@
                 </div>
                 <h4><label for="sortby"><%= i18n.formatMessage('Sort By') %></label></h4>
                 <div class="fieldWrap sort-group">
-                    <select id="sortby" class="form-select">
+                    <select id="sortby" class="form-select" name="sortby">
                         <option value="DateAdded" <% if (model.get('sortby') === 'DateAdded') { print('selected="selected"'); } %>><%= i18n.formatMessage('Date Added') %></option>
                         <option value="DateProduced" <% if (model.get('sortby') === 'DateProduced') { print('selected="selected"'); } %>><%= i18n.formatMessage('Date Produced') %></option>
                         <option value="Description" <% if (model.get('sortby') === 'Description') { print('selected="selected"'); } %>><%= i18n.formatMessage('Description') %></option>
                         <option value="Name" <% if (model.get('sortby') === 'Name') { print('selected="selected"'); } %>><%= i18n.formatMessage('Title') %></option>
                         <option value="Duration" <% if (model.get('sortby') === 'Duration') { print('selected="selected"'); } %>><%= i18n.formatMessage('Duration') %></option>
                         <option value="Keywords" <% if (model.get('sortby') === 'Keywords') { print('selected="selected"'); } %>><%= i18n.formatMessage('Keywords') %></option>
-                        <!-- <option value="videoCustomPosition">Custom Order</option> -->
+                        <% if (orders.length) { %>
+                        <option value="Custom" <% if (model.get('sortby') === 'Custom') { print('selected="selected"'); } %>>Custom Order</option>
+                        <% } %>
                     </select>
-                    <input id="sortAsc" class="form-radio" <% if (!model.get('desc')) { print('checked="checked"'); } %> name="sortDirection" value="asc" type="radio"/>
-                    <label for="sortAsc"><%= i18n.formatMessage('Ascending') %></label>
-                    <input id="sortDesc" class="form-radio" <% if (model.get('desc')) { print('checked="checked"'); } %> name="sortDirection" value="desc" type="radio"/>
-                    <label for="sortDesc"><%= i18n.formatMessage('Descending') %></label>
+                    <input id="sortAsc" class="form-radio" <% if (!model.get('desc')) { print('checked="checked"'); } %> name="sortDirection" value="asc" type="radio" <% if (model.get('sortby') === 'Custom') { print('style="display: none;"'); } %>/>
+                    <label for="sortAsc" <% if (model.get('sortby') === 'Custom') { print('style="display: none;"'); } %>><%= i18n.formatMessage('Ascending') %></label>
+                    <input id="sortDesc" class="form-radio" <% if (model.get('desc')) { print('checked="checked"'); } %> name="sortDirection" value="desc" type="radio" <% if (model.get('sortby') === 'Custom') { print('style="display: none;"'); } %>/>
+                    <label for="sortDesc" <% if (model.get('sortby') === 'Custom') { print('style="display: none;"'); } %>><%= i18n.formatMessage('Descending') %></label>
+                    <select id="customOrders" class="form-select" name="customOrders" <% if (model.get('sortby') !== 'Custom') { print('style="display: none;"'); } %>>
+                        <% orders.each(function(order) { %>
+                            <option value="<%= order.id %>" <% if (model.get('customorder') && model.get('customorder') === order.id) { print('selected="selected"'); } %>><%- order.get('name') %></option>
+                        <% }); %>
+                    </select>
                 </div>
             </div>
             <div id="display" class="playlist-display">

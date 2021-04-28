@@ -31,8 +31,6 @@ define(function(require) {
             src.addQuery({
                 'isPreview': Boolean(isPreview),
                 'layout': layout,
-                'sortBy': this.model.get('sortby'),
-                'desc': this.model.get('desc'),
                 'search': this.model.get('search'),
                 'categories': categories === '-1' ? '' : categories,
                 'resultsCount': this.model.get('resultscount'),
@@ -55,6 +53,17 @@ define(function(require) {
                 'displayAxdxs': this.model.get('axdxs'),
                 'isResponsive': embedType === 'responsive'
             });
+
+            if (this.model.get('sortby') === 'Custom') {
+                src.addQuery({
+                    'customOrderIdentifier': this.model.get('customorder')
+                });
+            } else {
+                src.addQuery({
+                    'sortBy': this.model.get('sortby'),
+                    'desc': this.model.get('desc')
+                });
+            }
 
             return src.toString();
         },
