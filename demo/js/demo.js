@@ -32,11 +32,12 @@
                 imagePath: '/assets/css/images',
                 logLevel: 'debug',
                 tpcEnabled: tpcEnabled,
-                useAuthRedirect: true,
-                redirectCallback: function(state) {
-                    var config = app.getConfig();
-                    config.institutionId = state.institutionId;
-                }
+                currentUserId: '83c4d061-ea5a-4595-94c0-bd96b7c18366',
+                // useAuthRedirect: true,
+                // redirectCallback: function(state) {
+                //     var config = app.getConfig();
+                //     config.institutionId = state.institutionId;
+                // }
             }),
             updateTabI18n = function() {
                 var $tabsList = $('.tabsList', $tabs),
