@@ -1,5 +1,5 @@
 /**
- * ev-script 2.4.1 2021-04-28
+ * ev-script 2.4.2 2021-04-30
  * Ensemble Video Chooser Library
  * https://github.com/ensembleVideo/ev-script
  * Copyright (c) 2021 Symphony Video, Inc.
@@ -42189,9 +42189,7 @@ define('ev-script/views/playlist-embed',['require','underscore','urijs/URI','ev-
                 embedType = this.model.get('embedtype'),
                 categories = this.model.get('categories');
 
-            // Assuming if localStorage is not available that third-party
-            // cookies are blocked.  In that case need to preview in new window.
-            if (isPreview && (!this.config.tpcEnabled || this.isTop())) {
+            if (isPreview) {
                 target += '/preview';
                 src = URI(target);
             }
