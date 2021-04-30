@@ -21,9 +21,7 @@ define(function(require) {
                 embedType = this.model.get('embedtype'),
                 categories = this.model.get('categories');
 
-            // Assuming if localStorage is not available that third-party
-            // cookies are blocked.  In that case need to preview in new window.
-            if (isPreview && (!this.config.tpcEnabled || this.isTop())) {
+            if (isPreview) {
                 target += '/preview';
                 src = URI(target);
             }
