@@ -213,7 +213,7 @@ define(function(require) {
                 $dirs = this.$('input[name="sortDirection"]'),
                 $labels = this.$('label[for="sortAsc"],label[for="sortDesc"]'),
                 $customOrder = this.$('select[name="customOrders"]');
-            if (sortby === 'Custom') {
+            if (sortby === 'CustomPosition') {
                 $dirs.prop('disabled', true);
                 $dirs.hide();
                 $labels.hide();

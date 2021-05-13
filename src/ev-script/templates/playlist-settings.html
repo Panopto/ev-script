@@ -130,14 +130,14 @@
                         <option value="Duration" <% if (model.get('sortby') === 'Duration') { print('selected="selected"'); } %>><%= i18n.formatMessage('Duration') %></option>
                         <option value="Keywords" <% if (model.get('sortby') === 'Keywords') { print('selected="selected"'); } %>><%= i18n.formatMessage('Keywords') %></option>
                         <% if (orders.length) { %>
-                        <option value="Custom" <% if (model.get('sortby') === 'Custom') { print('selected="selected"'); } %>>Custom Order</option>
+                        <option value="CustomPosition" <% if (model.get('sortby') === 'CustomPosition') { print('selected="selected"'); } %>>Custom Order</option>
                         <% } %>
                     </select>
-                    <input id="sortAsc" class="form-radio" <% if (!model.get('desc')) { print('checked="checked"'); } %> name="sortDirection" value="asc" type="radio" <% if (model.get('sortby') === 'Custom') { print('style="display: none;"'); } %>/>
-                    <label for="sortAsc" <% if (model.get('sortby') === 'Custom') { print('style="display: none;"'); } %>><%= i18n.formatMessage('Ascending') %></label>
-                    <input id="sortDesc" class="form-radio" <% if (model.get('desc')) { print('checked="checked"'); } %> name="sortDirection" value="desc" type="radio" <% if (model.get('sortby') === 'Custom') { print('style="display: none;"'); } %>/>
-                    <label for="sortDesc" <% if (model.get('sortby') === 'Custom') { print('style="display: none;"'); } %>><%= i18n.formatMessage('Descending') %></label>
-                    <select id="customOrders" class="form-select" name="customOrders" <% if (model.get('sortby') !== 'Custom') { print('style="display: none;"'); } %>>
+                    <input id="sortAsc" class="form-radio" <% if (!model.get('desc')) { print('checked="checked"'); } %> name="sortDirection" value="asc" type="radio" <% if (model.get('sortby') === 'CustomPosition') { print('style="display: none;"'); } %>/>
+                    <label for="sortAsc" <% if (model.get('sortby') === 'CustomPosition') { print('style="display: none;"'); } %>><%= i18n.formatMessage('Ascending') %></label>
+                    <input id="sortDesc" class="form-radio" <% if (model.get('desc')) { print('checked="checked"'); } %> name="sortDirection" value="desc" type="radio" <% if (model.get('sortby') === 'CustomPosition') { print('style="display: none;"'); } %>/>
+                    <label for="sortDesc" <% if (model.get('sortby') === 'CustomPosition') { print('style="display: none;"'); } %>><%= i18n.formatMessage('Descending') %></label>
+                    <select id="customOrders" class="form-select" name="customOrders" <% if (model.get('sortby') !== 'CustomPosition') { print('style="display: none;"'); } %>>
                         <% orders.each(function(order) { %>
                             <option value="<%= order.id %>" <% if (model.get('customorder') && model.get('customorder') === order.id) { print('selected="selected"'); } %>><%- order.get('name') %></option>
                         <% }); %>

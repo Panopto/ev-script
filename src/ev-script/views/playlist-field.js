@@ -7,6 +7,7 @@ define(function(require) {
         URITemplate = require('urijs/URITemplate'),
         FieldView = require('ev-script/views/field'),
         BaseCollection = require('ev-script/collections/base'),
+        BaseModel = require('ev-script/models/base'),
         PlaylistSettings = require('ev-script/models/playlist-settings'),
         PlaylistPickerView = require('ev-script/views/playlist-picker'),
         PlaylistSettingsView = require('ev-script/views/playlist-settings'),
@@ -18,7 +19,7 @@ define(function(require) {
         initialize: function(options) {
             FieldView.prototype.initialize.call(this, options);
             // Other functions are bound in base field view
-            _.bindAll(this, 'getCategorySearchUrl', 'getAllOrdersUrl');
+            _.bindAll(this, 'getCategorySearchUrl', 'getAllOrdersUrl', 'getSortUrl');
         },
         getCategorySearchUrl: function() {
             var playlist = this.model.get('content'),
@@ -30,6 +31,13 @@ define(function(require) {
         getAllOrdersUrl: function() {
             var playlist = this.model.get('content'),
                 searchLink = playlist._links['ev:PlaylistOrders/GetAll'],
+                searchUrl = searchLink ? searchLink.href : null,
+                template = searchUrl ? new URITemplate(searchUrl) : null;
+            return template ? template.expand({}) : null;
+        },
+        getSortUrl: function() {
+            var playlist = this.model.get('content'),
+                searchLink = playlist._links['ev:PlaylistSort/Get'],
                 searchUrl = searchLink ? searchLink.href : null,
                 template = searchUrl ? new URITemplate(searchUrl) : null;
             return template ? template.expand({}) : null;
@@ -78,17 +86,36 @@ define(function(require) {
                         }, this),
                         error: _.bind(this.ajaxError, this)
                     });
+                }, this),
+                fetchSort = _.bind(function(url) {
+                    if (!url) {
+                        return;
+                    }
+                    var sort = new BaseModel({}, { 'href': url });
+                    sort.fetch({
+                        picker: this.picker,
+                        success: _.bind(function(model, response, options) {
+                            this.model.set('sortby', response.orderBy);
+                            if (response.orderBy === 'CustomPosition') {
+                                this.model.set('customorder', response.customOrderId);
+                            } else if (response.orderBy) {
+                                this.model.set('desc', response.orderByDirection === 'desc');
+                            }
+                        }, this),
+                        error: _.bind(this.ajaxError, this)
+                    });
                 }, this);
 
             this.categories = new BaseCollection(null, {});
-            this.orders = new BaseCollection(null, {});            
+            this.orders = new BaseCollection(null, {});
 
             if (!this.model.isNew()) {
                 fetchCategories(this.getCategorySearchUrl(), this.categories);
                 fetchOrders(this.getAllOrdersUrl(), this.orders);
+                fetchSort(this.getSortUrl());
             }
             this.model.on('change', _.bind(function() {
-                // If the id has changed, we need to refetch categories and custom orders
+                // If the id has changed, we need to refetch categories, custom orders and current sort
                 if (this.model.changed.id) {
                     this.categories.reset([], { silent: true });
                     this.orders.reset([], { silent: true });
@@ -96,6 +123,7 @@ define(function(require) {
                     if (!this.model.isNew()) {
                         fetchCategories(this.getCategorySearchUrl(), this.categories);
                         fetchOrders(this.getAllOrdersUrl(), this.orders);
+                        fetchSort(this.getSortUrl());
                     }
                 }
                 if (!this.model.isNew()) {

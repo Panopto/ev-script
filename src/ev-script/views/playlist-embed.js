@@ -52,7 +52,7 @@ define(function(require) {
                 'isResponsive': embedType === 'responsive'
             });
 
-            if (this.model.get('sortby') === 'Custom') {
+            if (this.model.get('sortby') === 'CustomPosition') {
                 src.addQuery({
                     'customOrderIdentifier': this.model.get('customorder')
                 });
