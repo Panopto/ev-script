@@ -4512,6 +4512,9 @@ a.uppy-Dashboard-poweredBy {
 .uppy-Webcam-button:focus {
   box-shadow: 0 0 0 3px rgba(34, 117, 215, 0.5);
 }
+.uppy-Webcam-button:hover {
+  background-color: #d31b2d;
+}
 [data-uppy-theme=dark] .uppy-Webcam-button:focus {
   outline: none;
 }
@@ -4520,6 +4523,14 @@ a.uppy-Dashboard-poweredBy {
 }
 [data-uppy-theme=dark] .uppy-Webcam-button:focus {
   box-shadow: 0 0 0 2px rgba(170, 225, 255, 0.85);
+}
+
+.uppy-Webcam-button--submit {
+  background-color: #2275d7;
+  margin: 0 12px;
+}
+.uppy-Webcam-button--submit:hover {
+  background-color: #1f69c1;
 }
 
 .uppy-Webcam-button svg {
@@ -4536,10 +4547,6 @@ a.uppy-Dashboard-poweredBy {
 .uppy-size--md .uppy-Webcam-button {
   width: 60px;
   height: 60px;
-}
-
-.uppy-Webcam-button:hover {
-  background-color: #d31b2d;
 }
 
 .uppy-Webcam-button--picture {
