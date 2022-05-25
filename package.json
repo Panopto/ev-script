@@ -39,7 +39,7 @@
     "express": "^4.17.1",
     "flex.less": "git://github.com/codio/Flex.less.git",
     "globalize": "^1.6.0",
-    "grunt": "^1.4.0",
+    "grunt": "^1.5.3",
     "grunt-cli": "^1.4.2",
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-copy": "^1.0.0",
