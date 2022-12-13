@@ -36,7 +36,7 @@
     "cookie-parser": "^1.4.5",
     "errorhandler": "^1.5.1",
     "ev-scroll-loader": "git://github.com/ensembleVideo/ev-scroll-loader.git",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "flex.less": "git://github.com/codio/Flex.less.git",
     "globalize": "^1.6.0",
     "grunt": "^1.4.0",
